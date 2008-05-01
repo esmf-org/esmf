@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.23 2008/04/30 17:27:42 feiliu Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.24 2008/05/01 16:53:25 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_FieldGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldGatherUTest.F90,v 1.23 2008/04/30 17:27:42 feiliu Exp $'
+    '$Id: ESMF_FieldGatherUTest.F90,v 1.24 2008/05/01 16:53:25 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -58,6 +58,13 @@ program ESMF_FieldGatherUTest
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 #ifdef ESMF_TESTEXHAUSTIVE
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Scatter test
+        call test_gather_2d(rc)
+        write(failMsg, *) ""
+        write(name, *) "FieldGather basic test"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
@@ -73,6 +80,20 @@ program ESMF_FieldGatherUTest
 contains
 
 #ifdef ESMF_TESTEXHAUSTIVE
+
+#undef ESMF_METHOD
+#define ESMF_METHOD "test_gather_2d"
+    subroutine test_gather_2d(rc)
+        integer, intent(out)                        :: rc
+        ! local arguments used to create field
+        !type(ESMF_Field)                            :: field
+        !type(ESMF_Grid)                             :: grid
+        !type(ESMF_DistGrid)                         :: distgrid
+        !type(ESMF_ArraySpec)                        :: arrayspec
+        !integer                                     :: localrc
+
+        rc = ESMF_SUCCESS
+    end subroutine test_gather_2d
 
 #undef ESMF_METHOD
 #define ESMF_METHOD "test_scatter_2d"
