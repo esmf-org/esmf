@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.4 2008/05/01 08:41:35 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.5 2008/05/01 17:44:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.4 2008/05/01 08:41:35 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.5 2008/05/01 17:44:37 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -363,11 +363,11 @@ contains
 !     {\tt shortname}, {\tt longname}, {\tt units}, and {\tt coordinates}.
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF_Array), intent(inout) :: array
-!     \item type(ESMF_Field), intent(inout) :: field  
-!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
-!     \item type(ESMF_Grid), intent(inout) :: grid
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
 !     The arguments are:
@@ -390,8 +390,8 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
-!     subroutine ESMF_AttAddPackCustom(<object>, convention, purpose, attrList, &
-!       count, rc)
+!     subroutine ESMF_AttAddPackCustom(<object>, convention, purpose, &
+!     attrList, count, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
@@ -405,11 +405,11 @@ contains
 !     Adds a customized attribute package to <object>.
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF_Array), intent(inout) :: array
-!     \item type(ESMF_Field), intent(inout) :: field  
-!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
-!     \item type(ESMF_Grid), intent(inout) :: grid
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
 !     The arguments are:
@@ -447,11 +447,11 @@ contains
 !     Copies an attribute hierarchy from <object1> to <object2>.
 !     Supported values for <object1> are:
 !     \begin{description}
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !     Supported values for <object2> are:
 !     \begin{description}
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 ! 
 !     The arguments are:
@@ -490,11 +490,11 @@ contains
 !     attibute is not found.
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF_Array), intent(inout) :: array
-!     \item type(ESMF_Field), intent(inout) :: field  
-!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
-!     \item type(ESMF_Grid), intent(inout) :: grid
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !     Supported values for <value argument> are:
 !     \begin{description}
@@ -556,11 +556,11 @@ contains
 !     Returns the attribute count for <object>
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF_Array), intent(inout) :: array
-!     \item type(ESMF_Field), intent(inout) :: field  
-!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
-!     \item type(ESMF_Grid), intent(inout) :: grid
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 ! 
 !     The arguments are:
@@ -594,11 +594,11 @@ contains
 !     including {\tt typekind} and {\tt count}.
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF_Array), intent(inout) :: array
-!     \item type(ESMF_Field), intent(inout) :: field  
-!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
-!     \item type(ESMF_Grid), intent(inout) :: grid
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 ! 
 !     The arguments are:
@@ -639,11 +639,11 @@ contains
 !     including {\tt name}, {\tt typekind} and {\tt count}.
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF_Array), intent(inout) :: array
-!     \item type(ESMF_Field), intent(inout) :: field  
-!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
-!     \item type(ESMF_Grid), intent(inout) :: grid
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 ! 
 !     The arguments are:
@@ -687,11 +687,11 @@ contains
 !     {\tt valueList} and a {\tt convention} and {\tt purpose}.
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF_Array), intent(inout) :: array
-!     \item type(ESMF_Field), intent(inout) :: field  
-!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
-!     \item type(ESMF_Grid), intent(inout) :: grid
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !     Supported values for the <value argument> are:
 !     \begin{description}
@@ -2117,7 +2117,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttGetCount"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeGet - Query the number of attributes
 !
 ! !INTERFACE:
@@ -2169,7 +2169,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttGetInfoByName"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeGet - Query Array attributes by name
 !
 ! !INTERFACE:
@@ -2234,7 +2234,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttGetInfoByNum"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeGet - Query Array attributes by index number
 !
 ! !INTERFACE:
@@ -8830,8 +8830,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttSetLinkField"
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Link a FBundle to a Field in 
-!            an attribute hierarchy
+! !IROUTINE: ESMF_AttributeSet - Link an FBundle attribute hierarchy to a Field
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -14397,7 +14396,7 @@ contains
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AttributeSet - Link a state attribute hierarchy with the
-!                                         hierarchy of bundle, field, or state
+!                               {\bf hierarchy of bundle, field, or state}
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeSet()
@@ -14689,11 +14688,11 @@ contains
 !     the convention, purpose, and object type of the associated attributes.
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF_Array), intent(inout) :: array
-!     \item type(ESMF_Field), intent(inout) :: field  
-!     \item type(ESMF_FieldBundle), intent(inout) :: fbundle 
-!     \item type(ESMF_Grid), intent(inout) :: grid
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
 !     The arguments are:
