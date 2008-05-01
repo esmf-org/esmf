@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.19 2008/05/01 17:42:20 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.20 2008/05/01 18:47:42 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.19 2008/05/01 17:42:20 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.20 2008/05/01 18:47:42 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -237,7 +237,7 @@ contains
     integer :: localrc                          !  Local error code
     logical :: rcpresent                        ! Return code present
     integer :: fieldDimCount, fieldUngriddedDimCount 
-    integer :: gridDimCount, gridDistDimCount
+    integer :: gridDimCount
     integer :: fieldUndistDimCount 
     integer :: i
     integer :: localGridToFieldMap(ESMF_MAXDIM)
@@ -273,7 +273,6 @@ contains
     ! number of ungridded Field dimensions,  
     ! and number of undistributed Field Dimensions  
     call ESMF_GridGet(grid, dimCount=gridDimCount, rc=localrc) 
-    gridDistDimCount=gridDimCount 
     if (ESMF_LogMsgFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
@@ -296,7 +295,7 @@ contains
     endif
 
     fieldUngriddedDimCount = fieldDimCount-gridDimCount  
-    fieldUndistDimCount = fieldDimCount-gridDistDimCount  
+    fieldUndistDimCount = fieldDimCount-gridDimCount  
  
     ! Error Check Input  
     if (present(gridToFieldMap)) then   
@@ -327,18 +326,18 @@ contains
     endif  
  
     if (present(maxHaloLWidth)) then   
-        if (size(maxHaloLWidth) .ne. gridDistDimCount) then  
+        if (size(maxHaloLWidth) .ne. gridDimCount) then  
             call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
-              "- maxHaloLWidth must equal to distgrid_rank", &  
+              "- maxHaloLWidth must equal to grid dimCount", &  
                 ESMF_CONTEXT, rc)   
             return  
         endif  
     endif  
  
     if (present(maxHaloUWidth)) then   
-       if (size(maxHaloUWidth) .ne. gridDistDimCount) then  
+       if (size(maxHaloUWidth) .ne. gridDimCount) then  
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
-              "- maxHaloUWidth must equal to distgrid_rank", &  
+              "- maxHaloUWidth must equal to grid dimCount", &  
                 ESMF_CONTEXT, rc)   
            return  
        endif  
@@ -385,15 +384,15 @@ contains
      enddo  
  
      if(present(maxHaloLWidth)) then  
-       localMaxHaloLWidth(1:gridDistDimCount) = &  
-          maxHaloLWidth (1:gridDistDimCount)  
+       localMaxHaloLWidth(1:gridDimCount) = &  
+          maxHaloLWidth (1:gridDimCount)  
      else  
           localMaxHaloLWidth = 0  
      endif  
  
      if(present(maxHaloUWidth)) then  
-       localMaxHaloUWidth(1:gridDistDimCount) = &  
-          maxHaloUWidth (1:gridDistDimCount)  
+       localMaxHaloUWidth(1:gridDimCount) = &  
+          maxHaloUWidth (1:gridDimCount)  
      else  
           localMaxHaloUWidth = 0  
      endif  
@@ -411,8 +410,8 @@ contains
     ! Call construction method to allocate and initialize field internals.
     call ESMF_FieldConstructIANew(ftype, grid, arrayspec, &
                                 localStaggerloc, localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
-                                ungriddedUBound, localMaxHaloLWidth(1:gridDistDimCount), &
-                                localMaxHaloUWidth(1:gridDistDimCount), name, &
+                                ungriddedUBound, localMaxHaloLWidth(1:gridDimCount), &
+                                localMaxHaloUWidth(1:gridDimCount), name, &
                                 iospec, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -557,7 +556,7 @@ contains
     logical :: rcpresent                    ! Return code present
 
     integer :: fieldDimCount, fieldUngriddedDimCount 
-    integer :: gridDimCount, gridDistDimCount
+    integer :: gridDimCount
     integer :: fieldUndistDimCount 
     integer :: i
     integer :: localGridToFieldMap(ESMF_MAXDIM)
@@ -595,7 +594,6 @@ contains
     ! number of ungridded Field dimensions,  
     ! and number of undistributed Field Dimensions  
     call ESMF_GridGet(grid, dimCount=gridDimCount, rc=localrc)
-    gridDistDimCount=gridDimCount   
     if (ESMF_LogMsgFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
@@ -618,7 +616,7 @@ contains
     endif
  
     fieldUngriddedDimCount = fieldDimCount-gridDimCount  
-    fieldUndistDimCount = fieldDimCount-gridDistDimCount  
+    fieldUndistDimCount = fieldDimCount-gridDimCount  
  
     ! Error Check Input  
     if (present(gridToFieldMap)) then   
@@ -649,18 +647,18 @@ contains
     endif  
  
     if (present(maxHaloLWidth)) then   
-        if (size(maxHaloLWidth) .ne. gridDistDimCount) then  
+        if (size(maxHaloLWidth) .ne. gridDimCount) then  
             call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
-              "- maxHaloLWidth must equal to distgrid_rank", &  
+              "- maxHaloLWidth must equal to grid dimCount", &  
                 ESMF_CONTEXT, rc)   
             return  
         endif  
     endif  
  
     if (present(maxHaloUWidth)) then   
-       if (size(maxHaloUWidth) .ne. gridDistDimCount) then  
+       if (size(maxHaloUWidth) .ne. gridDimCount) then  
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
-              "- maxHaloUWidth must equal to distgrid_rank", &  
+              "- maxHaloUWidth must equal to grid dimCount", &  
                 ESMF_CONTEXT, rc)   
            return  
        endif  
@@ -713,15 +711,15 @@ contains
      enddo  
  
      if(present(maxHaloLWidth)) then  
-       localMaxHaloLWidth(1:gridDistDimCount) = &  
-          maxHaloLWidth (1:gridDistDimCount)  
+       localMaxHaloLWidth(1:gridDimCount) = &  
+          maxHaloLWidth (1:gridDimCount)  
      else  
           localMaxHaloLWidth = 0  
      endif  
  
      if(present(maxHaloUWidth)) then  
-       localMaxHaloUWidth(1:gridDistDimCount) = &  
-          maxHaloUWidth (1:gridDistDimCount)  
+       localMaxHaloUWidth(1:gridDimCount) = &  
+          maxHaloUWidth (1:gridDimCount)  
      else  
           localMaxHaloUWidth = 0  
      endif  
