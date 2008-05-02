@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.31.2.1 2008/04/05 03:14:16 cdeluca Exp $
+// $Id: ESMC_FTable.C,v 1.31.2.2 2008/05/02 05:54:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.31.2.1 2008/04/05 03:14:16 cdeluca Exp $";
+           "$Id: ESMC_FTable.C,v 1.31.2.2 2008/05/02 05:54:13 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -443,6 +443,12 @@
  } // end ESMC_FTableSetFuncArgs
 
 //-----------------------------------------------------------------------------
+ 
+extern "C"{ 
+void FTN(f_esmf_fortranudtpointersize)(int *size);  // prototype used below
+}
+ 
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FTableSetDataPtr"
 //BOP
@@ -456,7 +462,7 @@
 //
 // !ARGUMENTS:
       char *namep,           // in, data name
-      void *datap,           // in, data address
+      void **datap,          // in, data address
       enum dtype dtype) {    // in, data type
 //
 // !DESCRIPTION:
@@ -468,15 +474,24 @@
     // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
 
- // TODO: test this code
-    if (datacount >= dataalloc) {
-        data = (datainfo *)realloc((void *)data, (datacount+4) * sizeof(datainfo));
-        dataalloc = datacount+4;
+    // TODO: test this code
+    if (datacount >= dataalloc){
+      data =
+        (datainfo *)realloc((void *)data, (datacount+4) * sizeof(datainfo));
+      dataalloc = datacount+4;
     }
-    data[datacount].dataptr = datap;
     data[datacount].dataname = new char[strlen(namep)+1];
     strcpy(data[datacount].dataname, namep);
     data[datacount].dtype = dtype;
+    
+    if (dtype == DT_VOIDP){
+      data[datacount].dataptr = *datap;
+    }else if (dtype == DT_FORTRAN_UDT_POINTER){
+      int datumSize;
+      FTN(f_esmf_fortranudtpointersize)(&datumSize);
+      data[datacount].dataptr = (void *)new char[datumSize];
+      memcpy(data[datacount].dataptr, (void *)datap, datumSize);
+    }
    
     datacount++;
 
@@ -554,13 +569,19 @@
     int i;
 
     for (i=0; i<datacount; i++) {
-        if (strcmp(namep, data[i].dataname))
-           continue;
+      if (strcmp(namep, data[i].dataname)) continue;
 
+      *dtype = data[i].dtype;
+      
+      if (*dtype == DT_VOIDP){
         *datap = data[i].dataptr;
-        *dtype = data[i].dtype;
+      }else if (*dtype == DT_FORTRAN_UDT_POINTER){
+        int datumSize;
+        FTN(f_esmf_fortranudtpointersize)(&datumSize);
+        memcpy((void *)datap, data[i].dataptr, datumSize);
+      }
 
-        return ESMF_SUCCESS;
+      return ESMF_SUCCESS;
     }
 
     return ESMF_FAILURE;

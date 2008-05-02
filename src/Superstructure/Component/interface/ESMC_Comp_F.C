@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.50.2.1 2008/04/05 03:14:11 cdeluca Exp $
+// $Id: ESMC_Comp_F.C,v 1.50.2.2 2008/05/02 05:54:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
 #define ESMC_METHOD "ESMC_SetDP"
 static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     char *name = "localdata";
-    enum dtype dtype = DT_VOIDP;
+    enum dtype dtype = DT_FORTRAN_UDT_POINTER;
     int localrc;
 
      // Initialize return code; assume routine not implemented
@@ -126,7 +126,7 @@ static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
         return;
     }
 
-    localrc = (**ptr)->ESMC_FTableSetDataPtr(name, *datap, dtype);
+    localrc = (**ptr)->ESMC_FTableSetDataPtr(name, datap, dtype);
     if (status) *status = localrc;
 }
 
@@ -284,7 +284,7 @@ extern "C" {
      void FTN(esmf_usercompsetinternalstate)(ESMC_FTable ***ptr, char *name, 
                                          void **datap, int *status, int slen) {
          char *tbuf; 
-         enum dtype dtype = DT_VOIDP;
+         enum dtype dtype = DT_FORTRAN_UDT_POINTER;
          int localrc;
 
      // Initialize return code; assume routine not implemented
@@ -300,7 +300,7 @@ extern "C" {
          newtrim(name, slen, NULL, NULL, &tbuf);
          //printf("after newtrim, name = '%s'\n", tbuf);
 
-         localrc = (**ptr)->ESMC_FTableSetDataPtr(tbuf, *datap, dtype);
+         localrc = (**ptr)->ESMC_FTableSetDataPtr(tbuf, datap, dtype);
   
          delete[] tbuf;
          if (status) *status = localrc;

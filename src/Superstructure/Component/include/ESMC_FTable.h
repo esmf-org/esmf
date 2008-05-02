@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.h,v 1.21.2.1 2008/04/05 03:14:10 cdeluca Exp $
+// $Id: ESMC_FTable.h,v 1.21.2.2 2008/05/02 05:54:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ class funcinfo {
  friend class ESMC_FTable;
 };
 
-enum dtype { DT_VOIDP=1 };
+enum dtype { DT_VOIDP=1, DT_FORTRAN_UDT_POINTER };
 class datainfo {
  private:
  protected:
@@ -110,7 +110,9 @@ class datainfo {
    enum dtype dtype;
  public:
    datainfo() { dataname = NULL; dataptr = NULL; dtype=DT_VOIDP; }
-  ~datainfo() { if (dataname != NULL) delete[] dataname; } 
+  ~datainfo() { if (dataname != NULL) delete[] dataname; 
+                if (dtype == DT_FORTRAN_UDT_POINTER)
+                  delete [] (char *)dataptr;} 
    //datainfo(const datainfo& rhs) { }  // copy strings and type, not ptr
    //datainfo& operator=(const datainfo& rhs) { }
  friend class ESMC_FTable;
@@ -135,7 +137,7 @@ class ESMC_FTable {
     int ESMC_FTableSetFuncPtr(char *name, void *func, enum ftype ftype, 
                                                   int acount, void **arglist);
     int ESMC_FTableSetFuncArgs(char *name, int acount, void **arglist);
-    int ESMC_FTableSetDataPtr(char *name, void *data, enum dtype dtype);
+    int ESMC_FTableSetDataPtr(char *name, void **data, enum dtype dtype);
 
     int ESMC_FTableGetFuncPtr(char *name, void **func, enum ftype *ftype);
     int ESMC_FTableGetDataPtr(char *name, void **data, enum dtype *dtype);

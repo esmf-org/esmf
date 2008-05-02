@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsize.cppF90,v 1.1.2.3 2008/05/02 00:12:13 theurich Exp $
+! $Id: ESMF_FortranWordsize.cppF90,v 1.1.2.4 2008/05/02 05:54:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -172,3 +172,10 @@ TypeKindDeclarationMacro(ESMF_FortranWordsize)
 !------------------------------------------------------------------------------
 
 end module ESMF_FortranWordsizeMod
+
+
+subroutine f_esmf_fortranudtpointersize(size)
+  use ESMF_FortranWordsizeMod
+  integer::size
+  call ESMF_FortranUDTPointerSize(size)
+end subroutine

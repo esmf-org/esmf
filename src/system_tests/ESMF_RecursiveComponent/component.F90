@@ -1,4 +1,4 @@
-! $Id: component.F90,v 1.1.2.3 2008/03/06 05:37:30 theurich Exp $
+! $Id: component.F90,v 1.1.2.4 2008/05/02 05:54:13 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -246,8 +246,7 @@ module componentMod
       call ESMF_GridCompDestroy(component2, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
       ! Deallocate data structure that was stored in internal state
-  !TODO: fix InternalState to make this possible on all supported platforms
-  !      deallocate(myComps)
+      deallocate(myComps)
     endif
         
   end subroutine
