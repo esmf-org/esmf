@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsize.cppF90,v 1.1.2.2 2008/05/01 23:24:24 theurich Exp $
+! $Id: ESMF_FortranWordsize.cppF90,v 1.1.2.3 2008/05/02 00:12:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -27,43 +27,79 @@ module ESMF_FortranWordsizeMod
 ^include "ESMF.h"
 !------------------------------------------------------------------------------
 ! !USES:
-     use ESMF_UtilTypesMod      
-     use ESMF_LogErrMod
+  use ESMF_UtilTypesMod      
+  use ESMF_LogErrMod
 
-     implicit none
+  implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+  private
 
 !------------------------------------------------------------------------------
 ! !PUBLIC FUNCTION:
 
-      public ESMF_FortranWordsize
+  public ESMF_FortranUDTPointerSize
+  public ESMF_FortranWordsize
 
 !------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FortranWordsize"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FortranWordsize -- Generic interface to find Fortran data sizes
 !
 ! !INTERFACE:
 
+  interface ESMF_FortranWordsize
 
-    interface ESMF_FortranWordsize
-!EOP
+    TypeKindInterfaceMacro(ESMF_FortranWordsize)
 
-      ! < interfaces for each TK >
-TypeKindInterfaceMacro(ESMF_FortranWordsize)
+!EOPI
+  end interface
 
-    end interface
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    contains
+contains
 
-!==============================================================================
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FortranUDTPointerSize()"
+!BOPI
+! !IROUTINE: ESMF_FortranUDTPointerSize - Get size of Fortran 
+
+! !INTERFACE:
+  subroutine ESMF_FortranUDTPointerSize(size)
+!
+! !ARGUMENTS:
+    integer, intent(out)  :: size
+!EOPI
+!------------------------------------------------------------------------------
+    integer, parameter :: int8_k = selected_int_kind (12)   ! 8-byte integer
+    integer, parameter :: chars_l = 256
+    type simple_udt
+      sequence
+      real :: a, b, c
+      integer :: i, j, k
+    end type
+    integer(int8_k) :: udt_begin
+    type(simple_udt), pointer :: udt_ptr
+    character :: udt_chars(chars_l), udt_endchar
+    equivalence (udt_begin, udt_chars)
+    common /udtcom/ udt_begin, udt_ptr, udt_endchar
+    
+    udt_chars = achar (0)
+    udt_endchar = achar (1)
+    size = maxloc (iachar (udt_chars), dim=1) - 9
+
+  end subroutine ESMF_FortranUDTPointerSize
 !------------------------------------------------------------------------------
 
 
+
+!==============================================================================
 #define ESMF_FortranWordsizeDoc() \
 !BOP @\
 ! !IROUTINE: ESMF_FortranWordsize - Return the size in byte units of a scalar @\
