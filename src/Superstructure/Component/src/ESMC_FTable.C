@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.31.2.2 2008/05/02 05:54:13 theurich Exp $
+// $Id: ESMC_FTable.C,v 1.31.2.3 2008/05/02 23:09:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.31.2.2 2008/05/02 05:54:13 theurich Exp $";
+           "$Id: ESMC_FTable.C,v 1.31.2.3 2008/05/02 23:09:33 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -489,6 +489,15 @@ void FTN(f_esmf_fortranudtpointersize)(int *size);  // prototype used below
     }else if (dtype == DT_FORTRAN_UDT_POINTER){
       int datumSize;
       FTN(f_esmf_fortranudtpointersize)(&datumSize);
+      if (datumSize==0){
+        // The above call to get the pointer size does not
+        // work on pre 7.x versions of PGI. The following
+        // hard-coded size applies in those cases.
+        // If we ever find other compilers where the above
+        // call reports a zero size we will have to make
+        // this section explicitly compiler dependent.
+        datumSize = sizeof(void *) + 4;
+      }
       data[datacount].dataptr = (void *)new char[datumSize];
       memcpy(data[datacount].dataptr, (void *)datap, datumSize);
     }
@@ -577,6 +586,15 @@ void FTN(f_esmf_fortranudtpointersize)(int *size);  // prototype used below
         *datap = data[i].dataptr;
       }else if (*dtype == DT_FORTRAN_UDT_POINTER){
         int datumSize;
+        if (datumSize==0){
+          // The above call to get the pointer size does not
+          // work on pre 7.x versions of PGI. The following
+          // hard-coded size applies in those cases.
+          // If we ever find other compilers where the above
+          // call reports a zero size we will have to make
+          // this section explicitly compiler dependent.
+          datumSize = sizeof(void *) + 4;
+        }
         FTN(f_esmf_fortranudtpointersize)(&datumSize);
         memcpy((void *)datap, data[i].dataptr, datumSize);
       }
