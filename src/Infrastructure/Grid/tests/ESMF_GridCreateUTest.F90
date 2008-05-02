@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.67.2.6 2008/04/28 23:22:58 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.67.2.7 2008/05/02 22:05:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.67.2.6 2008/04/28 23:22:58 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.67.2.7 2008/05/02 22:05:13 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -1027,9 +1027,14 @@ program ESMF_GridCreateUTest
   grid=ESMF_GridCreate(distgrid=distgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+  ! allocate coord array
+  call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
 
   ! create a buffer to put the grid in
-  bufCount=10000
+  bufCount=100000
   allocate(buf(bufCount))
 
   ! Serialize
@@ -1070,6 +1075,16 @@ program ESMF_GridCreateUTest
   if ((gridEdgeUWidth(1) .ne. 1) .or. (gridEdgeUWidth(2) .ne. 1)) correct=.false. 
   if ((gridAlign(1) .ne. -1) .or. (gridAlign(2) .ne. -1)) correct=.false. 
   if (localDECount .ne. 0) correct=.false. 
+
+  ! Get Coord Array and see if it looks ok
+  call ESMF_GridGetCoord(grid2, staggerloc=ESMF_STAGGERLOC_CENTER, &
+         coordDim=1, array=array, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Validate Array
+  call ESMF_ArrayValidate(array, rc=localrc)  
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
 
   ! destroy grids
   call ESMF_GridDestroy(grid,rc=localrc)
