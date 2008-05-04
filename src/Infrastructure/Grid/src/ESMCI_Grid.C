@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.36.2.14 2008/05/02 22:05:10 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.36.2.15 2008/05/04 05:24:55 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.14 2008/05/02 22:05:10 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.15 2008/05/04 05:24:55 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2784,8 +2784,13 @@ int Grid::serialize(
 
     // Don't do isDEBnds because a proxy object isn't on a valid DE
 
+    // make sure loffset is aligned correctly
+    r=loffset%8;
+    if (r!=0) loffset += 8-r;
+
     // Serialize the Array exists array
     SERIALIZE_VAR2D(cp, buffer,loffset,arrayExists,staggerLocCount,dimCount,int);
+
     // make sure loffset is aligned correctly
     r=loffset%8;
     if (r!=0) loffset += 8-r;
@@ -2945,6 +2950,10 @@ int Grid::deserialize(
 
   isDELBnd=ESMC_NULL_POINTER;
   isDEUBnd=ESMC_NULL_POINTER;
+
+  // make sure loffset is aligned correctly
+  r=loffset%8;
+  if (r!=0) loffset += 8-r;
 
   // Deserialize the Array exists array
   DESERIALIZE_VAR2D( buffer,loffset,arrayExists,staggerLocCount,dimCount,int);
