@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.1.2.5 2008/04/08 22:13:16 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.1.2.6 2008/05/05 22:57:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -473,9 +473,11 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    *matchResult = ESMCI::DistGrid::match(*ptr1, *ptr2, &localrc);
+    bool matchBool = ESMCI::DistGrid::match(*ptr1, *ptr2, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
+    if (matchBool) *matchResult = ESMF_TRUE;
+    else *matchResult = ESMF_FALSE;
   }
   
   void FTN(c_esmc_distgridprint)(ESMCI::DistGrid **ptr, int *rc){

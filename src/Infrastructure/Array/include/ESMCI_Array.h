@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.1.2.12 2008/04/21 22:37:48 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.1.2.13 2008/05/05 22:57:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -212,6 +212,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     const char *getName()               const {return ESMC_BaseGetName();}
     int setName(char *name){return ESMC_BaseSetName(name, "Array");}
     // misc.
+    static bool match(Array *array1, Array *array2, int *rc=NULL);
     int print() const;
     int validate() const;
     // serialize() and deserialize()

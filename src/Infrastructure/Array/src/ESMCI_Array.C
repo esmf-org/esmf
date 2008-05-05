@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.15 2008/04/21 22:37:48 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.16 2008/05/05 22:57:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.15 2008/04/21 22:37:48 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.16 2008/05/05 22:57:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2009,6 +2009,98 @@ int Array::setComputationalUWidth(
 // misc.
 //
 //-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::match()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::match
+//
+// !INTERFACE:
+bool Array::match(
+//
+// !RETURN VALUE:
+//    bool according to match
+//
+// !ARGUMENTS:
+//
+  Array *array1,                          // in
+  Array *array2,                          // in
+  int *rc                                 // (out) return code
+  ){
+//
+// !DESCRIPTION:
+//    Determine if array1 and array2 match.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // initialize return value
+  bool matchResult = false;
+  
+  // return with errors for NULL pointer
+  if (array1 == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to Array", rc);
+    return matchResult;
+  }
+  if (array2 == NULL){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to Array", rc);
+    return matchResult;
+  }
+  
+  // check if Array pointers are identical
+  if (array1 == array2){
+    // pointers are identical -> nothing more to check
+    matchResult = true;
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  
+  // compare the distgrid members
+  matchResult = DistGrid::match(array1->getDistGrid(), array2->getDistGrid(),
+    &localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    return rc;
+  if (matchResult==false){
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  
+  // compare Array members to ensure DE-local tiles are congruent
+  if (array1->tensorCount != array2->tensorCount){
+    matchResult = false;
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  if (array1->tensorElementCount != array2->tensorElementCount){
+    matchResult = false;
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  int localDeCount = array1->getDistGrid()->getDELayout()->getLocalDeCount();
+  int *int1 = array1->totalElementCountPLocalDe;
+  int *int2 = array2->totalElementCountPLocalDe;
+  for (int i=0; i<localDeCount; i++){
+    if (int1[i] != int2[i]){
+      matchResult = false;
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+
+  // return successfully indicating match
+  matchResult = true;
+  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+  return matchResult;
+}
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -7744,6 +7836,11 @@ int Array::sparseMatMul(
     }
     //TODO: need to check DistGrid-conformance and congruence of local tiles
     //      between argument Array pair and Array pair used during XXE precomp.
+    // use Array::match() method to perform this check. This however, would
+    // require that a reference is kept inside the routehandle to the Array
+    // pair used during store(). not sure how good an idea that is. The 
+    // alternative is to keep a "fingerprint" of the Arrays that's just enough
+    // info to perform the congurence check here.
   }
   
 #ifdef ASMMTIMING

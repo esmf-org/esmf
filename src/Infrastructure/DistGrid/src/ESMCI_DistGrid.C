@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.1.2.5 2008/04/21 22:37:51 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.1.2.6 2008/05/05 22:57:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.1.2.5 2008/04/21 22:37:51 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.1.2.6 2008/05/05 22:57:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1765,10 +1765,10 @@ int DistGrid::fillIndexListPDimPDe(
 // !IROUTINE:  ESMCI::DistGrid::match
 //
 // !INTERFACE:
-ESMC_Logical DistGrid::match(
+bool DistGrid::match(
 //
 // !RETURN VALUE:
-//    ESMC\_Logical according to match
+//    bool according to match
 //
 // !ARGUMENTS:
 //
@@ -1787,7 +1787,7 @@ ESMC_Logical DistGrid::match(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   // initialize return value
-  ESMC_Logical matchResult = ESMF_FALSE;
+  bool matchResult = false;
   
   // return with errors for NULL pointer
   if (distgrid1 == NULL){
@@ -1804,7 +1804,7 @@ ESMC_Logical DistGrid::match(
   // check if DistGrid pointers are identical
   if (distgrid1 == distgrid2){
     // pointers are identical -> nothing more to check
-    matchResult = ESMF_TRUE;
+    matchResult = true;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
@@ -1813,21 +1813,21 @@ ESMC_Logical DistGrid::match(
   int dimCount1 = distgrid1->dimCount;
   int dimCount2 = distgrid2->dimCount;
   if (dimCount1 != dimCount2){
-    matchResult = ESMF_FALSE;
+    matchResult = false;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
   int patchCount1 = distgrid1->patchCount;
   int patchCount2 = distgrid2->patchCount;
   if (patchCount1 != patchCount2){
-    matchResult = ESMF_FALSE;
+    matchResult = false;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
   int deCount1 = distgrid1->delayout->getDeCount();
   int deCount2 = distgrid2->delayout->getDeCount();
   if (deCount1 != deCount2){
-    matchResult = ESMF_FALSE;
+    matchResult = false;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
@@ -1835,7 +1835,7 @@ ESMC_Logical DistGrid::match(
   int *int2 = distgrid2->minIndexPDimPPatch;
   for (int i=0; i<dimCount1*patchCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = ESMF_FALSE;
+      matchResult = false;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -1844,7 +1844,7 @@ ESMC_Logical DistGrid::match(
   int2 = distgrid2->maxIndexPDimPPatch;
   for (int i=0; i<dimCount1*patchCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = ESMF_FALSE;
+      matchResult = false;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -1853,7 +1853,7 @@ ESMC_Logical DistGrid::match(
   int2 = distgrid2->elementCountPPatch;
   for (int i=0; i<patchCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = ESMF_FALSE;
+      matchResult = false;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -1862,7 +1862,7 @@ ESMC_Logical DistGrid::match(
   int2 = distgrid2->minIndexPDimPDe;
   for (int i=0; i<dimCount1*deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = ESMF_FALSE;
+      matchResult = false;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -1871,7 +1871,7 @@ ESMC_Logical DistGrid::match(
   int2 = distgrid2->maxIndexPDimPDe;
   for (int i=0; i<dimCount1*deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = ESMF_FALSE;
+      matchResult = false;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -1880,7 +1880,7 @@ ESMC_Logical DistGrid::match(
   int2 = distgrid2->elementCountPDe;
   for (int i=0; i<deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = ESMF_FALSE;
+      matchResult = false;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -1889,7 +1889,7 @@ ESMC_Logical DistGrid::match(
   int2 = distgrid2->patchListPDe;
   for (int i=0; i<deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = ESMF_FALSE;
+      matchResult = false;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -1898,14 +1898,14 @@ ESMC_Logical DistGrid::match(
   int2 = distgrid2->contigFlagPDimPDe;
   for (int i=0; i<dimCount1*deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = ESMF_FALSE;
+      matchResult = false;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
   }
   
   // return successfully indicating match
-  matchResult = ESMF_TRUE;
+  matchResult = true;
   if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
   return matchResult;
 }

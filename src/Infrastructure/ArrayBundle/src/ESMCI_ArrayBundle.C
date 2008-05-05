@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.1.2.6 2008/04/29 22:13:49 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.1.2.7 2008/05/05 22:57:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.1.2.6 2008/04/29 22:13:49 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.1.2.7 2008/05/05 22:57:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -354,21 +354,40 @@ int ArrayBundle::redistStore(
       rc = ESMF_SUCCESS;
       return rc;
     }
-    
-    // trivial implementation only call Array::redistStore() for first
-    // src/dst Array pair
-    
     Array *srcArray = srcArraybundle->getArrayList()[0];
     Array *dstArray = dstArraybundle->getArrayList()[0];
-    localrc = Array::redistStore(srcArray, dstArray, routehandle,
-      srcToDstTransposeMap, typekindFactor, factor);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      &rc)) return rc;
 
-    // return successfully
-    rc = ESMF_SUCCESS;
-    return rc;
+    // check if all src/dst Array pairs are congruent
+    bool allPairsCongruent = true;  // reset: assume pairs are congruent
+    for (int i=1; i<srcArrayCount; i++){
+      allPairsCongruent = Array::match(srcArray,
+        srcArraybundle->getArrayList()[i], &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        &rc)) return rc;
+      if (!allPairsCongruent) break;  // found mismatch
+      allPairsCongruent = Array::match(dstArray,
+        dstArraybundle->getArrayList()[i], &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        &rc)) return rc;
+      if (!allPairsCongruent) break;  // found mismatch
+    }
     
+    if (allPairsCongruent){
+      // trivial implementation only call Array::redistStore() for first
+      // src/dst Array pair
+      localrc = Array::redistStore(srcArray, dstArray, routehandle,
+        srcToDstTransposeMap, typekindFactor, factor);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        &rc)) return rc;
+      // return successfully
+      rc = ESMF_SUCCESS;
+      return rc;
+    }else{
+      // unimplemented branch
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+        "- non-congruent src/dst Array pairs are not yet supported", &rc);
+      return rc;
+    }
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
@@ -417,7 +436,7 @@ int ArrayBundle::redist(
     ESMC_HandleType rhType = (*routehandle)->ESMC_RouteHandleGetType();
     
     if (rhType == ESMC_ARRAYSPARSEMATMULHANDLE){
-      // apply routehandle for each src/dst Array pair
+      // apply same routehandle to each src/dst Array pair
     
       Array *srcArray = NULL;
       Array *dstArray = NULL;
@@ -455,6 +474,10 @@ int ArrayBundle::redist(
       rc = ESMF_SUCCESS;
       return rc;
     }else{
+      // unimplemented branch
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+        "- only simple ESMC_ARRAYSPARSEMATMULHANDLE are supported", &rc);
+      return rc;
     }
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -463,6 +486,44 @@ int ArrayBundle::redist(
   }
   
   // return, don't set success, this is multi exit method
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayBundle::redistRelease()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayBundle::redistRelease
+//
+// !INTERFACE:
+int ArrayBundle::redistRelease(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ESMC_RouteHandle *routehandle        // inout -
+  ){    
+//
+// !DESCRIPTION:
+//    Release information for an ArrayBundle redistribution
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // implemented via sparseMatMul
+  localrc = sparseMatMulRelease(routehandle);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
   return rc;
 }
 //-----------------------------------------------------------------------------
@@ -523,21 +584,40 @@ int ArrayBundle::sparseMatMulStore(
       rc = ESMF_SUCCESS;
       return rc;
     }
-    
-    // trivial implementation only call Array::sparseMatMulStore() for first
-    // src/dst Array pair
-    
     Array *srcArray = srcArraybundle->getArrayList()[0];
     Array *dstArray = dstArraybundle->getArrayList()[0];
-    localrc = Array::sparseMatMulStore(srcArray, dstArray, routehandle,
-      typekindFactors, factorList, factorListCount, factorIndexList);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-      &rc)) return rc;
 
-    // return successfully
-    rc = ESMF_SUCCESS;
-    return rc;
+    // check if all src/dst Array pairs are congruent
+    bool allPairsCongruent = true;  // reset: assume pairs are congruent
+    for (int i=1; i<srcArrayCount; i++){
+      allPairsCongruent = Array::match(srcArray,
+        srcArraybundle->getArrayList()[i], &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        &rc)) return rc;
+      if (!allPairsCongruent) break;  // found mismatch
+      allPairsCongruent = Array::match(dstArray,
+        dstArraybundle->getArrayList()[i], &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        &rc)) return rc;
+      if (!allPairsCongruent) break;  // found mismatch
+    }
     
+    if (allPairsCongruent){
+      // trivial implementation only call Array::sparseMatMulStore() for first
+      // src/dst Array pair
+      localrc = Array::sparseMatMulStore(srcArray, dstArray, routehandle,
+        typekindFactors, factorList, factorListCount, factorIndexList);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        &rc)) return rc;
+      // return successfully
+      rc = ESMF_SUCCESS;
+      return rc;
+    }else{
+      // unimplemented branch
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+        "- non-congruent src/dst Array pairs are not yet supported", &rc);
+      return rc;
+    }
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
@@ -550,44 +630,6 @@ int ArrayBundle::sparseMatMulStore(
 //-----------------------------------------------------------------------------
     
     //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::ArrayBundle::redistRelease()"
-//BOPI
-// !IROUTINE:  ESMCI::ArrayBundle::redistRelease
-//
-// !INTERFACE:
-int ArrayBundle::redistRelease(
-//
-// !RETURN VALUE:
-//    int return code
-//
-// !ARGUMENTS:
-//
-  ESMC_RouteHandle *routehandle        // inout -
-  ){    
-//
-// !DESCRIPTION:
-//    Release information for an ArrayBundle redistribution
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
-  // implemented via sparseMatMul
-  localrc = sparseMatMulRelease(routehandle);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-
-  // return successfully
-  rc = ESMF_SUCCESS;
-  return rc;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ArrayBundle::sparseMatMul()"
 //BOPI
@@ -626,7 +668,7 @@ int ArrayBundle::sparseMatMul(
     ESMC_HandleType rhType = (*routehandle)->ESMC_RouteHandleGetType();
     
     if (rhType == ESMC_ARRAYSPARSEMATMULHANDLE){
-      // apply routehandle for each src/dst Array pair
+      // apply same routehandle to each src/dst Array pair
     
       Array *srcArray = NULL;
       Array *dstArray = NULL;
@@ -667,6 +709,10 @@ int ArrayBundle::sparseMatMul(
       rc = ESMF_SUCCESS;
       return rc;
     }else{
+      // unimplemented branch
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+        "- only simple ESMC_ARRAYSPARSEMATMULHANDLE are supported", &rc);
+      return rc;
     }
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
