@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.10.2.4 2008/04/01 00:26:10 theurich Exp $
+! $Id: user_model.F90,v 1.10.2.5 2008/05/05 18:45:27 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -46,6 +46,10 @@
         ! Local variables
         type(mydata), pointer :: mydatablock
         type(wrapper) :: mywrapper
+#ifdef ESMF_TESTWITHTHREADS
+        type(ESMF_VM) :: vm
+        type(ESMF_Logical) :: supportPthreads
+#endif
 
         print *, "In user register routine"
 
@@ -77,11 +81,17 @@
 
 #ifdef ESMF_TESTWITHTHREADS
         ! The following call will turn on ESMF-threading (single threaded)
-        ! for this component. If you are using this file as a template for 
-        ! your own code development you probably don't want to include the 
-        ! following call unless you are interested in exploring ESMF's 
+        ! for this component. If you are using this file as a template for
+        ! your own code development you probably don't want to include the
+        ! following call unless you are interested in exploring ESMF's
         ! threading features.
-        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+
+        ! First test whether ESMF-threading is supported on this machine
+        call ESMF_VMGetGlobal(vm, rc=rc)
+        call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+        if (supportPthreads == ESMF_True) then
+          call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+        endif
 #endif
 
         rc = ESMF_SUCCESS

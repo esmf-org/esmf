@@ -1,4 +1,4 @@
-! $Id: component.F90,v 1.1.2.6 2008/05/05 18:24:55 theurich Exp $
+! $Id: component.F90,v 1.1.2.7 2008/05/05 18:45:29 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -29,6 +29,10 @@ module componentMod
   subroutine componentReg(comp, rc)
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    type(ESMF_Logical) :: supportPthreads
+#endif
 
     ! Initialize
     rc = ESMF_SUCCESS
@@ -46,12 +50,17 @@ module componentMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads == ESMF_True) then
+      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+    endif
 #endif
 
   end subroutine
