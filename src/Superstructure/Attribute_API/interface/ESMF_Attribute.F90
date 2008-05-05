@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.5 2008/05/01 17:44:37 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.6 2008/05/05 07:47:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.5 2008/05/01 17:44:37 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.6 2008/05/05 07:47:09 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -787,10 +787,10 @@ contains
       fpurpose = purpose
       fobject = 'array'
 
-      name1 = 'longname'
-      name2 = 'shortname'
+      name1 = 'shortname'
+      name2 = 'longname'
       name3 = 'units'
-      name4 = 'coordinates'
+      name4 = 'dimensions'
 
       call c_ESMC_AttPackCreate(array, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -3512,10 +3512,10 @@ contains
       fpurpose = purpose
       fobject = 'field'
 
-      name1 = 'longname'
-      name2 = 'shortname'
+      name1 = 'shortname'
+      name2 = 'longname'
       name3 = 'units'
-      name4 = 'coordinates'
+      name4 = 'dimensions'
 
       call c_ESMC_AttPackCreate(field%ftypep%base, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -6237,10 +6237,10 @@ contains
       fpurpose = purpose
       fobject = 'fieldbundle'
 
-      name1 = 'longname'
-      name2 = 'shortname'
+      name1 = 'shortname'
+      name2 = 'longname'
       name3 = 'units'
-      name4 = 'coordinates'
+      name4 = 'dimensions'
 
       call c_ESMC_AttPackCreate(fieldbundle%btypep%base, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -9016,10 +9016,10 @@ contains
       fpurpose = purpose
       fobject = 'grid'
 
-      name1 = 'longname'
-      name2 = 'shortname'
+      name1 = 'shortname'
+      name2 = 'longname'
       name3 = 'units'
-      name4 = 'coordinates'
+      name4 = 'dimensions'
 
       call c_ESMC_AttPackCreate(grid, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -11741,8 +11741,8 @@ contains
       fpurpose = purpose
       fobject = 'state'
 
-      name1 = 'longname'
-      name2 = 'shortname'
+      name1 = 'shortname'
+      name2 = 'longname'
       name3 = 'organization'
       name4 = 'discipline'
 
@@ -14659,7 +14659,7 @@ contains
         fpurpose = 'N/A'
       endif
       
-      fobject = 'state'
+      fobject = 'field'
 
       call c_ESMC_AttPackWrite(state%statep%base, fconvention, &
         fpurpose, fobject, localrc)

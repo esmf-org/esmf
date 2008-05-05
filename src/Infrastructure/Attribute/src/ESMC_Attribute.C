@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.9 2008/04/05 03:38:07 cdeluca Exp $
+// $Id: ESMC_Attribute.C,v 1.10 2008/05/05 07:46:14 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.9 2008/04/05 03:38:07 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.10 2008/05/05 07:46:14 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -370,7 +370,9 @@
 // !ARGUMENTS:
       char *convention,        //  in - convention
       char *purpose,           //  in - purpose
-      char *object) const {    //  in - object
+      char *object,            //  in - object
+      char *basename,          //  in - basename
+      int count) const {       //  in - count  
 //
 // !DESCRIPTION:
 //    Print the contents of an attribute package.  Expected to be
@@ -380,14 +382,58 @@
 
   char msgbuf[ESMF_MAXSTR];
   int localrc;
-  ESMC_Attribute *attpack;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
+  
+  if (count == 0) {
+    sprintf(msgbuf, "\n\nName: %s  Convention: %s  Purpose: %s\n\n",
+      basename,convention,purpose);
+    printf(msgbuf);
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    sprintf(msgbuf, "%-35s%-35s%-35s%-35s\n","Short Name","Long Name","Units","Dimensions");
+    printf(msgbuf);
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    ++count;
+  }
+  
+  if (strcmp(convention,attrConvention) == 0 && 
+      strcmp(purpose,attrPurpose) == 0 &&
+      strcmp(object,attrObject) == 0) {
+      if (items == 1) {
+        if (tk == ESMC_TYPEKIND_I4)
+          sprintf(msgbuf, "%-35d",vi);
+        else if (tk == ESMC_TYPEKIND_I8) 
+          sprintf(msgbuf, "%-35ld",vtl); 
+        else if (tk == ESMC_TYPEKIND_R4) 
+          sprintf(msgbuf, "%-35f",vf);  
+        else if (tk == ESMC_TYPEKIND_R8) 
+          sprintf(msgbuf, "%-35g",vd);  
+        else if (tk == ESMC_TYPEKIND_LOGICAL) 
+          sprintf(msgbuf, "%-35s",ESMC_LogicalString(vb));
+        else if (tk == ESMC_TYPEKIND_CHARACTER)
+          sprintf(msgbuf, "%-35s",vcp);
+        else {
+          sprintf(msgbuf, "%-35s","N/A");
+        }
+        printf(msgbuf);
+        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      }
+        if (strcmp("dimensions",attrName) == 0) {
+          sprintf(msgbuf, "\n");
+          printf(msgbuf);
+          ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+        }
+      //}
+  }
+  for(int i=0;  i<attrCount; i++) {
+      attrList[i]->ESMC_AttPackWrite(convention,purpose,object,basename,++count);
+  }
 
+/*
   attpack = ESMC_AttPackGet(convention, purpose, object);
   if (!attpack) {
-       sprintf(msgbuf, "  Cannot find an attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
+       sprintf(msgbuf, "  Cannot find an attribute package on this object with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
                       convention, purpose, object);
        printf(msgbuf);
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
@@ -395,15 +441,13 @@
        return localrc;
   }
 
-  sprintf(msgbuf, "  Attribute package contains %d attributes.\n", attpack->attrCount);
-  printf(msgbuf);
-  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   for (int i=0; i<attpack->attrCount; i++) {
       sprintf(msgbuf, "   Attr %d:\n", i);
       printf(msgbuf);
       ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       attpack->attrList[i]->ESMC_Print();
   }
+*/
   
   return ESMF_SUCCESS;
 
@@ -2653,7 +2697,8 @@ if (count) {
 //   copy an attribute, including contents, to current object (this)
 //
 //EOP
-  int i;
+  int i, localrc;
+  ESMC_Attribute *attr;
 
   memcpy(attrName, source.attrName, ESMF_MAXSTR);
   memcpy(attrConvention, source.attrConvention, ESMF_MAXSTR);
@@ -2711,13 +2756,19 @@ if (count) {
   }
 
   // if attribute list, copy it.
-  if(source.attrList != ESMC_NULL_POINTER) {
-    for (i=0; i<attrCount; i++) {
-      if(source.attrList[i]->attrList == ESMC_NULL_POINTER) {
-        attrList[i] = new ESMC_Attribute();
-        attrList[i] = source.attrList[i];
+  for (i=0; i<source.attrCount; i++) {
+    if(source.attrList[i]->attrList == ESMC_NULL_POINTER) {
+      attr = new ESMC_Attribute();
+      *attr = *(source.attrList[i]);
+      localrc = ESMC_AttributeSet(attr);
+    }
+    else {
+      if(this->attrAlloc < (this->attrCount + 1)) {
+        localrc = this->ESMC_AttributeAlloc(1);
       }
-      else attrList[i] = source.attrList[i];
+    
+      attrList[attrCount] = source.attrList[i];
+      (this->attrCount)++;
     }
   }
 
