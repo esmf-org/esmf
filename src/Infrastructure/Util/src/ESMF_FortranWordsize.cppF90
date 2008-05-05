@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsize.cppF90,v 1.1.2.4 2008/05/02 05:54:12 theurich Exp $
+! $Id: ESMF_FortranWordsize.cppF90,v 1.1.2.5 2008/05/05 18:24:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -68,7 +68,7 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FortranUDTPointerSize()"
 !BOPI
-! !IROUTINE: ESMF_FortranUDTPointerSize - Get size of Fortran 
+! !IROUTINE: ESMF_FortranUDTPointerSize - Get upper limit on size of Fortran UDT Pointer in bytes
 
 ! !INTERFACE:
   subroutine ESMF_FortranUDTPointerSize(size)
@@ -77,26 +77,36 @@ contains
     integer, intent(out)  :: size
 !EOPI
 !------------------------------------------------------------------------------
-    integer, parameter :: int8_k = selected_int_kind (12)   ! 8-byte integer
-    integer, parameter :: chars_l = 256
     type simple_udt
       sequence
       real :: a, b, c
       integer :: i, j, k
     end type
-    integer(int8_k) :: udt_begin
     type(simple_udt), pointer :: udt_ptr
-    character :: udt_chars(chars_l), udt_endchar
-    equivalence (udt_begin, udt_chars)
-    common /udtcom/ udt_begin, udt_ptr, udt_endchar
+    character :: udt_endchar
+    common /udtcom/ udt_ptr, udt_endchar
     
-    udt_chars = achar (0)
-    udt_endchar = achar (1)
-    size = maxloc (iachar (udt_chars), dim=1) - 9
-
+    call ESMF_FortranUDTPointerSizeInit()
+    
+    size = ichar(udt_endchar)
+    
+    ! because of compiler introduced padding size may actually overestimate the
+    ! size of the (UDT, pointer) structure
+    
+    if (size==0) then
+      size = 64 ! bytes - large enough to work on all current platforms
+    endif
+    
   end subroutine ESMF_FortranUDTPointerSize
 !------------------------------------------------------------------------------
 
+subroutine ESMF_FortranUDTPointerSizeInit
+  implicit none
+  character :: comchars(256)
+  common /udtcom/ comchars
+  integer :: i
+  comchars = (/ (char (i), i=0, 255) /)
+end subroutine ESMF_FortranUDTPointerSizeInit
 
 
 !==============================================================================
@@ -178,4 +188,17 @@ subroutine f_esmf_fortranudtpointersize(size)
   use ESMF_FortranWordsizeMod
   integer::size
   call ESMF_FortranUDTPointerSize(size)
+end subroutine
+
+
+subroutine f_esmf_fortranudtpointercopy(dst, src)
+  ! make a copy of the internal structure of a pointer to user derived type
+  type simple_udt
+    sequence
+    real :: a, b, c
+    integer :: i, j, k
+  end type
+  type (simple_udt), pointer:: dst
+  type (simple_udt), pointer:: src
+  dst => src
 end subroutine

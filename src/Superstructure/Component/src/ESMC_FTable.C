@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.31.2.4 2008/05/02 23:14:04 theurich Exp $
+// $Id: ESMC_FTable.C,v 1.31.2.5 2008/05/05 18:24:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.31.2.4 2008/05/02 23:14:04 theurich Exp $";
+           "$Id: ESMC_FTable.C,v 1.31.2.5 2008/05/05 18:24:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -446,6 +446,7 @@
  
 extern "C"{ 
 void FTN(f_esmf_fortranudtpointersize)(int *size);  // prototype used below
+void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
 }
  
 //-----------------------------------------------------------------------------
@@ -487,19 +488,10 @@ void FTN(f_esmf_fortranudtpointersize)(int *size);  // prototype used below
     if (dtype == DT_VOIDP){
       data[datacount].dataptr = *datap;
     }else if (dtype == DT_FORTRAN_UDT_POINTER){
-      int datumSize;
+      int datumSize;  // upper limit of (UDT, pointer) size
       FTN(f_esmf_fortranudtpointersize)(&datumSize);
-      if (datumSize==0){
-        // The above call to get the pointer size does not
-        // work on pre 7.x versions of PGI. The following
-        // hard-coded size applies in those cases.
-        // If we ever find other compilers where the above
-        // call reports a zero size we will have to make
-        // this section explicitly compiler dependent.
-        datumSize = 12;
-      }
       data[datacount].dataptr = (void *)new char[datumSize];
-      memcpy(data[datacount].dataptr, (void *)datap, datumSize);
+      FTN(f_esmf_fortranudtpointercopy)(data[datacount].dataptr, (void *)datap);
     }
    
     datacount++;
@@ -585,18 +577,7 @@ void FTN(f_esmf_fortranudtpointersize)(int *size);  // prototype used below
       if (*dtype == DT_VOIDP){
         *datap = data[i].dataptr;
       }else if (*dtype == DT_FORTRAN_UDT_POINTER){
-        int datumSize;
-        FTN(f_esmf_fortranudtpointersize)(&datumSize);
-        if (datumSize==0){
-          // The above call to get the pointer size does not
-          // work on pre 7.x versions of PGI. The following
-          // hard-coded size applies in those cases.
-          // If we ever find other compilers where the above
-          // call reports a zero size we will have to make
-          // this section explicitly compiler dependent.
-          datumSize = 12;
-        }
-        memcpy((void *)datap, data[i].dataptr, datumSize);
+        FTN(f_esmf_fortranudtpointercopy)((void *)datap, data[i].dataptr);
       }
 
       return ESMF_SUCCESS;
