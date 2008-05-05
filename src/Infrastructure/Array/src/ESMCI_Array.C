@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.16 2008/05/05 22:57:40 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.17 2008/05/05 23:07:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.16 2008/05/05 22:57:40 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.17 2008/05/05 23:07:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2062,6 +2062,18 @@ bool Array::match(
     return matchResult;
   }
   
+  // check typekind, rank match
+  if (array1->typekind != array2->typekind){
+    matchResult = false;
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  if (array1->rank != array2->rank){
+    matchResult = false;
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+
   // compare the distgrid members
   matchResult = DistGrid::match(array1->getDistGrid(), array2->getDistGrid(),
     &localrc);

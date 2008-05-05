@@ -1,4 +1,4 @@
-% $Id: ArrayBundle_rest.tex,v 1.1.2.1 2008/04/29 18:51:18 theurich Exp $
+% $Id: ArrayBundle_rest.tex,v 1.1.2.2 2008/05/05 23:07:22 theurich Exp $
 
 %\subsubsection{Restrictions and Future Work}
 \begin{itemize}
@@ -6,8 +6,9 @@
 the future this functionality will be provided via the
 {\tt ESMF\_ArrayBundleAdd()} method.
 \item The current implementation of the ArrayBundle communication methods only
-supports ArrayBundles that contain Arrays with identical distribution, i.e.
-DistGrid, type, kind and rank.
+supports ArrayBundles that contain congruent Arrays of the same type, kind and
+rank. Congruent Arrays are defined on matching DistGrids and the shape of the
+DE-local tiles matches for each DE.
 \item The current implementation of the ArrayBundle communication methods have
 not been optimized for performance or memory usage.
 \end{itemize}
