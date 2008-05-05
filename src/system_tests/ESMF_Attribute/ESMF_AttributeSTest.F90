@@ -33,8 +33,7 @@ program ESMF_AttributeSTest
   type(ESMF_GridComp) :: comp1
   type(ESMF_GridComp) :: comp2
   type(ESMF_CplComp) :: cplcomp
-  character(len=ESMF_MAXSTR) :: name, value, conv, purp
-  
+    
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: testresult = 0
 
@@ -103,14 +102,14 @@ program ESMF_AttributeSTest
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
     ! use petList to define comp1 on PET 0,1,2,3
-    comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1,2/), rc=rc)
+    comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1,2,3,4,5/), rc=rc)
     !print  *, "Created component ", trim(cname1), "rc =", rc
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     cname2 = "user model 2"
     ! use petList to define comp1 on PET 0,1,2,3
-    comp2 = ESMF_GridCompCreate(name=cname2, petList=(/3,4,5/), rc=rc)
+    comp2 = ESMF_GridCompCreate(name=cname2, petList=(/0,1,2,3,4,5/), rc=rc)
     !print  *, "Created component ", trim(cname1), "rc =", rc
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
@@ -153,11 +152,11 @@ program ESMF_AttributeSTest
  
 ! print *, '-------------------------------Initialize----------------------------------'
  
-  c1imp = ESMF_StateCreate("comp1 import", ESMF_STATE_IMPORT, rc=rc)
+  c1imp = ESMF_StateCreate("Comp1 importState", ESMF_STATE_IMPORT, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=rc)
+  c1exp = ESMF_StateCreate("Comp1 exportState", ESMF_STATE_EXPORT, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -166,11 +165,11 @@ program ESMF_AttributeSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
    
-  c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=rc)
+  c2imp = ESMF_StateCreate("Comp2 importState", ESMF_STATE_IMPORT, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  c2exp = ESMF_StateCreate("comp2 export", ESMF_STATE_EXPORT, rc=rc)
+  c2exp = ESMF_StateCreate("Comp2 exportState", ESMF_STATE_EXPORT, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)

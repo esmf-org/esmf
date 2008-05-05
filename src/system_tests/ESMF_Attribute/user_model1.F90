@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.20 2008/05/01 22:26:03 rokuingh Exp $
+! $Id: user_model1.F90,v 1.21 2008/05/05 07:45:10 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -105,16 +105,17 @@ module user_model1
     integer, intent(out) :: rc
 
     ! Local variables
-    type(ESMF_State)            :: MyState, physics
     type(ESMF_VM)               :: vm
     type(ESMF_DistGrid)         :: distgrid
     type(ESMF_ArraySpec)        :: arrayspec
     type(ESMF_Array)            :: array
-    type(ESMF_Field)            :: uwind, ozone, co, tke, wt, field
-    type(ESMF_FieldBundle)      :: bundle, tracers, turbulence
     type(ESMF_Grid)             :: grid
+    type(ESMF_Field)            :: evap,h250,omega,salt,sh,sno,so4,t2m,ua,wet1
+    type(ESMF_FieldBundle)      :: fbundle
     integer                     :: petCount, status, myPet
-    character(len=ESMF_MAXSTR)  :: name, value, conv, purp, fconv, fpurp, sname, svalue, outvalue
+    character(len=ESMF_MAXSTR)  :: name1,name2,name3,name4,value1,value2,value3,value4
+    character(len=ESMF_MAXSTR)  :: conv, purp, fconv, fpurp, outvalue
+
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -129,124 +130,180 @@ module user_model1
     call ESMF_StateGet(exportState, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-  !!! Arlindo's State Pretty Print example
-  !!!
-  !!!
-      if (myPet .eq. 0) then
-        print *, "--------------------------------------- "
-        print *, 'Start of State Pretty Print example'
-        print *, "--------------------------------------- "
-      endif
-      
-      sname = 'name'
-      svalue = 'My Nice State'
+    ! initialize variables
+    fconv = 'netCDF'
+    fpurp = 'basic'
+    name1 = 'shortname'
+    name2 = 'longname'
+    name3 = 'units'
+    name4 = 'dimensions'
  
-      MyState = ESMF_StateCreate("MyState", ESMF_STATE_IMPORT, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
+    ! create a field, make an attribute package, and set attributes in the package
+    value1 = 'evap'
+    value2 = 'evaporation from turbulence'
+    value3 = 'm-2 s-1'
+    value4 = 'xy'
+      
+    evap = ESMF_FieldCreate("evap", rc=status)
+    call ESMF_AttributeAdd(evap, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(evap, name1, value1, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(evap, name2, value2, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(evap, name3, value3, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(evap, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
 
-      call ESMF_AttributeSet(MyState, sname, svalue, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
+    ! create a field, make an attribute package, and set attributes in the package
+    value1 = 'h250'
+    value2 = 'height at 250 Pa'
+    value3 = 'm'
+    value4 = 'xy'
+      
+    h250 = ESMF_FieldCreate("h250", rc=status)
+    call ESMF_AttributeAdd(h250, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(h250, name1, value1, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(h250, name2, value2, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(h250, name3, value3, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(h250, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
 
-      physics = ESMF_StateCreate("physics", ESMF_STATE_IMPORT, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
+    ! create a field, make an attribute package, and set attributes in the package
+    value1 = 'omega'
+    value2 = 'verticle pressure velocity'
+    value3 = 'Pa s-1'
+    value4 = 'xyz'
       
-      ! field stuff
-      fconv = 'netCDF'
-      fpurp = 'basic'
-      name = 'longname'
-      value = 'zonal wind'
+    omega = ESMF_FieldCreate("omega", rc=status)
+    call ESMF_AttributeAdd(omega, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(omega, name1, value1, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(omega, name2, value2, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(omega, name3, value3, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(omega, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+    
+    ! create a field, make an attribute package, and set attributes in the package
+    value1 = 'salt'
+    value2 = 'sea salt mixing ratio'
+    value3 = 'unitless'
+    value4 = 'xyz'
       
-      uwind = ESMF_FieldCreate("uwind", rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeAdd(uwind, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeSet(uwind, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      
-      value = 'ozone'
-      ozone = ESMF_FieldCreate("ozone", rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeAdd(ozone, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeSet(ozone, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      
-      value = 'carbon monoxide'
-      co = ESMF_FieldCreate("co", rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeAdd(co, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeSet(co, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      
-      value = 'turbulent kinetic energy'
-      tke = ESMF_FieldCreate("tke", rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeAdd(tke, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeSet(tke, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      
-      value = 'heat fluxes'
-      wt = ESMF_FieldCreate("wt", rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeAdd(wt, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeSet(wt, name, value, convention=fconv, purpose=fpurp, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-
-      ! bundle stuff
-      tracers = ESMF_FieldBundleCreate(name="tracers", rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      
-      turbulence = ESMF_FieldBundleCreate(name="turbulence", rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      
-      ! connect the attribute hierarchy
-      call ESMF_AttributeSet(turbulence, tke, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeSet(turbulence, wt, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-
-      call ESMF_AttributeSet(tracers, ozone, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeSet(tracers, co, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-
-      call ESMF_AttributeSet(physics, turbulence, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-
-      call ESMF_AttributeSet(MyState, uwind, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeSet(MyState, tracers, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
-      call ESMF_AttributeSet(MyState, physics, rc=status)
-      if (status .ne. ESMF_SUCCESS) return
+    salt = ESMF_FieldCreate("salt", rc=status)
+    call ESMF_AttributeAdd(salt, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(salt, name1, value1, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(salt, name2, value2, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(salt, name3, value3, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(salt, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
  
-      if (myPet .eq. 0) then
-        !call ESMF_StatePrint(MyState, rc=status)
-        if (status .ne. ESMF_SUCCESS) return
-        print *, "--------------------------------------- "
-        print *, 'End of State Pretty Print example'
-        print *, "--------------------------------------- "
-      endif
-  !!!
-  !!!
-  !!! Arlindo's State Pretty Print example
+    ! create a field, make an attribute package, and set attributes in the package
+    value1 = 'sh'
+    value2 = 'sensible heat flux from turbulence'
+    value3 = 'W m-2'
+    value4 = 'xy'
+      
+    sh = ESMF_FieldCreate("sh", rc=status)
+    call ESMF_AttributeAdd(sh, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(sh, name1, value1, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(sh, name2, value2, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(sh, name3, value3, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(sh, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+ 
+    ! create a field, make an attribute package, and set attributes in the package
+    value1 = 'sno'
+    value2 = 'snowfall'
+    value3 = 'kg m-2 s-1'
+    value4 = 'xy'
+      
+    sno = ESMF_FieldCreate("sno", rc=status)
+    call ESMF_AttributeAdd(sno, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(sno, name1, value1, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(sno, name2, value2, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(sno, name3, value3, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(sno, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+ 
+    ! create a field, make an attribute package, and set attributes in the package
+    value1 = 'so4'
+    value2 = 'sulfate aerosol mixing ratio'
+    value3 = 'unitless'
+    value4 = 'xyz'
+      
+    so4 = ESMF_FieldCreate("so4", rc=status)
+    call ESMF_AttributeAdd(so4, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(so4, name1, value1, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(so4, name2, value2, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(so4, name3, value3, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(so4, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+ 
+    ! create a field, make an attribute package, and set attributes in the package
+    value1 = 't2m'
+    value2 = '2-meter air temperature'
+    value3 = 'K'
+    value4 = 'xyz'
+      
+    t2m = ESMF_FieldCreate("t2m", rc=status)
+    call ESMF_AttributeAdd(t2m, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(t2m, name1, value1, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(t2m, name2, value2, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(t2m, name3, value3, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(t2m, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+ 
+    ! create a field, make an attribute package, and set attributes in the package
+    value1 = 'ua'
+    value2 = 'surface eastward wind'
+    value3 = 'm s-1'
+    value4 = 'xy'
+      
+    ua = ESMF_FieldCreate("ua", rc=status)
+    call ESMF_AttributeAdd(ua, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(ua, name1, value1, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(ua, name2, value2, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(ua, name3, value3, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(ua, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+ 
+    ! create a field, make an attribute package, and set attributes in the package
+    value1 = 'wet1'
+    value2 = 'surface soil wetness'
+    value3 = 'unitless'
+    value4 = 'xyz'
+      
+    wet1 = ESMF_FieldCreate("wet1", rc=status)
+    call ESMF_AttributeAdd(wet1, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(wet1, name1, value1, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(wet1, name2, value2, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(wet1, name3, value3, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeSet(wet1, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+ 
+      
+    ! create a field bundle for the first five fields from above
+    fbundle = ESMF_FieldBundleCreate(name="fbundle", rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+      
+    ! connect the attrs from the first five fields above to the field bundle
+    call ESMF_AttributeSet(fbundle, evap, rc=status)
+    call ESMF_AttributeSet(fbundle, h250, rc=status)
+    call ESMF_AttributeSet(fbundle, omega, rc=status)
+    call ESMF_AttributeSet(fbundle, salt, rc=status)
+    call ESMF_AttributeSet(fbundle, sh, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
 
-    ! copy all attribute information into export state
-    call ESMF_AttributeCopy(MyState, exportState, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    ! connect the attrs from the remaining five fields directly to the export state
+    call ESMF_AttributeSet(exportState, sno, rc=status)
+    call ESMF_AttributeSet(exportState, so4, rc=status)
+    call ESMF_AttributeSet(exportState, t2m, rc=status)
+    call ESMF_AttributeSet(exportState, ua, rc=status)
+    call ESMF_AttributeSet(exportState, wet1, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
 
-    call ESMF_FieldDestroy(uwind, rc=rc)
-    call ESMF_FieldDestroy(ozone, rc=rc)
-    call ESMF_FieldDestroy(co, rc=rc)
-    call ESMF_FieldDestroy(tke, rc=rc)
-    call ESMF_FieldDestroy(wt, rc=rc)
-    call ESMF_FieldBundleDestroy(tracers, rc=rc)
-    call ESMF_FieldBundleDestroy(turbulence, rc=rc)
-    call ESMF_StateDestroy(physics, rc=rc)
-    call ESMF_StateDestroy(MyState, rc=rc)
+    ! connect the attrs from the field bundle to the export state
+    call ESMF_AttributeSet(exportState, fbundle, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+  
+    ! Don't delete the fields so we can copy attrs (shallow) and reuse
 
     rc = ESMF_SUCCESS
     return
