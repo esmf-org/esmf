@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.67.2.8 2008/05/05 05:39:55 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.67.2.9 2008/05/05 16:42:27 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.67.2.8 2008/05/05 05:39:55 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.67.2.9 2008/05/05 16:42:27 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -1027,12 +1027,10 @@ program ESMF_GridCreateUTest
   grid=ESMF_GridCreate(distgrid=distgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-#if 0
   ! allocate coord array
   call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
        rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-#endif
 
   ! create a buffer to put the grid in
   bufCount=100000
@@ -1060,8 +1058,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
-  ! check that defaults are as expected
-
+  ! check that values are as expected
   if (typekind .ne. ESMF_TYPEKIND_R8) correct=.false.
   if (dimCount .ne. 2) correct=.false.
   if ((distgridToGridMap(1) .ne. 1) .or. (distgridToGridMap(2) .ne. 2)) correct=.false.
@@ -1077,7 +1074,6 @@ program ESMF_GridCreateUTest
   if ((gridAlign(1) .ne. -1) .or. (gridAlign(2) .ne. -1)) correct=.false. 
   if (localDECount .ne. 0) correct=.false. 
 
-#if 0
   ! Get Coord Array and see if it looks ok
   call ESMF_GridGetCoord(grid2, staggerloc=ESMF_STAGGERLOC_CENTER, &
          coordDim=1, array=array, rc=localrc)
@@ -1086,7 +1082,6 @@ program ESMF_GridCreateUTest
   ! Validate Array
   call ESMF_ArrayValidate(array, rc=localrc)  
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-#endif
 
   ! destroy grids
   call ESMF_GridDestroy(grid,rc=localrc)
