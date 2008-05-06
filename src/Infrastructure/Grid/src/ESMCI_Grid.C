@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.66 2008/05/01 22:43:43 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.67 2008/05/06 21:42:13 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.66 2008/05/01 22:43:43 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.67 2008/05/06 21:42:13 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -3175,15 +3175,12 @@ int Grid::serialize(
   if (cp) *((t *)(bufptr+loff))=var;    \
   loff += (sizeof(t));  
 
-  // if (cp) memcpy(bufptr+loff,&var,sizeof(t));    \
-
-
 #define SERIALIZE_VAR1D(cp,bufptr,loff,varptr,s1,t)    \
   if (cp) memcpy(bufptr+loff,varptr,(s1*sizeof(t)));       \
   loff += (s1*sizeof(t));  
 
 #define SERIALIZE_VAR2D(cp,bufptr,loff,varptr,s1,s2,t) \
-  if (cp) memcpy(bufptr+loff,((t *)varptr)+s1,(s1*s2*sizeof(t))); \
+  if (cp) memcpy(bufptr+loff,((t **)varptr)+s1,(s1*s2*sizeof(t))); \
   loff += (s1*s2*sizeof(t));  
 
 
@@ -3270,12 +3267,13 @@ int Grid::serialize(
 
     // Don't do isDEBnds because a proxy object isn't on a valid DE
 
+    // Serialize the Array exists array
+    SERIALIZE_VAR2D(cp, buffer,loffset,arrayExists,staggerLocCount,dimCount,bool);
+
     // make sure loffset is aligned correctly
     r=loffset%8;
     if (r!=0) loffset += 8-r;
 
-    // Serialize the Array exists array
-    SERIALIZE_VAR2D(cp, buffer,loffset,arrayExists,staggerLocCount,dimCount,bool);
     // Serialize the Coord Arrays 
     for (int s=0; s<staggerLocCount; s++) {
       for (int c=0; c<dimCount; c++) {
@@ -3370,7 +3368,7 @@ int Grid::deserialize(
 
 #define DESERIALIZE_VAR2D(bufptr,loff,varptr,s1,s2,t) \
   varptr=_allocate2D<t>(s1,s2);         \
-  memcpy(((t *)varptr)+s1,bufptr+loff,(s1*s2*sizeof(t))); \
+  memcpy(((t **)varptr)+s1,bufptr+loff,(s1*s2*sizeof(t))); \
   loff += (s1*s2*sizeof(t));  
 
   // get localoffset
@@ -3438,26 +3436,26 @@ int Grid::deserialize(
   // So make sure that they're NULL
   isDELBnd=ESMC_NULL_POINTER;
   isDEUBnd=ESMC_NULL_POINTER;
-
+    
+  // Deserialize the Array exists array
+  DESERIALIZE_VAR2D( buffer,loffset,arrayExists,staggerLocCount,dimCount,bool);
+  
   // make sure loffset is aligned correctly
   r=loffset%8;
   if (r!=0) loffset += 8-r;
-    
-    // Deserialize the Array exists array
-    DESERIALIZE_VAR2D( buffer,loffset,arrayExists,staggerLocCount,dimCount,bool);
-
-    // Deserialize the Coord Arrays 
-    coordArrayList=_allocate2D<Array *>(staggerLocCount,dimCount);
-    for (int s=0; s<staggerLocCount; s++) {
-      for (int c=0; c<dimCount; c++) {
-	if (arrayExists[s][c]) {
-	  coordArrayList[s][c]=new Array;
+  
+  // Deserialize the Coord Arrays 
+  coordArrayList=_allocate2D<Array *>(staggerLocCount,dimCount);
+  for (int s=0; s<staggerLocCount; s++) {
+    for (int c=0; c<dimCount; c++) {
+      if (arrayExists[s][c]) {
+	coordArrayList[s][c]=new Array;
 	  coordArrayList[s][c]->deserialize(buffer, &loffset);
-	} else {
-	  coordArrayList[s][c]=ESMC_NULL_POINTER;
-	}
+      } else {
+	coordArrayList[s][c]=ESMC_NULL_POINTER;
       }
     }
+  }
 
   // Setup didIAllocList if the arrayExists then deallocate it
   //// allocate storage for array allocation flag
