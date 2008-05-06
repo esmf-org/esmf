@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.4.2.2 2008/04/08 03:23:56 cdeluca Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.4.2.3 2008/05/06 15:24:55 cdeluca Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -50,12 +50,12 @@
 
 \section{Attribute Class}
 
-\subsection{Object Model}
-#ifdef STANDALONE
-\input{Attribute_obj}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Attribute/doc/Attribute_obj}
-#endif
+%\subsection{Object Model}
+%#ifdef STANDALONE
+%\input{Attribute_obj}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Attribute/doc/Attribute_obj}
+%#endif
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -84,6 +84,13 @@
 %#elif defined(CONSTITUENT)
 %\input{../Infrastructure/Attribute/doc/Attribute_implnotes}
 %#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+\input{../../../Superstructure/AttributeAPI/doc/ESMF_Attribute_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/AttributeAPI/doc/ESMF_Attribute_fapi}
+#endif
 
 #ifdef STANDALONE
 %\section{Bibliography}

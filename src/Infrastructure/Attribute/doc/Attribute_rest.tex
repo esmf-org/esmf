@@ -1,4 +1,4 @@
-% $Id: Attribute_rest.tex,v 1.3.2.2 2008/04/08 03:23:56 cdeluca Exp $
+% $Id: Attribute_rest.tex,v 1.3.2.3 2008/05/06 15:24:55 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,25 +8,10 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-The following capabilities are still being developed.  They will be listed by category to avoid confusion.
- 
-\subsubsection{Attributes}
+Subsequent releases of ESMF will include the concept of an Attribute
+hierarchy.  This will enable, for example, the Attributes of the Fields
+in a Bundle to be associated with the Bundle.  Future work will also
+include the association of a purpose, convention (e.g., CF), and I/O format
+(e.g., plain text, XML) with sets of Attributes.
 
-\begin{itemize}
-\item Addition of an internal variable to track the object to which the attribute belongs.
-\item Ability to read in meta-data automatically from an XML file.
-\end{itemize}
 
-\subsubsection{Attribute Hierarchies}
-
-\begin{itemize}
-\item Addition of a updating routine that will sync an attribute hierarchy with a later version of itself.
-\end{itemize}
-
-\subsubsection{Attribute Packages}
-
-\begin{itemize}
-\item Waiting on full specification of object attribute packages.
-\item Allow users to specify their own attribute packages.
-\item Automatically create object attribute packages upon object creation.
-\end{itemize}

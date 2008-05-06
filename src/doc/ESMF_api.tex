@@ -316,19 +316,6 @@ safety, users should try to avoid exploiting such implicit behavior.
 A preferable approach is to use a class creation or duplication 
 method.  Unfortunately, not all classes have duplication methods yet.
 
-\subsection{Attributes}
-
-Attributes are (name, value) pairs, where
-the name is a character string and the value can be either a single
-value or list of {\tt int}/{\tt I*4}, {\tt double}/{\tt R*8},
-logical ({\tt ESMF\_Logical}), or {\tt char *}/{\tt character} values.
-Attributes can be associated with Fields, FieldBundles, and States. 
-Mixed types are not allowed in a single attribute, and all attribute
-names must be unique within a single object.    Attributes are set
-by name, and can be retrieved either directly by name or by querying
-for a count of attributes and retrieving names and values
-by index number.
-
 \section{Integrating ESMF into Applications}
 
 Depending on the requirements of the application, the user may 
