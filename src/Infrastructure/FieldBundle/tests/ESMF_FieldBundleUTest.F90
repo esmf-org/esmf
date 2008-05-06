@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.1.2.5 2008/05/06 17:54:40 cdeluca Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.1.2.6 2008/05/06 18:43:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.1.2.5 2008/05/06 17:54:40 cdeluca Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.1.2.6 2008/05/06 18:43:29 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -221,7 +221,7 @@
       !This test crashes, bug 1169299 created, commented out
       !  Verify the getting Field names query from an uninitialized FieldBundle is handled
       ! (I think its fixed - Bob 2/12/2007)
-      call ESMF_FieldBundleGetNames(bundle1, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
+      call ESMF_FieldBundleGet(bundle1, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting Field names from an uninitialized FieldBundle Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -258,7 +258,7 @@
 
       !EX_UTest
       !  Verify the getting Field names query from FieldBundle returns ESMF_SUCCESS
-      call ESMF_FieldBundleGetNames(bundle1, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
+      call ESMF_FieldBundleGet(bundle1, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Field names from a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -270,7 +270,7 @@
       write(failMsg, *) "Field count not 3"
       write(name, *) "Verifying Field count from a FieldBundle Test"
       call ESMF_Test((fieldcount.eq.3), name, failMsg, result, ESMF_SRCLINE)
-		
+
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -287,7 +287,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      call ESMF_FieldBundleAdd(bundle2, simplefield, rc=rc)
+      call ESMF_FieldBundleAdd(bundle2, field=simplefield, rc=rc)
       write(failMsg, *) "Add uninitialized Field to uncreated FieldBundle failed"
       write(name, *) "Adding an uninitialized Field to an uncreated FieldBundle Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -331,7 +331,7 @@
 
       !EX_UTest
       !  Verify the getting Field names query from FieldBundle returns ESMF_SUCCESS
-      call ESMF_FieldBundleGetNames(bundle2, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
+      call ESMF_FieldBundleGet(bundle2, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Field names from a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -348,7 +348,7 @@
 
       !EX_UTest
       ! Add a field to an empty FieldBundle
-      call ESMF_FieldBundleAdd(bundle2, simplefield, rc=rc)
+      call ESMF_FieldBundleAdd(bundle2, field=simplefield, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Adding a field to an Empty FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -356,7 +356,7 @@
 
       !EX_UTest
       !  Verify the getting Field names query from FieldBundle returns ESMF_SUCCESS
-      call ESMF_FieldBundleGetNames(bundle2, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
+      call ESMF_FieldBundleGet(bundle2, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Field names from a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -428,7 +428,7 @@
 
       !EX_UTest
       !  Verify that a Field can be added to an empty FieldBundle
-      call ESMF_FieldBundleAdd(bundle2, simplefield, rc=rc)
+      call ESMF_FieldBundleAdd(bundle2, field=simplefield, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Adding a Field to an Empty FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -458,7 +458,7 @@
    
       !EX_UTest
       !  Verify that multiple Fields can be added to a FieldBundle 
-      call ESMF_FieldBundleAdd(bundle3, 3, fields, rc)
+      call ESMF_FieldBundleAdd(bundle3, 3, fields, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Adding multiple Fields to a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

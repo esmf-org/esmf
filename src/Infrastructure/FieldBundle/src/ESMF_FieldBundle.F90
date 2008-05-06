@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.1.2.7 2008/05/06 17:54:34 cdeluca Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.1.2.8 2008/05/06 18:43:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -176,6 +176,7 @@
        public ESMF_FieldBundleDestroy      ! Destroy a FieldBundle
 
        public ESMF_FieldBundleGet          ! Get FieldBundle information
+       public ESMF_FieldBundleAdd          ! Add field/fields to FieldBundle
 
 !      public ESMF_FieldBundleRemoveField   ! Delete one or more Fields by name or number
 
