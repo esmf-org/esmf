@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.34 2008/05/01 21:46:32 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.35 2008/05/06 17:36:12 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create 2D Field with 2D Grid and Fortran data pointer}
+!\subsubsection{Create 2D Field with 2D Grid and Fortran data array}
 !\label{sec:field:usage:create_2dptr}
 !
 !  User can create a {\tt ESMF\_Field} directly from a {\tt ESMF\_Grid} and a intrinsic 
@@ -96,11 +96,11 @@
 !  implied in the above equation. We'll clarify the meaning of a word when ambiguity could occur.
 !  
 !  Rule 1 is most useful for a user working with Field creation from a Grid and a Fortran
-!  array pointer in most scenarios. It extends to higher dimension count, 3D, 4D, etc...
+!  data array in most scenarios. It extends to higher dimension count, 3D, 4D, etc...
 !  Typically, as the code example demonstrates, a user first creates a Grid 
 !  , then the user use {\tt ESMF\_GridGet}
 !  to retrieve the computational and exclusive counts, next the user calculates the shape
-!  of each Fortran array dimension according to rule 1. The Fortran array pointer is allocated
+!  of each Fortran array dimension according to rule 1. The Fortran data array is allocated
 !  and initialized based on the computed shape and a Field can either be created or finalized
 !  from an empty field.
 !
@@ -128,14 +128,14 @@
     field = ESMF_FieldCreate(grid, farray, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
-    print *, "Field Create from a Grid and a Fortran data pointer returned"
+    print *, "Field Create from a Grid and a Fortran data array returned"
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data pointer}
+!\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data array}
 !\label{sec:field:usage:create_2dgrid_3dptr}
 !
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
@@ -143,7 +143,7 @@
 !  of the Fortran data array.
 !  
 !  This example demonstrates a typical use of {\tt ESMF\_Field} combining
-!  a 2D grid and 3D data pointer. One immediate problem follows: 
+!  a 2D grid and 3D data array. One immediate problem follows: 
 !  how does one define the bounds of the ungridded dimension? This is
 !  solved by the optional arguments ungriddedLBound and ungriddedUBound
 !  of FieldCreate interface. By definition, ungriddedLBound and ungriddedUBound
@@ -231,7 +231,7 @@
         rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
-    print *, "Field Create from a Grid and a Fortran data pointer returned"
+    print *, "Field Create from a Grid and a Fortran data array returned"
     call ESMF_FieldDestroy(field,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray3d)
@@ -240,7 +240,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data pointer with gridToFieldMap}
+!\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data array with gridToFieldMap}
 !\label{sec:field:usage:create_2dgrid_3dptr_map}
 !
 !  Building upon the previous example, we will create a 3D Field from
@@ -285,7 +285,7 @@
         rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
-    print *, "Field Create from a Grid and a Fortran data pointer returned"
+    print *, "Field Create from a Grid and a Fortran data array returned"
     call ESMF_FieldDestroy(field,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray3d)
@@ -294,19 +294,19 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data pointer with halos}
+!\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data array with halos}
 !\label{sec:field:usage:create_2dgrid_3dptr_map_halo}
 !
 !  This example is similar to example \ref{sec:field:usage:create_2dgrid_3dptr_map}, 
 !  in addition we will show
 !  a user can associate different halo width to a Fortran array to create
 !  a Field through the maxHaloLWidth and maxHaloUWdith optional arguments.
-!  A diagram of the dimension configuration from Grid, halos, and Fortran data pointer
+!  A diagram of the dimension configuration from Grid, halos, and Fortran data array
 !  is shown here.
 !\begin{center}
 !\begin{figure}
 !\scalebox{0.75}{\includegraphics{FieldParameterSetup}}
-!\caption{Field dimension configuration from Grid, halos, and Fortran data pointer.}
+!\caption{Field dimension configuration from Grid, halos, and Fortran data array.}
 !\label{fig:fieldparameter}
 !\end{figure}
 !\end{center}
@@ -450,7 +450,7 @@
         rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
-    print *, "Field Create from a Grid and a Fortran data pointer returned"
+    print *, "Field Create from a Grid and a Fortran data array returned"
     call ESMF_FieldDestroy(field,rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray3d)

@@ -1,4 +1,4 @@
-% $Id: Field_usage.tex,v 1.9.2.2 2008/03/20 21:04:05 feiliu Exp $
+% $Id: Field_usage.tex,v 1.9.2.3 2008/05/06 17:36:12 feiliu Exp $
 
 %\subsection{Use and Examples}
 
@@ -20,7 +20,7 @@ writing out data to files for history and restart.
 
 The sections below go into more detail about Field usage.
 
-\subsubsection{Field Creation}
+\subsubsection{Field Creation and Destruction}
 
 Fields can be created and destroyed at any time during 
 application execution.  However, these Field methods require 
@@ -59,3 +59,13 @@ data values in the array.  Then at Field create time, the
 appropriate amount of memory is allocated to contain the
 data which is local to each DE.
 
+When finished with a {\tt ESMF\_Field}, the {\tt ESMF\_FieldDestroy} method
+removes it.  However, the objects inside the {\tt ESMF\_Field}
+created externally should be deleted separately, 
+since objects can be added to
+more than one {\tt ESMF\_Field}, for example the same {\tt ESMF\_Grid}
+can be used in multiple {\tt ESMF\_Field}s.  When a single Grid object
+is shared by multiple Fields, the internal Grid is not deleted by
+{\tt ESMF\_FieldDestroy} call. Field provides copy behavior through creation 
+interface, internally created {\tt ESMF\_Array} object
+will be deleted upon Field destruction to prevent memory leak.

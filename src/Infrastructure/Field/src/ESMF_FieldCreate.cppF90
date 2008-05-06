@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.21 2008/05/01 21:46:32 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.22 2008/05/06 17:36:18 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.21 2008/05/01 21:46:32 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.22 2008/05/06 17:36:18 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1294,7 +1294,7 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 ! The arguments are:
 ! \begin{description}
 ! \item [field]
-!       Pointer to an {\tt ESMF\_Field} object.
+!       {\tt ESMF\_Field} object.
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1375,7 +1375,7 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 ! \item [ftype]
 !       Pointer to an {\tt ESMF\_Field} object.
 ! \item [grid] 
-!       Pointer to an {\tt ESMF\_Grid} object. 
+!       {\tt ESMF\_Grid} object. 
 ! \item [arrayspec]
 !       Data specification.
 ! \item [{[staggerloc]}]
@@ -1565,7 +1565,7 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 ! \item [ftype]
 !       Pointer to an {\tt ESMF\_Field} object.
 ! \item [grid] 
-!       Pointer to an {\tt ESMF\_Grid} object. 
+!       {\tt ESMF\_Grid} object. 
 ! \item [array]
 !       Data. 
 ! \item [copyflag]
@@ -1742,7 +1742,7 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 ! \item [ftype]
 !       Pointer to an {\tt ESMF\_Field} object.
 ! \item [grid] 
-!       Pointer to an {\tt ESMF\_Grid} object. 
+!       {\tt ESMF\_Grid} object. 
 ! \item [arrayspec]
 !       Data specification. 
 ! \item [{[staggerloc]}] 
@@ -1921,7 +1921,7 @@ end subroutine ESMF_FieldConstructNoDataPtr
 ! \item [ftype]
 !       Pointer to an {\tt ESMF\_Field} object.
 ! \item [grid] 
-!       Pointer to an {\tt ESMF\_Grid} object. 
+!       {\tt ESMF\_Grid} object. 
 ! \item [{[staggerloc]}] 
 !       Stagger location of data in grid cells.  For valid 
 !       predefined values see Section \ref{sec:opt:staggerloc}.
