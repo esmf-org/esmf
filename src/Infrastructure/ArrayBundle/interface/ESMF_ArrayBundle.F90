@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.1.2.8 2008/04/30 23:00:53 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.1.2.9 2008/05/06 04:06:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.1.2.8 2008/04/30 23:00:53 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.1.2.9 2008/05/06 04:06:03 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -790,7 +790,7 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution with local factor argument
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayBundleRedistStore()
@@ -816,6 +816,13 @@ contains
 !
 !   The effect of this method on ArrayBundles that contain aliased members is
 !   undefined.
+!
+!   PETs that specify a {\tt factor} argument must use the
+!   <type><kind> overloaded interface. Other PETs call into the interface
+!   without {\tt factor} argument. If multiple PETs specify the {\tt factor}
+!   argument its type and kind as well as its value must match across all
+!   PETs. If none of the PETs specifies a {\tt factor} argument the default
+!   will be a factor of 1.
 !
 !   See the description of method {\tt ESMF\_ArrayRedistStore()} for
 !   the definition of the Array based operation.
@@ -1105,7 +1112,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedistStore()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution without local factor argument
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
@@ -1130,6 +1137,13 @@ contains
 !
 !   The effect of this method on ArrayBundles that contain aliased members is
 !   undefined.
+!
+!   PETs that specify a {\tt factor} argument must use the
+!   <type><kind> overloaded interface. Other PETs call into the interface
+!   without {\tt factor} argument. If multiple PETs specify the {\tt factor}
+!   argument its type and kind as well as its value must match across all
+!   PETs. If none of the PETs specifies a {\tt factor} argument the default
+!   will be a factor of 1.
 !
 !   See the description of method {\tt ESMF\_ArrayRedistStore()} for
 !   the definition of the Array based operation.
@@ -1376,6 +1390,15 @@ contains
 !   The effect of this method on ArrayBundles that contain aliased members is
 !   undefined.
 !
+!   PETs that specify non-zero matrix coefficients must use
+!   the <type><kind> overloaded interface and provide the {\tt factorList} and
+!   {\tt factorIndexList} arguments. Providing {\tt factorList} and
+!   {\tt factorIndexList} arguments with {\tt size(factorList) = (/0/)} and
+!   {\tt size(factorIndexList) = (/2,0/)} or {\tt (/4,0/)} indicates that a 
+!   PET does not provide matrix elements. Alternatively, PETs that do not 
+!   provide matrix elements may also call into the overloaded interface
+!   {\em without} {\tt factorList} and {\tt factorIndexList} arguments.
+!   
 !   See the description of method {\tt ESMF\_ArraySMMStore()} for
 !   the definition of the Array based operation.
 !
@@ -1704,7 +1727,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSMMStoreNF()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication without local factors
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
@@ -1729,7 +1752,16 @@ contains
 !   The effect of this method on ArrayBundles that contain aliased members is
 !   undefined.
 !
-!   See the description of method {\tt ESMF\_ArraySparseMatMulStore()} for
+!   PETs that specify non-zero matrix coefficients must use
+!   the <type><kind> overloaded interface and provide the {\tt factorList} and
+!   {\tt factorIndexList} arguments. Providing {\tt factorList} and
+!   {\tt factorIndexList} arguments with {\tt size(factorList) = (/0/)} and
+!   {\tt size(factorIndexList) = (/2,0/)} or {\tt (/4,0/)} indicates that a 
+!   PET does not provide matrix elements. Alternatively, PETs that do not 
+!   provide matrix elements may also call into the overloaded interface
+!   {\em without} {\tt factorList} and {\tt factorIndexList} arguments.
+!   
+!   See the description of method {\tt ESMF\_ArraySMMStore()} for
 !   the definition of the Array based operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 

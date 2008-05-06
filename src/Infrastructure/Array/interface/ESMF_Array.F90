@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.73.2.11 2008/04/30 23:47:28 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.73.2.12 2008/05/06 04:06:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.73.2.11 2008/04/30 23:47:28 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.73.2.12 2008/05/06 04:06:01 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -628,7 +628,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution
+! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution with local factor argument
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayRedistStore()
@@ -944,7 +944,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayRedistStore()"
 !BOP
-! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution
+! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution without local factor argument
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
