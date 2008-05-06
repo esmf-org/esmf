@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.40 2008/04/05 03:38:58 cdeluca Exp $
+// $Id: ESMC_Time_F.C,v 1.41 2008/05/06 02:21:35 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 #include <ESMCI_F90Interface.h>
 #include <ESMC_TimeInterval.h>
-#include <ESMC_Time.h>
+#include <ESMCI_Time.h>
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
