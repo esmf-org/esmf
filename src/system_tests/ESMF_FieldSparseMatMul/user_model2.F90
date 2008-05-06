@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3.2.6 2008/05/06 04:31:47 cdeluca Exp $
+! $Id: user_model2.F90,v 1.3.2.7 2008/05/06 14:41:58 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -148,7 +148,7 @@ module user_model2
     pi = 3.14159d0
 
     ! Get the destination Field from the import State
-    call ESMF_StateGet(importState, fieldName="field data", field=field, rc=rc)
+    call ESMF_StateGet(importState, "field data", field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     ! Get the Array from the Field
