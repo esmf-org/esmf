@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.22 2008/04/05 03:39:12 cdeluca Exp $
+// $Id: ESMC_GridComp.h,v 1.23 2008/05/06 14:34:07 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 // !USES:
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
-#include "ESMC_Time.h"
+#include "ESMCI_Time.h"
 #include "ESMC_Clock.h"
 #include "ESMC_Grid.h"
 #include "ESMC_FTable.h"  // function & data pointer table 
