@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.22 2008/05/06 17:36:18 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.23 2008/05/06 17:43:28 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.22 2008/05/06 17:36:18 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.23 2008/05/06 17:43:28 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -812,7 +812,7 @@ contains
 ! \begin{description} @\
 ! \item [grid]  @\
 !       {\tt ESMF\_Grid} object.  The dimCount of the @\
-!       Grid muust be smaller than or equal to the rank of the {\tt farray}. @\
+!       Grid must be smaller than or equal to the rank of the {\tt farray}. @\
 ! \item [farray] @\
 !       Native fortran data array to be copied/referenced in the {\tt field} @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
