@@ -1,7 +1,7 @@
-// $Id: ESMC_BaseTime.h,v 1.34 2008/05/06 02:18:20 rosalind Exp $
+// $Id: ESMCI_BaseTime.h,v 1.1 2008/05/06 02:18:19 rosalind Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2008, University Corporation for Atmospheric Research,
+// Copyright 2002-2007, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -31,11 +31,11 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMCI_BaseTime - Base time class
+// !CLASS:  ESMC_BaseTime - Base time class
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the C++ {\tt ESMCI\_BaseTime} members and
+// The code in this file defines the C++ {\tt ESMC\_BaseTime} members and
 // declares method signatures (prototypes).  The companion file
 // {\tt ESMC\_BaseTime.C} contains the definitions (full code bodies) for
 // the {\tt ESMC\_BaseTime} methods.
@@ -83,7 +83,7 @@
 // hence are defined here for sharing.
 //
 // The separate class ESMC_Fraction is inherited to handle fractional
-// arithmetic.  ESMCI_BaseTime encapsulates common time-specific knowledge,
+// arithmetic.  ESMC_BaseTime encapsulates common time-specific knowledge,
 // whereas ESMC_Fraction is time-knowledge independent; it simply performs
 // generic fractional arithmetic, manipulations and comparisons.
 //
@@ -202,7 +202,7 @@ class BaseTime : public ESMC_Fraction { // it is a fraction !
 //-------------------------------------------------------------------------
 
 
-};    // end class BaseTime
+};    // end class ESMC_BaseTime
 
 }     // end namespace ESMCI
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.52 2008/04/05 03:38:57 cdeluca Exp $
+// $Id: ESMC_Calendar.h,v 1.53 2008/05/06 02:18:20 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -68,7 +68,7 @@
 //  
 // !USES:
  #include <ESMC_Base.h>           // inherited Base class
- #include <ESMC_BaseTime.h>       // inherited BaseTime class
+ #include <ESMCI_BaseTime.h>       // inherited BaseTime class
 
 // forward reference to prevent #include recursion
 class ESMC_Time;
@@ -177,8 +177,8 @@ class ESMC_Calendar {
     // conversions based on UTC: time zone offset done by client
     //  (TMG 2.4.5, 2.5.6)
     int ESMC_CalendarConvertToTime(ESMC_I8 yy, int mm, int dd,
-                                   ESMC_I8 d, ESMC_BaseTime *t) const;
-    int ESMC_CalendarConvertToDate(ESMC_BaseTime *t,
+                                   ESMC_I8 d, ESMCI::BaseTime *t) const;
+    int ESMC_CalendarConvertToDate(ESMCI::BaseTime *t,
                                    ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
                                    int *mm=0, int *dd=0,
                                    ESMC_I4 *d=0, ESMC_I8 *d_i8=0,

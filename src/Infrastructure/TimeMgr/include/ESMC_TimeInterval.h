@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.48 2008/04/05 03:38:57 cdeluca Exp $
+// $Id: ESMC_TimeInterval.h,v 1.49 2008/05/06 02:18:21 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -67,8 +67,8 @@ class ESMC_TimeInterval;
 
 // !USES:
  #include <ESMC_Base.h>           // inherited Base class
- #include <ESMC_BaseTime.h>       // inherited BaseTime class
- #include <ESMC_Time.h>
+ #include <ESMCI_BaseTime.h>       // inherited BaseTime class
+ #include <ESMCI_Time.h>
 
 enum ESMC_ComparisonType {ESMC_EQ, ESMC_NE,
                           ESMC_LT, ESMC_GT,
@@ -82,8 +82,8 @@ enum ESMC_AbsValueType {ESMC_POSITIVE_ABS, ESMC_NEGATIVE_ABS};
 // !PRIVATE TYPES:
 
  // class definition type
-class ESMC_TimeInterval : public ESMC_BaseTime { 
-                                             // inherits ESMC_BaseTime
+class ESMC_TimeInterval : public ESMCI::BaseTime { 
+                                             // inherits ESMCI::BaseTime
                                              // TODO: (& ESMC_Base class when
                                              // fully aligned with F90 equiv)
   private:
@@ -273,6 +273,7 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 //EOP
 //-------------------------------------------------------------------------
 
-};
+};     // end clase TimeInterval
+
 
 #endif // ESMC_TIME_INTERVAL_H
