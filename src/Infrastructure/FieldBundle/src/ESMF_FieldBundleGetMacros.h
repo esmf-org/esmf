@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldBundleGetMacros.h,v 1.1.2.2 2008/04/05 03:12:43 cdeluca Exp $
+! $Id: ESMF_FieldBundleGetMacros.h,v 1.1.2.3 2008/05/06 17:54:36 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@
                               ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
-        call ESMF_FieldBundleGetField(bundle, fieldName, field, status) @\
+        call ESMF_FieldBundleGet(bundle, fieldName, field, status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\

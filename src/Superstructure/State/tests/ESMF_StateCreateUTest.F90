@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.7.2.4 2008/05/06 04:31:40 cdeluca Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.7.2.5 2008/05/06 17:54:41 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.7.2.4 2008/05/06 04:31:40 cdeluca Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.7.2.5 2008/05/06 17:54:41 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -410,12 +410,12 @@
     fname = "Surface pressure"
     field1 = ESMF_FieldCreateNoData(fname, rc=rc)
 
-    call ESMF_FieldBundleAddField(bundle2, field1, rc=rc) 
+    call ESMF_FieldBundleAdd(bundle2, field1, rc=rc) 
 
     fname = "Energy Flux"
     field2 = ESMF_FieldCreateNoData(fname, rc=rc)
 
-    call ESMF_FieldBundleAddField(bundle2, field2, rc=rc) 
+    call ESMF_FieldBundleAdd(bundle2, field2, rc=rc) 
 
     call ESMF_FieldBundlePrint(bundle2, "", rc=rc)
 
