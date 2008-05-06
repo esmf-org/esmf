@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17.2.1 2008/05/01 23:24:24 theurich Exp $ 
+# $Id: makefile,v 1.17.2.2 2008/05/06 17:19:18 theurich Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
@@ -12,6 +12,7 @@ AUTOGEN   = ESMF_FortranWordsize.F90 ESMF_TypeKindGet.F90
 SOURCEC	  = ESMC_Util.C ESMC_Fraction.C ESMCI_F90Interface.C
 SOURCEF	  = ESMF_UtilTypes.F90 \
             ESMF_LogErr.F90  \
+            ESMF_FortranWordsizeHelper.F90 \
             $(AUTOGEN) \
             ESMF_InitMacros.F90
             
@@ -41,5 +42,5 @@ CLOBBERDIRS =
 
 ESMF_InitMacros.o: ESMF_LogErr.o ESMF_UtilTypes.o 
 ESMF_LogErr.o: ESMF_UtilTypes.o 
-ESMF_FortranWordsize.o: ESMF_FortranWordsize.cppF90 ESMF_TypeKindMacros.hcppF90
+ESMF_FortranWordsize.o: ESMF_FortranWordsize.cppF90 ESMF_FortranWordsizeHelper.o ESMF_TypeKindMacros.hcppF90
 ESMF_TypeKindGet.o: ESMF_TypeKindGet.cppF90 ESMF_TypeKindMacros.hcppF90

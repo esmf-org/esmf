@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsize.cppF90,v 1.1.2.5 2008/05/05 18:24:55 theurich Exp $
+! $Id: ESMF_FortranWordsize.cppF90,v 1.1.2.6 2008/05/06 17:19:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -93,20 +93,14 @@ contains
     ! because of compiler introduced padding size may actually overestimate the
     ! size of the (UDT, pointer) structure
     
-    if (size==0) then
+    if (size<4) then
+      ! A size smaller than 4 bytes is suspicious and may indicate that the
+      ! size was not determined correctly by the above code!
       size = 64 ! bytes - large enough to work on all current platforms
     endif
     
   end subroutine ESMF_FortranUDTPointerSize
 !------------------------------------------------------------------------------
-
-subroutine ESMF_FortranUDTPointerSizeInit
-  implicit none
-  character :: comchars(256)
-  common /udtcom/ comchars
-  integer :: i
-  comchars = (/ (char (i), i=0, 255) /)
-end subroutine ESMF_FortranUDTPointerSizeInit
 
 
 !==============================================================================
