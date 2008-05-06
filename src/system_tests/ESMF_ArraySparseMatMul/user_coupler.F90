@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4.2.5 2008/05/05 18:45:26 theurich Exp $
+! $Id: user_coupler.F90,v 1.4.2.6 2008/05/06 04:31:44 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -111,11 +111,11 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get source Array out of import state
-    call ESMF_StateGetArray(importState, "array data", srcArray, rc=rc)
+    call ESMF_StateGet(importState, "array data", srcArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get destination Array out of export state
-    call ESMF_StateGetArray(exportState, "array data", dstArray, rc=rc)
+    call ESMF_StateGet(exportState, "array data", dstArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! get localPet
@@ -183,11 +183,11 @@ module user_coupler
     print *, "User Coupler Run starting"
 
     ! Get source Array out of import state
-    call ESMF_StateGetArray(importState, "array data", srcArray, rc=rc)
+    call ESMF_StateGet(importState, "array data", srcArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get destination Array out of export state
-    call ESMF_StateGetArray(exportState, "array data", dstArray, rc=rc)
+    call ESMF_StateGet(exportState, "array data", dstArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Use ArraySMM() to take data from srcArray to dstArray

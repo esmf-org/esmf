@@ -1,4 +1,4 @@
-! $Id: CplCompTemplate.F90,v 1.1 2004/12/09 23:08:38 nscollins Exp $
+! $Id: CplCompTemplate.F90,v 1.1.8.1 2008/05/06 04:31:39 cdeluca Exp $
 !
 ! Test code which supplies a user-written coupler component.
 
@@ -60,8 +60,8 @@
 
       ! Now any other ESMF calls can be made here.
 
-      call ESMF_StateGetState(importstate,  "GComp1 Import", state1, rc)
-      call ESMF_StateGetState(importstate,  "GComp2 Import", state2, rc)
+      call ESMF_StateGet(importstate,  "GComp1 Import", state1, rc)
+      call ESMF_StateGet(importstate,  "GComp2 Import", state2, rc)
 
       ! Regridding, transformations, redistribution routines might be
       ! called here.

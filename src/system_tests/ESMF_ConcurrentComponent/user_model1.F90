@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1.2.4 2008/04/28 16:14:36 theurich Exp $
+! $Id: user_model1.F90,v 1.1.2.5 2008/05/06 04:31:45 cdeluca Exp $
 !
 ! System test for Concurrent Components.  User-code, component 1.
 
@@ -104,7 +104,7 @@
             distgrid=distgrid, name="rawdata", rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        call ESMF_StateAddArray(exportState, rawdata, rc=status)
+        call ESMF_StateAdd(exportState, rawdata, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
   
@@ -112,7 +112,7 @@
             distgrid=distgrid, name="sorted_data1", rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        call ESMF_StateAddArray(exportState, sorted_data, rc=status)
+        call ESMF_StateAdd(exportState, sorted_data, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
@@ -142,14 +142,14 @@
         integer, dimension(:), pointer      :: sdptr     ! sorted data ptr
   
         print *, "In user 1 run routine"
-        call ESMF_StateGetArray(exportState, "rawdata", rawdata, rc=status)
+        call ESMF_StateGet(exportState, "rawdata", rawdata, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         call ESMF_ArrayGet(rawdata, localDe=0, farrayPtr=rdptr, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
   
-        call ESMF_StateGetArray(exportState, "sorted_data1", sorted_data, rc=status)
+        call ESMF_StateGet(exportState, "sorted_data1", sorted_data, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         call ESMF_ArrayGet(sorted_data, localDe=0, farrayPtr=sdptr, rc=status)
@@ -186,7 +186,7 @@
 
         print *, "In user 1 final routine"
 
-        call ESMF_StateGetArray(exportState, "rawdata", rawdata, rc=status)
+        call ESMF_StateGet(exportState, "rawdata", rawdata, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
@@ -194,7 +194,7 @@
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
   
-        call ESMF_StateGetArray(exportState, "sorted_data1", sorted_data, rc=status)
+        call ESMF_StateGet(exportState, "sorted_data1", sorted_data, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1.2.5 2008/05/05 18:45:26 theurich Exp $
+! $Id: user_model1.F90,v 1.1.2.6 2008/05/06 04:31:43 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -116,7 +116,7 @@ module user_model1
     srcArray1 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="srcArray1", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(exportState, srcArray1, rc=rc)
+    call ESMF_StateAdd(exportState, srcArray1, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Create the dstArray1 and add it to the importState
@@ -126,7 +126,7 @@ module user_model1
     dstArray1 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="dstArray1", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(importState, dstArray1, rc=rc)
+    call ESMF_StateAdd(importState, dstArray1, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Fill the srcF90 array and ArrayScatter() it across srcArray1
@@ -172,7 +172,7 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get the Arrays from the states
-    call ESMF_StateGetArray(importState, "dstArray1", dstArray1, rc=rc)
+    call ESMF_StateGet(importState, "dstArray1", dstArray1, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Initialize dstF90
@@ -219,7 +219,7 @@ module user_model1
 
     print *, "User Comp1 Final starting"
 
-    call ESMF_StateGetArray(exportState, "srcArray1", array, rc=rc)
+    call ESMF_StateGet(exportState, "srcArray1", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -228,7 +228,7 @@ module user_model1
     call ESMF_DistGridDestroy(distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_StateGetArray(importState, "dstArray1", array, rc=rc)
+    call ESMF_StateGet(importState, "dstArray1", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

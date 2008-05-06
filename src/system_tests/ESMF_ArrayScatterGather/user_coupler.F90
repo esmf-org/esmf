@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1.2.5 2008/05/05 18:45:26 theurich Exp $
+! $Id: user_coupler.F90,v 1.1.2.6 2008/05/06 04:31:43 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -102,9 +102,9 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Get the Arrays from the states
-    call ESMF_StateGetArray(importState, "srcArray1", srcArray1, rc=rc)
+    call ESMF_StateGet(importState, "srcArray1", srcArray1, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGetArray(exportState, "srcArray2", srcArray2, rc=rc)
+    call ESMF_StateGet(exportState, "srcArray2", srcArray2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! ArrayGather() srcArray1 into srcF90 on rootPet=5
@@ -140,9 +140,9 @@ module user_coupler
     print *, "User Coupler Run starting"
 
     ! Get the Arrays from the states
-    call ESMF_StateGetArray(exportState, "dstArray1", dstArray1, rc=rc)
+    call ESMF_StateGet(exportState, "dstArray1", dstArray1, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGetArray(exportState, "dstArray2", dstArray2, rc=rc)
+    call ESMF_StateGet(exportState, "dstArray2", dstArray2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! ArrayGather() dstArray2 into dstF90 on rootPet=2

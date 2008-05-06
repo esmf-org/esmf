@@ -1,4 +1,4 @@
-! $Id: cplComp.F90,v 1.1.2.5 2008/05/05 18:45:27 theurich Exp $
+! $Id: cplComp.F90,v 1.1.2.6 2008/05/06 04:31:45 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -81,9 +81,9 @@ module cplCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Get access to src and dst Arrays in States
-    call ESMF_StateGetArray(importState, "ioComp.arraySrc", arraySrc, rc=rc)
+    call ESMF_StateGet(importState, "ioComp.arraySrc", arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGetArray(exportState, "modelA.array", arrayDst, rc=rc)
+    call ESMF_StateGet(exportState, "modelA.array", arrayDst, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Precompute and store ArrayRedist: arraySrc -> arrayDst
@@ -96,9 +96,9 @@ module cplCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Add RouteHandle to import and export State for direct coupling
-    call ESMF_StateAddRouteHandle(importState, routehandle, rc=rc)
+    call ESMF_StateAdd(importState, routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddRouteHandle(exportState, routehandle, rc=rc)
+    call ESMF_StateAdd(exportState, routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
   end subroutine
@@ -128,9 +128,9 @@ module cplCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Get access to src and dst Arrays in States
-    call ESMF_StateGetArray(importState, "modelB.array", arraySrc, rc=rc)
+    call ESMF_StateGet(importState, "modelB.array", arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGetArray(exportState, "ioComp.arrayDst", arrayDst, rc=rc)
+    call ESMF_StateGet(exportState, "ioComp.arrayDst", arrayDst, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Precompute and store ArrayRedist: arraySrc -> arrayDst
@@ -143,9 +143,9 @@ module cplCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Add RouteHandle to import and export State for direct coupling
-    call ESMF_StateAddRouteHandle(importState, routehandle, rc=rc)
+    call ESMF_StateAdd(importState, routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddRouteHandle(exportState, routehandle, rc=rc)
+    call ESMF_StateAdd(exportState, routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
   end subroutine
@@ -165,7 +165,7 @@ module cplCompMod
     rc = ESMF_SUCCESS
     
     ! Get access to the RouteHandle and release
-    call ESMF_StateGetRouteHandle(importState, "io2modelRedist", routehandle, &
+    call ESMF_StateGet(importState, "io2modelRedist", routehandle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=rc)
@@ -188,7 +188,7 @@ module cplCompMod
     rc = ESMF_SUCCESS
     
     ! Get access to the RouteHandle and destroy
-    call ESMF_StateGetRouteHandle(importState, "model2ioRedist", routehandle, &
+    call ESMF_StateGet(importState, "model2ioRedist", routehandle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=rc)

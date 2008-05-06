@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4.2.5 2008/05/05 18:45:28 theurich Exp $
+! $Id: user_coupler.F90,v 1.4.2.6 2008/05/06 04:31:46 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -112,11 +112,11 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get source Field out of import State
-    call ESMF_StateGetField(importState, "field data", srcField, rc=rc)
+    call ESMF_StateGet(importState, "field data", srcField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get destination Field out of export State
-    call ESMF_StateGetField(exportState, "field data", dstField, rc=rc)
+    call ESMF_StateGet(exportState, "field data", dstField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get Array out of srcField
@@ -193,11 +193,11 @@ module user_coupler
     print *, "User Coupler Run starting"
 
     ! Get source Field out of import State
-    call ESMF_StateGetField(importState, "field data", srcField, rc=rc)
+    call ESMF_StateGet(importState, "field data", srcField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get destination Field out of export State
-    call ESMF_StateGetField(exportState, "field data", dstField, rc=rc)
+    call ESMF_StateGet(exportState, "field data", dstField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get Array out of srcField

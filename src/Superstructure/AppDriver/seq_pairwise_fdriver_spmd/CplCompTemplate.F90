@@ -1,4 +1,4 @@
-! $Id: CplCompTemplate.F90,v 1.3.8.1 2008/04/02 17:56:17 feiliu Exp $
+! $Id: CplCompTemplate.F90,v 1.3.8.2 2008/05/06 04:31:39 cdeluca Exp $
 !
 ! Test code which supplies a user-written coupler component.
 
@@ -49,8 +49,8 @@
 
       call ESMF_LogWrite("Coupler Initialize routine called", ESMF_LOG_INFO)
 
-      call ESMF_StateGetState(importstate,  "GComp1 Import", state1, rc)
-      call ESMF_StateGetState(importstate,  "GComp2 Import", state2, rc)
+      call ESMF_StateGet(importstate,  "GComp1 Import", state1, rc)
+      call ESMF_StateGet(importstate,  "GComp2 Import", state2, rc)
 
       call ESMF_LogWrite("Coupler Initialize routine returning", ESMF_LOG_INFO)
       rc=ESMF_SUCCESS

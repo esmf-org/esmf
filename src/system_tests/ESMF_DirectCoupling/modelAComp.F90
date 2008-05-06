@@ -1,4 +1,4 @@
-! $Id: modelAComp.F90,v 1.1.2.4 2008/05/05 18:45:27 theurich Exp $
+! $Id: modelAComp.F90,v 1.1.2.5 2008/05/06 04:31:45 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -90,9 +90,9 @@ module modelACompMod
     array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="modelA.array", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(importState, array, rc=rc)
+    call ESMF_StateAdd(importState, array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(exportState, array, rc=rc)
+    call ESMF_StateAdd(exportState, array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
       
   end subroutine
@@ -114,14 +114,14 @@ module modelACompMod
     rc = ESMF_SUCCESS
 
     ! Get the Array from the export State
-    call ESMF_StateGetArray(exportState, "modelA.array", array, rc=rc)
+    call ESMF_StateGet(exportState, "modelA.array", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to RouteHandles for direct coupling to ioComp and modelBComp
-    call ESMF_StateGetRouteHandle(importState, "io2modelRedist", &
+    call ESMF_StateGet(importState, "io2modelRedist", &
       routehandle=io2modelRedist, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGetRouteHandle(exportState, "modelA2BRedist", &
+    call ESMF_StateGet(exportState, "modelA2BRedist", &
       routehandle=modelA2BRedist, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
@@ -158,7 +158,7 @@ module modelACompMod
     rc = ESMF_SUCCESS
     
     ! Garbage collection of objects explicitly created in this component
-    call ESMF_StateGetArray(exportState, "modelA.array", array, rc=rc)
+    call ESMF_StateGet(exportState, "modelA.array", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

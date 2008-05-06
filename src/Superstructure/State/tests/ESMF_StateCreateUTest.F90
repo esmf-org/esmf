@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.7.2.3 2008/04/05 03:14:27 cdeluca Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.7.2.4 2008/05/06 04:31:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.7.2.3 2008/04/05 03:14:27 cdeluca Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.7.2.4 2008/05/06 04:31:40 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -121,7 +121,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest 
       ! Test adding a bundle to a state
-      call ESMF_StateAddFieldBundle(state2, bundle1, rc=rc)
+      call ESMF_StateAdd(state2, bundle1, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Adding a FieldBundle to a State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -146,7 +146,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest 
       ! Test adding a second bundle to a state
-      call ESMF_StateAddFieldBundle(state2, bundle2, rc=rc)
+      call ESMF_StateAdd(state2, bundle2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Adding a second FieldBundle to a State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -162,7 +162,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest      
       ! Test getting a FieldBundle by name
-      call ESMF_StateGetFieldBundle(state2, "Surface pressure", qbundle, rc=rc)
+      call ESMF_StateGet(state2, "Surface pressure", qbundle, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a FieldBundle from a State by name"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -205,7 +205,7 @@
       !EX_removeUTest      
       ! Adding a name only
       sname = "Downward wind"
-      call ESMF_StateAddNameOnly(state3, sname, rc=rc)
+      call ESMF_StateAdd(state3, sname, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Adding a name only"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -239,7 +239,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest      
       ! Replacing a name placeholder with a real item, using bundle from above
-      call ESMF_StateAddFieldBundle(state3, bundle2, rc=rc)
+      call ESMF_StateAdd(state3, bundle2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Replacing a name placeholder with a bundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -289,7 +289,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest      
       ! Add a nested State to another
-      call ESMF_StateAddState(state5, state1, rc=rc)
+      call ESMF_StateAdd(state5, state1, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Add a nested State into another State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -306,7 +306,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest      
       ! Add another nested State to the first
-      call ESMF_StateAddState(state5, state2, rc=rc)
+      call ESMF_StateAdd(state5, state2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Add a second nested State into another State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -388,17 +388,17 @@
     state4 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)
 
     sname = "Surface pressure"
-    call ESMF_StateAddNameOnly(state4, sname, rc=rc)
+    call ESMF_StateAdd(state4, sname, rc=rc)
     
     call ESMF_StateSetNeeded(state4, sname, ESMF_NEEDED, rc=rc)
     
     sname = "Energy Flux"
-    call ESMF_StateAddNameOnly(state4, sname, rc=rc)
+    call ESMF_StateAdd(state4, sname, rc=rc)
     
     call ESMF_StateSetNeeded(state4, sname, ESMF_NEEDED, rc=rc)
     
     sname = "Humidity"
-    call ESMF_StateAddNameOnly(state4, sname, rc=rc)
+    call ESMF_StateAdd(state4, sname, rc=rc)
     
     call ESMF_StateSetNeeded(state4, sname, ESMF_NEEDED, rc=rc)
     
@@ -420,7 +420,7 @@
     call ESMF_FieldBundlePrint(bundle2, "", rc=rc)
 
 
-    call ESMF_StateAddFieldBundle(state4, bundle2, rc=rc)
+    call ESMF_StateAdd(state4, bundle2, rc=rc)
 
     call ESMF_StatePrint(state4, rc=rc)
     

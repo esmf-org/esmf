@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.1.2.2 2008/04/28 20:29:15 cdeluca Exp $
+! $Id: ESMF_Attribute.F90,v 1.1.2.3 2008/05/06 04:31:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -76,7 +76,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.1.2.2 2008/04/28 20:29:15 cdeluca Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.1.2.3 2008/05/06 04:31:22 cdeluca Exp $'
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_AttributeGet - Get an Attribute
@@ -231,9 +231,9 @@ module ESMF_AttributeMod
 !
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF_Field), intent(inout) :: field
-!     \item type(ESMF_FieldBundle), intent(inout) :: fieldbundle
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_Field), intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
 !     Supported values for <value argument> are:
@@ -284,9 +284,9 @@ module ESMF_AttributeMod
 !
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF_Field), intent(inout) :: field
-!     \item type(ESMF_FieldBundle), intent(inout) :: fieldbundle
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_Field), intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
 !     The arguments are:
@@ -324,9 +324,9 @@ module ESMF_AttributeMod
 !
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF_Field), intent(inout) :: field
-!     \item type(ESMF_FieldBundle), intent(inout) :: fieldbundle
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_Field), intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
 !     The arguments are:
@@ -369,9 +369,9 @@ module ESMF_AttributeMod
 !
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF_Field), intent(inout) :: field
-!     \item type(ESMF_FieldBundle), intent(inout) :: fieldbundle
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_Field), intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
 !     The arguments are:
@@ -411,9 +411,9 @@ module ESMF_AttributeMod
 !
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF_Field), intent(inout) :: field
-!     \item type(ESMF_FieldBundle), intent(inout) :: fieldbundle
-!     \item type(ESMF_State), intent(inout) :: state
+!     \item type(ESMF\_Field), intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !
 !     Supported values for the <value argument> are:

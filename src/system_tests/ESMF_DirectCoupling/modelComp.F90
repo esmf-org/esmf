@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.1.2.6 2008/05/05 18:45:28 theurich Exp $
+! $Id: modelComp.F90,v 1.1.2.7 2008/05/06 04:31:45 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -132,9 +132,9 @@ module modelCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get access to src and dst Arrays in States
-    call ESMF_StateGetArray(modelAExp, "modelA.array", arraySrc, rc=rc)
+    call ESMF_StateGet(modelAExp, "modelA.array", arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGetArray(modelBImp, "modelB.array", arrayDst, rc=rc)
+    call ESMF_StateGet(modelBImp, "modelB.array", arrayDst, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Precompute and store ArrayRedist: arraySrc -> arrayDst
@@ -147,9 +147,9 @@ module modelCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Add RouteHandle to import and export State for direct coupling
-    call ESMF_StateAddRouteHandle(modelAExp, routehandle, rc=rc)
+    call ESMF_StateAdd(modelAExp, routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddRouteHandle(modelBImp, routehandle, rc=rc)
+    call ESMF_StateAdd(modelBImp, routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine
@@ -200,7 +200,7 @@ module modelCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get access to the RouteHandle and release
-    call ESMF_StateGetRouteHandle(modelAExp, "modelA2BRedist", routehandle, &
+    call ESMF_StateGet(modelAExp, "modelA2BRedist", routehandle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=rc)

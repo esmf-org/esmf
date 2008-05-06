@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1.2.3 2008/05/05 18:45:25 theurich Exp $
+! $Id: user_model2.F90,v 1.1.2.4 2008/05/06 04:31:42 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -118,7 +118,7 @@ module user_model2
     arraybundle = ESMF_ArrayBundleCreate(arrayList=array, name="dstAryBndl", &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArrayBundle(importState, arraybundle, rc=rc)
+    call ESMF_StateAdd(importState, arraybundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "User Comp2 Init returning"
@@ -152,7 +152,7 @@ module user_model2
     pi = 3.14159d0
 
     ! Get the destination ArrayBundle from the export State
-    call ESMF_StateGetArrayBundle(importState, "dstAryBndl", arraybundle, rc=rc)
+    call ESMF_StateGet(importState, "dstAryBndl", arraybundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get the destination Arrays from the ArrayBundle
@@ -206,7 +206,7 @@ module user_model2
 
     print *, "User Comp2 Final starting"
 
-    call ESMF_StateGetArrayBundle(importState, "dstAryBndl", arraybundle, rc=rc)
+    call ESMF_StateGet(importState, "dstAryBndl", arraybundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayBundleGet(arraybundle, arrayList=array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

@@ -1,4 +1,4 @@
-! $Id: ioComp.F90,v 1.1.2.7 2008/05/05 18:45:27 theurich Exp $
+! $Id: ioComp.F90,v 1.1.2.8 2008/05/06 04:31:45 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -90,14 +90,14 @@ module ioCompMod
     arraySrc = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="ioComp.arraySrc", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(exportState, arraySrc, rc=rc)
+    call ESMF_StateAdd(exportState, arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     ! Create the destination Array and add it to the import State
     arrayDst = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="ioComp.arrayDst", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(importState, arrayDst, rc=rc)
+    call ESMF_StateAdd(importState, arrayDst, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
   end subroutine
@@ -123,7 +123,7 @@ module ioCompMod
     pi = 3.14159d0
 
     ! Get the source Array from the export State
-    call ESMF_StateGetArray(exportState, "ioComp.arraySrc", arraySrc, rc=rc)
+    call ESMF_StateGet(exportState, "ioComp.arraySrc", arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
@@ -140,7 +140,7 @@ module ioCompMod
     enddo
     
     ! Get the destination Array from the import State
-    call ESMF_StateGetArray(importState, "ioComp.arrayDst", arrayDst, rc=rc)
+    call ESMF_StateGet(importState, "ioComp.arrayDst", arrayDst, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
@@ -151,10 +151,10 @@ module ioCompMod
     farrayDstPtr = real(0.,ESMF_KIND_R4)
 
     ! Gain access to RouteHandles for direct coupling to modelA and modelB
-    call ESMF_StateGetRouteHandle(exportState, "io2modelRedist", &
+    call ESMF_StateGet(exportState, "io2modelRedist", &
       routehandle=io2modelRedist, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGetRouteHandle(importState, "model2ioRedist", &
+    call ESMF_StateGet(importState, "model2ioRedist", &
       routehandle=model2ioRedist, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
@@ -212,11 +212,11 @@ module ioCompMod
     rc = ESMF_SUCCESS
     
     ! Garbage collection of objects explicitly created in this component
-    call ESMF_StateGetArray(exportState, "ioComp.arraySrc", arraySrc, rc=rc)
+    call ESMF_StateGet(exportState, "ioComp.arraySrc", arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayDestroy(arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out    
-    call ESMF_StateGetArray(importState, "ioComp.arrayDst", arrayDst, rc=rc)
+    call ESMF_StateGet(importState, "ioComp.arrayDst", arrayDst, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(arrayDst, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

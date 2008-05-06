@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1.2.5 2008/05/05 18:45:25 theurich Exp $
+! $Id: user_coupler.F90,v 1.1.2.6 2008/05/06 04:31:41 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -112,14 +112,14 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get source Array out of import state
-    call ESMF_StateGetArrayBundle(importState, "srcAryBndl", srcArraybundle, &
+    call ESMF_StateGet(importState, "srcAryBndl", srcArraybundle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayBundleGet(srcArraybundle, arrayList=srcArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get destination Array out of export state
-    call ESMF_StateGetArrayBundle(exportState, "dstAryBndl", dstArraybundle, &
+    call ESMF_StateGet(exportState, "dstAryBndl", dstArraybundle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayBundleGet(dstArraybundle, arrayList=dstArray, rc=rc)
@@ -193,14 +193,14 @@ module user_coupler
     print *, "User Coupler Run starting"
 
     ! Get source Array out of import state
-    call ESMF_StateGetArrayBundle(importState, "srcAryBndl", srcArrayBundle, &
+    call ESMF_StateGet(importState, "srcAryBndl", srcArrayBundle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayBundleGet(srcArraybundle, arrayList=srcArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get destination Array out of export state
-    call ESMF_StateGetArrayBundle(exportState, "dstAryBndl", dstArraybundle, &
+    call ESMF_StateGet(exportState, "dstAryBndl", dstArraybundle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayBundleGet(dstArraybundle, arrayList=dstArray, rc=rc)

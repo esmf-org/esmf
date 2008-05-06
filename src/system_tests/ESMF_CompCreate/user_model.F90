@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.10.2.5 2008/05/05 18:45:27 theurich Exp $
+! $Id: user_model.F90,v 1.10.2.6 2008/05/06 04:31:44 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -149,7 +149,7 @@
 
         ! Add an empty "humidity" field to the export state.
         humidity = ESMF_FieldCreate(name="humidity", rc=rc)
-        call ESMF_StateAddField(exportState, humidity, rc=rc)
+        call ESMF_StateAdd(exportState, humidity, rc=rc)
         call ESMF_StatePrint(exportState, rc=rc)
 
         print *, "User Comp Init returning"
@@ -182,8 +182,8 @@
         ! one component to the import before this call.  For now, copy the
         ! field from the export state to import state by hand.
         if (onetime .gt. 0) then
-          call ESMF_StateGetField(exportState, "humidity", humidity, rc=status)
-          call ESMF_StateAddField(importState, humidity, rc=status)
+          call ESMF_StateGet(exportState, "humidity", humidity, rc=status)
+          call ESMF_StateAdd(importState, humidity, rc=status)
           onetime = 0
         endif
 
@@ -198,13 +198,13 @@
                         mydatablock%scale_factor, mydatablock%flag
    
         call ESMF_StatePrint(importState, rc=status)
-        call ESMF_StateGetField(importState, "humidity", humidity, rc=status)
+        call ESMF_StateGet(importState, "humidity", humidity, rc=status)
         call ESMF_FieldPrint(humidity, "", rc=status)
 
         ! This is where the model specific computation goes.
 
         ! Here is where the output state is updated.
-        !call ESMF_StateAddField(exportState, humidity, rc=status)
+        !call ESMF_StateAdd(exportState, humidity, rc=status)
         call ESMF_StatePrint(exportState, rc=status)
  
         print *, "User Comp Run returning"

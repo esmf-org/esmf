@@ -1,4 +1,4 @@
-// $Id: ESMC_StateEx.C,v 1.11.2.1 2008/04/02 20:07:42 cdeluca Exp $
+// $Id: ESMC_StateEx.C,v 1.11.2.2 2008/05/06 04:31:39 cdeluca Exp $
 //
 // Example/test code which creates a new State.
 
@@ -70,8 +70,8 @@ main(int argc, char **argv) {
     bundle1 = ESMF_FieldBundleCreate(bundlename, rc=rc);
     printf("FieldBundle Create returned, rc = %d", rc);
 
-    rc = ESMF_StateAddFieldBundle(state2, bundle1);
-    printf("StateAddFieldBundle returned, rc = %d", rc);
+    rc = ESMF_StateAdd(state2, bundle1);
+    printf("StateAdd returned, rc = %d", rc);
 
     // Loop here, updating FieldBundle contents each time step
 
@@ -102,12 +102,12 @@ main(int argc, char **argv) {
     printf("State Create returned", rc, " name = ", trim(compname)
 
     dataname = "Downward wind";
-    rc = ESMF_StateAddNameOnly(state3, dataname);
-    printf("StateAddNameOnly returned, rc = %d, name = %s\n", rc, dataname);
+    rc = ESMF_StateAdd(state3, dataname);
+    printf("StateAdd returned, rc = %d, name = %s\n", rc, dataname);
 
     dataname = "Humidity";
-    rc = ESMF_StateAddNameOnly(state3, dataname)
-    printf("StateAddNameOnly returned, rc = %d, name = %s\n", rc, dataname);
+    rc = ESMF_StateAdd(state3, dataname)
+    printf("StateAdd returned, rc = %d, name = %s\n", rc, dataname);
 
     // See next example for how this is used.
 
@@ -148,8 +148,8 @@ main(int argc, char **argv) {
         bundle2 = ESMF_FieldBundleCreate(bundlename, rc=rc);
         printf("FieldBundle Create returned, rc = %d, name = %s\n", rc, bundlename);
 
-        rc = ESMF_StateAddFieldBundle(state3, bundle2);
-        printf("StateAddFieldBundle returned, rc = %d\n", rc);
+        rc = ESMF_StateAdd(state3, bundle2);
+        printf("StateAdd returned, rc = %d\n", rc);
     } else 
         printf("Data marked as not needed, name = %s\n", statename);
 

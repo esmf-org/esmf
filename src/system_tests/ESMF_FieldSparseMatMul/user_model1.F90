@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.3.2.4 2008/05/05 18:45:28 theurich Exp $
+! $Id: user_model1.F90,v 1.3.2.5 2008/05/06 04:31:46 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -113,7 +113,7 @@ module user_model1
     field = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field data", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddField(exportState, field=field, rc=rc)
+    call ESMF_StateAdd(exportState, field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "User Comp1 Init returning"
@@ -148,7 +148,7 @@ module user_model1
     pi = 3.14159d0
 
     ! Get the source Field from the export State
-    call ESMF_StateGetField(exportState, "field data", field, rc=rc)
+    call ESMF_StateGet(exportState, "field data", field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get the Array from the Field
@@ -197,7 +197,7 @@ module user_model1
 
     print *, "User Comp1 Final starting"
 
-    call ESMF_StateGetField(exportState, "field data", field, rc=rc)
+    call ESMF_StateGet(exportState, "field data", field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_FieldGet(field, grid=grid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

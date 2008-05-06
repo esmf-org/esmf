@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1.2.6 2008/05/05 18:45:26 theurich Exp $
+! $Id: user_model2.F90,v 1.1.2.7 2008/05/06 04:31:44 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -112,7 +112,7 @@ module user_model2
     srcArray2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="srcArray2", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(importState, srcArray2, rc=rc)
+    call ESMF_StateAdd(importState, srcArray2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Create the dstArray2 and add it to the exportState
@@ -122,7 +122,7 @@ module user_model2
     dstArray2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="dstArray2", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(exportState, dstArray2, rc=rc)
+    call ESMF_StateAdd(exportState, dstArray2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "User Comp2 Init returning"
@@ -157,9 +157,9 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Get the Arrays from the states
-    call ESMF_StateGetArray(importState, "srcArray2", srcArray2, rc=rc)
+    call ESMF_StateGet(importState, "srcArray2", srcArray2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGetArray(exportState, "dstArray2", dstArray2, rc=rc)
+    call ESMF_StateGet(exportState, "dstArray2", dstArray2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     ! ArrayGather() srcArray2 into workF90 on rootPet=0
@@ -197,7 +197,7 @@ module user_model2
 
     print *, "User Comp2 Final starting"
 
-    call ESMF_StateGetArray(exportState, "dstArray2", array, rc=rc)
+    call ESMF_StateGet(exportState, "dstArray2", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -206,7 +206,7 @@ module user_model2
     call ESMF_DistGridDestroy(distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_StateGetArray(importState, "srcArray2", array, rc=rc)
+    call ESMF_StateGet(importState, "srcArray2", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

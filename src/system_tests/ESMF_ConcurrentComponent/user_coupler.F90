@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1.2.3 2008/04/28 16:14:36 theurich Exp $
+! $Id: user_coupler.F90,v 1.1.2.4 2008/05/06 04:31:45 cdeluca Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -128,10 +128,10 @@
         !print *, "Export State contains ", itemcount, " items."
 
         ! Get the src and dst arrays
-        call ESMF_StateGetArray(importState, "sorted_data1", sorted_data1, rc=status)       
+        call ESMF_StateGet(importState, "sorted_data1", sorted_data1, rc=status)       
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        call ESMF_StateGetArray(exportState, "sorted_data2", sorted_data2, rc=status)       
+        call ESMF_StateGet(exportState, "sorted_data2", sorted_data2, rc=status)       
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
@@ -165,11 +165,11 @@
         print *, "User Coupler Run starting"
         
         ! query data from States
-        call ESMF_StateGetArray(importState, "sorted_data1", sorted_data1, rc=status)    
+        call ESMF_StateGet(importState, "sorted_data1", sorted_data1, rc=status)    
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_StateGetArray(exportState, "sorted_data2", sorted_data2, rc=status)    
+        call ESMF_StateGet(exportState, "sorted_data2", sorted_data2, rc=status)    
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 

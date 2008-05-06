@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1.2.5 2008/05/05 18:45:26 theurich Exp $
+! $Id: user_model2.F90,v 1.1.2.6 2008/05/06 04:31:43 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -113,7 +113,7 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArraySet(array, name="array data", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(importState, array, rc=rc)
+    call ESMF_StateAdd(importState, array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "User Comp2 Init returning"
@@ -145,7 +145,7 @@ module user_model2
     pi = 3.14159d0
 
     ! Get the destination Array from the import State
-    call ESMF_StateGetArray(importState, "array data", array, rc=rc)
+    call ESMF_StateGet(importState, "array data", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     ! Gain access to actual data via F90 array pointer
@@ -188,7 +188,7 @@ module user_model2
 
     print *, "User Comp2 Final starting"
 
-    call ESMF_StateGetArray(importState, "array data", array, rc=rc)
+    call ESMF_StateGet(importState, "array data", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.23.2.3 2008/04/05 03:14:23 cdeluca Exp $
+! $Id: ESMF_StateEx.F90,v 1.23.2.4 2008/05/06 04:31:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -95,8 +95,8 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_StateAddFieldBundle(state2, bundle1, rc)
-    print *, "StateAddFieldBundle returned", rc
+    call ESMF_StateAdd(state2, bundle1, rc)
+    print *, "StateAdd returned", rc
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -137,15 +137,15 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     dataname = "Downward wind"
-    call ESMF_StateAddNameOnly(state3, dataname, rc)
+    call ESMF_StateAdd(state3, dataname, rc)
 !EOC
-    print *, "StateAddNameOnly returned", rc, " name = ", trim(dataname)
+    print *, "StateAdd returned", rc, " name = ", trim(dataname)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     dataname = "Humidity"
-    call ESMF_StateAddNameOnly(state3, dataname, rc)
+    call ESMF_StateAdd(state3, dataname, rc)
 !EOC
-    print *, "StateAddNameOnly returned", rc, " name = ", trim(dataname)
+    print *, "StateAdd returned", rc, " name = ", trim(dataname)
 
     ! See next example for how this is used.
 
@@ -201,9 +201,9 @@
         print *, "FieldBundle Create returned", rc, "name = ", trim(bundlename)
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-        call ESMF_StateAddFieldBundle(state3, bundle2, rc)
+        call ESMF_StateAdd(state3, bundle2, rc)
 !EOC
-        print *, "StateAddFieldBundle returned", rc
+        print *, "StateAdd returned", rc
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     else
