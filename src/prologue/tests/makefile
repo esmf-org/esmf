@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7.2.1 2008/04/28 05:25:23 theurich Exp $ 
+# $Id: makefile,v 1.7.2.2 2008/05/06 17:26:58 w6ws Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -86,6 +86,9 @@ RUN_ESMF_WordsizeUTestUNI:
 #
 # Test for pointers to derived types changing size based on type
 #
+
+UTEST_F95Ptr_OBJS =	ESMF_F95PtrBData.o
+ESMF_F95PtrUTest.o:	ESMF_F95PtrBData.o
 
 RUN_ESMF_F95PtrUTest:
 	$(MAKE) TNAME=F95Ptr NP=2 ftest

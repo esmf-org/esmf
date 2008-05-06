@@ -1,4 +1,4 @@
-! $Id: ESMF_F95PtrUTest.F90,v 1.2.2.4 2008/05/06 04:53:44 w6ws Exp $
+! $Id: ESMF_F95PtrUTest.F90,v 1.2.2.5 2008/05/06 17:26:59 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_F95PTRUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_F95PtrUTest.F90,v 1.2.2.4 2008/05/06 04:53:44 w6ws Exp $'
+    '$Id: ESMF_F95PtrUTest.F90,v 1.2.2.5 2008/05/06 17:26:59 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   integer, parameter :: int8_k = selected_int_kind (12)		! 8-byte integer
@@ -52,7 +52,11 @@ program ESMF_F95PTRUTest
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name
-  
+ 
+  ! Make sure the BLOCK DATA gets linked in
+
+  external :: ESMF_F95PtrBData
+ 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
   !-----------------------------------------------------------------------------
@@ -123,11 +127,14 @@ contains
 #endif
 
   !-----------------------------------------------------------------------------
+  ! NEX_UTest
   ! First obtain a simple F95 pointer for comparison purposes
   
-    print *, 'pointer to scalar REAL:'
+    write (name,*) 'pointer to scalar REAL'
+    write (failMsg,*) 'Pointer length is not a positive, non-zero, integer!'
     realptr_l = ichar (real_endchar)
     print *, '  F95 pointer-to-scalar length =', realptr_l
+    call ESMF_Test ((realptr_l > 0), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
 
@@ -185,44 +192,3 @@ contains
   end subroutine
   
 end program
-
-block data bdata
-  implicit none
-
-  !-----------------------------------------------------------------------------
-  ! Initialize the common blocks.
-  !
-  ! The common blocks are defined here as arrays of CHARACTER.  Each
-  ! element of the array is initialized to a value corresponding to
-  ! its position in the array.
-  !
-  ! Note that the CHARACTER types used here are intentionally different
-  ! than how the common blocks are used in the main program, so that
-  ! the sizes of other objects can be measured by looking at the value
-  ! of the byte following the object.
-
-  integer, parameter :: char_max = 256
-
-  integer :: i
-
-  character :: real_chars(char_max) = (/ (char (i),i=0, char_max-1) /)
-  common /realcom/ real_chars
-
-  character :: char_chars(char_max) = (/ (char (i),i=0, char_max-1) /)
-  common /charcom/ char_chars
-
-  character :: udt_chars(char_max) = (/ (char (i), i=0, char_max-1) /)
-  common /udtcom/ udt_chars
-
-  character :: biggerudt_chars(char_max) = (/ (char (i),i=0, char_max-1) /)
-  common /biggerudtcom/ biggerudt_chars
-
-#if defined (ENABLE_ESMF_UDT_TEST)
-  character :: vm_chars(char_max) = (/ (char (i), i=0, char_max-1) /)
-  common /vmcom/ vm_chars
-
-  character :: base_chars(char_max) = (/ (char (i), i=0, char_max-1) /)
-  common /basecom/ base_chars
-#endif
-
-end block data
