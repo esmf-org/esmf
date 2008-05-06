@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.5 2008/05/01 17:42:26 rokuingh Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.6 2008/05/06 23:54:28 rokuingh Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -50,13 +50,6 @@
 
 \section{Attribute Class}
 
-\subsection{Object Model}
-#ifdef STANDALONE
-\input{Attribute_obj}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Attribute/doc/Attribute_obj}
-#endif
-
 \subsection{Description}
 #ifdef STANDALONE
 \input{Attribute_desc}
@@ -64,12 +57,19 @@
 \input{../Infrastructure/Attribute/doc/Attribute_desc}
 #endif
 
-%\subsection{Use and Examples}
-%#ifdef STANDALONE
-%\input{Attribute_usage} 
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Attribute/doc/Attribute_ex} 
-%#endif
+\subsection{Object Model}
+#ifdef STANDALONE
+\input{Attribute_obj}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Attribute/doc/Attribute_obj}
+#endif
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{Attribute_usage} 
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Attribute/doc/Attribute_usage} 
+#endif
 
 \subsection{Restrictions and Future Work}
 #ifdef STANDALONE
@@ -92,12 +92,12 @@
 \input{../Superstructure/Attribute_API/doc/ESMF_Attribute_fapi}
 #endif
 
-#ifdef STANDALONE
+%#ifdef STANDALONE
 %\section{Bibliography}
 %\bibliography{Attribute} 
 %\bibliographystyle{plain}
 %\addcontentsline{toc}{section}{Bibliography}
-#endif
+%#endif
 
 #ifdef STANDALONE
 \end{document}

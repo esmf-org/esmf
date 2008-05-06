@@ -1,4 +1,4 @@
-% $Id: Attribute_usage.tex,v 1.3 2008/04/05 03:38:07 cdeluca Exp $
+% $Id: Attribute_usage.tex,v 1.4 2008/05/06 23:54:28 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -7,4 +7,29 @@
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
+
+An Attribute can be created with this call: \\ 
+%%%
+\noindent{\tt call} ${\tt ESMF\_AttributeAdd(field, convention=conv, purpose=purp, rc=status)}$\\
+%%%
+
+An Attribute can be set on an object with this call: \\
+%%%
+\noindent{\tt call} ${\tt ESMF\_AttributeSet(field, name, value, convention=conv, purpose=purp, rc=status)}$\\
+%%%
+
+An Attribute can be retrieved from an object with this call: \\
+%%%
+\noindent{\tt call} ${\tt ESMF\_AttributeGet(field, name, value, convention=conv, purpose=purp, rc=status)}$\\
+%%%
+
+An Attribute hierarchy can be copied with this call: \\
+%%%
+\noindent{\tt call} ${\tt ESMF\_AttributeCopy(importState, exportState, rc=rc)}$\\
+%%%
+
+All Attributes on an ESMF object with a given convention and purpose can be written with this call: \\
+%%%
+\noindent{\tt call} ${\tt ESMF\_AttributeWrite(importState,fconv,fpurp,rc=rc)}$\\
+%%%
 
