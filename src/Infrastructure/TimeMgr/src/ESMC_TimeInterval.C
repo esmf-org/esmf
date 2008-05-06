@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.85 2008/04/05 03:39:00 cdeluca Exp $
+// $Id: ESMC_TimeInterval.C,v 1.86 2008/05/06 02:35:50 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 
  #include <ESMC_LogErr.h>
  #include <ESMF_LogMacros.inc>
- #include <ESMC_Time.h>
+ #include <ESMCI_Time.h>
 
  // associated class definition file
  #include <ESMC_TimeInterval.h>
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.85 2008/04/05 03:39:00 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.86 2008/05/06 02:35:50 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -205,7 +205,7 @@
     }
 
     // use base class set for sub-day values
-    rc = ESMC_BaseTimeSet(h, m, s, s_i8, ms, us, ns, h_r8, m_r8, s_r8,
+    rc = ESMCI::BaseTime::set(h, m, s, s_i8, ms, us, ns, h_r8, m_r8, s_r8,
                           ms_r8, us_r8, ns_r8, sN, sD);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       { *this = saveTimeInterval; return(rc); }
@@ -760,7 +760,7 @@
 
     // use base class to get sub-day values (h,m,s) on remaining
     //   unconverted base time
-    rc = ESMC_BaseTimeGet(&tiToConvert, h, m, s, s_i8,
+    rc = ESMCI::BaseTime::get(&tiToConvert, h, m, s, s_i8,
                           ms, us, ns, h_r8, m_r8, s_r8,
                           ms_r8, us_r8, ns_r8, sN, sD);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
@@ -895,7 +895,7 @@
     int rc = ESMF_SUCCESS;
 
     // use base class Set()
-    rc = ESMC_BaseTime::ESMC_BaseTimeSet(s, sN, sD);
+    rc = ESMCI::BaseTime::set(s, sN, sD);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
@@ -1220,7 +1220,7 @@
     }
 
     // create zero basetime for comparison
-    ESMC_BaseTime zeroBaseTime;
+    ESMCI::BaseTime zeroBaseTime;
 
     // create local copies to manipulate and divide 
     ESMC_TimeInterval ti1 = *this;
@@ -1235,7 +1235,7 @@
     if (ti1.yy == 0 && ti2.yy == 0 &&
         ti1.mm == 0 && ti2.mm == 0 &&
         ti1.d  == 0 && ti2.d  == 0) {
-      return(ti1.ESMC_BaseTime::operator/(ti2));
+      return(ti1.ESMCI::BaseTime::operator/(ti2));
     }
 
     // calendars must be the same for divide on relative parts
@@ -1419,7 +1419,7 @@
       quotient.d  /= divisor;
 
       // divide absolute seconds (and any fractional) part
-      quotient.ESMC_BaseTime::operator/=(divisor);
+      quotient.ESMCI::BaseTime::operator/=(divisor);
 
     } else {
       // TODO: write LogErr message (divide-by-zero)
@@ -1593,7 +1593,7 @@
     //       operator/ (return real) and Compare method ?
 
     // create zero basetime for comparison
-    ESMC_BaseTime zeroBaseTime;
+    ESMCI::BaseTime zeroBaseTime;
 
     // initialize result to zero
     ESMC_TimeInterval remainder;
@@ -1626,7 +1626,7 @@
     if (ti1.yy == 0 && ti2.yy == 0 &&
         ti1.mm == 0 && ti2.mm == 0 &&
         ti1.d  == 0 && ti2.d  == 0) {
-      remainder = ti1.ESMC_BaseTime::operator%(ti2);
+      remainder = ti1.ESMCI::BaseTime::operator%(ti2);
       return(remainder);
     }
 
@@ -1833,7 +1833,7 @@
     product.d  *= multiplier;
 
     // multiply absolute seconds (and any fractional) part
-    product.ESMC_BaseTime::operator*=(multiplier);
+    product.ESMCI::BaseTime::operator*=(multiplier);
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
@@ -2095,8 +2095,8 @@
     sum.mm += timeinterval.mm;
     sum.d  += timeinterval.d;
 
-    // add absolute seconds part using ESMC_BaseTime operator
-    sum.ESMC_BaseTime::operator+=(timeinterval);
+    // add absolute seconds part using ESMCI::BaseTime operator
+    sum.ESMCI::BaseTime::operator+=(timeinterval);
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
@@ -2137,8 +2137,8 @@
     diff.mm -= timeinterval.mm;
     diff.d  -= timeinterval.d;
 
-    // subtract absolute seconds part using ESMC_BaseTime operator
-    diff.ESMC_BaseTime::operator-=(timeinterval);
+    // subtract absolute seconds part using ESMCI::BaseTime operator
+    diff.ESMCI::BaseTime::operator-=(timeinterval);
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
@@ -2374,7 +2374,7 @@
     }
 
     // create zero basetime for comparison
-    ESMC_BaseTime zeroBaseTime;
+    ESMCI::BaseTime zeroBaseTime;
 
     // create local copies to manipulate and compare 
     ESMC_TimeInterval ti1 = *this;
@@ -2392,17 +2392,17 @@
       switch (comparisonType)
       {
         case ESMC_EQ:
-          return(ti1.ESMC_BaseTime::operator==(ti2));
+          return(ti1.ESMCI::BaseTime::operator==(ti2));
         case ESMC_NE:
-          return(ti1.ESMC_BaseTime::operator!=(ti2));
+          return(ti1.ESMCI::BaseTime::operator!=(ti2));
         case ESMC_LT:
-          return(ti1.ESMC_BaseTime::operator<(ti2));
+          return(ti1.ESMCI::BaseTime::operator<(ti2));
         case ESMC_GT:
-          return(ti1.ESMC_BaseTime::operator>(ti2));
+          return(ti1.ESMCI::BaseTime::operator>(ti2));
         case ESMC_LE:
-          return(ti1.ESMC_BaseTime::operator<=(ti2));
+          return(ti1.ESMCI::BaseTime::operator<=(ti2));
         case ESMC_GE:
-          return(ti1.ESMC_BaseTime::operator>=(ti2));
+          return(ti1.ESMCI::BaseTime::operator>=(ti2));
       };
     }
 
@@ -2649,7 +2649,7 @@
     //        (share code with ESMC_TimeIntervalSet()).
 
     // TODO: use base class ReadRestart() first
-    // rc = ESMC_BaseTime::ESMC_BaseTimeReadRestart(s, sN, sD);
+    // rc = ESMCI::BaseTime::readRestart(s, sN, sD);
 
     return(rc);
 
@@ -2677,7 +2677,7 @@
     int rc = ESMF_SUCCESS;
 
     // TODO: use base class Write() first
-    //  rc = ESMC_BaseTime::ESMC_BaseTimeWriteRestart(s, sN, sD);
+    //  rc = ESMCI::BaseTime::writeRestart(s, sN, sD);
 
     // calendar= this->calendar;  // TODO?: this only saves calendar pointer;
                                //  component must be sure to save corresponding
@@ -2710,7 +2710,7 @@
 
     int rc = ESMF_SUCCESS;
 
-    rc = ESMC_BaseTime::ESMC_BaseTimeValidate();
+    rc = ESMCI::BaseTime::validate();
     ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
 
     return(rc);
@@ -2748,7 +2748,7 @@
       }
     } else {
       // default
-      ESMC_BaseTime::ESMC_BaseTimePrint(options);
+      ESMCI::BaseTime::print(options);
       printf("yy = %lld\n", yy);
       printf("mm = %lld\n", mm);
       printf("d  = %lld\n", d);
@@ -2782,7 +2782,7 @@
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_TimeInterval::ESMC_TimeInterval(void) constructor"
 
-//   ESMC_BaseTime(0, 0, 1) { // TODO: F90 issue with base class constructor?
+//   ESMCI::BaseTime(0, 0, 1) { // TODO: F90 issue with base class constructor?
 
    ESMC_FractionSet(0,0,1);
    yy = 0;
@@ -2838,7 +2838,7 @@
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_TimeInterval::ESMC_TimeInterval(direct) constructor"
 
-   ESMC_BaseTime(s, sN, sD) {  // pass to base class constructor
+   ESMCI::BaseTime(s, sN, sD) {  // pass to base class constructor
 
    this->yy = yy;
    this->mm = mm;

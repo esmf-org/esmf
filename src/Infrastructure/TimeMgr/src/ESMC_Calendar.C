@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.87 2008/04/05 03:38:59 cdeluca Exp $
+// $Id: ESMC_Calendar.C,v 1.88 2008/05/06 02:35:50 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
  #include <ESMC_LogErr.h>
  #include <ESMF_LogMacros.inc>
 
- #include <ESMC_Time.h>
+ #include <ESMCI_Time.h>
  #include <ESMC_TimeInterval.h>
 
  // associated class definition file
@@ -41,7 +41,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.87 2008/04/05 03:38:59 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.88 2008/05/06 02:35:50 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static array of calendar type names
@@ -910,7 +910,7 @@ int ESMC_Calendar::count=0;
 //
 // !ARGUMENTS:
       ESMC_I8 yy, int mm, int dd, ESMC_I8 d,    // in
-      ESMC_BaseTime *t) const {                           // out
+      ESMCI::BaseTime *t) const {                           // out
 //
 // !DESCRIPTION:
 //     Converts a calendar-specific date to core {\tt ESMC\_BaseTime}
@@ -1198,7 +1198,7 @@ int ESMC_Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_BaseTime *t,                                                // in/out
+      ESMCI::BaseTime *t,                                                // in/out
       ESMC_I4 *yy, ESMC_I8 *yy_i8, int *mm, int *dd,         // out
       ESMC_I4 *d, ESMC_I8 *d_i8, ESMC_R8 *d_r8) const { // out
 //
@@ -1871,12 +1871,12 @@ int ESMC_Calendar::count=0;
     //   (applies to all calendars since secondsPerDay is defined for all)
     if (timeinterval.d != 0) {
         ESMC_TimeInterval daysTi(timeinterval.d * secondsPerDay);
-        nonCalTi.ESMC_BaseTime::operator+=(daysTi);
+        nonCalTi.ESMCI::BaseTime::operator+=(daysTi);
     }
 
     // perform the remaining increment with the non-calendar and
     //   any relative days parts
-    sum.ESMC_BaseTime::operator+=(nonCalTi);
+    sum.ESMCI::BaseTime::operator+=(nonCalTi);
 
     return(sum);
 
@@ -2022,12 +2022,12 @@ int ESMC_Calendar::count=0;
     //   (applies to all calendars since secondsPerDay is defined for all)
     if (timeinterval.d != 0) {
         ESMC_TimeInterval daysTi(timeinterval.d * secondsPerDay);
-        nonCalTi.ESMC_BaseTime::operator+=(daysTi);
+        nonCalTi.ESMCI::BaseTime::operator+=(daysTi);
     }
 
     // perform the remaining decrement with the non-calendar and
     //   any relative days parts
-    diff.ESMC_BaseTime::operator-=(nonCalTi);
+    diff.ESMCI::BaseTime::operator-=(nonCalTi);
 
     return(diff);
 

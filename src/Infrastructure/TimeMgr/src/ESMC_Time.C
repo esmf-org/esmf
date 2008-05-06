@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.88 2008/04/05 03:38:59 cdeluca Exp $"
+// $Id: ESMC_Time.C,v 1.89 2008/05/06 02:35:50 rosalind Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,12 +32,12 @@
  #include <ESMC_TimeInterval.h>
 
  // associated class definition file
- #include <ESMC_Time.h>
+ #include "ESMCI_Time.h"
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.88 2008/04/05 03:38:59 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.89 2008/05/06 02:35:50 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -318,7 +318,7 @@
     }
     
     // use base class to convert sub-day values
-    ESMC_BaseTimeSet(h, m, s, s_i8, ms, us, ns, h_r8, m_r8, s_r8,
+    ESMCI::BaseTime::set(h, m, s, s_i8, ms, us, ns, h_r8, m_r8, s_r8,
                      ms_r8, us_r8, ns_r8, sN, sD);
 
     rc = ESMC_TimeValidate();
@@ -448,7 +448,7 @@
     }
 
     // use base class to get all other non-calendar dependant units
-    rc = ESMC_BaseTimeGet(&timeToConvert, h, m, s, s_i8,
+    rc = ESMCI::BaseTime::get(&timeToConvert, h, m, s, s_i8,
                           ms, us, ns, h_r8, m_r8, s_r8, ms_r8,
                           us_r8, ns_r8, sN, sD);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
@@ -615,7 +615,7 @@
     int rc = ESMF_SUCCESS;
 
     // use base class Set()
-    rc = ESMC_BaseTime::ESMC_BaseTimeSet(s, sN, sD);
+    rc = ESMCI::BaseTime::set(s, sN, sD);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
@@ -980,7 +980,7 @@
     //        (share code with ESMC_TimeSet()).
 
     // TODO: use base class ReadRestart() first
-    // rc = ESMC_BaseTime::ESMC_BaseTimeReadRestart(s, sN, sD);
+    // rc = ESMCI::BaseTime::readRestart(s, sN, sD);
 
     return(rc);
 
@@ -1008,7 +1008,7 @@
     int rc = ESMF_SUCCESS;
 
     // TODO: use base class Write() first
-    //  rc = ESMC_BaseTime::ESMC_BaseTimeWriteRestart(s, sN, sD);
+    //  rc = ESMCI::BaseTime::writeRestart(s, sN, sD);
 
     // calendar= this->calendar;  // TODO?: this only saves calendar pointer;
                                //  component must be sure to save corresponding
@@ -1073,7 +1073,7 @@
       }
     }
 
-    rc = ESMC_BaseTime::ESMC_BaseTimeValidate();
+    rc = ESMCI::BaseTime::validate();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
@@ -1144,7 +1144,7 @@
       }
     } else {
       // default
-      ESMC_BaseTime::ESMC_BaseTimePrint(options);
+      ESMCI::BaseTime::print(options);
       if (this->calendar != ESMC_NULL_POINTER) {
         this->calendar->ESMC_CalendarPrint(options, this);
       }
@@ -1176,7 +1176,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-//   ESMC_BaseTime(0,0,1) {  // TODO: F90 issue with base class constructor?
+//   ESMCI::BaseTime(0,0,1) {  // TODO: F90 issue with base class constructor?
    ESMC_FractionSet(0,0,1);  // set seconds = 0
                              // set fractional seconds numerator = 0
                              // set fractional seconds denominator = 1
@@ -1210,7 +1210,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-   ESMC_BaseTime(s, sN, sD) {   // use base class constructor
+   ESMCI::BaseTime(s, sN, sD) {   // use base class constructor
 
   // set calendar type
   this->calendar = ESMC_NULL_POINTER;  // to detect invalid, unset time
