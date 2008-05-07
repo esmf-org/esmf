@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.5 2008/05/05 07:45:10 rokuingh Exp $
+! $Id: user_model2.F90,v 1.6 2008/05/07 00:15:21 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -21,7 +21,11 @@ module user_model2
   implicit none
     
   public userm2_register
-        
+  
+  type(ESMF_Field)            :: aero,delp,dewl,hi,ox,ple,s,speed,taux,zle
+  type(ESMF_FieldBundle)      :: fbundle
+
+  
   contains
 
 !-------------------------------------------------------------------------
@@ -72,50 +76,9 @@ module user_model2
     integer, intent(out) :: rc
 
     ! Local variables
-    type(ESMF_VM)         :: vm
-    integer               :: petCount
-    
-    ! Initialize return code
-    rc = ESMF_SUCCESS
-
-    ! Determine petCount
-    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    
-    rc = ESMF_SUCCESS
-    return
-    
-    ! get here only on error exit
-10  continue
-    print *, 'FAILURE in Comp 2 Init!!!!'
-    rc = ESMF_FAILURE
-
-  end subroutine user_init
-
-!-------------------------------------------------------------------------
-!   !  The Run routine where data is computed.
-!   !
- 
-  subroutine user_run(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
-    integer, intent(out) :: rc
-
-    ! Local variables
-    type(ESMF_VM)               :: vm
-    type(ESMF_DistGrid)         :: distgrid
-    type(ESMF_ArraySpec)        :: arrayspec
-    type(ESMF_Array)            :: array
-    type(ESMF_Grid)             :: grid
-    type(ESMF_Field)            :: aero,delp,dewl,hi,ox,ple,s,speed,taux,zle
-    type(ESMF_FieldBundle)      :: fbundle
-    integer                     :: petCount, status, myPet
-    character(len=ESMF_MAXSTR)  :: name1,name2,name3,name4,value1,value2,value3,value4
-    character(len=ESMF_MAXSTR)  :: conv, purp, fconv, fpurp, outvalue
-
+    type(ESMF_VM)          :: vm
+    integer                :: petCount, status, myPet
+    character(ESMF_MAXSTR) :: name1,name2,name3,name4,value1,value2,value3,value4,conv,purp
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -131,8 +94,8 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! initialize variables
-    fconv = 'netCDF'
-    fpurp = 'basic'
+    conv = 'netCDF'
+    purp = 'basic'
     name1 = 'shortname'
     name2 = 'longname'
     name3 = 'units'
@@ -145,11 +108,11 @@ module user_model2
     value4 = 'xy'
       
     aero = ESMF_FieldCreate("aero", rc=status)
-    call ESMF_AttributeAdd(aero, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(aero, name1, value1, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(aero, name2, value2, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(aero, name3, value3, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(aero, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeAdd(aero, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(aero, name1, value1, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(aero, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(aero, name3, value3, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(aero, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     ! create a field, make an attribute package, and set attributes in the package
@@ -159,11 +122,11 @@ module user_model2
     value4 = 'xyz'
 
     delp = ESMF_FieldCreate("delp", rc=status)
-    call ESMF_AttributeAdd(delp, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(delp, name1, value1, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(delp, name2, value2, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(delp, name3, value3, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(delp, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeAdd(delp, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(delp, name1, value1, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(delp, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(delp, name3, value3, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(delp, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     ! create a field, make an attribute package, and set attributes in the package
@@ -173,11 +136,11 @@ module user_model2
     value4 = 'xy'
       
     dewl = ESMF_FieldCreate("dewl", rc=status)
-    call ESMF_AttributeAdd(dewl, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(dewl, name1, value1, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(dewl, name2, value2, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(dewl, name3, value3, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(dewl, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeAdd(dewl, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(dewl, name1, value1, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(dewl, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(dewl, name3, value3, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(dewl, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
     
     ! create a field, make an attribute package, and set attributes in the package
@@ -187,11 +150,11 @@ module user_model2
     value4 = 'xy'
       
     hi = ESMF_FieldCreate("hi", rc=status)
-    call ESMF_AttributeAdd(hi, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(hi, name1, value1, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(hi, name2, value2, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(hi, name3, value3, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(hi, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeAdd(hi, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(hi, name1, value1, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(hi, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(hi, name3, value3, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(hi, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
     ! create a field, make an attribute package, and set attributes in the package
@@ -201,11 +164,11 @@ module user_model2
     value4 = 'xy'
       
     ox = ESMF_FieldCreate("ox", rc=status)
-    call ESMF_AttributeAdd(ox, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(ox, name1, value1, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(ox, name2, value2, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(ox, name3, value3, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(ox, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeAdd(ox, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(ox, name1, value1, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(ox, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(ox, name3, value3, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(ox, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
     ! create a field, make an attribute package, and set attributes in the package
@@ -215,11 +178,11 @@ module user_model2
     value4 = 'xy'
       
     ple = ESMF_FieldCreate("ple", rc=status)
-    call ESMF_AttributeAdd(ple, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(ple, name1, value1, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(ple, name2, value2, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(ple, name3, value3, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(ple, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeAdd(ple, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(ple, name1, value1, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(ple, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(ple, name3, value3, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(ple, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
     ! create a field, make an attribute package, and set attributes in the package
@@ -229,11 +192,11 @@ module user_model2
     value4 = 'xy'
       
     s = ESMF_FieldCreate("s", rc=status)
-    call ESMF_AttributeAdd(s, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(s, name1, value1, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(s, name2, value2, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(s, name3, value3, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(s, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeAdd(s, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(s, name1, value1, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(s, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(s, name3, value3, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(s, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
     ! create a field, make an attribute package, and set attributes in the package
@@ -243,11 +206,11 @@ module user_model2
     value4 = 'xy'
       
     speed = ESMF_FieldCreate("speed", rc=status)
-    call ESMF_AttributeAdd(speed, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(speed, name1, value1, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(speed, name2, value2, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(speed, name3, value3, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(speed, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeAdd(speed, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(speed, name1, value1, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(speed, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(speed, name3, value3, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(speed, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
     ! create a field, make an attribute package, and set attributes in the package
@@ -257,11 +220,11 @@ module user_model2
     value4 = 'xy'
       
     taux = ESMF_FieldCreate("taux", rc=status)
-    call ESMF_AttributeAdd(taux, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(taux, name1, value1, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(taux, name2, value2, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(taux, name3, value3, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(taux, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeAdd(taux, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(taux, name1, value1, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(taux, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(taux, name3, value3, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(taux, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
     ! create a field, make an attribute package, and set attributes in the package
@@ -271,11 +234,11 @@ module user_model2
     value4 = 'xyz'
       
     zle = ESMF_FieldCreate("zle", rc=status)
-    call ESMF_AttributeAdd(zle, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(zle, name1, value1, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(zle, name2, value2, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(zle, name3, value3, convention=fconv, purpose=fpurp, rc=status)
-    call ESMF_AttributeSet(zle, name4, value4, convention=fconv, purpose=fpurp, rc=status)
+    call ESMF_AttributeAdd(zle, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(zle, name1, value1, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(zle, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(zle, name3, value3, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(zle, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
       
     ! create a field bundle for the first five fields from above
@@ -303,10 +266,53 @@ module user_model2
     if (status .ne. ESMF_SUCCESS) return
   
     ! Don't delete the fields so we can copy attrs (shallow) and reuse
+    
+    rc = ESMF_SUCCESS
+    return
+    
+    ! get here only on error exit
+10  continue
+    print *, 'FAILURE in Comp 2 Init!!!!'
+    rc = ESMF_FAILURE
+
+  end subroutine user_init
+
+!-------------------------------------------------------------------------
+!   !  The Run routine where data is computed.
+!   !
+ 
+  subroutine user_run(comp, importState, exportState, clock, rc)
+    type(ESMF_GridComp), intent(inout) :: comp
+    type(ESMF_State), intent(inout) :: importState, exportState
+    type(ESMF_Clock), intent(in) :: clock
+    integer, intent(out) :: rc
+
+
+    ! Local variables
+    type(ESMF_VM)               :: vm
+    integer                     :: petCount, status, myPet
+    character(ESMF_MAXSTR)      :: conv,purp
+    
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+    ! Determine petCount
+    call ESMF_GridCompGet(comp, vm=vm, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+    call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+
+    ! Get the export state
+    call ESMF_StateGet(exportState, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! initialize variables
+    conv = 'netCDF'
+    purp = 'basic'
 
     if (myPet .eq. 0) then
-      call ESMF_AttributeWrite(importState,fconv,fpurp,rc=rc)
-      call ESMF_AttributeWrite(exportState,fconv,fpurp,rc=rc)
+      call ESMF_AttributeWrite(importState,conv,purp,rc=rc)
+      call ESMF_AttributeWrite(exportState,conv,purp,rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
     endif
 
@@ -333,6 +339,18 @@ module user_model2
 
     rc = ESMF_SUCCESS
     return
+    
+    call ESMF_FieldDestroy(aero,rc=rc)
+    call ESMF_FieldDestroy(delp,rc=rc)
+    call ESMF_FieldDestroy(dewl,rc=rc)
+    call ESMF_FieldDestroy(hi,rc=rc)
+    call ESMF_FieldDestroy(ox,rc=rc)
+    call ESMF_FieldDestroy(ple,rc=rc)
+    call ESMF_FieldDestroy(s,rc=rc)
+    call ESMF_FieldDestroy(speed,rc=rc)
+    call ESMF_FieldDestroy(taux,rc=rc)
+    call ESMF_FieldDestroy(zle,rc=rc)
+    call ESMF_FieldBundleDestroy(fbundle,rc=rc)
 
     ! get here only on error exit
 30  continue

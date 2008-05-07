@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.9 2008/05/01 22:26:03 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.10 2008/05/07 00:15:20 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -70,11 +70,17 @@ module user_coupler
 
     ! Local variables
     integer               :: itemcount, localPet
-    
+    type(ESMF_VM)         :: vm
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    call ESMF_StateGet(importState, itemcount=itemcount, rc=rc)
+    ! Need to reconcile import and export states
+    call ESMF_CplCompGet(comp, vm=vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateReconcile(importState, vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateReconcile(exportState, vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
   end subroutine user_init

@@ -51,12 +51,6 @@ program ESMF_AttributeSTest
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-
-  print *, "--------------------------------------- "
-  print *, "Start of ", trim(testname)
-  print *, "--------------------------------------- "
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
 ! Create section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -73,6 +67,13 @@ program ESMF_AttributeSTest
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+  if (localPet .eq. 0) then
+      print *, "--------------------------------------- "
+      print *, "Start of ", trim(testname)
+      print *, "--------------------------------------- "
+  endif
+
 
   if (petCount .lt. 6) then
     ! Create the 2 model components and coupler
@@ -270,7 +271,11 @@ program ESMF_AttributeSTest
 10 continue
   
   ! Normal ESMF Test output
-  print *, testname, " complete."
+  if (localPet .eq. 0) then
+      print *, "--------------------------------------- "
+      print *, "End of ", trim(testname)
+      print *, "--------------------------------------- "
+  endif
 
   call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
     ESMF_SRCLINE)
@@ -284,11 +289,11 @@ program ESMF_AttributeSTest
     write(0, *) ""
   endif
   
-  print *, "------------------------------------------------------------"
-  print *, "------------------------------------------------------------"
-  print *, "Test finished, localPet = ", localPet
-  print *, "------------------------------------------------------------"
-  print *, "------------------------------------------------------------"
+!  print *, "------------------------------------------------------------"
+!  print *, "------------------------------------------------------------"
+!  print *, "Test finished, localPet = ", localPet
+!  print *, "------------------------------------------------------------"
+!  print *, "------------------------------------------------------------"
 
   call ESMF_Finalize() 
 
