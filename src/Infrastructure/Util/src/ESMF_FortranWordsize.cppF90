@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsize.cppF90,v 1.1.2.6 2008/05/06 17:19:15 theurich Exp $
+! $Id: ESMF_FortranWordsize.cppF90,v 1.1.2.7 2008/05/07 23:30:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -192,7 +192,11 @@ subroutine f_esmf_fortranudtpointercopy(dst, src)
     real :: a, b, c
     integer :: i, j, k
   end type
-  type (simple_udt), pointer:: dst
-  type (simple_udt), pointer:: src
-  dst => src
+  type wrapper
+    type(simple_udt), pointer:: udt
+  end type
+  
+  type (wrapper):: dst
+  type (wrapper):: src
+  dst%udt => src%udt
 end subroutine
