@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather.cppF90,v 1.2 2008/05/07 19:48:35 feiliu Exp $
+! $Id: ESMF_FieldScatter.cppF90,v 1.1 2008/05/07 19:48:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -10,10 +10,10 @@
 !
 !==============================================================================
 !
-^define ESMF_FILENAME "ESMF_FieldGather.F90"
+^define ESMF_FILENAME "ESMF_FieldScatter.F90"
 !
-!   ESMF Field Communications Gather module
-module ESMF_FieldGatherMod
+!   ESMF Field Communications Scatter module
+module ESMF_FieldScatterMod
 !
 !==============================================================================
 !
@@ -25,10 +25,10 @@ module ESMF_FieldGatherMod
 !------------------------------------------------------------------------------
 !
 !BOPI
-! !MODULE: ESMF_FieldGatherMod - FieldGather routines for Field objects
+! !MODULE: ESMF_FieldScatterMod - FieldScatter routines for Field objects
 !
 ! !DESCRIPTION:
-! The code in this file implements the {\tt ESMF\_FieldGather} subroutine.
+! The code in this file implements the {\tt ESMF\_FieldScatter} subroutine.
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -54,28 +54,28 @@ module ESMF_FieldGatherMod
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-    public ESMF_FieldGather
+    public ESMF_FieldScatter
 !
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGather.cppF90,v 1.2 2008/05/07 19:48:35 feiliu Exp $'
+      '$Id: ESMF_FieldScatter.cppF90,v 1.1 2008/05/07 19:48:35 feiliu Exp $'
 
 !------------------------------------------------------------------------------
-    interface ESMF_FieldGather
-        TypeKindRankInterfaceMacro(FieldGatherDPtr)
-    end interface ESMF_FieldGather
+    interface ESMF_FieldScatter
+        TypeKindRankInterfaceMacro(FieldScatterDPtr)
+    end interface ESMF_FieldScatter
 !------------------------------------------------------------------------------
 contains
 
-#define FieldGatherDPtrDoc() \
+#define FieldScatterDPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldGather - Gather a Fortran90 array from an ESMF_Field @\
+! !IROUTINE: ESMF_FieldScatter - Scatter a Fortran90 array to an ESMF_Field @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldGather() @\
-! subroutine ESMF_FieldGather<rank><type><kind>(field, farray, & @\
+! ! Private name; call using ESMF_FieldScatter() @\
+! function ESMF_FieldScatter<rank><type><kind>(field, farray, & @\
 !        patch, rootPet, vm, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -87,26 +87,26 @@ contains
 !   integer, intent(out), optional                       :: rc  @\
 ! @\
 ! !DESCRIPTION: @\
-! This method gathers the data contained in a Field and stores the gathered @\
-! data into a Fortran array located on rootPet. Optionally for Field distributed @\
-! on multi-patch distgrid, user can specify a patch number from where to collect data. @\
+! This method takes the data from a Fortran data array located on rootPet 
+! and scatters the data into a Field. Optionally for Field distributed @\
+! on multi-patch distgrid, user can specify a patch number to where to scatter data. @\
 ! @\
 ! For examples and associated documentations using this method see Section  @\
-! \ref{sec:field:usage:gather_2dptr}. @\
+! \ref{sec:field:usage:scatter_2dptr}. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [field]  @\
 !       {\tt ESMF\_Field} object. @\
 ! \item [farray] @\
-!       Native Fortran data array to store gathered data from the {\tt field} @\
+!       Native Fortran data array to scatter data to the {\tt field} @\
 ! \item [{[patch]}] @\
-!       Patch number of a multi-patch {\tt field} from where to gather data @\
+!       Patch number of a multi-patch {\tt field} to where to scatter data @\
 ! \item [rootPet] @\
-!       Pet number where farray is located to store gathered data @\
+!       Pet number where farray is located to retrieve scattered data @\
 ! \item [{[vm]}] @\
 !       Optionally a user speicified vm object of the concurrent context @\
-!       to improve gather performance @\
+!       to improve scatter performance @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -114,11 +114,11 @@ contains
 !EOP @\
 !---------------------------------------------------------------------------- @\
 
-#define FieldGatherDPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+#define FieldScatterDPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !---------------------------------------------------------------------------- @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_FieldGatherDPtr" @\
-    subroutine ESMF_FieldGatherDPtr##mrank##D##mtypekind(field,  farray, & @\
+^define ESMF_METHOD "ESMF_FieldScatterDPtr" @\
+    subroutine ESMF_FieldScatterDPtr##mrank##D##mtypekind(field,  farray, & @\
         patch, rootPet, vm, rc) @\
 @\
         ! input arguments @\
@@ -143,7 +143,7 @@ contains
         if(present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
         ! check variable: focus on field and farray @\
-        ! rely on ArrayGather to check the sanity of other variables @\
+        ! rely on ArrayScatter to check the sanity of other variables @\
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, field, rc) @\
         if(present(vm)) then @\
             ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc) @\
@@ -204,19 +204,19 @@ contains
           return @\
         endif @\
 @\
-        ! perform gather through internal array @\
+        ! perform scatter through internal array @\
         ! For performance consideration: @\
-        ! Rely on ArrayGather to perform sanity checking of the other parameters @\
+        ! Rely on ArrayScatter to perform sanity checking of the other parameters @\
         ! Otherwise, we need to make sure patch is a reasonable value @\
-        call ESMF_ArrayGather(array, farray, patch, rootPet, l_vm, rc=localrc) @\
+        call ESMF_ArrayScatter(array, farray, patch, rootPet, l_vm, rc=localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
             ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rc)) return @\
 @\
         if (present(rc)) rc = ESMF_SUCCESS @\
-    end subroutine ESMF_FieldGatherDPtr##mrank##D##mtypekind @\
+    end subroutine ESMF_FieldScatterDPtr##mrank##D##mtypekind @\
 !------------------------------------------------------------------------------ @\
 
-TypeKindRankDeclarationMacro(FieldGatherDPtr)
+TypeKindRankDeclarationMacro(FieldScatterDPtr)
 
 end module
