@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2008/05/06 21:42:14 oehmke Exp $
+# $Id: makefile,v 1.2 2008/05/07 06:00:40 oehmke Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -14,17 +14,16 @@ OBJSF     =
 TEXFILES  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/Infrastructure/Grid/examples
+LOCDIR	  = src/Infrastructure/LocStream/examples
 
 
-EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_GridUsageEx \
-	            $(ESMF_EXDIR)/ESMF_GridCreateRegFromDGEx
+EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_LocStreamEx
 
-EXAMPLES_RUN      = run_ESMF_GridUsageEx \
-	            run_ESMF_GridCreateRegFromDGEx
 
-EXAMPLES_RUN_UNI  = run_ESMF_GridUsageEx_uni \
-	            run_ESMF_GridCreateRegFromDGEx_uni
+EXAMPLES_RUN      = run_ESMF_LocStreamEx
+
+EXAMPLES_RUN_UNI  = run_ESMF_LocStreamEx_uni
+
 
 include $(ESMF_DIR)/makefile
 
@@ -35,22 +34,13 @@ CLEANFILES  = $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
 #
-#  ESMF_GridUsage
+#  ESMF_LocStream
 #
-run_ESMF_GridUsageEx:
-	$(MAKE) EXNAME=GridUsage NP=4 exfrun
+run_ESMF_LocStreamEx:
+	$(MAKE) EXNAME=LocStream NP=4 exfrun
 
-run_ESMF_GridUsageEx_uni:
-	$(MAKE) EXNAME=GridUsage NP=1 exfrun
-
-#
-#  ESMF_GridUsage
-#
-run_ESMF_GridCreateRegFromDGEx:
-	$(MAKE) EXNAME=GridCreateRegFromDG NP=4 exfrun
-
-run_ESMF_GridCreateRegFromDGEx_uni:
-	$(MAKE) EXNAME=GridCreateRegFromDG NP=1 exfrun
+run_ESMF_LocStreamEx_uni:
+	$(MAKE) EXNAME=LocStream NP=1 exfrun
 
 
 
