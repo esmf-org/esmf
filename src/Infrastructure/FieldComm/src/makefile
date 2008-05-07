@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2008/04/02 20:42:55 cdeluca Exp $
+# $Id: makefile,v 1.6 2008/05/07 18:33:47 feiliu Exp $
 
 # leave alone.
 ALL: build_here 
@@ -6,13 +6,14 @@ ALL: build_here
 # don't set these unless absolutely necessary - they've got to be
 #  architecture and compiler independent and should be inherited
 #  from the upper level makefile if possible.
+AUTOGEN   = ESMF_FieldGather.F90
 CFLAGS    =
 FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = 
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_FieldComm.F90
+SOURCEF	  =  ESMF_FieldComm.F90 ESMF_FieldGather.F90
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # list all .h files which should be copied to common include dir

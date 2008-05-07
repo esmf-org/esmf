@@ -1,0 +1,214 @@
+! $Id: ESMF_FieldGather.cppF90,v 1.1 2008/05/07 18:33:47 feiliu Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2008, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+!
+^define ESMF_FILENAME "ESMF_FieldGather.F90"
+!
+!   ESMF Field Communications Gather module
+module ESMF_FieldGatherMod
+!
+!==============================================================================
+!
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+^include "ESMF.h"
+#include "ESMF_TypeKindRankMacros.hcppF90"
+!------------------------------------------------------------------------------
+!
+!BOPI
+! !MODULE: ESMF_FieldCommMod - Communication routines for Field objects
+!
+! !DESCRIPTION:
+! The code in this file implements the {\tt ESMF\_Field} class
+! communication routines, including Redistribution, Halo, Gather,
+! Scatter, and others.
+!
+! This type is implemented in Fortran 90 and a corresponding
+! C++ interface is provided for access.
+!EOPI
+!------------------------------------------------------------------------------
+! !USES:
+    use ESMF_UtilTypesMod
+    use ESMF_InitMacrosMod
+    use ESMF_LogErrMod
+    use ESMF_BaseMod
+    use ESMF_IOSpecMod
+    use ESMF_VMMod
+    use ESMF_DELayoutMod
+    use ESMF_RHandleMod
+    use ESMF_FieldMod
+    use ESMF_FieldGetMod
+    use ESMF_ArrayMod
+    implicit none
+!------------------------------------------------------------------------------
+! !PRIVATE TYPES:
+!  <none>
+!------------------------------------------------------------------------------
+! !PUBLIC TYPES:
+!  <none>
+!------------------------------------------------------------------------------
+!
+! !PUBLIC MEMBER FUNCTIONS:
+    public ESMF_FieldGather
+!
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+    character(*), parameter, private :: version = &
+      '$Id: ESMF_FieldGather.cppF90,v 1.1 2008/05/07 18:33:47 feiliu Exp $'
+
+    interface ESMF_FieldGather
+        TypeKindRankInterfaceMacro(FieldGatherTKR)
+    end interface ESMF_FieldGather
+!------------------------------------------------------------------------------
+contains
+
+#define FieldGatherTKRDoc() \
+!---------------------------------------------------------------------------- @\
+!BOP @\
+! !IROUTINE: ESMF_FieldGather - Gather a  Fortran90 array from an ESMF_Field @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_FieldGather() @\
+! function ESMF_FieldCreateFromDataPtr<rank><type><kind>(field, farray, & @\
+!        patch, rootPet, vm, rc) @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_Field)                                     :: field  @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
+!   integer, intent(in), optional                        :: patch     @\
+!   integer, intent(in)                                  :: rootPet @\
+!   type(ESMF_VM), intent(in), optional                  :: vm  @\
+!   integer, intent(out), optional                       :: rc  @\
+! @\
+! !DESCRIPTION: @\
+! This method gathers the data contained in a Field and stores the gathered @\
+! data into a Fortran array located on rootPet. Optionally for Field distributed @\
+! on multi-patch distgrid, user can specify a patch number from where to collect data. @\
+! @\
+! For examples and associated documentations using this method see Section  @\
+! \ref{sec:field:usage:gather_2dptr}. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item [field]  @\
+!       {\tt ESMF\_Field} object. @\
+! \item [farray] @\
+!       Native fortran data array to gather data from the {\tt field} @\
+! \item [{[patch]}] @\
+!       Patch number of a multi-patch {\tt field} from where to gather data @\
+! \item [rootPet] @\
+!       Pet number where farray is located to gather data @\
+! \item [{[vm]}] @\
+!       Optionally a user speicified vm object of concurrent context @\
+!       to improve gather performance @\
+! \item [{[rc]}]  @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define FieldGatherTKRMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldGatherTKR" @\
+    subroutine ESMF_FieldGatherTKR##mrank##D##mtypekind(field,  farray, & @\
+        patch, rootPet, vm, rc) @\
+@\
+        ! input arguments @\
+        type(ESMF_Field)                                       :: field  @\
+        mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
+        integer, intent(in), optional                          :: patch     @\
+        integer, intent(in)                                    :: rootPet @\
+        type(ESMF_VM), intent(in), optional                    :: vm  @\
+        integer, intent(out), optional                         :: rc  @\
+@\
+        ! local variables @\
+        integer                                     :: localrc, lpe @\
+        type(ESMF_Array)                            :: array   @\
+        integer                                     :: fa_rank @\
+        type(ESMF_VM)                               :: l_vm @\
+        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
+@\
+        ! Initialize return code; assume routine not implemented @\
+        localrc = ESMF_RC_NOT_IMPL @\
+        if(present(rc)) rc = ESMF_RC_NOT_IMPL @\
+@\
+        ! check variable: focus on field and farray @\
+        ! rely on ArrayGather to check the sanity of other variables @\
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, field, rc) @\
+        if(present(vm)) then @\
+            ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc) @\
+            l_vm = vm @\
+        else @\
+            call ESMF_VMGetCurrent(l_vm, rc=localrc) @\
+            if (ESMF_LogMsgFoundError(localrc, & @\
+                ESMF_ERR_PASSTHRU, & @\
+                ESMF_CONTEXT, rc)) return @\
+        endif @\
+@\
+        call ESMF_VMGet(l_vm, localPet=lpe, rc=localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+            ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rc)) return @\
+@\
+        if(lpe .eq. rootPet) then @\
+            ! Check the size of the native array. @\
+            ! The following use of fptr is a bit of trickery to get all F90 @\
+            ! compilers to cooperate. For some compilers the associated() test @\
+            ! will return .false. for farray of size 0. Some of those compilers @\
+            ! will produce a run-time error in size(fptr). Other compilers will @\
+            ! return .true. for the associated() test but return 0 in size(). @\
+            fpointer => farray @\
+            if(.not. associated(fpointer,farray)) then @\
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
+                "- farray is not associated with memory allocation)", & @\
+                ESMF_CONTEXT, rc)  @\
+              return @\
+            endif @\
+@\
+            if (size(fpointer)==0) then @\
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
+                "- farray is not associated with memory allocation)", & @\
+                ESMF_CONTEXT, rc)  @\
+              return @\
+            endif @\
+        endif @\
+@\
+        ! Check the rank of the native array. @\
+        call ESMF_FieldGet(field, array=array, dimCount=fa_rank, rc=localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+            ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rc)) return @\
+@\
+        if(fa_rank .ne. mrank) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
+            "- farray must have same dimension count as field)", & @\
+            ESMF_CONTEXT, rc)  @\
+          return @\
+        endif @\
+@\
+        ! perform gather through internal array @\
+        ! rely on ArrayGather to perform sanity checking of the other parameters @\
+        call ESMF_ArrayGather(array, farray, patch, rootPet, l_vm, rc=localrc) @\
+        call ESMF_FieldGet(field, array=array, rc=localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+            ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rc)) return @\
+@\
+        if (present(rc)) rc = ESMF_SUCCESS @\
+    end subroutine ESMF_FieldGatherTKR##mrank##D##mtypekind @\
+!------------------------------------------------------------------------------ @\
+
+TypeKindRankDeclarationMacro(FieldGatherTKR)
+
+end module
