@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1.2.1 2008/04/24 21:42:37 feiliu Exp $ 
+# $Id: makefile,v 1.1.2.2 2008/05/07 23:23:50 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -27,7 +27,7 @@ SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
 
 SYSTEM_TESTS_RUN      = RUN_ConcurrentComp
 
-SYSTEM_TESTS_RUN_UNI  = RUN_ConcurrentCompUNI
+SYSTEM_TESTS_RUN_UNI  =
 
 ESMF_ConcurrentCompSTest.o : $(SYSTEM_TESTS_OBJ)
 
@@ -42,9 +42,4 @@ CLOBBERDIRS =
 
 RUN_ConcurrentComp:
 	$(MAKE) TNAME=ConcurrentComp NP=8 stest
-
-RUN_ConcurrentCompUNI:
-	$(MAKE) TNAME=ConcurrentComp NP=1 stest
-
-
 
