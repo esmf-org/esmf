@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2008/05/06 21:42:14 oehmke Exp $ 
+# $Id: makefile,v 1.2 2008/05/07 06:39:46 oehmke Exp $ 
 
 ALL: onedoc
 
@@ -14,7 +14,7 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/LocStream/doc
 
-DVIFILES  =	Grid_refdoc.dvi
+DVIFILES  =	LocStream_refdoc.dvi
 PDFFILES  =     $(ESMC_DOCDIR)/LocStream_refdoc.pdf
 HTMLFILES =	$(ESMC_DOCDIR)/LocStream_refdoc
 

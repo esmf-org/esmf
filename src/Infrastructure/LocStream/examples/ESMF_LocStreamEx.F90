@@ -63,9 +63,7 @@ program ESMF_LocStreamEx
 
 
 !BOE
-!\subsubsection{Creating a 2D Regularly Distributed Rectilinear Grid
-!                  With Uniformly Spaced Coordinates}
-! \label{example:2DRegUniGrid}
+!\subsubsection{Creating a 2D Regularly Distributed Rectilinear Grid With Uniformly Spaced Coordinates}
 !
 ! The following is an example of creating a simple rectilinear grid 
 ! and loading in a set of coordinates. It illustrates a straightforward use
@@ -153,103 +151,6 @@ if (petCount .le. 6) then
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 endif
 
-
-!BOE
-!
-! The remaining examples in this section will use the irregular 
-! distribution because of its greater generality. To create code similar to these, but
-! using a regular distribution, replace the {\tt countsPerDEDim} arguments
-! in the Grid create with the appropriate {\tt maxIndex} and {\tt regDecomp} arguments. 
-!
-!\subsubsection{Creating a 2D Irregularly Distributed Rectilinear Grid
-!                  With Uniformly Spaced Coordinates}
-! \label{example:2DIrregUniGrid}
-!
-! This example serves as an illustration of the difference between using
-! a regular and irregular distribution. It repeats the previous example
-! except using an irregular distribution to give the user more control
-! over how the cells are divided between the DEs. As before, this code
-! creates a 10x20 2D Grid with uniformly spaced coordinates  varying from (10,10) to (100,200).
-! In this example, the Grid is partitioned using an irregular distribution. The first dimension
-! is divided into two pieces, the first with 3 Grid cells per
-! DE and the second with 7 Grid cells per DE. In the second dimension,
-! the Grid is divided into 3 pieces, with 11, 2, and 7 cells per DE respectively.
-! This example assumes that the code is being run with a 1-1 mapping between 
-! PETs and DEs because we are only accessing the first DE on each PET (localDE=0).
-! Because we have 6 DEs (2x3), this example would only work when run on 6 PETs. 
-! The Grid is created with global indices. After Grid creation the
-! local bounds and native Fortran arrays are retrieved and the
-! coordinates are set by the user. 
-!
-!EOE
-
-! Don't run without correct number of procs
-if (petCount .le. 6) then
-
-!BOC
-   !-------------------------------------------------------------------
-   ! Create the Grid:  Allocate space for the Grid object, define the
-   ! topology and distribution of the Grid, and specify that it 
-   ! will have global coordinates.  Note that aperiodic bounds are
-   ! specified by default - if periodic bounds were desired they
-   ! would need to be specified using an additional gridConn argument
-   ! (which isn't implemented yet). In this call the minIndex hasn't 
-   ! been set, so it defaults to (1,1,...).
-   !-------------------------------------------------------------------
-   grid2D=ESMF_GridCreateShapeTile(          &
-            ! Define an irregular distribution
-            countsPerDEDim1=(/3,7/),    &
-            countsPerDEDim2=(/11,2,7/), &
-            ! Specify mapping of coords dim to Grid dim
-            coordDep1=(/1/), & ! 1st coord is 1D and depends on 1st Grid dim
-            coordDep2=(/2/), & ! 2nd coord is 1D and depends on 2nd Grid dim
-            indexflag=ESMF_INDEX_GLOBAL, & 
-            rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Allocate coordinate storage and associate it with the center
-   ! stagger location.  Since no coordinate values are specified in
-   ! this call no coordinate values are set yet.
-   !-------------------------------------------------------------------
-   call ESMF_GridAddCoord(grid2D,  & 
-          staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Get the pointer to the first coordinate array and the bounds
-   ! of its global indices on the local DE.   
-   !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid2D, coordDim=1, localDE=0, &
-          staggerloc=ESMF_STAGGERLOC_CENTER, &
-          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordX, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Calculate and set coordinates in the first dimension [10-100].
-   !-------------------------------------------------------------------
-   do i=lbnd(1),ubnd(1)
-        coordX(i) = i*10.0
-   enddo
-
-   !-------------------------------------------------------------------
-   ! Get the pointer to the second coordinate array and the bounds of
-   ! its global indices on the local DE.
-   !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid2D, coordDim=2, localDE=0, &
-          staggerloc=ESMF_STAGGERLOC_CENTER, &
-          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordY, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Calculate and set coordinates in the second dimension [10-200]
-   !-------------------------------------------------------------------
-   do j=lbnd(1),ubnd(1)
-        coordY(j) = j*10.0
-   enddo
-!EOC
-   !-------------------------------------------------------------------
-   ! Clean up to prepare for the next example.
-   !-------------------------------------------------------------------
-   call ESMF_GridDestroy(grid2D, rc=rc)
-   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-endif
 
 
    !-------------------------------------------------------------------
