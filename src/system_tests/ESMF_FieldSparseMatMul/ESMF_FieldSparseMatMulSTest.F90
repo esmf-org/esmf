@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSparseMatMulSTest.F90,v 1.4.2.3 2008/04/18 23:12:53 svasquez Exp $
+! $Id: ESMF_FieldSparseMatMulSTest.F90,v 1.4.2.4 2008/05/07 20:30:26 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -22,14 +22,14 @@
 !       10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi)
 !
 !    The coupler component runs on all 6 PETs and reconciles import and export
-!    states which contain source and destination Array, respectively. The 
-!    coupler component then calls ArraySparseMatMul() using the identity matrix.
+!    States which contain source and destination Array, respectively. The 
+!    coupler component then calls ArraySMM() using the identity matrix.
 !    This amounts to a redistribution of the source Array data onto the 
 !    destination Array.
 !    
 !    Finally the second gridded component compares the data stored in the
 !    destination Array to the exact solution of the above function as a measure
-!    of the accuracy of the ArraySparseMat() method.
+!    of the accuracy of the ArraySMM() method.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
