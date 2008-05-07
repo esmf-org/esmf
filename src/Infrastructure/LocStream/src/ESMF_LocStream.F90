@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.1 2008/05/06 21:42:14 oehmke Exp $
+! $Id: ESMF_LocStream.F90,v 1.2 2008/05/07 22:20:31 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -120,7 +120,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.1 2008/05/06 21:42:14 oehmke Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.2 2008/05/07 22:20:31 oehmke Exp $'
 
 !==============================================================================
 !
@@ -139,6 +139,7 @@ interface ESMF_LocStreamCreate
 !
       module procedure ESMF_LocStreamCreateFromDG
       module procedure ESMF_LocStreamCreateFromLocal
+      module procedure ESMF_LocStreamCreateFromGlobal
 
       
 ! !DESCRIPTION: 
@@ -196,6 +197,8 @@ interface ESMF_LocStreamAddKey
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_LocStreamAddKeyAlloc
+      module procedure ESMF_LocStreamAddKeyI4
+      module procedure ESMF_LocStreamAddKeyR4
       module procedure ESMF_LocStreamAddKeyR8
 
       
@@ -334,9 +337,245 @@ contains
 
 !------------------------------------------------------------------------------
 #undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamAddKeyI4"
+!BOP
+! !IROUTINE: ESMF_LocStreamAddKey - Add a key Array created around user money
+
+! !INTERFACE:
+  ! Private name; call using ESMF_LocStreamAddKey()
+  subroutine ESMF_LocStreamAddKeyI4(locstream, keyName, farray, copyflag, &
+               keyUnits, keyLongName, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Locstream), intent(in)                   :: locstream
+    character (len=*),         intent(in)                    :: keyName
+    integer(ESMF_KIND_I4), dimension(:), intent(in)  :: farray
+    type(ESMF_CopyFlag), intent(in), optional       :: copyflag
+    character (len=*),    intent(in), optional          :: keyUnits 
+    character (len=*),    intent(in), optional   :: keyLongName 
+    integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Add a key to a locstream. Once a key has been added its internal data
+! can be retrieved and used to set key values. 
+!
+! The arguments are:
+! \begin{description}
+! \item [locstream]
+! The {\tt ESMF\_LocStream} object to add key to.
+! \item [keyName]
+! The name of the key to add. 
+! \item[farray] 
+! Valid native Fortran90 array, i.e. memory must be associated with the 
+! actual argument. The type/kind/rank information of {\tt farray} will be 
+! used to set the key Array's properties accordingly. 
+! \item[{[copyflag]}] 
+! Specifies whether the Array object will reference the memory allocation 
+! provided by {\tt farray} directly or will copy the data from 
+! {\tt farray} into a new memory allocation. Valid options are 
+! {\tt ESMF\_DATA\_REF} (default) or {\tt ESMF\_DATA\_COPY}. 
+! Depending on the specific situation the {\tt ESMF\_DATA\_REF} option 
+! may be unsafe when specifying an array slice for {\tt farray}. 
+! \item [{[keyUnits]}]
+! The units of the key data. 
+! If not specified, then the item remains blank.  
+! \item [{[keyLongName]}]
+! The long name of the key data. 
+! If not specified, then the item remains blank.  
+! \item [{[rc]}]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------------
+    type(ESMF_LocStreamType), pointer :: lstypep
+    type(ESMF_ArraySpec) :: arrayspec
+    type(ESMF_TypeKind) :: localKeyTypeKind 
+    integer :: i,keyIndex
+    integer :: localrc
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check variables
+    ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
+
+    ! get the pointer to the locstream
+    lstypep => locstream%lstypep
+
+    ! find the index of the key
+    keyIndex=0
+    do i=1,lstypep%keyCount
+       if (trim(keyName) .eq. trim(lstypep%keyNames(i))) then
+          keyIndex=i
+          exit 
+       endif
+    enddo
+
+   ! If nothing found return error
+   if (keyIndex==0) then
+      if (ESMF_LogMsgFoundError(ESMF_RC_ARG_WRONG, &
+            " - keyName not found in this LocStream", &
+            ESMF_CONTEXT, rc)) return
+   endif
+
+   ! Make sure the key hasn't already been created
+   if (lstypep%keyCreated(keyIndex)) then
+      if (ESMF_LogMsgFoundError(ESMF_RC_ARG_WRONG, &
+            " - key has already been added to this LocStream", &
+            ESMF_CONTEXT, rc)) return
+   endif
+
+   ! Create Array
+   lstypep%keys(keyIndex)=ESMF_ArrayCreate(farray, distgrid=lstypep%distgrid, &
+                            copyflag=copyflag, indexflag=lstypep%indexflag,  &
+                            name=lstypep%keyNames(keyIndex), rc=localrc)
+   if (ESMF_LogMsgFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rc)) return
+
+   ! Set key as created and that we should destroy the array
+   lstypep%keyCreated(keyIndex)=.true.  
+   lstypep%destroyKeys(keyIndex)=.true. 
+
+   ! set other info
+   if (present(keyUnits)) then
+      lstypep%keyUnits(keyIndex)=keyUnits
+   endif
+
+   if (present(keyLongName)) then
+      lstypep%keyLongNames(keyIndex)=keyLongName
+   endif
+
+   ! return success
+   if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_LocStreamAddKeyI4
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamAddKeyR4"
+!BOP
+! !IROUTINE: ESMF_LocStreamAddKey - Add a key Array created around user money
+
+! !INTERFACE:
+  ! Private name; call using ESMF_LocStreamAddKey()
+  subroutine ESMF_LocStreamAddKeyR4(locstream, keyName, farray, copyflag, &
+               keyUnits, keyLongName, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Locstream), intent(in)                   :: locstream
+    character (len=*),         intent(in)                    :: keyName
+    real(ESMF_KIND_R4), dimension(:), intent(in)  :: farray
+    type(ESMF_CopyFlag), intent(in), optional       :: copyflag
+    character (len=*),    intent(in), optional          :: keyUnits 
+    character (len=*),    intent(in), optional   :: keyLongName 
+    integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Add a key to a locstream. Once a key has been added its internal data
+! can be retrieved and used to set key values. 
+!
+! The arguments are:
+! \begin{description}
+! \item [locstream]
+! The {\tt ESMF\_LocStream} object to add key to.
+! \item [keyName]
+! The name of the key to add. 
+! \item[farray] 
+! Valid native Fortran90 array, i.e. memory must be associated with the 
+! actual argument. The type/kind/rank information of {\tt farray} will be 
+! used to set the key Array's properties accordingly. 
+! \item[{[copyflag]}] 
+! Specifies whether the Array object will reference the memory allocation 
+! provided by {\tt farray} directly or will copy the data from 
+! {\tt farray} into a new memory allocation. Valid options are 
+! {\tt ESMF\_DATA\_REF} (default) or {\tt ESMF\_DATA\_COPY}. 
+! Depending on the specific situation the {\tt ESMF\_DATA\_REF} option 
+! may be unsafe when specifying an array slice for {\tt farray}. 
+! \item [{[keyUnits]}]
+! The units of the key data. 
+! If not specified, then the item remains blank.  
+! \item [{[keyLongName]}]
+! The long name of the key data. 
+! If not specified, then the item remains blank.  
+! \item [{[rc]}]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------------
+    type(ESMF_LocStreamType), pointer :: lstypep
+    type(ESMF_ArraySpec) :: arrayspec
+    type(ESMF_TypeKind) :: localKeyTypeKind 
+    integer :: i,keyIndex
+    integer :: localrc
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check variables
+    ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
+
+    ! get the pointer to the locstream
+    lstypep => locstream%lstypep
+
+    ! find the index of the key
+    keyIndex=0
+    do i=1,lstypep%keyCount
+       if (trim(keyName) .eq. trim(lstypep%keyNames(i))) then
+          keyIndex=i
+          exit 
+       endif
+    enddo
+
+   ! If nothing found return error
+   if (keyIndex==0) then
+      if (ESMF_LogMsgFoundError(ESMF_RC_ARG_WRONG, &
+            " - keyName not found in this LocStream", &
+            ESMF_CONTEXT, rc)) return
+   endif
+
+   ! Make sure the key hasn't already been created
+   if (lstypep%keyCreated(keyIndex)) then
+      if (ESMF_LogMsgFoundError(ESMF_RC_ARG_WRONG, &
+            " - key has already been added to this LocStream", &
+            ESMF_CONTEXT, rc)) return
+   endif
+
+   ! Create Array
+   lstypep%keys(keyIndex)=ESMF_ArrayCreate(farray, distgrid=lstypep%distgrid, &
+                            copyflag=copyflag, indexflag=lstypep%indexflag,  &
+                            name=lstypep%keyNames(keyIndex), rc=localrc)
+   if (ESMF_LogMsgFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rc)) return
+
+   ! Set key as created and that we should destroy the array
+   lstypep%keyCreated(keyIndex)=.true.  
+   lstypep%destroyKeys(keyIndex)=.true. 
+
+   ! set other info
+   if (present(keyUnits)) then
+      lstypep%keyUnits(keyIndex)=keyUnits
+   endif
+
+   if (present(keyLongName)) then
+      lstypep%keyLongNames(keyIndex)=keyLongName
+   endif
+
+   ! return success
+   if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_LocStreamAddKeyR4
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamAddKeyR8"
 !BOP
-! !IROUTINE: ESMF_LocStreamAddKeyR8 - Add a key Array created around user money
+! !IROUTINE: ESMF_LocStreamAddKey - Add a key Array created around user money
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
@@ -449,6 +688,7 @@ contains
 
   end subroutine ESMF_LocStreamAddKeyR8
 !------------------------------------------------------------------------------
+
 
 
 !------------------------------------------------------------------------------
@@ -625,12 +865,126 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreate"
 !BOP
+! !IROUTINE: ESMF_LocStreamCreate - Create a new location stream from a global count
+
+! !INTERFACE:
+      ! Private name: call using ESMF_LocStreamCreate()
+      function ESMF_LocStreamCreateFromGlobal(name, keyNames, &
+                 globalCount, decompFlag, indexflag, rc )
+!
+! !RETURN VALUE:
+      type(ESMF_LocStream) :: ESMF_LocStreamCreateFromGlobal
+
+!
+! !ARGUMENTS:
+      character (len=*), intent(in), optional         :: name
+      character (len=*), intent(in)                   :: keyNames
+      integer, intent(in)                             :: globalCount
+      type(ESMF_DecompFlag), intent (in)              :: decompFlag
+      type(ESMF_IndexFlag), intent(in), optional :: indexflag
+      integer, intent(out), optional                     :: rc
+!
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt ESMF\_LocStream} object, constructs its
+!     internal derived types.  The {\tt ESMF\_DistGrid} is set up, indicating
+!     how the LocStream is distributed. The key tokens are specified here (and the
+!     Arrays are allocated), but the information is attached
+!     at a later time. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[name]
+!          Name of the location stream
+!     \item[keyNames]
+!          Names of keys (arbitrary type)
+!     \item[globalCount]
+!          Total number of locations over all PETs.
+!     \item[decompFlag]
+!          Specify how to divide the locations between the PETs. Please
+!          see Section~\ref{opt:decompflag} for a full description of the 
+!          possible options. 
+!     \item[{[indexflag]}]
+!          Flag that indicates how the DE-local indices are to be defined.
+!          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
+!          that the index range on each DE starts at 1. See Section~\ref{opt:indexflag}
+!          for the full range of options. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+    integer                                               :: localrc  ! Error status
+    type (ESMF_LocStreamType), pointer :: lstypep
+    type(ESMF_LocStream)                       :: locstream 
+    type(ESMF_VM)                                   :: vm       ! Virtual machine used
+
+      integer, allocatable  :: countsPerPet(:)
+      logical                             :: dummy
+      integer :: localPet, petCount
+      integer :: i, currMin
+      type(ESMF_DistGrid)                 :: distgrid
+      integer, pointer :: deBLockList(:,:,:)   
+      integer               :: minIndex(1), maxIndex(1)
+      type(ESMF_IndexFlag)  :: indexflagLocal
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! Set defaults
+      if (present(indexflag)) then
+         indexflagLocal=indexflag
+      else
+         indexflagLocal=ESMF_INDEX_DELOCAL
+      endif
+
+      !! Create DistGrid
+      distgrid=ESMF_DistGridCreate(minIndex=(/1/), &
+                                   maxIndex=(/globalCount/), &
+                                   decompFlag=(/decompFlag/), &
+                                   indexflag=indexflagLocal, &
+                                   rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! cleanup local allocations
+      deallocate(countsPerPet)
+      deallocate(deBlockList)
+
+      ! Set pointer to internal locstream type
+      locstream%lstypep=>lstypep
+
+      ! Create LocStream using CreateFromDistGrid version
+      ESMF_LocStreamCreateFromGlobal=ESMF_LocStreamCreateFromDG(name=name, &
+                                                               keyNames=keynames, &
+                                                               distgrid=distgrid, &
+                                                               destroyDistgrid=.true., &
+                                                               indexflag=indexflagLocal, &
+                                                               rc=localrc )
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_LocStreamCreateFromGlobal
+!------------------------------------------------------------------------------
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamCreate"
+!BOP
 ! !IROUTINE: ESMF_LocStreamCreate - Create a new location stream from a local count
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateFromLocal(name, keyNames, &
-                                                                          localCount, indexflag, rc )
+                 localCount, indexflag, rc )
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateFromLocal
@@ -769,6 +1123,1532 @@ contains
       end function ESMF_LocStreamCreateFromLocal
 !------------------------------------------------------------------------------
 
+
+
+#if 0
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamCreateCopy"
+!BOP
+! !IROUTINE: ESMF_LocStreamCreate - Create a loc stream from an existing one
+
+! !INTERFACE:
+      ! NOT YET INTEGRATED
+      ! Private name; call using ESMF_LocStreamCreate()
+      function ESMF_LocStreamCreateCopy(locstream, name, rc)
+
+!
+! !RETURN VALUE:
+      type (ESMF_LocStream) :: ESMF_LocStreamCreateCopy
+
+!
+! !ARGUMENTS:
+      type(ESMF_LocStream), intent(in)      :: locstream
+      character (len=*), intent(in)         :: name
+      integer, intent(out), optional        :: rc
+!
+! !DESCRIPTION:
+!
+!     Create a new location stream based on the information in an
+!     existing one.  The contents of the stream, in particular the
+!     keys, and the decomposition are simply adopted.
+!
+!     The arguments are:
+!     \begin{description}
+!      \item[locstream]
+!          Location stream to be copied
+!      \item[{[name]}]
+!          Name of the new location stream
+!      \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      type(ESMF_LocStreamClass), pointer      :: igrid       ! Pointer to new grid
+      type(ESMF_LocStreamSpecific), pointer   :: igridSpecific
+      type(ESMF_LocStream), pointer       :: ls
+      type(ESMF_LocStream), pointer       :: lsIn
+      type(ESMF_DELayout)                 :: delayout
+      type(ESMF_InternDG)                 :: internDG
+      type(ESMF_Pointer)                  :: ptr
+
+      integer :: k
+      integer :: localrc                                ! Error status
+      integer :: rank
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      if (igridIn%ptr%horzLocStreamType /= ESMF_IGRID_TYPE_LOCATIONSTREAM ) then
+        if ( ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                   "LocStream object not location stream", &
+                                   ESMF_CONTEXT, rc) ) return
+        return
+      endif
+
+! check grid status
+      if (igridIn%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to copy an uninitialized igrid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
+      ! Initialize pointers
+      nullify(igrid)
+      nullify(ESMF_LocStreamCreateLocStreamCopy%ptr)
+
+
+      allocate(igrid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating LocStream object", &
+                                     ESMF_CONTEXT, rc)) return
+
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_LocStreamConstructNew(igrid, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_InternDGGetDELayout(igridIn%ptr%internDGs(1)%ptr, delayout, &
+                                    localrc)
+
+      !
+      ! For the time being, just fill in the LocStreamClass variables
+      igrid%igridStructure             = igridIn%ptr%igridStructure
+      igrid%horzIgridType              = igridIn%ptr%horzLocStreamType
+      igrid%horzStagger                = igridIn%ptr%horzStagger
+      igrid%coordOrder                 = igridIn%ptr%coordOrder
+      igrid%dimCount                   = 1   ! By definition
+      igrid%minGlobalCoordPerDim(1)    = igridIn%ptr%minGlobalCoordPerDim(1)
+      igrid%maxGlobalCoordPerDim(1)    = igridIn%ptr%maxGlobalCoordPerDim(1)
+
+!
+!     To bind with ESMF:  allocate the specific grid, bind to ls
+
+
+      lsIn => igridIn%ptr%igridSpecific%locStream
+      igrid%igridSpecific%locStream => ESMF_LSConstructCopy(lsIn,localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "locStream",              &
+                                     ESMF_CONTEXT, rc)) return
+      ls => igrid%igridSpecific%locStream
+
+!
+! Attach keys
+!
+      do k=1, lsIn%keyCount
+        call ESMF_LocalArrayGetThis( lsIn%keys(k), ptr )
+        if ( ptr /= ESMF_NULL_POINTER ) then
+          ls%keys(k) = ESMF_LocalArrayCreate( lsIn%keys(k), localrc )
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+        endif
+      enddo
+
+!
+! Copy over the key decomposition
+!
+      allocate( ls%dist(size(lsIn%dist)) )
+      ls%dist = lsIn%dist
+
+! Determine the internal DG (later just DistGrid)
+
+      internDG = ESMF_InternDGCreate( 1, (/sum(ls%dist)/), delayout, &
+                                      (/1/), ls%dist, rc=localrc )
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! now that it's created, add the interndg to the igrid
+      call ESMF_LocStreamAddInternDG(igrid, internDG, localrc)
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      igrid%igridStorage = ESMF_IGRID_STORAGE_ARBITRARY
+      igrid%igridStatus  = ESMF_IGRID_STATUS_READY
+
+      ! Set return values.
+      ESMF_LocStreamCreateLocStreamCopy%ptr => igrid
+
+      ESMF_INIT_SET_CREATED(ESMF_LocStreamCreateLocStreamCopy)
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_LocStreamCreateCopy
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamCreateSubset"
+!BOP
+! !IROUTINE: ESMF_LocStreamCreate - Create a subset of an existing LocStream
+
+! !INTERFACE:
+      ! NOT YET INTEGRATED
+      ! Private name; call using ESMF_LocStreamCreate()
+      function ESMF_LocStreamCreateSubset(locstream, name, keyNames, &
+                 ranges, values, complement, nsel, rc)
+!
+! !RETURN VALUE:
+      type (ESMF_LocStream) :: ESMF_LocStreamCreateSubset
+
+!
+! !ARGUMENTS:
+      type(ESMF_LocStream),  intent(in)            :: locstream
+      character (len=*),     intent(in)            :: name
+      character (len=*),     intent(in)            :: keyNames
+      type(ESMF_LocalArray), intent(in),  optional :: ranges(:)
+      type(ESMF_LocalArray), intent(in),  optional :: values(:)
+      logical,               intent(in),  optional :: complement
+      integer,               intent(out), optional :: nsel
+      integer,               intent(out), optioanl :: rc
+
+!
+! !DESCRIPTION:
+!
+!     Create a new location stream based on a subset of an existing one.  
+!     The contents of the stream, in particular the keys, and the decomposition
+!     are simply adopted.  This operation is communication-free.
+!
+!     The arguments are:
+!     \begin{description}
+!      \item[locstream]
+!          Location stream from which the new location stream is to be created. 
+!      \item[{[name]}]
+!          Name of the new location stream.
+!      \item[keyNames]
+!          Names of the keys used to determine the subset
+!      \item[{[ranges]}]
+!          Ranges which fulfill the criteria (lbound,ubound)
+!      \item[{[values]}]
+!          Values which fulfill the criteria (val(1), val(2), .. val(n))
+!      \item[{[complement]}]
+!          If present, take the complementary set 
+!      \item[{[nsel]}]
+!          The number of chosen locations on this DE
+!      \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!     This routine selects from the location stream according to a given
+!     set of conditions, specified in terms of values and/or enumerated 
+!     lists and/or ranges of any of the atomic attributes. For example,
+!
+!\begin{verbatim}
+!     allocate( ranges(2), values(2) )
+!     allocate( i4Array(3), r4Array(2) )
+!     i4Array=(/1,7,5/); r4Array=(/150.,250./)
+!     ranges(1) = ESMF_LocalArrayCreate( i4Array, ESMF_DATA_COPY )
+!     values(2) = ESMF_LocalArrayCreate( r4Array, ESMF_DATA_COPY )
+!     deallocate( i4Array, r4Array )
+!     lsnew = ESMF_LocStreamCreateLocStream( ls, "middle atmosphere", &
+!                                       key = 'ks:lev', ranges=ranges,  &
+!                                       values = values, nsel=nsel, rc=rc )
+!     call ESMF_LocalArrayDestroy( ranges(1) )
+!     call ESMF_LocalArrayDestroy( values(2) )
+!\end{verbatim}
+!
+!     selects locations that simultaneously satisfy all specified criteria.
+!
+!     Alternatively,
+!\begin{verbatim}
+!     lsnew = ESMF_LocStreamCreateLocStream( ls, "middle atmosphere",        &
+!                                       key = 'ks:lev', nsel,           &
+!                                       ranges=ranges, values = values, &
+!                                       complement=complement, rc = rc )
+!\end{verbatim}
+!     selects observations that do not satisfy any of the specified 
+!     conditions.
+!   
+!     On return, nsel is the number of selected observations.
+!
+!     Notes:
+!\begin{itemize}
+!\item The subset is chosen from the {\em local} DE.  There is no 
+!      communication.  It is possible that the resulting location
+!      stream could be seriously load imbalanced.
+!\item This routine must be called with keyword arguments for the
+!\item Each range includes the endpoints, BUT
+!\item It is up to the user to deal with possible effects of floating
+!      point arithmetic on equality tests for real attributes. For
+!      example, use
+!\begin{verbatim}
+!     r4Array=(/500.-epsilon(1.),500.+epsilon(1.)/)
+!     ranges(2) = ESMF_LocalArrayCreate( r4Array, ESMF_DATA_COPY )
+!\end{verbatim}
+!\item There is no check for inconsistent conditions; the result will
+!      be \verb|nsel=0, rc=0|
+!\end{itemize}
+!
+!EOP
+
+      type(ESMF_LocStreamClass), pointer      :: igrid       ! Pointer to new grid
+      type(ESMF_LocStreamSpecific), pointer   :: igridSpecific
+      type(ESMF_LocStream), pointer       :: ls         ! Output loc stream
+      type(ESMF_LocStream), pointer       :: lsIn       ! Input loc stream
+      type(ESMF_LocalArray)               :: lArray     ! for attributes
+      type(ESMF_DELayout)                 :: delayout
+      type(ESMF_InternDG)                 :: internDG
+      type(ESMF_Pointer)                  :: ptr
+      type(ESMF_VM)                       :: vm
+      type(ESMF_Logical)                  :: otoflag
+
+      character(len=ESMF_MAXSTR)          :: string
+      integer(ESMF_KIND_I4), pointer      :: i4ptr(:)
+      real(ESMF_KIND_R4), pointer         :: r4ptr(:)
+      real(ESMF_KIND_R8), pointer         :: r8ptr(:)
+
+!  Local storage for selection:
+!  ---------------------------
+      logical, allocatable                :: selected(:)
+
+      integer :: i, k
+      integer :: nLocalActive                           ! Number active locs
+      integer :: localrc                                ! Error status
+      integer :: rank, keyLen
+      integer :: counts(1)
+      integer :: ns
+      integer :: deCount, petCount, localPet
+      character(len=ESMF_MAXSTR) :: key
+      character(len=ESMF_MAXSTR), pointer :: keyArray(:)  ! order sort keys
+      logical :: dummy
+
+      type(ESMF_TypeKind)              :: keyKind       ! key kind
+      integer                          :: localKind
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      if (igridIn%ptr%horzLocStreamType /= ESMF_IGRID_TYPE_LOCATIONSTREAM ) then
+        if ( ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                   "LocStream object not location stream", &
+                                   ESMF_CONTEXT, rc) ) return
+        return
+      endif
+
+! check igrid status
+      if (igridIn%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to copy an uninitialized igrid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
+      ! Initialize pointers
+      nullify(igrid)
+      nullify(ESMF_LocStreamCreateLocStreamSubset%ptr)
+
+      allocate(igrid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating LocStream object", &
+                                     ESMF_CONTEXT, rc)) return
+
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_LocStreamConstructNew(igrid, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_LocStreamGetDELayout(igridIn, delayout, rc=localrc)
+
+      !
+      ! For the time being, just fill in the LocStreamClass variables
+      igrid%igridStructure             = igridIn%ptr%igridStructure
+      igrid%horzIgridType              = igridIn%ptr%horzLocStreamType
+      igrid%horzStagger                = igridIn%ptr%horzStagger
+      igrid%coordOrder                 = igridIn%ptr%coordOrder
+      igrid%dimCount                   = 1   ! By definition
+      igrid%minGlobalCoordPerDim(1)    = igridIn%ptr%minGlobalCoordPerDim(1)
+      igrid%maxGlobalCoordPerDim(1)    = igridIn%ptr%maxGlobalCoordPerDim(1)
+
+      lsIn => igridIn%ptr%igridSpecific%locStream
+
+!
+! Create a copy of the location stream (without the contents of the keys)
+!
+      igrid%igridSpecific%locStream => ESMF_LSConstructCopy(lsIn,localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "locStream",              &
+                                     ESMF_CONTEXT, rc)) return
+      ls => igrid%igridSpecific%locStream
+
+      allocate( ls%dist( size(lsIn%dist) ) )
+
+      if ( present( values ) .or. present( ranges ) ) then
+
+!
+! First pull out the sorting keys
+!
+        nLocalActive = lsIn%nLocalActive 
+        allocate ( selected(nLocalActive), stat=localrc )
+        if (ESMF_LogMsgFoundAllocError(localrc, "locStream",              &
+                                     ESMF_CONTEXT, rc)) return
+
+!  All data are selected to begin with
+!  -----------------------------------
+        selected = .true.
+
+        i = 0
+        string = trim( keyNames )
+        do while ( string /= '' )
+          i = i + 1
+
+          if ( i > lsIn%keyCount ) then
+            dummy = ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                          "TOO MANY KEYS SPECIFIED", &
+                                          ESMF_CONTEXT, rc)
+          endif
+          call ESMF_StripKey( string, key )
+
+          call ESMF_LSGetLocalArrayKey(lsIn, key, lArray, keyLen, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          if ( keyLen /= lsIn%nLocalActive ) then
+            dummy = ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                          "size of array does not match", &
+                                          ESMF_CONTEXT, rc)
+          endif
+
+!
+! Select from a list of values (if specified for this key)
+!
+          if ( present(values) ) then
+            call ESMF_MSSelectValues(lArray, values(i), selected)
+          endif
+
+!
+! Select from the range (if specified for this key)
+!
+          if ( present(ranges) ) then
+            call ESMF_MSSelectRange(lArray, ranges(i), selected)
+          endif
+        enddo
+
+!
+! The array 'selected' now contains the entries to be kept (or excluded)
+!
+!  Apply complement
+!  ----------------
+        if ( present(complement) ) then
+          if ( complement ) selected = .not. selected
+        end if
+
+        ls%nLocalActive = count(selected)
+        ns = ls%nLocalActive
+        if (present(nsel)) nsel = ns
+
+
+!
+! Attach keys
+!
+        do i=1, lsIn%keyCount
+          call ESMF_LocalArrayGetThis( lsIn%keys(i), ptr )
+          if ( ptr /= ESMF_NULL_POINTER ) then
+            ls%keys(i) = ESMF_LocalArraySelect( lsIn%keys(i), selected, &
+                                                rc=localrc )
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+          endif
+        enddo
+
+!
+! Communication part of code:  can this be removed to make the
+! routine communication-free?
+!
+        call ESMF_DELayoutGet(delayout, vm=vm, deCount=deCount,         &
+                              oneToOneFlag=otoFlag, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,           &
+                                  ESMF_CONTEXT, rc)) return
+
+        if (otoflag .ne. ESMF_TRUE) then
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                        "DELAYOUT not one-to-one", &
+                                        ESMF_CONTEXT, rc)
+          return
+        endif
+
+        call ESMF_VMGet( vm, localPet = localPet,                       &
+                         petCount = petCount, rc=localrc )
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,           &
+                                  ESMF_CONTEXT, rc)) return
+
+        if ( petCount /= deCount ) then
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD,                &
+                                        "PETs to DEs not one-to-one",   &
+                                        ESMF_CONTEXT, rc)
+          return
+        endif
+
+        ls%dist    = 0
+
+        call ESMF_VMAllGather(vm, sendData=(/ls%nLocalActive/),         &
+                              recvData=ls%dist, count=1, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      
+        counts(1) = sum( ls%dist(1:deCount) )
+        if ( counts(1) > ls%maxGlobal ) then
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                        "TOO MANY TOTAL LOCATIONS", &
+                                        ESMF_CONTEXT, rc)
+          return
+        endif
+
+      else
+!
+! Attach keys
+!
+        ls%dist = lsIn%dist
+        do k=1, lsIn%keyCount
+          call ESMF_LocalArrayGetThis( lsIn%keys(k), ptr )
+          if ( ptr /= ESMF_NULL_POINTER ) then
+            ls%keys(k) = ESMF_LocalArrayCreate( lsIn%keys(k), localrc )
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+            call ESMF_LocalArrayGet( lsIn%keys(k), kind = keyKind, rc=localrc )
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+            localkind = keyKind%dkind
+          endif
+        enddo
+
+!
+! In the trivial case, just sort the locations locally by the key names
+!
+        call ESMF_LSSortLocal( ls, keyNames, rc=localrc )
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      endif
+
+
+!
+! Determine the internal DG (later just DistGrid)
+!
+      internDG = ESMF_InternDGCreate( 1, (/sum(ls%dist)/), delayout, &
+                                      (/1/), ls%dist, rc=localrc )
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! now that it's created, add the interndg to the igrid
+      call ESMF_LocStreamAddInternDG(igrid, internDG, localrc)
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      igrid%igridStorage = ESMF_IGRID_STORAGE_ARBITRARY
+      igrid%igridStatus  = ESMF_IGRID_STATUS_READY
+
+      ! Set return values.
+      ESMF_LocStreamCreateLocStreamSubset%ptr => igrid
+
+      ESMF_INIT_SET_CREATED(ESMF_LocStreamCreateLocStreamSubset)
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_LocStreamCreateLocStreamSubset
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamCreateMerge"
+!BOP
+! !IROUTINE: ESMF_LocStreamCreate - Create a new stream by merging other LocStreams
+
+! !INTERFACE:
+      ! NOT YET INTEGRATED
+      ! Private name; call using ESMF_LocStreamCreate()
+      function ESMF_LocStreamCreateMerge(locstreamList, name, rc )
+
+!
+! !RETURN VALUE:
+      type(ESMF_LocStream) :: ESMF_LocStreamCreateMerge
+
+!
+! !ARGUMENTS:
+      type (ESMF_LocStream), dimension(:), intent(in) :: locstreamList
+      character (len=*),                  intent(in)  :: name
+      integer, intent(out), optional                  :: rc
+!
+! !DESCRIPTION:
+!     Merges two location streams {\em locally}, which may violate
+!     the criteria applied to either of the input location streams.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[locstreamList]
+!          List of location streams from which the new location stream is to be created
+!     \item[{[name]}]
+!          Name of the resulting location stream
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+      type(ESMF_LocStreamClass), pointer   :: igrid         ! Pointer to new grid
+      type(ESMF_LocStream), pointer    :: ls            ! Pointer to new LS
+      type(ESMF_LocStream), pointer    :: lsIn          ! Pointer to LS element
+      type(ESMF_DELayout)              :: delayout      ! Layout
+      type(ESMF_TypeKind)              :: keyKind       ! key kind
+      type(ESMF_InternDG)              :: internDG      ! Internal distgrid
+      type(ESMF_Pointer)               :: ptr           ! temporary pointer
+      integer :: nDEs, nDEsIn                           ! Number of DEs
+      integer :: keyCount, keyCountIn                   ! Number of DEs
+      integer :: i, j, k                                ! indices
+      integer :: count                                  ! counter
+      integer :: localrc                                ! Error status
+      integer :: localkind
+      integer(ESMF_KIND_I4), dimension(:), pointer :: intptr
+      integer(ESMF_KIND_I4), dimension(:), pointer :: intArrayNew
+      real(ESMF_KIND_R8), dimension(:), pointer    :: realptr
+      real(ESMF_KIND_R8), dimension(:), pointer    :: realArrayNew
+
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+     ! Initialize pointers
+      nullify(igrid)
+      nullify(ESMF_LocStreamCreateLocStreamMerge%ptr)
+
+      allocate(igrid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating LocStream object", &
+                                     ESMF_CONTEXT, rc)) return
+
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_LocStreamConstructNew(igrid, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+!
+! Compare key names to see if the location streams are compatible
+!
+
+      !
+      ! For the time being, just fill in the LocStreamClass variables
+      igrid%igridStructure             = ESMF_IGRID_STRUCT_UNSTRUCT
+      igrid%horzLocStreamType              = ESMF_IGRID_TYPE_LOCATIONSTREAM
+      igrid%horzStagger                = ESMF_IGRID_HORZ_STAGGER_UNKNOWN
+      igrid%coordOrder                 = ESMF_COORD_ORDER_XYZ
+      igrid%dimCount                   = 1   
+
+!
+!     To bind with ESMF:  allocate the specific igrid, bind to ls
+
+
+      lsIn => igridsIn(1)%ptr%igridSpecific%locStream 
+      igrid%igridSpecific%locStream => ESMF_LSConstructCopy( lsIn, localrc )
+      if (ESMF_LogMsgFoundAllocError(localrc, "locStream", &
+                                     ESMF_CONTEXT, rc)) return
+      call ESMF_InternDGGetDELayout(igridsIn(1)%ptr%internDGs(1)%ptr, &
+                                    delayout, localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "locStream", &
+                                     ESMF_CONTEXT, rc)) return
+
+      ls => igrid%igridSpecific%locStream 
+
+      ls%maxGlobal = 0
+      ls%maxLocal  = 0
+      ls%nLocalActive = 0
+
+!
+! All igrids must have be distributed over the same number of DEs
+!
+      allocate( ls%dist( size(lsIn%dist) ) )
+
+      ls%dist = 0
+
+      keyCount = igridsIn(1)%ptr%igridSpecific%locStream%keyCount
+      do k = 1, size( igridsIn )
+        lsIn => igridsIn(k)%ptr%igridSpecific%locStream 
+        keyCountIn = lsIn%keyCount
+
+!
+! Check for consistency in the number keys
+!
+        if ( keyCount /= keyCountIn ) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, &
+                                    "LocStream array inconsistent", &
+                                    ESMF_CONTEXT, rc)) return
+        endif
+
+!
+! TODO  Check for consistency in the name and type of keys
+!
+        ls%dist = ls%dist + lsIn%dist
+
+! Determine the maximum number of observations
+        ls%maxGlobal = ls%maxGlobal + lsIn%maxGlobal
+! Determine the maximum local number of observations
+        ls%maxLocal  = ls%maxLocal  + lsIn%maxLocal
+! Determine the length of the merged location stream
+        ls%nLocalActive = ls%nLocalActive + lsIn%nLocalActive
+      enddo
+
+
+      igrid%minGlobalCoordPerDim(1)    = 0.0
+      igrid%maxGlobalCoordPerDim(1)    = REAL(ls%maxGlobal)
+
+!
+! Allocate and copy keys
+!
+      allocate( ls%keys( ls%keyCount ) )  ! Allocate the array of keys
+
+      do k=1, ls%keyCount
+        lsIn => igridsIn(k)%ptr%igridSpecific%locStream 
+        call ESMF_LocalArrayGetThis( lsIn%keys(k), ptr )
+        if ( ptr /= ESMF_NULL_POINTER ) then 
+
+          call ESMF_LocalArrayGet( lsIn%keys(k), kind = keyKind, rc=localrc )
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          localkind = keyKind%dkind
+
+          select case (localkind)
+            case (ESMF_TYPEKIND_I4%dkind)
+ 
+              allocate( intArrayNew( ls%nLocalActive ) )
+              count = 0
+              do j=1, size(igridsIn)
+                call ESMF_LocalArrayGetData( lsIn%keys(k), intPtr,   &
+                                             ESMF_DATA_REF, localrc )
+                if (ESMF_LogMsgFoundError(localrc, &
+                                          ESMF_ERR_PASSTHRU, &
+                                          ESMF_CONTEXT, rc)) return
+                do i=1, lsIn%nLocalActive
+                  count = count + 1
+                  intArrayNew(count) = intPtr(i)     ! Copy key
+                enddo
+              enddo
+              ls%keys(k) = ESMF_LocalArrayCreate( intArrayNew, &
+                                                  ESMF_DATA_COPY, localrc )
+              if (ESMF_LogMsgFoundError(localrc, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc )) return
+
+            case (ESMF_TYPEKIND_R8%dkind)
+
+              allocate( realArrayNew( ls%nLocalActive ) )
+              count = 0
+              do j=1, size(igridsIn)
+                call ESMF_LocalArrayGetData( lsIn%keys(k), realPtr,  &
+                                             ESMF_DATA_REF, localrc )
+                if (ESMF_LogMsgFoundError(localrc, &
+                                          ESMF_ERR_PASSTHRU, &
+                                          ESMF_CONTEXT, rc)) return
+                
+                do i=1, lsIn%nLocalActive
+                  count = count + 1
+                  realArrayNew(count) = realPtr(i)   ! Copy key
+                enddo
+              enddo
+              ls%keys(k) = ESMF_LocalArrayCreate(RealArrayNew, &
+                                                 ESMF_DATA_COPY, localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+
+            case default
+              if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                        "Unsupported Key Type", &
+                                        ESMF_CONTEXT, rc) ) return
+          end select
+
+        endif
+      
+      enddo
+
+!
+! Determine the new decomposition
+!
+
+! Determine the internal DG (later just DistGrid)
+
+      internDG = ESMF_InternDGCreate( 1, (/sum(ls%dist)/), delayout, &
+                                      (/1/), ls%dist, rc=localrc )
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! now that it's created, add the interndg to the igrid
+      call ESMF_LocStreamAddInternDG(igrid, internDG, localrc)
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      igrid%igridStorage = ESMF_IGRID_STORAGE_ARBITRARY
+      igrid%igridStatus  = ESMF_IGRID_STATUS_READY
+
+      ! Set return values.
+      ESMF_LocStreamCreateLocStreamMerge%ptr => igrid
+
+      ESMF_INIT_SET_CREATED(ESMF_LocStreamCreateLocStreamMerge)
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_LocStreamCreateLocStreamMerge
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamCreateByKeys"
+!BOP
+! !IROUTINE: ESMF_LocStreamCreate - Revised LocStream based on sort criteria
+
+! !INTERFACE:
+      ! NOT YET INTEGRATED
+      ! Private name; call using ESMF_LocStreamCreate()
+      function ESMF_LocStreamCreateByKeys(locstream, name, sortKeys, &
+                 balancePrimary, rc)
+
+!
+! !RETURN VALUE:
+      type(ESMF_LocStream) :: ESMF_LocStreamCreateByKeys
+
+!
+! !ARGUMENTS:
+      type (ESMF_LocStream), intent(inout)         :: locstream
+      character (len=*),     intent(in)            :: name
+      character (len=*),     intent(in)            :: sortKeys
+      logical,               intent(in)            :: balancePrimary
+      integer,               intent(out), optional :: rc
+
+! !DESCRIPTION:
+!
+! Using an existing location stream, create a new location stream 
+! based on a set of sorting keys (primary, secondary, tertiary, 
+! ...).  The location stream data are maintained, but they are 
+! redistributed over all DEs to reflect the sorting.
+!  
+! In the simplest case, this routine tries to distribute the
+! observations even manner, while respecting the constraint that
+! entries with any given key value reside only on one DE.  Since this
+! might create load imbalance, a added with the additional parameters
+! {\tt sortKeys} and {\tt unsplitKey}.  The former first sorts the
+! observations by primary, secondary (and possibly higher level) keys.
+! The distribution then ensures that:
+!
+! \begin{eqnarray}
+!  DE_a < DE_b & \Longrightarrow & ( k^{(1)}_a < k^{(1)}_b ) \vee \\
+!  &&  (( k^{(1)}_a = k^{(1)}_b ) \wedge ( k^{(2)}_a < k^{(2)}_b )) \vee \\
+!  &&  (( k^{(1)}_a = k^{(1)}_b ) \wedge ( k^{(2)}_a = k^{(2)}_b ) 
+!                                 \wedge (k^{(3)}_a < k^{(3)}_b) ) \vee \cdots
+! \end{eqnarray}
+!
+! However, while one DE can own multiple primary keys, it is not
+! allowed that observations with the same primary key value are
+! located on more than one DE:
+!     
+! \begin{equation}
+!   DE_a \ne DE_b \Longrightarrow k^{(1)}_a \ne k^{(1)}_b 
+! \end{equation}
+!  
+! This definition does not allows {\tt balancePrimary} releases this
+! constraint.
+!
+! There may be a need for further constraints at a later time.  Given
+! all of these constraints, the routine tries its best to evenly
+! distribute the observations.
+!
+! This routine can be expensive in terms of communication: all the
+! keys must be redistributed.  Worse, this routine might be called as
+! often as every hour of atmospheric simulation.  Thus it needs to be
+! efficient, even for $10^6$ or more locations.
+!
+! The arguments are:
+!
+!     \begin{description}
+!     \item[locstream]
+!          Location stream from which the new location stream is to be created
+!     \item[{[name]}]
+!          Name of the resulting location stream
+!     \item[sortKeys]
+!          Keys to sort by (primary, secondary, and higher level)
+!     \item[{[balancePrimary]}]
+!          If is allowed to split locations with the same primary
+!          key value over more than one DE for load balance. Default: false.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+      type(ESMF_LocStreamClass), pointer   :: igrid         ! Pointer to new grid
+      type(ESMF_LocStream), pointer    :: lsIn          ! Pointer to LS
+      type(ESMF_LocStream), pointer    :: lsOut         ! Pointer to new LS
+      type(ESMF_LocalArray)            :: lArray        ! Temp. Local Array
+      type(ESMF_DELayout)              :: delayout      ! Layout
+      type(ESMF_InternDG)              :: internDG      ! Internal distgrid
+      type(ESMF_VM)                    :: vm            ! Virtual machine
+      type(ESMF_Logical)               :: otoFlag       ! One-to-one flag
+      type(ESMF_Pointer)               :: ptr           ! pointer
+
+      integer                          :: nLocalActive  ! Number active entries
+      integer                          :: deCount       ! Number of DEs
+      integer                          :: counts(1)     ! for InternDG
+      integer                          :: localrc       ! Error status
+      integer                          :: i, k          ! loop index
+
+      character(len=ESMF_MAXSTR)       :: string, primaryKey
+
+      integer, allocatable             :: indx(:)       ! index array for sort
+      integer, allocatable             :: blockSizes(:) ! block sizes
+      logical                          :: dummy
+
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      if ( balancePrimary ) then
+        print *, "balancePrimary currently not supported, using unbalanced"
+      endif
+
+      if (igridIn%ptr%horzLocStreamType /= ESMF_IGRID_TYPE_LOCATIONSTREAM ) then
+        if ( ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                   "LocStream object not location stream", &
+                                   ESMF_CONTEXT, rc) ) return
+        return
+      endif
+
+! check igrid status
+      if (igridIn%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to copy an uninitialized igrid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
+     ! Initialize pointers
+      nullify(igrid)
+      nullify(ESMF_LocStreamCreateLocStreamByKeys%ptr)
+
+      allocate(igrid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating LocStream object", &
+                                     ESMF_CONTEXT, rc)) return
+
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_LocStreamConstructNew(igrid, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+!
+! Compare key names to see if the location streams are compatible
+!
+
+      !
+      ! For the time being, just fill in the LocStreamClass variables
+      igrid%igridStructure             = ESMF_IGRID_STRUCT_UNSTRUCT
+      igrid%horzIgridType              = ESMF_IGRID_TYPE_LOCATIONSTREAM
+      igrid%horzStagger                = ESMF_IGRID_HORZ_STAGGER_UNKNOWN
+      igrid%coordOrder                 = ESMF_COORD_ORDER_XYZ
+      igrid%dimCount                   = 1   
+
+      lsIn => igridIn%ptr%igridSpecific%locStream 
+      igrid%igridSpecific%locStream => ESMF_LSConstructCopy( lsIn, localrc )
+      if (ESMF_LogMsgFoundAllocError(localrc, "locStream", &
+                                     ESMF_CONTEXT, rc)) return
+
+!     To bind with ESMF:  allocate the specific igrid, bind to lsOut
+      lsOut => igrid%igridSpecific%locStream
+
+!
+! Attach keys
+!
+      do k=1, lsIn%keyCount
+        call ESMF_LocalArrayGetThis( lsIn%keys(k), ptr )
+        if ( ptr /= ESMF_NULL_POINTER ) then
+          lsOut%keys(k) = ESMF_LocalArrayCreate( lsIn%keys(k), localrc )
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+        endif
+      enddo
+
+!
+      call ESMF_LocStreamGetDELayout(igridIn, delayout, rc=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "locStream", &
+                                     ESMF_CONTEXT, rc)) return
+
+!
+! Distribution part of Create
+      call ESMF_DELayoutGet(delayout, vm=vm, deCount=deCount,            &
+                            oneToOneFlag=otoFlag, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (otoflag .ne. ESMF_TRUE) then
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                      "DELAYOUT not one-to-one", &
+                                      ESMF_CONTEXT, rc)
+        return
+      endif
+
+      nLocalActive = lsOut%nLocalActive   ! might be 0 !!
+
+!
+! Only redistribute if there is more than one DE, otherwise simply sort
+!
+      if ( deCount > 1 ) then 
+
+!
+! First pull out the primary key
+!
+        string = trim( sortKeys )
+        call ESMF_StripKey( string, primaryKey )
+
+!
+! pull out primary key
+!
+        call ESMF_LSGetLocalArrayKey(lsOut, primaryKey, lArray, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        allocate( indx(nLocalActive) )
+        call ESMF_MSIndexSet( nLocalActive, indx )
+        call ESMF_MSIndexSort( indx, lArray, .false., localrc )
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+!
+! Find the lowest and highest keys locally
+! Find the partitions which would evenly distribute the local data set
+!
+        allocate( lsOut%dist( deCount ) )
+        lsOut%dist = 0
+        call collectLAStats(lArray,lsOut%dist)
+
+!
+! Redistribute the location stream 
+!
+        call ESMF_LSRedistribute( lsOut, vm, lsOut%dist, indx, rc=localrc )
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+!
+! Now consolidate and gather all the new local sizes
+!
+        lsOut%dist  = 0
+        call ESMF_VMAllGather(vm, sendData=(/lsOut%nLocalActive/), &
+                              recvData=lsOut%dist, count=1, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      
+        counts(1) = sum( lsOut%dist(1:deCount) )
+        if ( counts(1) > lsOut%maxGlobal ) then
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                        "TOO MANY TOTAL LOCATIONS", &
+                                        ESMF_CONTEXT, rc)
+          return
+        endif
+
+!
+! Determine the internal DG (later just DistGrid)
+        internDG = ESMF_InternDGCreate( 1, counts, delayout, &
+                                        (/1/), lsOut%dist, rc=localrc )
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ! now that it's created, add the interndg to the igrid
+        call ESMF_LocStreamAddInternDG(igrid, internDG, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        deallocate( indx )
+
+      endif
+
+!
+! Finally, sort everything locally with all the sort keys
+!
+      call ESMF_LSSortLocal( lsOut, sortKeys, localrc )
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      igrid%igridStorage = ESMF_IGRID_STORAGE_ARBITRARY
+      igrid%igridStatus  = ESMF_IGRID_STATUS_READY
+
+      ! Set return values.
+      ESMF_LocStreamCreateLocStreamByKeys%ptr => igrid
+      ESMF_INIT_SET_CREATED(ESMF_LocStreamCreateLocStreamByKeys)
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+    contains
+
+      subroutine collectLAStats(lArray,blockSizes)
+
+      type(ESMF_LocalArray), intent(in)    :: lArray
+      integer, intent(inout), dimension(:) :: blockSizes
+
+      integer(ESMF_KIND_I4), pointer      :: i4ptr(:)
+      integer(ESMF_KIND_I4), allocatable  :: partitionI4(:),resultI4(:)
+      real(ESMF_KIND_R4), pointer         :: r4ptr(:)
+      real(ESMF_KIND_R4), allocatable     :: partitionR4(:), resultR4(:)
+      real(ESMF_KIND_R8), pointer         :: r8ptr(:)
+      real(ESMF_KIND_R8), allocatable     :: partitionR8(:), resultR8(:)
+
+      type(ESMF_Pointer)                  :: ptr           ! Temporary pointer
+      type(ESMF_TypeKind)                 :: keyKind       ! key kind
+      integer                             :: localkind
+      integer                             :: localrc
+      integer                             :: iDE, index, partitionSize, part
+
+      partitionSize = (nLocalActive / deCount)
+
+
+      call ESMF_LocalArrayGetThis( lArray, ptr )
+      if ( ptr /= ESMF_NULL_POINTER ) then 
+        call ESMF_LocalArrayGet( lArray, kind = keyKind, rc = localrc )
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        localkind = keyKind%dkind
+
+        select case (localkind)
+          case (ESMF_TYPEKIND_I4%dkind)
+            call ESMF_LocalArrayGetData( lArray, i4ptr,          &
+                                         ESMF_DATA_REF, localrc )
+            if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+            allocate( resultI4(deCount-1), partitionI4(deCount-1) )
+            partitionI4 = 0
+            if ( partitionSize > 0 ) then
+              index = 0
+              do iDE=1, deCount-1
+                index = index + partitionSize
+                partitionI4(iDE) =  i4ptr( indx( index ) )
+              enddo
+            endif
+            call ESMF_VMAllReduce( vm, partitionI4, resultI4, deCount-1, &
+                                   ESMF_MAX )
+
+            part = 0
+            iDE  = 1
+            do i=1, nLocalActive
+              if ( i4ptr( indx( i ) ) .ge. resultI4( iDE )   ) then
+                blockSizes(iDE) = part
+                iDE = iDE + 1
+                part = 1  ! Not zero, because this element has now been read
+              else
+                part = part + 1
+              endif
+            enddo
+            blockSizes(deCount) = part   !  Last DE gets all the rest
+            deallocate( resultI4, partitionI4 )
+
+
+          case (ESMF_TYPEKIND_R4%dkind)
+            call ESMF_LocalArrayGetData( lArray, r4ptr,          &
+                                         ESMF_DATA_REF, localrc )
+            if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+
+
+            allocate( resultR4(deCount-1), partitionR4(deCount-1) )
+            partitionR4 = 0.0
+            if ( partitionSize > 0 ) then
+              index = 0
+              do iDE=1, deCount-1
+                index = index + partitionSize
+                partitionR4(iDE) =  r4ptr( indx( index ) )
+              enddo
+            endif
+            call ESMF_VMAllReduce( vm, partitionR4, resultR4, deCount-1, &
+                                   ESMF_MAX )
+
+            part = 0
+            iDE  = 1
+            do i=1, nLocalActive
+              if ( r4ptr( indx( i ) ) .ge. resultR4( iDE )   ) then
+                blockSizes(iDE) = part
+                iDE = iDE + 1
+                part = 1   ! Not zero, because this element has now been read
+              else
+                part = part + 1
+              endif
+            enddo
+            blockSizes(deCount) = part   !  Last DE gets all the rest
+            deallocate( resultR4, partitionR4 )
+
+          case (ESMF_TYPEKIND_R8%dkind)
+            call ESMF_LocalArrayGetData( lArray, r8ptr,          &
+                                     ESMF_DATA_REF, localrc )
+            if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+
+            allocate( resultR8(deCount-1), partitionR8(deCount-1) )
+            partitionR8 = 0.0
+            if ( partitionSize > 0 ) then
+              index = 0
+              do iDE=1, deCount-1
+                index = index + partitionSize
+                partitionR8(iDE) =  r8ptr( indx( index ) )
+              enddo
+            endif
+            call ESMF_VMAllReduce( vm, partitionR8, resultR8, deCount-1, &
+                                   ESMF_MAX )
+
+            part = 0
+            iDE  = 1
+            do i=1, nLocalActive
+              if ( r8ptr( indx( i ) ) .ge. resultR8( iDE ) ) then
+                blockSizes(iDE) = part
+                iDE = iDE + 1
+                part = 1    ! Not zero, because this element has now been read
+              else
+                part = part + 1
+              endif
+            enddo
+            blockSizes(deCount) = part   !  Last DE gets all the rest
+            deallocate( resultR8, partitionR8 )
+
+          case default
+           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                     "Unsupported Key Type", &
+                                     ESMF_CONTEXT, rc) ) return
+        endselect
+      endif
+      
+      end subroutine collectLAStats
+
+      end function ESMF_LocStreamCreateByKeys
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamCreateByBkg"
+!BOP
+! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream by projecting onto a Grid
+
+! !INTERFACE:
+      ! NOT YET INTEGRATED
+      ! Private name; call using ESMF_LocStreamCreate()
+      function ESMF_LocStreamCreateByBkg(locstream, name, keyNames, &
+                 backgroundGrid, rc)
+
+!
+! !RETURN VALUE:
+      type(ESMF_LocStream) :: ESMF_LocStreamCreateByBkg
+
+!
+! !ARGUMENTS:
+      type(ESMF_LocStream), intent(inout)          :: locstream
+      character (len=*),    intent(in)             :: name
+      character (len=*),    intent(in)             :: keyNames
+      type(ESMF_Grid),      intent(inout)          :: backgroundGrid
+      integer,              intent(out),  optional :: rc
+!
+! !DESCRIPTION:
+!
+!     Create an location stream from an existing one in accordance with 
+!     the distribution of the background Grid.  The {\tt keyNames} specify
+!     which key(s) will form the overlay to the background Grid.  
+!
+!     The arguments are:
+!     \begin{description}
+!      \item[locstream]
+!          Location stream from which the new location stream is to be created
+!      \item[{[name]}]
+!          Name of the resulting location stream
+!      \item[keyNames]
+!          Names of the keys used to determine the link to background Grid.
+!          The first key in this list matches up with the first coordinate of the 
+!          Grid, the second key in this list matches up with the second coordinate
+!          of the Grid, and so on. 
+!      \item[backgroundGrid]
+!          Background Grid which determines the distribution by "overlaying"
+!      \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+     type(ESMF_LocStreamClass), pointer:: igrid         ! Pointer to new igrid
+     type(ESMF_LocStream), pointer :: lsIn          ! Pointer to LS
+     type(ESMF_LocStream), pointer :: lsOut         ! Pointer to new LS
+     type(ESMF_InternDG)           :: internDG      ! Internal distgrid
+     type(ESMF_DELayout)           :: delayout      ! Layout
+     type(ESMF_VM)                 :: vm            ! Virtual machine
+     type(ESMF_Logical)            :: otoFlag       ! One-to-one flag
+     type(ESMF_Pointer)            :: ptr
+
+     integer                       :: localrc       ! Error status
+     logical                       :: dummy
+     integer                       :: i, j, k, off
+     integer                       :: numDims
+     integer                       :: newCount, oldcount
+     integer                       :: iDE, deCount
+     integer                       :: counts(1)     ! for InternDG
+     integer, allocatable          :: indx(:)
+     integer, allocatable          :: blockSizes(:)
+     integer, pointer              :: intPtr(:)
+     logical, allocatable          :: mask(:)
+
+     character(len=ESMF_MAXSTR)    :: keytemp, string
+
+     character(len=ESMF_MAXSTR), allocatable   :: units(:)
+     type(ESMF_LocalArray), allocatable        :: coords(:)
+     type(ESMF_LocalArray)                     :: ownerDE
+
+! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      if (igridIn%ptr%horzIgridType /= ESMF_IGRID_TYPE_LOCATIONSTREAM ) then
+        if ( ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                   "LocStream object not location stream", &
+                                   ESMF_CONTEXT, rc) ) return
+        return
+      endif
+
+! check igrid status
+      if (igridIn%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to copy an uninitialized igrid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
+!
+! Currently LATLON and LATLON_UNI are supported,
+! but later all logically rectangular grids
+!
+      if (background%ptr%horzLocStreamType /= ESMF_IGRID_TYPE_LATLON_UNI .and. &
+          background%ptr%horzLocStreamType /= ESMF_IGRID_TYPE_LATLON ) then
+        if ( ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                   "Background igrid not lat-lon", &
+                                   ESMF_CONTEXT, rc) ) return
+        return
+      endif
+
+! check igrid status
+      if (background%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
+        call ESMF_LogWrite("trying to copy an uninitialized igrid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
+     ! Initialize pointers
+      nullify(igrid)
+      nullify(ESMF_LocStreamCreateLocStreamByBkg%ptr)
+
+      allocate(igrid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating LocStream object", &
+                                     ESMF_CONTEXT, rc)) return
+
+      ! Call construction method to allocate and initialize igrid internals.
+      call ESMF_LocStreamConstructNew(igrid, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+!
+! Compare key names to see if the location streams are compatible
+!
+
+      !
+      ! For the time being, just fill in the LocStreamClass variables
+      igrid%igridStructure             = ESMF_IGRID_STRUCT_UNSTRUCT
+      igrid%horzIgridType              = ESMF_IGRID_TYPE_LOCATIONSTREAM
+      igrid%horzStagger                = ESMF_IGRID_HORZ_STAGGER_UNKNOWN
+      igrid%coordOrder                 = ESMF_COORD_ORDER_XYZ
+      igrid%dimCount                   = 1   
+
+      lsIn => igridIn%ptr%igridSpecific%locStream 
+      igrid%igridSpecific%locStream => ESMF_LSConstructCopy( lsIn, localrc )
+      if (ESMF_LogMsgFoundAllocError(localrc, "locStream", &
+                                     ESMF_CONTEXT, rc)) return
+
+!     To bind with ESMF:  allocate the specific igrid, bind to lsOut
+      lsOut => igrid%igridSpecific%locStream
+
+!
+! Attach keys
+!
+      do k=1, lsIn%keyCount
+        call ESMF_LocalArrayGetThis( lsIn%keys(k), ptr )
+        if ( ptr /= ESMF_NULL_POINTER ) then
+          lsOut%keys(k) = ESMF_LocalArrayCreate( lsIn%keys(k), localrc )
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+        endif
+      enddo
+
+!
+      call ESMF_LocStreamGetDELayout(igridIn, delayout, rc=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "locStream", &
+                                     ESMF_CONTEXT, rc)) return
+
+!
+! Distribution part of Create
+      call ESMF_DELayoutGet(delayout, vm=vm, deCount=deCount,            &
+                            oneToOneFlag=otoFlag, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (otoflag .ne. ESMF_TRUE) then
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                      "DELAYOUT not one-to-one", &
+                                      ESMF_CONTEXT, rc)
+        return
+      endif
+
+      numDims = 0
+      string = trim( keyNames )
+      do while ( string /= '' )
+         call ESMF_StripKey( string, keytemp )
+         numDims = numDims + 1
+      enddo
+
+      if (numDims > lsIn%keyCount) then
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                      "Too many keys", &
+                                      ESMF_CONTEXT, rc)
+        return
+      endif
+
+      allocate( units( numDims ) )
+      allocate( coords( numDims ) )
+
+      string = trim( keyNames )
+      do i = 1, numDims
+         call ESMF_StripKey( string, keytemp )
+         call ESMF_LSGetLocalArrayKey(lsIn, keytemp, coords(i), &
+                                      count=newCount, units=units(i), &
+                                      rc=localrc)
+         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rc)) return
+         if ( i > 1 .and. newCount /= oldcount ) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                      "Unsupported Key Type", &
+                                      ESMF_CONTEXT, rc) ) return
+         endif
+         oldcount = newCount
+      enddo
+
+!
+! Determine the owners of all of the locations in the stream
+! by projecting them on to the background igrid.  Every igrid
+! should supply a routine to determine ownership.
+! TODO: make a case distinction for various igrids.
+!
+
+      call ESMF_LRLocStreamIsOnDE(background, units, coords, newCount, ownerDE, &
+                             rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+!
+! ownerDE contains the destinations of the individual items
+! (== 100000 if ESMF_LRLocStreamIsOnDE could not determine the DE)
+! Now sort the local location stream; note that the undefined
+! entries will be pushed to the end of the key arrays.
+!
+
+      allocate( indx(newCount) )
+      call ESMF_LocalArrayGetData(ownerDE, intPtr,         &
+                                  docopy=ESMF_DATA_REF, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_MSIndexSet( newCount, indx )
+      call ESMF_MSIndexSort( indx, intPtr, descend=.false., stat=localrc )
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      
+!
+! Determine the number of key entries to be sent to each DE
+!
+      allocate( mask(newCount) )
+      allocate( blockSizes(deCount) )
+      do iDE=1, deCount
+        where ( intPtr == (iDE-1) )
+          mask = .true.
+        elsewhere
+          mask = .false.
+        endwhere
+        blockSizes( iDE ) = count( mask )
+      enddo
+      deallocate( mask )
+
+      newCount = sum(blockSizes)   ! Only those which are defined
+
+!
+! Redistribute the keys, as dictated by indx and blockSizes
+! Note that undefined owners are at the end of the local (permuted)
+! arrays and therefore are not communicated
+!
+      call ESMF_LSRedistribute( lsOut, vm, blockSizes, indx, rc)
+
+!
+! Determine the new decomposition
+!
+      allocate( lsOut%dist(deCount) )
+
+!
+! Now consolidate and gather all the new local sizes
+!
+      lsOut%dist  = 0
+      call ESMF_VMAllGather(vm, sendData=(/lsOut%nLocalActive/), &
+                            recvData=lsOut%dist, count=1, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      counts(1) = sum( lsOut%dist(1:deCount) )
+      if ( counts(1) > lsOut%maxGlobal ) then
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                      "TOO MANY TOTAL LOCATIONS", &
+                                      ESMF_CONTEXT, rc)
+        return
+      endif
+
+! Determine the internal DG (later just DistGrid)
+
+      internDG = ESMF_InternDGCreate( 1, counts, delayout, &
+                                      (/1/), lsOut%dist, rc=localrc )
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! now that it's created, add the interndg to the igrid
+      call ESMF_LocStreamAddInternDG(igrid, internDG, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      deallocate( blockSizes )
+      deallocate( indx )
+
+      deallocate( coords )
+      deallocate( units )
+
+      igrid%igridStorage = ESMF_IGRID_STORAGE_ARBITRARY
+      igrid%igridStatus  = ESMF_IGRID_STATUS_READY
+
+      ! Set return values.
+      ESMF_LocStreamCreateLocStreamByBkg%ptr => igrid
+      ESMF_INIT_SET_CREATED(ESMF_LocStreamCreateLocStreamByBkg)
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_LocStreamCreateByBkg
+#endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1029,8 +2909,8 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyI4"
-!BOPI
-! !IROUTINE: ESMF_LocStreamGetKey - Get pointer to I4 key values
+!BOP
+! !IROUTINE: ESMF_LocStreamGetKey - Get pointer to key values
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
@@ -1090,7 +2970,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 
 
  ! Local variables 
@@ -1183,13 +3063,13 @@ end subroutine ESMF_LocStreamGetKeyI4
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyR4"
-!BOPI
-! !IROUTINE: ESMF_LocStreamGetKey - Get pointer to R4 key values
+!BOP
+! !IROUTINE: ESMF_LocStreamGetKey - Get pointer to key values
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-      subroutine ESMF_LocStreamGetKeyR4(locstream, localDE, keyName, & 
-          computationalLBound, computationalUBound, computationalCount,     &
+  subroutine ESMF_LocStreamGetKeyR4(locstream, localDE, keyName,        & 
+          computationalLBound, computationalUBound, computationalCount, &
           fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
@@ -1244,7 +3124,7 @@ end subroutine ESMF_LocStreamGetKeyI4
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 
 
  ! Local variables 
@@ -1337,8 +3217,8 @@ end subroutine ESMF_LocStreamGetKeyR4
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyR8"
-!BOPI
-! !IROUTINE: ESMF_LocStreamGetKey - Get pointer to R8 key values
+!BOP
+! !IROUTINE: ESMF_LocStreamGetKey - Get pointer to key values
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
@@ -1398,7 +3278,7 @@ end subroutine ESMF_LocStreamGetKeyR4
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 
 
  ! Local variables 

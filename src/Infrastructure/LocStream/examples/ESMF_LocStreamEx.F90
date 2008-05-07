@@ -36,24 +36,17 @@ program ESMF_LocStreamEx
       real(ESMF_KIND_R8), pointer :: cornerX(:), cornerY(:), cornerZ(:)
       real(ESMF_KIND_R8), pointer :: coordX2D(:,:), coordY2D(:,:)
       real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
-
-      integer :: elbnd(3),eubnd(3)
-      integer :: clbnd(3),cubnd(3)
-      integer :: celwdth(2),ceuwdth(2)
-      integer :: tlbnd(3),tubnd(3)
-      integer :: i,j,k
-      integer :: lbnd(3), ubnd(3), lbnd_corner(3), ubnd_corner(3)
-      integer, allocatable :: petMap(:,:,:), localIndices(:,:)
-      integer :: distgridToGridMap(2)
-      integer :: lbnd1D(1), ubnd1D(1)
-
-      type(ESMF_Grid) :: grid2D, grid3D, grid4D
+      real(ESMF_KIND_R8), pointer :: lat(:), lon(:), temp(:)
+      type(ESMF_Field)            :: fieldTemp
+    
       type(ESMF_Array) :: arrayCoordX, arrayCoordY,array
 
-      type(ESMF_distGrid) :: distgrid2D,distgrid4D,distgrid
-      type(ESMF_StaggerLoc) :: staggerloc
+      type(ESMF_distGrid) :: distgrid
+      type(ESMF_LocStream) :: locstream
       integer :: localPet, petCount
       integer :: lDE,localDECount
+      integer,parameter :: numLocationsOnThisPet=20
+      integer :: i
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -61,97 +54,181 @@ program ESMF_LocStreamEx
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-
+#if 0
 !BOE
-!\subsubsection{Creating a 2D Regularly Distributed Rectilinear Grid With Uniformly Spaced Coordinates}
+!\subsubsection{Creating A LocStream Employing User Allocated Memory}
 !
-! The following is an example of creating a simple rectilinear grid 
-! and loading in a set of coordinates. It illustrates a straightforward use
-! of the {\tt ESMF\_GridCreateShapeTile()} call described in the previous section. 
-! This code creates a 10x20 2D grid with uniformly spaced coordinates varying from (10,10) to (100,200).
-! The grid is partitioned using a regular distribution. The first dimension
-! is divided into two pieces, and the second dimension is divided into 3.
-! This example assumes that the code is being run with a 1-1 mapping between 
-! PETs and DEs because we are only accessing the first DE on each PET (localDE=0).
-! Because we have 6 DEs (2x3), this example would only work when run on 6 PETs. 
-! The Grid is created with global indices. After Grid creation the
-! local bounds and native Fortran arrays are retrieved and the
-! coordinates are set by the user. 
+! The following is an example of creating a LocStream object.
+! After creation, key data is added, and a Field is created 
+! (Note that this last has not yet been implemented). 
 !
 !EOE
 
-! Don't run without correct number of procs
-if (petCount .le. 6) then
 
 !BOC
    !-------------------------------------------------------------------
-   ! Create the Grid:  Allocate space for the Grid object, define the
-   ! topology and distribution of the Grid, and specify that it 
-   ! will have global indices.  Note that aperiodic bounds are
-   ! specified by default - if periodic bounds were desired they
-   ! would need to be specified using an additional gridConn argument
-   ! (which isn't implemented yet). In this call the minIndex hasn't 
-   ! been set, so it defaults to (1,1,...). The default is to 
-   ! divide the index range as equally as possible among the DEs
-   ! specified in regDecomp. This behavior can be changed by 
-   ! specifying decompFlag. 
+   ! Allocate and set example location information
    !-------------------------------------------------------------------
-   grid2D=ESMF_GridCreateShapeTile(          &
-            ! Define a regular distribution
-            maxIndex=(/10,20/), & ! define index space
-            regDecomp=(/2,3/),  & ! define how to divide among DEs
-            ! Specify mapping of coords dim to Grid dim
-            coordDep1=(/1/), & ! 1st coord is 1D and depends on 1st Grid dim
-            coordDep2=(/2/), & ! 2nd coord is 1D and depends on 2nd Grid dim
-            indexflag=ESMF_INDEX_GLOBAL, &
-            rc=rc)
+   allocate(lon(numLocationsOnThisPet))
+   allocate(lat(numLocationsOnThisPet))
 
-   !-------------------------------------------------------------------
-   ! Allocate coordinate storage and associate it with the center
-   ! stagger location.  Since no coordinate values are specified in
-   ! this call no coordinate values are set yet.
-   !-------------------------------------------------------------------
-   call ESMF_GridAddCoord(grid2D,  & 
-          staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Get the pointer to the first coordinate array and the bounds
-   ! of its global indices on the local DE.   
-   !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid2D, coordDim=1, localDE=0, &
-          staggerloc=ESMF_STAGGERLOC_CENTER, &
-          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordX, rc=rc)
-
-   !-------------------------------------------------------------------
-   ! Calculate and set coordinates in the first dimension [10-100].
-   !-------------------------------------------------------------------
-   do i=lbnd(1),ubnd(1)
-        coordX(i) = i*10.0
+   do i=1,numLocationsOnThisPet
+      lon(i)=360.0/numLocationsOnThisPet
+      lat(i)=0.0
    enddo
 
    !-------------------------------------------------------------------
-   ! Get the pointer to the second coordinate array and the bounds of
-   ! its global indices on the local DE.
+   ! Allocate and set example Field data
    !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid2D, coordDim=2, localDE=0, &
-          staggerloc=ESMF_STAGGERLOC_CENTER, &
-          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordY, rc=rc)
+   allocate(temp(numLocationsOnThisPet))
+
+   do i=1,numLocationsOnThisPet
+      temp(i)=90.0
+   enddo
+
 
    !-------------------------------------------------------------------
-   ! Calculate and set coordinates in the second dimension [10-200]
+   ! Create the LocStream:  Allocate space for the LocStream object, 
+   ! define the number and distribution of the locations. 
    !-------------------------------------------------------------------
-   do j=lbnd(1),ubnd(1)
-        coordY(j) = j*10.0
-   enddo
+   locstream=ESMF_LocStreamCreate(name="Equatorial Measurements",   &
+                                  keyNames="Lat:Long",              &
+                                  localCount=numLocationsOnThisPet, &
+                                  rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Add key data, referencing a user data pointer. By changing the 
+   ! copyFlag to ESMF_DATA_COPY an internally allocated copy of the 
+   ! user data may also be set.  
+   !-------------------------------------------------------------------
+   call ESMF_LocStreamAddKey(locstream,              &
+                             keyName="Lat",          &
+                             farray=lat,             &
+                             copyFlag=ESMF_DATA_REF, &
+                             keyUnits="Degrees",     &
+                             keyLongName="Latitude", rc=rc)
+
+   call ESMF_LocStreamAddKey(locstream,              &
+                             keyName="Lon",          &
+                             farray=lon,             &
+                             copyFlag=ESMF_DATA_REF, &
+                             keyUnits="Degrees",     &
+                             keyLongName="Longitude", rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Create a Field on the Location Stream. In this case the 
+   ! Field is created from a user array, but any of the other
+   ! Field create methods (e.g. from ArraySpec) would also apply.
+   !------------------------------------------------------------------- 
+      
+   !  field_temp=ESMF_FieldCreate(locstream,   &
+   !                              farray=temp, &
+   !                              name="temp", &
+   !                              rc=rc)
+
+
 !EOC
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
-   call ESMF_GridDestroy(grid2D, rc=rc)
+   call ESMF_LocStreamDestroy(locstream, rc=rc)
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-endif
 
 
+
+!BOE
+!\subsubsection{Creating A LocStream Employing Internally Allocated Memory}
+!
+! The following is an example of creating a LocStream object.
+! After creation, key data is internally allocated,
+! the pointer is retrieved, and the data is set.
+! A Field is also created on the LocStream (Note that this last has not yet 
+! been implemented). 
+!
+!EOE
+
+
+!BOC
+   !-------------------------------------------------------------------
+   ! Allocate and set example Field data
+   !-------------------------------------------------------------------
+   allocate(temp(numLocationsOnThisPet))
+
+   do i=1,numLocationsOnThisPet
+      temp(i)=90.0
+   enddo
+
+
+   !-------------------------------------------------------------------
+   ! Create the LocStream:  Allocate space for the LocStream object, 
+   ! define the number and distribution of the locations. 
+   !-------------------------------------------------------------------
+   locstream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
+                                  keyNames="Lat:Long", &
+                                  localCount=numLocationsOnThisPet, &
+                                  rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Add key data (internally allocating memory).
+   !-------------------------------------------------------------------
+   call ESMF_LocStreamAddKey(locstream,                    &
+                             keyName="Lat",                &
+                             KeyTypeKind=ESMF_TYPEKIND_R8, &
+                             keyUnits="Degrees",           &
+                             keyLongName="Latitude", rc=rc)
+
+   call ESMF_LocStreamAddKey(locstream,                    &
+                             keyName="Lon",                &
+                             KeyTypeKind=ESMF_TYPEKIND_R8, &
+                             keyUnits="Degrees",           &
+                             keyLongName="Longitude", rc=rc)
+
+
+   !-------------------------------------------------------------------
+   ! Get key data. 
+   !-------------------------------------------------------------------
+   call ESMF_LocStreamGetKey(locstream,                    &
+                             localDE=0,                    &
+                             keyName="Lat",                &
+                             farray=lat,                   &
+                             rc=rc)
+
+   call ESMF_LocStreamGetKey(locstream,                    &
+                             localDE=0,                    &
+                             keyName="Lon",                &
+                             farray=lon,                   &
+                             rc=rc)
+   
+
+   !-------------------------------------------------------------------
+   ! Set key data. 
+   !-------------------------------------------------------------------
+   do i=1,numLocationsOnThisPet
+      lon(i)=360.0/numLocationsOnThisPet
+      lat(i)=0.0
+   enddo
+
+
+   !-------------------------------------------------------------------
+   ! Create a Field on the Location Stream. In this case the 
+   ! Field is created from a user array, but any of the other
+   ! Field create methods (e.g. from ArraySpec) would also apply.
+   !------------------------------------------------------------------- 
+      
+   !  field_temp=ESMF_FieldCreate(locstream,   &
+   !                              farray=temp, &
+   !                              name="temp", &
+   !                              rc=rc)
+
+
+!EOC
+   !-------------------------------------------------------------------
+   ! Clean up to prepare for the next example.
+   !-------------------------------------------------------------------
+   call ESMF_LocStreamDestroy(locstream, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+#endif
 
    !-------------------------------------------------------------------
    ! Shut down and end.

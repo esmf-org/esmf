@@ -7,10 +7,19 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-The ESMF Grid class is used to describe the geometry and discretization
-of logically rectangular physical grids.  It also contains the
-description of the grid's underlying topology and the decomposition
-of the physical grid across the available computational resources.
-The most frequent use of the Grid class is to describe physical grids
-in user code so that sufficient information is available to perform ESMF
-methods such as regridding.  
+
+The ESMF LocStream class is used to represent a set of points (the locations)
+with descriptive data associated with each point (keys). A LocStream differs
+from a Grid in that no topological structure is maintained between the points
+(e.g. the class contains no information about which point is the neighbor
+of which other point).
+
+ A LocStream is typically used to represent the points at which a
+set of observations has been measured. The key data is used to 
+describe each location. This description can contain coordinates, or
+other information which allows the locations to be identified. 
+
+ESMF Fields may be created on a LocStream. The Fields can then be
+used to hold information associated with each location. For example, 
+the values measured at each observation point. 
+
