@@ -1,4 +1,4 @@
-! $Id: ESMF_F95PtrUTest.F90,v 1.2.2.5 2008/05/06 17:26:59 w6ws Exp $
+! $Id: ESMF_F95PtrUTest.F90,v 1.2.2.6 2008/05/07 03:51:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_F95PTRUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_F95PtrUTest.F90,v 1.2.2.5 2008/05/06 17:26:59 w6ws Exp $'
+    '$Id: ESMF_F95PtrUTest.F90,v 1.2.2.6 2008/05/07 03:51:01 theurich Exp $'
 !------------------------------------------------------------------------------
 
   integer, parameter :: int8_k = selected_int_kind (12)		! 8-byte integer
@@ -127,7 +127,7 @@ contains
 #endif
 
   !-----------------------------------------------------------------------------
-  ! NEX_UTest
+  ! NEX_disable_UTest
   ! First obtain a simple F95 pointer for comparison purposes
   
     write (name,*) 'pointer to scalar REAL'
@@ -157,7 +157,7 @@ contains
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_disable_UTest
     write(name, *) "Compare pointer size between simple and bigger UDT"
     write(failMsg, *) "Pointer size changed between UDTs!"
     biggerudtptr_l = ichar (biggerudt_endchar)

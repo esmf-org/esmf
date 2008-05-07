@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7.2.2 2008/05/06 17:26:58 w6ws Exp $ 
+# $Id: makefile,v 1.7.2.3 2008/05/07 03:51:02 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -18,18 +18,18 @@ LOCDIR	  = src/prologue/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_StringUTest \
                 $(ESMF_TESTDIR)/ESMF_WordsizeUTest \
-                $(ESMF_TESTDIR)/ESMF_F90ArrayPtrUTest \
-                $(ESMF_TESTDIR)/ESMF_F95PtrUTest
+                $(ESMF_TESTDIR)/ESMF_F90ArrayPtrUTest
+#                $(ESMF_TESTDIR)/ESMF_F95PtrUTest
 
 TESTS_RUN     = RUN_ESMF_StringUTest \
                 RUN_ESMF_WordsizeUTest \
-                RUN_ESMF_F90ArrayPtrUTest \
-                RUN_ESMF_F95PtrUTest
+                RUN_ESMF_F90ArrayPtrUTest
+#                RUN_ESMF_F95PtrUTest
 
 TESTS_RUN_UNI = RUN_ESMF_StringUTestUNI \
                 RUN_ESMF_WordsizeUTestUNI \
-                RUN_ESMF_F90ArrayPtrUTestUNI \
-                RUN_ESMF_F95PtrUTestUNI
+                RUN_ESMF_F90ArrayPtrUTestUNI
+#                RUN_ESMF_F95PtrUTestUNI
 
 include ${ESMF_DIR}/makefile
 
