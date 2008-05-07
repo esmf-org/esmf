@@ -1,4 +1,4 @@
-% $Id: LocStream_refdoc.ctex,v 1.1 2008/05/06 21:42:13 oehmke Exp $
+% $Id: LocStream_refdoc.ctex,v 1.2 2008/05/07 03:58:43 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -100,12 +100,12 @@
 
 %\section{LocStream Fortran Interface}
 
-%\subsection{Use and Examples}
-%#ifdef STANDALONE
-%\input{LocStreamex_fapi}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/LocStream/doc/LocStream_fex}
-%#endif
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{LocStreamEx_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/LocStream/doc/LocStreamEx_fapi}
+#endif
 
 %\subsection{Parameters and Definitions}
 %#ifdef STANDALONE
