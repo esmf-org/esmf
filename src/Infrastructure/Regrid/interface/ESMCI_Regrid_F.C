@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.9 2008/04/29 20:23:55 dneckels Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.10 2008/05/08 17:39:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@ enum {ESMF_REGRID_SCHEME_FULL3D = 0, ESMF_REGRID_SCHEME_NATIVE = 1};
 
 
 
-extern "C" void FTN(c_esmc_arraysparsematmulstore)(ESMCI::Array **srcArray,
+extern "C" void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle,
     ESMC_TypeKind *typekind, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, int *rc);
@@ -186,7 +186,7 @@ for (UInt n = 0; n < num_entries; ++n) {
     // Build the ArraySMM
     int localrc;
     enum ESMC_TypeKind tk = ESMC_TYPEKIND_R8;
-    FTN(c_esmc_arraysparsematmulstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
+    FTN(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
                &num_entries, &iiptr, &localrc);
 
     if (localrc != ESMF_SUCCESS) Throw() << "arraysparsematmulstore failed";
