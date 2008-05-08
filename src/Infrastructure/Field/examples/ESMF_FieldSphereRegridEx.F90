@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.6 2008/04/29 20:23:16 dneckels Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.7 2008/05/08 21:47:28 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.6 2008/04/29 20:23:16 dneckels Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.7 2008/05/08 21:47:28 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -351,24 +351,24 @@ program ESMF_FieldSphereRegridEx
 
 !BOE
 ! 
-!\subsubsection{Destroy a Regrid Operator}
+!\subsubsection{Release a Regrid Operator}
 !EOE
 
 !BOC
-  call ESMF_FieldRegridDestroy(routeHandle, rc=localrc)
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
 !EOC
-  write(failMsg, *) "FieldRegridDestroy"
+  write(failMsg, *) "FieldRegridRelease"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
   ! Uncomment these calls to see some actual regrid results
   spherical_grid = 1
-!  call ESMF_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
-!               "srcmesh", srcArray, rc=localrc, &
-!               spherical=spherical_grid)
-!  call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
-!               "dstmesh", dstArray, rc=localrc, &
-!               spherical=spherical_grid)
+  call ESMF_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
+               "srcmesh", srcArray, rc=localrc, &
+               spherical=spherical_grid)
+  call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
+               "dstmesh", dstArray, rc=localrc, &
+               spherical=spherical_grid)
 
 
 10   continue

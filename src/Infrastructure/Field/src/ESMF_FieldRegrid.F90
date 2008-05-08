@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.4 2008/05/08 02:27:19 theurich Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.5 2008/05/08 21:47:29 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -43,12 +43,12 @@ module ESMF_FieldRegridMod
 ! - ESMF-public methods:
    public ESMF_FieldRegridStore        ! Store a regrid matrix
    public ESMF_FieldRegridRun          ! apply a regrid operator
-   public ESMF_FieldRegridDestroy      ! apply a regrid operator
+   public ESMF_FieldRegridRelease      ! apply a regrid operator
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.4 2008/05/08 02:27:19 theurich Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.5 2008/05/08 21:47:29 dneckels Exp $'
 
 !==============================================================================
 !
@@ -219,13 +219,13 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldRegridDestroy"
+#define ESMF_METHOD "ESMF_FieldRegridRelease"
 
 !BOP
-! !IROUTINE: ESMF_FieldRegridDestroy - Free resources used by regrid object
+! !IROUTINE: ESMF_FieldRegridRelease - Free resources used by regrid object
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldRegridDestroy(routeHandle, rc)
+      subroutine ESMF_FieldRegridRelease(routeHandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RouteHandle), intent(inout)  :: routeHandle
@@ -251,6 +251,6 @@ contains
 
         if(present(rc)) rc = ESMF_SUCCESS
 
-    end subroutine ESMF_FieldRegridDestroy
+    end subroutine ESMF_FieldRegridRelease
 
 end module ESMF_FieldRegridMod

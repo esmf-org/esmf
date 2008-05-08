@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.8 2008/04/15 15:40:15 w6ws Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.9 2008/05/08 21:47:28 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.8 2008/04/15 15:40:15 w6ws Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.9 2008/05/08 21:47:28 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -309,13 +309,13 @@ program ESMF_FieldRegridEx
 
 !BOE
 ! 
-!\subsubsection{Destroy a Regrid Operator}
+!\subsubsection{Release a Regrid Operator}
 !EOE
 
 !BOC
-  call ESMF_FieldRegridDestroy(routeHandle, rc=localrc)
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
 !EOC
-  write(failMsg, *) "FieldRegridDestroy"
+  write(failMsg, *) "FieldRegridRelease"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
