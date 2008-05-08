@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.26 2008/05/07 19:48:35 feiliu Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.27 2008/05/08 19:00:36 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -29,16 +29,13 @@ program ESMF_FieldGatherUTest
 ! !USES:
     use ESMF_TestMod     ! test methods
     use ESMF_Mod
-    use ESMF_FieldGetMod
-    use ESMF_FieldGatherMod
-    use ESMF_FieldScatterMod
   
     implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldGatherUTest.F90,v 1.26 2008/05/07 19:48:35 feiliu Exp $'
+    '$Id: ESMF_FieldGatherUTest.F90,v 1.27 2008/05/08 19:00:36 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -128,7 +125,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, allocCount=fa_shape, rc=localrc)
+        call ESMF_FieldGet(grid, localDe=0, totalCount=fa_shape, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -216,7 +213,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, allocCount=fa_shape, rc=localrc)
+        call ESMF_FieldGet(grid, localDe=0, totalCount=fa_shape, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2008/04/30 17:27:42 feiliu Exp $ 
+# $Id: makefile,v 1.18 2008/05/08 19:00:37 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -17,9 +17,11 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/FieldComm/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldGatherUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldGatherUTest \
+	$(ESMF_TESTDIR)/ESMF_FieldRedistUTest
                
-TESTS_RUN     = RUN_ESMF_FieldGatherUTest
+TESTS_RUN     = RUN_ESMF_FieldGatherUTest \
+	RUN_ESMF_FieldRedistUTest
                 
 TESTS_RUN_UNI = 
 
@@ -35,3 +37,6 @@ CLOBBERDIRS =
 
 RUN_ESMF_FieldGatherUTest:
 	$(MAKE) TNAME=FieldGather NP=4 ftest
+
+RUN_ESMF_FieldRedistUTest:
+	$(MAKE) TNAME=FieldRedist NP=4 ftest
