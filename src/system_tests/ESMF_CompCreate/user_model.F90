@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.14 2008/04/02 19:44:22 theurich Exp $
+! $Id: user_model.F90,v 1.15 2008/05/08 02:27:32 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -46,6 +46,10 @@
         ! Local variables
         type(mydata), pointer :: mydatablock
         type(wrapper) :: mywrapper
+#ifdef ESMF_TESTWITHTHREADS
+        type(ESMF_VM) :: vm
+        type(ESMF_Logical) :: supportPthreads
+#endif
 
         print *, "In user register routine"
 
@@ -77,11 +81,17 @@
 
 #ifdef ESMF_TESTWITHTHREADS
         ! The following call will turn on ESMF-threading (single threaded)
-        ! for this component. If you are using this file as a template for 
-        ! your own code development you probably don't want to include the 
-        ! following call unless you are interested in exploring ESMF's 
+        ! for this component. If you are using this file as a template for
+        ! your own code development you probably don't want to include the
+        ! following call unless you are interested in exploring ESMF's
         ! threading features.
-        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+
+        ! First test whether ESMF-threading is supported on this machine
+        call ESMF_VMGetGlobal(vm, rc=rc)
+        call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+        if (supportPthreads == ESMF_True) then
+          call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+        endif
 #endif
 
         rc = ESMF_SUCCESS
@@ -139,7 +149,7 @@
 
         ! Add an empty "humidity" field to the export state.
         humidity = ESMF_FieldCreate(name="humidity", rc=rc)
-        call ESMF_StateAddField(exportState, humidity, rc=rc)
+        call ESMF_StateAdd(exportState, humidity, rc=rc)
         call ESMF_StatePrint(exportState, rc=rc)
 
         print *, "User Comp Init returning"
@@ -172,8 +182,8 @@
         ! one component to the import before this call.  For now, copy the
         ! field from the export state to import state by hand.
         if (onetime .gt. 0) then
-          call ESMF_StateGetField(exportState, "humidity", humidity, rc=status)
-          call ESMF_StateAddField(importState, humidity, rc=status)
+          call ESMF_StateGet(exportState, "humidity", humidity, rc=status)
+          call ESMF_StateAdd(importState, humidity, rc=status)
           onetime = 0
         endif
 
@@ -188,13 +198,13 @@
                         mydatablock%scale_factor, mydatablock%flag
    
         call ESMF_StatePrint(importState, rc=status)
-        call ESMF_StateGetField(importState, "humidity", humidity, rc=status)
+        call ESMF_StateGet(importState, "humidity", humidity, rc=status)
         call ESMF_FieldPrint(humidity, "", rc=status)
 
         ! This is where the model specific computation goes.
 
         ! Here is where the output state is updated.
-        !call ESMF_StateAddField(exportState, humidity, rc=status)
+        !call ESMF_StateAdd(exportState, humidity, rc=status)
         call ESMF_StatePrint(exportState, rc=status)
  
         print *, "User Comp Run returning"

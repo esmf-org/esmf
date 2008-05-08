@@ -1,4 +1,4 @@
-! $Id: ESMF_UserCComp.F90,v 1.5 2004/02/06 23:30:28 nscollins Exp $
+! $Id: ESMF_UserCComp.F90,v 1.6 2008/05/08 02:27:25 theurich Exp $
 !
 ! Test code which supplies a user-written coupler component.
 
@@ -62,8 +62,8 @@
      
       type(ESMF_Field) :: field1, field2
 
-      call ESMF_StateGetField(import, "fieldname1", field1, rc=rc)
-      call ESMF_StateGetField(export, "fieldname2", field2, rc=rc)
+      call ESMF_StateGet(import, "fieldname1", field1, rc=rc)
+      call ESMF_StateGet(export, "fieldname2", field2, rc=rc)
 
     end subroutine my_init
 
@@ -76,8 +76,8 @@
      
       type(ESMF_Field) :: field1, field2
 
-      call ESMF_StateGetField(import, "fieldname1", field1, rc=rc)
-      call ESMF_StateGetField(export, "fieldname2", field2, rc=rc)
+      call ESMF_StateGet(import, "fieldname1", field1, rc=rc)
+      call ESMF_StateGet(export, "fieldname2", field2, rc=rc)
 
 
     end subroutine my_run
@@ -91,8 +91,8 @@
      
       type(ESMF_Field) :: field1, field2
 
-      call ESMF_StateGetField(import, "fieldname1", field1, rc=rc)
-      call ESMF_StateGetField(export, "fieldname2", field2, rc=rc)
+      call ESMF_StateGet(import, "fieldname1", field1, rc=rc)
+      call ESMF_StateGet(export, "fieldname2", field2, rc=rc)
 
 
     end subroutine my_final

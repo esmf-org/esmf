@@ -157,7 +157,9 @@ port ESMF.
 \item[ESMF\_ABI]
 If a system supports 32-bit and 64-bit (pointer wordsize) application binary
 interfaces (ABIs), this variable can be set to select which ABI to use. Valid 
-values are {\tt 32} or {\tt 64}. By default the most common ABI is chosen.
+values are {\tt 32} or {\tt 64}. By default the most common ABI is chosen. On
+x86\_64 achitectures three additional, more specific ABI settings are available,
+{\tt x86\_64\_32}, {\tt x86\_64\_small} and {\tt x86\_64\_medium}.
 
 \item[ESMF\_SITE]
 The SourceForge {\tt esmfcontrib} repository contains makefiles which have 

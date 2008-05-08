@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsize.cppF90,v 1.2 2008/04/05 03:39:03 cdeluca Exp $
+! $Id: ESMF_FortranWordsize.cppF90,v 1.3 2008/05/08 02:27:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -11,8 +11,8 @@
 !==============================================================================
 ^define ESMF_FILENAME "ESMF_FortranWordsize.F90"
 
-!     ESMF FortranWordsize module
-      module ESMF_FortranWordsizeMod
+! ESMF FortranWordsize module
+module ESMF_FortranWordsizeMod
 
 !==============================================================================
 !
@@ -24,51 +24,175 @@
 ! < ignore blank lines below.  they are created by the files which
 ! define various macros. >
 #include "ESMF_TypeKindMacros.hcppF90"
-#include "ESMF_FortranWordsizeMacros.h"
 ^include "ESMF.h"
 !------------------------------------------------------------------------------
 ! !USES:
-     use ESMF_UtilTypesMod      
-     use ESMF_LogErrMod
+  use ESMF_UtilTypesMod      
+  use ESMF_LogErrMod
 
-     implicit none
+  implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-      private
+  private
 
 !------------------------------------------------------------------------------
 ! !PUBLIC FUNCTION:
 
-      public ESMF_FortranWordsize
+  public ESMF_FortranUDTPointerSize
+  public ESMF_FortranWordsize
 
 !------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FortranWordsize"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FortranWordsize -- Generic interface to find Fortran data sizes
 !
 ! !INTERFACE:
 
+  interface ESMF_FortranWordsize
 
-    interface ESMF_FortranWordsize
-!EOP
+    TypeKindInterfaceMacro(ESMF_FortranWordsize)
 
-      ! < interfaces for each TK >
-TypeKindInterfaceMacro(ESMF_FortranWordsize)
+!EOPI
+  end interface
 
-    end interface
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    contains
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FortranUDTPointerSize()"
+!BOPI
+! !IROUTINE: ESMF_FortranUDTPointerSize - Get upper limit on size of Fortran UDT Pointer in bytes
+
+! !INTERFACE:
+  subroutine ESMF_FortranUDTPointerSize(size)
+!
+! !ARGUMENTS:
+    integer, intent(out)  :: size
+!EOPI
+!------------------------------------------------------------------------------
+    type simple_udt
+      sequence
+      real :: a, b, c
+      integer :: i, j, k
+    end type
+    type(simple_udt), pointer :: udt_ptr
+    character :: udt_endchar
+    common /udtcom/ udt_ptr, udt_endchar
+    
+    call ESMF_FortranUDTPointerSizeInit()
+    
+    size = ichar(udt_endchar)
+    
+    ! because of compiler introduced padding size may actually overestimate the
+    ! size of the (UDT, pointer) structure
+    
+    if (size<4) then
+      ! A size smaller than 4 bytes is suspicious and may indicate that the
+      ! size was not determined correctly by the above code!
+      size = 64 ! bytes - large enough to work on all current platforms
+    endif
+    
+  end subroutine ESMF_FortranUDTPointerSize
+!------------------------------------------------------------------------------
+
 
 !==============================================================================
-!------------------------------------------------------------------------------
+#define ESMF_FortranWordsizeDoc() \
+!BOP @\
+! !IROUTINE: ESMF_FortranWordsize - Return the size in byte units of a scalar @\
+! @\
+! !INTERFACE: @\
+!   ! Private name; call using ESMF_FortranWordsize() @\
+!   function ESMF_FortranWordsize<typekind>(var, rc) @\
+! @\
+! !RETURN VALUE: @\
+!      integer :: ESMF_FortranWordsize<typekind> @\
+! @\
+! !ARGUMENTS: @\
+!     <type>(ESMF_KIND_<typekind>), intent(in) :: var @\
+!     integer, intent(out), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+!   Return the size in units of bytes of a scalar (var) argument. @\
+!   Valid types and kinds supported by the framework are: @\
+!   integers of 1-byte, 2-byte, 4-byte, and 8-byte size, and @\
+!   reals of 4-byte and 8-bytes size.  @\
+! @\
+!   The arguments are: @\
+!   \begin{description} @\
+!   \item [var] @\
+!      Scalar of any supported type and kind @\
+!   \item [rc] @\
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!   \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define ESMF_FortranWordsizeMacro(mtypename, mtypekind) \
+!------------------------------------------------------------------------------ @\
+! <Created by macro - do not edit directly > @\
+!------------------------------------------------------------------------------ @\
+@\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD to "ESMF_FortranWordsize##mtypekind" @\
+^define ESMF_METHOD "ESMF_FortranWordsize" @\
+    integer function ESMF_FortranWordsize##mtypekind(var, rc) @\
+@\
+     mtypename(ESMF_KIND_##mtypekind), intent(in) :: var @\
+     integer, intent(out), optional :: rc @\
+@\
+     ! local data @\
+     integer :: size @\
+     mtypename(ESMF_KIND_##mtypekind) :: varTK(2) ! varTK is same TK as var @\
+     logical :: rcpresent                    ! Return code present @\
+@\
+     ! Initialize return code; assume routine not implemented @\
+     rcpresent = .FALSE. @\
+     if (present(rc)) then @\
+         rcpresent = .TRUE. @\
+         rc = ESMF_RC_NOT_IMPL @\
+     endif @\
+@\
+     call ESMF_PointerDifference(ESMC_POINTER_SIZE, varTK(1), varTK(2), size) @\
+     ESMF_FortranWordsize##mtypekind = size @\
+@\
+     if (rcpresent) rc = ESMF_SUCCESS @\
+@\
+     end function ESMF_FortranWordsize##mtypekind @\
+@\
+! < end macro - do not edit directly >  @\
+!---------------------------------------------------------------------------- @\
 
 TypeKindDeclarationMacro(ESMF_FortranWordsize)
 
-!! < end of automatically generated functions >
 !------------------------------------------------------------------------------
 
-!------------------------------------------------------------------------------
+end module ESMF_FortranWordsizeMod
 
-    end module ESMF_FortranWordsizeMod
+
+subroutine f_esmf_fortranudtpointersize(size)
+  use ESMF_FortranWordsizeMod
+  integer::size
+  call ESMF_FortranUDTPointerSize(size)
+end subroutine
+
+
+subroutine f_esmf_fortranudtpointercopy(dst, src)
+  ! make a copy of the internal structure of a pointer to user derived type
+  type simple_udt
+    sequence
+    real :: a, b, c
+    integer :: i, j, k
+  end type
+  type (simple_udt), pointer:: dst
+  type (simple_udt), pointer:: src
+  dst => src
+end subroutine

@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2008/04/29 00:38:20 theurich Exp $
+! $Id: user_coupler.F90,v 1.3 2008/05/08 02:27:29 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -34,6 +34,10 @@ module user_coupler
   subroutine usercpl_register(comp, rc)
     type(ESMF_CplComp) :: comp
     integer, intent(out) :: rc
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    type(ESMF_Logical) :: supportPthreads
+#endif
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -55,12 +59,17 @@ module user_coupler
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads == ESMF_True) then
+      call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
+    endif
 #endif
 
     print *, "User Coupler Register returning"
@@ -103,14 +112,14 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get source Array out of import state
-    call ESMF_StateGetArrayBundle(importState, "srcAryBndl", srcArraybundle, &
+    call ESMF_StateGet(importState, "srcAryBndl", srcArraybundle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayBundleGet(srcArraybundle, arrayList=srcArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get destination Array out of export state
-    call ESMF_StateGetArrayBundle(exportState, "dstAryBndl", dstArraybundle, &
+    call ESMF_StateGet(exportState, "dstAryBndl", dstArraybundle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayBundleGet(dstArraybundle, arrayList=dstArray, rc=rc)
@@ -144,16 +153,16 @@ module user_coupler
       enddo
     endif
 
-    ! Precompute and store an ArraySparseMatMul operation
+    ! Precompute and store an ArrayBundleSMM operation
     if (localPet==0 .or. localPet==4) then
       ! only PET 0 and PET 4 provide factors
-      call ESMF_ArrayBundleSparseMatMulStr(&
+      call ESMF_ArrayBundleSMMStore(&
         srcArrayBundle=srcArraybundle, dstArrayBundle=dstArraybundle, &
         routehandle=routehandle, factorList=factorList, &
         factorIndexList=factorIndexList, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
     else
-      call ESMF_ArrayBundleSparseMatMulStr(&
+      call ESMF_ArrayBundleSMMStore(&
         srcArrayBundle=srcArraybundle, dstArrayBundle=dstArraybundle, &
         routehandle=routehandle, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
@@ -184,22 +193,22 @@ module user_coupler
     print *, "User Coupler Run starting"
 
     ! Get source Array out of import state
-    call ESMF_StateGetArrayBundle(importState, "srcAryBndl", srcArrayBundle, &
+    call ESMF_StateGet(importState, "srcAryBndl", srcArrayBundle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayBundleGet(srcArraybundle, arrayList=srcArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get destination Array out of export state
-    call ESMF_StateGetArrayBundle(exportState, "dstAryBndl", dstArraybundle, &
+    call ESMF_StateGet(exportState, "dstAryBndl", dstArraybundle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayBundleGet(dstArraybundle, arrayList=dstArray, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Use ArrayBundleSparseMatMul() to take data
+    ! Use ESMF_ArrayBundleSMM() to take data
     ! from srcArraybundle to dstArraybundle
-    call ESMF_ArrayBundleSparseMatMul(srcArrayBundle=srcArraybundle, &
+    call ESMF_ArrayBundleSMM(srcArrayBundle=srcArraybundle, &
       dstArrayBundle=dstArraybundle, routehandle=routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
   
@@ -223,8 +232,8 @@ module user_coupler
 
     print *, "User Coupler Final starting"
   
-    ! Release resources stored for the ArrayBundleSparseMatMul.
-    call ESMF_ArrayBundleSparseMatMulRel(routehandle=routehandle, rc=rc)
+    ! Release resources stored for the ESMF_ArrayBundleSMM.
+    call ESMF_ArrayBundleSMMRelease(routehandle=routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "User Coupler Final returning"

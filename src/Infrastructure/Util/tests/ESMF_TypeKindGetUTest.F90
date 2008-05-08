@@ -1,4 +1,4 @@
-! $Id: ESMF_TypeKindGetUTest.F90,v 1.8 2008/04/05 03:39:04 cdeluca Exp $
+! $Id: ESMF_TypeKindGetUTest.F90,v 1.9 2008/05/08 02:27:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -27,14 +27,13 @@
 ! !USES:
       use ESMF_TestMod         ! test methods
       use ESMF_Mod             ! the ESMF Framework
-      use ESMF_TypeKindGetMod     !  the ESMF_TypeKindGet function.
 
     implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TypeKindGetUTest.F90,v 1.8 2008/04/05 03:39:04 cdeluca Exp $'
+      '$Id: ESMF_TypeKindGetUTest.F90,v 1.9 2008/05/08 02:27:22 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"

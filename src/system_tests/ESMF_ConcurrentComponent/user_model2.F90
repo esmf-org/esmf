@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3 2008/04/29 04:18:55 theurich Exp $
+! $Id: user_model2.F90,v 1.4 2008/05/08 02:27:33 theurich Exp $
 !
 ! System test for Concurrent Components, user-written component 2.
 
@@ -103,7 +103,7 @@
             distgrid=distgrid, name="sorted_data2", rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        call ESMF_StateAddArray(importState, sorted_data, rc=status)
+        call ESMF_StateAdd(importState, sorted_data, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
@@ -132,7 +132,7 @@
         integer                             :: i
 
         print *, "In user 2 run routine"
-        call ESMF_StateGetArray(importState, "sorted_data2", sorted_data, rc=status)
+        call ESMF_StateGet(importState, "sorted_data2", sorted_data, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         call ESMF_ArrayGet(sorted_data, localDe=0, farrayPtr=sdptr, rc=status)
@@ -172,7 +172,7 @@
 
         print *, "In user 2 final routine"
   
-        call ESMF_StateGetArray(importState, "sorted_data2", sorted_data, rc=status)
+        call ESMF_StateGet(importState, "sorted_data2", sorted_data, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 

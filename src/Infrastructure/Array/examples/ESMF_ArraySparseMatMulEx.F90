@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.5 2008/04/05 03:37:57 cdeluca Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.6 2008/05/08 02:27:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -195,11 +195,11 @@ program ESMF_ArraySparseMatMulEx
 ! factorIndexList} while the sequence indices of the destination Array elements are
 ! stored in the second row.
 !
-! Each PET in the current VM must call into {\tt ESMF\_ArraySparseMatMulStore()}
+! Each PET in the current VM must call into {\tt ESMF\_ArraySMMStore()}
 ! to precompute and store the communication pattern for the sparse matrix
 ! multiplication. The multiplication factors may be provided in parallel, i.e.
 ! multiple PETs may specify {\tt factorList} and {\tt factorIndexList} arguments
-! when calling into {\tt ESMF\_ArraySparseMatMulStore()}. PETs that do not
+! when calling into {\tt ESMF\_ArraySMMStore()}. PETs that do not
 ! provide factors either call with {\tt factorList} and {\tt factorIndexList}
 ! arguments containing zero elements or issue the call omitting both arguments.
 !EOE
@@ -211,7 +211,7 @@ program ESMF_ArraySparseMatMulEx
     factorIndexList(1,:) = (/5/)          ! seq indices into srcArray
     factorIndexList(2,:) = (/30/)         ! seq indices into dstArray
     
-    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+    call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, factorList=factorList, &
       factorIndexList=factorIndexList, rc=rc)
       
@@ -224,7 +224,7 @@ program ESMF_ArraySparseMatMulEx
     factorIndexList(1,:) = (/8, 2, 12/)   ! seq indices into srcArray
     factorIndexList(2,:) = (/11, 11, 30/) ! seq indices into dstArray
     
-    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+    call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, factorList=factorList, &
       factorIndexList=factorIndexList, rc=rc)
       
@@ -233,15 +233,15 @@ program ESMF_ArraySparseMatMulEx
   else
     ! PETs 2 and 3 do not provide factors
     
-    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+    call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, rc=rc)
       
   endif
 !EOC
 !BOE
 ! The RouteHandle object {\tt sparseMatMulHandle} produced by 
-! {\tt ESMF\_ArraySparseMatMulStore()} can now be used to call {\tt
-! ESMF\_ArraySparseMatMul()} collectively across all PETs of the current VM to
+! {\tt ESMF\_ArraySMMStore()} can now be used to call {\tt
+! ESMF\_ArraySMM()} collectively across all PETs of the current VM to
 ! perform
 ! \begin{verbatim}
 !   dstArray = 0.0
@@ -255,7 +255,7 @@ program ESMF_ArraySparseMatMulEx
 ! PETs 0 and 1 in parallel. For this example
 !EOE
 !BOC
-  call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
+  call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
     routehandle=sparseMatMulHandle, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -274,12 +274,12 @@ program ESMF_ArraySparseMatMulEx
 ! dstArray(1) = 0.2 * srcArray(0,1)  +  0.8 * srcArray(1,3).
 ! \end{verbatim}
 !
-! The call to {\tt ESMF\_ArraySparseMatMul()} does provide the option to turn
+! The call to {\tt ESMF\_ArraySMM()} does provide the option to turn
 ! the default {\tt dstArray} initialization off. If argument {\tt zeroflag}
 ! is set to {\tt ESMF\_FALSE}
 !EOE
 !BOC
-  call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
+  call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
     routehandle=sparseMatMulHandle, zeroflag=ESMF_FALSE, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -297,7 +297,7 @@ program ESMF_ArraySparseMatMulEx
 ! user code before the handle becomes inaccessible.
 !EOE
 !BOC
-  call ESMF_ArraySparseMatMulRelease(routehandle=sparseMatMulHandle, rc=rc)
+  call ESMF_ArraySMMRelease(routehandle=sparseMatMulHandle, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
@@ -359,7 +359,7 @@ program ESMF_ArraySparseMatMulEx
 !BOE
 ! Setting up {\tt factorList} and {\tt factorIndexList} is identical to the 
 ! case for Arrays without undistributed dimensions. Also the call to 
-! {\tt ESMF\_ArraySparseMatMulStore()} remains unchanged. Internally, however,
+! {\tt ESMF\_ArraySMMStore()} remains unchanged. Internally, however,
 ! the source and destination Arrays are checked to make sure the total
 ! undistributed element count matches.
 !EOE
@@ -371,7 +371,7 @@ program ESMF_ArraySparseMatMulEx
     factorIndexList(1,:) = (/5/)          ! seq indices into srcArray
     factorIndexList(2,:) = (/30/)         ! seq indices into dstArray
     
-    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+    call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, factorList=factorList, &
       factorIndexList=factorIndexList, rc=rc)
       
@@ -384,7 +384,7 @@ program ESMF_ArraySparseMatMulEx
     factorIndexList(1,:) = (/8, 2, 12/)   ! seq indices into srcArray
     factorIndexList(2,:) = (/11, 11, 30/) ! seq indices into dstArray
     
-    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+    call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, factorList=factorList, &
       factorIndexList=factorIndexList, rc=rc)
       
@@ -393,19 +393,19 @@ program ESMF_ArraySparseMatMulEx
   else
     ! PETs 2 and 3 do not provide factors
     
-    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+    call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, rc=rc)  
   endif
 !EOC
 
 !BOE
-! The call into the {\tt ESMF\_ArraySparseMatMul()} operation is completely
+! The call into the {\tt ESMF\_ArraySMM()} operation is completely
 ! transparent with respect to whether source and/or destination Arrays contain
 ! undistributed dimensions.
 !EOE
 
 !BOC
-  call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
+  call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
     routehandle=sparseMatMulHandle, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -435,7 +435,7 @@ program ESMF_ArraySparseMatMulEx
 !call ESMF_ArrayPrint(srcArray, rc=rc)
 !call ESMF_ArrayPrint(dstArray, rc=rc)
 
-  call ESMF_ArraySparseMatMulRelease(routehandle=sparseMatMulHandle, rc=rc)
+  call ESMF_ArraySMMRelease(routehandle=sparseMatMulHandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
 !BOE
@@ -503,7 +503,7 @@ program ESMF_ArraySparseMatMulEx
     factorIndexList(3,:) = (/30/)         ! seq indices into dstArray
     factorIndexList(4,:) = (/2/)          ! undistr. seq indices into dstArray
     
-    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+    call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, factorList=factorList, &
       factorIndexList=factorIndexList, rc=rc)
       
@@ -518,7 +518,7 @@ program ESMF_ArraySparseMatMulEx
     factorIndexList(3,:) = (/11, 11, 30/) ! seq indices into dstArray
     factorIndexList(4,:) = (/4, 4, 2/)    ! undistr. seq indices into dstArray
     
-    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+    call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, factorList=factorList, &
       factorIndexList=factorIndexList, rc=rc)
       
@@ -527,18 +527,18 @@ program ESMF_ArraySparseMatMulEx
   else
     ! PETs 2 and 3 do not provide factors
     
-    call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+    call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, rc=rc)  
   endif
 !EOC
 
 !BOE
-! The call into the {\tt ESMF\_ArraySparseMatMul()} operation remains
+! The call into the {\tt ESMF\_ArraySMM()} operation remains
 ! unchanged.
 !EOE
 
 !BOC
-  call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
+  call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
     routehandle=sparseMatMulHandle, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -566,7 +566,7 @@ program ESMF_ArraySparseMatMulEx
 !call ESMF_ArrayPrint(srcArray, rc=rc)
 !call ESMF_ArrayPrint(dstArray, rc=rc)
 
-  call ESMF_ArraySparseMatMulRelease(routehandle=sparseMatMulHandle, rc=rc)
+  call ESMF_ArraySMMRelease(routehandle=sparseMatMulHandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
   call ESMF_ArrayDestroy(srcArray, rc=rc) ! destroy the Array object

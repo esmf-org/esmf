@@ -1,0 +1,13 @@
+% $Id: ArrayBundle_desc.tex,v 1.2 2008/05/08 02:27:11 theurich Exp $
+
+The {\tt ESMF\_ArrayBundle} class allows a set of Arrays to be bundled into a
+single object. The Arrays in an ArrayBundle may be of different type, kind,
+rank and distribution. Besides ease of use resulting from bundeling the
+ArrayBundle class offers the opportunity for performance optimization when
+operating on a bundle of Arrays as a single entity. Especially communication
+methods are good candidates for performance optimization. Best optimization
+results are expected for ArrayBundles that contain Arrays that share a common
+distribution, i.e. DistGrid, and are of same type, kind and rank.
+
+ArrayBundles are one of the data objects that can be added to States,
+which are used for providing to or consuming data from other components.

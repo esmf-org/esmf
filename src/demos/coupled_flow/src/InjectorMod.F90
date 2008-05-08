@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.6 2008/04/02 20:43:01 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.7 2008/05/08 02:27:27 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -257,27 +257,27 @@
       !  needed will be copied over to the export state for coupling.
       !  These are empty and will be filled in by the first run of the 
       !  Coupler.
-      call ESMF_StateAddField(importState, field_sie, rc)
-      call ESMF_StateAddField(importState, field_u, rc)
-      call ESMF_StateAddField(importState, field_v, rc)
-      call ESMF_StateAddField(importState, field_rho, rc)
-      call ESMF_StateAddField(importState, field_p, rc)
-      call ESMF_StateAddField(importState, field_q, rc)
-      call ESMF_StateAddField(importState, field_flag, rc)
+      call ESMF_StateAdd(importState, field_sie, rc)
+      call ESMF_StateAdd(importState, field_u, rc)
+      call ESMF_StateAdd(importState, field_v, rc)
+      call ESMF_StateAdd(importState, field_rho, rc)
+      call ESMF_StateAdd(importState, field_p, rc)
+      call ESMF_StateAdd(importState, field_q, rc)
+      call ESMF_StateAdd(importState, field_flag, rc)
 
       ! This is adding names only to the export list, marked by default
       !  as "not needed". The coupler will mark the ones needed based
       !  on the requirements of the component(s) this is coupled to.
-      call ESMF_StateAddNameOnly(exportState, "SIE", rc)
-      call ESMF_StateAddNameOnly(exportState, "U", rc)
-      call ESMF_StateAddNameOnly(exportState, "V", rc)
-      call ESMF_StateAddNameOnly(exportState, "RHO", rc)
-      call ESMF_StateAddNameOnly(exportState, "P", rc)
-      call ESMF_StateAddNameOnly(exportState, "Q", rc)
-      call ESMF_StateAddNameOnly(exportState, "FLAG", rc)
+      call ESMF_StateAdd(exportState, "SIE", rc)
+      call ESMF_StateAdd(exportState, "U", rc)
+      call ESMF_StateAdd(exportState, "V", rc)
+      call ESMF_StateAdd(exportState, "RHO", rc)
+      call ESMF_StateAdd(exportState, "P", rc)
+      call ESMF_StateAdd(exportState, "Q", rc)
+      call ESMF_StateAdd(exportState, "FLAG", rc)
 
 ! Give the export state an initial set of values for the SIE Field.
-      call ESMF_StateAddField(exportState, field_sie, rc)
+      call ESMF_StateAdd(exportState, field_sie, rc)
 
       rc = ESMF_SUCCESS
 
@@ -344,8 +344,8 @@
              cycle
          endif
 
-         call ESMF_StateGetField(importState, datanames(i), thisfield, rc=rc)
-         call ESMF_StateAddField(exportState, thisfield, rc=rc)
+         call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
+         call ESMF_StateAdd(exportState, thisfield, rc=rc)
 
       enddo
 
@@ -415,10 +415,10 @@
 
 
         ! Get the Field and FieldBundle data from the State that we might update
-        call ESMF_StateGetField(importState, "SIE", local_sie, rc=rc)
-        call ESMF_StateGetField(importState, "V", local_v, rc=rc)
-        call ESMF_StateGetField(importState, "RHO", local_rho, rc=rc)
-        call ESMF_StateGetField(importState, "FLAG", local_flag, rc=rc)
+        call ESMF_StateGet(importState, "SIE", local_sie, rc=rc)
+        call ESMF_StateGet(importState, "V", local_v, rc=rc)
+        call ESMF_StateGet(importState, "RHO", local_rho, rc=rc)
+        call ESMF_StateGet(importState, "FLAG", local_flag, rc=rc)
       
         ! Get the Field and FieldBundle data from the State, and a pointer to
         !  the existing data (not a copy).
@@ -471,8 +471,8 @@
                cycle
            endif
 
-           call ESMF_StateGetField(importState, datanames(i), thisfield, rc=rc)
-           call ESMF_StateAddField(exportState, thisfield, rc=rc)
+           call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
+           call ESMF_StateAdd(exportState, thisfield, rc=rc)
 
         enddo
 

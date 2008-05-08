@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.5 2008/04/02 19:44:24 theurich Exp $
+! $Id: modelComp.F90,v 1.6 2008/05/08 02:27:34 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -29,6 +29,10 @@ module modelCompMod
   subroutine modelCompReg(comp, rc)
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    type(ESMF_Logical) :: supportPthreads
+#endif
 
     ! Initialize
     rc = ESMF_SUCCESS
@@ -46,12 +50,17 @@ module modelCompMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads == ESMF_True) then
+      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+    endif
 #endif
 
   end subroutine
@@ -123,9 +132,9 @@ module modelCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get access to src and dst Arrays in States
-    call ESMF_StateGetArray(modelAExp, "modelA.array", arraySrc, rc=rc)
+    call ESMF_StateGet(modelAExp, "modelA.array", arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGetArray(modelBImp, "modelB.array", arrayDst, rc=rc)
+    call ESMF_StateGet(modelBImp, "modelB.array", arrayDst, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Precompute and store ArrayRedist: arraySrc -> arrayDst
@@ -138,9 +147,9 @@ module modelCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Add RouteHandle to import and export State for direct coupling
-    call ESMF_StateAddRouteHandle(modelAExp, routehandle, rc=rc)
+    call ESMF_StateAdd(modelAExp, routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddRouteHandle(modelBImp, routehandle, rc=rc)
+    call ESMF_StateAdd(modelBImp, routehandle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine
@@ -191,7 +200,7 @@ module modelCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get access to the RouteHandle and release
-    call ESMF_StateGetRouteHandle(modelAExp, "modelA2BRedist", routehandle, &
+    call ESMF_StateGet(modelAExp, "modelA2BRedist", routehandle, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=rc)

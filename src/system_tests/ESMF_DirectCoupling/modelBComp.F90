@@ -1,4 +1,4 @@
-! $Id: modelBComp.F90,v 1.3 2008/04/02 19:44:23 theurich Exp $
+! $Id: modelBComp.F90,v 1.4 2008/05/08 02:27:34 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -21,6 +21,10 @@ module modelBCompMod
   subroutine modelBCompReg(comp, rc)
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    type(ESMF_Logical) :: supportPthreads
+#endif
 
     ! Initialize
     rc = ESMF_SUCCESS
@@ -38,12 +42,17 @@ module modelBCompMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads == ESMF_True) then
+      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+    endif
 #endif
 
   end subroutine
@@ -81,9 +90,9 @@ module modelBCompMod
     array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="modelB.array", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(importState, array, rc=rc)
+    call ESMF_StateAdd(importState, array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(exportState, array, rc=rc)
+    call ESMF_StateAdd(exportState, array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
       
   end subroutine
@@ -105,14 +114,14 @@ module modelBCompMod
     rc = ESMF_SUCCESS
 
     ! Get the Array from the import State
-    call ESMF_StateGetArray(importState, "modelB.array", array, rc=rc)
+    call ESMF_StateGet(importState, "modelB.array", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to RouteHandles for direct coupling to modelAComp and ioComp
-    call ESMF_StateGetRouteHandle(importState, "modelA2BRedist", &
+    call ESMF_StateGet(importState, "modelA2BRedist", &
       routehandle=modelA2BRedist, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGetRouteHandle(exportState, "model2ioRedist", &
+    call ESMF_StateGet(exportState, "model2ioRedist", &
       routehandle=model2ioRedist, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
@@ -149,7 +158,7 @@ module modelBCompMod
     rc = ESMF_SUCCESS
     
     ! Garbage collection of objects explicitly created in this component
-    call ESMF_StateGetArray(importState, "modelB.array", array, rc=rc)
+    call ESMF_StateGet(importState, "modelB.array", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.126 2008/04/17 18:58:35 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.127 2008/05/08 02:27:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.126 2008/04/17 18:58:35 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.127 2008/05/08 02:27:20 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -373,7 +373,7 @@
       ! the argument list. The data array is referenced and not copied.
       ! Verifying that a Field can be created with a Grid
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-      f3 = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
+      f3 = ESMF_FieldCreate(grid, arrayspec, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
                         name="Field 0", iospec=ios, rc=rc)
 
@@ -403,7 +403,7 @@
       ! and Array.  f6 is *not* created here and should be invalid.
       grid2 = ESMF_GridCreateEmpty(rc=rc)
       call ESMF_GridDestroy(grid2, rc=rc)
-      f6 = ESMF_FieldCreate(grid2, arrayspec, allocflag=ESMF_ALLOC, &
+      f6 = ESMF_FieldCreate(grid2, arrayspec, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
                         name="Field 0", iospec=ios, rc=rc)
 
@@ -428,7 +428,7 @@
       ! f3 gets created here and used thru the rest of the tests.
       gname="oceangrid"
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-      f3 = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
+      f3 = ESMF_FieldCreate(grid, arrayspec, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
                         name="Field 0", iospec=ios, rc=rc)
       call ESMF_FieldGet(f3, grid=grid3, rc=rc)

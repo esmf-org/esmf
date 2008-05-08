@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.95 2008/04/29 00:37:48 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.96 2008/05/08 02:27:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -83,9 +83,9 @@ module ESMF_ArrayMod
   public ESMF_ArrayRedist
   public ESMF_ArrayRedistRelease
   public ESMF_ArrayRedistStore
-  public ESMF_ArraySparseMatMul
-  public ESMF_ArraySparseMatMulRelease
-  public ESMF_ArraySparseMatMulStore
+  public ESMF_ArraySMM
+  public ESMF_ArraySMMRelease
+  public ESMF_ArraySMMStore
 #ifdef FIRSTNEWARRAYPROTOTYPE
   public ESMF_ArrayWait
 #endif
@@ -107,7 +107,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.95 2008/04/29 00:37:48 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.96 2008/05/08 02:27:09 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -170,18 +170,18 @@ module ESMF_ArrayMod
       
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore -- Generic interface
+! !IROUTINE: ESMF_ArraySMMStore -- Generic interface
 
 ! !INTERFACE:
-  interface ESMF_ArraySparseMatMulStore
+  interface ESMF_ArraySMMStore
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_ArraySparseMatMulStoreI4
-    module procedure ESMF_ArraySparseMatMulStoreI8
-    module procedure ESMF_ArraySparseMatMulStoreR4
-    module procedure ESMF_ArraySparseMatMulStoreR8
-    module procedure ESMF_ArraySparseMatMulStoreNF
+    module procedure ESMF_ArraySMMStoreI4
+    module procedure ESMF_ArraySMMStoreI8
+    module procedure ESMF_ArraySMMStoreR4
+    module procedure ESMF_ArraySMMStoreR8
+    module procedure ESMF_ArraySMMStoreNF
 !EOPI
 
   end interface
@@ -629,7 +629,7 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution
+! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution with local factor argument
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayRedistStore()
@@ -716,7 +716,7 @@ contains
     integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                    intent(out),  optional  :: rc
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
@@ -777,7 +777,7 @@ contains
     integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                    intent(out),  optional  :: rc
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
@@ -838,7 +838,7 @@ contains
     integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                    intent(out),  optional  :: rc
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
@@ -899,7 +899,7 @@ contains
     integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                    intent(out),  optional  :: rc
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
@@ -945,7 +945,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayRedistStore()"
 !BOP
-! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution
+! !IROUTINE: ESMF_ArrayRedistStore - Precompute Array redistribution without local factor argument
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
@@ -1355,13 +1355,13 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySparseMatMul()"
+#define ESMF_METHOD "ESMF_ArraySMM()"
 !BOP
-! !IROUTINE: ESMF_ArraySparseMatMul - Execute an Array sparse matrix multiplication
+! !IROUTINE: ESMF_ArraySMM - Execute an Array sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_ArraySparseMatMul(srcArray, dstArray, routehandle, &
-    zeroflag, checkflag, rc)
+  subroutine ESMF_ArraySMM(srcArray, dstArray, routehandle, zeroflag, &
+    checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in),   optional  :: srcArray
@@ -1375,16 +1375,16 @@ contains
 !   Execute a precomputed Array sparse matrix multiplication from {\tt srcArray}
 !   to {\tt dstArray}. Both {\tt srcArray} and {\tt dstArray} must be
 !   congruent and typekind conform with the respective Arrays used during 
-!   {\tt ESMF\_ArraySparseMatMulStore()}. Congruent Arrays possess
+!   {\tt ESMF\_ArraySMMStore()}. Congruent Arrays possess
 !   matching DistGrids and the shape of the local array tiles matches between
 !   the Arrays for every DE.
 !
 !   It is erroneous to specify the identical Array object for {\tt srcArray} and
 !   {\tt dstArray} arguments.
 !
-!   See {\tt ESMF\_ArraySparseMatMulStore()} on how to precompute 
+!   See {\tt ESMF\_ArraySMMStore()} on how to precompute 
 !   {\tt routehandle}. See section \ref{Array:SparseMatMul} for details on the
-!   operation {\tt ESMF\_ArraySparseMatMul()} performs.
+!   operation {\tt ESMF\_ArraySMM()} performs.
 !
 !   This call is {\em collective} across the current VM.
 !
@@ -1450,7 +1450,7 @@ contains
     if (present(checkflag)) opt_checkflag = checkflag
         
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMul(opt_srcArray, opt_dstArray, routehandle, &
+    call c_ESMC_ArraySMM(opt_srcArray, opt_dstArray, routehandle, &
       opt_zeroflag, opt_checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1458,18 +1458,18 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArraySparseMatMul
+  end subroutine ESMF_ArraySMM
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySparseMatMulRelease()"
+#define ESMF_METHOD "ESMF_ArraySMMRelease()"
 !BOP
-! !IROUTINE: ESMF_ArraySparseMatMulRelease - Release resources associated with Array sparse matrix multiplication
+! !IROUTINE: ESMF_ArraySMMRelease - Release resources associated with Array sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_ArraySparseMatMulRelease(routehandle, rc)
+  subroutine ESMF_ArraySMMRelease(routehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
@@ -1505,17 +1505,17 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArraySparseMatMulRelease
+  end subroutine ESMF_ArraySMMRelease
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute Array sparse matrix multiplication with local factors
+! !IROUTINE: ESMF_ArraySMMStore - Precompute Array sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
-! ! Private name; call using ESMF_ArraySparseMatMulStore()
-! subroutine ESMF_ArraySparseMatMulStore<type><kind>(srcArray, dstArray, &
+! ! Private name; call using ESMF_ArraySMMStore()
+! subroutine ESMF_ArraySMMStore<type><kind>(srcArray, dstArray, &
 !   routehandle, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
@@ -1551,7 +1551,7 @@ contains
 !   {\tt dstArray} arguments.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are congruent
+!   {\tt ESMF\_ArraySMM()} on any pair of Arrays that are congruent
 !   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
 !   Congruent Arrays possess matching DistGrids and the shape of the local
 !   array tiles matches between the Arrays for every DE.
@@ -1608,14 +1608,14 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySparseMatMulStoreI4()"
+#define ESMF_METHOD "ESMF_ArraySMMStoreI4()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
+! !IROUTINE: ESMF_ArraySMMStore - Precompute and store an Array sparse matrix multiplication 
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArraySparseMatMulStore()
-  subroutine ESMF_ArraySparseMatMulStoreI4(srcArray, dstArray, routehandle, &
-    factorList, factorIndexList, rc)
+  ! Private name; call using ESMF_ArraySMMStore()
+  subroutine ESMF_ArraySMMStoreI4(srcArray, dstArray, routehandle, factorList, &
+    factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -1649,7 +1649,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, routehandle, &
+    call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_I4, opt_factorList, len_factorList, factorIndexListArg, &
       localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1668,20 +1668,20 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArraySparseMatMulStoreI4
+  end subroutine ESMF_ArraySMMStoreI4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySparseMatMulStoreI8()"
+#define ESMF_METHOD "ESMF_ArraySMMStoreI8()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication
+! !IROUTINE: ESMF_ArraySMMStore - Precompute and store an Array sparse matrix multiplication
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArraySparseMatMulStore()
-  subroutine ESMF_ArraySparseMatMulStoreI8(srcArray, dstArray, routehandle, &
-    factorList, factorIndexList, rc)
+  ! Private name; call using ESMF_ArraySMMStore()
+  subroutine ESMF_ArraySMMStoreI8(srcArray, dstArray, routehandle, factorList, &
+    factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -1715,7 +1715,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, routehandle, &
+    call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_I8, opt_factorList, len_factorList, factorIndexListArg, &
       localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1734,20 +1734,20 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArraySparseMatMulStoreI8
+  end subroutine ESMF_ArraySMMStoreI8
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySparseMatMulStoreR4()"
+#define ESMF_METHOD "ESMF_ArraySMMStoreR4()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication
+! !IROUTINE: ESMF_ArraySMMStore - Precompute and store an Array sparse matrix multiplication
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArraySparseMatMulStore()
-  subroutine ESMF_ArraySparseMatMulStoreR4(srcArray, dstArray, routehandle, &
-    factorList, factorIndexList, rc)
+  ! Private name; call using ESMF_ArraySMMStore()
+  subroutine ESMF_ArraySMMStoreR4(srcArray, dstArray, routehandle, factorList, &
+    factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -1781,7 +1781,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, routehandle, &
+    call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_R4, opt_factorList, len_factorList, factorIndexListArg, &
       localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1800,20 +1800,20 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArraySparseMatMulStoreR4
+  end subroutine ESMF_ArraySMMStoreR4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySparseMatMulStoreR8()"
+#define ESMF_METHOD "ESMF_ArraySMMStoreR8()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication
+! !IROUTINE: ESMF_ArraySMMStore - Precompute and store an Array sparse matrix multiplication
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArraySparseMatMulStore()
-  subroutine ESMF_ArraySparseMatMulStoreR8(srcArray, dstArray, routehandle, &
-    factorList, factorIndexList, rc)
+  ! Private name; call using ESMF_ArraySMMStore()
+  subroutine ESMF_ArraySMMStoreR8(srcArray, dstArray, routehandle, factorList, &
+    factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -1847,7 +1847,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMulStore(srcArray, dstArray, routehandle, &
+    call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_R8, opt_factorList, len_factorList, factorIndexListArg, &
       localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1866,20 +1866,19 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArraySparseMatMulStoreR8
+  end subroutine ESMF_ArraySMMStoreR8
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySparseMatMulStoreNF()"
+#define ESMF_METHOD "ESMF_ArraySMMStoreNF()"
 !BOP
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute Array sparse matrix multiplication without local factors
+! !IROUTINE: ESMF_ArraySMMStore - Precompute Array sparse matrix multiplication without local factors
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArraySparseMatMulStore()
-  subroutine ESMF_ArraySparseMatMulStoreNF(srcArray, dstArray, routehandle, &
-    rc)
+  ! Private name; call using ESMF_ArraySMMStore()
+  subroutine ESMF_ArraySMMStoreNF(srcArray, dstArray, routehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -1912,7 +1911,7 @@ contains
 !   {\tt dstArray} arguments.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArraySparseMatMul()} on any pair of Arrays that are congruent
+!   {\tt ESMF\_ArraySMM()} on any pair of Arrays that are congruent
 !   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
 !   Congruent Arrays possess matching DistGrids and the shape of the local
 !   array tiles matches between the Arrays for every DE.
@@ -1948,7 +1947,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArraySparseMatMulStoreNF(srcArray, dstArray, routehandle, &
+    call c_ESMC_ArraySMMStoreNF(srcArray, dstArray, routehandle, &
       localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1961,7 +1960,7 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArraySparseMatMulStoreNF
+  end subroutine ESMF_ArraySMMStoreNF
 !------------------------------------------------------------------------------
 
 

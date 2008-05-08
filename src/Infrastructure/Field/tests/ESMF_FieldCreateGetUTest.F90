@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.13 2008/05/01 19:19:54 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.14 2008/05/08 02:27:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1352,7 +1352,6 @@
             ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,5,3/), &
             maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
-            allocflag=ESMF_NO_ALLOC, &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
             gridToFieldMap=(/1,2,4,7/) &
@@ -2493,7 +2492,7 @@ contains
         call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
-            allocCount=fsize, rc=localrc)
+            totalCount=fsize, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -3206,12 +3205,12 @@ contains
 ! Cannot use the following numbers, cause overflow on most systems due to memory requirement
 !        call ESMF_FieldGet(grid, ungriddedLBound=(/1,2/), ungriddedUBound=(/10,23/), &
 !            maxHaloLWidth=(/2,3,4,5,6/), maxHaloUWidth=(/10,11,12,13,14/), &
-!            allocCount=fsize, &
+!            totalCount=fsize, &
 !            rc=localrc)
         call ESMF_FieldGet(grid, localDe=0, ungriddedLBound=(/1,2/), &
             ungriddedUBound=(/2,3/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
-            allocCount=fsize, &
+            totalCount=fsize, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3261,7 +3260,7 @@ contains
         call ESMF_FieldGet(grid, localDe=0, ungriddedLBound=(/1,2/), &
             ungriddedUBound=(/2,3/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
-            allocLBound=flb, allocUBound=fub, &
+            totalLBound=flb, totalUBound=fub, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3353,7 +3352,7 @@ contains
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
-            allocCount=fsize, &
+            totalCount=fsize, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3515,7 +3514,7 @@ contains
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
-            allocLBound=flb, allocUBound=fub, &
+            totalLBound=flb, totalUBound=fub, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3609,7 +3608,6 @@ contains
         gridEdgeLWidth, gridEdgeUWidth, &
         regDecomp, &
         distgridToGridMap, &
-        allocflag, &
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
@@ -3623,7 +3621,6 @@ contains
         integer, dimension(:), optional   :: gridEdgeLWidth, gridEdgeUWidth
         integer, dimension(:), optional   :: regDecomp
         integer, dimension(:), optional   :: distgridToGridMap
-        type(ESMF_AllocFlag), optional    :: allocflag
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
@@ -3686,7 +3683,7 @@ contains
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
-            allocLBound=flb, allocUBound=fub, &
+            totalLBound=flb, totalUBound=fub, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3702,7 +3699,7 @@ contains
         field = ESMF_FieldCreate(grid, arrayspec, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
-            staggerloc=staggerloc, allocflag=allocflag, &
+            staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3911,7 +3908,7 @@ contains
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
-            allocLBound=flb, allocUBound=fub, &
+            totalLBound=flb, totalUBound=fub, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &

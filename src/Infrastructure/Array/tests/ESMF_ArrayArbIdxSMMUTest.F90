@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.11 2008/04/07 06:45:50 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.12 2008/05/08 02:27:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.11 2008/04/07 06:45:50 theurich Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.12 2008/05/08 02:27:11 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -387,23 +387,23 @@ program ESMF_ArrayArbIdxSMMUTest
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySparseMatMulStore Test"
+  write(name, *) "ArraySMMStore Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMulStore(srcArray=srcArray, dstArray=dstArray, &
+  call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
     routehandle=routehandle, factorList=factorList, &
     factorIndexList=factorIndexList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySparseMatMulMul: srcArray -> dstArray Test"
+  write(name, *) "ArraySMM: srcArray -> dstArray Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMul(srcArray=srcArray, dstArray=dstArray, &
+  call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
     routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   ! The expected result of the sparse matrix multiplication in dstArray is:
-  ! (note: by default ArraySparseMatMul() initializes _all_ destination elements
+  ! (note: by default ArraySMM() initializes _all_ destination elements
   ! to zero before adding in sparse matrix terms.)
   !
   ! PET   localDE   DE    dstArray contents
@@ -450,14 +450,14 @@ program ESMF_ArrayArbIdxSMMUTest
 #ifdef ESMF_TESTEXHAUSTIVE
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySparseMatMulMul: srcArray2 -> dstArray2 (RRA) Test"
+  write(name, *) "ArraySMM: srcArray2 -> dstArray2 (RRA) Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMul(srcArray=srcArray2, dstArray=dstArray2, &
+  call ESMF_ArraySMM(srcArray=srcArray2, dstArray=dstArray2, &
     routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   ! The expected result of the sparse matrix multiplication in dstArray2 is:
-  ! (note: by default ArraySparseMatMul() initializes _all_ destination elements
+  ! (note: by default ArraySMM() initializes _all_ destination elements
   ! to zero before adding in sparse matrix terms.)
   !
   ! PET   localDE   DE    dstArray2 contents
@@ -503,23 +503,23 @@ program ESMF_ArrayArbIdxSMMUTest
 
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySparseMatMulStore with tensor dims Test"
+  write(name, *) "ArraySMMStore with tensor dims Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMulStore(srcArray=srcArray3, dstArray=dstArray3, &
+  call ESMF_ArraySMMStore(srcArray=srcArray3, dstArray=dstArray3, &
     routehandle=routehandle3, factorList=factorList, &
     factorIndexList=factorIndexList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySparseMatMulMul: srcArray3 -> dstArray3 Test"
+  write(name, *) "ArraySMM: srcArray3 -> dstArray3 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMul(srcArray=srcArray3, dstArray=dstArray3, &
+  call ESMF_ArraySMM(srcArray=srcArray3, dstArray=dstArray3, &
     routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   ! The expected result of the sparse matrix multiplication in dstArray3 is:
-  ! (note: by default ArraySparseMatMul() initializes _all_ destination elements
+  ! (note: by default ArraySMM() initializes _all_ destination elements
   ! to zero before adding in sparse matrix terms.)
   !
   ! PET   localDE   DE    dstArray3 contents, tensor dimension j=1
@@ -599,14 +599,14 @@ program ESMF_ArrayArbIdxSMMUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "routehandle3 Release Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMulRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_ArraySMMRelease(routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySparseMatMulStore with mismatching input Test"
+  write(name, *) "ArraySMMStore with mismatching input Test"
   write(failMsg, *) "Did return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMulStore(srcArray=srcArray3, dstArray=dstArray2, &
+  call ESMF_ArraySMMStore(srcArray=srcArray3, dstArray=dstArray2, &
     routehandle=routehandle3, factorList=factorList, &
     factorIndexList=factorIndexList, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -615,7 +615,7 @@ program ESMF_ArrayArbIdxSMMUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "routehandle3 Release (delete routehandle) Test"
   write(failMsg, *) "Did return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMulRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_ArraySMMRelease(routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
@@ -645,23 +645,23 @@ program ESMF_ArrayArbIdxSMMUTest
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySparseMatMulStore with tensor mixing factorIndexList Test"
+  write(name, *) "ArraySMMStore with tensor mixing factorIndexList Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMulStore(srcArray=srcArray3, dstArray=dstArray2, &
+  call ESMF_ArraySMMStore(srcArray=srcArray3, dstArray=dstArray2, &
     routehandle=routehandle3, factorList=factorList2, &
     factorIndexList=factorIndexList2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySparseMatMulMul: srcArray3 -> dstArray2 Test"
+  write(name, *) "ArraySMM: srcArray3 -> dstArray2 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMul(srcArray=srcArray3, dstArray=dstArray2, &
+  call ESMF_ArraySMM(srcArray=srcArray3, dstArray=dstArray2, &
     routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   ! The expected result of the sparse matrix multiplication in dstArray2 is:
-  ! (note: by default ArraySparseMatMul() initializes _all_ destination elements
+  ! (note: by default ArraySMM() initializes _all_ destination elements
   ! to zero before adding in sparse matrix terms.)
   !
   ! PET   localDE   DE    dstArray2 contents
@@ -709,7 +709,7 @@ program ESMF_ArrayArbIdxSMMUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "routehandle3 Release Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMulRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_ArraySMMRelease(routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
@@ -739,25 +739,25 @@ program ESMF_ArrayArbIdxSMMUTest
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySparseMatMulStore with tensor mixing factorIndexList Test"
+  write(name, *) "ArraySMMStore with tensor mixing factorIndexList Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMulStore(srcArray=srcArray3, dstArray=dstArray3, &
+  call ESMF_ArraySMMStore(srcArray=srcArray3, dstArray=dstArray3, &
     routehandle=routehandle3, factorList=factorList2, &
     factorIndexList=factorIndexList2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
-  write(name, *) "ArraySparseMatMulMul: srcArray3 -> dstArray3 Test"
+  write(name, *) "ArraySMM: srcArray3 -> dstArray3 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMul(srcArray=srcArray3, dstArray=dstArray3, &
+  call ESMF_ArraySMM(srcArray=srcArray3, dstArray=dstArray3, &
     routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 call ESMF_ArrayPrint(dstArray3)
 
   ! The expected result of the sparse matrix multiplication in dstArray3 is:
-  ! (note: by default ArraySparseMatMul() initializes _all_ destination elements
+  ! (note: by default ArraySMM() initializes _all_ destination elements
   ! to zero before adding in sparse matrix terms.)
   !
   ! PET   localDE   DE    dstArray3 contents, tensor dimension j=1
@@ -837,7 +837,7 @@ call ESMF_ArrayPrint(dstArray3)
   !EX_UTest_Multi_Proc_Only
   write(name, *) "routehandle3 Release Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMulRelease(routehandle=routehandle3, rc=rc)
+  call ESMF_ArraySMMRelease(routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
@@ -913,7 +913,7 @@ call ESMF_ArrayPrint(dstArray3)
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "routehandle Release Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_ArraySparseMatMulRelease(routehandle=routehandle, rc=rc)
+  call ESMF_ArraySMMRelease(routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------

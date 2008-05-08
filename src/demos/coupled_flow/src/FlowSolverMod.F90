@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.5 2007/07/19 22:15:33 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.6 2008/05/08 02:27:27 theurich Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -289,28 +289,28 @@
 ! For initialization, add all fields to the import state.  Only the ones
 ! needed will be copied over to the export state for coupling.
 !
-      call ESMF_StateAddField(import_state, field_sie, rc)
-      call ESMF_StateAddField(import_state, field_u, rc)
-      call ESMF_StateAddField(import_state, field_v, rc)
-      call ESMF_StateAddField(import_state, field_rho, rc)
-      call ESMF_StateAddField(import_state, field_p, rc)
-      call ESMF_StateAddField(import_state, field_q, rc)
-      call ESMF_StateAddField(import_state, field_flag, rc)
+      call ESMF_StateAdd(import_state, field_sie, rc)
+      call ESMF_StateAdd(import_state, field_u, rc)
+      call ESMF_StateAdd(import_state, field_v, rc)
+      call ESMF_StateAdd(import_state, field_rho, rc)
+      call ESMF_StateAdd(import_state, field_p, rc)
+      call ESMF_StateAdd(import_state, field_q, rc)
+      call ESMF_StateAdd(import_state, field_flag, rc)
 !
 ! This is adding names only to the export list, marked by default
 ! as "not needed".  The coupler will mark the ones needed based
 ! on the requirements of the component(s) this is coupled to.
 !
-      call ESMF_StateAddNameOnly(export_state, "SIE", rc)
-      call ESMF_StateAddNameOnly(export_state, "U", rc)
-      call ESMF_StateAddNameOnly(export_state, "V", rc)
-      call ESMF_StateAddNameOnly(export_state, "RHO", rc)
-      call ESMF_StateAddNameOnly(export_state, "P", rc)
-      call ESMF_StateAddNameOnly(export_state, "Q", rc)
-      call ESMF_StateAddNameOnly(export_state, "FLAG", rc)
+      call ESMF_StateAdd(export_state, "SIE", rc)
+      call ESMF_StateAdd(export_state, "U", rc)
+      call ESMF_StateAdd(export_state, "V", rc)
+      call ESMF_StateAdd(export_state, "RHO", rc)
+      call ESMF_StateAdd(export_state, "P", rc)
+      call ESMF_StateAdd(export_state, "Q", rc)
+      call ESMF_StateAdd(export_state, "FLAG", rc)
 
 ! Give the export state an initial set of values for the SIE Field.
-      call ESMF_StateAddField(export_state, field_sie, rc)
+      call ESMF_StateAdd(export_state, field_sie, rc)
 
       rc = ESMF_SUCCESS
 
@@ -378,8 +378,8 @@
         endif
 
         ! Set export data in export state
-        call ESMF_StateGetField(import_state, datanames(i), thisfield, rc=rc)
-        call ESMF_StateAddField(export_state, thisfield, rc=rc)
+        call ESMF_StateGet(import_state, datanames(i), thisfield, rc=rc)
+        call ESMF_StateAdd(export_state, thisfield, rc=rc)
 
       enddo
 
@@ -833,8 +833,8 @@
           if (.not. ESMF_StateIsNeeded(export_state, datanames(i), rc)) then 
               cycle
           endif
-          call ESMF_StateGetField(import_state, datanames(i), thisfield, rc=rc)
-          call ESMF_StateAddField(export_state, thisfield, rc=rc)
+          call ESMF_StateGet(import_state, datanames(i), thisfield, rc=rc)
+          call ESMF_StateAdd(export_state, thisfield, rc=rc)
         enddo
 !
 ! Print graphics every printout steps

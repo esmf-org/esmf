@@ -1,4 +1,4 @@
-! $Id: ESMF_F95PtrUTest.F90,v 1.2 2008/04/28 05:12:27 theurich Exp $
+! $Id: ESMF_F95PtrUTest.F90,v 1.3 2008/05/08 02:27:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_F95PTRUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_F95PtrUTest.F90,v 1.2 2008/04/28 05:12:27 theurich Exp $'
+    '$Id: ESMF_F95PtrUTest.F90,v 1.3 2008/05/08 02:27:29 theurich Exp $'
 !------------------------------------------------------------------------------
 
   integer, parameter :: int8_k = selected_int_kind (12)		! 8-byte integer
@@ -52,7 +52,11 @@ program ESMF_F95PTRUTest
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name
-  
+ 
+  ! Make sure the BLOCK DATA gets linked in
+
+  external :: ESMF_F95PtrBData
+ 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
   !-----------------------------------------------------------------------------
@@ -70,23 +74,19 @@ contains
 ! Compare F90 pointer sizes for simple base variables vs simple UDTs (those
 ! which only have base variable types) vs UDTs with pointers in them.
 
-! Note that technically, a pointer to a simple scalar variable is a
-! F2003 feature.
+! The COMMON blocks have been initialized in BLOCK DATA with CHARACTER
+! arrays initialized to contain byte offsets.  To measure the size of
+! a pointer, place it in the common block.  Then follow the pointer with
+! a single character.  Thanks to storage association, the trailing
+! character will contain the length of the preceding object.
 
-    integer, parameter :: chars_l = 256
-    integer, parameter :: pad_k = int8_k	! 8-byte integer
-
-    integer(pad_k) :: real_begin
     real, pointer :: real_ptr
-    character :: real_chars(chars_l), real_endchar
-    equivalence (real_begin, real_chars)
-    common /realcom/ real_begin, real_ptr, real_endchar
+    character :: real_endchar
+    common /realcom/ real_ptr, real_endchar
 
-    integer(pad_k) :: char_begin
     character(32), pointer :: char_ptr
-    character :: char_chars(chars_l), char_endchar
-    equivalence (char_begin, char_chars)
-    common /charcom/ char_begin, char_ptr, char_endchar
+    character :: char_endchar
+    common /charcom/ char_ptr, char_endchar
 
     type simple_udt
       sequence
@@ -94,11 +94,9 @@ contains
       integer :: i, j, k
     end type
 
-    integer(pad_k) :: udt_begin
     type(simple_udt), pointer :: udt_ptr
-    character :: udt_chars(chars_l), udt_endchar
-    equivalence (udt_begin, udt_chars)
-    common /udtcom/ udt_begin, udt_ptr, udt_endchar
+    character :: udt_endchar
+    common /udtcom/ udt_ptr, udt_endchar
 
     type bigger_udt
       sequence
@@ -109,85 +107,76 @@ contains
       character(100) :: string
     end type
 
-    integer(pad_k) :: biggerudt_begin
     type(bigger_udt), pointer :: biggerudt_ptr
-    character :: biggerudt_chars(chars_l), biggerudt_endchar
-    equivalence (biggerudt_begin, biggerudt_chars)
-    common /biggerudtcom/ biggerudt_begin, biggerudt_ptr, biggerudt_endchar
+    character :: biggerudt_endchar
+    common /biggerudtcom/ biggerudt_ptr, biggerudt_endchar
 
 #if defined (ENABLE_ESMF_UDT_TEST)
-    integer(pad_k) :: vm_begin
     type (ESMF_VM), pointer :: vm_ptr
-    character :: vm_chars(chars_l), vm_endchar
-    equivalence (vm_begin, vm_chars)
-    common /vmcom/ vm_begin, vm_ptr, vm_endchar
+    character :: vm_endchar
+    common /vmcom/ vm_ptr, vm_endchar
 
-    integer(pad_k) :: base_begin
     type (ESMF_Base), pointer :: base_ptr
-    character :: base_chars(chars_l), base_endchar
-    equivalence (base_begin, base_chars)
-    common /basecom/ base_begin, base_ptr, base_endchar
+    character :: base_endchar
+    common /basecom/ base_ptr, base_endchar
 #endif
 
     integer :: realptr_l, charptr_l, udtptr_l, biggerudtptr_l
+#if defined (ENABLE_ESMF_UDT_TEST)
     integer :: vmptr_l, baseptr_l
-
+#endif
 
   !-----------------------------------------------------------------------------
+  ! NEX_UTest
   ! First obtain a simple F95 pointer for comparison purposes
   
-    print *, 'pointer to scalar REAL:'
-    real_chars = achar (0)
-    real_endchar = achar (1)
-    realptr_l = maxloc (iachar (real_chars), dim=1) - 9
+    write (name,*) 'pointer to scalar REAL'
+    write (failMsg,*) 'Pointer length is not a positive, non-zero, integer!'
+    realptr_l = ichar (real_endchar)
     print *, '  F95 pointer-to-scalar length =', realptr_l
+    call ESMF_Test ((realptr_l > 0), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_notest_UTest
     write(name, *) "Pointer to CHARACTER string"
     write(failMsg, *) "Pointer size changed!"    
-    char_chars = achar (0)
-    char_endchar = achar (1)
-    charptr_l = maxloc (iachar (char_chars), dim=1) - 9
-    call ESMF_Test((charptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
+    charptr_l = ichar (char_endchar)
+    print *, '  F95 pointer-to-characterString length =', charptr_l
+    !call ESMF_Test((charptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_notest_UTest
     write(name, *) "Pointer to simple Plain Old Data derived type"
     write(failMsg, *) "Pointer size changed!"
-    udt_chars = achar (0)
-    udt_endchar = achar (1)
-    udtptr_l = maxloc (iachar (udt_chars), dim=1) - 9
-    call ESMF_Test((udtptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
+    udtptr_l = ichar (udt_endchar)
+    print *, '  F95 pointer-to-simpleUDT length =', udtptr_l
+    !call ESMF_Test((udtptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-    write(name, *) "Pointer to more complex derived type"
-    write(failMsg, *) "Pointer size changed!"
-    biggerudt_chars = achar (0)
-    biggerudt_endchar = achar (1)
-    biggerudtptr_l = maxloc (iachar (biggerudt_chars), dim=1) - 9
-    call ESMF_Test((biggerudtptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
+    write(name, *) "Compare pointer size between simple and bigger UDT"
+    write(failMsg, *) "Pointer size changed between UDTs!"
+    biggerudtptr_l = ichar (biggerudt_endchar)
+    print *, '  F95 pointer-to-biggerUDT length =', biggerudtptr_l
+    call ESMF_Test((biggerudtptr_l == udtptr_l), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
 #if defined (ENABLE_ESMF_UDT_TEST)
-! Note that these currently do not work on some compilers because they contain
-! F95 component initialization, so can not be placed into COMMON blocks.  What
-! is strange is that we only want to place pointers to the derived types, but
-! the compilers are rejecting them anyway.  It is still TBD whether this is a
-! constraint in the Standard, or an oversight in the compilers.
+  ! These currently do not work on some compilers because the ESMF derived
+  ! types either contain F95 component initialization, or do not have a
+  ! SEQUENCE statement.  This prevents them from being placed into
+  ! COMMON blocks.  Note that the Standard does not even allow a pointer to
+  ! such types to reside in COMMON.  (See Constraint 589 in §5.5.2 of F2003.)
 
   !-----------------------------------------------------------------------------
   !NEX_disabled_UTest
     write(name, *) "Pointer to ESMF_VM type"
     write(failMsg, *) "Pointer size changed!"
-    vm_chars = achar (0)
-    vm_endchar = achar (1)
-    vmptr_l = maxloc (iachar (vm_chars), dim=1) - 9
+    vmptr_l = ichar (vm_endchar)
     call ESMF_Test((vmptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -195,9 +184,7 @@ contains
   !NEX_disabled_UTest
     write(name, *) "Pointer to ESMF_Base type"
     write(failMsg, *) "Pointer size changed!"
-    base_chars = achar (0)
-    base_endchar = achar (1)
-    baseptr_l = maxloc (iachar (base_chars), dim=1) - 9
+    baseptr_l = ichar (base_endchar)
     call ESMF_Test((baseptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 #endif

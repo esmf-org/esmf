@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.16 2008/04/05 03:39:17 cdeluca Exp $
+! $Id: ESMF_State_C.F90,v 1.17 2008/05/08 02:27:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.16 2008/04/05 03:39:17 cdeluca Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.17 2008/05/08 02:27:26 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -85,7 +85,7 @@
        !  set the valid init code of the new object
        call ESMF_ArraySetInitCreated(farray, rc)
 
-       call ESMF_StateAddArray(state=state, array=farray, rc=rc)
+       call ESMF_StateAdd(state=state, array=farray, rc=rc)
 
 
    end subroutine f_esmf_stateaddarray
@@ -109,7 +109,7 @@
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
 
-       call ESMF_StateGetArray(state=state, arrayName=arrayName, &
+       call ESMF_StateGet(state=state, itemName=arrayName, &
                                array=farray, rc=rc)
 
        ! the array object returned to the C interface must consist only of the

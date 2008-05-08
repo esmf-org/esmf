@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.5 2008/04/22 18:01:26 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.6 2008/05/08 02:27:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -154,8 +154,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int fillIndexListPDimPDe(int *indexList, int de, int dim,
       VMK::commhandle **commh, int rootPet, VM *vm=NULL) const;
     // misc.
-    static ESMC_Logical match(DistGrid *distgrid1, DistGrid *distgrid2,
-      int *rc=NULL);
+    static bool match(DistGrid *distgrid1, DistGrid *distgrid2, int *rc=NULL);
     int print() const;
     int validate() const;
     // serialize() and deserialize()

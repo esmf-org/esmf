@@ -1,4 +1,4 @@
-! $Id: ESMF_StateLimitUTest.F90,v 1.11 2008/04/05 03:39:19 cdeluca Exp $
+! $Id: ESMF_StateLimitUTest.F90,v 1.12 2008/05/08 02:27:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateLimitUTest.F90,v 1.11 2008/04/05 03:39:19 cdeluca Exp $'
+      '$Id: ESMF_StateLimitUTest.F90,v 1.12 2008/05/08 02:27:26 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -389,7 +389,7 @@
       !NEX_removeUTest
       ! now add stuff
       
-      call ESMF_StateAddFieldBundle(state, &
+      call ESMF_StateAdd(state, &
                                   1, bundlelist=bundle(1:1), &
                                   rc=rc)
       write(name, *) "Adding FieldBundle(s) to State"
@@ -409,7 +409,7 @@
       !NEX_removeUTest
       ! and more stuff
 
-      call ESMF_StateAddField(state, &
+      call ESMF_StateAdd(state, &
                               5, fieldlist=sfield(1:5), &
                               rc=rc)
       write(name, *) "Adding Field(s) to State"
@@ -434,7 +434,7 @@
       placeholders(4) = "V Field"
       placeholders(5) = "Energy Field"
 
-      call ESMF_StateAddNameOnly(state, &
+      call ESMF_StateAdd(state, &
                                  5, namelist=placeholders(1:5), &
                                  rc=rc)
       write(name, *) "Adding Placeholder Name(s) to State"
@@ -454,7 +454,7 @@
       !NEX_removeUTest
       ! and still more stuff
 
-      call ESMF_StateAddField(state, &
+      call ESMF_StateAdd(state, &
                               15, fieldlist=sfield(1:15), &
                               rc=rc)
       write(name, *) "Adding Field(s) to State"
@@ -474,7 +474,7 @@
       ! now add too much stuff - this should provoke an error
       ! at reconcile time.
       
-      call ESMF_StateAddFieldBundle(state, &
+      call ESMF_StateAdd(state, &
                                   1, bundlelist=bundle(2:2), &
                                   rc=rc)
       write(name, *) "Adding FieldBundle(s) to State"

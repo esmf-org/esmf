@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.62 2008/04/07 06:46:10 theurich Exp $
+! $Id: ESMF_StateUTest.F90,v 1.63 2008/05/08 02:27:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.62 2008/04/07 06:46:10 theurich Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.63 2008/05/08 02:27:27 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -105,7 +105,7 @@
       ! Add  uncreated array to uncreated  State 
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Add uncreated array to uncreated State Test"
-      call ESMF_StateAddArray(state4, testarray, rc=rc)
+      call ESMF_StateAdd(state4, testarray, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -115,7 +115,7 @@
       arrayname = "Test Array"
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Get uncreated array from uncreated State Test"
-      call ESMF_StateGetArray(state4, arrayname, testarray, rc=rc)
+      call ESMF_StateGet(state4, arrayname, testarray, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -134,7 +134,7 @@
       ! Add  uncreated array to a  State 
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Add uncreated array to a State Test"
-      call ESMF_StateAddArray(state4, testarray, rc=rc)
+      call ESMF_StateAdd(state4, testarray, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -145,7 +145,7 @@
       arrayname = "Test Array"
       write(failMsg, *) "Did not return ESMF_RC_ARG_INCOMP"
       write(name, *) "Get uncreated array from a State Test"
-      call ESMF_StateGetArray(state4, arrayname, testarray, rc=rc)
+      call ESMF_StateGet(state4, arrayname, testarray, rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_ARG_INCOMP), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -163,7 +163,7 @@
       !arrayname = "Test Array"
       !write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       !write(name, *) "Get a destroyed array from a State Test"
-      !call ESMF_StateGetArray(state4, arrayname, testarray, rc=rc)
+      !call ESMF_StateGet(state4, arrayname, testarray, rc=rc)
       !call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), &
       !                name, failMsg, result, ESMF_SRCLINE)
 
@@ -187,7 +187,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest 
       ! Test Get Item Info from an empty import State 
-      call ESMF_StateGetItemInfo(state1, name="FieldBundle1", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, name="FieldBundle1", stateitemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting item info from an empty import State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -210,7 +210,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest 
       ! Test Get Item Info from destroyed import State 
-      call ESMF_StateGetItemInfo(state1, name="FieldBundle1", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, name="FieldBundle1", stateitemtype=stateItemType, rc=rc)
       write(failMsg, *) "Returned ESMF_SUCCESS"
       write(name, *) "Getting item info from destroyed State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
@@ -237,7 +237,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_removeUTest
-      call ESMF_StateAddFieldBundle(state1, bundle1, rc)
+      call ESMF_StateAdd(state1, bundle1, rc)
       write(name, *) "Adding a FieldBundle to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -245,7 +245,7 @@
 
       !EX_removeUTest 
       ! Test Get Item Info from State 
-      call ESMF_StateGetItemInfo(state1, name="Temperature", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, name="Temperature", stateitemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting FieldBundle item info from State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -269,7 +269,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !EX_removeUTest
-      call ESMF_StateAddFieldBundle(state1, bundle1, rc)
+      call ESMF_StateAdd(state1, bundle1, rc)
       write(name, *) "Adding a second FieldBundle to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -314,7 +314,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !EX_removeUTest
-      call ESMF_StateAddFieldBundle(state1, bundle3, rc)
+      call ESMF_StateAdd(state1, bundle3, rc)
       write(name, *) "Adding a FieldBundle with Fields to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -330,7 +330,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !EX_removeUTest
-      call ESMF_StateAddField(state1, field1, rc)
+      call ESMF_StateAdd(state1, field1, rc)
       write(name, *) "Adding a Field to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -338,7 +338,7 @@
 
       !EX_removeUTest 
       ! Test Get Item Info from State 
-      call ESMF_StateGetItemInfo(state1, name="Humidity", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, name="Humidity", stateitemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Field item info from State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -354,7 +354,7 @@
 
       !EX_removeUTest 
       ! Test Get Unknown Item Info from State 
-      call ESMF_StateGetItemInfo(state1, name="Humanity", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, name="Humanity", stateitemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting unknown item info from State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -392,7 +392,7 @@
 
   !------------------------------------------------------------------------
   !EX_removeUTest
-  call ESMF_StateAddArray(state1, array, rc)
+  call ESMF_StateAdd(state1, array, rc)
   write(name, *) "Adding an Array to a State Test"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
     ESMF_SRCLINE)
@@ -400,7 +400,7 @@
   !------------------------------------------------------------------------
   !EX_removeUTest 
   ! Test Get Item Info from State 
-  call ESMF_StateGetItemInfo(state1, name="testArray", stateitemtype=stateItemType, rc=rc)
+  call ESMF_StateGet(state1, name="testArray", stateitemtype=stateItemType, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Getting Array item info from State Test"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
@@ -427,7 +427,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Test Adding a name to a State
-      call ESMF_StateAddNameOnly(state1, name="StateOne", rc=rc)
+      call ESMF_StateAdd(state1, name="StateOne", rc=rc)
       write(failMsg, *) "DId not return ESMF_SUCCESS"
       write(name, *) "Adding a name to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -473,7 +473,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Test getting FieldBundle from State
-      call  ESMF_StateGetFieldBundle(state1, bundlename, bundle2(1), rc=rc)
+      call  ESMF_StateGet(state1, bundlename, bundle2(1), rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting FieldBundle from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
@@ -542,7 +542,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Test getting Field from State
-      call  ESMF_StateGetField(state1, fieldname, field2, rc=rc)
+      call  ESMF_StateGet(state1, fieldname, field2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting Field from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
@@ -602,7 +602,7 @@
       !------------------------------------------------------------------------
       !EX_removeUTest
       ! Test getting Array from State
-      call  ESMF_StateGetArray(state1, "testArray", array2, rc=rc)
+      call  ESMF_StateGet(state1, "testArray", array2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting Array from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
@@ -685,14 +685,14 @@
 
  
       !EX_removeUTest
-      call ESMF_StateAddState(state1, state3, rc=rc)
+      call ESMF_StateAdd(state1, state3, rc=rc)
       write(name, *) "Adding an uninitialized State to a State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_removeUTest
-      call ESMF_StateAddFieldBundle(state1, bundle5, rc=rc)
+      call ESMF_StateAdd(state1, bundle5, rc=rc)
       write(name, *) "Adding an uninitialized FieldBundle to a State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -700,7 +700,7 @@
 
       !EX_removeUTest
       ! Test adding an uninitialized Field to a State
-      call ESMF_StateAddField(state1, field4, rc)
+      call ESMF_StateAdd(state1, field4, rc)
       write(name, *) "Adding an uninitialized Field to a State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                        name, failMsg, result, ESMF_SRCLINE)
@@ -727,7 +727,7 @@
 
       !EX_removeUTest
       ! Test adding a State to a State 
-      call ESMF_StateAddState(state2, state1, rc=rc)
+      call ESMF_StateAdd(state2, state1, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding a State to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -738,7 +738,7 @@
 
       !EX_removeUTest
       ! Test getting a State from a State 
-      call ESMF_StateGetState(state2, "Atmosphere Out", state3, rc=rc)
+      call ESMF_StateGet(state2, "Atmosphere Out", state3, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a State from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -753,7 +753,7 @@
       ! this is illegal in fortran but not all compilers catch it - they just
       ! do bizarre things with them.  So use an alias to the same State.
       state3 = state2
-      call ESMF_StateAddState(state2, state3, rc=rc)
+      call ESMF_StateAdd(state2, state3, rc=rc)
       write(failMsg, *) "Did return ESMF_SUCCESS"
       write(name, *) "Adding the same State to a State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
@@ -864,7 +864,7 @@
                indexflag=ESMF_INDEX_GLOBAL, name="arrayGDP", rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
-      call ESMF_StateAddArray(stateGDP, arrayGDP, rc)
+      call ESMF_StateAdd(stateGDP, arrayGDP, rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
       !------------------------------------------------------------------------

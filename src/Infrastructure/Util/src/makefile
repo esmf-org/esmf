@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2007/12/12 15:44:09 rosalind Exp $ 
+# $Id: makefile,v 1.19 2008/05/08 02:27:21 theurich Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
@@ -12,11 +12,13 @@ AUTOGEN   = ESMF_FortranWordsize.F90 ESMF_TypeKindGet.F90
 SOURCEC	  = ESMC_Util.C ESMC_Fraction.C ESMCI_F90Interface.C
 SOURCEF	  = ESMF_UtilTypes.F90 \
             ESMF_LogErr.F90  \
+            ESMF_FortranWordsizeHelper.F90 \
             $(AUTOGEN) \
             ESMF_InitMacros.F90
             
 STOREH    = ESMC_Arg.h ESMCI_Arg.h ESMF_Macros.inc ESMF.h ESMC_Macros.h \
-            ESMC_Util.h ESMCI_Util.h ESMF_TypeKindRankMacros.hcppF90 ESMC_Start.h \
+            ESMC_Util.h ESMCI_Util.h ESMF_TypeKindRankMacros.hcppF90 \
+            ESMC_Start.h \
             ESMC_F90Interface.h ESMCI_F90Interface.h ESMF_ErrReturnCodes.inc \
             ESMF_LogMacros.inc ESMF_LogConstants.inc ESMC_Fraction.h \
             ESMF_TypeKindMacros.hcppF90 ESMF_InitMacros.inc ESMCI_Null.h
@@ -40,5 +42,5 @@ CLOBBERDIRS =
 
 ESMF_InitMacros.o: ESMF_LogErr.o ESMF_UtilTypes.o 
 ESMF_LogErr.o: ESMF_UtilTypes.o 
-ESMF_FortranWordsize.o: ESMF_FortranWordsize.cppF90 ESMF_TypeKindMacros.hcppF90 ESMF_FortranWordsizeMacros.h
-ESMF_TypeKindGet.o: ESMF_TypeKindGet.cppF90 ESMF_TypeKindMacros.hcppF90 ESMF_TypeKindGet.h
+ESMF_FortranWordsize.o: ESMF_FortranWordsize.cppF90 ESMF_FortranWordsizeHelper.o ESMF_TypeKindMacros.hcppF90
+ESMF_TypeKindGet.o: ESMF_TypeKindGet.cppF90 ESMF_TypeKindMacros.hcppF90

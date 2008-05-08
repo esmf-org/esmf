@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.9 2008/05/01 04:43:48 rokuingh Exp $
+// $Id: ESMCI_Array_F.C,v 1.10 2008/05/08 02:27:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -636,12 +636,12 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_arraysparsematmulstore)(ESMCI::Array **srcArray,
+  void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle, 
     ESMC_TypeKind *typekind, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraysparsematmulstore()"
+#define ESMC_METHOD "c_esmc_arraysmmstore()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
@@ -652,10 +652,10 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraysparsematmulstorenf)(ESMCI::Array **srcArray,
+  void FTN(c_esmc_arraysmmstorenf)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraysparsematmulstorenf()"
+#define ESMC_METHOD "c_esmc_arraysmmstorenf()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
@@ -665,11 +665,11 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraysparsematmul)(ESMCI::Array **srcArray,
+  void FTN(c_esmc_arraysmm)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMC_RouteHandle **routehandle,
     ESMC_Logical *zeroflag, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraysparsematmul()"
+#define ESMC_METHOD "c_esmc_arraysmm()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling

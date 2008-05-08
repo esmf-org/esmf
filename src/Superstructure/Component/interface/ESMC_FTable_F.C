@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.24 2008/04/05 03:39:12 cdeluca Exp $
+// $Id: ESMC_FTable_F.C,v 1.25 2008/05/08 02:27:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -180,7 +180,7 @@ extern "C" {
 
 
      void FTN(c_esmc_ftablesetinternalstate)(ESMC_FTable ***ptr, char *type,
-                        void *data, enum dtype *dtype, int *status, int slen) {
+                        void **data, enum dtype *dtype, int *status, int slen) {
          char *name;
 
          *status = ESMC_RC_NOT_IMPL;

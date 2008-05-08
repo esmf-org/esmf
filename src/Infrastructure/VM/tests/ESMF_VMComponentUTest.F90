@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.16 2008/04/17 18:58:37 theurich Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.17 2008/05/08 02:27:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -28,6 +28,10 @@ module ESMF_VMComponentUTest_gcomp_mod
     ! arguments
     type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    type(ESMF_Logical) :: supportPthreads
+#endif
     
     ! Initialize
     rc = ESMF_SUCCESS
@@ -47,12 +51,17 @@ module ESMF_VMComponentUTest_gcomp_mod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads == ESMF_True) then
+      call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
+    endif
 #endif
 
   end subroutine !--------------------------------------------------------------
@@ -61,6 +70,10 @@ module ESMF_VMComponentUTest_gcomp_mod
     ! arguments
     type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    type(ESMF_Logical) :: supportPthreads
+#endif
     
     ! Initialize
     rc = ESMF_SUCCESS
@@ -80,13 +93,18 @@ module ESMF_VMComponentUTest_gcomp_mod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    ! TODO: Many systems are not able to run the exhaustive version of this
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads == ESMF_True) then
+      call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
+    endif
+    ! TODO: Some systems are not able to run the exhaustive version of this
     ! test in ESMF-threaded mode because it will spawn 100s concurrent Pthreads.
     ! This is *not* an ESMF problem but a system issue that originates from 
     ! the stacklimit being too small as to allow 100s concurrent threads within
@@ -171,7 +189,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.16 2008/04/17 18:58:37 theurich Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.17 2008/05/08 02:27:22 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0

@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.15 2008/04/05 03:39:20 cdeluca Exp $
+% CVS $Id: code_conv_gen.tex,v 1.16 2008/05/08 02:27:28 theurich Exp $
 
 \subsection{Docs: Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -254,7 +254,7 @@ define specific {\tt ESMF\_<Class>Set<Something>} and
 \item {\tt ESMF/C\_<Class>Add()}, {\tt ESMF\_<Class>Get()}, and 
 {\tt ESMF\_<Class>Remove()} for manipulating 
 items that can be appended or inserted into a list of like
-items within a class.  For example, the {\tt ESMF\_StateAddField()}
+items within a class.  For example, the {\tt ESMF\_StateAdd()}
 method adds another Field to the list of Fields contained
 in the State class.
 
@@ -357,14 +357,14 @@ The first line of every file in ESMF
   must be its CVS version identification. For example, each \LaTeX
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.15 2008/04/05 03:39:20 cdeluca Exp $ 
+% $Id: code_conv_gen.tex,v 1.16 2008/05/08 02:27:28 theurich Exp $ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.15 2008/04/05 03:39:20 cdeluca Exp $'
+character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.16 2008/05/08 02:27:28 theurich Exp $'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}

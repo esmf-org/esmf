@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.2 2008/04/29 00:37:54 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.3 2008/05/08 02:27:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -76,15 +76,16 @@ module ESMF_ArrayBundleMod
   public ESMF_ArrayBundleDestroy
   public ESMF_ArrayBundleGet
   public ESMF_ArrayBundlePrint
-  public ESMF_ArrayBundleSparseMatMul
-  public ESMF_ArrayBundleSparseMatMulRel
-  public ESMF_ArrayBundleSparseMatMulStr
+  public ESMF_ArrayBundleRedist
+  public ESMF_ArrayBundleRedistStore
+  public ESMF_ArrayBundleRedistRelease
+  public ESMF_ArrayBundleSMM
+  public ESMF_ArrayBundleSMMRelease
+  public ESMF_ArrayBundleSMMStore
 
   public ESMF_ArrayBundleHalo
   public ESMF_ArrayBundleHaloStore
   public ESMF_ArrayBundleHaloRun
-  public ESMF_ArrayBundleRedistStore
-  public ESMF_ArrayBundleRedist
   public ESMF_ArrayBundleValidate
 
 ! - ESMF-internal methods:
@@ -99,7 +100,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.2 2008/04/29 00:37:54 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.3 2008/05/08 02:27:13 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -110,18 +111,37 @@ module ESMF_ArrayBundleMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayBundleSparseMatMulStr -- Generic interface
+! !IROUTINE: ESMF_ArrayBundleRedistStore -- Generic interface
 
 ! !INTERFACE:
-  interface ESMF_ArrayBundleSparseMatMulStr
+  interface ESMF_ArrayBundleRedistStore
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_ArrayBundleSparseMMSI4
-    module procedure ESMF_ArrayBundleSparseMMSI8
-    module procedure ESMF_ArrayBundleSparseMMSR4
-    module procedure ESMF_ArrayBundleSparseMMSR8
-    module procedure ESMF_ArrayBundleSparseMMSNF
+    module procedure ESMF_ArrayBundleRedistStoreI4
+    module procedure ESMF_ArrayBundleRedistStoreI8
+    module procedure ESMF_ArrayBundleRedistStoreR4
+    module procedure ESMF_ArrayBundleRedistStoreR8
+    module procedure ESMF_ArrayBundleRedistStoreNF
+!EOPI
+
+  end interface
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayBundleSMMStore -- Generic interface
+
+! !INTERFACE:
+  interface ESMF_ArrayBundleSMMStore
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_ArrayBundleSMMStoreI4
+    module procedure ESMF_ArrayBundleSMMStoreI8
+    module procedure ESMF_ArrayBundleSMMStoreR4
+    module procedure ESMF_ArrayBundleSMMStoreR8
+    module procedure ESMF_ArrayBundleSMMStoreNF
 !EOPI
 
   end interface
@@ -638,158 +658,573 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedist()"
-!BOPI
-! !IROUTINE: ESMF_ArrayBundleRedist - Redistribute data from srcArrayBundle to dstArrayBundle
-!
+!BOP
+! !IROUTINE: ESMF_ArrayBundleRedist - Execute an ArrayBundle redistribution
 ! !INTERFACE:
-    subroutine ESMF_ArrayBundleRedist(srcArrayBundle, dstArrayBundle, rc)
+    subroutine ESMF_ArrayBundleRedist(srcArrayBundle, dstArrayBundle, &
+      routehandle, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)       :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(out)      :: dstArrayBundle
-    integer, intent(out), optional              :: rc
+    type(ESMF_ArrayBundle), intent(in),   optional  :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(out),  optional  :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_Logical),     intent(in),   optional  :: checkflag
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Pairwise redistribute data from the Arrays in {\tt srcArrayBundle} to the
-!   Arrays in {\tt dstArrayBundle}. Redist requires that the rank of 
-!   source Arrays and destination Arrays be the same. Furthermore
-!   the number of distributed dimensions in the associated DistGrids must match
-!   and the {\tt indexflag} must be the same.
+!   Execute a precomputed ArrayBundle redistribution from the Arrays in
+!   {\tt srcArrayBundle} to the Arrays in {\tt dstArrayBundle}.
 !
-!   There are two variants of the Redist operation. In the first
-!   case, when the associated DistGrids are defined with indexflag 
-!   {\tt ESMF\_GLOBAL},
-!   data is mapped from source Array to destination Array according to the
-!   global index space. In the second case, for indexflag {\tt ESMF\_DELOCAL},
-!   the data mapping is done in patch-local index space patch for patch.
-!   
-!   In either case Redist does not require that source and destination
-!   Arrays have the same number of elements. Only destination elements that also
-!   appear in the source Array will be overwritten.
+!   This call is {\em collective} across the current VM.
 !
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
+!   \begin{description}
+!   \item [{[srcArrayBundle]}]
+!     {\tt ESMF\_ArrayBundle} with source data.
+!   \item [{[dstArrayBundle]}]
+!     {\tt ESMF\_ArrayBundle} with destination data.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[checkflag]}]
+!     If set to {\tt ESMF\_TRUE} the input Array pairs will be checked for
+!     consistency with the precomputed operation provided by {\tt routehandle}.
+!     If set to {\tt ESMF\_FALSE} {\em (default)} only a very basic input check
+!     will be performed, leaving many inconsistencies undetected. Set
+!     {\tt checkflag} to {\tt ESMF\_FALSE} to achieve highest performance.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: opt_checkflag! helper variable
+    type(ESMF_ArrayBundle)  :: opt_srcArrayBundle ! helper variable
+    type(ESMF_ArrayBundle)  :: opt_dstArrayBundle ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments, deal with optional ArrayBundle args
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
+    if (present(srcArrayBundle)) then
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
+      opt_srcArrayBundle = srcArrayBundle
+    else
+      call ESMF_ArrayBundleSetThisNull(opt_srcArrayBundle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    if (present(dstArrayBundle)) then
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
+      opt_dstArrayBundle = dstArrayBundle
+    else
+      call ESMF_ArrayBundleSetThisNull(opt_dstArrayBundle, localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    ! Set default flags
+    opt_checkflag = ESMF_FALSE
+    if (present(checkflag)) opt_checkflag = checkflag
+        
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayBundleRedist(opt_srcArrayBundle, opt_dstArrayBundle,&
+      routehandle, opt_checkflag, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayBundleRedist
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleRedistRelease()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleRedistRelease - Release resources associated with ArrayBundle redistribution
+!
+! !INTERFACE:
+  subroutine ESMF_ArrayBundleRedistRelease(routehandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    integer,                intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Release resouces associated with an ArrayBundle redistribution.
+!   After this call {\tt routehandle} becomes invalid.
+!
+!   \begin{description}
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments, deal with optional Array args
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
+        
+    ! Call into the RouteHandle code
+    call ESMF_RouteHandleRelease(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayBundleRedistRelease
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution with local factor argument
+!
+! !INTERFACE:
+! ! Private name; call using ESMF_ArrayBundleRedistStore()
+! subroutine ESMF_ArrayBundleRedistStore<type><kind>(srcArrayBundle, &
+!   dstArrayBundle, routehandle, factor, srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+!   type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
+!   type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
+!   type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+!   <type>(ESMF_KIND_<kind>),   intent(in)              :: factor
+!   integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
+!   integer,                    intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Store an ArrayBundle redistribution operation from
+!   {\tt srcArrayBundle} to {\tt dstArrayBundle}. The redistribution
+!   between ArrayBundles is defined as the sequence of
+!   individual Array redistributions over all source and
+!   destination Array pairs in sequence. The method requires that
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle} reference an identical
+!   number of {\tt ESMF\_Array} objects.
+!
+!   The effect of this method on ArrayBundles that contain aliased members is
+!   undefined.
+!
+!   PETs that specify a {\tt factor} argument must use the
+!   <type><kind> overloaded interface. Other PETs call into the interface
+!   without {\tt factor} argument. If multiple PETs specify the {\tt factor}
+!   argument its type and kind as well as its value must match across all
+!   PETs. If none of the PETs specifies a {\tt factor} argument the default
+!   will be a factor of 1.
+!
+!   See the description of method {\tt ESMF\_ArrayRedistStore()} for
+!   the definition of the Array based operation.
+!
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_ArrayBundleRedist()} on any pair of ArrayBundles that 
+!   are congruent and typekind conform with the Arrays contained in
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
+!   Congruent Arrays possess matching DistGrids and the shape of the local
+!   array tiles matches between the Arrays for every DE.
+!
+!   This method is overloaded for:\newline
+!   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
+!   \newline
+!
+!   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
 !   \item [srcArrayBundle]
-!         {\tt ESMF\_ArrayBundle} containing source Arrays.
-!   \item [srcArrayBundle]
-!         {\tt ESMF\_ArrayBundle} holding destination Arrays.
+!     {\tt ESMF\_ArrayBundle} with source data.
+!   \item [dstArrayBundle]
+!     {\tt ESMF\_ArrayBundle} with destination data.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[factor]}]
+!     Factor by which to multipy source data. Default is 1.
+!   \item [{[srcToDstTransposeMap]}]
+!     List with as many entries as there are dimensions in the Arrays in
+!     {\tt srcArrayBundle}. Each
+!     entry maps the corresponding source Array dimension against the 
+!     specified destination Array dimension. Mixing of distributed and
+!     undistributed dimensions is supported.
 !   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleRedistStoreI4()"
+!BOPI
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayBundleRedistStore()
+  subroutine ESMF_ArrayBundleRedistStoreI4(srcArrayBundle, dstArrayBundle, &
+    routehandle, factor, srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
+    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    integer(ESMF_KIND_I4),      intent(in)              :: factor
+    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                    intent(out),  optional  :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
-  ! Initialize return code
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
-  end subroutine ESMF_ArrayBundleRedist
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
+    
+    ! Deal with (optional) array arguments
+    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
+      routehandle, srcToDstTransposeMapArg, ESMF_TYPEKIND_I4, factor, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayBundleRedistStoreI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleRedistStoreI8()"
+!BOPI
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayBundleRedistStore()
+  subroutine ESMF_ArrayBundleRedistStoreI8(srcArrayBundle, dstArrayBundle, &
+    routehandle, factor, srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
+    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    integer(ESMF_KIND_I8),      intent(in)              :: factor
+    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                    intent(out),  optional  :: rc
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
+    
+    ! Deal with (optional) array arguments
+    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
+      routehandle, srcToDstTransposeMapArg, ESMF_TYPEKIND_I8, factor, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayBundleRedistStoreI8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleRedistStoreR4()"
+!BOPI
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayBundleRedistStore()
+  subroutine ESMF_ArrayBundleRedistStoreR4(srcArrayBundle, dstArrayBundle, &
+    routehandle, factor, srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
+    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    real(ESMF_KIND_R4),         intent(in)              :: factor
+    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                    intent(out),  optional  :: rc
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
+    
+    ! Deal with (optional) array arguments
+    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
+      routehandle, srcToDstTransposeMapArg, ESMF_TYPEKIND_R4, factor, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayBundleRedistStoreR4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleRedistStoreR8()"
+!BOPI
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_ArrayBundleRedistStore()
+  subroutine ESMF_ArrayBundleRedistStoreR8(srcArrayBundle, dstArrayBundle, &
+    routehandle, factor, srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
+    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    real(ESMF_KIND_R8),         intent(in)              :: factor
+    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                    intent(out),  optional  :: rc
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
+    
+    ! Deal with (optional) array arguments
+    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
+      routehandle, srcToDstTransposeMapArg, ESMF_TYPEKIND_R8, factor, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayBundleRedistStoreR8
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRedistStore()"
-!BOPI
-! !IROUTINE: ESMF_ArrayBundleRedistStore - Store an ArrayBundleRedist() operation
-!
-! !INTERFACE:
-    subroutine ESMF_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
-      routehandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)           :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(out)          :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    integer, intent(out), optional                  :: rc
-!
-! !DESCRIPTION:
-!   Store a Redist() operation for {\tt srcArrayBundle} and 
-!   {\tt dstArrayBundle}. See ArrayBundleRedist() for details.
-!
-!   The returned {\tt routehandle} can be used with {\tt srcArrayBundle} and
-!   {\tt dstArrayBundle} arguments that are DistGrid-conform to those for which 
-!   the operation was precomputed and stored. 
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!   \begin{description}
-!   \item [srcArrayBundle]
-!         {\tt ESMF\_ArrayBundle} containing source Arrays.
-!   \item [dstArrayBundle]
-!         {\tt ESMF\_ArrayBundle} holding destination Arrays.
-!   \item [routehandle]
-!         Handle to the Route that stores the operation.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-  ! Initialize return code
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
-  end subroutine ESMF_ArrayBundleRedistStore
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleRedistRun()"
-!BOPI
-! !IROUTINE: ESMF_ArrayBundleRedistRun - Execute a stored ArrayBundleRedist() operation
-!
-! !INTERFACE:
-    subroutine ESMF_ArrayBundleRedistRun(srcArrayBundle, dstArrayBundle, &
-      routehandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)           :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(out)          :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    integer, intent(out), optional                  :: rc
-!
-! !DESCRIPTION:
-!   Execute a stored ArrayBundleRedist() operation for {\tt srcArrayBundle} and 
-!   {\tt dstArrayBundle}.
-!
-!     This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The
-!     call will block until all PET-local data objects are accessible.
-!
-!   \begin{description}
-!   \item [srcArrayBundle]
-!         {\tt ESMF\_ArrayBundle} containing source Arrays.
-!   \item [dstArrayBundle]
-!         {\tt ESMF\_ArrayBundle} holding destination Arrays.
-!   \item [routehandle]
-!         Handle to the Route that stores the operation.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-  ! Initialize return code
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
-  end subroutine ESMF_ArrayBundleRedistRun
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMatMul()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSparseMatMul - Execute an ArrayBundle sparse matrix multiplication
+! !IROUTINE: ESMF_ArrayBundleRedistStore - Precompute ArrayBundle redistribution without local factor argument
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleSparseMatMul(srcArrayBundle, dstArrayBundle, &
-    routehandle, zeroflag, checkflag, rc)
+  ! Private name; call using ESMF_ArrayBundleRedistStore()
+  subroutine ESMF_ArrayBundleRedistStoreNF(srcArrayBundle, dstArrayBundle, &
+    routehandle, srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
+    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                    intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!   Store an ArrayBundle redistribution operation from
+!   {\tt srcArrayBundle} to {\tt dstArrayBundle}. The redistribution
+!   between ArrayBundles is defined as the sequence of
+!   individual Array redistributions over all source and
+!   destination Array pairs in sequence. The method requires that
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle} reference an identical
+!   number of {\tt ESMF\_Array} objects.
+!
+!   The effect of this method on ArrayBundles that contain aliased members is
+!   undefined.
+!
+!   PETs that specify a {\tt factor} argument must use the
+!   <type><kind> overloaded interface. Other PETs call into the interface
+!   without {\tt factor} argument. If multiple PETs specify the {\tt factor}
+!   argument its type and kind as well as its value must match across all
+!   PETs. If none of the PETs specifies a {\tt factor} argument the default
+!   will be a factor of 1.
+!
+!   See the description of method {\tt ESMF\_ArrayRedistStore()} for
+!   the definition of the Array based operation.
+!
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_ArrayBundleRedist()} on any pair of ArrayBundles that 
+!   are congruent and typekind conform with the Arrays contained in
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
+!   Congruent Arrays possess matching DistGrids and the shape of the local
+!   array tiles matches between the Arrays for every DE.
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [srcArrayBundle]
+!     {\tt ESMF\_ArrayBundle} with source data.
+!   \item [dstArrayBundle]
+!     {\tt ESMF\_ArrayBundle} with destination data.
+!   \item [routehandle]
+!     Handle to the precomputed Route.
+!   \item [{[srcToDstTransposeMap]}]
+!     List with as many entries as there are dimensions in the Arrays in
+!     {\tt srcArrayBundle}. Each
+!     entry maps the corresponding source Array dimension against the 
+!     specified destination Array dimension. Mixing of distributed and
+!     undistributed dimensions is supported.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: srcToDstTransposeMapArg   ! index helper
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
+    
+    ! Deal with (optional) array arguments
+    srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayBundleRedistStoreNF(srcArrayBundle, dstArrayBundle, &
+      routehandle, srcToDstTransposeMapArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Mark routehandle object as being created
+    call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArrayBundleRedistStoreNF
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleSMM()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleSMM - Execute an ArrayBundle sparse matrix multiplication
+!
+! !INTERFACE:
+  subroutine ESMF_ArrayBundleSMM(srcArrayBundle, dstArrayBundle, routehandle, &
+    zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in),   optional  :: srcArrayBundle
@@ -800,8 +1235,8 @@ contains
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Execute a precomputed Array sparse matrix multiplication from the Arrays in
-!   {\tt srcArrayBundle} to the Arrays in {\tt dstArrayBundle}.
+!   Execute a precomputed ArrayBundle sparse matrix multiplication from the
+!   Arrays in {\tt srcArrayBundle} to the Arrays in {\tt dstArrayBundle}.
 !
 !   This call is {\em collective} across the current VM.
 !
@@ -867,7 +1302,7 @@ contains
     if (present(checkflag)) opt_checkflag = checkflag
         
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayBundleSparseMatMul(opt_srcArrayBundle, opt_dstArrayBundle,&
+    call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
       routehandle, opt_zeroflag, opt_checkflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -875,18 +1310,18 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMatMul
+  end subroutine ESMF_ArrayBundleSMM
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMatMulRel()"
+#define ESMF_METHOD "ESMF_ArrayBundleSMMRelease()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSparseMatMulRel - Release resources associated with ArrayBundle sparse matrix multiplication
+! !IROUTINE: ESMF_ArrayBundleSMMRelease - Release resources associated with ArrayBundle sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleSparseMatMulRel(routehandle, rc)
+  subroutine ESMF_ArrayBundleSMMRelease(routehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
@@ -922,17 +1357,17 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMatMulRel
+  end subroutine ESMF_ArrayBundleSMMRelease
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSparseMatMulStr - Precompute ArrayBundle sparse matrix multiplication with local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
-! ! Private name; call using ESMF_ArrayBundleSparseMatMulStr()
-! subroutine ESMF_ArrayBundleSparseMatMulStr<type><kind>(srcArrayBundle, &
+! ! Private name; call using ESMF_ArrayBundleSMMStore()
+! subroutine ESMF_ArrayBundleSMMStore<type><kind>(srcArrayBundle, &
 !   dstArrayBundle, routehandle, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
@@ -955,11 +1390,20 @@ contains
 !   The effect of this method on ArrayBundles that contain aliased members is
 !   undefined.
 !
-!   See the description of method {\tt ESMF\_ArraySparseMatMulStore()} for
+!   PETs that specify non-zero matrix coefficients must use
+!   the <type><kind> overloaded interface and provide the {\tt factorList} and
+!   {\tt factorIndexList} arguments. Providing {\tt factorList} and
+!   {\tt factorIndexList} arguments with {\tt size(factorList) = (/0/)} and
+!   {\tt size(factorIndexList) = (/2,0/)} or {\tt (/4,0/)} indicates that a 
+!   PET does not provide matrix elements. Alternatively, PETs that do not 
+!   provide matrix elements may also call into the overloaded interface
+!   {\em without} {\tt factorList} and {\tt factorIndexList} arguments.
+!   
+!   See the description of method {\tt ESMF\_ArraySMMStore()} for
 !   the definition of the Array based operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleSparseMatMul()} on any pair of ArrayBundles that 
+!   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that 
 !   are congruent and typekind conform with the Arrays contained in
 !   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
 !   Congruent Arrays possess matching DistGrids and the shape of the local
@@ -1017,13 +1461,13 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMMSI4()"
+#define ESMF_METHOD "ESMF_ArrayBundleSMMStoreI4()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArrayBundleSparseMatMulStr()
-  subroutine ESMF_ArrayBundleSparseMMSI4(srcArrayBundle, dstArrayBundle, &
+  ! Private name; call using ESMF_ArrayBundleSMMStore()
+  subroutine ESMF_ArrayBundleSMMStoreI4(srcArrayBundle, dstArrayBundle, &
     routehandle, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
@@ -1058,7 +1502,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayBundleSparseMMStr(srcArrayBundle, dstArrayBundle, &
+    call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_I4, opt_factorList, len_factorList, &
       factorIndexListArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1077,19 +1521,19 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMMSI4
+  end subroutine ESMF_ArrayBundleSMMStoreI4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMMSI8()"
+#define ESMF_METHOD "ESMF_ArrayBundleSMMStoreI8()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArrayBundleSparseMatMulStr()
-  subroutine ESMF_ArrayBundleSparseMMSI8(srcArrayBundle, dstArrayBundle, &
+  ! Private name; call using ESMF_ArrayBundleSMMStore()
+  subroutine ESMF_ArrayBundleSMMStoreI8(srcArrayBundle, dstArrayBundle, &
     routehandle, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
@@ -1124,7 +1568,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayBundleSparseMMStr(srcArrayBundle, dstArrayBundle, &
+    call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_I8, opt_factorList, len_factorList, &
       factorIndexListArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1143,19 +1587,19 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMMSI8
+  end subroutine ESMF_ArrayBundleSMMStoreI8
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMMSR4()"
+#define ESMF_METHOD "ESMF_ArrayBundleSMMStoreR4()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArrayBundleSparseMatMulStr()
-  subroutine ESMF_ArrayBundleSparseMMSR4(srcArrayBundle, dstArrayBundle, &
+  ! Private name; call using ESMF_ArrayBundleSMMStore()
+  subroutine ESMF_ArrayBundleSMMStoreR4(srcArrayBundle, dstArrayBundle, &
     routehandle, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
@@ -1190,7 +1634,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayBundleSparseMMStr(srcArrayBundle, dstArrayBundle, &
+    call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_R4, opt_factorList, len_factorList, &
       factorIndexListArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1209,19 +1653,19 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMMSR4
+  end subroutine ESMF_ArrayBundleSMMStoreR4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMMSR8()"
+#define ESMF_METHOD "ESMF_ArrayBundleSMMStoreR8()"
 !BOPI
-! !IROUTINE: ESMF_ArraySparseMatMulStore - Precompute and store an Array sparse matrix multiplication 
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArrayBundleSparseMatMulStr()
-  subroutine ESMF_ArrayBundleSparseMMSR8(srcArrayBundle, dstArrayBundle, &
+  ! Private name; call using ESMF_ArrayBundleSMMStore()
+  subroutine ESMF_ArrayBundleSMMStoreR8(srcArrayBundle, dstArrayBundle, &
     routehandle, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
@@ -1256,7 +1700,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayBundleSparseMMStr(srcArrayBundle, dstArrayBundle, &
+    call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_R8, opt_factorList, len_factorList, &
       factorIndexListArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1275,19 +1719,19 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMMSR8
+  end subroutine ESMF_ArrayBundleSMMStoreR8
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleSparseMMSNF()"
+#define ESMF_METHOD "ESMF_ArrayBundleSMMStoreNF()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSparseMatMulStr - Precompute ArrayBundle sparse matrix multiplication without local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute ArrayBundle sparse matrix multiplication without local factors
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArrayBundleSparseMatMulStr()
-  subroutine ESMF_ArrayBundleSparseMMSNF(srcArrayBundle, dstArrayBundle, &
+  ! Private name; call using ESMF_ArrayBundleSMMStore()
+  subroutine ESMF_ArrayBundleSMMStoreNF(srcArrayBundle, dstArrayBundle, &
     routehandle, rc)
 !
 ! !ARGUMENTS:
@@ -1308,11 +1752,20 @@ contains
 !   The effect of this method on ArrayBundles that contain aliased members is
 !   undefined.
 !
-!   See the description of method {\tt ESMF\_ArraySparseMatMulStore()} for
+!   PETs that specify non-zero matrix coefficients must use
+!   the <type><kind> overloaded interface and provide the {\tt factorList} and
+!   {\tt factorIndexList} arguments. Providing {\tt factorList} and
+!   {\tt factorIndexList} arguments with {\tt size(factorList) = (/0/)} and
+!   {\tt size(factorIndexList) = (/2,0/)} or {\tt (/4,0/)} indicates that a 
+!   PET does not provide matrix elements. Alternatively, PETs that do not 
+!   provide matrix elements may also call into the overloaded interface
+!   {\em without} {\tt factorList} and {\tt factorIndexList} arguments.
+!   
+!   See the description of method {\tt ESMF\_ArraySMMStore()} for
 !   the definition of the Array based operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleSparseMatMul()} on any pair of ArrayBundles that 
+!   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that 
 !   are congruent and typekind conform with the Arrays contained in
 !   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
 !   Congruent Arrays possess matching DistGrids and the shape of the local
@@ -1349,7 +1802,7 @@ contains
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayBundleSparseMMStrNF(srcArrayBundle, dstArrayBundle, &
+    call c_ESMC_ArrayBundleSMMStoreNF(srcArrayBundle, dstArrayBundle, &
       routehandle, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1362,7 +1815,7 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ArrayBundleSparseMMSNF
+  end subroutine ESMF_ArrayBundleSMMStoreNF
 !------------------------------------------------------------------------------
 
 

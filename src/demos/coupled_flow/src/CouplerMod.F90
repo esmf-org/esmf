@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.3 2007/06/23 04:01:15 cdeluca Exp $
+! $Id: CouplerMod.F90,v 1.4 2008/05/08 02:27:27 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -128,8 +128,8 @@
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
 
     call ESMF_StateGet(importState, name=statename, rc=rc)
-    call ESMF_StateGetField(importState, "SIE", src_field, rc=rc)
-    call ESMF_StateGetField(exportState, "SIE", dst_field, rc=rc)
+    call ESMF_StateGet(importState, "SIE", src_field, rc=rc)
+    call ESMF_StateGet(exportState, "SIE", dst_field, rc=rc)
 
     if (trim(statename) .eq. "FlowSolver Feedback") then
       call ESMF_StateSetNeeded(importState, "SIE", ESMF_NEEDED, rc)
@@ -247,8 +247,8 @@
 !   an Export State and the other is an Import State.
 !
 !\begin{verbatim}
-           call ESMF_StateGetField(importState, datanames(i), srcfield, rc=rc)
-           call ESMF_StateGetField(exportState, datanames(i), dstfield, rc=rc)
+           call ESMF_StateGet(importState, datanames(i), srcfield, rc=rc)
+           call ESMF_StateGet(exportState, datanames(i), dstfield, rc=rc)
 !\end{verbatim}
 !
 !   The redist routine uses information contained in the Fields and the

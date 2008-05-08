@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.2 2008/04/29 00:38:20 theurich Exp $
+! $Id: user_model1.F90,v 1.3 2008/05/08 02:27:29 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -31,6 +31,10 @@ module user_model1
   subroutine userm1_register(comp, rc)
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    type(ESMF_Logical) :: supportPthreads
+#endif
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -53,12 +57,17 @@ module user_model1
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads == ESMF_True) then
+      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+    endif
 #endif
 
     print *, "User Comp1 Register returning"
@@ -110,7 +119,7 @@ module user_model1
     arraybundle = ESMF_ArrayBundleCreate(arrayList=array, name="srcAryBndl", &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArrayBundle(exportState, arraybundle, rc=rc)
+    call ESMF_StateAdd(exportState, arraybundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "User Comp1 Init returning"
@@ -144,7 +153,7 @@ module user_model1
     pi = 3.14159d0
 
     ! Get the source ArrayBundle from the export State
-    call ESMF_StateGetArrayBundle(exportState, "srcAryBndl", arraybundle, rc=rc)
+    call ESMF_StateGet(exportState, "srcAryBndl", arraybundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get the source Arrays from the ArrayBundle
@@ -192,7 +201,7 @@ module user_model1
 
     print *, "User Comp1 Final starting"
 
-    call ESMF_StateGetArrayBundle(exportState, "srcAryBndl", arraybundle, rc=rc)
+    call ESMF_StateGet(exportState, "srcAryBndl", arraybundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayBundleGet(arraybundle, arrayList=array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

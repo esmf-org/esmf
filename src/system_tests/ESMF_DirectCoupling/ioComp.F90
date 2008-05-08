@@ -1,4 +1,4 @@
-! $Id: ioComp.F90,v 1.4 2008/04/02 19:44:23 theurich Exp $
+! $Id: ioComp.F90,v 1.5 2008/05/08 02:27:34 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -21,6 +21,10 @@ module ioCompMod
   subroutine ioCompReg(comp, rc)
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    type(ESMF_Logical) :: supportPthreads
+#endif
 
     ! Initialize
     rc = ESMF_SUCCESS
@@ -38,12 +42,17 @@ module ioCompMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads == ESMF_True) then
+      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+    endif
 #endif
 
   end subroutine
@@ -81,14 +90,14 @@ module ioCompMod
     arraySrc = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="ioComp.arraySrc", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(exportState, arraySrc, rc=rc)
+    call ESMF_StateAdd(exportState, arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     ! Create the destination Array and add it to the import State
     arrayDst = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="ioComp.arrayDst", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(importState, arrayDst, rc=rc)
+    call ESMF_StateAdd(importState, arrayDst, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
   end subroutine
@@ -114,7 +123,7 @@ module ioCompMod
     pi = 3.14159d0
 
     ! Get the source Array from the export State
-    call ESMF_StateGetArray(exportState, "ioComp.arraySrc", arraySrc, rc=rc)
+    call ESMF_StateGet(exportState, "ioComp.arraySrc", arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
@@ -131,7 +140,7 @@ module ioCompMod
     enddo
     
     ! Get the destination Array from the import State
-    call ESMF_StateGetArray(importState, "ioComp.arrayDst", arrayDst, rc=rc)
+    call ESMF_StateGet(importState, "ioComp.arrayDst", arrayDst, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
@@ -142,10 +151,10 @@ module ioCompMod
     farrayDstPtr = real(0.,ESMF_KIND_R4)
 
     ! Gain access to RouteHandles for direct coupling to modelA and modelB
-    call ESMF_StateGetRouteHandle(exportState, "io2modelRedist", &
+    call ESMF_StateGet(exportState, "io2modelRedist", &
       routehandle=io2modelRedist, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGetRouteHandle(importState, "model2ioRedist", &
+    call ESMF_StateGet(importState, "model2ioRedist", &
       routehandle=model2ioRedist, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
@@ -203,11 +212,11 @@ module ioCompMod
     rc = ESMF_SUCCESS
     
     ! Garbage collection of objects explicitly created in this component
-    call ESMF_StateGetArray(exportState, "ioComp.arraySrc", arraySrc, rc=rc)
+    call ESMF_StateGet(exportState, "ioComp.arraySrc", arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayDestroy(arraySrc, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out    
-    call ESMF_StateGetArray(importState, "ioComp.arrayDst", arrayDst, rc=rc)
+    call ESMF_StateGet(importState, "ioComp.arrayDst", arrayDst, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(arrayDst, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.2 2008/04/29 00:37:51 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.3 2008/05/08 02:27:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -115,12 +115,56 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundlesparsemmstr)(ESMCI::ArrayBundle **srcArraybundle,
+  void FTN(c_esmc_arraybundlerediststore)(ESMCI::ArrayBundle **srcArraybundle,
+    ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle, 
+    ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_TypeKind *typekind,
+    void *factor, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundlerediststore()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::ArrayBundle::redistStore(
+      *srcArraybundle, *dstArraybundle, routehandle, *srcToDstTransposeMap,
+      *typekind, factor),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_arraybundlerediststorenf)(ESMCI::ArrayBundle **srcArraybundle,
+    ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle,
+    ESMCI::InterfaceInt **srcToDstTransposeMap, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundlerediststorenf()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::ArrayBundle::redistStore(
+      *srcArraybundle, *dstArraybundle, routehandle, *srcToDstTransposeMap),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_arraybundleredist)(ESMCI::ArrayBundle **srcArraybundle,
+    ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle,
+    ESMC_Logical *checkflag, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundleredist()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::ArrayBundle::redist(
+      *srcArraybundle, *dstArraybundle, routehandle, *checkflag),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_arraybundlesmmstore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle, 
     ESMC_TypeKind *typekind, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraybundlesparsemmstr()"
+#define ESMC_METHOD "c_esmc_arraybundlesmmstore()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
@@ -131,11 +175,11 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundlesparsemmstrnf)(ESMCI::ArrayBundle **srcArraybundle,
+  void FTN(c_esmc_arraybundlesmmstorenf)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle,
     int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraybundlesparsemmstrnf()"
+#define ESMC_METHOD "c_esmc_arraybundlesmmstorenf()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
@@ -145,11 +189,11 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundlesparsematmul)(ESMCI::ArrayBundle **srcArraybundle,
+  void FTN(c_esmc_arraybundlesmm)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle,
     ESMC_Logical *zeroflag, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraybundlesparsematmul()"
+#define ESMC_METHOD "c_esmc_arraybundlesmm()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling

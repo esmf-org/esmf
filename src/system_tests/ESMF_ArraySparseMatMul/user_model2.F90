@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.20 2008/04/07 06:46:19 theurich Exp $
+! $Id: user_model2.F90,v 1.21 2008/05/08 02:27:32 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -31,6 +31,10 @@ module user_model2
   subroutine userm2_register(comp, rc)
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    type(ESMF_Logical) :: supportPthreads
+#endif
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -53,12 +57,17 @@ module user_model2
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads == ESMF_True) then
+      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+    endif
 #endif
 
     print *, "User Comp2 Register returning"
@@ -104,7 +113,7 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArraySet(array, name="array data", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAddArray(importState, array, rc=rc)
+    call ESMF_StateAdd(importState, array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "User Comp2 Init returning"
@@ -136,7 +145,7 @@ module user_model2
     pi = 3.14159d0
 
     ! Get the destination Array from the import State
-    call ESMF_StateGetArray(importState, "array data", array, rc=rc)
+    call ESMF_StateGet(importState, "array data", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     ! Gain access to actual data via F90 array pointer
@@ -179,7 +188,7 @@ module user_model2
 
     print *, "User Comp2 Final starting"
 
-    call ESMF_StateGetArray(importState, "array data", array, rc=rc)
+    call ESMF_StateGet(importState, "array data", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

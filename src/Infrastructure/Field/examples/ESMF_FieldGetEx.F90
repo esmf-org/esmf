@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.8 2008/04/17 18:58:33 theurich Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.9 2008/05/08 02:27:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_FieldGetEx
 
 !------------------------------------------------------------------------------
-!ESMF_EXAMPLE        String used by test script to count examples.
+!EremoveSMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 ! !PROGRAM: ESMF_FieldGetEx - Field Get Examples
 !
@@ -97,7 +97,7 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldGet(grid3d, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
-        allocCount=fa_shape, rc=rc)
+        totalCount=fa_shape, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)) )
