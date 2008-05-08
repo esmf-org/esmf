@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.2 2008/05/08 02:27:18 theurich Exp $
+! $Id: ESMF_FieldEx.F90,v 1.3 2008/05/08 04:46:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -170,7 +170,7 @@
 !  User can get the internal {\tt ESMF\_Grid} and {\tt ESMF\_Array} 
 !  from a {\tt ESMF\_Field}. User should not issue any destroy command
 !  on the retrieved grid or array object since they are referenced
-!  from the {\tt ESMF\_Field}. The retrieved objects should be used
+!  from within the {\tt ESMF\_Field}. The retrieved objects should be used
 !  in a read-only fashion to query additional information not directly
 !  available through FieldGet interface.
 !
@@ -197,9 +197,9 @@
 !\subsubsection{Create Field with Grid and Arrayspec}
 !\label{sec:field:usage:create_grid_arrayspec}
 !
-!  The user first creates an {\tt ESMF\_Grid} and an
+!  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a
 !  {\tt ESMF\_Arrayspec} with corresponding rank and type.  
-!  This create associates the two objects.  
+!  This create method associates the two objects.  
 ! 
 !  We first create a Grid with a regular distribution that is
 !  10x20 index in 2x2 DEs.  This version of field create simply
@@ -257,8 +257,7 @@
 !
 !   This example also demonstrates the technique to create a typical
 !   3D data Field that has 2 gridded dimensions and 1 ungridded
-!   dimension. Such a 3D Field is typically used in atmospheric modelling
-!   such as the temperature or pressure Fields.
+!   dimension. 
 !
 !   First we create a 2D grid with an index space of 180x360 one degree
 !   per Grid element. In the FieldCreate call, we use gridToFieldMap
@@ -300,6 +299,9 @@
 !
 !  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a 
 !  {\tt ESMF\_Array}. Object grid is created in the previous example.
+!  
+!  This example creates a 2D {\tt ESMF\_Field} from a 2D {\tt ESMF\_Grid}
+!  and a 2D {\tt ESMF\_Array}.
 !EOE
 
 !BOC
@@ -336,8 +338,9 @@
 !\subsubsection{Create Empty Field and Finish an empty Field with FieldSetCommit}
 !\label{sec:field:usage:create_empty_setcommit}
 !
-!  The user creates an empty {\tt ESMF\_Field} object.
-!  Then the user can finalize a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
+!  User can create an empty {\tt ESMF\_Field} object.
+!  Then the user can finalize the empty {\tt ESMF\_Field} from a {\tt ESMF\_Grid} 
+!  and a intrinsic 
 !  Fortran data array. This interface is overloaded for type, kind, rank of
 !  of the Fortran data array.
 !
@@ -437,7 +440,7 @@
 !BOE
 !  A user can allocate the Fortran array in a different manner using the lower and
 !  upper bounds returned from FieldGet through the optional totalLBound and totalUBound
-!  arguments. In the following example, we crete another 7D Field by retrieving the bounds
+!  arguments. In the following example, we create another 7D Field by retrieving the bounds
 !  and allocate the Fortran array with this approach. In this scheme, indexing the
 !  Fortran array is sometimes more convenient than using the shape directly.
 !EOE
@@ -474,32 +477,32 @@
     deallocate(farray7d)
     deallocate(farray7d2)
 
-!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!-------------------------------- Example -----------------------------
-!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
-!BOE
-!\subsubsection{Destroy a Field}
-!\label{sec:field:usage:destroy}
+! TODO: remove this subsection
+!!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!!-------------------------------- Example -----------------------------
+!!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!!BremoveOE
+!!\subsubsection{Destroy a Field}
+!!\label{sec:field:usage:destroy}
+!!
+!!  When finished with an {\tt ESMF\_Field}, the destroy method
+!!  removes it.  However, the objects inside the {\tt ESMF\_Field}
+!!  but created externally should be deleted separately, 
+!!  since objects can be added to
+!!  more than one {\tt ESMF\_Field}, for example the same {\tt ESMF\_Grid}
+!!  can be used in multiple {\tt ESMF\_Field}s.
+!!  
+!!  For example, a single Grid object
+!!  can be shared by multiple Fields, the internal Grid is not deleted by
+!!  this call. Field provides copy behavior through creation 
+!!  interface, the internally created {\tt ESMF\_Array} object
+!!  will be deleted upon Field destruction to prevent memory leak.
+!!EremoveOE
+!!-------------------------------------------------------------------------
 !
-!  When finished with an {\tt ESMF\_Field}, the destroy method
-!  removes it.  However, the objects inside the {\tt ESMF\_Field}
-!  but created externally should be deleted separately, 
-!  since objects can be added to
-!  more than one {\tt ESMF\_Field}, for example the same {\tt ESMF\_Grid}
-!  can be used in multiple {\tt ESMF\_Field}s.
-!  
-!  For example, a single Grid reference
-!  can be shared by multiple Fields, the internal Grid is not deleted by
-!  this call. Field provides copy behavior through creation and
-!  set interface, the internally created {\tt ESMF\_Array} object
-!  will be deleted upon Field destruction to prevent memory leak.
-
-!EOE
-!-------------------------------------------------------------------------
-
-!BOC
+!!BremoveOC
     call ESMF_FieldDestroy(field1, rc=rc)
-!EOC
+!!EremoveOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !-------------------------------------------------------------------------

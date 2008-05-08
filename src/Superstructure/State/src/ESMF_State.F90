@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.146 2008/05/08 02:27:26 theurich Exp $
+! $Id: ESMF_State.F90,v 1.147 2008/05/08 04:46:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.146 2008/05/08 02:27:26 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.147 2008/05/08 04:46:07 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -95,15 +95,19 @@
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_StateAddOneArray
+    module procedure ESMF_StateAddOneArrayX
     module procedure ESMF_StateAddArrayList
 
     module procedure ESMF_StateAddOneArrayBundle
+    module procedure ESMF_StateAddOneArrayBundleX
     module procedure ESMF_StateAddArrayBundleList
 
     module procedure ESMF_StateAddOneField
+    module procedure ESMF_StateAddOneFieldX
     module procedure ESMF_StateAddFieldList
 
     module procedure ESMF_StateAddOneFieldBundle
+    module procedure ESMF_StateAddOneFieldBundleX
     module procedure ESMF_StateAddFieldBundleList
 
     module procedure ESMF_StateAddOneName
@@ -113,6 +117,7 @@
     module procedure ESMF_StateAddRouteHandleList
 
     module procedure ESMF_StateAddOneState
+    module procedure ESMF_StateAddOneStateX
     module procedure ESMF_StateAddStateList
 
 
@@ -163,12 +168,11 @@
 ! !IROUTINE: ESMF_StateAdd - Add a single item to a State
 !
 ! !INTERFACE:
-!  subroutine ESMF_StateAdd(state, <item>, proxyflag, rc)
+!  subroutine ESMF_StateAdd(state, <item>, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_State), intent(inout)          :: state
 !    <item>, see below for supported values
-!    logical,          intent(in),   optional :: proxyflag
 !    integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -212,7 +216,8 @@
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !EOP
-!
+!------------------------------------------------------------------------------
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddOneArray"
@@ -221,12 +226,11 @@
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_StateAdd()   
-  subroutine ESMF_StateAddOneArray(state, array, proxyflag, rc)
+  subroutine ESMF_StateAddOneArray(state, array, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     type(ESMF_Array), intent(in)             :: array
-    logical,          intent(in),   optional :: proxyflag
     integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -270,13 +274,79 @@
 
       temp_list(1) = array
 
+      call ESMF_StateClsAddArrayList(state%statep, 1, temp_list, rc=localrc)      
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_StateAddOneArray
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddOneArrayX"
+!BOPI
+! !IROUTINE: ESMF_StateAdd - Add an Array to a State with proxyflag
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_StateAdd()   
+  subroutine ESMF_StateAddOneArrayX(state, array, proxyflag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)          :: state
+    type(ESMF_Array), intent(in)             :: array
+    logical,          intent(in)             :: proxyflag
+    integer,          intent(out),  optional :: rc
+!     
+! !DESCRIPTION:
+!  Add a single {\tt array} reference to an existing 
+!  {\tt state}.  The {\tt array} name must be unique 
+!  within the {\tt state}.
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!     An {\tt ESMF\_State} object.
+! \item[array]
+!     The {\tt ESMF\_Array} to be added.  This is a reference only; when
+!     the {\tt ESMF\_State} is destroyed the objects contained in it will
+!     not be destroyed.   Also, the {\tt ESMF\_Array} cannot be safely 
+!     destroyed before the {\tt ESMF\_State} is destroyed.
+!     Since objects can be added to multiple containers, it remains
+!     the user's responsibility to manage the
+!     destruction of objects when they are no longer in use.
+! \item[proxyflag]
+!     Indicate whether this is a proxy object. 
+! \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+      type(ESMF_Array) :: temp_list(1)
+      integer :: localrc
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      temp_list(1) = array
+
       call ESMF_StateClsAddArrayList(state%statep, 1, temp_list, &
         proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine ESMF_StateAddOneArray
+  end subroutine ESMF_StateAddOneArrayX
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -286,12 +356,11 @@
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_StateAdd()   
-  subroutine ESMF_StateAddOneArrayBundle(state, arraybundle, proxyflag, rc)
+  subroutine ESMF_StateAddOneArrayBundle(state, arraybundle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),       intent(inout)          :: state
     type(ESMF_ArrayBundle), intent(in)             :: arraybundle
-    logical,                intent(in),   optional :: proxyflag
     integer,                intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -336,12 +405,79 @@
       temp_list(1) = arraybundle
 
       call ESMF_StateClsAddArrayBundleList(state%statep, 1, temp_list, &
-        proxyflag=proxyflag, rc=localrc)      
+        rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_StateAddOneArrayBundle
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddOneArrayBundleX"
+!BOPI
+! !IROUTINE: ESMF_StateAdd - Add an ArrayBundle to a State with proxyflag
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_StateAdd()   
+  subroutine ESMF_StateAddOneArrayBundleX(state, arraybundle, proxyflag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_State),       intent(inout)          :: state
+    type(ESMF_ArrayBundle), intent(in)             :: arraybundle
+    logical,                intent(in)             :: proxyflag
+    integer,                intent(out),  optional :: rc
+!     
+! !DESCRIPTION:
+!  Add a single {\tt arraybundle} reference to an existing 
+!  {\tt state}.  The {\tt arraybundle} name must be unique 
+!  within the {\tt state}.
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!     An {\tt ESMF\_State} object.
+! \item[arraybundle]
+!     The {\tt ESMF\_ArrayBundle} to be added.  This is a reference only; when
+!     the {\tt ESMF\_State} is destroyed the objects contained in it will
+!     not be destroyed.   Also, the {\tt ESMF\_ArrayBundle} cannot be safely 
+!     destroyed before the {\tt ESMF\_State} is destroyed.
+!     Since objects can be added to multiple containers, it remains
+!     the user's responsibility to manage the
+!     destruction of objects when they are no longer in use.
+! \item[proxyflag]
+!     Indicate whether this is a proxy object. 
+! \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+      type(ESMF_ArrayBundle) :: temp_list(1)
+      integer :: localrc
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundle,rc)
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      temp_list(1) = arraybundle
+
+      call ESMF_StateClsAddArrayBundleList(state%statep, 1, temp_list, &
+        proxyflag=proxyflag, rc=localrc)      
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_StateAddOneArrayBundleX
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -351,13 +487,12 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddOneField(state, field, proxyflag, rc)
+      subroutine ESMF_StateAddOneField(state, field, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      type(ESMF_Field), intent(in) :: field
-      logical, optional :: proxyflag
-      integer, intent(out), optional :: rc
+      type(ESMF_State), intent(inout)         :: state
+      type(ESMF_Field), intent(in)            :: field
+      integer,          intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
 !      Add a single {\tt field} reference to an existing 
@@ -382,7 +517,74 @@
 !     \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
+      integer :: localrc
+      type(ESMF_Field) :: temp_list(1)
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      temp_list(1) = field
+
+      call ESMF_StateClsAddFieldList(state%statep, 1, temp_list, rc=localrc)      
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_StateAddOneField
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddOneFieldX"
+!BOPI
+! !IROUTINE: ESMF_StateAdd - Add a Field to a State with proxyflag
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAdd()   
+      subroutine ESMF_StateAddOneFieldX(state, field, proxyflag, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout)         :: state
+      type(ESMF_Field), intent(in)            :: field
+      logical                                 :: proxyflag
+      integer,          intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a single {\tt field} reference to an existing 
+!      {\tt state}.
+!      The {\tt field} name must be unique within the {\tt state}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!      An {\tt ESMF\_State} object.
+!     \item[field]
+!      The {\tt ESMF\_Field} to be added.
+!      This is a reference only; when
+!      the {\tt ESMF\_State} is destroyed the objects contained in it will
+!      not be destroyed.   Also, the {\tt ESMF\_Field} cannot be safely 
+!      destroyed before the {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the user's responsibility to manage the
+!      destruction of objects when they are no longer in use.
+!     \item[proxyflag]
+!      Indicate whether this is a proxy object. 
+!     \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
       integer :: localrc
       type(ESMF_Field) :: temp_list(1)
 
@@ -407,7 +609,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_StateAddOneField
+      end subroutine ESMF_StateAddOneFieldX
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -417,13 +619,12 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddOneFieldBundle(state, fieldbundle, proxyflag, rc)
+      subroutine ESMF_StateAddOneFieldBundle(state, fieldbundle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      type(ESMF_FieldBundle), intent(in) :: fieldbundle
-      logical, optional :: proxyflag
-      integer, intent(out), optional :: rc
+      type(ESMF_State),       intent(inout)         :: state
+      type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+      integer,                intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
 !      Add a single {\tt fieldbundle} reference to an existing 
@@ -448,6 +649,76 @@
 !     \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
+
+      integer :: localrc
+      type(ESMF_FieldBundle) :: temp_list(1)
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      temp_list(1) = fieldbundle
+
+      call ESMF_StateClAddFieldBundleList(state%statep, temp_list, 1, &
+        rc=localrc)      
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_StateAddOneFieldBundle
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddOneFieldBundleX"
+!BOPI
+! !IROUTINE: ESMF_StateAdd - Add a FieldBundle to a State with proxyflag
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAdd()   
+      subroutine ESMF_StateAddOneFieldBundleX(state, fieldbundle, proxyflag, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State),       intent(inout)         :: state
+      type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+      logical,                intent(in)            :: proxyflag
+      integer,                intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a single {\tt fieldbundle} reference to an existing 
+!      {\tt state}.
+!      The {\tt fieldbundle} name must be unique within the {\tt state}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!      The {\tt ESMF\_State} object.
+!     \item[fieldbundle]
+!      The {\tt ESMF\_FieldBundle} to be added.
+!      This is a reference only; when
+!      the {\tt ESMF\_State} is destroyed the objects contained in it will
+!      not be destroyed.   Also, the {\tt ESMF\_FieldBundle} cannot be safely 
+!      destroyed before the {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the user's responsibility to manage the
+!      destruction of objects when they are no longer in use.
+!     \item[proxyflag]
+!      Indicate whether this is a proxy object. 
+!     \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
 
       integer :: localrc
       type(ESMF_FieldBundle) :: temp_list(1)
@@ -473,7 +744,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_StateAddOneFieldBundle
+      end subroutine ESMF_StateAddOneFieldBundleX
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -511,7 +782,7 @@
 !     \end{description}
 !
 !EOPI
-
+!------------------------------------------------------------------------------
       integer :: localrc
       character(len=ESMF_MAXSTR) :: temp_list(1)
       
@@ -573,7 +844,7 @@
 !     \end{description}
 !
 !EOPI
-
+!------------------------------------------------------------------------------
       type(ESMF_RouteHandle) :: temp_list(1)
       integer :: localrc
 
@@ -609,13 +880,12 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddOneState(state, nestedState, proxyflag, rc)
+      subroutine ESMF_StateAddOneState(state, nestedState, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      type(ESMF_State), intent(in) :: nestedState
-      logical, optional :: proxyflag
-      integer, intent(out), optional :: rc
+      type(ESMF_State), intent(inout)         :: state
+      type(ESMF_State), intent(in)            :: nestedState
+      integer,          intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
 !      Add a {\tt nestedState} reference to an existing 
@@ -641,7 +911,76 @@
 !     \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
+      integer :: localrc
+      type(ESMF_State) :: temp_list(1)
 
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,nestedState,rc)
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+
+      temp_list(1) = nestedState
+
+      call ESMF_StateClsAddStateList(state%statep, 1, temp_list, rc=localrc)      
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_StateAddOneState
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddOneStateX"
+!BOPI
+! !IROUTINE: ESMF_StateAdd - Add a State to a State with proxyflag
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAdd()   
+      subroutine ESMF_StateAddOneStateX(state, nestedState, proxyflag, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout)         :: state
+      type(ESMF_State), intent(in)            :: nestedState
+      logical,          intent(in)            :: proxyflag
+      integer,          intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a {\tt nestedState} reference to an existing 
+!      {\tt state}.
+!      The {\tt nestedState} name must be unique within the 
+!      container {\tt state}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!      An {\tt ESMF\_State} object.  This is the container object.
+!     \item[nestedState]
+!      The {\tt ESMF\_State} to be added.  This is the nested object.
+!      This is a reference only; when
+!      the {\tt ESMF\_State} is destroyed the objects contained in it will
+!      not be destroyed.   Also, nested {\tt ESMF\_State}s cannot be safely 
+!      destroyed before the container {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the user's responsibility to manage the
+!      destruction of objects when they are no longer in use.
+!     \item[proxyflag]
+!      Indicate whether this is a proxy object. 
+!     \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
       integer :: localrc
       type(ESMF_State) :: temp_list(1)
 
@@ -667,7 +1006,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_StateAddOneState
+      end subroutine ESMF_StateAddOneStateX
 
 !------------------------------------------------------------------------------
 !BOP
@@ -4240,7 +4579,7 @@
 
         do j=1, fcount
             ! get next field and query name
-            call ESMF_FieldBundleGetField(bundles(i), j, field, localrc)
+            call ESMF_FieldBundleGet(bundles(i), j, field, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
@@ -4366,7 +4705,7 @@
             if (present(proxyflag)) nextitem%proxyFlag = proxyflag
     
             ! get next field and query name
-            call ESMF_FieldBundleGetField(bundles(i), j, field, localrc)
+            call ESMF_FieldBundleGet(bundles(i), j, field, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10

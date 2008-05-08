@@ -1,4 +1,4 @@
-! $Id: ESMF_StateHelpers.F90,v 1.14 2008/04/05 03:39:19 cdeluca Exp $
+! $Id: ESMF_StateHelpers.F90,v 1.15 2008/05/08 04:46:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -337,27 +337,27 @@ subroutine CreateFieldBundle(bundle, field1, field2, field3, field4, field5, rc)
     if (localrc.NE.ESMF_SUCCESS) return
 
     if (present(field1)) then
-      call ESMF_FieldBundleAddField(bundle, field1, rc=localrc)
+      call ESMF_FieldBundleAdd(bundle, field1, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field2)) then
-      call ESMF_FieldBundleAddField(bundle, field2, rc=localrc)
+      call ESMF_FieldBundleAdd(bundle, field2, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field3)) then
-      call ESMF_FieldBundleAddField(bundle, field3, rc=localrc)
+      call ESMF_FieldBundleAdd(bundle, field3, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field4)) then
-      call ESMF_FieldBundleAddField(bundle, field4, rc=localrc)
+      call ESMF_FieldBundleAdd(bundle, field4, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field5)) then
-      call ESMF_FieldBundleAddField(bundle, field5, rc=localrc)
+      call ESMF_FieldBundleAdd(bundle, field5, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
@@ -385,27 +385,27 @@ subroutine AddFieldBundle(bundle, field1, field2, field3, field4, field5, rc)
     if (present(rc)) rc = ESMF_FAILURE
         
     if (present(field1)) then
-      call ESMF_FieldBundleAddField(bundle, field1, rc=localrc)
+      call ESMF_FieldBundleAdd(bundle, field1, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field2)) then
-      call ESMF_FieldBundleAddField(bundle, field2, rc=localrc)
+      call ESMF_FieldBundleAdd(bundle, field2, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field3)) then
-      call ESMF_FieldBundleAddField(bundle, field3, rc=localrc)
+      call ESMF_FieldBundleAdd(bundle, field3, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field4)) then
-      call ESMF_FieldBundleAddField(bundle, field4, rc=localrc)
+      call ESMF_FieldBundleAdd(bundle, field4, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 
     if (present(field5)) then
-      call ESMF_FieldBundleAddField(bundle, field5, rc=localrc)
+      call ESMF_FieldBundleAdd(bundle, field5, rc=localrc)
       if (localrc.NE.ESMF_SUCCESS) return
     endif
 

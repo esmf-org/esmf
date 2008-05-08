@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.4 2008/04/05 03:38:20 cdeluca Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.5 2008/05/08 04:46:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -176,10 +176,8 @@
        public ESMF_FieldBundleDestroy      ! Destroy a FieldBundle
 
        public ESMF_FieldBundleGet          ! Get FieldBundle information
-       public ESMF_FieldBundleGetFieldNames
+       public ESMF_FieldBundleAdd          ! Add field/fields to FieldBundle
 
-       public ESMF_FieldBundleGetField      ! Get one or more Fields by name or number
-       public ESMF_FieldBundleAddField      ! Add one or more Fields 
 !      public ESMF_FieldBundleRemoveField   ! Delete one or more Fields by name or number
 
       public ESMF_FieldBundleSetGrid           ! In empty FieldBundle, set Grid
@@ -260,27 +258,29 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldBundleGetField - Retrieve Fields from a FieldBundle
+! !IROUTINE: ESMF_FieldBundleGet - Get information from a FieldBundle
 !
 ! !INTERFACE:
-     interface ESMF_FieldBundleGetField
+     interface ESMF_FieldBundleGet
 
 ! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_FieldBundleGetInfo
+        module procedure ESMF_FieldBundleGetFieldNames
         module procedure ESMF_FieldBundleGetFieldByName
         module procedure ESMF_FieldBundleGetFieldByNum
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
-!  types of {\tt ESMF\_FieldBundleGetField} functions.
+!  types of {\tt ESMF\_FieldBundleGet} functions.
 !EOPI
       end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldBundleAddField - Add Fields to a FieldBundle
+! !IROUTINE: ESMF_FieldBundleAdd - Add Fields to a FieldBundle
 !
 ! !INTERFACE:
-     interface ESMF_FieldBundleAddField
+     interface ESMF_FieldBundleAdd
 
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldBundleAddOneField
@@ -288,9 +288,10 @@
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
-!  types of {\tt ESMF\_FieldBundleAddField} functions.
+!  types of {\tt ESMF\_FieldBundleAdd} functions.
 !EOPI
       end interface
+
 
 !------------------------------------------------------------------------------
 interface operator (.eq.)
@@ -328,10 +329,10 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleAddOneField"
 !BOP
-! !IROUTINE: ESMF_FieldBundleAddField - Add a Field to a FieldBundle
+! !IROUTINE: ESMF_FieldBundleAdd - Add a Field to a FieldBundle
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAddField()
+      ! Private name; call using ESMF_FieldBundleAdd()
       subroutine ESMF_FieldBundleAddOneField(bundle, field, rc)
 !
 ! !ARGUMENTS:
@@ -400,10 +401,10 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleAddFieldList"
 !BOP
-! !IROUTINE: ESMF_FieldBundleAddField - Add a list of Fields to a FieldBundle
+! !IROUTINE: ESMF_FieldBundleAdd - Add a list of Fields to a FieldBundle
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleAddField()
+      ! Private name; call using ESMF_FieldBundleAdd()
       subroutine ESMF_FieldBundleAddFieldList(bundle, fieldCount, fieldList, rc)
 !
 ! !ARGUMENTS:
@@ -745,12 +746,13 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleGet"
+#define ESMF_METHOD "ESMF_FieldBundleGetInfo"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleGet - Return information about a FieldBundle
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleGet(bundle, grid, fieldCount, name, rc)
+      ! Private name; call using ESMF_FieldBundleGet()
+      subroutine ESMF_FieldBundleGetInfo(bundle, grid, fieldCount, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: bundle
@@ -831,7 +833,7 @@ end function
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_FieldBundleGet
+      end subroutine ESMF_FieldBundleGetInfo
 
 
 !------------------------------------------------------------------------------
@@ -1066,10 +1068,10 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleGetFieldByName"
 !BOP
-! !IROUTINE: ESMF_FieldBundleGetField - Retrieve a Field by name
+! !IROUTINE: ESMF_FieldBundleGet - Retrieve a Field by name
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleGetField()
+      ! Private name; call using ESMF_FieldBundleGet()
       subroutine ESMF_FieldBundleGetFieldByName(bundle, name, field, rc)
 !
 ! !ARGUMENTS:
@@ -1162,10 +1164,10 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleGetFieldByNum"
 !BOP
-! !IROUTINE: ESMF_FieldBundleGetField - Retrieve a Field by index number
+! !IROUTINE: ESMF_FieldBundleGet - Retrieve a Field by index number
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleGetField()
+      ! Private name; call using ESMF_FieldBundleGet()
       subroutine ESMF_FieldBundleGetFieldByNum(bundle, fieldIndex, field, rc)
 !
 ! !ARGUMENTS:
@@ -1242,9 +1244,10 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleGetFieldNames"
 !BOP
-! !IROUTINE: ESMF_FieldBundleGetFieldNames - Return all Field names in a FieldBundle
+! !IROUTINE: ESMF_FieldBundleGet - Return all Field names in a FieldBundle
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGet()
       subroutine ESMF_FieldBundleGetFieldNames(bundle, nameList, nameCount, rc)
 !
 ! !ARGUMENTS:

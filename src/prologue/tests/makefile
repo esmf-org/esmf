@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2008/05/08 02:27:29 theurich Exp $ 
+# $Id: makefile,v 1.13 2008/05/08 04:46:08 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -19,20 +19,20 @@ LOCDIR	  = src/prologue/tests
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_StringUTest \
                 $(ESMF_TESTDIR)/ESMF_WordsizeUTest \
                 $(ESMF_TESTDIR)/ESMF_F90ArrayPtrUTest \
-		$(ESMF_TESTDIR)/ESMF_LAPACKUTest \
-		$(ESMF_TESTDIR)/ESMF_F95PtrUTest
+		$(ESMF_TESTDIR)/ESMF_LAPACKUTest
+#		$(ESMF_TESTDIR)/ESMF_F95PtrUTest
 
 TESTS_RUN     = RUN_ESMF_StringUTest \
                 RUN_ESMF_WordsizeUTest \
                 RUN_ESMF_F90ArrayPtrUTest \
-		RUN_ESMF_LAPACKUTest \
-		RUN_ESMF_F95PtrUTest
+		RUN_ESMF_LAPACKUTest
+#		RUN_ESMF_F95PtrUTest
 
 TESTS_RUN_UNI = RUN_ESMF_StringUTestUNI \
                 RUN_ESMF_WordsizeUTestUNI \
                 RUN_ESMF_F90ArrayPtrUTestUNI \
-		RUN_ESMF_LAPACKUTestUNI \
-		RUN_ESMF_F95PtrUTestUNI
+		RUN_ESMF_LAPACKUTestUNI
+#		RUN_ESMF_F95PtrUTestUNI
 
 include ${ESMF_DIR}/makefile
 
