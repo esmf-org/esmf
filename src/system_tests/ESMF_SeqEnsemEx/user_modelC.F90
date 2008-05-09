@@ -1,4 +1,4 @@
-! $Id: user_modelC.F90,v 1.1 2008/02/20 22:57:28 svasquez Exp $
+! $Id: user_modelC.F90,v 1.2 2008/05/09 18:09:37 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -80,7 +80,7 @@ module user_modelC
     initConditionC = 2
 
     ! Add the integer to the export State
-    call ESMF_StateAttributeSet(exportState, name="CondC", value=initConditionC, rc=rc)
+    call ESMF_AttributeSet(exportState, name="CondC", value=initConditionC, rc=rc)
    
     return
     
@@ -101,12 +101,12 @@ module user_modelC
     integer               :: ConditionC
     
     ! Get the value from the State
-    call ESMF_StateAttributeGet(exportState, name="CondC", value=ConditionC, rc=rc)
+    call ESMF_AttributeGet(exportState, name="CondC", value=ConditionC, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! increment condition C and put back in the export State
     ConditionC = ConditionC + 1
-    call ESMF_StateAttributeSet(exportState, name="CondC", value=ConditionC, rc=rc)
+    call ESMF_AttributeSet(exportState, name="CondC", value=ConditionC, rc=rc)
    
     print *, "User Comp C Run returning"
 
@@ -130,7 +130,7 @@ module user_modelC
     print *, "User Comp Final starting"
 
    ! Get the value from the State
-    call ESMF_StateAttributeGet(exportState, name="CondC", value=ConditionC, rc=rc)
+    call ESMF_AttributeGet(exportState, name="CondC", value=ConditionC, rc=rc)
    if (rc .ne. ESMF_SUCCESS) return
     
    if ( ConditionC.eq.7) then

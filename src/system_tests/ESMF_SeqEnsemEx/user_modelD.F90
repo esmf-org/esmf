@@ -1,4 +1,4 @@
-! $Id: user_modelD.F90,v 1.2 2008/02/21 05:02:08 svasquez Exp $
+! $Id: user_modelD.F90,v 1.3 2008/05/09 18:09:37 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -94,13 +94,13 @@ module user_modelD
     real               :: average
     
     ! Get the values from the State
-    call ESMF_StateAttributeGet(importState, name="CondA", value=ConditionA, rc=rc)
+    call ESMF_AttributeGet(importState, name="CondA", value=ConditionA, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    call ESMF_StateAttributeGet(importState, name="CondB", value=ConditionB, rc=rc)
+    call ESMF_AttributeGet(importState, name="CondB", value=ConditionB, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    call ESMF_StateAttributeGet(importState, name="CondC", value=ConditionC, rc=rc)
+    call ESMF_AttributeGet(importState, name="CondC", value=ConditionC, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Calculate average of the 3 conditions
@@ -131,13 +131,13 @@ module user_modelD
     print *, "User Comp Final starting"
 
     ! Get the values from the State
-    call ESMF_StateAttributeGet(importState, name="CondA", value=ConditionA, rc=rc)
+    call ESMF_AttributeGet(importState, name="CondA", value=ConditionA, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    call ESMF_StateAttributeGet(importState, name="CondB", value=ConditionB, rc=rc)
+    call ESMF_AttributeGet(importState, name="CondB", value=ConditionB, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    call ESMF_StateAttributeGet(importState, name="CondC", value=ConditionC, rc=rc)
+    call ESMF_AttributeGet(importState, name="CondC", value=ConditionC, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
 

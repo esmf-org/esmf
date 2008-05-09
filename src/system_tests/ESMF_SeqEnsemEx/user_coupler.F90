@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2008/02/20 22:54:42 svasquez Exp $
+! $Id: user_coupler.F90,v 1.4 2008/05/09 18:09:37 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -110,14 +110,14 @@ module user_coupler
     end if
 
     ! Get the Condition for this model
-    call ESMF_StateAttributeGet(exportState, name=name, value=condition, rc=rc)
+    call ESMF_AttributeGet(exportState, name=name, value=condition, rc=rc)
 
     ! square the condition just read
     condition=condition * condition
  
     ! Store the condition for this component in the modelD import State
     
-    call ESMF_StateAttributeSet(importState, name=name, value=condition, rc=rc)
+    call ESMF_AttributeSet(importState, name=name, value=condition, rc=rc)
 
     print *, "User Coupler Run returning"
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistDirSTest.F90,v 1.8 2008/04/23 20:48:39 svasquez Exp $
+! $Id: ESMF_DistDirSTest.F90,v 1.9 2008/05/09 18:09:36 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -140,7 +140,6 @@ program DistDir
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-/bin/bash: line 1: :q: command not found
   print *, "System Test DistDir complete."
 
   ! Normal ESMF Test output
@@ -170,6 +169,7 @@ program DistDir
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
 
+10 continue
   call ESMF_Finalize(rc=rc) 
 
 end program DistDir
