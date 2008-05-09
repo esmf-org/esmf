@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.56.2.7 2008/04/24 18:02:52 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.56.2.8 2008/05/09 04:52:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -467,6 +467,22 @@
                                ESMF_INDEX_GLOBAL = ESMF_IndexFlag(1)
 
 !------------------------------------------------------------------------------
+!     ! ESMF_RegionFlag
+!
+!     ! Interface flag for setting index bounds
+
+      type ESMF_RegionFlag
+      sequence
+      private
+        integer :: i_type
+      end type
+
+      type(ESMF_RegionFlag), parameter ::  &
+        ESMF_REGION_TOTAL = ESMF_RegionFlag(0), &
+        ESMF_REGION_SELECT = ESMF_RegionFlag(1), &
+        ESMF_REGION_EMPTY = ESMF_RegionFlag(2)
+
+!------------------------------------------------------------------------------
 !BOPI
 !
 ! !PUBLIC TYPES:
@@ -505,6 +521,8 @@
       public ESMF_Direction, ESMF_MODE_FORWARD, ESMF_MODE_REVERSE
 
       public ESMF_IndexFlag, ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL
+      public ESMF_RegionFlag, &
+             ESMF_REGION_TOTAL, ESMF_REGION_SELECT, ESMF_REGION_EMPTY
 
       public ESMF_ReduceFlag, ESMF_SUM, ESMF_MIN, ESMF_MAX
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_VASBLOCKING, &
@@ -582,6 +600,7 @@ interface operator (.eq.)
   module procedure ESMF_lgeq
   module procedure ESMF_dmeq
   module procedure ESMF_ifeq
+  module procedure ESMF_rfeq
 end interface
 
 interface operator (.ne.)
@@ -1240,6 +1259,17 @@ function ESMF_ifeq(if1, if2)
   type(ESMF_IndexFlag), intent(in) :: if1, if2
 
   ESMF_ifeq = (if1%i_type .eq. if2%i_type)
+end function
+
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_RegionFlag types
+
+function ESMF_rfeq(rf1, rf2)
+  logical ESMF_rfeq
+  type(ESMF_RegionFlag), intent(in) :: rf1, rf2
+
+  ESMF_rfeq = (rf1%i_type .eq. rf2%i_type)
 end function
 
 
