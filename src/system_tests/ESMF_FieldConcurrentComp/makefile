@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2008/05/09 18:09:36 feiliu Exp $ 
+# $Id: makefile,v 1.2 2008/05/09 18:20:49 feiliu Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -40,10 +40,10 @@ CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 
-RUN_ConcurrentComp:
+RUN_FieldConComp:
 	$(MAKE) TNAME=FieldConComp NP=8 stest
 
-RUN_ConcurrentCompUNI:
+RUN_FieldConCompUNI:
 	$(MAKE) TNAME=FieldConComp NP=1 stest
 
 
