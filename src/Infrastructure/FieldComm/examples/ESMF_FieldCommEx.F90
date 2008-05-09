@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.23 2008/04/05 03:38:22 cdeluca Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.24 2008/05/09 19:43:13 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_FieldCommEx
 
 !------------------------------------------------------------------------------
-!ESMF_EXremoveAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_FieldCommEx - Field level communication routines
@@ -25,210 +25,207 @@
 ! Also see the Programming Model section of this document.
 !-----------------------------------------------------------------------------
 
-#include "ESMF.h" 
+#include <ESMF.h>
+#include <ESMF_Macros.inc>
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldCommEx"
 
     ! ESMF Framework module
     use ESMF_Mod
+    use ESMF_TestMod
 
     implicit none
     
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+    character(*), parameter :: version = &
+    '$Id: ESMF_FieldCommEx.F90,v 1.24 2008/05/09 19:43:13 feiliu Exp $'
+!------------------------------------------------------------------------------
+
     ! Local variables
-    integer :: rc, finalrc, npets
-    integer :: i, j
-    integer :: lb(2), ub(2), halo
-    type(ESMF_IGrid) :: srcigrid, dstigrid
-    type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_DELayout) :: layout1, layout2
-    type(ESMF_VM) :: vm
-    type(ESMF_RouteHandle) :: halo_rh, redist_rh, regrid_rh
-    type(ESMF_Field) :: field1, field2
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1
-    real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
-!EOC
+    integer :: rc, finalrc
 
+    ! local arguments used to create field etc
+    type(ESMF_Field)                            :: field
+    type(ESMF_Grid)                             :: grid
+    type(ESMF_DistGrid)                         :: distgrid
+    type(ESMF_VM)                               :: vm
+    !type(ESMF_ArraySpec)                        :: arrayspec
+    type(ESMF_Array)                            :: array
+    integer                                     :: localrc, lpe, i, j
+
+    integer, allocatable                        :: farray(:,:)
+    integer, allocatable                        :: farrayDst(:,:)
+    integer, allocatable                        :: farraySrc(:,:)
+    integer                                     :: fa_shape(2)
+    integer, pointer                            :: fptr(:,:)
+
+    rc = ESMF_SUCCESS
     finalrc = ESMF_SUCCESS
-        
-!-------------------------------------------------------------------------
-!   ! Setup:
-!   !
-!   !  Create a source and destination igrid with data on it, to use
-!   !  in the Halo, Redist, and Regrid calls below.
-!   !  Note Regrid call has been removed.  cmd 8/07.
- 
+!------------------------------------------------------------------------------
     call ESMF_Initialize(rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    
-    call ESMF_VMGetGlobal(vm, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-    ! Get number of PETs we are running with
-    call ESMF_VMGet(vm, petCount=npets, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) &
+        call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!------------------------------------------------------------------------------
+!BOE
+! \subsection{Gather Field data onto root PET}
+!\label{sec:field:usage:gather_2dptr}
+!
+! user can use {\tt ESMF\_FieldGather} interface to gather Field data from multiple
+! PETS onto a single root PET. This interface is overloaded by type, kind, and rank.
+! 
+! In this example, we first create a 2D Field, then use {\tt ESMF\_FieldGather} to
+! collect all the data in this Field into a data pointer on PET 0.
+!EOE
+!BOC 
+    ! Get current VM and pet number
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    layout1 = ESMF_DELayoutCreate(vm, (/ 1, npets /), rc=rc)
-    layout2 = ESMF_DELayoutCreate(vm, (/ npets, 1 /), rc=rc)
+    call ESMF_VMGet(vm, localPet=lpe, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    mincoords = (/  0.0,  0.0 /)
-    maxcoords = (/ 20.0, 30.0 /)
-    srcigrid = ESMF_IGridCreateHorzXYUni((/ 90, 180 /), &
-                   mincoords, maxcoords, &
-                   horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
-                   name="srcigrid", rc=rc)
-    call ESMF_IGridDistribute(srcigrid, delayout=layout1, rc=rc)
+    ! Create a 2D Grid and use this grid to create a Field
+    ! farray is the Fortran data array that contains data on each PET.
+    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        regDecomp=(/2,2/), &
+        gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+        name="grid", rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! same igrid coordinates, but different layout
-    dstigrid = ESMF_IGridCreateHorzXYUni((/ 90, 180 /), &
-                   mincoords, maxcoords, &
-                   horzStagger=ESMF_IGRID_HORZ_STAGGER_A, &
-                   name="dstigrid", rc=rc)
-    call ESMF_IGridDistribute(dstigrid, delayout=layout2, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldGet(grid, localDe=0, totalCount=fa_shape, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! allow for a halo width of 3
-    halo = 3
-    field1 = ESMF_FieldCreate(srcigrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                              haloWidth=halo, name="src pressure", rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    allocate(farray(fa_shape(1), fa_shape(2)))
+    farray = lpe
+    array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
+        staggerloc=0, &
+        rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldGetDataPointer(field1, f90ptr1, ESMF_DATA_REF, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    field = ESMF_FieldCreate(grid, array, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    lb(:) = lbound(f90ptr1)
-    ub(:) = ubound(f90ptr1)
+    ! allocate the Fortran data array on PET 0 to store gathered data
+    if(lpe .eq. 0) allocate(farrayDst(10,20))
+    call ESMF_FieldGather(field, farrayDst, rootPet=0, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    f90ptr1(:,:) = 0.0
-    do j=lb(2)+halo, ub(2)-halo
-      do i=lb(1)+halo, ub(1)-halo
-        f90ptr1(i, j) = i*1000 + j
-      enddo
+    ! check that the values gathered on rootPet are correct
+    !    1        5         10
+    ! 1  +--------+---------+
+    !    |        |         |
+    !    |   0    |    1    |
+    !    |        |         |
+    ! 10 +--------+---------+
+    !    |        |         |
+    !    |   2    |    3    |
+    !    |        |         |
+    ! 20 +--------+---------+
+    if(lpe .eq. 0) then
+        do i = 1, 2
+            do j = 1, 2
+                if(farrayDst(i, j) .ne. (i-1)+(j-1)*2) localrc=ESMF_FAILURE
+                if(farrayDst(i*5, j*10) .ne. (i-1)+(j-1)*2) localrc=ESMF_FAILURE
+            enddo
+        enddo
+        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    endif
+!EOC
+    call ESMF_FieldDestroy(field, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_GridDestroy(grid, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_ArrayDestroy(array, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    deallocate(farray)
+    if(lpe .eq. 0) deallocate(farrayDst)
+
+!------------------------------------------------------------------------------
+!BOE
+! \subsection{Scatter Field data from root PET onto its set of joint PETs}
+!\label{sec:field:usage:scatter_2dptr}
+!
+! user can use {\tt ESMF\_FieldScatter} interface to scatter Field data from root
+! PET onto its set of joint PETs. This interface is overloaded by type, kind, and rank.
+! 
+! In this example, we first create a 2D Field, then use {\tt ESMF\_FieldScatter} to
+! scatter the data from a data array located on PET 0 onto this Field.
+!EOE
+!BOC 
+    ! Create a 2D Grid and use this grid to create a Field
+    ! farray is the Fortran data array that contains data on each PET.
+    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        regDecomp=(/2,2/), &
+        gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+        name="grid", rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_FieldGet(grid, localDe=0, totalCount=fa_shape, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    allocate(farray(fa_shape(1), fa_shape(2)))
+    farray = lpe
+    array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
+        staggerloc=0, &
+        rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    field = ESMF_FieldCreate(grid, array, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! initialize values to be scattered
+    !    1        5         10
+    ! 1  +--------+---------+
+    !    |        |         |
+    !    |   0    |    1    |
+    !    |        |         |
+    ! 10 +--------+---------+
+    !    |        |         |
+    !    |   2    |    3    |
+    !    |        |         |
+    ! 20 +--------+---------+
+    if(lpe .eq. 0) then
+        allocate(farraySrc(10,20))
+        farraySrc(1:5,1:10) = 0
+        farraySrc(6:10,1:10) = 1
+        farraySrc(1:5,11:20) = 2
+        farraySrc(6:10,11:20) = 3
+    endif
+
+    ! scatter the data onto individual PETs of the Field
+    call ESMF_FieldScatter(field, farraySrc, rootPet=0, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_FieldGet(field, localDe=0, farray=fptr, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! verify that the scattered data is properly distributed
+    do i = lbound(fptr, 1), ubound(fptr, 1)
+        do j = lbound(fptr, 2), ubound(fptr, 2)
+            if(fptr(i, j) .ne. lpe) localrc = ESMF_FAILURE
+        enddo
+        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     enddo
-
-
-    field2 = ESMF_FieldCreate(dstigrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                              haloWidth=halo, name="dst pressure", rc=rc)
-
- 
-    ! fields all ready to go
+!EOC
+    call ESMF_FieldDestroy(field, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_GridDestroy(grid, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_ArrayDestroy(array, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    deallocate(farray)
+    if(lpe .eq. 0) deallocate(farraySrc)
 
 !------------------------------------------------------------------------------
-!BOE
-!\subsubsection{Field Halo operation}
-      
-!  The user has already created an {\tt ESMF\_IGrid}, an
-!  {\tt ESMF\_Array} with data, and used them to create an {\tt ESMF\_Field}.
-!
-!  Now that field is used in the store call which precomputes the
-!  data movement which is required.  The {\tt ESMF_FieldHalo()} call
-!  actually performs the operation.
-!EOE
-
-
-!BOC
-    call ESMF_FieldHaloStore(field1, routehandle=halo_rh, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-    call ESMF_FieldHalo(field1, halo_rh, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-    call ESMF_FieldHaloRelease(halo_rh, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    print *, "Halo example 1 returned"
-
-
-!------------------------------------------------------------------------------
-!BOE
-!\subsubsection{Field Data Redistribution operation}
-      
-!  The user has already created an {\tt ESMF\_IGrid}, an 
-!  {\tt ESMF\_Array} with data, and used them to create an {\tt ESMF\_Field}.
-!
-!  The data redistribution operation does not do interpolation; it 
-!  is used when the same igrid is decomposed differently - perhaps along
-!  different indices, or on different numbers of PETs.
-!
-!  The store call will precompute the data movement necessary, and the
-!  call to {\tt ESMF\_FieldRedist()} will perform the actual movement.
-!EOE
-
-
-!BOC
-    call ESMF_FieldRedistStore(field1, field2, vm, &
-                               routehandle=redist_rh, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-    call ESMF_FieldRedist(field1, field2, routehandle=redist_rh, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-    call ESMF_FieldRedistRelease(redist_rh, rc=rc)
-!EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-
-    print *, "Redist example 2 returned"
-
-!-------------------------------------------------------------------------
-!BremoveOE
-!\subsubsection{Field Regridding operation}
-!      
-!  The user has already created an {\tt ESMF\_IGrid}, an
-!  {\tt ESMF\_Array} with data, and used them to create an {\tt ESMF\_Field}.
-!
-!  The regridding operation can interpolate data values to move data
-!  from one igrid to another.
-!
-!  The store call will precompute the data movement necessary, and the
-!  call to {\tt ESMF\_FieldRegrid()} will perform the actual movement.
-!EremoveOE
-!
-!
-!
-!BremoveOC
-!    call ESMF_FieldRegridStore(field1, field2, vm, &
-!                               routehandle=regrid_rh, &
-!                               regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
-!EremoveOC
-!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!
-!BremoveOC
-!    call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
-!EremoveOC
-!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!
-!BremoveOC
-!    call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
-!EremoveOC
-!    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!
-!    print *, "Regrid example 3 returned"
-
-!-------------------------------------------------------------------------
-!    ! Cleanup
-
-    call ESMF_FieldDestroy(field1, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_FieldDestroy(field2, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_IGridDestroy(srcigrid, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_IGridDestroy(dstigrid, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
     if (finalrc.EQ.ESMF_SUCCESS) then
        print *, "PASS: ESMF_FieldCommEx.F90"
     else
@@ -240,4 +237,3 @@
     end program ESMF_FieldCommEx
     
 !\end{verbatim}
-    

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2006/01/30 20:10:08 nscollins Exp $
+# $Id: makefile,v 1.13 2008/05/09 19:43:13 feiliu Exp $
 
 ALL:  build_examples
 
@@ -18,14 +18,14 @@ LOCDIR	  = src/Infrastructure/FieldComm/examples
 
 
 EXAMPLES_BUILD  = $(ESMF_EXDIR)/ESMF_FieldCommEx \
-		  $(ESMF_EXDIR)/ESMF_FieldRedistEx
+#		  $(ESMF_EXDIR)/ESMF_FieldRedistEx
 
 
 EXAMPLES_RUN = run_ESMF_FieldCommEx \
-	       run_ESMF_FieldRedistEx
+#	       run_ESMF_FieldRedistEx
                
 EXAMPLES_RUN_UNI = run_ESMF_FieldCommEx_uni \
-		   run_ESMF_FieldRedistEx_uni
+#		   run_ESMF_FieldRedistEx_uni
                    
 
 
