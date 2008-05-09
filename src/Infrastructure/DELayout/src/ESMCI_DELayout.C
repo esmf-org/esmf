@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.1.2.5 2008/05/09 05:52:15 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.1.2.6 2008/05/09 16:45:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.5 2008/05/09 05:52:15 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.6 2008/05/09 16:45:45 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3916,10 +3916,12 @@ int XXE::execReady(
           // insert explicit waitOnIndex StreamElements
           count = i;
           for (int j=0; j<sendnbCount; j++){
+            int index = sendnbIndexList[j];
             stream[count].opId = waitOnIndex;
+            stream[count].predicateBitField = stream[index].predicateBitField;
             xxeElement = &(stream[count]);
             xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
-            xxeWaitOnIndexInfo->index = sendnbIndexList[j];
+            xxeWaitOnIndexInfo->index = index;
             ++count;
             if (count >= max){
               localrc = growStream(1000);
@@ -3957,10 +3959,12 @@ int XXE::execReady(
           // insert explicit waitOnIndex StreamElements
           count = i;
           for (int j=0; j<recvnbCount; j++){
+            int index = recvnbIndexList[j];
             stream[count].opId = waitOnIndex;
+            stream[count].predicateBitField = stream[index].predicateBitField;
             xxeElement = &(stream[count]);
             xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
-            xxeWaitOnIndexInfo->index = recvnbIndexList[j];
+            xxeWaitOnIndexInfo->index = index;
             ++count;
             if (count >= max){
               localrc = growStream(1000);
@@ -4303,8 +4307,10 @@ int XXE::optimize(
               xxeSendnbInfo->buffer = buffer;
               xxeSendnbInfo->size = bufferSize;
               // invalidate all other sendnb StreamElements to nop
-              for (int k=1; k<aeList[0]->indexCount; k++)
+              for (int k=1; k<aeList[0]->indexCount; k++){
                 stream[aeList[0]->indexList[k]].opId = nop;
+                stream[aeList[0]->indexList[k]].predicateBitField = 0x0;
+              }
             }else{
               // need to introduce a contiguous intermediate buffer
               int bufferSize = 0; // reset
@@ -4321,6 +4327,7 @@ int XXE::optimize(
                 // data of StreamElements ref. by aeList[kk] are congtig. memory
                 // -> only need a single memCpy for all of them
                 extrastream[xxeCount].opId = memCpy;
+                extrastream[xxeCount].predicateBitField = 0x0;  //TODO: match!
                 xxeElement = &(extrastream[xxeCount]);
                 xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
                 xxeMemCpyInfo->dstMem = buffer + bufferOffset;
@@ -4329,13 +4336,16 @@ int XXE::optimize(
                 ++xxeCount;
                 bufferOffset += aeList[kk]->bufferSize;
                 // invalidate all StreamElements in stream assoc. w. aeList[kk]
-                for (int k=0; k<aeList[kk]->indexCount; k++)
-                  stream[aeList[kk]->indexList[k]].opId = nop;  // invalidate
+                for (int k=0; k<aeList[kk]->indexCount; k++){
+                  stream[aeList[kk]->indexList[k]].opId = nop;
+                  stream[aeList[kk]->indexList[k]].predicateBitField = 0x0;
+                }
               }
               // determine first Sendnb index
               int firstIndex = aeList[0]->indexList[0];
               // replace the first sendnb StreamElement using the interm. buffer
               stream[firstIndex].opId = sendnb;
+              stream[firstIndex].predicateBitField = 0x0;  //TODO: match!
               xxeElement = &(stream[firstIndex]);
               xxeSendnbInfo = (SendnbInfo *)xxeElement;
               xxeSendnbInfo->buffer = buffer;
@@ -4403,8 +4413,10 @@ int XXE::optimize(
               xxeRecvnbInfo->buffer = buffer;
               xxeRecvnbInfo->size = bufferSize;
               // invalidate all other recvnb StreamElements to nop
-              for (int k=1; k<aeList[0]->indexCount; k++)
+              for (int k=1; k<aeList[0]->indexCount; k++){
                 stream[aeList[0]->indexList[k]].opId = nop;
+                stream[aeList[0]->indexList[k]].predicateBitField = 0x0;
+              }
             }else{
               // need to introduce a contiguous intermediate buffer
               int bufferSize = 0; // reset
@@ -4421,6 +4433,7 @@ int XXE::optimize(
                 // data of StreamElements referenced by aeList[kk] are congtig.
                 // -> only need a single memCpy for all of them
                 extrastream[xxeCount].opId = memCpy;
+                extrastream[xxeCount].predicateBitField = 0x0;  //TODO: match!
                 xxeElement = &(extrastream[xxeCount]);
                 xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
                 xxeMemCpyInfo->dstMem = aeList[kk]->bufferStart;
@@ -4429,12 +4442,15 @@ int XXE::optimize(
                 ++xxeCount;
                 bufferOffset += aeList[kk]->bufferSize;
                 // invalidate all StreamElements in stream asso. with aeList[kk]
-                for (int k=0; k<aeList[kk]->indexCount; k++)
-                  stream[aeList[kk]->indexList[k]].opId = nop;  // invalidate
+                for (int k=0; k<aeList[kk]->indexCount; k++){
+                  stream[aeList[kk]->indexList[k]].opId = nop;
+                  stream[aeList[kk]->indexList[k]].predicateBitField = 0x0;
+                }
               }
               // replace the very first recvnb StreamElement using the
               // intermediate buffer
               stream[aeList[0]->indexList[0]].opId = recvnb;
+              stream[aeList[0]->indexList[0]].predicateBitField = 0x0;//TODO:mat
               xxeElement = &(stream[aeList[0]->indexList[0]]);
               xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
               xxeRecvnbInfo->buffer = buffer;
