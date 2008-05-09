@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmType.F90,v 1.15 2008/04/05 03:38:58 cdeluca Exp $
+! $Id: ESMF_AlarmType.F90,v 1.16 2008/05/09 18:35:28 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -17,9 +17,9 @@
 !
 !==============================================================================
 !
-! This file contains the Alarm class definition.  The Alarm class methods
-! are defined in ESMF_Alarm.F90.  This split is to resolve mutual method
-! dependency with ESMF_Clock.
+! This file contains the Alarm class data definition, as well as internal methods.
+! The Alarm class methods are defined in ESMF_Alarm.F90.  This split is to resolve 
+! mutual method dependency with ESMF_Clock.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -86,7 +86,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_AlarmType.F90,v 1.15 2008/04/05 03:38:58 cdeluca Exp $'
+      '$Id: ESMF_AlarmType.F90,v 1.16 2008/05/09 18:35:28 rosalind Exp $'
 !------------------------------------------------------------------------------
 
       contains
