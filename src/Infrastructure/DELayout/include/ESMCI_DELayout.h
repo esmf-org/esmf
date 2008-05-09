@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.1.2.3 2008/04/21 22:37:50 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.1.2.4 2008/05/09 04:48:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -215,6 +215,7 @@ class XXE{
       productSumScalar, productSumScalarRRA,
       productSumSuperScalarRRA,
       productSumSuperScalarContigRRA,
+      zeroSuperScalarRRA,
       memCpy, memCpySrcRRA,
       memGatherSrcRRA,
       // --- subs
@@ -228,15 +229,12 @@ class XXE{
       // --- ids below are not suitable for direct execution
       waitOnAllSendnb, waitOnAllRecvnb
     };
-    enum OpSubId{
-      noSum
-    };
     enum TKId{
       I4, I8, R4, R8, BYTE
     };
     struct StreamElement{
       OpId opId;              // id of operation
-      OpSubId opSubId;        // id of sub-operation
+      int predicateBitField;  // predicate bit field to control conditional exec
       char opInfo[12*8];      // 12 x 8-byte to hold info associated with op
     };
     
@@ -287,9 +285,9 @@ class XXE{
         delete xxeSubList[i];
       delete [] xxeSubList;
     }
-    int exec(int rraCount=0, char **rraList=NULL, double *dTime=NULL,
-      int indexStart=-1, int indexStop=-1);
-    int print(int rraCount=0, char **rraList=NULL,
+    int exec(int rraCount=0, char **rraList=NULL, int filterBitField=0x0,
+      double *dTime=NULL, int indexStart=-1, int indexStop=-1);
+    int print(int rraCount=0, char **rraList=NULL, int filterBitField=0x0,
       int indexStart=-1, int indexStop=-1);
     int printProfile();
     int execReady();
@@ -327,7 +325,7 @@ class XXE{
       
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       VMK::commhandle **commhandle;
       void *buffer;
       int size;
@@ -336,7 +334,7 @@ class XXE{
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       VMK::commhandle **commhandle;
       void *buffer;
       int size;
@@ -345,7 +343,7 @@ class XXE{
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       VMK::commhandle **commhandle;
       int rraOffset;
       int size;
@@ -355,7 +353,7 @@ class XXE{
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       VMK::commhandle **commhandle;
       int rraOffset;
       int size;
@@ -365,13 +363,13 @@ class XXE{
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       int index;
     }WaitOnIndexInfo;
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       int count;
       XXE **xxe;
       int *index;
@@ -380,14 +378,14 @@ class XXE{
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       int indexStart;
       int indexEnd;
     }WaitOnIndexRangeInfo;
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       TKId elementTK;
       TKId factorTK;
       TKId valueTK;
@@ -399,7 +397,7 @@ class XXE{
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       TKId elementTK;
       TKId factorTK;
       TKId valueTK;
@@ -410,7 +408,7 @@ class XXE{
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       TKId elementTK;
       TKId factorTK;
       TKId valueTK;
@@ -422,7 +420,7 @@ class XXE{
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       TKId elementTK;
       TKId factorTK;
       TKId valueTK;
@@ -435,7 +433,7 @@ class XXE{
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       TKId elementTK;
       TKId factorTK;
       TKId valueTK;
@@ -448,7 +446,16 @@ class XXE{
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
+      TKId elementTK;
+      int *rraOffsetList;
+      int rraIndex;
+      int termCount;
+    }ZeroSuperScalarRRAInfo;
+
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
       void *dstMem;
       void *srcMem;
       int size;
@@ -456,7 +463,7 @@ class XXE{
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       void *dstMem;
       int rraOffset;
       int size;
@@ -465,7 +472,7 @@ class XXE{
     
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       void *dstBase;
       TKId dstBaseTK;
       int *rraOffsetList;
@@ -478,13 +485,13 @@ class XXE{
     
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       XXE *xxe;
     }XxeSubInfo;
     
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       int count;
       XXE **xxe;
     }XxeSubMultiInfo;
@@ -493,7 +500,7 @@ class XXE{
     
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       char *timerString;
       int timerId;
       int actualWtimerId;
@@ -511,7 +518,7 @@ class XXE{
     
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       char *messageString;
     }MessageInfo;
     
@@ -519,7 +526,7 @@ class XXE{
 
     typedef struct{
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       VMK::commhandle **commhandle;
     }CommhandleInfo;
 

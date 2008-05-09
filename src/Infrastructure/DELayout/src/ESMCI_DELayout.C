@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.1.2.3 2008/04/21 22:37:51 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.1.2.4 2008/05/09 04:48:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.3 2008/04/21 22:37:51 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.4 2008/05/09 04:48:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2417,6 +2417,7 @@ int XXE::exec(
 //
   int rraCount,       // in  - number of relative run-time address in rraList
   char **rraList,     // in  - relative run-time addresses
+  int filterBitField, // in  - filter operations according to predicateBitField
   double *dTime,      // out - execution time, NULL to disable
   int indexStart,     // in  - start index, < 0 for default (full stream)
   int indexStop       // in  - stop index, < 0 for default (full stream)
@@ -2455,7 +2456,7 @@ int XXE::exec(
     return rc;
   }
   
-  void *xxeElement, *xxeIndexElement;
+  StreamElement *xxeElement, *xxeIndexElement;
   SendnbInfo *xxeSendnbInfo;
   RecvnbInfo *xxeRecvnbInfo;
   SendnbRRAInfo *xxeSendnbRRAInfo;
@@ -2469,6 +2470,7 @@ int XXE::exec(
   ProductSumScalarRRAInfo *xxeProductSumScalarRRAInfo;
   ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
   ProductSumSuperScalarContigRRAInfo *xxeProductSumSuperScalarContigRRAInfo;
+  ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo;
   MemCpyInfo *xxeMemCpyInfo;
   MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
   MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo;
@@ -2484,6 +2486,10 @@ int XXE::exec(
   
   for (int i=indexRangeStart; i<=indexRangeStop; i++){
     xxeElement = &(stream[i]);
+    
+    if (xxeElement->predicateBitField & filterBitField)
+      continue; // filter out this operation
+    
 //    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
     switch(stream[i].opId){
     case send:
@@ -2626,6 +2632,52 @@ int XXE::exec(
           termCount, 0);
       }
       break;
+    case zeroSuperScalarRRA:
+      {
+        xxeZeroSuperScalarRRAInfo =
+          (ZeroSuperScalarRRAInfo *)xxeElement;
+        int *rraOffsetList = xxeZeroSuperScalarRRAInfo->rraOffsetList;
+        int termCount = xxeZeroSuperScalarRRAInfo->termCount;
+        switch (xxeZeroSuperScalarRRAInfo->elementTK){
+        case I4:
+          {
+            for (int i=0; i<termCount; i++){
+              ESMC_I4 *rraBase =
+                (ESMC_I4 *)rraList[xxeZeroSuperScalarRRAInfo->rraIndex];
+              *(rraBase+rraOffsetList[i]) = 0;
+            }
+          }
+          break;
+        case I8:
+          {
+            for (int i=0; i<termCount; i++){
+              ESMC_I8 *rraBase =
+                (ESMC_I8 *)rraList[xxeZeroSuperScalarRRAInfo->rraIndex];
+              *(rraBase+rraOffsetList[i]) = 0;
+            }
+          }
+          break;
+        case R4:
+          {
+            for (int i=0; i<termCount; i++){
+              ESMC_R4 *rraBase =
+                (ESMC_R4 *)rraList[xxeZeroSuperScalarRRAInfo->rraIndex];
+              *(rraBase+rraOffsetList[i]) = 0.;
+            }
+          }
+          break;
+        case R8:
+          {
+            for (int i=0; i<termCount; i++){
+              ESMC_R8 *rraBase =
+                (ESMC_R8 *)rraList[xxeZeroSuperScalarRRAInfo->rraIndex];
+              *(rraBase+rraOffsetList[i]) = 0.;
+            }
+          }
+          break;
+        }
+      }
+      break;
     case memCpy:
       {
         xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
@@ -2713,14 +2765,16 @@ int XXE::exec(
     case xxeSub:
       {
         xxeSubInfo = (XxeSubInfo *)xxeElement;
-        xxeSubInfo->xxe->exec(rraCount, rraList); // recursive call
+        // recursive call:
+        xxeSubInfo->xxe->exec(rraCount, rraList, filterBitField);
       }
       break;
     case xxeSubMulti:
       {
         xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
         for (int k=0; k<xxeSubMultiInfo->count; k++)
-          xxeSubMultiInfo->xxe[k]->exec(rraCount, rraList); // recursive call
+          // recursive call:
+          xxeSubMultiInfo->xxe[k]->exec(rraCount, rraList, filterBitField);
       }
       break;
     case waitOnAnyIndexSub:
@@ -2739,7 +2793,8 @@ int XXE::exec(
               vm->commtest(xxeCommhandleInfo->commhandle, &(completeFlag[k]));
               if (completeFlag[k]){
                 // recursive call into xxe execution
-                xxeWaitOnAnyIndexSubInfo->xxe[k]->exec(rraCount, rraList);
+                xxeWaitOnAnyIndexSubInfo->xxe[k]->
+                  exec(rraCount, rraList, filterBitField);
                 ++completeTotal;
               }
             }
@@ -2765,10 +2820,8 @@ int XXE::exec(
         VMK::wtime(wtime);
         *wtime -= wtimeRelative;
         // actual xxe wtimer stream element
-        if (xxeWtimerInfo->opSubId != noSum){
-          *wtimeSumActual += *wtime - *wtimeActual; // add time interval
-          ++(*sumTermCountActual);  // count this sum term
-        }
+        *wtimeSumActual += *wtime - *wtimeActual; // add time interval
+        ++(*sumTermCountActual);  // count this sum term
         *wtimeActual = *wtime;
       }
       break;
@@ -3302,6 +3355,7 @@ int XXE::print(
 //
   int rraCount,       // in  - number of relative run-time address in rraList
   char **rraList,     // in  - relative run-time addresses
+  int filterBitField, // in  - filter operations according to predicateBitField
   int indexStart,     // in  - start index, < 0 for default (full stream)
   int indexStop       // in  - stop index, < 0 for default (full stream)
   ){
@@ -4058,7 +4112,7 @@ int XXE::optimize(
   class AnalyzeElement{
     public:
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       int partnerPet;
       char *bufferStart;
       char *bufferEnd;
@@ -4067,10 +4121,10 @@ int XXE::optimize(
       int indexList[10000];
       AnalyzeElement *next;
     public:
-      AnalyzeElement(int index, OpId opIdArg, OpSubId opSubIdArg, 
+      AnalyzeElement(int index, OpId opIdArg, int predicateBitFieldArg,
         int petArg, void *buffer, int size){
         opId=opIdArg;
-        opSubId=opSubIdArg;
+        predicateBitField=predicateBitFieldArg;
         partnerPet=petArg;
         bufferStart=(char *)buffer;
         bufferEnd=bufferStart+size;
@@ -4085,21 +4139,25 @@ int XXE::optimize(
       }
       void print(){
         if (this){
-          printf("opId: %d, opSubId: %d, partnerPet: %d, indexCount: %d, "
-            "buffer: %p - %p\n",
-            opId, opSubId, partnerPet, indexCount, bufferStart, bufferEnd);
+          printf("opId: %d, predicateBitField: %d, partnerPet: %d, "
+            "indexCount: %d, buffer: %p - %p\n",
+            opId, predicateBitField, partnerPet, indexCount, bufferStart,
+            bufferEnd);
           next->print();  // recursive call
         }else
           printf("ae: END\n");
       }
-      void add(int index, OpId opIdArg, OpSubId opSubIdArg, 
+      void add(int index, OpId opIdArg, int predicateBitFieldArg, 
         int petArg, void *buffer, int size){
-        if (opIdArg!=opId || opSubId!=opSubId || petArg!=partnerPet)
+        if (opIdArg!=opId || predicateBitFieldArg!=predicateBitField
+          || petArg!=partnerPet)
           if (next)
-            next->add(index, opIdArg, opSubIdArg, petArg, buffer, size);
+            next->add(index, opIdArg, predicateBitFieldArg, petArg, buffer,
+            size);
           else
             next = new 
-              AnalyzeElement(index, opIdArg, opSubIdArg, petArg, buffer, size);
+              AnalyzeElement(index, opIdArg, predicateBitFieldArg, petArg,
+              buffer, size);
         else{
           if ((char *)buffer == bufferEnd){
             // in this simple analyzer elements must be in order
@@ -4109,11 +4167,12 @@ int XXE::optimize(
             ++indexCount;
           }else
             if (next)
-              next->add(index, opIdArg, opSubIdArg, petArg, buffer, size);
+              next->add(index, opIdArg, predicateBitFieldArg, petArg, buffer,
+              size);
             else
               next = new 
-                AnalyzeElement(index, opIdArg, opSubIdArg, petArg, buffer,
-                  size);
+                AnalyzeElement(index, opIdArg, predicateBitFieldArg, petArg,
+                buffer, size);
         }
       }
       int elementCount(){
@@ -4201,22 +4260,24 @@ int XXE::optimize(
       case sendnb:
         {
           xxeSendnbInfo = (SendnbInfo *)xxeElement;
-          if (aq) aq->add(i, xxeSendnbInfo->opId, xxeSendnbInfo->opSubId,
-            xxeSendnbInfo->dstPet, xxeSendnbInfo->buffer, xxeSendnbInfo->size);
+          if (aq) aq->add(i, xxeSendnbInfo->opId, 
+            xxeSendnbInfo->predicateBitField, xxeSendnbInfo->dstPet,
+            xxeSendnbInfo->buffer, xxeSendnbInfo->size);
           else
             aq = new AnalyzeElement(i, xxeSendnbInfo->opId,
-              xxeSendnbInfo->opSubId, xxeSendnbInfo->dstPet,
+              xxeSendnbInfo->predicateBitField, xxeSendnbInfo->dstPet,
               xxeSendnbInfo->buffer, xxeSendnbInfo->size);
         }
         break;
       case recvnb:
         {
           xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
-          if (aq) aq->add(i, xxeRecvnbInfo->opId, xxeRecvnbInfo->opSubId,
-            xxeRecvnbInfo->srcPet, xxeRecvnbInfo->buffer, xxeRecvnbInfo->size);
+          if (aq) aq->add(i, xxeRecvnbInfo->opId,
+            xxeRecvnbInfo->predicateBitField, xxeRecvnbInfo->srcPet,
+            xxeRecvnbInfo->buffer, xxeRecvnbInfo->size);
           else
             aq = new AnalyzeElement(i, xxeRecvnbInfo->opId,
-              xxeRecvnbInfo->opSubId, xxeRecvnbInfo->srcPet,
+              xxeRecvnbInfo->predicateBitField, xxeRecvnbInfo->srcPet,
               xxeRecvnbInfo->buffer, xxeRecvnbInfo->size);
         }
         break;
