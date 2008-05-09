@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.37 2008/05/06 02:18:20 rosalind Exp $
+// $Id: ESMC_Alarm.h,v 1.38 2008/05/09 20:08:20 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -77,7 +77,7 @@
 // !USES:
  #include <ESMC_Base.h>
  #include <ESMC_IOSpec.h>    // IOSpec class for ReadRestart()/WriteRestart()
- #include <ESMC_TimeInterval.h>
+ #include <ESMCI_TimeInterval.h>
  #include <ESMCI_Time.h>
  class ESMC_Clock;
 

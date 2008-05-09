@@ -1,4 +1,4 @@
-// $Id: ESMCI.h,v 1.15 2008/05/06 02:41:59 rosalind Exp $
+// $Id: ESMCI.h,v 1.16 2008/05/09 20:09:45 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 #include "ESMC_Fraction.h"
 #include "ESMCI_BaseTime.h"
 #include "ESMC_Calendar.h"
-#include "ESMC_TimeInterval.h"
+#include "ESMCI_TimeInterval.h"
 #include "ESMCI_Time.h"
 #include "ESMC_Alarm.h"
 #include "ESMC_Clock.h"

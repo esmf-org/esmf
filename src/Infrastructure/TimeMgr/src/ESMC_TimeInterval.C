@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.86 2008/05/06 02:35:50 rosalind Exp $
+// $Id: ESMC_TimeInterval.C,v 1.87 2008/05/09 20:08:21 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -15,7 +15,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ {\tt ESMC\_TimeInterval} methods
-// declared in the companion file {\tt ESMC_TimeInterval.h}.
+// declared in the companion file {\tt ESMCI_TimeInterval.h}.
 //
 //-------------------------------------------------------------------------
 //
@@ -33,12 +33,12 @@
  #include <ESMCI_Time.h>
 
  // associated class definition file
- #include <ESMC_TimeInterval.h>
+ #include <ESMCI_TimeInterval.h>
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.86 2008/05/06 02:35:50 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.87 2008/05/09 20:08:21 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //

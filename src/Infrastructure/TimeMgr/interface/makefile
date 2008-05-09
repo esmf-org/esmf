@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2008/05/06 02:21:35 rosalind Exp $ 
+# $Id: makefile,v 1.23 2008/05/09 20:08:20 rosalind Exp $ 
 
 ALL: build_here 
 
@@ -38,7 +38,7 @@ ESMC_BaseTime_F.o:	ESMC_Base.h ESMC_BaseTime.h makefile
 
 ESMC_Calendar_F.o:	ESMC_Base.h ESMC_Calendar.h makefile
 
-ESMC_TimeInterval_F.o:	ESMC_Base.h ESMC_TimeInterval.h makefile
+ESMC_TimeInterval_F.o:	ESMC_Base.h ESMCI_TimeInterval.h makefile
 
 ESMC_Time_F.o:	ESMC_Base.h ESMCI_Time.h makefile
 
