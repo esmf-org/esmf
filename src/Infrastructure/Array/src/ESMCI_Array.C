@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.18 2008/05/09 04:51:49 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.19 2008/05/09 05:52:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.18 2008/05/09 04:51:49 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.19 2008/05/09 05:52:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2266,6 +2266,7 @@ int Array::serialize(
   int *ip;
   ESMC_TypeKind *dkp;
   ESMC_IndexFlag *ifp;
+  int r;
 
   // Check if buffer has enough free memory to hold object
   if ((*length - *offset) < sizeof(Array)){
@@ -2275,6 +2276,8 @@ int Array::serialize(
   }
 
   // Serialize the Base class,
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -2283,6 +2286,8 @@ int Array::serialize(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize Array meta data
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   dkp = (ESMC_TypeKind *)(buffer + *offset);
   *dkp++ = typekind;
   ip = (int *)dkp;
@@ -2348,8 +2353,11 @@ int Array::deserialize(
   int *ip;
   ESMC_TypeKind *dkp;
   ESMC_IndexFlag *ifp;
+  int r;
 
   // Deserialize the Base class
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   localrc = ESMC_Base::ESMC_Deserialize(buffer, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -2359,6 +2367,8 @@ int Array::deserialize(
   // Pull DELayout out of DistGrid
   delayout = distgrid->getDELayout();
   // Deserialize Array meta data
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   dkp = (ESMC_TypeKind *)(buffer + *offset);
   typekind = *dkp++;
   ip = (int *)dkp;

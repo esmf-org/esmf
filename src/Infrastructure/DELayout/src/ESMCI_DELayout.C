@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.1.2.4 2008/05/09 04:48:16 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.1.2.5 2008/05/09 05:52:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.4 2008/05/09 04:48:16 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.5 2008/05/09 05:52:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1425,40 +1425,33 @@ int DELayout::serialize(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  int fixedpart, nbytes;
   int i, j;
   char *cp;
   int *ip;
   ESMC_Logical *lp;
-  VM **vp;
   ESMC_DePinFlag *dp;
   de_type *dep;
+  int r;
 
-  // TODO: we cannot reallocate from C++ if the original buffer is
-  //  allocated on the f90 side.  change the code to make the allocate
-  //  happen in C++; then this will be fine.  (for now make sure buffer
-  //  is always big enough so realloc is not needed.)
-  fixedpart = sizeof(DELayout);
-  if ((*length - *offset) < fixedpart) {
+  // Check if buffer has enough free memory to hold object
+  if ((*length - *offset) < sizeof(DELayout)) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
     "- Buffer too short to add a DELayout object", &rc);
     return rc;
   }
 
-  // first set the base part of the object
+  // Serialize the Base class
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   localrc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
+  // Serialize the DELayout internal data members
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   cp = (char *)(buffer + *offset);
-  
-  // TODO: for now, send NULL as the vm, because i do not know how to
-  // serialize a VM.   probably sending an integer VM ID number would be
-  // what we want in the long run.
-  vp = (VM **)cp;   
-  *vp++ = NULL;     
-
-  ip = (int *)vp;
+  ip = (int *)cp;
   *ip++ = deCount;
   *ip++ = oldstyle;
   if (oldstyle){
@@ -1539,27 +1532,27 @@ DELayout *DELayout::deserialize(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   DELayout *a = new DELayout;
-  int fixedpart, nbytes;
   int i, j;
   char *cp;
   int *ip;
   ESMC_Logical *lp;
-  VM **vp;
   ESMC_DePinFlag *dp;
   de_type *dep;
+  int r;
 
-  // first get the base part of the object
+  // Deserialize the Base class
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   localrc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return NULL;
 
-  // now the rest
+  // Deserialize the DELayout internal data members
+  a->vm = NULL;  // this must be NULL
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   cp = (char *)(buffer + *offset);
-  
-  vp = (VM **)cp;
-  a->vm = *vp++;  // this is a NULL that comes from the serialize side
-
-  ip = (int *)vp;
+  ip = (int *)cp;
   a->deCount = *ip++;
   a->oldstyle = *ip++;
 

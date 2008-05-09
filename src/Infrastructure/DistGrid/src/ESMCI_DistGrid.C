@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.1.2.6 2008/05/05 22:57:43 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.1.2.7 2008/05/09 05:52:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.1.2.6 2008/05/05 22:57:43 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.1.2.7 2008/05/09 05:52:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2694,7 +2694,7 @@ const int *DistGrid::getArbSeqIndexListPLocalDe(
 
 //-----------------------------------------------------------------------------
 //
-// Serialize/Deserialize functions
+// serialize() and deserialize()
 //
 //-----------------------------------------------------------------------------
 
@@ -2727,33 +2727,22 @@ int DistGrid::serialize(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  int fixedpart, nbytes;
-  int i, j;
+  int i;
   char *cp;
   int *ip;
   ESMC_Logical *lp;
-  VM **vp;
-  ESMC_DePinFlag *dp;
-  de_type *dep;
+  int r;
 
-  // TODO: we cannot reallocate from C++ if the original buffer is
-  //  allocated on the f90 side.  change the code to make the allocate
-  //  happen in C++; then this will be fine.  (for now make sure buffer
-  //  is always big enough so realloc is not needed.)
-  fixedpart = sizeof(DistGrid);
-  if ((*length - *offset) < fixedpart) {
+  // Check if buffer has enough free memory to hold object
+  if ((*length - *offset) < sizeof(DistGrid)) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
       "Buffer too short to add a DistGrid object", &rc);
     return rc;
   }
 
-  // fixedpart = sizeof(DELayout);
-  // if ((*length - *offset) < fixedpart) {
-  //     buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
-  //     *length += 2 * fixedpart;
-  //  }
-
   // Serialize the Base class,
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   localrc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -2762,6 +2751,8 @@ int DistGrid::serialize(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize DistGrid meta data
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   ip = (int *)(buffer + *offset);
   *ip++ = dimCount;
   *ip++ = patchCount;
@@ -2823,16 +2814,15 @@ DistGrid *DistGrid::deserialize(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   DistGrid *a = new DistGrid;
-  int fixedpart, nbytes;
-  int i, j;
+  int i;
   char *cp;
   int *ip;
   ESMC_Logical *lp;
-  VM **vp;
-  ESMC_DePinFlag *dp;
-  de_type *dep;
-
+  int r;
+  
   // Deserialize the Base class
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   localrc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return NULL;
@@ -2842,6 +2832,8 @@ DistGrid *DistGrid::deserialize(
   // VM is a special case
   a->vm = NULL; // VM must be reset
   // Deserialize DistGrid meta data
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   ip = (int *)(buffer + *offset);
   a->dimCount = *ip++;
   a->patchCount = *ip++;
