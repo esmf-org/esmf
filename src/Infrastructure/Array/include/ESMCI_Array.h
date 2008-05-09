@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.1.2.13 2008/05/05 22:57:39 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.1.2.14 2008/05/09 04:51:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -234,7 +234,8 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_TypeKind typekindFactors = ESMF_NOKIND, void *factorList = NULL,
       int factorListCount = 0, InterfaceInt *factorIndexList = NULL);
     static int sparseMatMul(Array *srcArray, Array *dstArray,
-      ESMC_RouteHandle **routehandle, ESMC_Logical zeroflag=ESMF_TRUE,
+      ESMC_RouteHandle **routehandle,
+      ESMC_RegionFlag zeroflag=ESMF_REGION_TOTAL,
       ESMC_Logical checkflag=ESMF_FALSE);
     static int sparseMatMulRelease(ESMC_RouteHandle *routehandle);
     

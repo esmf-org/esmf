@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.73.2.12 2008/05/06 04:06:01 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.73.2.13 2008/05/09 04:51:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,6 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_Array                 ! implemented in ESMF_ArrayCreateMod 
-  public ESMF_RegionFlag, ESMF_REGION_EXCLUSIVE, ESMF_REGION_COMPUTATIONAL
       
 !------------------------------------------------------------------------------
 
@@ -105,7 +104,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.73.2.12 2008/05/06 04:06:01 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.73.2.13 2008/05/09 04:51:47 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1366,7 +1365,7 @@ contains
     type(ESMF_Array),       intent(in),   optional  :: srcArray
     type(ESMF_Array),       intent(inout),optional  :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    type(ESMF_Logical),     intent(in),   optional  :: zeroflag
+    type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
     type(ESMF_Logical),     intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
@@ -1395,12 +1394,16 @@ contains
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[zeroflag]}]
-!     If set to {\tt ESMF\_TRUE} {\em (default)} the total regions of all 
-!     DEs in {\tt dstArray} will be initialized to zero before updating the 
+!     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
+!     all DEs in {\tt dstArray} will be initialized to zero before updating the 
 !     elements with the results of the sparse matrix multiplication. If set to
-!     {\tt ESMF\_FALSE} the elements in {\tt dstArray} will not be modified
-!     prior to the sparse matrix multiplication and results will be added
-!     to the incoming element values.
+!     {\tt ESMF\_REGION\_EMPTY} the elements in {\tt dstArray} will not be
+!     modified prior to the sparse matrix multiplication and results will be
+!     added to the incoming element values. Setting {\tt zeroflag} to 
+!     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
+!     destination Array that will be updated by the sparse matrix
+!     multiplication. See section \ref{opt:regionflag} for a complete list of
+!     valid settings.
 !   \item [{[checkflag]}]
 !     If set to {\tt ESMF\_TRUE} the input Array pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -1414,7 +1417,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_Logical)      :: opt_zeroflag ! helper variable
+    type(ESMF_RegionFlag)   :: opt_zeroflag ! helper variable
     type(ESMF_Logical)      :: opt_checkflag! helper variable
     type(ESMF_Array)        :: opt_srcArray ! helper variable
     type(ESMF_Array)        :: opt_dstArray ! helper variable
@@ -1443,7 +1446,7 @@ contains
     endif
     
     ! Set default flags
-    opt_zeroflag = ESMF_TRUE
+    opt_zeroflag = ESMF_REGION_TOTAL
     if (present(zeroflag)) opt_zeroflag = zeroflag
     opt_checkflag = ESMF_FALSE
     if (present(checkflag)) opt_checkflag = checkflag
