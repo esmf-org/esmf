@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.26 2008/05/12 18:41:56 feiliu Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.27 2008/05/12 19:06:26 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.26 2008/05/12 18:41:56 feiliu Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.27 2008/05/12 19:06:26 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -73,7 +73,7 @@
 ! \subsubsection{Gather Field data onto root PET}
 ! \label{sec:field:usage:gather_2dptr}
 !
-! user can use {\tt ESMF\_FieldGather} interface to gather Field data from multiple
+! User can use {\tt ESMF\_FieldGather} interface to gather Field data from multiple
 ! PETS onto a single root PET. This interface is overloaded by type, kind, and rank.
 ! 
 ! In this example, we first create a 2D Field, then use {\tt ESMF\_FieldGather} to
@@ -153,7 +153,7 @@
 ! \subsubsection{Scatter Field data from root PET onto its set of joint PETs}
 ! \label{sec:field:usage:scatter_2dptr}
 !
-! user can use {\tt ESMF\_FieldScatter} interface to scatter Field data from root
+! User can use {\tt ESMF\_FieldScatter} interface to scatter Field data from root
 ! PET onto its set of joint PETs. This interface is overloaded by type, kind, and rank.
 ! 
 ! In this example, we first create a 2D Field, then use {\tt ESMF\_FieldScatter} to
