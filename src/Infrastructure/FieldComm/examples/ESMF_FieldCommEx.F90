@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.25 2008/05/12 18:26:18 feiliu Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.26 2008/05/12 18:41:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.25 2008/05/12 18:26:18 feiliu Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.26 2008/05/12 18:41:56 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -70,8 +70,8 @@
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !------------------------------------------------------------------------------
 !BOE
-! \subsection{Gather Field data onto root PET}
-!\label{sec:field:usage:gather_2dptr}
+! \subsubsection{Gather Field data onto root PET}
+! \label{sec:field:usage:gather_2dptr}
 !
 ! user can use {\tt ESMF\_FieldGather} interface to gather Field data from multiple
 ! PETS onto a single root PET. This interface is overloaded by type, kind, and rank.
@@ -136,7 +136,8 @@
         enddo
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     endif
-!EOC
+
+    ! destroy all objects created in this example to prevent memory leak
     call ESMF_FieldDestroy(field, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_GridDestroy(grid, rc=rc)
@@ -145,11 +146,12 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray)
     if(lpe .eq. 0) deallocate(farrayDst)
+!EOC
 
 !------------------------------------------------------------------------------
 !BOE
-! \subsection{Scatter Field data from root PET onto its set of joint PETs}
-!\label{sec:field:usage:scatter_2dptr}
+! \subsubsection{Scatter Field data from root PET onto its set of joint PETs}
+! \label{sec:field:usage:scatter_2dptr}
 !
 ! user can use {\tt ESMF\_FieldScatter} interface to scatter Field data from root
 ! PET onto its set of joint PETs. This interface is overloaded by type, kind, and rank.
