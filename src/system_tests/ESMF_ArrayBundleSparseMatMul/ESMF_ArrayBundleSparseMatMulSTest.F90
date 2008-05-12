@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleSparseMatMulSTest.F90,v 1.2 2008/04/29 00:38:17 theurich Exp $
+! $Id: ESMF_ArrayBundleSparseMatMulSTest.F90,v 1.3 2008/05/12 21:56:38 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -10,26 +10,33 @@
 ! System test ArrayBundleSparseMatMul.  
 !    Two gridded components and one coupler component, one-way coupling.
 !
-!    First gridded component runs on 4 PETs and defines a 2D source Array 
-!    100x150. Second gridded component defines a destination Array also 
+!    First gridded component runs on 4 PETs and defines two 2D source Arrays 
+!    100x150. Second gridded component defines two destination Arrays also 
 !    100x150 but runs on only 2 PETs. Both gridded components use DELayouts 
-!    with 1 DE per PET. The decomposition of the source Array is defined as 
-!    (petCount x 1) = (4 x 1) while the destination Array is decomposed as 
+!    with 1 DE per PET. The decomposition of the source Arrays is defined as 
+!    (petCount x 1) = (4 x 1) while the destination Arrays are decomposed as 
 !    (1 x petCount) = (1 x 2).
 !
-!    The first component initializes the source Array to a geometric function:
+!    The first gridded component creates an ArrayBundle that holds both source
+!    Arrays. One source Array is initialized to the geometric function:
 !
 !       10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi)
+! 
+!    and the second source Array is set equal to the first with a constant
+!    offset.
+!
+!    The second gridded component also creates an ArrayBundle that holds both
+!    destination Arrays.
 !
 !    The coupler component runs on all 6 PETs and reconciles import and export
-!    states which contain source and destination Array, respectively. The 
-!    coupler component then calls ArraySparseMatMul() using the identity matrix.
-!    This amounts to a redistribution of the source Array data onto the 
-!    destination Array.
+!    States which contain source and destination ArrayBundles, respectively. The 
+!    coupler component then calls ArrayBundleSMM() using the identity matrix.
+!    This amounts to a redistribution of the source ArrayBundle data onto the 
+!    destination ArrayBundle.
 !    
 !    Finally the second gridded component compares the data stored in the
-!    destination Array to the exact solution of the above function as a measure
-!    of the accuracy of the ArraySparseMat() method.
+!    destination ArrayBundle to the exact solution of the above function as a
+!    measure of the accuracy of the ArrayBundleSMM() method.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}

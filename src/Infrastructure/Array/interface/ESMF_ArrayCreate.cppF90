@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.32 2008/04/29 00:37:49 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.33 2008/05/12 21:56:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -69,23 +69,8 @@ module ESMF_ArrayCreateMod
   end type
 
 !------------------------------------------------------------------------------
-!
-! ESMF_RegionFlag
-
-  type ESMF_RegionFlag
-  sequence
-  private
-    integer :: value
-  end type
-
-  type(ESMF_RegionFlag), parameter :: &
-    ESMF_REGION_EXCLUSIVE = ESMF_RegionFlag(1), &
-    ESMF_REGION_COMPUTATIONAL = ESMF_RegionFlag(2)
-
-!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_Array
-  public ESMF_RegionFlag, ESMF_REGION_EXCLUSIVE, ESMF_REGION_COMPUTATIONAL
 
 !------------------------------------------------------------------------------
 !
@@ -110,7 +95,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.32 2008/04/29 00:37:49 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.33 2008/05/12 21:56:35 theurich Exp $'
 
 !==============================================================================
 ! 

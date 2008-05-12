@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.15 2008/05/08 02:27:10 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.16 2008/05/12 21:56:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.15 2008/05/08 02:27:10 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.16 2008/05/12 21:56:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2274,6 +2274,7 @@ int Array::serialize(
   int *ip;
   ESMC_TypeKind *dkp;
   ESMC_IndexFlag *ifp;
+  int r;
 
   // Check if buffer has enough free memory to hold object
   if ((*length - *offset) < sizeof(Array)){
@@ -2283,6 +2284,8 @@ int Array::serialize(
   }
 
   // Serialize the Base class,
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -2291,6 +2294,8 @@ int Array::serialize(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize Array meta data
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   dkp = (ESMC_TypeKind *)(buffer + *offset);
   *dkp++ = typekind;
   ip = (int *)dkp;
@@ -2356,8 +2361,11 @@ int Array::deserialize(
   int *ip;
   ESMC_TypeKind *dkp;
   ESMC_IndexFlag *ifp;
+  int r;
 
   // Deserialize the Base class
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   localrc = ESMC_Base::ESMC_Deserialize(buffer, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -2367,6 +2375,8 @@ int Array::deserialize(
   // Pull DELayout out of DistGrid
   delayout = distgrid->getDELayout();
   // Deserialize Array meta data
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   dkp = (ESMC_TypeKind *)(buffer + *offset);
   typekind = *dkp++;
   ip = (int *)dkp;
@@ -3841,7 +3851,7 @@ int Array::redist(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // implemented via sparseMatMul
-  localrc = sparseMatMul(srcArray, dstArray, routehandle, ESMF_TRUE,
+  localrc = sparseMatMul(srcArray, dstArray, routehandle, ESMF_REGION_TOTAL,
     checkflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -6581,6 +6591,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   XXE::ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
   XXE::ProductSumSuperScalarContigRRAInfo
     *xxeProductSumSuperScalarContigRRAInfo;
+  XXE::ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo;
   XXE::MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
   XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo;
   XXE::WtimerInfo *xxeWtimerInfo;
@@ -6594,6 +6605,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 #ifdef ASMMPROFILE
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;
+  xxe->stream[xxe->count].predicateBitField = 0x0;
   xxeElement = &(xxe->stream[xxe->count]);
   xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
   xxeWtimerInfo->timerId = 0;
@@ -6752,6 +6764,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 #ifdef ASMMPROFILE
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
+    xxe->stream[xxe->count].predicateBitField = 0x0;
     xxeElement = &(xxe->stream[xxe->count]);
     xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
     xxeWtimerInfo->timerId = xxe->count;
@@ -6789,6 +6802,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 #endif
       recvnbIndex[j][i] = xxe->count;  // need index for the associated wait
       xxe->stream[xxe->count].opId = XXE::recvnb;
+      xxe->stream[xxe->count].predicateBitField = 0x0;
       xxeElement = &(xxe->stream[xxe->count]);
       xxeRecvnbInfo = (XXE::RecvnbInfo *)xxeElement;
       xxeRecvnbInfo->buffer = buffer[j][i];
@@ -6809,6 +6823,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 #ifdef ASMMPROFILE
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
+    xxe->stream[xxe->count].predicateBitField = 0x0;
     xxeElement = &(xxe->stream[xxe->count]);
     xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
     xxeWtimerInfo->timerId = xxe->count;
@@ -6943,6 +6958,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 #ifdef ASMMPROFILE
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
+    xxe->stream[xxe->count].predicateBitField = 0x0;
     xxeElement = &(xxe->stream[xxe->count]);
     xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
     xxeWtimerInfo->timerId = xxe->count;
@@ -7000,6 +7016,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 #endif
         // sendnbRRA out of single contiguous linIndex run
         xxe->stream[xxe->count].opId = XXE::sendnbRRA;
+        xxe->stream[xxe->count].predicateBitField = 0x0;
         xxeElement = &(xxe->stream[xxe->count]);
         xxeSendnbRRAInfo = (XXE::SendnbRRAInfo *)xxeElement;
         xxeSendnbRRAInfo->rraOffset =
@@ -7025,6 +7042,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
             * dataSizeSrc;
           // memCpySrcRRA pieces into intermediate buffer
           xxe->stream[xxe->count].opId = XXE::memCpySrcRRA;
+          xxe->stream[xxe->count].predicateBitField = 0x0;
           xxeElement = &(xxe->stream[xxe->count]);
           xxeMemCpySrcRRAInfo = (XXE::MemCpySrcRRAInfo *)xxeElement;
           xxeMemCpySrcRRAInfo->dstMem = bufferPointer;
@@ -7040,6 +7058,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 #else
         // memGatherSrcRRA pieces into intermediate buffer
         xxe->stream[xxe->count].opId = XXE::memGatherSrcRRA;
+        xxe->stream[xxe->count].predicateBitField = 0x0;
         xxeElement = &(xxe->stream[xxe->count]);
         xxeMemGatherSrcRRAInfo = (XXE::MemGatherSrcRRAInfo *)xxeElement;
         xxeMemGatherSrcRRAInfo->dstBase = buffer;
@@ -7085,7 +7104,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
           countList[k] = linIndexContigBlockList[k].linIndexCount;
         }
         double dt_tk;
-        localrc = xxe->exec(rraCount, rraList, &dt_tk, xxeIndex, xxeIndex);
+        localrc = xxe->exec(rraCount, rraList, 0x0, &dt_tk, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // try byte option for memGatherSrcRRA
@@ -7095,7 +7114,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
           countList[k] = linIndexContigBlockList[k].linIndexCount * dataSizeSrc;
         }
         double dt_byte;
-        localrc = xxe->exec(rraCount, rraList, &dt_byte, xxeIndex, xxeIndex);
+        localrc = xxe->exec(rraCount, rraList, 0x0, &dt_byte, xxeIndex, 
+          xxeIndex);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
 #if 0        
@@ -7139,6 +7159,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
 #endif
         // sendnb out of contiguous intermediate buffer
         xxe->stream[xxe->count].opId = XXE::sendnb;
+        xxe->stream[xxe->count].predicateBitField = 0x0;
         xxeElement = &(xxe->stream[xxe->count]);
         xxeSendnbInfo = (XXE::SendnbInfo *)xxeElement;
         xxeSendnbInfo->buffer = buffer;
@@ -7175,6 +7196,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
 #ifdef ASMMPROFILE
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
+    xxe->stream[xxe->count].predicateBitField = 0x0;
     xxeElement = &(xxe->stream[xxe->count]);
     xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
     xxeWtimerInfo->timerId = xxe->count;
@@ -7199,13 +7221,109 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t9);   //gjt - profile
 #endif
+  
+  
+  // use recv pattern for all localDEs in dstArray and issue XXE::"zero"
+  for (int j=0; j<dstLocalDeCount; j++){
+#ifdef ASMMPROFILE
+    // <XXE profiling element>
+    xxe->stream[xxe->count].opId = XXE::wtimer;
+    xxe->stream[xxe->count].predicateBitField = 0x1;
+    xxeElement = &(xxe->stream[xxe->count]);
+    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+    xxeWtimerInfo->timerId = xxe->count;
+    xxeWtimerInfo->timerString = new char[80];
+    strcpy(xxeWtimerInfo->timerString, "Wt: zero");
+    xxeWtimerInfo->actualWtimerId = xxe->count;
+    xxeWtimerInfo->relativeWtimerId = 0;
+    xxeWtimerInfo->relativeWtimerXXE = NULL;
+    localrc = xxe->incCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
+    localrc = xxe->incStorageCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+    // </XXE profiling element>
+#endif
+  
+    //TODO:: move the k-loop to the inside of zeroSuperScalarRRA setup
     
+    for (int k=0; k<diffPartnerDeCount[j]; k++){
+      
+      xxe->stream[xxe->count].opId = XXE::zeroSuperScalarRRA;
+      xxe->stream[xxe->count].predicateBitField = 0x1;
+      xxeElement = &(xxe->stream[xxe->count]);
+      localrc = xxe->incCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+      xxeZeroSuperScalarRRAInfo =
+        (XXE::ZeroSuperScalarRRAInfo *)xxeElement;
+      switch (typekindDst){
+      case ESMC_TYPEKIND_R4:
+        xxeZeroSuperScalarRRAInfo->elementTK = XXE::R4;
+        break;
+      case ESMC_TYPEKIND_R8:
+        xxeZeroSuperScalarRRAInfo->elementTK = XXE::R8;
+        break;
+      case ESMC_TYPEKIND_I4:
+        xxeZeroSuperScalarRRAInfo->elementTK = XXE::I4;
+        break;
+      case ESMC_TYPEKIND_I8:
+        xxeZeroSuperScalarRRAInfo->elementTK = XXE::I8;
+        break;
+      default:
+        break;
+      }
+      xxeZeroSuperScalarRRAInfo->rraIndex = srcLocalDeCount
+        + j; // localDe index into dstArray shifted by srcArray localDeCount
+      int termCount = partnerDeCount[j][k];
+      xxeZeroSuperScalarRRAInfo->termCount = termCount;
+      char *rraOffsetListChar = new char[termCount*sizeof(int)];
+      int *rraOffsetList = (int *)rraOffsetListChar;
+      xxeZeroSuperScalarRRAInfo->rraOffsetList = rraOffsetList;
+      xxe->storage[xxe->storageCount] = rraOffsetListChar; // garb coll.
+      localrc = xxe->incStorageCount();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+      
+      for (int kk=0; kk<termCount; kk++){
+        DstInfo *dstInfo = &(dstInfoTable[j][k][kk]);
+        rraOffsetList[kk] = dstInfo->linIndex;
+      } // for kk - termCount
+    } // k - diffPartnerDeCount[j]    
+      
+#ifdef ASMMPROFILE
+    // <XXE profiling element>
+    xxe->stream[xxe->count].opId = XXE::wtimer;
+    xxe->stream[xxe->count].predicateBitField = 0x1;
+    xxeElement = &(xxe->stream[xxe->count]);
+    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
+    xxeWtimerInfo->timerId = xxe->count;
+    xxeWtimerInfo->timerString = new char[80];
+    strcpy(xxeWtimerInfo->timerString, "Wt: /zero");
+    xxeWtimerInfo->actualWtimerId = xxe->count;
+    xxeWtimerInfo->relativeWtimerId = 0;
+    xxeWtimerInfo->relativeWtimerXXE = NULL;
+    localrc = xxe->incCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
+    localrc = xxe->incStorageCount();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+    // </XXE profiling element>
+#endif
+  } // for j - dstLocalDeCount
+  
+        
   // use recv pattern for all localDEs in dstArray and issue XXE::"+=*"
   for (int j=0; j<dstLocalDeCount; j++){
 
 #ifdef ASMMPROFILE
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
+    xxe->stream[xxe->count].predicateBitField = 0x0;
     xxeElement = &(xxe->stream[xxe->count]);
     xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
     xxeWtimerInfo->timerId = xxe->count;
@@ -7226,6 +7344,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       
     // use waitOnAnyIndexSub to wait on and process the incoming data
     xxe->stream[xxe->count].opId = XXE::waitOnAnyIndexSub;
+    xxe->stream[xxe->count].predicateBitField = 0x0;
     xxeElement = &(xxe->stream[xxe->count]);
     xxeWaitOnAnyIndexSubInfo = (XXE::WaitOnAnyIndexSubInfo *)xxeElement;
     xxeWaitOnAnyIndexSubInfo->count = diffPartnerDeCount[j];
@@ -7267,6 +7386,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
 #ifdef ASMMPROFILE
       // <XXE profiling element>
       xxeSub->stream[xxeSub->count].opId = XXE::wtimer;
+      xxeSub->stream[xxeSub->count].predicateBitField = 0x0;
       xxeElement = &(xxeSub->stream[xxeSub->count]);
       xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
       xxeWtimerInfo->timerId = 0;
@@ -7289,6 +7409,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
 #ifdef ASMMPROFILE
       // <XXE profiling element>
       xxeSub->stream[xxeSub->count].opId = XXE::wtimer;
+      xxeSub->stream[xxeSub->count].predicateBitField = 0x0;
       xxeElement = &(xxeSub->stream[xxeSub->count]);
       xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
       xxeWtimerInfo->timerId = xxeSub->count;
@@ -7315,6 +7436,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         int linIndex = dstInfo->linIndex;
         // enter scalar "+=*" operation into XXE stream
         xxeSub->stream[xxeSub->count].opId = XXE::productSumScalarRRA;
+        xxeSub->stream[xxeSub->count].predicateBitField = 0x0;
         xxeElement = &(xxeSub->stream[xxeSub->count]);
         xxeProductSumScalarRRAInfo = (XXE::ProductSumScalarRRAInfo *)xxeElement;
         switch (typekindDst){
@@ -7385,6 +7507,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
 
       // try super-scalar "+=*" operation in XXE stream
       xxeSub->stream[xxeIndex].opId = XXE::productSumSuperScalarRRA;
+      xxeSub->stream[xxeIndex].predicateBitField = 0x0;
       xxeElement = &(xxeSub->stream[xxeIndex]);
       xxeProductSumSuperScalarRRAInfo =
         (XXE::ProductSumSuperScalarRRAInfo *)xxeElement;
@@ -7513,20 +7636,21 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       }
       xxeSub->optimizeElement(xxeIndex);
       double dt_sScalar;
-      localrc = xxeSub->exec(rraCount, rraList, &dt_sScalar, xxeIndex,
+      localrc = xxeSub->exec(rraCount, rraList, 0x0, &dt_sScalar, xxeIndex,
         xxeIndex);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
       
       // try super-scalar contig "+=*" operation in XXE stream
       xxeSub->stream[xxeIndex].opId = XXE::productSumSuperScalarContigRRA;
+      xxeSub->stream[xxeIndex].predicateBitField = 0x0;
       xxeProductSumSuperScalarContigRRAInfo =
         (XXE::ProductSumSuperScalarContigRRAInfo *)xxeElement;
       // only change members that are different compared to super-scalar
       xxeProductSumSuperScalarContigRRAInfo->valueList = (void *)(buffer[j][k]);
       xxeSub->optimizeElement(xxeIndex);
       double dt_sScalarC;
-      localrc = xxeSub->exec(rraCount, rraList, &dt_sScalarC, xxeIndex,
+      localrc = xxeSub->exec(rraCount, rraList, 0x0, &dt_sScalarC, xxeIndex,
         xxeIndex);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
@@ -7549,12 +7673,14 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
         // already set from last trial, just need to remove some garbage:
         delete [] valueListChar;  // garbage from productSumSuperScalarRRA try
       }
-      
+      xxeSub->stream[xxeIndex].predicateBitField = 0x0;// set predication bits
+
 #endif
             
 #ifdef ASMMPROFILE
       // <XXE profiling element>
       xxeSub->stream[xxeSub->count].opId = XXE::wtimer;
+      xxeSub->stream[xxeSub->count].predicateBitField = 0x0;
       xxeElement = &(xxeSub->stream[xxeSub->count]);
       xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
       xxeWtimerInfo->timerId = xxeSub->count;
@@ -7583,6 +7709,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
 #ifdef ASMMPROFILE
     // <XXE profiling element>
     xxe->stream[xxe->count].opId = XXE::wtimer;
+    xxe->stream[xxe->count].predicateBitField = 0x0;
     xxeElement = &(xxe->stream[xxe->count]);
     xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
     xxeWtimerInfo->timerId = xxe->count;
@@ -7634,6 +7761,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
 #ifdef ASMMPROFILE
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;
+  xxe->stream[xxe->count].predicateBitField = 0x0;
   xxeElement = &(xxe->stream[xxe->count]);
   xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
   xxeWtimerInfo->timerId = xxe->count;
@@ -7654,6 +7782,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   
   // post XXE::waitOnAllSendnb
   xxe->stream[xxe->count].opId = XXE::waitOnAllSendnb;
+  xxe->stream[xxe->count].predicateBitField = 0x0;
   localrc = xxe->incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -7661,6 +7790,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
 #ifdef ASMMPROFILE
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;
+  xxe->stream[xxe->count].predicateBitField = 0x0;
   xxeElement = &(xxe->stream[xxe->count]);
   xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
   xxeWtimerInfo->timerId = xxe->count;
@@ -7682,6 +7812,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
 #ifdef ASMMPROFILE
   // <XXE profiling element>
   xxe->stream[xxe->count].opId = XXE::wtimer;
+  xxe->stream[xxe->count].predicateBitField = 0x0;
   xxeElement = &(xxe->stream[xxe->count]);
   xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
   xxeWtimerInfo->timerId = xxe->count;
@@ -7793,8 +7924,12 @@ int Array::sparseMatMul(
   Array *srcArray,                      // in    - source Array
   Array *dstArray,                      // inout - destination Array
   ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
-  ESMC_Logical zeroflag,                // in    - ESMF_FALSE: don't zero dstA.
-                                        //         ESMF_TRUE: (def.) zero dstA.
+  ESMC_RegionFlag zeroflag,             // in    - ESMF_REGION_TOTAL:
+                                        //          -> zero out total region
+                                        //         ESMF_REGION_SELECT:
+                                        //          -> zero out target points
+                                        //         ESMF_REGION_EMPTY:
+                                        //          -> don't zero out any points
   ESMC_Logical checkflag                // in    - ESMF_FALSE: (def.) bas. chcks
                                         //         ESMF_TRUE: full input check
   ){    
@@ -7868,7 +8003,7 @@ int Array::sparseMatMul(
 #endif
   
   // conditionally zero out total regions of the dstArray for all localDEs
-  if (dstArrayFlag && (zeroflag==ESMF_TRUE)){
+  if (dstArrayFlag && (zeroflag==ESMF_REGION_TOTAL)){
     for (int i=0; i<dstArray->delayout->getLocalDeCount(); i++){
       char *start = (char *)(dstArray->larrayBaseAddrList[i]);
       int elementCount =
@@ -7918,11 +8053,16 @@ int Array::sparseMatMul(
   VMK::wtime(&t4);      //gjt - profile
 #endif
   
-  //TODO: determine XXE predicate flag for XXE exec(),
+  int filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
+  
+  //TODO: determine XXE filterBitField for XXE exec(),
   // considering src vs. dst, DE, phase of nb-call...
   
+  if (zeroflag!=ESMF_REGION_SELECT)
+    filterBitField |= 1;  // filter the zero operations (always on lowest bit)
+  
   // execute XXE stream
-  localrc = xxe->exec(rraCount, rraList); //TODO: specify predicate flag
+  localrc = xxe->exec(rraCount, rraList, filterBitField);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 

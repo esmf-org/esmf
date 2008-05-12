@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.3 2008/05/08 02:27:13 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.4 2008/05/12 21:56:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -191,7 +191,7 @@ extern "C" {
 
   void FTN(c_esmc_arraybundlesmm)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMC_RouteHandle **routehandle,
-    ESMC_Logical *zeroflag, ESMC_Logical *checkflag, int *rc){
+    ESMC_RegionFlag *zeroflag, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmm()"
     // Initialize return code; assume routine not implemented

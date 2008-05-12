@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.3 2008/05/08 02:27:13 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.4 2008/05/12 21:56:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.3 2008/05/08 02:27:13 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.4 2008/05/12 21:56:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -646,8 +646,12 @@ int ArrayBundle::sparseMatMul(
   ArrayBundle *srcArraybundle,          // in    - source Array
   ArrayBundle *dstArraybundle,          // inout - destination Array
   ESMC_RouteHandle **routehandle,       // inout - handle to precomputed comm
-  ESMC_Logical zeroflag,                // in    - ESMF_FALSE: don't zero dstA.
-                                        //         ESMF_TRUE: (def.) zero dstA.
+  ESMC_RegionFlag zeroflag,             // in    - ESMF_REGION_TOTAL:
+                                        //          -> zero out total region
+                                        //         ESMF_REGION_SELECT:
+                                        //          -> zero out target points
+                                        //         ESMF_REGION_EMPTY:
+                                        //          -> don't zero out any points
   ESMC_Logical checkflag                // in    - ESMF_FALSE: (def.) bas. chcks
                                         //         ESMF_TRUE: full input check
   ){    
@@ -832,6 +836,7 @@ int ArrayBundle::serialize(
   // Prepare pointer variables of different types
   char *cp;
   int *ip;
+  int r;
 
   // Check if buffer has enough free memory to hold object
   if ((*length - *offset) < sizeof(ArrayBundle)){
@@ -840,11 +845,15 @@ int ArrayBundle::serialize(
     return rc;
   }
 
-  // Serialize the Base class,
+  // Serialize the Base class
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize the ArrayBundle with all its Arrays
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   ip = (int *)(buffer + *offset);
   *ip++ = arrayCount;
   cp = (char *)ip;
@@ -890,12 +899,17 @@ int ArrayBundle::deserialize(
   // Prepare pointer variables of different types
   char *cp;
   int *ip;
-
+  int r;
+  
   // Deserialize the Base class
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   localrc = ESMC_Base::ESMC_Deserialize(buffer, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Deserialize the ArrayBundle with all its Arrays
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   ip = (int *)(buffer + *offset);
   arrayCount = *ip++;
   cp = (char *)ip;

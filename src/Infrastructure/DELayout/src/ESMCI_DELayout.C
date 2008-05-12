@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.4 2008/04/22 18:01:26 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.5 2008/05/12 21:56:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.4 2008/04/22 18:01:26 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.5 2008/05/12 21:56:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1425,40 +1425,33 @@ int DELayout::serialize(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  int fixedpart, nbytes;
   int i, j;
   char *cp;
   int *ip;
   ESMC_Logical *lp;
-  VM **vp;
   ESMC_DePinFlag *dp;
   de_type *dep;
+  int r;
 
-  // TODO: we cannot reallocate from C++ if the original buffer is
-  //  allocated on the f90 side.  change the code to make the allocate
-  //  happen in C++; then this will be fine.  (for now make sure buffer
-  //  is always big enough so realloc is not needed.)
-  fixedpart = sizeof(DELayout);
-  if ((*length - *offset) < fixedpart) {
+  // Check if buffer has enough free memory to hold object
+  if ((*length - *offset) < sizeof(DELayout)) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
     "- Buffer too short to add a DELayout object", &rc);
     return rc;
   }
 
-  // first set the base part of the object
+  // Serialize the Base class
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   localrc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
+  // Serialize the DELayout internal data members
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   cp = (char *)(buffer + *offset);
-  
-  // TODO: for now, send NULL as the vm, because i do not know how to
-  // serialize a VM.   probably sending an integer VM ID number would be
-  // what we want in the long run.
-  vp = (VM **)cp;   
-  *vp++ = NULL;     
-
-  ip = (int *)vp;
+  ip = (int *)cp;
   *ip++ = deCount;
   *ip++ = oldstyle;
   if (oldstyle){
@@ -1539,27 +1532,27 @@ DELayout *DELayout::deserialize(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   DELayout *a = new DELayout;
-  int fixedpart, nbytes;
   int i, j;
   char *cp;
   int *ip;
   ESMC_Logical *lp;
-  VM **vp;
   ESMC_DePinFlag *dp;
   de_type *dep;
+  int r;
 
-  // first get the base part of the object
+  // Deserialize the Base class
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   localrc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return NULL;
 
-  // now the rest
+  // Deserialize the DELayout internal data members
+  a->vm = NULL;  // this must be NULL
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;  // alignment
   cp = (char *)(buffer + *offset);
-  
-  vp = (VM **)cp;
-  a->vm = *vp++;  // this is a NULL that comes from the serialize side
-
-  ip = (int *)vp;
+  ip = (int *)cp;
   a->deCount = *ip++;
   a->oldstyle = *ip++;
 
@@ -2417,6 +2410,7 @@ int XXE::exec(
 //
   int rraCount,       // in  - number of relative run-time address in rraList
   char **rraList,     // in  - relative run-time addresses
+  int filterBitField, // in  - filter operations according to predicateBitField
   double *dTime,      // out - execution time, NULL to disable
   int indexStart,     // in  - start index, < 0 for default (full stream)
   int indexStop       // in  - stop index, < 0 for default (full stream)
@@ -2455,7 +2449,7 @@ int XXE::exec(
     return rc;
   }
   
-  void *xxeElement, *xxeIndexElement;
+  StreamElement *xxeElement, *xxeIndexElement;
   SendnbInfo *xxeSendnbInfo;
   RecvnbInfo *xxeRecvnbInfo;
   SendnbRRAInfo *xxeSendnbRRAInfo;
@@ -2469,6 +2463,7 @@ int XXE::exec(
   ProductSumScalarRRAInfo *xxeProductSumScalarRRAInfo;
   ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo;
   ProductSumSuperScalarContigRRAInfo *xxeProductSumSuperScalarContigRRAInfo;
+  ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo;
   MemCpyInfo *xxeMemCpyInfo;
   MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
   MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo;
@@ -2484,6 +2479,10 @@ int XXE::exec(
   
   for (int i=indexRangeStart; i<=indexRangeStop; i++){
     xxeElement = &(stream[i]);
+    
+    if (xxeElement->predicateBitField & filterBitField)
+      continue; // filter out this operation
+    
 //    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
     switch(stream[i].opId){
     case send:
@@ -2626,6 +2625,52 @@ int XXE::exec(
           termCount, 0);
       }
       break;
+    case zeroSuperScalarRRA:
+      {
+        xxeZeroSuperScalarRRAInfo =
+          (ZeroSuperScalarRRAInfo *)xxeElement;
+        int *rraOffsetList = xxeZeroSuperScalarRRAInfo->rraOffsetList;
+        int termCount = xxeZeroSuperScalarRRAInfo->termCount;
+        switch (xxeZeroSuperScalarRRAInfo->elementTK){
+        case I4:
+          {
+            for (int i=0; i<termCount; i++){
+              ESMC_I4 *rraBase =
+                (ESMC_I4 *)rraList[xxeZeroSuperScalarRRAInfo->rraIndex];
+              *(rraBase+rraOffsetList[i]) = 0;
+            }
+          }
+          break;
+        case I8:
+          {
+            for (int i=0; i<termCount; i++){
+              ESMC_I8 *rraBase =
+                (ESMC_I8 *)rraList[xxeZeroSuperScalarRRAInfo->rraIndex];
+              *(rraBase+rraOffsetList[i]) = 0;
+            }
+          }
+          break;
+        case R4:
+          {
+            for (int i=0; i<termCount; i++){
+              ESMC_R4 *rraBase =
+                (ESMC_R4 *)rraList[xxeZeroSuperScalarRRAInfo->rraIndex];
+              *(rraBase+rraOffsetList[i]) = 0.;
+            }
+          }
+          break;
+        case R8:
+          {
+            for (int i=0; i<termCount; i++){
+              ESMC_R8 *rraBase =
+                (ESMC_R8 *)rraList[xxeZeroSuperScalarRRAInfo->rraIndex];
+              *(rraBase+rraOffsetList[i]) = 0.;
+            }
+          }
+          break;
+        }
+      }
+      break;
     case memCpy:
       {
         xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
@@ -2713,14 +2758,16 @@ int XXE::exec(
     case xxeSub:
       {
         xxeSubInfo = (XxeSubInfo *)xxeElement;
-        xxeSubInfo->xxe->exec(rraCount, rraList); // recursive call
+        // recursive call:
+        xxeSubInfo->xxe->exec(rraCount, rraList, filterBitField);
       }
       break;
     case xxeSubMulti:
       {
         xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
         for (int k=0; k<xxeSubMultiInfo->count; k++)
-          xxeSubMultiInfo->xxe[k]->exec(rraCount, rraList); // recursive call
+          // recursive call:
+          xxeSubMultiInfo->xxe[k]->exec(rraCount, rraList, filterBitField);
       }
       break;
     case waitOnAnyIndexSub:
@@ -2739,7 +2786,8 @@ int XXE::exec(
               vm->commtest(xxeCommhandleInfo->commhandle, &(completeFlag[k]));
               if (completeFlag[k]){
                 // recursive call into xxe execution
-                xxeWaitOnAnyIndexSubInfo->xxe[k]->exec(rraCount, rraList);
+                xxeWaitOnAnyIndexSubInfo->xxe[k]->
+                  exec(rraCount, rraList, filterBitField);
                 ++completeTotal;
               }
             }
@@ -2765,10 +2813,8 @@ int XXE::exec(
         VMK::wtime(wtime);
         *wtime -= wtimeRelative;
         // actual xxe wtimer stream element
-        if (xxeWtimerInfo->opSubId != noSum){
-          *wtimeSumActual += *wtime - *wtimeActual; // add time interval
-          ++(*sumTermCountActual);  // count this sum term
-        }
+        *wtimeSumActual += *wtime - *wtimeActual; // add time interval
+        ++(*sumTermCountActual);  // count this sum term
         *wtimeActual = *wtime;
       }
       break;
@@ -3302,6 +3348,7 @@ int XXE::print(
 //
   int rraCount,       // in  - number of relative run-time address in rraList
   char **rraList,     // in  - relative run-time addresses
+  int filterBitField, // in  - filter operations according to predicateBitField
   int indexStart,     // in  - start index, < 0 for default (full stream)
   int indexStop       // in  - stop index, < 0 for default (full stream)
   ){
@@ -3869,10 +3916,12 @@ int XXE::execReady(
           // insert explicit waitOnIndex StreamElements
           count = i;
           for (int j=0; j<sendnbCount; j++){
+            int index = sendnbIndexList[j];
             stream[count].opId = waitOnIndex;
+            stream[count].predicateBitField = stream[index].predicateBitField;
             xxeElement = &(stream[count]);
             xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
-            xxeWaitOnIndexInfo->index = sendnbIndexList[j];
+            xxeWaitOnIndexInfo->index = index;
             ++count;
             if (count >= max){
               localrc = growStream(1000);
@@ -3910,10 +3959,12 @@ int XXE::execReady(
           // insert explicit waitOnIndex StreamElements
           count = i;
           for (int j=0; j<recvnbCount; j++){
+            int index = recvnbIndexList[j];
             stream[count].opId = waitOnIndex;
+            stream[count].predicateBitField = stream[index].predicateBitField;
             xxeElement = &(stream[count]);
             xxeWaitOnIndexInfo = (WaitOnIndexInfo *)xxeElement;
-            xxeWaitOnIndexInfo->index = recvnbIndexList[j];
+            xxeWaitOnIndexInfo->index = index;
             ++count;
             if (count >= max){
               localrc = growStream(1000);
@@ -4058,7 +4109,7 @@ int XXE::optimize(
   class AnalyzeElement{
     public:
       OpId opId;
-      OpSubId opSubId;
+      int predicateBitField;
       int partnerPet;
       char *bufferStart;
       char *bufferEnd;
@@ -4067,10 +4118,10 @@ int XXE::optimize(
       int indexList[10000];
       AnalyzeElement *next;
     public:
-      AnalyzeElement(int index, OpId opIdArg, OpSubId opSubIdArg, 
+      AnalyzeElement(int index, OpId opIdArg, int predicateBitFieldArg,
         int petArg, void *buffer, int size){
         opId=opIdArg;
-        opSubId=opSubIdArg;
+        predicateBitField=predicateBitFieldArg;
         partnerPet=petArg;
         bufferStart=(char *)buffer;
         bufferEnd=bufferStart+size;
@@ -4085,21 +4136,25 @@ int XXE::optimize(
       }
       void print(){
         if (this){
-          printf("opId: %d, opSubId: %d, partnerPet: %d, indexCount: %d, "
-            "buffer: %p - %p\n",
-            opId, opSubId, partnerPet, indexCount, bufferStart, bufferEnd);
+          printf("opId: %d, predicateBitField: %d, partnerPet: %d, "
+            "indexCount: %d, buffer: %p - %p\n",
+            opId, predicateBitField, partnerPet, indexCount, bufferStart,
+            bufferEnd);
           next->print();  // recursive call
         }else
           printf("ae: END\n");
       }
-      void add(int index, OpId opIdArg, OpSubId opSubIdArg, 
+      void add(int index, OpId opIdArg, int predicateBitFieldArg, 
         int petArg, void *buffer, int size){
-        if (opIdArg!=opId || opSubId!=opSubId || petArg!=partnerPet)
+        if (opIdArg!=opId || predicateBitFieldArg!=predicateBitField
+          || petArg!=partnerPet)
           if (next)
-            next->add(index, opIdArg, opSubIdArg, petArg, buffer, size);
+            next->add(index, opIdArg, predicateBitFieldArg, petArg, buffer,
+            size);
           else
             next = new 
-              AnalyzeElement(index, opIdArg, opSubIdArg, petArg, buffer, size);
+              AnalyzeElement(index, opIdArg, predicateBitFieldArg, petArg,
+              buffer, size);
         else{
           if ((char *)buffer == bufferEnd){
             // in this simple analyzer elements must be in order
@@ -4109,11 +4164,12 @@ int XXE::optimize(
             ++indexCount;
           }else
             if (next)
-              next->add(index, opIdArg, opSubIdArg, petArg, buffer, size);
+              next->add(index, opIdArg, predicateBitFieldArg, petArg, buffer,
+              size);
             else
               next = new 
-                AnalyzeElement(index, opIdArg, opSubIdArg, petArg, buffer,
-                  size);
+                AnalyzeElement(index, opIdArg, predicateBitFieldArg, petArg,
+                buffer, size);
         }
       }
       int elementCount(){
@@ -4201,22 +4257,24 @@ int XXE::optimize(
       case sendnb:
         {
           xxeSendnbInfo = (SendnbInfo *)xxeElement;
-          if (aq) aq->add(i, xxeSendnbInfo->opId, xxeSendnbInfo->opSubId,
-            xxeSendnbInfo->dstPet, xxeSendnbInfo->buffer, xxeSendnbInfo->size);
+          if (aq) aq->add(i, xxeSendnbInfo->opId, 
+            xxeSendnbInfo->predicateBitField, xxeSendnbInfo->dstPet,
+            xxeSendnbInfo->buffer, xxeSendnbInfo->size);
           else
             aq = new AnalyzeElement(i, xxeSendnbInfo->opId,
-              xxeSendnbInfo->opSubId, xxeSendnbInfo->dstPet,
+              xxeSendnbInfo->predicateBitField, xxeSendnbInfo->dstPet,
               xxeSendnbInfo->buffer, xxeSendnbInfo->size);
         }
         break;
       case recvnb:
         {
           xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
-          if (aq) aq->add(i, xxeRecvnbInfo->opId, xxeRecvnbInfo->opSubId,
-            xxeRecvnbInfo->srcPet, xxeRecvnbInfo->buffer, xxeRecvnbInfo->size);
+          if (aq) aq->add(i, xxeRecvnbInfo->opId,
+            xxeRecvnbInfo->predicateBitField, xxeRecvnbInfo->srcPet,
+            xxeRecvnbInfo->buffer, xxeRecvnbInfo->size);
           else
             aq = new AnalyzeElement(i, xxeRecvnbInfo->opId,
-              xxeRecvnbInfo->opSubId, xxeRecvnbInfo->srcPet,
+              xxeRecvnbInfo->predicateBitField, xxeRecvnbInfo->srcPet,
               xxeRecvnbInfo->buffer, xxeRecvnbInfo->size);
         }
         break;
@@ -4249,8 +4307,10 @@ int XXE::optimize(
               xxeSendnbInfo->buffer = buffer;
               xxeSendnbInfo->size = bufferSize;
               // invalidate all other sendnb StreamElements to nop
-              for (int k=1; k<aeList[0]->indexCount; k++)
+              for (int k=1; k<aeList[0]->indexCount; k++){
                 stream[aeList[0]->indexList[k]].opId = nop;
+                stream[aeList[0]->indexList[k]].predicateBitField = 0x0;
+              }
             }else{
               // need to introduce a contiguous intermediate buffer
               int bufferSize = 0; // reset
@@ -4267,6 +4327,7 @@ int XXE::optimize(
                 // data of StreamElements ref. by aeList[kk] are congtig. memory
                 // -> only need a single memCpy for all of them
                 extrastream[xxeCount].opId = memCpy;
+                extrastream[xxeCount].predicateBitField = 0x0;  //TODO: match!
                 xxeElement = &(extrastream[xxeCount]);
                 xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
                 xxeMemCpyInfo->dstMem = buffer + bufferOffset;
@@ -4275,13 +4336,16 @@ int XXE::optimize(
                 ++xxeCount;
                 bufferOffset += aeList[kk]->bufferSize;
                 // invalidate all StreamElements in stream assoc. w. aeList[kk]
-                for (int k=0; k<aeList[kk]->indexCount; k++)
-                  stream[aeList[kk]->indexList[k]].opId = nop;  // invalidate
+                for (int k=0; k<aeList[kk]->indexCount; k++){
+                  stream[aeList[kk]->indexList[k]].opId = nop;
+                  stream[aeList[kk]->indexList[k]].predicateBitField = 0x0;
+                }
               }
               // determine first Sendnb index
               int firstIndex = aeList[0]->indexList[0];
               // replace the first sendnb StreamElement using the interm. buffer
               stream[firstIndex].opId = sendnb;
+              stream[firstIndex].predicateBitField = 0x0;  //TODO: match!
               xxeElement = &(stream[firstIndex]);
               xxeSendnbInfo = (SendnbInfo *)xxeElement;
               xxeSendnbInfo->buffer = buffer;
@@ -4349,8 +4413,10 @@ int XXE::optimize(
               xxeRecvnbInfo->buffer = buffer;
               xxeRecvnbInfo->size = bufferSize;
               // invalidate all other recvnb StreamElements to nop
-              for (int k=1; k<aeList[0]->indexCount; k++)
+              for (int k=1; k<aeList[0]->indexCount; k++){
                 stream[aeList[0]->indexList[k]].opId = nop;
+                stream[aeList[0]->indexList[k]].predicateBitField = 0x0;
+              }
             }else{
               // need to introduce a contiguous intermediate buffer
               int bufferSize = 0; // reset
@@ -4367,6 +4433,7 @@ int XXE::optimize(
                 // data of StreamElements referenced by aeList[kk] are congtig.
                 // -> only need a single memCpy for all of them
                 extrastream[xxeCount].opId = memCpy;
+                extrastream[xxeCount].predicateBitField = 0x0;  //TODO: match!
                 xxeElement = &(extrastream[xxeCount]);
                 xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
                 xxeMemCpyInfo->dstMem = aeList[kk]->bufferStart;
@@ -4375,12 +4442,15 @@ int XXE::optimize(
                 ++xxeCount;
                 bufferOffset += aeList[kk]->bufferSize;
                 // invalidate all StreamElements in stream asso. with aeList[kk]
-                for (int k=0; k<aeList[kk]->indexCount; k++)
-                  stream[aeList[kk]->indexList[k]].opId = nop;  // invalidate
+                for (int k=0; k<aeList[kk]->indexCount; k++){
+                  stream[aeList[kk]->indexList[k]].opId = nop;
+                  stream[aeList[kk]->indexList[k]].predicateBitField = 0x0;
+                }
               }
               // replace the very first recvnb StreamElement using the
               // intermediate buffer
               stream[aeList[0]->indexList[0]].opId = recvnb;
+              stream[aeList[0]->indexList[0]].predicateBitField = 0x0;//TODO:mat
               xxeElement = &(stream[aeList[0]->indexList[0]]);
               xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
               xxeRecvnbInfo->buffer = buffer;

@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.28 2008/04/02 20:43:02 cdeluca Exp $
+% $Id: ESMF_options.tex,v 1.29 2008/05/12 21:56:37 theurich Exp $
 
 \section{Global Options and Parameters}
 
@@ -198,6 +198,21 @@ Valid values are:
          Determine the minimum of all data elements.
    \item [ESMF\_MAX]
          Determine the maximum of all data elements.
+\end{description}
+
+\subsubsection{ESMF\_RegionFlag}
+\label{opt:regionflag}
+{\sf DESCRIPTION:\\}
+Specifies various regions in the data layout of an Array or Field object.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_REGION\_TOTAL]
+      Total allocated memory.
+\item [ESMF\_REGION\_SELECT]
+      Operation specific elements. See specific operation for details.
+\item [ESMF\_REGION\_EMPTY]
+      Empty set of elments.
 \end{description}
 
 \subsubsection{ESMF\_ReqForRestartFlag}
