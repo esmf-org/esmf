@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.4 2008/05/12 19:06:26 feiliu Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.5 2008/05/12 19:13:24 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.4 2008/05/12 19:06:26 feiliu Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.5 2008/05/12 19:13:24 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -101,6 +101,9 @@ contains
 !   {\tt routehandle}.
 !
 !   This call is {\em collective} across the current VM.
+!
+!   For examples and associated documentations using this method see Section  
+!   \ref{sec:field:usage:redist_1dptr}. 
 !
 !   \begin{description}
 !   \item [{[srcField]}]
