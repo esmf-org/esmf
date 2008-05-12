@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.18 2008/04/05 03:38:22 cdeluca Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.19 2008/05/12 18:26:18 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
      program FieldRedistEx
 
 !-------------------------------------------------------------------------
-!ESMF_EXremoveAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !
 ! !PROGRAM: ESMF_FieldRedistEx - Field Redistribution
@@ -22,252 +22,148 @@
 !     
 ! This program shows examples of Field interfaces for redistribution of data.
 !-----------------------------------------------------------------------------
-
+#include <ESMF.h>
+#include <ESMF_Macros.inc>
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRedistEx"
      ! ESMF Framework module
      use ESMF_Mod
+     use ESMF_TestMod
      implicit none
 
-     ! instantiate two igrids, two fields, and two arrays
-     type(ESMF_IGrid)  ::  igrid1,  igrid2
-     type(ESMF_Field) :: field1, field2
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+    character(*), parameter :: version = &
+    '$Id: ESMF_FieldRedistEx.F90,v 1.19 2008/05/12 18:26:18 feiliu Exp $'
+!------------------------------------------------------------------------------
 
-     ! Local variables
-     integer :: finalrc, rc
-     integer :: i, j, j1, add
-     integer :: counts(2), localCounts(2)
-     integer :: npets, myDE
-     integer, dimension(:,:), allocatable :: myIndices
-     real(ESMF_KIND_R8) :: min(2), max(2)
-     real(ESMF_KIND_R8) :: pi = 3.1416d0
-     real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
-     real(ESMF_KIND_R8), dimension(:,:), pointer :: srcdata
-     type(ESMF_ArraySpec) :: arrayspec1D, arrayspec2D
-     type(ESMF_DELayout) :: delayout1, delayout2
-     type(ESMF_IGridHorzStagger) :: horz_stagger
-     type(ESMF_RouteHandle) :: rh12
-     type(ESMF_VM) :: vm
+    ! Local variables
+    integer :: rc, finalrc
+    type(ESMF_Field)                            :: srcField, dstField
+    type(ESMF_Grid)                             :: grid
+    type(ESMF_DistGrid)                         :: distgrid
+    type(ESMF_VM)                               :: vm
+    type(ESMF_RouteHandle)                      :: routehandle
+    type(ESMF_Array)                            :: srcArray, dstArray
+    integer                                     :: localrc, lpe, i
 
-     finalrc = ESMF_SUCCESS
+    integer, allocatable                        :: src_farray(:), dst_farray(:)
+    integer                                     :: fa_shape(1)
+    integer, pointer                            :: fptr(:)
 
-     ! Initialize the framework and get back the default global VM
-     call ESMF_Initialize(vm=vm, rc=rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    rc = ESMF_SUCCESS
+    finalrc = ESMF_SUCCESS
+!------------------------------------------------------------------------------
+    call ESMF_Initialize(rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-     ! Get the PET count
-     call ESMF_VMGet(vm, petCount=npets, rc=rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-     if (npets .eq. 1) then
-       print *, "This test must run with > 1 processor"
-       finalrc = ESMF_FAILURE
-     endif
-
+    if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) &
+        call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!------------------------------------------------------------------------------
 !BOE
-!\subsubsection{Field Redistribution example}
-
-! This example illustrates the use of Field interfaces for redistribution of
-! data.
+! \subsection{Redist data from source Field to destination Field}
+!\label{sec:field:usage:redist_1dptr}
 !
-! Basically redistribution works on two Fields that are on the same IGrid except
-! that the IGrid is distributed differently.  In this example, two IGrids are created
-! from the same underlying 2D horizontal IGrid, but one is distributed as logical
-! blocks and the other is distributed as arbitrary vectors.
+! User can use {\tt ESMF\_FieldRedist} interface to redistribute data from 
+! source Field to destination Field. This interface is overloaded by type and kind;
+! In the version of {\tt ESMF\_FieldRedist} without factor argument, a default value
+! of 1 is used.
+! 
+! In this example, we first create two 1D Fields, a source Field and a destination
+! Field. Then we use {\tt ESMF\_FieldRedist} to
+! redistribute data from source Field to destination Field.
 !EOE
+!BOC 
 
-!BOC
-     ! First create two layouts, one for a 2D block distribution and a 1D layout
-     ! for vector distribution:
+    ! Get current VM and pet number
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-     delayout1 = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=rc)
-     delayout2 = ESMF_DELayoutCreate(vm, (/ npets, 1 /), rc=rc)
+    call ESMF_VMGet(vm, localPet=lpe, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! create distgrid and grid
+    distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
+        regDecomp=(/4/), &
+        rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    grid = ESMF_GridCreate(distgrid=distgrid, &
+        gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
+        name="grid", rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_FieldGet(grid, localDe=0, totalCount=fa_shape, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! create src_farray, srcArray, and srcField
+    ! +--------+--------+--------+--------+
+    !      0        1        2        3            ! value
+    ! 1        4        8        12       16       ! bounds
+    allocate(src_farray(fa_shape(1)) )
+    src_farray = lpe
+    srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, &
+        staggerloc=0, &
+        rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    srcField = ESMF_FieldCreate(grid, srcArray, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! create dst_farray, dstArray, and dstField
+    ! +--------+--------+--------+--------+
+    !      0        0        0        0            ! value
+    ! 1        4        8        12       16       ! bounds
+    allocate(dst_farray(fa_shape(1)) )
+    dst_farray = 0
+    dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, &
+        staggerloc=0, &
+        rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    dstField = ESMF_FieldCreate(grid, dstArray, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! perform redist
+    ! 1. setup routehandle from source Field to destination Field
+    call ESMF_FieldRedistStore(srcField, dstField, routehandle, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! 2. use precomputed routehandle to redistribute data
+    call ESMF_FieldRedist(srcfield, dstField, routehandle, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! verify redist
+    call ESMF_FieldGet(dstField, localDe=0, farray=fptr, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! Verify that the redistributed data in dstField is correct.
+    ! Before the redist op, the dst Field contains all 0. 
+    ! The redist op reset the values to the PE value, verify this is the case.
+    do i = lbound(fptr, 1), ubound(fptr, 1)
+        if(fptr(i) .ne. lpe) localrc = ESMF_FAILURE
+    enddo
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! release route handle
+    call ESMF_FieldRedistRelease(routehandle, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! destroy all objects created in this example to prevent memory leak
+    call ESMF_FieldDestroy(srcField, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(dstField, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_ArrayDestroy(srcArray, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_ArrayDestroy(dstArray, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_GridDestroy(grid, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_DistGridDestroy(distgrid, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    deallocate(src_farray, dst_farray)
 !EOC
-
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-     ! Next create the IGrids with exactly the same underlying parameters:
-
-     counts(1) = 60
-     counts(2) = 40
-     min(1)    =  0.0
-     max(1)    = 60.0
-     min(2)    =  0.0
-     max(2)    = 50.0
-     horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
-
-     igrid1 = ESMF_IGridCreateHorzXYUni(counts=counts, &
-                             minGlobalCoordPerDim=min, &
-                             maxGlobalCoordPerDim=max, &
-                             horzStagger=horz_stagger, &
-                             name="source igrid", rc=rc)
-!EOC
-
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-     igrid2 = ESMF_IGridCreateHorzXYUni(counts=counts, &
-                             minGlobalCoordPerDim=min, &
-                             maxGlobalCoordPerDim=max, &
-                             horzStagger=horz_stagger, &
-                             name="source igrid", rc=rc)
-!EOC
-
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-     ! With two identical IGrids, distribute one in the normal block style:
-
-     call ESMF_IGridDistribute(igrid1, delayout=delayout1, rc=rc)
-!EOC
-
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-     ! and get our local DE number on the second layout
-     call ESMF_DELayoutGetDeprecated(delayout2, localDE=myDE, rc=rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-     ! The second IGrid is distributed in arbitrary vectors.  The following code
-     ! fragment calculates the vectors of index pairs in {\tt myIndices}, based
-     ! on the local DE number.  This is just a simple algorithm to create a
-     ! semi-regular distribution of points to the PETs.
-
-     i = int((counts(1)*counts(2) + npets -1)/npets)
-     allocate (myIndices(i,2))
-
-     j1  = 1 + myDE
-     add = 0
-     do i = 1,counts(1)
-       do j = j1,counts(2),npets
-         add = add + 1
-         myIndices(add,1) = i
-         myIndices(add,2) = j
-       enddo
-       j1 = j - counts(2)
-     enddo
-
-     call ESMF_IGridDistribute(igrid2, delayout=delayout2, myCount=add, &
-                              myIndices=myIndices, rc=rc)
-!EOC
-
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-     ! Set up a 1D (for the vector Field) and a 2D real array
-     call ESMF_ArraySpecSet(arrayspec2D, rank=2, &
-                            typekind=ESMF_TYPEKIND_R8, rc=rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_ArraySpecSet(arrayspec1D, rank=1, &
-                            typekind=ESMF_TYPEKIND_R8, rc=rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-     ! Create Fields for each of the IGrids:
-     field1 = ESMF_FieldCreate(igrid1, arrayspec2D, &
-                               horzRelloc=ESMF_CELL_CENTER, &
-                               haloWidth=0, name="humidity1", rc=rc)
-
-     field2 = ESMF_FieldCreate(igrid2, arrayspec1D, &
-                               horzRelloc=ESMF_CELL_CENTER, &
-                               haloWidth=0, name="humidity2", rc=rc)
-!EOC
-
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
-     ! Then precompute the communication pattern to
-     ! move data from the regularly distributed Field1 
-     ! to the arbitrarily stored Field2:
-     call ESMF_FieldRedistStore(field1, field2, vm, routehandle=rh12, rc=rc)
-!EOC
-
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-     ! get coordinate arrays available for setting the source data array
-     call ESMF_IGridGetCoord(igrid1, dim=1, horzRelloc=ESMF_CELL_CENTER, &
-                            centerCoord=coordX, localCounts=localCounts, rc=rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_IGridGetCoord(igrid1, dim=2, horzRelloc=ESMF_CELL_CENTER, &
-                            centerCoord=coordY, rc=rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-     ! Get pointers to the data and set it up
-     call ESMF_FieldGetDataPointer(field1, srcdata, ESMF_DATA_REF, rc=rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-     ! initialize data arrays
-     srcdata = 0.0
-
-     ! set data array to a function of coordinates (in the computational part
-     ! of the array only, not the halo region)
-     do j   = 1,localCounts(2)
-       do i = 1,localCounts(1)
-         srcdata(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
-                             + 2.0*sin(coordY(i,j)/50.0*pi) 
-       enddo
-     enddo
-
-     ! No deallocate() is needed for array data, it will be freed when the
-     ! Array is destroyed. 
-
-!BOC
-     ! After the data in Field1 has been filled, simply call the 
-     ! redistribution method here to move the data to Field2:
-     call ESMF_FieldRedist(field1, field2, rh12, rc=rc)
-!EOC
-
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-     ! Clean up
-
-     deallocate(myIndices)
-
-!BOC
-     ! Once the Route is no longer needed, it is up to the user to release
-     ! it, since the user created it:
-     call ESMF_FieldRedistRelease(rh12, rc)
-!EOC
-
-
-     ! Second example showing one fuction call
-!BOE
-!\subsubsection{Field Redistribution example using a single call}
-
-! This example illustrates the use of Field interfaces for redistribution of
-! data with a single call.  Using the data structures from the previous example,
-! this example illustrates the capability to perform a redistribution in a single
-! call to FieldRedist rather than the three separate calls to FieldRedistStore,
-! FieldRedist, and FieldRedistRelease.  Please note that in this case the calling
-! argument list does not include a RouteHandle and one is not returned to the
-! user for reuse.  However, this interface can be useful for some applications
-! where there is no future use of the communication patterns.
-!
-!EOE
-
-!BOC
-     ! Note that this call looks similar to the previous one applying the
-     ! precomputed RouteHandle with the exception of requiring the VM in
-     ! the calling list.
-
-     call ESMF_FieldRedist(field1, field2, parentVM=vm, rc=rc)
-
-!EOC
-
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_FieldDestroy(field1, rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_FieldDestroy(field2, rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_IGridDestroy(igrid1, rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_IGridDestroy(igrid2, rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_DELayoutDestroy(delayout1, rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-     call ESMF_DELayoutDestroy(delayout2, rc)
-     if (rc.ne.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
 
      call ESMF_Finalize(rc=rc)
 

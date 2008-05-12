@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.2 2008/05/09 18:11:04 feiliu Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.3 2008/05/12 18:27:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.2 2008/05/09 18:11:04 feiliu Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.3 2008/05/12 18:27:51 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -259,8 +259,8 @@ contains
 ! It is erroneous to specify the identical Field object for srcField and dstField 
 ! arguments. 
 !  
-! The routine returns an ESMF_RouteHandle that can be used to call 
-! ESMF_FieldRedist() on any pair of Fields that are congruent and typekind 
+! The routine returns an ESMF\_RouteHandle that can be used to call 
+! ESMF\_FieldRedist() on any pair of Fields that are congruent and typekind 
 ! conform with the srcField, dstField pair. Congruent Fields possess matching 
 ! DistGrids and the shape of the local array tiles matches between the Fields for 
 ! every DE. 
@@ -268,7 +268,7 @@ contains
 ! This call is collective across the current VM.  
 ! 
 ! For examples and associated documentations using this method see Section  
-! \ref{sec:field:usage:redist_2dptr}. 
+! \ref{sec:field:usage:redist_1dptr}. 
 ! 
 ! The arguments are: 
 ! \begin{description} 

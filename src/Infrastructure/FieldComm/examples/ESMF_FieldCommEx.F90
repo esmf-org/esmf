@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.24 2008/05/09 19:43:13 feiliu Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.25 2008/05/12 18:26:18 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.24 2008/05/09 19:43:13 feiliu Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.25 2008/05/12 18:26:18 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -215,7 +215,8 @@
         enddo
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     enddo
-!EOC
+
+    ! destroy all objects created in this example to prevent memory leak
     call ESMF_FieldDestroy(field, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_GridDestroy(grid, rc=rc)
@@ -224,7 +225,7 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray)
     if(lpe .eq. 0) deallocate(farraySrc)
-
+!EOC
 !------------------------------------------------------------------------------
     if (finalrc.EQ.ESMF_SUCCESS) then
        print *, "PASS: ESMF_FieldCommEx.F90"

@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.40 2008/05/08 02:27:17 theurich Exp $
+% $Id: Field_refdoc.ctex,v 1.41 2008/05/12 18:26:18 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -57,6 +57,8 @@
 %\input{../Infrastructure/Field/doc/ESMF_FieldGetEx_fapi}
 %\input{../Infrastructure/Field/doc/ESMF_FieldSetEx_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldRegridEx_fapi}
+\input{../Infrastructure/FieldComm/doc/ESMF_FieldCommEx_fapi}
+\input{../Infrastructure/FieldComm/doc/ESMF_FieldRedistEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
@@ -86,11 +88,17 @@
 \input{../Infrastructure/Field/doc/ESMF_Field_fapi}
 #endif
 
-%\subsection{Class API: Field Communications}
+\subsection{Class API: Field Communications}
 #ifdef STANDALONE
 %\input{../../FieldComm/doc/ESMF_FieldComm_fapi}
+\input{../../FieldComm/doc/ESMF_FieldGather_fapi}
+\input{../../FieldComm/doc/ESMF_FieldRedist_fapi}
+\input{../../FieldComm/doc/ESMF_FieldScatter_fapi}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/FieldComm/doc/ESMF_FieldComm_fapi}
+\input{../Infrastructure/FieldComm/doc/ESMF_FieldGather_fapi}
+\input{../Infrastructure/FieldComm/doc/ESMF_FieldRedist_fapi}
+\input{../Infrastructure/FieldComm/doc/ESMF_FieldScatter_fapi}
 #endif
 
 #ifdef STANDALONE
