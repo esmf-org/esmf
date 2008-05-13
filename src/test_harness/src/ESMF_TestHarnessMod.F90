@@ -38,6 +38,9 @@
 
   implicit none
 
+  ! Debug flag
+  logical, parameter, private :: debug_flag = .false.
+
   ! Process Parameters
   integer, parameter :: Harness_Error            = 0
   integer, parameter :: Harness_Redist           = 1
@@ -64,6 +67,7 @@
   ! Test Result Parameters
   integer, parameter :: HarnessTest_SUCCESS      = 1000
   integer, parameter :: HarnessTest_FAILURE      = 1001
+  integer, parameter :: HarnessTest_UNDEFINED    = 1002
 
 
 !-------------------------------------------------------------------------------
@@ -88,11 +92,6 @@
      integer :: location              ! string location of method
   end type process_record
 
-  type memory_record
-     character(ESMF_MAXSTR) :: string
-     integer :: chunks               ! number of logically rectangular chunks
-     integer, pointer :: rank(:)
-  end type memory_record
 
 !-------------------------------------------------------------------------------
 !
@@ -110,25 +109,85 @@
      type(character_array), pointer :: tag(:)
   end type sized_char_array
 
+!-------------------------------------------------------------------------------
+!  Distribution Types
+
+  type dist_specification_record
+     integer :: drank                            ! rank of the distribution
+     integer, pointer :: dsize(:)                ! num of dist elements along axis
+  end type dist_specification_record
+
+  type dist_record
+     character(ESMF_MAXSTR) :: filename   ! grid specifier filename
+     integer :: nDspecs                   ! number of grid spec records
+     type(dist_specification_record), pointer :: src_dist(:)
+     type(dist_specification_record), pointer :: dst_dist(:)
+  end type dist_record
+
+
+!-------------------------------------------------------------------------------
+!  Grid Types
+
+  type grid_specification_record
+     integer :: grank                            ! rank of the grid
+     type(character_array), pointer :: gtype(:)  ! type of grid spacing
+     type(character_array), pointer :: gunits(:) ! physical grid units
+     integer, pointer :: gsize(:)                ! num of grid elements along axis
+     real(ESMF_KIND_R8), pointer :: grange(:,:)  ! physical range of axes
+  end type grid_specification_record
+
+  type grid_record
+     character(ESMF_MAXSTR) :: filename   ! grid specifier filename
+     integer :: nGspecs                   ! number of grid spec records
+     type(grid_specification_record), pointer :: src_grid(:)
+     type(grid_specification_record), pointer :: dst_grid(:)
+  end type grid_record
+
+!-------------------------------------------------------------------------------
+!  Memory Types
+
+  type memory_config
+     character(ESMF_MAXSTR) :: string    ! memory string 
+     integer :: memRank                  ! rank of memory chunk
+     integer :: DistRank                 ! rank of distribution
+     integer :: GridRank                 ! rank of grid
+     integer, pointer :: DistOrder(:)
+     integer, pointer :: GridOrder(:)
+     type(character_array), pointer :: DistType(:)
+     type(character_array), pointer :: GridType(:)
+     integer, pointer :: HaloL(:)
+     integer, pointer :: HaloR(:)
+     integer, pointer :: StagLoc(:)
+  end type memory_config
+
   type problem_descriptor_strings
-     character(ESMF_MAXSTR) :: pds        ! problem descriptor string
-     type(process_record) :: process      ! method process
-     type(sized_char_array) :: classfile  ! distribution specification files
-     type(sized_char_array) :: distfiles  ! distribution specification files
-     type(sized_char_array) :: gridfiles  ! grid specification files
+     character(ESMF_MAXSTR) :: pds         ! problem descriptor string
+     integer, pointer :: test_status(:,:)  ! test status of the (dist,grid) config
+     type(process_record) :: process       ! method process
+     type(memory_config) :: DstMem         ! destination memory configuration
+     type(memory_config) :: SrcMem         ! source memory configuration
+     !
+     type(sized_char_array) :: classfile  ! class specification files
+     !
+     integer :: nDfiles                       ! number of distribution  spec files
+     type(dist_record), pointer :: Dfiles(:)  ! distribution specification files
+     !
+     integer :: nGfiles                       ! number of grid spec files
+     type(grid_record), pointer :: Gfiles(:)  ! grid specification files
   end type problem_descriptor_strings
 
   type problem_descriptor_records
      character(ESMF_MAXSTR) :: filename   ! filename of problem descriptor record
      integer :: numStrings                ! # of problem descriptor strings in record
-     type(problem_descriptor_strings), pointer :: string(:)  ! problem descriptor strings
+     type(problem_descriptor_strings), pointer :: str(:)  ! problem descriptor strings
   end type problem_descriptor_records
 
   type harness_descriptor
-     character(ESMF_MAXSTR) :: testClass   ! test class
-     integer :: reportType                 ! report type 
-     integer :: numRecords                 ! number of problem descriptor records
-     type(problem_descriptor_records), pointer :: record(:)  ! problem descriptor record  
+     character(ESMF_MAXSTR) :: testClass       ! test class
+     character(ESMF_MAXSTR) :: reportType      ! test result report type 
+     character(ESMF_MAXSTR) :: setupReportType ! setup report type 
+     integer :: numRecords                     ! number of problem descriptor records
+     type(problem_descriptor_records), pointer :: rcrd(:)  ! problem descriptor record  
   end type harness_descriptor
 
 !
@@ -142,6 +201,498 @@
  !------------------------------------------------------------------------------
  ! Routines to parse input files for descriptor string, and specifier files.
  !------------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  subroutine report_descriptor_string(PDS, nstatus, localrc)
+  !-----------------------------------------------------------------------------
+  ! routine reports the configuration 
+  ! report string takes the form:
+  ! {status}: {source string} {action} {destination string}
+  !-----------------------------------------------------------------------------
+  ! arguments
+  type(problem_descriptor_strings), intent(in   ) :: PDS
+  integer, intent(in   ) :: nstatus
+  integer, intent(  out) :: localrc
+
+  ! local character strings
+  character(ESMF_MAXSTR) :: src_string, dst_string
+  character(ESMF_MAXSTR) :: lstatus, laction, lgrid, ldist, lsuffix, ltmp
+  character(7) :: lsize, lorder, ltmpL, ltmpR  
+
+  ! local integer variables
+  integer :: iDfile, iGfile, irank, igrid, idist, istatus
+
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+
+
+  !-----------------------------------------------------------------------------
+  ! set action string
+  !-----------------------------------------------------------------------------
+  select case( PDS%process%tag )
+
+    case( Harness_Redist )
+      laction = "-->"
+    case( Harness_BilinearRemap )
+      laction = "=B=>"
+    case( Harness_ConservRemap )
+      laction = "=C=>"
+    case( Harness_2ndConservRemap )
+      laction = "=S=>"
+    case( Harness_NearNeighRemap )
+      laction = "=N=>"
+    case( Harness_Error )
+      ! error
+    case default
+      ! error
+  end select
+
+
+  do iDfile=1, PDS%nDfiles    ! loop through each of the dist specifier files
+  do iGfile=1, PDS%nGfiles    ! loop through each of the grid specifier files
+    !---------------------------------------------------------------------------
+    ! set STATUS string
+    !---------------------------------------------------------------------------
+    if( PDS%test_status(iDfile,iGfile) == HarnessTest_SUCCESS ) then
+      lstatus = "SUCCESS:"
+      istatus = 1
+    elseif( PDS%test_status(iDfile,iGfile) == HarnessTest_FAILURE ) then
+      lstatus = "FAILURE:"
+      istatus = 0
+    elseif( PDS%test_status(iDfile,iGfile) == HarnessTest_UNDEFINED ) then
+      lstatus = ""
+      istatus =-1 
+    else
+      ! error
+      call ESMF_LogMsgSetError( ESMF_FAILURE,"invalid test status value ",     &
+               rcToReturn=localrc)
+
+    endif
+    ! print specifier files
+    print*,iDfile,iGfile,'   > Specifier files:',trim(adjustL(                 &
+           PDS%Dfiles(iDfile)%filename)),                                      &
+           ', ',trim(adjustL(PDS%Gfiles(iGfile)%filename))
+
+    do idist=1, PDS%Dfiles(iDfile)%nDspecs ! loop thru all of file's dist specifiers
+    do igrid=1, PDS%Gfiles(iGfile)%nGspecs ! loop thru all of file's grid specifiers
+      !-------------------------------------------------------------------------
+      ! set source string
+      !-------------------------------------------------------------------------
+      src_string = '['
+      do irank=1,PDS%SrcMem%memRank 
+        ! after the first dimension add separaters to the string
+        if( irank > 1 ) src_string = trim(adjustL(src_string)) // '; '
+
+        ! for each dimension of the rank check if there is an associated
+        ! distribution and/or grid dimension. If not, insert place holder
+        if( PDS%SrcMem%DistOrder(irank) /= 0 ) then
+          write(lsize,"(i6)" ) PDS%Dfiles(iDfile)%src_dist(idist)%dsize(irank)
+          write(lorder,"(i1)") PDS%SrcMem%DistOrder(irank)
+          ldist = trim(adjustL(PDS%SrcMem%DistType(irank)%string)) //          &
+                  trim(adjustL(lorder))// '{' // trim(adjustL(lsize)) // '}'
+        else
+          ldist = '*'
+        endif
+        ! now do the grid part
+        if( PDS%SrcMem%GridOrder(irank) /= 0 ) then
+          write(lsize,"(i6)" ) PDS%Gfiles(iGfile)%src_grid(igrid)%gsize(irank)
+          write(lorder,"(i1)") PDS%SrcMem%GridOrder(irank)
+          lgrid = trim(adjustL(PDS%SrcMem%GridType(irank)%string)) //          &
+                  trim(adjustL(lorder)) // '{' // trim(adjustL(lsize)) // '}'
+        else
+          lgrid = '*'
+        endif
+
+        ! now add the suffix indicating periodicity and/or a halo
+        lsuffix = ''
+        ! check if the grid type is periodic
+        if( pattern_query(                                                     &
+                    PDS%Gfiles(iGfile)%src_grid(igrid)%gtype(irank)%string,    &
+                    "_periodic") /= 0 .or. pattern_query(                      &
+                    PDS%Gfiles(iGfile)%src_grid(igrid)%gtype(irank)%string,    &
+                           "_PERIODIC") /= 0 ) lsuffix = '+P'
+        ! check for nonzero halos
+        if( PDS%SrcMem%HaloL(irank) /= 0 .or. PDS%SrcMem%HaloR(irank) /= 0 ) then
+          write(ltmpL,"(i6)") PDS%SrcMem%HaloL(irank)
+          write(ltmpR,"(i6)") PDS%SrcMem%HaloR(irank)
+          ltmp = '+H{'//trim(adjustL(ltmpL))// ':' //trim(adjustL(ltmpR))// '}'
+          lsuffix = trim(adjustL(lsuffix)) // trim(adjustL(ltmp))
+        endif
+        ! concatenate the distribution and grid strings to the previous part of
+        ! the source string
+        src_string = trim(adjustL(src_string)) // trim(adjustL(ldist)) //      &
+                     trim(adjustL(lgrid)) // trim(adjustL(lsuffix))
+
+      enddo   ! irank
+      ! terminate the string with a close bracket and a stagger specification 
+      src_string = trim(adjustL(src_string)) // ']'
+      !-------------------------------------------------------------------------
+      ! set destination string
+      !-------------------------------------------------------------------------
+      dst_string = '['
+      do irank=1,PDS%DstMem%memRank 
+        ! after the first dimension add separaters to the string
+        if( irank > 1 ) dst_string = trim(adjustL(dst_string)) // ';'
+
+        ! for each dimension of the rank check if there is an associated
+        ! distribution and/or grid dimension. If not, insert place holder
+        if( PDS%DstMem%DistOrder(irank) /= 0 ) then
+          write(lsize,"(i6)" ) PDS%Dfiles(iDfile)%dst_dist(idist)%dsize(irank)
+          write(lorder,"(i1)") PDS%DstMem%DistOrder(irank)
+          ldist = trim(adjustL(PDS%DstMem%DistType(irank)%string)) //          &
+                  trim(adjustL(lorder)) // '{' // trim(adjustL(lsize)) // '}'
+        else
+          ldist = '*'
+        endif
+        ! now do the grid part
+        if( PDS%DstMem%GridOrder(irank) /= 0 ) then
+          write(lsize,"(i6)" ) PDS%Gfiles(iGfile)%src_grid(igrid)%gsize(irank)
+          write(lorder,"(i1)") PDS%DstMem%GridOrder(irank)
+          lgrid = trim(adjustL(PDS%DstMem%GridType(irank)%string)) //          &
+                  trim(adjustL(lorder)) // '{' // trim(adjustL(lsize)) // '}'
+        else
+          lgrid = '*'
+        endif
+
+        ! now add the suffix indicating periodicity and/or a halo
+        lsuffix = ''
+        ! check if the grid type is periodic
+        if( pattern_query(                                                     &
+                    PDS%Gfiles(iGfile)%dst_grid(igrid)%gtype(irank)%string,    &
+                    "_periodic") /= 0 .or. pattern_query(                      &
+                    PDS%Gfiles(iGfile)%dst_grid(igrid)%gtype(irank)%string,    &
+                           "_PERIODIC") /= 0 ) lsuffix = '+P'
+        ! check for nonzero halos
+        if( PDS%DstMem%HaloL(irank) /= 0 .or. PDS%DstMem%HaloR(irank) /= 0 ) then
+          write(ltmpL,"(i6)") PDS%DstMem%HaloL(irank)
+          write(ltmpR,"(i6)") PDS%DstMem%HaloR(irank)
+          ltmp = '+H{'//trim(adjustL(ltmpL))// ':' //trim(adjustL(ltmpR))// '}'
+          lsuffix = trim(adjustL(lsuffix)) // trim(adjustL(ltmp))
+        endif
+        ! concatenate the distribution and grid strings to the previous part of
+        ! the source string
+        dst_string = trim(adjustL(dst_string)) // trim(adjustL(ldist)) //      &
+                     trim(adjustL(lgrid)) // trim(adjustL(lsuffix))
+
+      enddo   ! irank
+      ! terminate the string with a close bracket and a stagger specification 
+      dst_string = trim(adjustL(dst_string)) // ']'
+
+
+      ! print out result string if codes match
+      if( istatus == nstatus .or. nstatus < 0 ) then
+         print*,trim(adjustL(lstatus)), trim(adjustL(src_string)),             &
+             trim(adjustL(laction)),trim(adjustL(dst_string))
+      endif
+    enddo    ! idist
+    enddo    ! igrid
+
+  enddo    ! iGfile
+  enddo    ! iDfile
+  !-----------------------------------------------------------------------------
+  ! set destination string
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  ! if I've gotten this far without an error, then the routine has succeeded.
+  !-----------------------------------------------------------------------------
+  localrc = ESMF_SUCCESS
+
+  !-----------------------------------------------------------------------------
+  end subroutine report_descriptor_string
+  !-----------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+
+
+
+  !-----------------------------------------------------------------------------
+  subroutine parse_descriptor_string(nstrings, pds, localrc)
+  !-----------------------------------------------------------------------------
+  ! Routine parses a problem descriptor string and extracts:
+  !	operation - redistribution or regrid plus method
+  !	rank of memory
+  !	rank of distribution
+  !	rank of grid association
+  !     order of dist and grid
+  !     type of dist or grid
+  !
+  ! Upon completion, the routine returns the values to the harness record
+  ! Harness%Record(*)%string(*)%   for 
+  !
+  !     process%string          character string of process
+  !     process%tag             numerical tag for process
+  !
+  !     SrcMem%memRank          rank of source memory block
+  !     SrcMem%GridRank         rank of source grid 
+  !     SrcMem%DistRank         rank of source distribution
+  !     SrcMem%GridType         type of grid
+  !     SrcMem%DistType         type of distribution
+  !     SrcMem%GridOrder        order of grid elements with dimensions
+  !     SrcMem%DistOrder        order of distribution elements with dimensions
+  !     SrcMem%HaloL            Left halo size for each dimension
+  !     SrcMem%HaloR            Right halo size for each dimension
+  !     SrcMem%StagLoc          Stagger location for each dimension
+  ! and the equivalent DstMem records.
+  !
+  !-----------------------------------------------------------------------------
+  ! arguments
+  integer, intent(in   ) :: nstrings
+  type(problem_descriptor_strings), intent(inout) :: pds
+  integer, intent(  out) :: localrc
+
+  ! local character strings
+  character(ESMF_MAXSTR) :: lstring, lname
+  character(ESMF_MAXSTR) :: src_string, dst_string
+  type(character_array), allocatable :: lsrc(:), ldst(:)
+  type(character_array), allocatable :: grid_type(:), dist_type(:)
+
+  logical :: flag = .true.
+
+  ! local integer variables
+  integer :: k, kstring
+  integer :: tag, location(2)
+  integer :: dst_beg, dst_end, src_beg, src_end
+  integer :: srcMulti, dstMulti
+  integer :: srcBlock,dstBlock
+  integer :: src_mem_rank, dst_mem_rank
+  integer :: dist_rank, grid_rank
+
+  integer, allocatable :: grid_order(:), dist_order(:)
+  integer, allocatable :: grid_HaloL(:), grid_HaloR(:)
+  integer, allocatable :: grid_StagLoc(:)
+
+  ! local logical variable
+  logical :: endflag = .false.
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  ! parse the problem descriptor string
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  ! search for the test operation
+  ! 1. search for "->" or "=>" - tip of symbol provides ending address
+  ! 2. back up until reach white space - provides begining address
+  ! 3. src_beg = 1, src_end = operation_beg-1
+  !    dst_beg = operation_end+1, dst_end = length(trim(string))
+  ! 4. LOCATION provides a reference for later splitting the string into
+  !    source and destination parts
+  !-----------------------------------------------------------------------------
+  lstring = trim(adjustL( pds%pds ) )
+  call process_query(lstring, lname, tag, location, localrc)  
+  if( ESMF_LogMsgFoundError(localrc,"syntax error in problem descriptor" //    &
+          " string " // trim(adjustL(lstring)),                                &
+          rcToReturn=localrc) ) return
+
+
+  ! store name (string) of operation and numerical code
+  pds%process%string = lname
+  pds%process%tag = tag
+
+  !-----------------------------------------------------------------------------
+  ! separate the problem descriptor string into source and destination
+  ! chunks to ease with parsing, but first determine if the problem
+  ! descriptor string describes a multiple block memory structure
+  !-----------------------------------------------------------------------------
+  call memory_topology(lstring, location, srcMulti, srcBlock,                  &
+                       dstMulti, dstBlock, localrc)
+  if( ESMF_LogMsgFoundError(localrc,"syntax error in problem descriptor" //    &
+          " string " // trim(adjustL(lstring)),                                &
+          rcToReturn=localrc) ) return
+
+  ! a multiple block memory structure contains (), these are counted in
+  ! srcMulti and dstMulti 
+  if( (srcMulti >= 1).or.(dstMulti >= 1) ) then
+     ! TODO break into multiple single block strings
+     ! and parse each string separately
+
+  elseif( (srcMulti == 0).and.(dstMulti == 0) ) then
+     ! single block memory structure
+     if( (srcBlock==1).and.(dstBlock==1) ) then
+        src_beg = 1
+        src_end = location(1)
+        dst_beg = location(2)
+        dst_end = len( trim(lstring) )
+        !-----------------------------------------------------------------------
+        ! separate string into source and destination strings
+        !-----------------------------------------------------------------------
+        src_string = adjustL( lstring(src_beg:src_end) )
+        dst_string = adjustL( lstring(dst_beg:dst_end) )
+
+        !-----------------------------------------------------------------------
+        ! check that the source and destination memory ranks are not empty
+        ! and that the sizes agree
+        !-----------------------------------------------------------------------
+        src_mem_rank = pattern_query(src_string,';') + 1
+        pds%SrcMem%memRank = src_mem_rank
+        dst_mem_rank = pattern_query(dst_string,';') + 1
+        pds%DstMem%memRank = dst_mem_rank
+
+        if( (src_mem_rank == 0).or.(dst_mem_rank == 0).or.                     &
+            (src_mem_rank /= dst_mem_rank) )  then
+           localrc = ESMF_FAILURE
+           call ESMF_LogMsgSetError(ESMF_FAILURE,"rank of memory block "       &
+                    // "symbols not properly paired", rcToReturn=localrc)
+        endif
+
+        ! test for common mistake of using commas instead of semicolons
+        if( pattern_query(dst_string,',') > 0 ) then
+           localrc = ESMF_FAILURE
+           call ESMF_LogMsgSetError(ESMF_FAILURE,"syntax error - commas"       &
+                    // " are not valid deliminators", rcToReturn=localrc)
+        endif
+
+        !-----------------------------------------------------------------------
+        ! create work space for parsing the source descriptor string
+        !-----------------------------------------------------------------------
+        allocate( lsrc(src_mem_rank+1) )
+        allocate( grid_order(src_mem_rank) )
+        allocate( grid_type(src_mem_rank) )      
+        allocate( grid_HaloL(src_mem_rank) )
+        allocate( grid_HaloR(src_mem_rank) )
+        allocate( grid_StagLoc(src_mem_rank) )    
+        allocate( dist_order(src_mem_rank) )      
+        allocate( dist_type(src_mem_rank) )      
+
+        allocate( pds%SrcMem%GridType(src_mem_rank) )
+        allocate( pds%SrcMem%DistType(src_mem_rank) )
+        allocate( pds%SrcMem%GridOrder(src_mem_rank) )
+        allocate( pds%SrcMem%DistOrder(src_mem_rank) )
+        allocate( pds%SrcMem%HaloL(src_mem_rank) )
+        allocate( pds%SrcMem%HaloR(src_mem_rank) )
+        allocate( pds%SrcMem%StagLoc(src_mem_rank) )
+
+        !-----------------------------------------------------------------------
+        ! partition the source descriptor string into separate parts which
+        ! correspond to memory locations and parse the substrings for 
+        ! grid and distribution descriptions.
+        !-----------------------------------------------------------------------
+        call memory_separate( src_string, src_mem_rank, lsrc, localrc) 
+        if( ESMF_LogMsgFoundError(localrc,"syntax error in SRC portion " //    &
+                "of problem descriptor string - memory separate " //           &
+                 trim(adjustL(lstring)), rcToReturn=localrc) ) return
+        call interpret_descriptor_string( lsrc, src_mem_rank,                  & 
+                 grid_rank, grid_order, grid_type, grid_HaloL, grid_HaloR,     &
+                 grid_StagLoc, dist_rank, dist_order, dist_type, localrc)
+        if( ESMF_LogMsgFoundError(localrc,"syntax error in SRC portion " //    &
+                "of problem descriptor string - interpret string " //          &
+                trim(adjustL(lstring)), rcToReturn=localrc) ) return
+
+        pds%SrcMem%GridRank = grid_rank
+        pds%SrcMem%DistRank = dist_rank
+
+        do k=1,pds%SrcMem%memRank 
+           pds%SrcMem%GridType(k)%string = grid_type(k)%string
+           pds%SrcMem%DistType(k)%string = dist_type(k)%string
+
+           pds%SrcMem%GridOrder(k) = grid_order(k)
+           pds%SrcMem%DistOrder(k) = dist_order(k)
+           pds%SrcMem%HaloL(k)     = grid_HaloL(k)
+           pds%SrcMem%HaloR(k)     = grid_HaloR(k)
+           pds%SrcMem%StagLoc(k)   = grid_StagLoc(k)
+        enddo
+
+        deallocate( lsrc )
+        deallocate( grid_order, grid_type, grid_HaloL, grid_HaloR )
+        deallocate( grid_StagLoc )    
+        deallocate( dist_order, dist_type )      
+
+        !-----------------------------------------------------------------------
+        ! create work space for parsing the destination descriptor string
+        !-----------------------------------------------------------------------
+        allocate( ldst(dst_mem_rank+1) )
+        allocate( grid_order(dst_mem_rank) )
+        allocate( grid_type(dst_mem_rank) )
+        allocate( grid_HaloL(dst_mem_rank) )
+        allocate( grid_HaloR(dst_mem_rank) )
+        allocate( grid_StagLoc(dst_mem_rank) )    
+        allocate( dist_order(dst_mem_rank) )
+        allocate( dist_type(dst_mem_rank) )      
+
+        allocate( pds%DstMem%GridOrder(dst_mem_rank) )
+        allocate( pds%DstMem%DistOrder(dst_mem_rank) )
+        allocate( pds%DstMem%GridType(dst_mem_rank) )
+        allocate( pds%DstMem%DistType(dst_mem_rank) )
+        allocate( pds%DstMem%HaloL(dst_mem_rank) )
+        allocate( pds%DstMem%HaloR(dst_mem_rank) )
+        allocate( pds%DstMem%StagLoc(dst_mem_rank) )
+
+        !-----------------------------------------------------------------------
+        ! partition the destination descriptor string into separate parts
+        ! which correspond to memory locations and parse the substrings 
+        ! for grid and distribution descriptions.
+        !-----------------------------------------------------------------------
+        call memory_separate( dst_string, dst_mem_rank, ldst, localrc) 
+        if( ESMF_LogMsgFoundError(localrc,"syntax error in SRC portion " //    &
+                "of problem descriptor string - memory separate " //           &
+                trim(adjustL(lstring)), rcToReturn=localrc) ) return
+        call interpret_descriptor_string( ldst, dst_mem_rank,                  & 
+                grid_rank, grid_order, grid_type, grid_HaloL, grid_HaloR,      &
+                grid_StagLoc, dist_rank, dist_order, dist_type, localrc)
+        if( ESMF_LogMsgFoundError(localrc,"syntax error in SRC portion " //    &
+                "of problem descriptor string - interpret string " //          &
+                trim(adjustL(lstring)), rcToReturn=localrc) ) return
+
+        pds%DstMem%GridRank = grid_rank
+        pds%DstMem%DistRank = dist_rank
+
+        do k=1,pds%DstMem%memRank 
+           pds%DstMem%GridType(k)%string  = grid_type(k)%string
+           pds%DstMem%DistType(k)%string  = dist_type(k)%string
+
+           pds%DstMem%GridOrder(k) = grid_order(k)
+           pds%DstMem%DistOrder(k) = dist_order(k)
+
+           pds%DstMem%HaloL(k)     = grid_HaloL(k)
+           pds%DstMem%HaloR(k)     = grid_HaloR(k)
+           pds%DstMem%StagLoc(k)   = grid_StagLoc(k)
+        enddo
+
+        deallocate( ldst )
+        deallocate( grid_order, grid_type, grid_HaloL, grid_HaloR )
+        deallocate( grid_StagLoc )    
+        deallocate( dist_order, dist_type )      
+     else  ! error does not conform to either single block or multiblock
+        localrc = ESMF_FAILURE
+        call ESMF_LogMsgSetError(ESMF_FAILURE,"syntax error - problem "        &
+                 // " descriptor string does not conform to either " //        &
+                 "single block syntax or to multiblock syntax",                &
+                 rcToReturn=localrc)
+     endif
+  else   ! error does not conform to either single block or multiblock
+     localrc = ESMF_FAILURE
+     call ESMF_LogMsgSetError(ESMF_FAILURE,"syntax error - problem "           &
+              // " descriptor string does not conform to either " //           &
+              "single block syntax or to multiblock syntax",                   &
+              rcToReturn=localrc)
+  endif
+
+! do k=1,pds%SrcMem%memRank 
+!    print*,k,' in parse descriptor src gtype/dtype ', &
+!    trim(pds%SrcMem%GridType(k)%string), & 
+!    trim(pds%SrcMem%DistType(k)%string)
+! enddo
+! do k=1,pds%DstMem%memRank 
+!    print*,k,' in parse descriptor dst gtype/dtype ', &
+!    trim(pds%DstMem%GridType(k)%string), & 
+!    trim(pds%DstMem%DistType(k)%string)
+! enddo
+
+  !-----------------------------------------------------------------------------
+  ! if I've gotten this far without an error, then the routine has succeeded.
+  !-----------------------------------------------------------------------------
+  localrc = ESMF_SUCCESS
+
+  !-----------------------------------------------------------------------------
+  end subroutine parse_descriptor_string
+  !-----------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
   subroutine interpret_descriptor_string(lstring, nstring,                     &
@@ -182,7 +733,6 @@
   !-----------------------------------------------------------------------------
   localrc = ESMF_RC_NOT_IMPL 
 
-  print*,' Determine grid layout'
   !-----------------------------------------------------------------------------
   ! Determine grid layout (rank and order)
   !-----------------------------------------------------------------------------
@@ -406,9 +956,10 @@
   enddo    !  kstring
 
   !-----------------------------------------------------------------------------
-  ! 
+  ! if I've gotten this far without an error, then the routine has succeeded.
   !-----------------------------------------------------------------------------
-  localrc = ESMF_SUCCESS     
+  localrc = ESMF_SUCCESS
+
   !-----------------------------------------------------------------------------
   end subroutine interpret_descriptor_string
   !-----------------------------------------------------------------------------
@@ -459,11 +1010,17 @@
        char2int = ntemp
     endif
     
+    !---------------------------------------------------------------------------
+    ! if I've gotten this far without an error, then the routine has succeeded.
+    !---------------------------------------------------------------------------
+    localrc = ESMF_SUCCESS
+
     return
     
     !---------------------------------------------------------------------------
     end function char2int
     !---------------------------------------------------------------------------
+
  !------------------------------------------------------------------------------
 
     !---------------------------------------------------------------------------
@@ -545,6 +1102,9 @@
           localrc = ESMF_FAILURE
           ! syntax error, more than one type of distribution specified
           print*,'Syntax error, more than one type of distribution specified'
+          call ESMF_LogMsgSetError( ESMF_FAILURE, "syntax error, more than" // &
+                   " one type of distribution specified",                      &
+                   rcToReturn=localrc)
        endif
     enddo
     !
@@ -570,6 +1130,11 @@
        endif
     enddo
   
+    !---------------------------------------------------------------------------
+    ! if I've gotten this far without an error, then the routine has succeeded.
+    !---------------------------------------------------------------------------
+    localrc = ESMF_SUCCESS
+
     !---------------------------------------------------------------------------
     end subroutine dist_query
     !---------------------------------------------------------------------------
@@ -608,6 +1173,11 @@
        return
     endif
     dist_rank = nDist
+
+    !---------------------------------------------------------------------------
+    ! if I've gotten this far without an error, then the routine has succeeded.
+    !---------------------------------------------------------------------------
+    localrc = ESMF_SUCCESS
 
     !---------------------------------------------------------------------------
     end function dist_rank
@@ -654,8 +1224,10 @@
     do i=1,MemRank
        if ( lstring(MemLoc(1):MemLoc(1)) /= lstring(MemLoc(i):MemLoc(i)) ) then
           localrc = ESMF_FAILURE
-          ! syntax error, more than one type of distribution specified
-          print*,'Syntax error, more than one type of distribution specified'
+          ! syntax error, more than one type of grid specified
+          print*,'Syntax error, more than one type of grid specified'
+          call ESMF_LogMsgSetError( ESMF_FAILURE, "syntax error, more than" // &
+                   " one type of grid specified", rcToReturn=localrc)
        endif
     enddo
     !
@@ -676,6 +1248,11 @@
        endif
     enddo
   
+    !---------------------------------------------------------------------------
+    ! if I've gotten this far without an error, then the routine has succeeded.
+    !---------------------------------------------------------------------------
+    localrc = ESMF_SUCCESS
+
     !---------------------------------------------------------------------------
     end subroutine grid_query
     !---------------------------------------------------------------------------
@@ -711,9 +1288,15 @@
     if ( nGrid == 0 ) then
        ! syntax error, no grid layout specified
        print*,'Syntax error, no grid layout'
-       localrc = ESMF_FAILURE
+       call ESMF_LogMsgSetError( ESMF_FAILURE, "syntax error, no grid " //     &
+                "layout specified", rcToReturn=localrc)
     endif
     grid_rank = nGrid
+
+    !---------------------------------------------------------------------------
+    ! if I've gotten this far without an error, then the routine has succeeded.
+    !---------------------------------------------------------------------------
+    localrc = ESMF_SUCCESS
 
     !---------------------------------------------------------------------------
     end function grid_rank
@@ -722,52 +1305,13 @@
  !------------------------------------------------------------------------------
 
     !---------------------------------------------------------------------------
-    subroutine memory_locate(lstring, MemCount, MemBeg, MemEnd, MemLoc,        &
-                             localrc)      
-    !---------------------------------------------------------------------------
-    ! This subroutine returns the location of the memory delimiters as
-    ! specified by the descriptor string.
-    !---------------------------------------------------------------------------
-
-    ! arguments
-    character(len=ESMF_MAXSTR), intent(in   ) :: lstring
-    integer,          intent(in   ) :: MemCount
-    integer,          intent(in   ) :: MemBeg, MemEnd
-    integer,          intent(inout) :: MemLoc(:)
-    integer,          intent(  out) :: localrc
-
-    ! local variables
-    character(len=1) :: pattern
-    integer, allocatable :: mloc(:)
-    integer :: tmpmem
-
-    ! initialize variables
-    localrc = ESMF_SUCCESS
-
-    ! initialize variables
-    pattern = ';'
-    MemLoc(1) = MemBeg
-
-    allocate( mloc(MemCount-1) )
-    tmpmem = MemCount-1
-    call pattern_locate(lstring(MemBeg:MemEnd),pattern,tmpmem,mloc)
-    MemLoc(2:MemCount) = mloc(1:MemCount-1) + MemBeg -1
-    MemLoc(MemCount+1) = MemEnd
- 
-    deallocate( mloc )
-    
-    !---------------------------------------------------------------------------
-    end subroutine memory_locate
-    !---------------------------------------------------------------------------
-
- !------------------------------------------------------------------------------
-
-    !---------------------------------------------------------------------------
     subroutine memory_separate(lstring, iRank, lmem,  localrc)
     !---------------------------------------------------------------------------
-    ! For a structured block of memory, return the memory rank as specified
-    ! by the descriptor string. 
-    ! 
+    ! For a structured block of memory, return the memory rank (iRank) as 
+    ! specified by the descriptor string, and separate each the string
+    ! corresponding to each memory dimension into a separate element of a
+    ! character array ( lmem(1:iRank) ). Finely separate any specification of
+    ! stagger into the last (iRank+1) element of the character array lmem.
     !---------------------------------------------------------------------------
 
     ! arguments
@@ -797,9 +1341,8 @@
     nEnd = pattern_query(lstring, ']')
 
     if( nMem+1 /=  iRank .and. nEnd /= 1 ) then
-       call ESMF_LogMsgSetError(ESMF_FAILURE,                                  &
-                "asserted memory rank not agree with actual memory rank",      &
-                rcToReturn=localrc)
+       call ESMF_LogMsgSetError(ESMF_FAILURE, "asserted memory rank does not"  &
+                // " agree with actual memory rank", rcToReturn=localrc)
     else
        !------------------------------------------------------------------------
        !------------------------------------------------------------------------
@@ -808,7 +1351,7 @@
        call pattern_locate(lstring, ']', nEnd, EndPos)
 
        !------------------------------------------------------------------------
-       ! extract first memory location - not enclosed by "," on front side
+       ! extract first memory location - not enclosed by ";" on front side
        !------------------------------------------------------------------------
        iBeg = 2
        iEnd = MemPos(1)-1
@@ -824,7 +1367,7 @@
        enddo
 
        !------------------------------------------------------------------------
-       ! extract last memory location - not enclosed by "," on back side
+       ! extract last memory location - not enclosed by ";" on back side
        !------------------------------------------------------------------------
        iBeg = MemPos(nMeM) +1
        iEnd = EndPos(1) -1
@@ -844,6 +1387,11 @@
        deallocate( MemPos )
     endif
      
+    !---------------------------------------------------------------------------
+    ! if I've gotten this far without an error, then the routine has succeeded.
+    !---------------------------------------------------------------------------
+    localrc = ESMF_SUCCESS
+
     !---------------------------------------------------------------------------
     end subroutine memory_separate
     !---------------------------------------------------------------------------
@@ -929,6 +1477,11 @@
        call ESMF_LogMsgSetError( ESMF_FAILURE, "symbols not paired properly",  &
                 rcToReturn=localrc)
     endif
+
+    !---------------------------------------------------------------------------
+    ! if I've gotten this far without an error, then the routine has succeeded.
+    !---------------------------------------------------------------------------
+    localrc = ESMF_SUCCESS
 
     !---------------------------------------------------------------------------
     end subroutine memory_topology
@@ -1052,6 +1605,11 @@
          lname = 'ERROR'
          tag = Harness_Error
       endif    ! process test
+
+    !---------------------------------------------------------------------------
+    ! if I've gotten this far without an error, then the routine has succeeded.
+    !---------------------------------------------------------------------------
+    localrc = ESMF_SUCCESS
 
     !---------------------------------------------------------------------------
     end subroutine process_query
@@ -1341,7 +1899,9 @@
   character(ESMF_MAXSTR), intent(in   ) :: lfilename, descriptor_label
   integer, intent(  out) :: int_value
   integer, intent(in   ) :: ncolumns(:), new_row(:)
-  integer, intent(inout) :: irow, nrows, kelements
+  integer, intent(inout) :: irow       ! current row of table
+  integer, intent(in   ) :: nrows      ! total rows in table
+  integer, intent(inout) :: kelements  ! current element of row irow of table
   type(ESMF_Config), intent(inout) :: localcf
   integer, intent(inout) :: rc
 
@@ -1359,9 +1919,11 @@
   rc = ESMF_RC_NOT_IMPL
 
   !-----------------------------------------------------------------------------
-  !
+  ! if kelements < ncolumns then not at end of the row and can safely read
+  ! another element.
   !-----------------------------------------------------------------------------
   if( kelements < ncolumns(irow) ) then
+     if( debug_flag) print*,' get attribute integer '
      call ESMF_ConfigGetAttribute(localcf, int_tmp, rc=localrc)
      !--------------------------------------------------------------------------
      ! if error
@@ -1386,6 +1948,7 @@
         irow = irow + 1
         kelements = 1
         ! if error
+        if( debug_flag) print*,' get next line '
         call ESMF_ConfigNextLine(localcf, flag, rc=localrc)
         write(lchar,"(i5)") irow
         if( ESMF_LogMsgFoundError(localrc,                                     &
@@ -1395,6 +1958,7 @@
         !-----------------------------------------------------------------------
         ! read and discard continuation symbol
         !-----------------------------------------------------------------------
+        if( debug_flag) print*,' get attribute integer - contin symbol '
         call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
         if( ESMF_LogMsgFoundError(localrc,                                     &
            "cannot read row " // trim(adjustL(lchar)) //                       &
@@ -1404,6 +1968,7 @@
         !-----------------------------------------------------------------------
         ! read string from table
         !-----------------------------------------------------------------------
+        if( debug_flag) print*,' get attribute integer - after contin symbol '
         call ESMF_ConfigGetAttribute(localcf, int_tmp, rc=localrc)
         if( ESMF_LogMsgFoundError(localrc,                                     &
            "cannot read row " // trim(adjustL(lchar)) //                       &
@@ -1414,11 +1979,11 @@
         int_value = int_tmp
 
      else
-           !--------------------------------------------------------------------
-           ! error continuation line missing, but grid not finished
-           !--------------------------------------------------------------------
-           write(lchar,"(i5)") irow
-           call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
+        !-----------------------------------------------------------------------
+        ! error continuation line missing, but grid not finished
+        !-----------------------------------------------------------------------
+        write(lchar,"(i5)") irow
+        call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
               "cannot read row " // trim(adjustL(lchar)) //                    &
               " of table " //trim(descriptor_label) // "in file " //           &
               trim(lfilename), rcToReturn=rc)
@@ -1452,7 +2017,9 @@
   character(ESMF_MAXSTR), intent(in   ) :: lfilename, descriptor_label
   real(ESMF_KIND_R8), intent(  out) :: flt_value
   integer, intent(in   ) :: ncolumns(:), new_row(:)
-  integer, intent(inout) :: irow, nrows, kelements
+  integer, intent(inout) :: irow       ! current row of table
+  integer, intent(in   ) :: nrows      ! total rows in table
+  integer, intent(inout) :: kelements  ! current element of row irow of table
   type(ESMF_Config), intent(inout) :: localcf
   integer, intent(inout) :: rc
 
@@ -1470,9 +2037,11 @@
   rc = ESMF_RC_NOT_IMPL
 
   !-----------------------------------------------------------------------------
-  !
+  ! if kelements < ncolumns then not at end of the row and can safely read
+  ! another element.
   !-----------------------------------------------------------------------------
   if( kelements < ncolumns(irow) ) then
+     if( debug_flag) print*,' get attribute - real '
      call ESMF_ConfigGetAttribute(localcf, flt_tmp, rc=localrc)
      !--------------------------------------------------------------------------
      ! if error
@@ -1497,6 +2066,7 @@
         irow = irow + 1
         kelements = 1
         ! if error
+        if( debug_flag) print*,' get next line  in real'
         call ESMF_ConfigNextLine(localcf, flag, rc=localrc)
         write(lchar,"(i5)") irow
         if( ESMF_LogMsgFoundError(localrc,                                     &
@@ -1506,6 +2076,7 @@
         !-----------------------------------------------------------------------
         ! read and discard continuation symbol
         !-----------------------------------------------------------------------
+        if( debug_flag) print*,' get attribute - contin symbol '
         call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
         if( ESMF_LogMsgFoundError(localrc,                                     &
            "cannot read row " // trim(adjustL(lchar)) //                       &
@@ -1515,6 +2086,7 @@
         !-----------------------------------------------------------------------
         ! read string from table
         !-----------------------------------------------------------------------
+        if( debug_flag) print*,' get attribute - real after continuation '
         call ESMF_ConfigGetAttribute(localcf, flt_tmp, rc=localrc)
         if( ESMF_LogMsgFoundError(localrc,                                     &
            "cannot read row " // trim(adjustL(lchar)) //                       &
@@ -1525,11 +2097,11 @@
         flt_value = flt_tmp
 
      else
-           !--------------------------------------------------------------------
-           ! error continuation line missing, but grid not finished
-           !--------------------------------------------------------------------
-           write(lchar,"(i5)") irow
-           call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
+        !-----------------------------------------------------------------------
+        ! error continuation line missing, but grid not finished
+        !-----------------------------------------------------------------------
+        write(lchar,"(i5)") irow
+        call ESMF_LogMsgSetError( ESMF_FAILURE," continuation missing " //     &
               "cannot read row " // trim(adjustL(lchar)) //                    &
               " of table " //trim(descriptor_label) // "in file " //           &
               trim(lfilename), rcToReturn=rc)
@@ -1560,10 +2132,13 @@
   ! This separate routine was created to avoid significant duplication of code
   ! necessary for parsing the tables.
   !-----------------------------------------------------------------------------
+  ! arguments
   character(ESMF_MAXSTR), intent(in   ) :: lfilename, descriptor_label
   character(ESMF_MAXSTR), intent(  out) :: string
   integer, intent(in   ) :: ncolumns(:), new_row(:)
-  integer, intent(inout) :: irow, nrows, kelements
+  integer, intent(inout) :: irow       ! current row of table
+  integer, intent(in   ) :: nrows      ! total rows in table
+  integer, intent(inout) :: kelements  ! current element of row irow of table
   type(ESMF_Config), intent(inout) :: localcf
   integer, intent(inout) :: rc
 
@@ -1580,9 +2155,11 @@
   rc = ESMF_RC_NOT_IMPL
 
   !-----------------------------------------------------------------------------
-  !
+  ! if kelements < ncolumns then not at end of the row and can safely read
+  ! another element.
   !-----------------------------------------------------------------------------
   if( kelements < ncolumns(irow) ) then
+     if( debug_flag) print*,' get attribute string '
      call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
      !--------------------------------------------------------------------------
      ! if error
@@ -1607,6 +2184,7 @@
         irow = irow + 1
         kelements = 1
         ! if error
+        if( debug_flag) print*,' next line string '
         call ESMF_ConfigNextLine(localcf, flag, rc=localrc)
         write(lchar,"(i5)") irow
         if( ESMF_LogMsgFoundError(localrc,                                     &
@@ -1616,6 +2194,7 @@
         !-----------------------------------------------------------------------
         ! read and discard continuation symbol
         !-----------------------------------------------------------------------
+        if( debug_flag) print*,' get attribute - read continuation symbol '
         call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
         if( ESMF_LogMsgFoundError(localrc,                                     &
               "cannot read row " // trim(adjustL(lchar)) //                    &
@@ -1625,6 +2204,7 @@
         !-----------------------------------------------------------------------
         ! read string from table
         !-----------------------------------------------------------------------
+        if( debug_flag)  print*,' get attribute string after continuation '
         call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
         if( ESMF_LogMsgFoundError(localrc,                                     &
               "cannot read row " // trim(adjustL(lchar)) //                    &
@@ -1639,7 +2219,7 @@
         ! error continuation line missing, but grid not finished
         !-----------------------------------------------------------------------
         write(lchar,"(i5)") irow
-        call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
+        call ESMF_LogMsgSetError( ESMF_FAILURE," continuation missing " //     &
                "cannot read row " // trim(adjustL(lchar)) //                   &
                " of table " //trim(descriptor_label) // "in file " //          &
                trim(lfilename), rcToReturn=rc)

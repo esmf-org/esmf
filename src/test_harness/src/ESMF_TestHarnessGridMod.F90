@@ -39,32 +39,10 @@
 
 !-------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-  private
-
-  type grid_specification_record
-     integer :: grank                    ! rank of the grid
-     type(character_array), pointer :: gtype(:)  ! type of grid spacing
-     type(character_array), pointer :: gunits(:) ! physical grid units
-     integer, pointer :: gsize(:)        ! number of grid elements along axis
-     real(ESMF_KIND_R8), pointer :: grange(:,:)     ! physical range of axes
-  end type grid_specification_record
 
 !-------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 
-  type grid_record
-     character(ESMF_MAXSTR) :: gname
-     integer :: topology                ! key representing the geometry of the grid
-     integer :: rank                    ! rank of the grid
-     integer, pointer :: order(:)       ! axis number, zero for free.
-     integer, pointer :: gsize(:)        ! number of grid elements along axis
-     integer, pointer :: stagger(:,:)   ! stagger location (axis,rank)
-     logical, pointer :: periodicity(:) ! (rank) periodicity along axis
-     logical, pointer :: halo(:)        ! (rank) periodicity along axis
-     integer, pointer :: halo_size(:,:) ! (rank,2) halo size along axis
-  end type grid_record
-
-  public grid_record
 !-------------------------------------------------------------------------------
 ! PUBLIC METHODS:
   public read_grid_specification
@@ -78,16 +56,15 @@
 
 
   !-----------------------------------------------------------------------------
-  subroutine read_grid_specification(lfilename, rc)
+  subroutine read_grid_specification(Gfile, rc)
   !-----------------------------------------------------------------------------
-  ! driver for reading the grid specifier files and constructing the esmf grid
-  ! object from an esmf array.
+  ! driver for reading the grid specifier files. Inputs a single grid record
+  ! corresponding to a single specifier file of a single problem descriptor string. 
   !
   !-----------------------------------------------------------------------------
 
   ! arguments
-  character(ESMF_MAXSTR), intent(in   ) :: lfilename
-  ! global grid object
+  type(grid_record), intent(inout) :: Gfile 
   integer, intent(  out) :: rc
 
   ! local ESMF types
@@ -96,14 +73,12 @@
   ! local parameters
   integer :: localrc ! local error status
 
-  ! local character strings
-  character(ESMF_MAXSTR) :: ltmp, lchar
+  integer :: igrid, irank
 
-  ! local integers
-  integer:: igrid, ngrids, irank, iT
+  ! local character strings
+  character(ESMF_MAXSTR) :: ltmp, lchar, lfilename
 
   ! local grid records 
-  type(grid_specification_record), pointer :: rgrid(:)
   type(grid_specification_record), pointer :: src_grid(:), dst_grid(:)
   type(sized_char_array), pointer :: testfunction(:)
 
@@ -118,7 +93,8 @@
   if( ESMF_LogMsgFoundError(localrc, "cannot create config object",            &
                             rcToReturn=rc) ) return
 
-  print*,'Opening Grid specifier file  ',trim( lfilename )
+  lfilename = Gfile%filename
+! print*,'Opening Grid specifier file  ',trim( lfilename )
   call ESMF_ConfigLoadFile(localcf, trim( lfilename ), rc=localrc )
   if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot load config file " // trim( lfilename ),                      &
@@ -134,78 +110,26 @@
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
   if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot read config label grid_type:" , rcToReturn=rc) ) return
+
   !-----------------------------------------------------------------------------
   ! Read the grid specifier file. The 'grid_type' argument specifies the type 
   ! of grid specification to be read ( redistrbution or remapping ).
   !-----------------------------------------------------------------------------
-
-  print*,'reading grid type:',trim(adjustL(ltmp)),' in file ', trim( lfilename )
-
   select case(trim(adjustL(ltmp)) )
 
      case('REDISTRIBUTION')
-       print*,' read grid specification for redistribution test'
-       call read_redistribution_grid(lfilename, ngrids, rgrid, localrc)
+!      print*,' read grid specification for redistribution test'
+       call read_redistribution_grid(lfilename, Gfile%nGspecs, Gfile%src_grid, &
+                Gfile%dst_grid,localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
                rcToReturn=rc)) return
 
-       ! drs debug
-       print*,'--------------- Redistribution Grid report ---------------------'
-       print*,'number of grids in file ',trim(adjustL(lfilename)),' is ',ngrids
-       do igrid=1,ngrids
-          print*,igrid,'th Grid is of rank ',rgrid(igrid)%grank
-          do irank=1,rgrid(igrid)%grank
-             print*,'     Grid type is ',rgrid(igrid)%gtype(irank)%string
-             print*,'     Grid ranges from ',rgrid(igrid)%grange(irank,1),      &
-                    ' to ', rgrid(igrid)%grange(irank,2)
-             print*,'     Grid units are ',rgrid(igrid)%gunits(irank)%string 
-          enddo ! irank
-       enddo ! igrid
-       ! drs debug
-
-       deallocate( rgrid )
      case('REMAP')
-       print*,' read grid specification for remapping test'
-       call read_remapping_grid(lfilename, ngrids, src_grid, dst_grid,         &
-                                testfunction, localrc)
+!      print*,' read grid specification for remapping test'
+       call read_remapping_grid(lfilename, Gfile%nGspecs, Gfile%src_grid,      &
+                Gfile%dst_grid,testfunction, localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
                rcToReturn=rc)) return
-
-
-       ! drs debug
-       print*,'--------------- Remapping Grid report ---------------------'
-       print*,'number of grids in file ',trim(adjustL(lfilename)),' is ',ngrids
-       do igrid=1,ngrids
-          print*,igrid,'th src/dst Grid is of rank ',src_grid(igrid)%grank,    &
-                  ' and ',dst_grid(igrid)%grank
-          print*,'              '
-          print*,'    Source Grid   '
-          do irank=1,src_grid(igrid)%grank
-             print*,'     SRC Grid type is ', src_grid(igrid)%gtype(irank)%string
-             print*,'     SRC Grid ranges from ',src_grid(igrid)%grange(irank,1), &
-                    ' to ', src_grid(igrid)%grange(irank,2)
-             print*,'     SRC Grid units are ',src_grid(igrid)%gunits(irank)%string 
-          enddo ! irank
-
-          print*,'              '
-          print*,'    Destination Grid   '
-          do irank=1,dst_grid(igrid)%grank
-             print*,'     DST Grid type is ', dst_grid(igrid)%gtype(irank)%string
-             print*,'     DST Grid ranges from ',dst_grid(igrid)%grange(irank,1), &
-                    ' to ', dst_grid(igrid)%grange(irank,2)
-             print*,'     SRC Grid units are ',dst_grid(igrid)%gunits(irank)%string 
-          enddo ! irank
-          do iT=1,testfunction(igrid)%tagsize
-             print*,'     Test function types ',testfunction(igrid)%tag(iT)%string
-          enddo
-
-       enddo ! igrid
-       ! drs debug
-
-
-
-
-       deallocate( src_grid, dst_grid, testfunction )
 
      case default
        ! error
@@ -214,6 +138,16 @@
               rcToReturn=rc)
 
      end select
+
+! do igrid=1,Gfile%nGspecs
+! do irank=1,Gfile%src_grid(igrid)%grank
+! print*,' igrid ',igrid, &
+!    ' irank ',irank
+
+! print*,' Gtype in read ',trim(Gfile%src_grid(igrid)%gtype(irank)%string)
+! print*,' Gunits in read ',trim(Gfile%src_grid(igrid)%gunits(irank)%string)
+! enddo
+! enddo
 
   !-----------------------------------------------------------------------------
   rc = ESMF_SUCCESS     
@@ -224,7 +158,7 @@
 !-------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  subroutine read_redistribution_grid(lfilename, ngrids, grid, rc)
+  subroutine read_redistribution_grid(lfilename, ngrids, grid, tmp_grid, rc)
   !-----------------------------------------------------------------------------
   ! routine to read the grid specifier file for a redistribution test. The
   ! routine reads the single grid specification needed by the redistribution
@@ -250,6 +184,7 @@
   ! arguments
   character(ESMF_MAXSTR), intent(in   ) :: lfilename
   type(grid_specification_record), pointer :: grid(:)
+  type(grid_specification_record), pointer :: tmp_grid(:)
   integer, intent(  out) :: ngrids
   integer, intent(inout) :: rc
 
@@ -400,6 +335,7 @@
   ! separate grid entries
   !-----------------------------------------------------------------------------
   allocate( grid(ngrid) )
+  allocate( tmp_grid(ngrid) )
 
   !-----------------------------------------------------------------------------
   ! Read the grid specifications from the table:
@@ -422,7 +358,7 @@
   igrid= 0
   do krow=1,nrows
 
-     print*,'krow',krow,' new row columns',new_row(krow),ncolumns(krow) 
+! drs debug print*,'krow',krow,' new row columns',new_row(krow),ncolumns(krow) 
 
      ! new grid specification - not continuation symbol and not end of row
      if( new_row(krow) /= 0 .and. ncolumns(krow) > 0 ) then
@@ -445,18 +381,24 @@
         allocate( grid(igrid)%gsize(grank) )
         allocate( grid(igrid)%grange(grank,2) )
 
-        print*,'irow',irow
+        tmp_grid(igrid)%grank = grank
+        allocate( tmp_grid(igrid)%gtype(grank) )
+        allocate( tmp_grid(igrid)%gunits(grank) )
+        allocate( tmp_grid(igrid)%gsize(grank) )
+        allocate( tmp_grid(igrid)%grange(grank,2) )
+
+!       print*,'irow',irow
         ! read row elements until grid rank is reached
         do while ( irank <= grank )
-        print*,'irank/grank',irank,grank
+!       print*,'irank/grank',irank,grank
            ! if haven't reached end of line, read grid type
            call read_table_string(gtype,                                       &
                                 kelements, irow, nrows, ncolumns, new_row,     &
                                 lfilename, descriptor_label, localcf, localrc)  
            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,               &
                rcToReturn=rc)) return
-
            grid(igrid)%gtype(irank)%string = gtype 
+           tmp_grid(igrid)%gtype(irank)%string = gtype 
 
            !--------------------------------------------------------------------
            ! read grid size
@@ -468,6 +410,7 @@
                rcToReturn=rc)) return
 
            grid(igrid)%gsize(irank) = gsize 
+           tmp_grid(igrid)%gsize(irank) = gsize 
 
            !--------------------------------------------------------------------
            ! read minimum grid range
@@ -478,6 +421,7 @@
            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,               &
                rcToReturn=rc)) return
            grid(igrid)%grange(irank,1) = gmin 
+           tmp_grid(igrid)%grange(irank,1) = gmin 
 
            !--------------------------------------------------------------------
            ! read maximum grid range
@@ -488,6 +432,7 @@
            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,               &
                rcToReturn=rc)) return
            grid(igrid)%grange(irank,2) = gmax 
+           tmp_grid(igrid)%grange(irank,2) = gmax 
 
            !--------------------------------------------------------------------
            ! read grid units
@@ -497,8 +442,8 @@
                                 lfilename, descriptor_label, localcf, localrc)  
            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,               &
                rcToReturn=rc)) return
-
            grid(igrid)%gunits(irank)%string = gunits
+           tmp_grid(igrid)%gunits(irank)%string = gunits
 
            !--------------------------------------------------------------------
            ! increment grid rank and loop
@@ -663,7 +608,7 @@
 
 
       ncolumns(krow) = ESMF_ConfigGetLen(localcf, rc=localrc)
-      if (localrc .ne. ESMF_SUCCESS .or. ncolumns(krow) .lt. 6 ) then
+      if (localrc .ne. ESMF_SUCCESS .or. ncolumns(krow) .lt. 1 ) then
         write(lchar,"(i5)") krow
         call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
                  "problem reading line " // trim(adjustl(lchar)) //            &
@@ -705,7 +650,7 @@
   ngrids = ngrid
 
   !-----------------------------------------------------------------------------
-  ! allocate storage for the grid information, based on the calculated number of
+  ! allocate storage for the grid information based on the calculated number of
   ! separate grid entries
   !-----------------------------------------------------------------------------
   allocate( src_grid(ngrid), dst_grid(ngrid), testfunction(ngrid) )
