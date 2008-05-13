@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.27.2.3 2008/05/09 21:54:36 theurich Exp $
+% $Id: ESMF_options.tex,v 1.27.2.4 2008/05/13 20:11:50 theurich Exp $
 
 \section{Global Options and Parameters}
 
@@ -22,6 +22,10 @@ Valid values are:
 {\sf DESCRIPTION:\\}  
 Indicates blocking behavior and PET synchronization.
 
+See the {\bf VM} item in {\ref sec:spatialclasses} for an
+explanation of the PET and VAS concepts used in the following
+definitions.
+         
 Valid values are:
 \begin{description}
 
@@ -31,14 +35,14 @@ Valid values are:
          communication method it is safe to modify or use all participating
          local data.
          
-         {\em Component calls:} The called method will block until all PETs in
-         all virtual address spaces (VASs) have completed the operation.
+         {\em Component calls:} The called method will block until all PETs of
+         the VM have completed the operation.
 
 \item [ESMF\_VASBLOCKING]
          {\em Communication calls:} Not available for communication calls.
          
-         {\em Component calls:} The called method will block until all PETs that
-         operate in the PET-local VAS have completed the operation. For PETs
+         {\em Component calls:} The called method will block each PET until
+         all operations in the PET-local VAS have completed. For PETs
          that run as single threaded processes this means that the method does
          {\em not} synchronize PETs on return.
          

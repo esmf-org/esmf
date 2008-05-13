@@ -188,6 +188,7 @@ as a unifying wrapper for distributed and shared memory communication
 libraries.
 
 \subsection{ESMF Spatial Classes}
+\label{sec:spatialclasses}
 
 Like the hierarchy of model data classes, ranging from the 
 simple to the complex, ESMF is organized around an hierarchy of 
@@ -203,15 +204,16 @@ those closest to the machine to those closest to the application, are:
 
 \item The {\bf Virtual Machine}, or {\bf VM} The ESMF VM is an 
 abstraction of a parallel computing environment that encompasses 
-both shared and distributed memory.  Its primary purpose 
-is resource allocation.  Each Component defines its own VM based on 
-the resources it desires.  The elements of a VM are {\bf Persistent 
-Execution Threads}, or {\bf PETs}.  A simple case is one in which 
-every PET is associated with an MPI process running on a separate
-processor.  If Components are nested, the parent component allocates 
-a subset of its PETs to its children.  The children have some flexibility, 
-subject to the constraints of the computing environment, to decide 
-how they want to use the PETs they've received.
+both shared and distributed memory, single and multi-core systems.
+Its primary purpose is resource allocation and management. Each Component
+runs in its own VM, using the resources it defines. The elements of a VM
+are {\bf Persistent Execution Threads}, or {\bf PETs}, that are
+executing in {\bf Virtual Address Spaces}, or {\bf VASs}. A simple
+case is one in which every PET is associated with a single MPI process.
+In this case every PET is executing in its own private VAS. If Components
+are nested, the parent component allocates a subset of its PETs to its
+children. The children have some flexibility, subject to the constraints of
+the computing environment, to decide how they want to use the resources associated with the PETs they've received.
 
 \item {\bf DELayout}  A DELayout represents a decomposition.  Its
 basic elements are {\bf Decomposition Elements}, or {\bf DEs}.  
@@ -230,6 +232,11 @@ information about the sequence and connectivity of data points,
 which is sufficient information for many operations.  Arrays
 are defined on DistGrids.
 
+\item {\bf Array} An Array defines how the index space described
+in the DistGrid is associated with the VAS of each PET. This association
+considers the type, kind and rank of the indexed data. Fields are
+defined on Arrays.
+
 \item {\bf Grid}  A Grid is an abstraction of a physical space.  
 It associates a coordinate system, a set of coordinates, and 
 a topology to a collection of grid cells.  Grids in ESMF are
@@ -243,10 +250,6 @@ keep track of the stagger location of a Field data point within its
 associated Grid cell.
 
 \end{itemize}
-
-Although it is not an ESMF class, the linear {\bf address space} 
-of the computer is another fundamental index space that must be 
-mapped to data stored by the ESMF system.  
 
 \subsection{ESMF Maps}
 
