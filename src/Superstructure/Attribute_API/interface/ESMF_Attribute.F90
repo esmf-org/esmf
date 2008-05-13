@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.7 2008/05/12 21:56:37 theurich Exp $
+! $Id: ESMF_Attribute.F90,v 1.8 2008/05/13 18:44:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.7 2008/05/12 21:56:37 theurich Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.8 2008/05/13 18:44:14 oehmke Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -11814,11 +11814,10 @@ contains
       
       call ESMF_StateValidate(state2, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return                                                    
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeCopyAll(state1%statep%base, state2%statep%base, &
-        localrc)
+      call c_ESMC_AttributeCopyAll(state1%statep%base, state2%statep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
