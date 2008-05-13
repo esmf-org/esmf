@@ -1,7 +1,11 @@
-% $Id: FieldBundle_desc.tex,v 1.1.2.1 2008/04/02 20:07:17 cdeluca Exp $
+% $Id: FieldBundle_desc.tex,v 1.1.2.2 2008/05/13 05:42:04 cdeluca Exp $
 
-The FieldBundle class represents ``bundles'' of Fields that are 
-discretized on the same Grid and distributed in the same manner.  
+A FieldBundle functions mainly as a convenient container for storing
+similar Fields.  It represents ``bundles'' of Fields that are 
+discretized on the same Grid and distributed in the same manner.
+It is an important data structure because this is often the form that
+data being transferred between Components takes.  
+
 Fields within a FieldBundle may be located at different locations relative 
 to the vertices of their common Grid.  The Fields in a FieldBundle may
 be of different dimensions, as long as the Grid dimensions that 
@@ -10,21 +14,16 @@ a distributed lat/lon Grid and a 3D Field with an added vertical
 dimension on the same distributed lat/lon Grid can be included
 in the same FieldBundle.
  
-FieldBundles currently function mainly as convenient containers for storing 
-Fields.  FieldBundles can be created and destroyed, can have attributes 
+FieldBundles can be created and destroyed, can have Attributes 
 added or retrieved, and can have Fields added or retrieved.
-Methods include a variety of queries that return information about 
-the attributes and the Fields that a FieldBundle contains.  The Fortran 
+Methods include queries that return information about the FieldBundle
+itself and about the Fields that it contains.  The Fortran 
 data pointer of a Field within a FieldBundle can be obtained 
-by passing the FieldBundle a Field name.  
+by first retrieving the the Field with a call to {\tt ESMF\_FieldBundleGet},
+and then using the {\tt ESMF\_FieldGet()} method to get the data.
 
-Memory layout information is stored in a FieldBundleDataMap object 
-which is attached to the FieldBundle.  It can be accessed by querying the 
-FieldBundle.  Although we have made the FieldBundleDataMap public, many of 
-the memory layout options have not been implemented.
-
-FieldBundles are one of the data objects that can be added to States,
-which are used for sending to or receiving data from other components.
+FieldBundles can be added to States, which are used for sending
+to or receiving data from Components.
 
 In the future FieldBundles will serve as a mechanism for performance
 optimization.  ESMF will take advantage of the similarities of the

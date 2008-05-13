@@ -1,4 +1,4 @@
-% $Id: FieldBundle_usage.tex,v 1.1.2.1 2008/04/02 20:07:19 cdeluca Exp $
+% $Id: FieldBundle_usage.tex,v 1.1.2.2 2008/05/13 05:42:05 cdeluca Exp $
 
 %\subsection{Use and Examples}
 
@@ -12,11 +12,7 @@ After creating multiple Fields, a FieldBundle
 can be created by passing a list of the Fields into the 
 method {\tt ESMF\_FieldBundleCreate()}.  The FieldBundle will contain
 references to the Fields.  An empty FieldBundle can also be created
-and Fields added singularly or in groups. 
-
-The feature which requests a packed Array be created from the
-combined Field data arrays is not implemented in this version
-of the framework.
+and Fields added one at a time or in groups.
 
 \subsubsection{Accessing FieldBundle Data}
 
@@ -24,9 +20,6 @@ To access data in a FieldBundle the user can provide a Field
 name and retrieve the Field's Fortran data pointer.  Alternatively,
 the user can retrieve the data in the form of an ESMF 
 Field and use the Field-level interfaces.
-
-The packed Array feature of FieldBundles is not implemented in
-this version of the Framework.
 
 \subsubsection{FieldBundle Deletion}
 
