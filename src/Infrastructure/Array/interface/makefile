@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18.2.3 2008/04/02 23:16:38 theurich Exp $
+# $Id: makefile,v 1.18.2.4 2008/05/13 05:22:03 theurich Exp $
 
 # leave alone.
 ALL: build_here
@@ -8,7 +8,7 @@ AUTOGEN   = ESMF_ArrayCreate.F90 ESMF_ArrayGet.F90 ESMF_ArrayGather.F90 ESMF_Arr
 # If you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMCI_Array_F.C
 # If you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = $(AUTOGEN) ESMF_Array.F90
+SOURCEF	  = $(AUTOGEN) ESMF_ArrayPr.F90 ESMF_Array.F90
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # List all .h files which should be copied to common include dir
