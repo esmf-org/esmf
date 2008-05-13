@@ -25,8 +25,16 @@ distgrid_block_2d2d::
  &                      'DST'  2  'D1=*'  0.5  'D2=*'  2     'END'
 
 # another example with variable distribution sizes
- '(2n,n/2)-->(2n,(n/2)-1)'  'SRC' 2  'D1=*' 2  'D2=*'  0.5  
+ '(2n,n/2)-->(2n,(n/2)+1)'  'SRC' 2  'D1=*' 2  'D2=*'  0.5  
  &                          'DST' 2  'D1=*' 2  'D2=*'  0.5  'D2=+' 1   'END'
+::
+
+# table specifing 3D to 2D distributions
+distgrid_block_3d2d::
+
+# example with two fixed distribution sizes
+ '(1,2,1)-->(2,1,*)'  'SRC' 3  'D1==' 1  'D2==' 2  'D3==' 1  
+ &                    'DST' 2  'D1==' 2  'D2==' 1  'END'  
 ::
 
 # table specifing 3D to 3D distributions
@@ -36,3 +44,4 @@ distgrid_block_3d3d::
  '(1,2,1)-->(2,1,1)'  'SRC' 3  'D1==' 1  'D2==' 2  'D3==' 1  
  &                    'DST' 3  'D1==' 2  'D2==' 1  'D3==' 1  'END'  
 ::
+

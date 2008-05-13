@@ -14,5 +14,5 @@ grid_redist::
 3  'UNIFORM'  120  -3.14159  3.14159  'RAD'   'UNIFORM'  90  -1.57  1.57  'RAD'   
  &      'UNIFORM'  20  0  4000  'METERS'
 3  'UNIFORM'  120  -180   180  'DEG_E'  'GAUSSIAN'  88  -88   88   'DEG_N'  
- &      'UNIFORM'  20  0  4000  'METERS'
+ &      'UNIFORM'  40  0  4000  'METERS'
 ::
