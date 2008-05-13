@@ -164,7 +164,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.21 2008/05/01 22:05:01 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.22 2008/05/13 22:17:04 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -3934,10 +3934,10 @@ end interface
     ! Call C++ Subroutine to do the get
     call c_ESMC_gridget(grid%this, &
       coordTypeKind, dimCount, tileCount, distgrid,  staggerlocsCount, &
-      distgridToGridMapArg, ESMF_NULL_POINTER, ESMF_NULL_POINTER, &
+      distgridToGridMapArg, &
       coordDimCountArg, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
-      indexflag, localDECount, ESMF_NULL_POINTER, ESMF_NULL_POINTER, localrc)
+      indexflag, localDECount, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
