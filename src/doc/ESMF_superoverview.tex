@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.28.2.2 2008/04/05 03:14:30 cdeluca Exp $
+% $Id: ESMF_superoverview.tex,v 1.28.2.3 2008/05/14 01:24:19 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -45,7 +45,9 @@ Hierarchical assembly of components into applications.\\
 Use of components in multiple contexts without modification.\\
 Sequential or concurrent component execution.\\
 Single program, multiple datastream (SPMD) applications for 
-maximum portability and reconfigurability.\\[.03in] \hline
+maximum portability and reconfigurability.\\
+Multiple program, multiple datastream (MPMD) option for 
+flexibility.\\ [.03in] \hline
 \end{tabular}
 \end{center}
 
@@ -73,14 +75,14 @@ In practice, setting entry points means that within user code
 there are calls to ESMF methods that associate the name of a 
 Fortran subroutine with a corresponding standard ESMF operation.  
 For example, a user-written initialization routine called 
-{\tt popOceanInit} might be associated with the standard 
-Initialize routine of an ESMF Gridded Component named ``POP'' 
+{\tt myOceanInit} might be associated with the standard 
+initialize routine of an ESMF Gridded Component named ``myOcean'' 
 that represents an ocean model.
 
 \item {\bf State}  ESMF components exchange information with other 
 components only through States.  A State is an ESMF derived
-type that can contain Fields, FieldBundles, Arrays, and other
-States.  A Component is associated with two States, an 
+type that can contain Fields, FieldBundles, Arrays, ArrayBundles,
+and other States.  A Component is associated with two States, an 
 {\bf Import State} and an {\bf Export State}.  Its Import State 
 holds the data that it receives from other Components.  
 Its Export State contains data that it can make available to 
@@ -98,7 +100,7 @@ an inter-component data exchange, and one or more Coupler
 Components. 
 
 The parent Gridded Component is responsible for creating the child 
-Gridded Components that are exchanging data and creating the Coupler, 
+Gridded Components that are exchanging data, for creating the Coupler, 
 for creating the necessary Import and Export States, and for 
 setting up the desired sequencing.  The AppDriver ``main'' routine
 calls the parent Gridded Component's initialize, run, and finalize 
@@ -111,8 +113,7 @@ parent Gridded Component is called by the AppDriver, it in turn
 calls the initialize methods of its child atmosphere and ocean 
 Gridded Components, and the initialize method of an 
 ocean-to-atmosphere Coupler Component.  Figure \ref{fig:appunit}
-shows this schematically for the atmospheric general circulation 
-model GEOS-5, from Goddard Space Flight Center.
+shows this schematically.
 
 \begin{center}
 \begin{figure}
@@ -134,14 +135,16 @@ PETs is contained in a structure called a {\bf Virtual Machine},
 or {\bf VM}.  The VM also contains information about the topology and
 characteristics of the underlying computer.
 Components are created hierarchically, with parent Components creating
-child Components and allocating some or all of its PETs to each one.
+child Components and allocating some or all of their PETs to each one.
 By default ESMF creates a new VM for each child Component, which 
 allows Components to tailor their VM resources to match their needs.
+In some cases a child may want to share its parent's VM - ESMF
+supports this too.
 
 A Gridded Component may exist across all the PETs in an application. 
 A Gridded Component may also reside on a subset of PETs in an
 application.  These PETs may wholly coincide with, be wholly contained
-within, or wholly contain another component.
+within, or wholly contain another Component.
 
 \begin{center}
 \begin{figure}
@@ -170,10 +173,10 @@ configuration for the same application running in a concurrent mode.
 Parent Components can select if and when to wait for concurrently
 executing child Components, synchronizing only when required.
 
-It is possible for ESMF applications to contain some component sets
+It is possible for ESMF applications to contain some Component sets
 that are executing sequentially and others that are executing concurrently.
-We might have, for example, atmosphere and land components created
-on the same subset of PETs, ocean and sea ice components created on
+We might have, for example, atmosphere and land Components created
+on the same subset of PETs, ocean and sea ice Components created on
 the remainder of PETs, and a Coupler created across all the PETs in
 the application.
 
@@ -205,13 +208,13 @@ the ``Ocean'' Gridded Component is distributed over six PETs.}
 \end{figure}
 \end{center}
 
-\subsection{Intracomponent Communication}
+\subsection{Intra-Component Communication}
 \label{sec:localcomm}
 
 All data transfers within an ESMF application occur {\it within} a
 component.  For example, a Gridded Component may contain halo updates.
-Another example is that a Coupler Component may contain a regridding
-and data redistribution between two Gridded Components.  As a result,
+Another example is that a Coupler Component may redistribute
+data between two Gridded Components.  As a result,
 the architecture of ESMF does not depend on any particular data
 communication mechanism, and new communication schemes can be
 introduced without affecting the overall structure of the application.
@@ -223,14 +226,6 @@ the Gridded Components that it couples.
 \subsection{Data Distribution and Scoping in Components}
 \label{sec:scoping}
 
-ESMF utilizes a {\bf unison} object creation strategy, where code on
-each PET calls the same object creation routines individually.
-Each PET can contain private local data, but all metadata about
-the object itself is common across all PETs.  
-ESMF can compute metadata information about objects on 
-remote PETs without making communication calls, which would 
-incur additional overhead and add unnecessary synchronization points.
-
 The scope of distributed objects is the VM of the currently 
 executing Component.  For this reason, all
 PETs in the current VM must make the same distributed object
@@ -238,11 +233,11 @@ creation calls.   When a Coupler Component running on a superset
 of a Gridded Component's PETs needs to make communication calls
 involving objects created by the Gridded Component,
 an ESMF-supplied function called {\tt ESMF\_StateReconcile()} creates proxy
-objects in those PETs which had no previous information about the
+objects for those PETs that had no previous information about the
 distributed objects.  Proxy objects contain no local data but
-can be used in communication calls (such as regrid or redistribution)
+can be used in communication calls (such as regrid or redistribute)
 to describe the remote source for data being moved to the current PET,
-or as a remote destination for local data being moved from this PET.
+or to describe the remote destination for data being moved from the local PET.
 Figure \ref{fig:reconcile} is a simple schematic that shows the 
 sequence of events in a reconcile call.
 

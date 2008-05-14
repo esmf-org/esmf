@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.27.2.5 2008/05/13 21:29:14 theurich Exp $
+% $Id: ESMF_options.tex,v 1.27.2.6 2008/05/14 01:24:19 cdeluca Exp $
 
 \section{Global Options and Parameters}
 
@@ -90,7 +90,7 @@ Valid values are:
          The component uses the parent's VM for resource management. Compared
          to components that use their own VM context components that run in the
          parent's VM context are more light-weight with respect to the overhead
-         of calling into their Initialize, Run and Finalize methods.
+         of calling into their initialize, run and finalize methods.
          Furthermore, VM-specific properties remain unchanged when going from
          the parent component to the child component. These properties include
          the MPI communicator, the number of PETs, the PET labeling, 
@@ -281,7 +281,7 @@ Supported ESMF type and kind combinations.
 This is an ESMF derived type used for arguments to subroutines 
 and functions that specify or query a data precision and type.
 These values cannot be used when declaring variables; see the next 
-section on Fortran 90 Kinds for that.
+section on Fortran Kinds for that.
 
 Valid values are:
 \begin{description}

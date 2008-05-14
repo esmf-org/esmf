@@ -92,7 +92,7 @@ They take significant time to set up and should not be created
 in a time-critical portion of code.  Deep objects persist 
 even after the method in which they were created has returned.
 Most classes in ESMF, including Fields, FieldBundles, Arrays,
-Grids and Clocks, fall into this category.
+ArrayBundles, Grids, and Clocks, fall into this category.
 
 {\tt Shallow} classes do not require {\tt ESMF\_<Class>Create()}
  and {\tt ESMF\_<Class>Destroy()} calls.  They can simply be declared
@@ -108,11 +108,11 @@ is stored in a deep object such as a Clock.  The Clock then
 carries a copy of the Time in persistent memory.  The Time is
 deallocated with the {\tt ESMF\_ClockDestroy()} call.
 
-See Section \ref{sec:overallimpl}, {\tt Overall Design and Implementation 
-Notes}, for a brief discussion of deep and shallow classes from 
+See Section \ref{sec:overallimpl}, Overall Design and Implementation 
+Notes, for a brief discussion of deep and shallow classes from 
 an implementation perspective.  For an in-depth look at the design 
 and inter-language issues related to deep and shallow classes,
-see the {\tt ESMF Implementation Report}.
+see the \htmladdnormallink{{\it ESMF Implementation Report}}{http://www.esmf.ucar.edu/documents/IMPL_repdoc}.
 
 \subsection{Special Methods}
 
@@ -143,22 +143,22 @@ user code.
 The ESMF API is organized around an hierarchy of classes that 
 contain model data.  The operations that are performed
 on model data, such as regridding, redistribution, and halo 
-updates, are accessed through these classes.  
+updates, are methods of these classes.  
 
 The main data classes in ESMF, in order of increasing complexity, are:
 \begin{itemize}
 \item {\bf Array} An ESMF Array is a distributed, multi-dimensional 
 array that can carry information such as its type, kind, rank, and 
 associated halo widths.  It contains a reference to a native Fortran array.
-\item {\bf ArrayBundle}  An ArrayBundle is a collection of Arrays
-distributed in the same manner.  It is useful for performing optimized
+\item {\bf ArrayBundle}  An ArrayBundle is a collection of Arrays, not
+necessarily distributed in the same manner.  It is useful for performing
 collective data operations and communications. 
 \item {\bf Field}  A Field represents a physical scalar or vector field.
 It contains a reference to an Array along with grid information and metadata.
 \item {\bf FieldBundle}  A FieldBundle is a collection of Fields discretized 
 on the same grid.  The staggering of data points may be different for 
 different Fields within a FieldBundle.  Like the ArrayBundle, it is
-useful for performing optimized collective data operations and
+useful for performing collective data operations and
 communications.
 \item {\bf State}  A State represents the collection of data that a 
 Component either requires to run (an Import State) or can make 
@@ -174,7 +174,7 @@ usually discretized on an underlying grid.  The Components
 responsible for regridding and transferring data between Gridded 
 Components are called Coupler Components.  Each Component
 is associated with an Import and an Export State.  Components
-can be nested so that simpler components and contained within more
+can be nested so that simpler Components are contained within more
 complex ones.
 
 \end{itemize}
@@ -197,7 +197,7 @@ Each of these spaces can be manipulated, in order to give
 the user control over how a computation is executed.  For Earth system
 models, this hierarchy starts with the address space associated
 with the computer and extends to the physical region described by
-the application.   The main spatial classes in ESMF, in order of
+the application.   The main spatial classes in ESMF, from
 those closest to the machine to those closest to the application, are:
 
 \begin{itemize}
@@ -213,16 +213,16 @@ case is one in which every PET is associated with a single MPI process.
 In this case every PET is executing in its own private VAS. If Components
 are nested, the parent component allocates a subset of its PETs to its
 children. The children have some flexibility, subject to the constraints of
-the computing environment, to decide how they want to use the resources associated with the PETs they've received.
+the computing environment, to decide how they want to use the
+resources associated with the PETs they've received.
 
-\item {\bf DELayout}  A DELayout represents a decomposition.  Its
+\item {\bf DELayout}  A DELayout represents a data decomposition
+(we also refer to this as a distribution).  Its
 basic elements are {\bf Decomposition Elements}, or {\bf DEs}.  
-A DELayout associates a set of DEs and a topology - how the DEs 
-are connected - with the PETs in a VM.  DEs are not
+A DELayout associates a set of DEs with the PETs in a VM.  DEs are not
 necessarily one-to-one with PETs.  For cache blocking,
 or user-managed multi-threading, more DEs than PETs may be defined.
-Fewer DEs than PETs may be defined if an application requires,
-for example, a decomposition that is an integer multiple.
+Fewer DEs than PETs may also be defined if an application requires it.
 
 \item {\bf DistGrid}  A DistGrid represents the index space
 associated with a grid.  It is a useful abstraction because
@@ -259,8 +259,8 @@ relationship between spaces is defined by default), or special Map arrays
 that allow the user to specify the desired association.  The form of the 
 specification is usually that the position of the array element carries
 information about the first object, and the value of the array element carries
-information about the second object.  ESMF includes a distGridToArrayMap,
-a gridToFieldMap, a distGridToGridMap, and others.
+information about the second object.  ESMF includes a {\tt distGridToArrayMap},
+a {\tt gridToFieldMap}, a {\tt distGridToGridMap}, and others.
 
 \subsection{ESMF Specification Classes}
 
@@ -276,9 +276,9 @@ of an array.
 There are a number of utilities in ESMF that can be used independently.
 These are:
 \begin{itemize}
-\item {\bf Attributes}, for storing metadata about Field, FieldBundles,
-and other data classes,
-\item {\bf TimeMgr}, for calendar, date, clock and alarm functions.
+\item {\bf Attributes}, for storing metadata about Fields,
+FieldBundles, States, and other classes.
+\item {\bf TimeMgr}, for calendar, time, clock and alarm functions.
 \item {\bf LogErr}, for logging and error handling.
 \item {\bf Config}, for creating resource files that can replace namelists
 as a consistent way of setting configuration parameters.
@@ -331,9 +331,9 @@ several different versions or implementations of components are going
 to be swapped in, or a particular component is going to be used 
 in multiple contexts.  Another reason for deciding on a top-down 
 approach is that the application contains legacy code that for 
-some reason (e.g., very large, difficult to work with, 
+some reason (e.g., intertwined functions, very large,
 highly performance-tuned, resource limitations) there is little 
-motivation to fully restructure.  The superstructure can be 
+motivation to fully restructure.  The superstructure can usually be 
 incorporated into such applications in a way that is non-intrusive.
 
 In the bottom-up approach, the user selects desired utilities 
@@ -341,10 +341,11 @@ In the bottom-up approach, the user selects desired utilities
 logging and error handling, etc.) from the ESMF infrastructure 
 and either writes new code using them, introduces them into 
 existing code, or replaces the functionality in existing code 
-with them.  This makes sense when there is a specific need for 
-some functionality, like robust data acommunications, or 
-when the component writer is starting from scratch.
-The calendar management utility is a popular place to start.
+with them.  This makes sense when maximizing code reuse and 
+minimizing maintenance costs is a goal.  There may be a specific
+need for functionality or the component writer may be starting
+from scratch.  The calendar management utility is a popular
+place to start.
 
 \subsection{Using the ESMF Superstructure}
 
@@ -353,10 +354,10 @@ the ESMF superstructure.  The first two tasks, which occur
 before an ESMF call is ever made, have the potential to be 
 the most difficult and time-consuming.  They are the work 
 of splitting an application into components and ensuring that
-each component has well-defined stages of execution.\footnote{ESMF
+each component has well-defined stages of execution.  ESMF
 aside, this sort of code structure helps to promote application
 clarity and maintainability, and the effort put into it is likely
-to be a good investment.}
+to be a good investment.
 
 \begin{enumerate}
 
@@ -371,8 +372,10 @@ finalize methods.  These methods can be multi-phase, e.g.,
 
 \item Pack any data that will be transferred between components
 into ESMF Import and Export State data structures.  This is done
-by wrapping model data in either ESMF Arrays or Fields.
-These Arrays and Fields are then added to the Import and
+by first wrapping model data in either ESMF Arrays or Fields.
+Arrays are simpler to create and use than Fields, but carry less
+information and have a more limited range of operations.
+These Arrays and Fields are then added to Import and
 Export States.  They may be packed into ArrayBundles or
 FieldBundles first, for more efficient communications.
 Metadata describing the model data can also be added.
