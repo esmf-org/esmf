@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.19 2008/04/05 03:37:56 cdeluca Exp $ 
+% $Id: Array_refdoc.ctex,v 1.20 2008/05/14 21:03:45 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -105,6 +105,8 @@
 \mbox{}\hrulefill\
 \input{ESMF_ArrayGet_fapi}
 \mbox{}\hrulefill\
+\input{ESMF_ArrayPr_fapi}
+\mbox{}\hrulefill\
 \input{ESMF_ArrayScatter_fapi}
 \mbox{}\hrulefill\
 \input{ESMF_Array_fapi}
@@ -114,6 +116,8 @@
 \input{../Infrastructure/Array/doc/ESMF_ArrayGather_fapi}
 \mbox{}\hrulefill\
 \input{../Infrastructure/Array/doc/ESMF_ArrayGet_fapi}
+\mbox{}\hrulefill\
+\input{../Infrastructure/Array/doc/ESMF_ArrayPr_fapi}
 \mbox{}\hrulefill\
 \input{../Infrastructure/Array/doc/ESMF_ArrayScatter_fapi}
 \mbox{}\hrulefill\
