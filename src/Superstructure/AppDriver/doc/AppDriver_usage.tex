@@ -1,4 +1,4 @@
-% $Id: AppDriver_usage.tex,v 1.12.2.1 2008/04/05 03:14:01 cdeluca Exp $
+% $Id: AppDriver_usage.tex,v 1.12.2.2 2008/05/14 04:02:10 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -13,8 +13,8 @@
 ESMF encourages application organization in which there is a single 
 top-level Gridded Component.  This provides a simple, clear sequence
 of operations at the highest level, and also enables the entire 
-application to be treated as a sub-Gridded Component of another, larger 
-application if desired.  When an application is organized in this fashion 
+application to be treated as a sub-Component of another, larger 
+application if desired.  When a simple application is organized in this fashion 
 the standard AppDriver can probably be used without much modification.  
 
 Examples of program organization using the AppDriver can be found in the 
@@ -24,17 +24,11 @@ within the AppDriver directory follows the naming convention:
 <seq|concur>_<pairwise|hub>_<f|c>driver_<spmd|mpmd>
 \end{verbatim}
 
-The examples that are currently implemented are 
+The example that is currently implemented is
 {\tt seq\_pairwise\_fdriver\_spmd}, which
 has sequential component execution, a pairwise coupler, a main program
-in Fortran, and all processors launching the same executable; and
-{\tt concur\_pairwise\_fdriver\_spmd}, which 
-has concurrent component execution, a pairwise coupler, a main program
 in Fortran, and all processors launching the same executable.
-
-
-The example {\tt seq\_pairwise\_fdriver\_spmd} is the simplest of the
-examples, and so it is also copied automatically into a top-level 
+It is also copied automatically into a top-level 
 {\tt quick\_start} directory at compilation time.  
 
 The user can copy the AppDriver files into
@@ -44,3 +38,9 @@ need additional application-specific code added in order to perform a
 meaningful function.  The {\tt README} file in the AppDriver 
 subdirectory or {\tt quick\_start} directory contains instructions about 
 which files to change.
+
+Examples of concurrent component execution can be found in the
+system tests that are bundled with the ESMF distribution.
+
+
+
