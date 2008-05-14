@@ -1,11 +1,11 @@
-! $Id: ESMF_GCompEx.F90,v 1.30.2.4 2008/05/06 04:31:39 cdeluca Exp $
+! $Id: ESMF_GCompEx.F90,v 1.30.2.5 2008/05/14 05:22:37 cdeluca Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
 !-------------------------------------------------------------------------
 !ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
-!BOC
+!
 ! !PROGRAM: ESMF_GCompEx.F90 - Gridded Component example
 !
 ! !DESCRIPTION:
@@ -14,7 +14,7 @@
 !
 !-----------------------------------------------------------------------------
 
-!EOC
+!
 
 !BOP
 !\subsubsection{Specifying a User-Code SetServices Routine}

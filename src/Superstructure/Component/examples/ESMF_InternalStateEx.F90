@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.10.2.1 2008/04/05 03:14:08 cdeluca Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.10.2.2 2008/05/14 05:22:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
       program ESMF_InternalStateEx
 
 !==============================================================================
-!BOC
+!
 ! !PROGRAM: ESMF_InternalStateEx - Example of using Set/Get Internal State
 !
 ! !DESCRIPTION:
@@ -25,13 +25,24 @@
 !   ESMF_CplCompGetInternalState
 !   ESMF_CplCompSetInternalState
 !
-!   These routines save the address of an internal, private data block
-!   during the execution of a Component's Initialize, Run, or Finalize
-!   code, and retrieve the address back during a different invocation 
-!   of these routines.   See the code below for examples of use.
 !-------------------------------------------------------------------------
+!BOC
+!\subsubsection{Example of Getting and Setting an Internal State}  
+!
+!   These routines save the address of an internal, private data block
+!   during the execution of a Component's initialize, run, or finalize
+!   code, and retrieve the address back during a different invocation 
+!   of these routines.  One situation where this is useful is in the
+!   creation of ensembles of the same component.  In this case it can 
+!   be tricky to distinguish which data belongs to which ensemble
+!   member - especially if the ensemble members are executing on the
+!   same PETs.  Internal states enable the user to create an array of
+!   internal data spaces, one for each ensemble member.  The correct
+!   data space can then be referenced for each ensemble member's calculations.
+!   
+!   See the code below for a simple example of using this capability.
+!
 !EOC
-!  
 !
 ! !USES:
 !BOC
