@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.1.2.2 2008/05/06 17:36:17 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.1.2.3 2008/05/14 20:56:43 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -259,8 +259,8 @@
 !   3D data Field that has 2 gridded dimensions and 1 ungridded
 !   dimension. 
 !
-!   First we create a 2D grid with an index space of 180x360 one degree
-!   per Grid element. In the FieldCreate call, we use gridToFieldMap
+!   First we create a 2D grid with an index space of 180x360 equivalent to
+!   180x360 Grid cells. In the FieldCreate call, we use gridToFieldMap
 !   to indicate the mapping between Grid dimension and Field dimension,
 !   for the ungridded dimension (typically the altitude), we use
 !   ungriddedLBound and ungriddedUBound to describe its bounds. Internally
