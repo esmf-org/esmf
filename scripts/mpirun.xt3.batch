@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.xt3.batch,v 1.2.2.1 2008/04/14 22:53:47 theurich Exp $
+# $Id: mpirun.xt3.batch,v 1.2.2.2 2008/05/14 22:05:36 svasquez Exp $
 # This script provides an interface such that the simple command
 # mpirun -np #
 # runs # copies of the program in parallel.
@@ -14,12 +14,15 @@ export num_procs=$2
 shift 2
 export prog=$*
 
-# must be multiples of 2
-#gjt: commenting out the following lines seems to work o.k. and allows uni-PET runs
-#if [ $num_procs = 1 ]
-#then
-#        export num_procs=2
-#fi
+# Make the mppe value a  multiple of 4.
+remainder=`expr $num_procs % 4`
+if [[ $remainder != 0 ]]
+then
+        export size=`expr $num_procs + 4 - $remainder`
+else
+        export size=$num_procs
+fi
+
 
 export working_dir=`pwd`
 
@@ -27,7 +30,7 @@ export working_dir=`pwd`
 cat > $ESMF_DIR/scripts/esmf_script << THE_END_OF_BATCH_SCRIPT
 #PBS $ESMF_BATCHOPTIONS
 #PBS -j oe
-#PBS -l size=$num_procs
+#PBS -l size=$size
 cd $working_dir
 aprun -n $num_procs $prog
 
