@@ -19,7 +19,6 @@
 #
 # Specification files
 # Following the problem descriptor string are filename(s) with the complete problem specification.
-#       -c (optional) class specific file
 #       -d distgrid specification
 #       -g Grid Specification
 # Multiple filenames can be used to specify the respective parameter space.
@@ -29,14 +28,14 @@
 #
 # specifies that a redistribution test is to be conducted where the range of distributions
 # is specified by two files and the range of grid types is specified by a single file.
-########################################################################################
+################################################################################
 problem_descriptor_string::
 # Two redistribution examples
-'[B1G1+H{1:2};B2G2+H{3:3}] --> [B2G2+H{5:6};B1G1+H{7:8}]' -c Classfile.rc -d DistGrid.rc 
- &  -g RedistGrid3D.rc     
+'[B1G1;B2G2] --> [B2G2;B1G1]' -d DistGrid.rc 
+ &  -g RedistGrid2D.rc     
 # 
-'[B1G1;B2G2;G3*]@{0,1,1} --> [B2G2+H{4:2};B1G1;B3G3+H{2:1}]' -c Classfile.rc -d DistGrid.rc 
- &       -g RedistGrid3D.rc     
+'[B1G1;B2G2;G3*] --> [B2G2;B1G1;B3G3]' -d DistGrid.rc 
+ &  -g RedistGrid3D.rc     
 ::   # end of list
 ~                     
 
