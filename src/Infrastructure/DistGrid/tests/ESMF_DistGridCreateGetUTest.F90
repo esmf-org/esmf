@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.6 2008/04/09 18:14:39 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.7 2008/05/14 01:44:29 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.6 2008/04/09 18:14:39 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.7 2008/05/14 01:44:29 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -62,7 +62,7 @@ program ESMF_DistGridCreateGetUTest
   integer, allocatable:: indexCountPDimPDe(:,:), localDeList(:)
   integer, allocatable:: indexList(:), seqIndexList(:)
   logical:: loopResult
-  type(ESMF_Logical):: matchResult
+  logical:: matchResult
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -311,7 +311,7 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "DistGridMatch() - identical DistGrids - matchResult"
   write(failMsg, *) "matchResult not ESMF_TRUE"
-  call ESMF_Test((matchResult.eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test(matchResult, name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -332,7 +332,7 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "DistGridMatch() - identical DistGrids - matchResult"
   write(failMsg, *) "matchResult not ESMF_TRUE"
-  call ESMF_Test((matchResult.eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test(matchResult, name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -352,7 +352,7 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "DistGridMatch() - different DistGrids that are the same - matchResult"
   write(failMsg, *) "matchResult not ESMF_TRUE"
-  call ESMF_Test((matchResult.eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test(matchResult, name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -379,7 +379,7 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "DistGridMatch() - different DistGrids - matchResult"
   write(failMsg, *) "matchResult not ESMF_FALSE"
-  call ESMF_Test((matchResult.ne.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test(.not. matchResult, name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest

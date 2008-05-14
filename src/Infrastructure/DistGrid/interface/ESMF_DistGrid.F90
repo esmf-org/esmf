@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.37 2008/04/09 18:14:38 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.38 2008/05/14 01:44:29 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.37 2008/04/09 18:14:38 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.38 2008/05/14 01:44:29 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2399,7 +2399,7 @@ contains
   function ESMF_DistGridMatch(distgrid1, distgrid2, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_Logical) :: ESMF_DistGridMatch
+    logical :: ESMF_DistGridMatch
       
 ! !ARGUMENTS:
     type(ESMF_DistGrid),  intent(in)              :: distgrid1
@@ -2409,7 +2409,7 @@ contains
 !
 ! !DESCRIPTION:
 !      Check if {\tt distgrid1} and {\tt distgrid2} match. Returns
-!      {\tt ESMF\_TRUE} if DistGrid objects match, {\tt ESMF\_FALSE} otherwise.
+!      {\tt .TRUE.} if DistGrid objects match, {\tt .FALSE.} otherwise.
 !
 !     The arguments are:
 !     \begin{description}
