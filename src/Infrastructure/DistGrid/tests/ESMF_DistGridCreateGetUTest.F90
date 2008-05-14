@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.7 2008/05/14 01:44:29 w6ws Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.8 2008/05/14 17:44:29 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.7 2008/05/14 01:44:29 w6ws Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.8 2008/05/14 17:44:29 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -56,7 +56,7 @@ program ESMF_DistGridCreateGetUTest
   type(ESMF_DistGrid):: distgrid, distgrid2
   type(ESMF_DELayout):: delayout
   integer:: dimCount, patchCount, deCount
-  type(ESMF_Logical):: regDecompFlag
+  logical:: regDecompFlag
   integer, allocatable:: elementCountPPatch(:), patchListPDe(:), elementCountPDe(:)
   integer, allocatable:: minIndexPDimPPatch(:,:), maxIndexPDimPPatch(:,:)
   integer, allocatable:: indexCountPDimPDe(:,:), localDeList(:)
@@ -117,7 +117,7 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "Verify regDecompFlag"
   write(failMsg, *) "Wrong result"
-  call ESMF_Test((regDecompFlag == ESMF_TRUE), &
+  call ESMF_Test(regDecompFlag, &
     name, failMsg, result, ESMF_SRCLINE)
     
   !------------------------------------------------------------------------
