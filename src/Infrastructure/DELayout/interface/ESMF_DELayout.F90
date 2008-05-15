@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.70 2008/04/05 03:38:13 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.71 2008/05/15 23:40:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.70 2008/04/05 03:38:13 cdeluca Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.71 2008/05/15 23:40:27 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -756,7 +756,7 @@ contains
     integer, target,              intent(out),  optional  :: vasMap(:)
     integer, target,              intent(out),  optional  :: compCapacity(:)
     integer, target,              intent(out),  optional  :: commCapacity(:,:)
-    type(ESMF_Logical),           intent(out),  optional  :: oneToOneFlag
+    logical,                      intent(out),  optional  :: oneToOneFlag
     type(ESMF_DePinFlag),         intent(out),  optional  :: dePinFlag
     integer,                      intent(out),  optional  :: localDeCount
     integer, target,              intent(out),  optional  :: localDeList(:)
@@ -794,9 +794,9 @@ contains
 !        capacity for each pair of DEs. The {\tt commCapacity} argument is a
 !        2D array where each dimension must at least be of size {\tt deCount}.
 !     \item[{[oneToOneFlag]}]
-!        Upon return this holds {\tt ESMF\_TRUE} if the specified 
+!        Upon return this holds {\tt .TRUE.} if the specified 
 !        {\tt ESMF\_DELayout} describes a 1-to-1 mapping between DEs and PETs,
-!        {\tt ESMF\_FALSE} otherwise.
+!        {\tt .FALSE.} otherwise.
 !     \item[{[dePinFlag]}]
 !        Upon return this flag will indicate the type of DE pinning. 
 !        See section \ref{opt:depinflag} for a list of valid pinning 
@@ -822,6 +822,7 @@ contains
     type(ESMF_InterfaceInt) :: vasMapArg              ! helper variable
     type(ESMF_InterfaceInt) :: localDeListArg         ! helper variable
     type(ESMF_InterfaceInt) :: vasLocalDeListArg      ! helper variable
+    type(ESMF_Logical)      :: localoneToOneFlag      ! helper variable
     
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -860,10 +861,12 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutGet(delayout, vm, deCount, petMapArg, vasMapArg, &
-      oneToOneFlag, dePinFlag, localDeCount, localDeListArg, &
+      localoneToOneFlag, dePinFlag, localDeCount, localDeListArg, &
       vasLocalDeCount, vasLocalDeListArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present (oneToOneFlag))  &
+      oneToOneFlag = localoneToOneFlag == ESMF_TRUE
       
     ! Set init code for deep C++ objects
     if (present(vm)) then

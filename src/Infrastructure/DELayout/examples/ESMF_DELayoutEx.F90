@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.16 2008/04/05 03:38:12 cdeluca Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.17 2008/05/15 23:40:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@ program ESMF_DELayoutEx
   integer, allocatable:: commWeights(:,:), compWeights(:), localDeList(:)
   type(ESMF_VM):: vm
   type(ESMF_DELayout):: delayout
-  type(ESMF_Logical):: oneToOneFlag
+  logical:: oneToOneFlag
   type(ESMF_DELayoutServiceReply):: reply
   ! result code
   integer :: finalrc
@@ -243,7 +243,7 @@ endif
 !BOC
   call ESMF_DELayoutGet(delayout, oneToOneFlag=oneToOneFlag, rc=rc)
   if (rc /= ESMF_SUCCESS) finalrc=rc
-  if (oneToOneFlag == ESMF_FALSE) then
+  if (.not. oneToOneFlag) then
     ! handle the unexpected case of general DE to PET mapping
   endif
   allocate(localDeList(1))
