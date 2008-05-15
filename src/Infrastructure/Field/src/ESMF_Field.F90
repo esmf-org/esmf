@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.323 2008/05/14 01:44:30 w6ws Exp $
+! $Id: ESMF_Field.F90,v 1.324 2008/05/15 20:25:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -176,7 +176,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.323 2008/05/14 01:44:30 w6ws Exp $'
+    '$Id: ESMF_Field.F90,v 1.324 2008/05/15 20:25:04 feiliu Exp $'
 
 !==============================================================================
 !
@@ -1136,6 +1136,9 @@ contains
 
       call c_ESMC_FieldSerialize(fp%fieldstatus, fp%gridstatus, &
                                  fp%datastatus, fp%iostatus, & 
+                                 fp%gridToFieldMap, &
+                                 fp%ungriddedLBound, fp%ungriddedUBound, &
+                                 fp%maxHaloLWidth, fp%maxHaloUWidth, &
                                  buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -1232,6 +1235,9 @@ contains
 
       call c_ESMC_FieldDeserialize(fp%fieldstatus, fp%gridstatus, &
                                    fp%datastatus, fp%iostatus, &
+                                   fp%gridToFieldMap, &
+                                   fp%ungriddedLBound, fp%ungriddedUBound, &
+                                   fp%maxHaloLWidth, fp%maxHaloUWidth, &
                                    buffer(1), offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &

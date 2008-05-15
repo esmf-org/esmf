@@ -1,4 +1,4 @@
-// $Id: ESMCI_Field_F.C,v 1.3 2008/04/05 03:38:16 cdeluca Exp $
+// $Id: ESMCI_Field_F.C,v 1.4 2008/05/15 20:25:04 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -26,7 +26,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_Field_F.C,v 1.3 2008/04/05 03:38:16 cdeluca Exp $";
+             "$Id: ESMCI_Field_F.C,v 1.4 2008/05/15 20:25:04 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -40,9 +40,14 @@ extern "C" {
 
 // non-method functions
 void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus, 
-				ESMC_Status *gridstatus, 
-				ESMC_Status *datastatus, 
-				ESMC_Status *iostatus,
+                ESMC_Status *gridstatus, 
+                ESMC_Status *datastatus, 
+                ESMC_Status *iostatus,
+                int * gridToFieldMap,
+                int * ungriddedLBound,
+                int * ungriddedUBound,
+                int * maxHaloLWidth,
+                int * maxHaloUWidth,
 				void *buffer, int *length, int *offset, int *localrc){
     int i;
 
@@ -53,7 +58,7 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
     ESMC_Status *sp;
 
     // TODO: verify length > 4 status vars, and if not, make room.
-    int fixedpart = 4 * sizeof(int *);
+    int fixedpart = 4 * sizeof(int *) + 5 * ESMF_MAXDIM * sizeof(int *);
     if ((*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
@@ -72,7 +77,24 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
     *sp++ = *datastatus; 
     *sp++ = *iostatus; 
 
-    *offset = (char *)sp - (char *)buffer;
+    // copy the rest of the field parameters
+    // we are explicitly assuming Fortran-integer is of size C-int
+    // This might be probelmatic on 64bit machines depending how compiler flag is used
+    // e.g. we know gridToFieldMap is of type cpu_word *, its element maybe int32 or int64
+    // depending on the size of Fortran-integer
+    char * ptr = (char *)sp;
+    memcpy((void *)ptr, (const void *)gridToFieldMap, ESMF_MAXDIM*sizeof(int));
+    ptr += ESMF_MAXDIM*sizeof(int);
+    memcpy((void *)ptr, (const void *)ungriddedLBound, ESMF_MAXDIM*sizeof(int));
+    ptr += ESMF_MAXDIM*sizeof(int);
+    memcpy((void *)ptr, (const void *)ungriddedUBound, ESMF_MAXDIM*sizeof(int));
+    ptr += ESMF_MAXDIM*sizeof(int);
+    memcpy((void *)ptr, (const void *)maxHaloLWidth, ESMF_MAXDIM*sizeof(int));
+    ptr += ESMF_MAXDIM*sizeof(int);
+    memcpy((void *)ptr, (const void *)maxHaloUWidth, ESMF_MAXDIM*sizeof(int));
+    ptr += ESMF_MAXDIM*sizeof(int);
+
+    *offset = ptr - (char *)buffer;
 
     if (localrc) *localrc = ESMF_SUCCESS;
 
@@ -81,10 +103,15 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
 
 
 void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus, 
-				  ESMC_Status *gridstatus, 
-				  ESMC_Status *datastatus, 
-				  ESMC_Status *iostatus, 
-				  void *buffer, int *offset, int *localrc){
+				ESMC_Status *gridstatus, 
+				ESMC_Status *datastatus, 
+				ESMC_Status *iostatus, 
+                int * gridToFieldMap,
+                int * ungriddedLBound,
+                int * ungriddedUBound,
+                int * maxHaloLWidth,
+                int * maxHaloUWidth,
+				void *buffer, int *offset, int *localrc){
 
     int i;
 
@@ -99,7 +126,19 @@ void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus,
     *datastatus = *sp++;
     *iostatus = *sp++;
 
-    *offset = (char *)sp - (char *)buffer;
+    char * ptr = (char *)sp;
+    memcpy((void *)gridToFieldMap, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
+    ptr += ESMF_MAXDIM*sizeof(int);
+    memcpy((void *)ungriddedLBound, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
+    ptr += ESMF_MAXDIM*sizeof(int);
+    memcpy((void *)ungriddedUBound, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
+    ptr += ESMF_MAXDIM*sizeof(int);
+    memcpy((void *)maxHaloLWidth, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
+    ptr += ESMF_MAXDIM*sizeof(int);
+    memcpy((void *)maxHaloUWidth, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
+    ptr += ESMF_MAXDIM*sizeof(int);
+
+    *offset = ptr - (char *)buffer;
 
     if (localrc) *localrc = ESMF_SUCCESS;
 
