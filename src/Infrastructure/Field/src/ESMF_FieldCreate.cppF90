@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.24 2008/05/16 20:01:15 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.25 2008/05/16 20:36:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.24 2008/05/16 20:01:15 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.25 2008/05/16 20:36:40 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -966,7 +966,6 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 ! !IROUTINE: ESMF_FieldCreateEmpty - Create an empty Field (no Grid)
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_FieldCreateEmpty()
   function ESMF_FieldCreateEmpty(name, iospec, rc)
 !
 ! !RETURN VALUE:
