@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.99 2008/04/17 18:58:36 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.100 2008/05/16 01:09:55 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.99 2008/04/17 18:58:36 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.100 2008/05/16 01:09:55 w6ws Exp $"
 
 !==============================================================================
 
@@ -2758,18 +2758,18 @@ module ESMF_VMMod
 !        Upon return this holds a flag indicating whether Pthreads are
 !        supported by the specified {\tt ESMF\_VM} object.
 !        \begin{description}
-!        \item[{\tt ESMF\_TRUE}]
+!        \item[{\tt .TRUE.}]
 !             Pthreads are supported.
-!        \item[{\tt ESMF\_FALSE}]
+!        \item[{\tt .FALSE.}]
 !             Pthreads are not supported.
 !        \end{description}
 !   \item[{[supportOpenMPFlag]}]
 !        Upon return this holds a flag indicating whether user-level OpenMP
 !        threading is supported by the specified {\tt ESMF\_VM} object.
 !        \begin{description}
-!        \item[{\tt ESMF\_TRUE}]
+!        \item[{\tt .TRUE.}]
 !             User-level OpenMP threading is supported.
-!        \item[{\tt ESMF\_FALSE}]
+!        \item[{\tt .FALSE.}]
 !             User-level OpenMP threading is not supported.
 !        \end{description}
 !   \item[{[rc]}] 
@@ -2778,6 +2778,8 @@ module ESMF_VMMod
 !
 !EOP
 !------------------------------------------------------------------------------
+    type(ESMF_Logical)      :: localsupportPthreadsFlag
+    type(ESMF_Logical)      :: localsupportOpenMPFlag
     integer                 :: localrc      ! local return code
 
     ! initialize return code; assume routine not implemented
@@ -2789,7 +2791,11 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
-      supportPthreadsFlag, supportOpenMPFlag, localrc)
+      localsupportPthreadsFlag, localsupportOpenMPFlag, localrc)
+    if (present (supportPthreadsFlag))  &
+      supportPthreadsFlag = localsupportPthreadsFlag
+    if (present (supportOpenMPFlag))  &
+      supportOpenMPFlag = localsupportOpenMPFlag
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
