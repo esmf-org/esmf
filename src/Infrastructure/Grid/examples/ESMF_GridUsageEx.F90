@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.28.2.14 2008/04/28 23:22:56 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.28.2.15 2008/05/16 22:19:57 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -832,17 +832,13 @@ endif
 !
 ! ESMF Grids can be created incrementally. To do this,
 ! the user first calls ESMF\_GridCreateEmpty to allocate the shell of
-! a Grid. Next, a series of {\tt ESMF\_GridSet()} calls are used to fill
-! in the details of the grid. Here we use a convenient {\tt ESMF\_GridSetCommitShapeTile()}
-! call that fills in the Grid via an interface much like the
-! {\tt ESMF\_GridCreateShapeTile()} call. When using {\tt ESMF\_GridSet} the
-! user must explicity call {\tt ESMF\_GridCommit} afterwards to make the Grid usable.
-! {\tt ESMF\_GridSetCommitShapeTile()} contains this commit internally, so it doesn't
-! need to done separately. For consistency's sake the initial {\tt ESMF\_GridCreateEmpty}
+! a Grid. Next, we use the {\tt ESMF\_GridSetCommitShapeTile()}
+! call that fills in the Grid and does an internal commit to make it usable.
+! For consistency's sake the initial {\tt ESMF\_GridCreateEmpty}
 ! call must occur on the same or a superset of the PETs as the
-! {\tt ESMF\_GridSet()} calls. The following example uses the incremental
-! technique to create a rectangular 10x20 Grid with coordinates at the
-! center and corner stagger locations. 
+! {\tt ESMF\_GridSetCommitShapeTile()} calls. The following example uses the
+! incremental technique to create a rectangular 10x20 Grid with coordinates at
+! the center and corner stagger locations. 
 !EOE
 
 !BOC

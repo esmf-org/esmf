@@ -164,7 +164,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.23 2008/05/16 21:01:55 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.24 2008/05/16 22:19:57 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -6636,7 +6636,7 @@ endif
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetFromDistGrid"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSet - Set the values in a Grid which has been created with CreateEmpty 
 
 ! !INTERFACE:
@@ -6720,7 +6720,7 @@ endif
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
     integer :: localrc ! local error status
     integer :: nameLen 
     type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
