@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.41 2008/05/01 19:15:28 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.42 2008/05/16 20:01:15 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1513,7 +1513,7 @@ contains
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
-        field = ESMF_FieldCreate(rc=localrc) 
+        field = ESMF_FieldCreateEmpty(rc=localrc) 
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -1541,7 +1541,7 @@ contains
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
-        field = ESMF_FieldCreate(rc=localrc) 
+        field = ESMF_FieldCreateEmpty(rc=localrc) 
         if(localrc /= ESMF_SUCCESS) rc = ESMF_FAILURE
         call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
             dimCount=dimCount, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &

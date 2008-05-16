@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.1.2.3 2008/05/14 20:56:43 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.1.2.4 2008/05/16 20:01:14 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -373,7 +373,7 @@
 
 !BOC
     ! create an empty Field
-    field3 = ESMF_FieldCreate("precip", rc=rc)
+    field3 = ESMF_FieldCreateEmpty("precip", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! use FieldGet to retrieve total counts 
