@@ -164,7 +164,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.22 2008/05/13 22:17:04 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.23 2008/05/16 21:01:55 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -762,7 +762,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCommit"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCommit - Commit a Grid to a specified completion level
 
 ! !INTERFACE:
@@ -819,7 +819,7 @@ end interface
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
     integer :: localrc ! local error status
 
     ! Initialize return code; assume failure until success is certain
