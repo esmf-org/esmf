@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.46 2008/04/05 03:39:03 cdeluca Exp $
+! $Id: ESMF_LogErr.F90,v 1.47 2008/05/16 19:16:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1584,9 +1584,9 @@ end subroutine ESMF_LogOpen
 ! !ARGUMENTS:
 !	
 	type(ESMF_Log), target,optional                         :: log
-	type(ESMF_Logical), intent(in),optional			:: verbose
-	type(ESMF_Logical), intent(in),optional			:: flush
-	type(ESMF_Logical), intent(in),optional			:: rootOnly
+	logical, intent(in),optional			        :: verbose
+	logical, intent(in),optional			        :: flush
+	logical, intent(in),optional			        :: rootOnly
 	type(ESMF_HaltType), intent(in),optional                :: halt
 	integer, intent(in),optional			        :: stream  
 	integer, intent(in),optional			        :: maxElements
