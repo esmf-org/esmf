@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.9 2008/05/08 21:47:28 dneckels Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.10 2008/05/16 22:14:22 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.9 2008/05/08 21:47:28 dneckels Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.10 2008/05/16 22:14:22 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -78,6 +78,9 @@ program ESMF_FieldRegridEx
   real(ESMF_KIND_R8) :: theta, d2rad, xtmp, x, y
 
   integer, pointer :: larrayList(:)
+
+  integer(ESMF_KIND_I4), pointer :: indicies(:,:)
+  real(ESMF_KIND_R4), pointer    :: weights(:)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -285,7 +288,9 @@ program ESMF_FieldRegridEx
 !EOE
 
 !BOC
-  routeHandle = ESMF_FieldRegridStore(srcField, dstField, ESMF_REGRID_METHOD_BILINEAR, localrc)
+  call ESMF_FieldRegridStore(srcField, dstField, routeHandle, &
+                  indicies, weights, &
+                  ESMF_REGRID_METHOD_BILINEAR, localrc)
 !EOC
 
   write(failMsg, *) "FieldRegridStore"
@@ -333,6 +338,16 @@ program ESMF_FieldRegridEx
 !
   !call ESMF_GridDestroy(gridDst, rc=localrc)
   !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+
+
+  ! print the weights
+  if (associated(indicies)) then
+    do i1 = 1, size(indicies,1)
+
+    print *, indicies(i1,1), indicies(i1,2) , ':', weights(i1)
+    
+    enddo
+  endif
 
 
 10   continue

@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.125 2008/05/16 21:17:32 dneckels Exp $
+! $Id: ESMF_Regrid.F90,v 1.126 2008/05/16 22:14:30 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -119,7 +119,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.125 2008/05/16 21:17:32 dneckels Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.126 2008/05/16 22:14:30 dneckels Exp $'
 
 !==============================================================================
 !
@@ -215,6 +215,7 @@
        integer :: localrc
        type(ESMF_StaggerLoc) :: staggerLoc
        type(ESMF_VM)        :: vm
+       integer :: has_rh, has_iw
 
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
@@ -265,11 +266,14 @@
          staggerLoc = ESMF_STAGGERLOC_CENTER
        endif
 
+       has_rh = 1
+       has_iw = 0
        ! Call through to the C++ object that does the work
        call c_ESMC_regrid_create(vm, srcGrid, srcArray, staggerLoc,  &
                    dstGrid, dstArray, staggerLoc%staggerloc, &
                    regridMethod, regridScheme, &
-                   routehandle, localrc)
+                   routehandle, has_rh, has_iw, &
+                   localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -299,7 +303,7 @@
       type(ESMF_RegridMethod), intent(in)    :: regridMethod
       integer, intent(in)                    :: regridScheme
       type(ESMF_RouteHandle),  intent(inout) :: routehandle
-      integer(ESMF_KIND_I4), pointer, intent(inout)   :: indicies(:)
+      integer(ESMF_KIND_I4), pointer, intent(inout)   :: indicies(:,:)
       real(ESMF_KIND_R4), pointer, intent(inout)      :: weights(:)
       integer,                  intent(  out), optional :: rc
 !
@@ -327,6 +331,7 @@
        integer :: localrc
        type(ESMF_StaggerLoc) :: staggerLoc
        type(ESMF_VM)        :: vm
+       integer :: has_rh, has_iw
 
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
@@ -377,11 +382,14 @@
          staggerLoc = ESMF_STAGGERLOC_CENTER
        endif
 
+       has_rh = 1
+       has_iw = 1
        ! Call through to the C++ object that does the work
        call c_ESMC_regrid_create(vm, srcGrid, srcArray, staggerLoc,  &
                    dstGrid, dstArray, staggerLoc%staggerloc, &
                    regridMethod, regridScheme, &
-                   routehandle, localrc)
+                   routehandle, has_rh, has_iw, &
+                   localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -409,7 +417,7 @@
       type(ESMF_Array), intent(inout)        :: dstArray
       type(ESMF_RegridMethod), intent(in)    :: regridMethod
       integer, intent(in)                    :: regridScheme
-      integer(ESMF_KIND_I4), pointer, intent(inout)   :: indicies(:)
+      integer(ESMF_KIND_I4), pointer, intent(inout)   :: indicies(:,:)
       real(ESMF_KIND_R4), pointer, intent(inout)      :: weights(:)
       integer,                  intent(  out), optional :: rc
 !
@@ -437,6 +445,8 @@
        integer :: localrc
        type(ESMF_StaggerLoc) :: staggerLoc
        type(ESMF_VM)        :: vm
+       type(ESMF_RouteHandle) :: lrouteHandle
+       integer :: has_rh, has_iw
 
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
@@ -487,11 +497,14 @@
          staggerLoc = ESMF_STAGGERLOC_CENTER
        endif
 
+       has_rh = 0
+       has_iw = 0
        ! Call through to the C++ object that does the work
-       !call c_ESMC_regrid_create(vm, srcGrid, srcArray, staggerLoc,  &
-       !            dstGrid, dstArray, staggerLoc%staggerloc, &
-       !            regridMethod, regridScheme, &
-       !            routehandle, localrc)
+       call c_ESMC_regrid_create(vm, srcGrid, srcArray, staggerLoc,  &
+                   dstGrid, dstArray, staggerLoc%staggerloc, &
+                   regridMethod, regridScheme, &
+                   lroutehandle, has_rh, has_iw, &
+                   localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 

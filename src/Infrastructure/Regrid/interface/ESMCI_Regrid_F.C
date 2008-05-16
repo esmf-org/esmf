@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.10 2008/05/08 17:39:39 dneckels Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.11 2008/05/16 22:14:30 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                    ESMCI::Grid **gridsrcpp, ESMCI::Array **arraysrcpp, int *srcstaggerLoc,
                    ESMCI::Grid **griddstpp, ESMCI::Array **arraydstpp, int *dststaggerLoc,
                    int *regridMethod, int *regridScheme,
-                   ESMC_RouteHandle **rh,
+                   ESMC_RouteHandle **rh, int *has_rh, int *has_iw,
                              int*rc) {
   Trace __trace(" FTN(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, int *srcstaggerLoc, ESMCI::Grid **griddstcpp, int *dststaggerLoc, int*rc");
   ESMCI::VM *vm = *vmpp;
