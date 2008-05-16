@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.123 2008/04/05 03:38:52 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.124 2008/05/16 20:35:41 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -96,12 +96,30 @@
     ! 
     public ESMF_RegridStore
 
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_RegridStore -- Generic interface
+
+! !INTERFACE:
+  interface ESMF_RegridStore
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_RegridStoreRH
+    module procedure ESMF_RegridStoreRHIW
+    module procedure ESMF_RegridStoreIW
+!EOPI
+
+  end interface
+
+
 !
 !EOPI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.123 2008/04/05 03:38:52 cdeluca Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.124 2008/05/16 20:35:41 dneckels Exp $'
 
 !==============================================================================
 !
@@ -153,12 +171,12 @@
 ! 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridStore"
+#define ESMF_METHOD "ESMF_RegridStoreRH"
 !BOPI
-! !IROUTINE: ESMF_RegridStore - Precomputes Regrid data
+! !IROUTINE: ESMF_RegridStoreRH - Precomputes Regrid data
 
 ! !INTERFACE:
-      subroutine ESMF_RegridStore(srcGrid, srcArray, &
+      subroutine ESMF_RegridStoreRH(srcGrid, srcArray, &
                  dstGrid, dstArray, &
                  regridMethod, regridScheme, &
                  routehandle, rc)
@@ -258,7 +276,229 @@
        ! Mark route handle created
        call ESMF_RouteHandleSetInitCreated(routeHandle, rc)
 
-      end subroutine ESMF_RegridStore
+      end subroutine ESMF_RegridStoreRH
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridStoreRHIW"
+!BOPI
+! !IROUTINE: ESMF_RegridStoreRH - Precomputes Regrid data
+
+! !INTERFACE:
+      subroutine ESMF_RegridStoreRHIW(srcGrid, srcArray, &
+                 dstGrid, dstArray, &
+                 regridMethod, regridScheme, &
+                 routehandle, &
+                 indicies, weights, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout)         :: srcGrid
+      type(ESMF_Array), intent(inout)        :: srcArray
+      type(ESMF_Grid), intent(inout)         :: dstGrid
+      type(ESMF_Array), intent(inout)        :: dstArray
+      type(ESMF_RegridMethod), intent(in)    :: regridMethod
+      integer, intent(in)                    :: regridScheme
+      type(ESMF_RouteHandle),  intent(inout) :: routehandle
+      integer(ESMF_KIND_I4), intent(inout)   :: indicies
+      real(ESMF_KIND_R4), intent(inout)      :: weights
+      integer,                  intent(  out), optional :: rc
+!
+! !DESCRIPTION:
+!     The arguments are:
+!     \begin{description}
+!     \item[srcGrid]
+!          The source grid.
+!     \item[srcArray]
+!          The source grid array.
+!     \item[dstGrid]
+!          The destination grid.
+!     \item[dstArray]
+!          The destination array.
+!     \item[regridMethod]
+!          The interpolation method to use.
+!     \item[regridScheme]
+!          Whether to use 3d or native coordinates
+!     \item[routeHandle]
+!          Handle to store the resulting sparseMatrix
+!     \item[{rc}]
+!          Return code.
+!     \end{description}
+!EOPI
+       integer :: localrc
+       type(ESMF_StaggerLoc) :: staggerLoc
+       type(ESMF_VM)        :: vm
+
+       ! Initialize return code; assume failure until success is certain
+       localrc = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! For the moment only support bilinear
+       if (regridMethod .ne. ESMF_REGRID_METHOD_BILINEAR) then
+         localrc = ESMF_RC_NOT_IMPL
+       else
+         localrc = ESMF_SUCCESS
+       endif
+
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+       ! global vm for now
+       call ESMF_VMGetGlobal(vm, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Initialize return code; assume failure until success is certain
+       localrc = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! For the moment only support bilinear
+       if (regridMethod .ne. ESMF_REGRID_METHOD_BILINEAR) then
+         localrc = ESMF_RC_NOT_IMPL
+       else
+         localrc = ESMF_SUCCESS
+       endif
+
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! global vm for now
+       call ESMF_VMGetGlobal(vm, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Choose the stagger.  Perhaps eventually this can be more configurable,
+       ! but for now, conserve = node, bilinear = center
+       if (regridMethod .eq. ESMF_REGRID_METHOD_BILINEAR) then
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       elseif (regridMethod .eq. ESMF_REGRID_METHOD_PATCH) then
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       else
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       endif
+
+       ! Call through to the C++ object that does the work
+       call c_ESMC_regrid_create(vm, srcGrid, srcArray, staggerLoc,  &
+                   dstGrid, dstArray, staggerLoc%staggerloc, &
+                   regridMethod, regridScheme, &
+                   routehandle, localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Mark route handle created
+       call ESMF_RouteHandleSetInitCreated(routeHandle, rc)
+
+      end subroutine ESMF_RegridStoreRHIW
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridStoreIW"
+!BOPI
+! !IROUTINE: ESMF_RegridStoreIW - Precomputes Regrid data
+
+! !INTERFACE:
+      subroutine ESMF_RegridStoreIW(srcGrid, srcArray, &
+                 dstGrid, dstArray, &
+                 regridMethod, regridScheme, &
+                 indicies, weights, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout)         :: srcGrid
+      type(ESMF_Array), intent(inout)        :: srcArray
+      type(ESMF_Grid), intent(inout)         :: dstGrid
+      type(ESMF_Array), intent(inout)        :: dstArray
+      type(ESMF_RegridMethod), intent(in)    :: regridMethod
+      integer, intent(in)                    :: regridScheme
+      integer(ESMF_KIND_I4), intent(inout)   :: indicies
+      real(ESMF_KIND_R4), intent(inout)      :: weights
+      integer,                  intent(  out), optional :: rc
+!
+! !DESCRIPTION:
+!     The arguments are:
+!     \begin{description}
+!     \item[srcGrid]
+!          The source grid.
+!     \item[srcArray]
+!          The source grid array.
+!     \item[dstGrid]
+!          The destination grid.
+!     \item[dstArray]
+!          The destination array.
+!     \item[regridMethod]
+!          The interpolation method to use.
+!     \item[regridScheme]
+!          Whether to use 3d or native coordinates
+!     \item[routeHandle]
+!          Handle to store the resulting sparseMatrix
+!     \item[{rc}]
+!          Return code.
+!     \end{description}
+!EOPI
+       integer :: localrc
+       type(ESMF_StaggerLoc) :: staggerLoc
+       type(ESMF_VM)        :: vm
+
+       ! Initialize return code; assume failure until success is certain
+       localrc = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! For the moment only support bilinear
+       if (regridMethod .ne. ESMF_REGRID_METHOD_BILINEAR) then
+         localrc = ESMF_RC_NOT_IMPL
+       else
+         localrc = ESMF_SUCCESS
+       endif
+
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+       ! global vm for now
+       call ESMF_VMGetGlobal(vm, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Initialize return code; assume failure until success is certain
+       localrc = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! For the moment only support bilinear
+       if (regridMethod .ne. ESMF_REGRID_METHOD_BILINEAR) then
+         localrc = ESMF_RC_NOT_IMPL
+       else
+         localrc = ESMF_SUCCESS
+       endif
+
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! global vm for now
+       call ESMF_VMGetGlobal(vm, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Choose the stagger.  Perhaps eventually this can be more configurable,
+       ! but for now, conserve = node, bilinear = center
+       if (regridMethod .eq. ESMF_REGRID_METHOD_BILINEAR) then
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       elseif (regridMethod .eq. ESMF_REGRID_METHOD_PATCH) then
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       else
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       endif
+
+       ! Call through to the C++ object that does the work
+       !call c_ESMC_regrid_create(vm, srcGrid, srcArray, staggerLoc,  &
+       !            dstGrid, dstArray, staggerLoc%staggerloc, &
+       !            regridMethod, regridScheme, &
+       !            routehandle, localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Mark route handle created
+       !call ESMF_RouteHandleSetInitCreated(routeHandle, rc)
+
+      end subroutine ESMF_RegridStoreIW
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
