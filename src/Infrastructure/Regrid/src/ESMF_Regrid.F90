@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.124 2008/05/16 20:35:41 dneckels Exp $
+! $Id: ESMF_Regrid.F90,v 1.125 2008/05/16 21:17:32 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -119,7 +119,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.124 2008/05/16 20:35:41 dneckels Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.125 2008/05/16 21:17:32 dneckels Exp $'
 
 !==============================================================================
 !
@@ -299,8 +299,8 @@
       type(ESMF_RegridMethod), intent(in)    :: regridMethod
       integer, intent(in)                    :: regridScheme
       type(ESMF_RouteHandle),  intent(inout) :: routehandle
-      integer(ESMF_KIND_I4), intent(inout)   :: indicies
-      real(ESMF_KIND_R4), intent(inout)      :: weights
+      integer(ESMF_KIND_I4), pointer, intent(inout)   :: indicies(:)
+      real(ESMF_KIND_R4), pointer, intent(inout)      :: weights(:)
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -409,8 +409,8 @@
       type(ESMF_Array), intent(inout)        :: dstArray
       type(ESMF_RegridMethod), intent(in)    :: regridMethod
       integer, intent(in)                    :: regridScheme
-      integer(ESMF_KIND_I4), intent(inout)   :: indicies
-      real(ESMF_KIND_R4), intent(inout)      :: weights
+      integer(ESMF_KIND_I4), pointer, intent(inout)   :: indicies(:)
+      real(ESMF_KIND_R4), pointer, intent(inout)      :: weights(:)
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
