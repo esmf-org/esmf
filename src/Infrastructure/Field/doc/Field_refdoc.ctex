@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.32.2.7 2008/05/06 15:24:56 cdeluca Exp $
+% $Id: Field_refdoc.ctex,v 1.32.2.8 2008/05/16 21:58:36 theurich Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -14,7 +14,7 @@
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{Field Design}
-\newcommand{\myauthors}{Nancy Collins}
+\newcommand{\myauthors}{Fei Liu}
 #endif
 
 #ifdef STANDALONE
@@ -75,12 +75,14 @@
 #ifdef STANDALONE
 \input{ESMF_FieldCreate_fapi}
 \input{ESMF_FieldGet_fapi}
-%\input{ESMF_FieldSet_fapi}
+\input{ESMF_FieldPr_fapi}
+\input{ESMF_FieldSet_fapi}
 \input{ESMF_Field_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/ESMF_FieldCreate_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldGet_fapi}
-%\input{../Infrastructure/Field/doc/ESMF_FieldSet_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldPr_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldSet_fapi}
 \input{../Infrastructure/Field/doc/ESMF_Field_fapi}
 #endif
 

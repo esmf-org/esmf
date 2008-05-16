@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.10 2008/05/01 18:47:42 oehmke Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.11 2008/05/16 21:58:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.10 2008/05/01 18:47:42 oehmke Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.11 2008/05/16 21:58:39 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -587,7 +587,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 !       dimensions are handled via individual communication methods.  For example, @\
 !       an undistributed dimension can be remapped to a distributed dimension @\
 !       as part of the ESMF\_ ArrayRedist() operation. @\
-! \item [{[ungriddedLBound]}]
+! \item [{[ungriddedLBound]}] @\
 !       Lower bounds of the ungridded dimensions of the {\tt field}. @\
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
 !       dimensions in the {\tt field}.  All ungridded dimensions of the @\
@@ -598,7 +598,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 !       these ungridded dimensions is the same as their order in the {\tt farray}. @\
 !       Note also that the bounds for undistributed dimensions included in the {\tt grid} are set @\
 !       in the {\tt grid}. @\
-! \item [{[ungriddedUBound]}]
+! \item [{[ungriddedUBound]}] @\
 !       Upper bounds of the ungridded dimensions of the {\tt field}. @\
 !       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
 !       dimensions in the {\tt field}.  All ungridded dimensions of the @\
