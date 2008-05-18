@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.114.2.14 2008/05/08 16:49:31 theurich Exp $
+! $Id: ESMF_State.F90,v 1.114.2.15 2008/05/18 05:48:10 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.114.2.14 2008/05/08 16:49:31 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.114.2.15 2008/05/18 05:48:10 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1932,12 +1932,12 @@
 ! !DESCRIPTION:
 !      Returns an <item> from an {\tt ESMF\_State} by name.  
 !      If the {\tt ESMF\_State} contains the <item> directly, only
-!      {\tt name} is required.
+!      {\tt itemName} is required.
 !      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
 !      and the <item> is one level down, this routine can return it
 !      in a single call by specifing the proper {\tt nestedStateName}.
 !      {\tt ESMF\_State}s can be nested to any depth, but this routine 
-!      only searches in immediate descendents.  
+!      only searches immediate descendents.  
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
 !
