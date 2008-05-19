@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.9 2008/05/19 19:55:54 dneckels Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.10 2008/05/19 22:39:12 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -67,7 +67,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.9 2008/05/19 19:55:54 dneckels Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.10 2008/05/19 22:39:12 dneckels Exp $'
 
 !==============================================================================
 !
@@ -160,7 +160,7 @@ contains
 
         
         call ESMF_RegridStore(srcGrid, srcArray, dstGrid, dstArray, &
-                 regridMethod, regridScheme, routeHandle, localrc)
+                 regridMethod, lregridScheme, routeHandle, localrc)
 
         if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
@@ -252,7 +252,7 @@ contains
 
         
         call ESMF_RegridStore(srcGrid, srcArray, dstGrid, dstArray, &
-                 regridMethod, regridScheme, routeHandle, &
+                 regridMethod, lregridScheme, routeHandle, &
                  indicies, weights, localrc)
 
         if (ESMF_LogMsgFoundError(localrc, &
@@ -344,7 +344,7 @@ contains
 
         
         call ESMF_RegridStore(srcGrid, srcArray, dstGrid, dstArray, &
-                 regridMethod, regridScheme, &
+                 regridMethod, lregridScheme, &
                  indicies, weights, localrc)
 
         if (ESMF_LogMsgFoundError(localrc, &

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.14 2008/05/19 19:55:54 dneckels Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.15 2008/05/19 22:39:12 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -258,6 +258,7 @@ extern "C" void FTN(c_esmc_copy_tempweights)(ESMCI::TempWeights **_tw, int *ii, 
 
   ESMCI::TempWeights &tw = (**_tw);
 
+/*
   for (int i = 0; i < tw.nentries; ++i) {
 
     int two_i = i << 1;
@@ -267,10 +268,13 @@ extern "C" void FTN(c_esmc_copy_tempweights)(ESMCI::TempWeights **_tw, int *ii, 
     w[i] = tw.factors[i];
 
   }
+*/
 
+/*
   delete [] tw.factors;
   delete [] tw.iientries;
 
   delete *_tw;
+*/
 
 }

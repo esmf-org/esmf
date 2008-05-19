@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.12 2008/05/19 19:55:54 dneckels Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.13 2008/05/19 22:39:12 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.12 2008/05/19 19:55:54 dneckels Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.13 2008/05/19 22:39:12 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -81,6 +81,7 @@ program ESMF_FieldRegridEx
 
   integer(ESMF_KIND_I4), pointer :: indicies(:,:)
   real(ESMF_KIND_R8), pointer    :: weights(:)
+  integer :: spherical_grid
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -289,8 +290,8 @@ program ESMF_FieldRegridEx
 
 !BOC
   call ESMF_FieldRegridStore(srcField, dstField, routeHandle, &
-                  indicies, weights, &
-                  ESMF_REGRID_METHOD_BILINEAR, localrc)
+                  !indicies, weights, &
+                  regridMethod=ESMF_REGRID_METHOD_BILINEAR, rc=localrc)
 !EOC
 
   write(failMsg, *) "FieldRegridStore"
@@ -318,7 +319,7 @@ program ESMF_FieldRegridEx
 !EOE
 
 !BOC
-  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+!  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
 !EOC
   write(failMsg, *) "FieldRegridRelease"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -326,12 +327,15 @@ program ESMF_FieldRegridEx
 
   ! Write results to a mesh
   num_arrays = 1
+  spherical_grid = 0
 
   ! Uncomment these calls to see some actual regrid results
-  !call ESMF_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
-               !"srcmesh", srcArray, rc=localrc)
-  !call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
-               !"dstmesh", dstArray, rc=localrc)
+  call ESMF_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
+               "srcmesh", srcArray, &
+               spherical=spherical_grid, rc=localrc)
+  call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
+               "dstmesh", dstArray, &
+               spherical=spherical_grid, rc=localrc)
 !
   !call ESMF_GridDestroy(gridSrc, rc=localrc)
   !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
