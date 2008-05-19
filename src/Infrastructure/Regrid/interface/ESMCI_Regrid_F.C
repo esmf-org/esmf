@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.11 2008/05/16 22:14:30 dneckels Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.12 2008/05/19 17:26:01 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -49,6 +49,7 @@
 using namespace ESMC;
 
 enum {ESMF_REGRID_SCHEME_FULL3D = 0, ESMF_REGRID_SCHEME_NATIVE = 1};
+enum {ESMF_REGRID_METHOD_BILINEAR = 0, ESMF_REGRID_METHOD_PATCH = 1};
 
 
 
@@ -112,7 +113,20 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     MEField<> &scoord = *srcmesh.GetCoordField();
     MEField<> &dcoord = *dstmesh.GetCoordField();
     std::vector<Interp::FieldPair> fpairs;
-    fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_STD));
+    
+    switch (*regridMethod) {
+
+      case ESMF_REGRID_METHOD_BILINEAR:
+        fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_STD));
+      break;
+
+      case ESMF_REGRID_METHOD_PATCH:
+        fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_PATCH));
+      break;
+
+      default:
+        Throw() << "Regrid method:" << *regridMethod << " is not implemented";
+    }
 
     Interp interp(srcmesh, dstmesh, fpairs);
 
