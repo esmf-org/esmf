@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.126 2008/05/16 22:14:30 dneckels Exp $
+! $Id: ESMF_Regrid.F90,v 1.127 2008/05/19 18:45:38 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -74,6 +74,12 @@
       integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
                             ESMF_REGRID_SCHEME_NATIVE = 1                            
 
+      ! temporarily store the weights while F90 arrays are alloc'ed
+      type ESMF_TempWeights 
+      sequence
+        type(ESMF_Pointer) :: this
+      end type
+
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 !
@@ -119,7 +125,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.126 2008/05/16 22:14:30 dneckels Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.127 2008/05/19 18:45:38 dneckels Exp $'
 
 !==============================================================================
 !
@@ -215,7 +221,8 @@
        integer :: localrc
        type(ESMF_StaggerLoc) :: staggerLoc
        type(ESMF_VM)        :: vm
-       integer :: has_rh, has_iw
+       integer :: has_rh, has_iw, nentries
+       type(ESMF_TempWeights) :: tweights
 
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
@@ -273,6 +280,7 @@
                    dstGrid, dstArray, staggerLoc%staggerloc, &
                    regridMethod, regridScheme, &
                    routehandle, has_rh, has_iw, &
+                   nentries, tweights, &
                    localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -331,7 +339,8 @@
        integer :: localrc
        type(ESMF_StaggerLoc) :: staggerLoc
        type(ESMF_VM)        :: vm
-       integer :: has_rh, has_iw
+       integer :: has_rh, has_iw, nentries
+       type(ESMF_TempWeights) :: tweights
 
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
@@ -389,9 +398,17 @@
                    dstGrid, dstArray, staggerLoc%staggerloc, &
                    regridMethod, regridScheme, &
                    routehandle, has_rh, has_iw, &
+                   nentries, tweights, &
                    localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Now we must allocate the F90 pointers and copy weights
+       allocate(indicies(nentries,2))
+       allocate(weights(nentries))
+
+       call c_ESMC_Copy_TempWeights(tweights, indicies, weights)
+
 
        ! Mark route handle created
        call ESMF_RouteHandleSetInitCreated(routeHandle, rc)
@@ -446,7 +463,8 @@
        type(ESMF_StaggerLoc) :: staggerLoc
        type(ESMF_VM)        :: vm
        type(ESMF_RouteHandle) :: lrouteHandle
-       integer :: has_rh, has_iw
+       integer :: has_rh, has_iw, nentries
+       type(ESMF_TempWeights) :: tweights
 
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
@@ -498,18 +516,23 @@
        endif
 
        has_rh = 0
-       has_iw = 0
+       has_iw = 1
        ! Call through to the C++ object that does the work
        call c_ESMC_regrid_create(vm, srcGrid, srcArray, staggerLoc,  &
                    dstGrid, dstArray, staggerLoc%staggerloc, &
                    regridMethod, regridScheme, &
                    lroutehandle, has_rh, has_iw, &
+                   nentries, tweights, &
                    localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-       ! Mark route handle created
-       !call ESMF_RouteHandleSetInitCreated(routeHandle, rc)
+       ! Now we must allocate the F90 pointers and copy weights
+       allocate(indicies(nentries,2))
+       allocate(weights(nentries))
+
+       call c_ESMC_Copy_TempWeights(tweights, indicies, weights)
+
 
       end subroutine ESMF_RegridStoreIW
 

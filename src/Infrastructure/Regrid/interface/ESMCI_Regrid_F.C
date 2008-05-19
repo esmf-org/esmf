@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.12 2008/05/19 17:26:01 dneckels Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.13 2008/05/19 18:45:38 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -51,6 +51,14 @@ using namespace ESMC;
 enum {ESMF_REGRID_SCHEME_FULL3D = 0, ESMF_REGRID_SCHEME_NATIVE = 1};
 enum {ESMF_REGRID_METHOD_BILINEAR = 0, ESMF_REGRID_METHOD_PATCH = 1};
 
+namespace ESMCI {
+  struct TempWeights {
+    int nentries;
+    int *iientries;
+    double *factors;
+  };
+}
+
 
 
 extern "C" void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
@@ -63,6 +71,7 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                    ESMCI::Grid **griddstpp, ESMCI::Array **arraydstpp, int *dststaggerLoc,
                    int *regridMethod, int *regridScheme,
                    ESMC_RouteHandle **rh, int *has_rh, int *has_iw,
+                   int *nentries, ESMCI::TempWeights **tweights,
                              int*rc) {
   Trace __trace(" FTN(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, int *srcstaggerLoc, ESMCI::Grid **griddstcpp, int *dststaggerLoc, int*rc");
   ESMCI::VM *vm = *vmpp;
@@ -192,24 +201,40 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
     } // for wi
 
+/*
 Par::Out() << "Matrix entries" << std::endl;
 for (UInt n = 0; n < num_entries; ++n) {
   Par::Out() << std::setw(5) << iientries[2*n] << std::setw(5) << iientries[2*n+1] << std::setw(15) << factors[n] << std::endl;
 }
+*/
 
     // Build the ArraySMM
-    int localrc;
-    enum ESMC_TypeKind tk = ESMC_TYPEKIND_R8;
-    FTN(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
-               &num_entries, &iiptr, &localrc);
+    if (*has_rh != 0) {
+      int localrc;
+      enum ESMC_TypeKind tk = ESMC_TYPEKIND_R8;
+      FTN(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
+                 &num_entries, &iiptr, &localrc);
 
-    if (localrc != ESMF_SUCCESS) Throw() << "arraysparsematmulstore failed";
+      if (localrc != ESMF_SUCCESS) Throw() << "arraysparsematmulstore failed";
 
+    }
 
+    *nentries = num_entries;
 
-    // Clean up
-    delete [] factors;
-    delete [] iientries;
+    // Clean up.  If has_iw, then we will use the arrays to
+    // fill out the users pointers.  These will be deleted following a copy.
+    if (*has_iw == 0) {
+      delete [] factors;
+      delete [] iientries;
+      *nentries = 0;
+    } else {
+      // Save off the weights so the F90 caller can allocate arrays and
+      // copy the values.
+      *tweights = new ESMCI::TempWeights;
+      (*tweights)->nentries = num_entries;
+      (*tweights)->factors = factors;
+      (*tweights)->iientries = iientries;
+    }
     
   }
   catch(std::exception &x) {
@@ -224,5 +249,27 @@ for (UInt n = 0; n < num_entries; ++n) {
   }
 
   *rc = ESMF_SUCCESS;
+
+}
+
+// Copy the weights stored in the temporary tw into the fortran arrays.  Also,
+// delete the temp weights.
+extern "C" void FTN(c_esmc_copy_tempweights)(ESMCI::TempWeights **_tw, int *ii, double *w) {
+
+  ESMCI::TempWeights &tw = (**_tw);
+
+  for (int i = 0; i < tw.nentries; ++i) {
+
+    int two_i = i << 1;
+
+    ii[i] = tw.iientries[two_i+0];
+    ii[two_i+i] = tw.iientries[two_i+1];
+
+  }
+
+  delete [] tw.factors;
+  delete [] tw.iientries;
+
+  delete *_tw;
 
 }

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.10 2008/05/16 22:14:22 dneckels Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.11 2008/05/19 18:45:48 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.10 2008/05/16 22:14:22 dneckels Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.11 2008/05/19 18:45:48 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -341,13 +341,13 @@ program ESMF_FieldRegridEx
 
 
   ! print the weights
-  if (associated(indicies)) then
-    do i1 = 1, size(indicies,1)
-
-    print *, indicies(i1,1), indicies(i1,2) , ':', weights(i1)
-    
-    enddo
-  endif
+!  if (associated(indicies)) then
+!    do i1 = 1, size(indicies,1)
+!
+  !  print *, indicies(i1,1), indicies(i1,2) , ':', weights(i1)
+  !  
+  !  enddo
+  !endif
 
 
 10   continue
