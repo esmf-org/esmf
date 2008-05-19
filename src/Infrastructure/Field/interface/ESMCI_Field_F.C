@@ -1,4 +1,4 @@
-// $Id: ESMCI_Field_F.C,v 1.4 2008/05/15 20:25:04 feiliu Exp $
+// $Id: ESMCI_Field_F.C,v 1.5 2008/05/19 20:53:55 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -26,7 +26,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_Field_F.C,v 1.4 2008/05/15 20:25:04 feiliu Exp $";
+             "$Id: ESMCI_Field_F.C,v 1.5 2008/05/19 20:53:55 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -43,6 +43,7 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
                 ESMC_Status *gridstatus, 
                 ESMC_Status *datastatus, 
                 ESMC_Status *iostatus,
+                int * staggerloc,
                 int * gridToFieldMap,
                 int * ungriddedLBound,
                 int * ungriddedUBound,
@@ -58,7 +59,7 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
     ESMC_Status *sp;
 
     // TODO: verify length > 4 status vars, and if not, make room.
-    int fixedpart = 4 * sizeof(int *) + 5 * ESMF_MAXDIM * sizeof(int *);
+    int fixedpart = 4 * sizeof(int *) + sizeof(int) + 5 * ESMF_MAXDIM * sizeof(int);
     if ((*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
@@ -83,6 +84,8 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
     // e.g. we know gridToFieldMap is of type cpu_word *, its element maybe int32 or int64
     // depending on the size of Fortran-integer
     char * ptr = (char *)sp;
+    memcpy((void *)ptr, (const void *)staggerloc, sizeof(int));
+    ptr += sizeof(int);
     memcpy((void *)ptr, (const void *)gridToFieldMap, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
     memcpy((void *)ptr, (const void *)ungriddedLBound, ESMF_MAXDIM*sizeof(int));
@@ -103,9 +106,10 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
 
 
 void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus, 
-				ESMC_Status *gridstatus, 
-				ESMC_Status *datastatus, 
-				ESMC_Status *iostatus, 
+                ESMC_Status *gridstatus, 
+                ESMC_Status *datastatus, 
+                ESMC_Status *iostatus, 
+                int * staggerloc,
                 int * gridToFieldMap,
                 int * ungriddedLBound,
                 int * ungriddedUBound,
@@ -127,6 +131,8 @@ void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus,
     *iostatus = *sp++;
 
     char * ptr = (char *)sp;
+    memcpy((void *)staggerloc, (const void *)ptr, sizeof(int));
+    ptr += sizeof(int);
     memcpy((void *)gridToFieldMap, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
     memcpy((void *)ungriddedLBound, (const void *)ptr, ESMF_MAXDIM*sizeof(int));

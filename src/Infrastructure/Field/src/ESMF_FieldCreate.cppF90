@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.26 2008/05/08 04:46:06 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.27 2008/05/19 20:53:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.26 2008/05/08 04:46:06 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.27 2008/05/19 20:53:56 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -2074,9 +2074,17 @@ end subroutine ESMF_FieldConstructNoDataPtr
 !
 ! TODO: more code goes here
 !
-    if(ftype%array_internal .and. &
+    if((ftype%is_proxy .or. ftype%array_internal) .and. &
       ftype%datastatus .eq. ESMF_STATUS_READY) then
         call ESMF_ArrayDestroy(ftype%array, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    endif
+
+    if(ftype%is_proxy .and. &
+      ftype%gridstatus .eq. ESMF_STATUS_READY) then
+        call ESMF_GridDestroy(ftype%grid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
