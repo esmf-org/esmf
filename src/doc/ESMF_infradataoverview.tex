@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.21.2.1 2008/04/02 20:07:49 cdeluca Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.21.2.2 2008/05/19 20:06:16 cdeluca Exp $
 
 \section{Overview of Infrastructure Data Handling}
 
@@ -90,6 +90,11 @@ with values that are updated by the DE in computations; and
 a {\bf total} domain, which includes both the computational 
 domain and data elements from other DEs which may be read 
 but are not updated in computations.
+
+\item {\bf ArrayBundle} ArrayBundles are collections of
+Arrays that are stored in a single object.  Unlike FieldBundles,
+they don't need to be distributed the same way across PETs.  The
+motivation for ArrayBundles is both convenience and performance.
 
 \item {\bf Field}  A Field holds model and/or observational 
 data together with its underlying grid or set of spatial 
