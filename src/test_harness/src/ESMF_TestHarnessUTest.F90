@@ -49,9 +49,6 @@
 
   ! local variables
   integer :: localPet, petCount, rootPet = 0
-  integer :: test_report_flag
-  integer :: problem_descriptor_count
-  integer :: ncount
   integer :: k, n, kfile
 
   logical :: debugflag = .false.
@@ -170,23 +167,23 @@
   if (rc .ne. ESMF_SUCCESS) then
      print*,'Error parsing problem descriptor files - see log file for details'
      finalrc = ESMF_FAILURE
-     goto 999
-!    call ESMF_TestEnd(result, ESMF_SRCLINE)
+     call ESMF_TestEnd(result, ESMF_SRCLINE)
   endif
-  print*,'exiting parse descriptor string'
-
-  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   ! report results
-  print*,'entering report test'
-  call TestHarnessReport(rc)
-  if (rc .ne. ESMF_SUCCESS) then
+! call TestHarnessReport(rc)
+  call RunTests(rc)
+  if (rc == ESMF_SUCCESS) then
+     print*,'PASS - all test harness tests have passed'
+  else
+     print*,'FAIL - one or more test harness tests have failed - see stdout ', &
+            'for complete details'
+  endif
+  if (rc /= ESMF_SUCCESS) then
      print*,'Error reporting tests - see log file for details'
      finalrc = ESMF_FAILURE
-     goto 999
-!    call ESMF_TestEnd(result, ESMF_SRCLINE)
+     call ESMF_TestEnd(result, ESMF_SRCLINE)
   endif
-  print*,'exiting report test'
 
   ! clean up and release memory
 
@@ -939,15 +936,12 @@ contains
 !===============================================================================
 ! dummy type - ignore - decalred to work around compiler bug. 
 ! type(character_array), allocatable :: Ttype(:)
-  ! local character strings
-  character(ESMF_MAXSTR) :: lstring, lname, lchar
-
+  ! local logical variables
   logical :: flag = .true.
 
   ! local integer variables
   integer :: nPEs
   integer :: k, kfile, kstr
-  integer :: irank, igrid
   integer :: iDfile, iGfile
   integer :: nDfiles, nGfiles, nstatus
 
@@ -967,8 +961,7 @@ contains
                 return
         ! read distribution specifier files
         do k=1,har%rcrd(kfile)%str(kstr)%nDfiles
-           nPEs = 12
-           ! drs debug nPEs = petCount
+           nPEs = petCount
            call read_dist_specification(nPEs,                                  &
                                         har%rcrd(kfile)%str(kstr)%Dfiles(k),   &
                                         har%rcrd(kfile)%str(kstr)%DstMem,      &
@@ -1029,6 +1022,62 @@ contains
   !-----------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+! !IROUTINE: RunTests         
+
+! !INTERFACE:
+  subroutine RunTests(localrc)
+!
+! !ARGUMENTS:
+  integer, intent(  out) :: localrc
+
+!
+! !DESCRIPTION:
+! This routine controls the execution of the test harness tests
+!-------------------------------------------------------------------------------
+  ! local variables
+  integer :: kfile, kstr
+
+  ! initialize local rc
+  localrc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  ! select type of test result report
+  !-----------------------------------------------------------------------------
+  select case (trim(adjustL(har%testClass)))
+     case("ARRAY")
+        do kfile=1,har%numRecords
+           do kstr=1,har%rcrd(kfile)%numStrings
+              ! test of a single problem descriptor string w/ specifiers
+              call array_redist_test(har%rcrd(kfile)%str(kstr), VM, localrc)
+              ! report on the single strings test 
+           !  call report_descriptor_string(har%rcrd(kfile)%str(kstr),nstatus, &  
+           !                                localrc)
+           enddo  ! kstr
+        enddo    ! kfile
+
+     case("FIELD")
+     ! not currently supported
+     call ESMF_LogMsgSetError( ESMF_FAILURE,"field test class currently" //    &
+               " unsupported",rcToReturn=localrc)
+
+     case default
+     ! error - class unknown
+     call ESMF_LogMsgSetError( ESMF_FAILURE," test class of unknown type",     &
+               rcToReturn=localrc)
+
+  end select  ! case of testclass
+
+  !-----------------------------------------------------------------------------
+  ! if I've gotten this far without an error, then the routine has succeeded.
+  !-----------------------------------------------------------------------------
+  localrc = ESMF_SUCCESS
+
+  !-----------------------------------------------------------------------------
+  end subroutine RunTests
+  !-----------------------------------------------------------------------------
+
 
 !-------------------------------------------------------------------------------
 ! !IROUTINE: TestHarnessReport

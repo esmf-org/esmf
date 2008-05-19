@@ -73,13 +73,10 @@
   ! local parameters
   integer :: localrc ! local error status
 
-  integer :: igrid, irank
-
   ! local character strings
-  character(ESMF_MAXSTR) :: ltmp, lchar, lfilename
+  character(ESMF_MAXSTR) :: ltmp, lfilename
 
   ! local grid records 
-  type(grid_specification_record), pointer :: src_grid(:), dst_grid(:)
   type(sized_char_array), pointer :: testfunction(:)
 
   ! initialize return flag
@@ -138,16 +135,6 @@
               rcToReturn=rc)
 
      end select
-
-! do igrid=1,Gfile%nGspecs
-! do irank=1,Gfile%src_grid(igrid)%grank
-! print*,' igrid ',igrid, &
-!    ' irank ',irank
-
-! print*,' Gtype in read ',trim(Gfile%src_grid(igrid)%gtype(irank)%string)
-! print*,' Gunits in read ',trim(Gfile%src_grid(igrid)%gunits(irank)%string)
-! enddo
-! enddo
 
   !-----------------------------------------------------------------------------
   rc = ESMF_SUCCESS     
@@ -960,7 +947,7 @@
   ! local ESMF types
 
   ! local character strings
-  character(ESMF_MAXSTR) :: ltmp, lchar
+! character(ESMF_MAXSTR) :: ltmp, lchar
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL

@@ -202,6 +202,312 @@
  ! Routines to parse input files for descriptor string, and specifier files.
  !------------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  subroutine array_redist_test(PDS, VM, rc)
+  !-----------------------------------------------------------------------------
+  !
+  !-----------------------------------------------------------------------------
+  ! arguments
+  type(problem_descriptor_strings), intent(in   ) :: PDS
+  type(ESMF_VM), intent(in   ) :: VM
+  integer, intent(  out) :: rc
+
+! local parameters
+  integer :: localrc ! local error status
+
+  ! local
+  type(ESMF_DistGrid) :: src_distgrid, dst_distgrid
+  integer :: iDfile, iGfile, iD, iG
+  character(ESMF_MAXSTR) :: liG, liD
+
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  ! assign needed local variables
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  ! for a single problem descriptor string, loop through each specifier file
+  ! combination
+  !-----------------------------------------------------------------------------
+  print*,'PDS%nDfiles  PDS%nGfiles  PDS%Dfiles%nDspecs  PDS%Gfiles%nGspecs ', &
+     PDS%nDfiles, PDS%nGfiles, PDS%Dfiles%nDspecs, PDS%Gfiles%nGspecs
+
+
+  do iDfile=1,PDS%nDfiles         ! distribution specifier files
+    do iGfile=1,PDS%nGfiles       ! grid specifier files
+      do iD=1, PDS%Dfiles(iDfile)%nDspecs   ! entries in distribution specifier
+        do iG=1, PDS%Gfiles(iGfile)%nGspecs ! entries in grid specifier file
+
+        print*, &
+         ' array redist test - src grid/dist/memory rank ', &
+          pds%SrcMem%GridRank,pds%SrcMem%DistRank,pds%SrcMem%memRank
+        print*, &
+         ' array redist test - dst grid/dist/memory rank ', &
+          pds%DstMem%GridRank,pds%DstMem%DistRank,pds%DstMem%memRank
+
+          ! create source and destination distributions
+          print*,iG,iD,iGfile,iDfile,' create src dist '
+          call create_distribution(PDS%SrcMem, PDS%Dfiles(iDfile)%src_dist(iD),&
+                    PDS%Gfiles(iGfile)%src_grid(iG), src_distgrid, VM, localrc)
+
+          print*,'               '
+
+          write(liG,"(i5)") iG 
+          write(liD,"(i5)") iD 
+          if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
+             // " with string "  // trim(adjustL(PDS%pds)) //                  &
+             " with entry "  // trim(adjustL(liD)) // " of file " //           &
+             trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
+             // " and entry " // trim(adjustL(liG)) // " of file " //          &
+             trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
+             rcToReturn=rc)) return
+
+          print*,iG,iD,iGfile,iDfile,' create dst dist '
+          call create_distribution(PDS%DstMem, PDS%Dfiles(iDfile)%dst_dist(iD),&
+                    PDS%Gfiles(iGfile)%dst_grid(iG), dst_distgrid, VM, localrc)
+          print*,'               '
+
+          write(liG,"(i5)") iG 
+          write(liD,"(i5)") iD 
+          if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
+             // " with string "  // trim(adjustL(PDS%pds)) //                  &
+             " with entry "  // trim(adjustL(liD)) // " of file " //           &
+             trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
+             // " and entry " // trim(adjustL(liG)) // " of file " //          &
+             trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
+             rcToReturn=rc)) return
+
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  ! create source and destination distributions (in DistMod)
+
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  ! create source array, destination array, and second source array
+
+  ! populate source array  (in grid)
+
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  ! run redistribution
+  ! redistribution store
+  ! redistribution  run
+
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  ! drs!!!! need iD and iG argument for test_status
+  ! test agreement between source and returned source array contents
+  ! PDS%test_status(iDfile,iGfile) = HarnessTest_SUCCESS _FAILURE
+
+
+          !---------------------------------------------------------------------
+          ! Clean up!!!!!!
+          !---------------------------------------------------------------------
+          !---------------------------------------------------------------------
+          ! Destroy Array objects before moving to next test
+          !---------------------------------------------------------------------
+          !---------------------------------------------------------------------
+          ! Destroy DistGrid objects before running next test
+          !---------------------------------------------------------------------
+          call ESMF_DistGridDestroy(src_distgrid, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
+             rcToReturn=rc)) return
+
+          call ESMF_DistGridDestroy(dst_distgrid, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
+             rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+
+        enddo  ! iG
+      enddo  ! iD
+    enddo  ! iGfile
+  enddo   ! iDfile
+  !-----------------------------------------------------------------------------
+  ! if I've gotten this far without an error, then the routine has succeeded.
+  !-----------------------------------------------------------------------------
+  localrc = ESMF_SUCCESS
+
+  !-----------------------------------------------------------------------------
+  end subroutine array_redist_test
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  subroutine create_distribution(Memory, DistRecord, GridRecord, DistGrid,VM,rc)
+  !-----------------------------------------------------------------------------
+  ! routine creates a single distribution from specifier files
+  !
+  !-----------------------------------------------------------------------------
+  ! arguments
+  type(memory_config), intent(in   ) :: Memory
+  type(dist_specification_record), intent(in   ) :: DistRecord
+  type(grid_specification_record), intent(in   ) :: GridRecord
+  type(ESMF_DistGrid), intent(  out) :: DistGrid
+  type(ESMF_VM), intent(in   ) :: VM
+  integer, intent(inout) :: rc
+
+  ! local parameters
+  integer :: localrc ! local error status
+
+  ! local integer variables
+  integer :: k, nconnect
+  integer, allocatable :: BIndx(:), EIndx(:)
+  integer, allocatable :: decompOrder(:)
+  type(ESMF_DecompFlag), allocatable :: decompType(:)
+  integer, allocatable :: connectionList(:,:), repetitionVector(:) 
+  integer, allocatable :: positionVector(:),orientationVector(:)
+
+  ! local logicals
+  logical :: noconnections
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  ! allocate input arrays with size of the meory rank
+  allocate( BIndx(Memory%memRank), EIndx(Memory%memRank) )
+  allocate( decompOrder(Memory%memRank), decompType(Memory%memRank) )
+  allocate( connectionList(3*Memory%memRank+2,1) )
+
+  ! initialize DistGridCreate input arrays
+  do k=1, Memory%memRank
+    BIndx(k)   = 1
+!   EIndx(k)     = 1
+    decompOrder(k) = 1
+    decompType(k)  = ESMF_DECOMP_DEFAULT
+  enddo
+
+  !-----------------------------------------------------------------------------
+  ! fill input arrays:
+  ! EIndx - filled with the grid sizes as specified by the grid specifier
+  !         files, but in the order indicated by the problem descriptor strings
+  ! decompOrder - filled with distribution sizes as specified by the dist
+  !           specifier files, but in the order indicated by the PDStrings
+  ! decompType - set to either ESMF_DECOMP_DEFAULT or ESMF_DECOMP_CYCLIC
+  !           depending on how its indicated in the problem descriptor string
+  !-----------------------------------------------------------------------------
+  nconnect = 0           ! assume number of connections is zero
+
+  print*,' memory rank ',Memory%memRank
+  print*,' grid rank',Memory%GridRank
+  ! fill the array with gridRank number of elements 
+  do k=1,Memory%GridRank
+    EIndx(k) = GridRecord%gsize( Memory%GridOrder(k) )
+  enddo  ! k
+  ! if there are additional memory elements fill them with what is left over
+  if( Memory%memRank > Memory%GridRank ) then
+    do k=Memory%GridRank+1,Memory%memRank
+      EIndx(k) = GridRecord%gsize( Memory%GridOrder(k) )
+    enddo  ! k
+  endif
+
+
+  print*,' dist rank',Memory%DistRank
+  do k=1,Memory%DistRank
+    decompOrder(k) = DistRecord%dsize( Memory%DistOrder(k) )
+  enddo  ! k
+
+  do k=1, Memory%DistRank
+    !  assume the decomposition type is block unless block-cyclic is specified
+    if( trim(adjustL(Memory%DistType(k)%string)) == "C" )  then
+      decompType(k) = ESMF_DECOMP_CYCLIC
+    endif
+
+    ! look for periodic boundary conditions specified in the grid specifier file
+    if( pattern_query(GridRecord%gtype(Memory%GridOrder(k))%string,            &
+      "_periodic") /= 0 .or. pattern_query(                                    &
+      GridRecord%gtype(Memory%GridOrder(k))%string,"_PERIODIC") /= 0)  then
+      nconnect = nconnect + 1
+    endif
+  enddo  ! k
+
+  print*,' mem rank ',Memory%memRank
+  do k=1,Memory%memRank
+    print*,k,' order/size ',Memory%GridOrder(k),decompOrder(k),EIndx(k)
+  enddo
+  print*,'        '
+  print*,'record size dist ',DistRecord%dsize(1),DistRecord%dsize(2)
+  !-----------------------------------------------------------------------------
+  ! check for a connected domain - set connection call arguments
+  !-----------------------------------------------------------------------------
+  if( nconnect == 1 ) then
+    ! singlely periodic domain
+    noconnections = .FALSE. 
+    ! workspace
+!   allocate( repetitionVector(Memory%memRank) )
+!   allocate( positionVector(Memory%memRank),orientationVector(Memory%memRank) )
+
+!   do k=1, Memory%memRank
+!     positionVector(k) = 0
+!     orientationVector(k) = k
+!     repetitionVector(k) = 0
+!     if( pattern_query(GridRecord%gtype(Memory%GridOrder(k))%string,          &
+!       "_periodic") /= 0 .or. pattern_query(                                  &
+!       GridRecord%gtype(Memory%GridOrder(k))%string,"_PERIODIC") /= 0)  then
+!       positionVector(k) = EIndx(k)
+!       repetitionVector(k) = k 
+!     endif
+!   enddo
+  elseif( nconnect > 1 ) then
+    ! multiply periodic domain
+    noconnections = .FALSE. 
+      ! multiply connected domains are not currently supported
+  else
+    ! no patch connections specified
+    noconnections = .TRUE.  
+
+  endif
+
+  !-----------------------------------------------------------------------------
+  ! create the distgrid
+  !-----------------------------------------------------------------------------
+  if( noconnections ) then
+    ! no connection
+    distgrid = ESMF_DistGridCreate(minIndex=BIndx, maxIndex=EIndx,             &
+                   regDecomp=decompOrder, decompflag=decompType,               &
+                   vm=VM, rc=localrc)
+  else
+    ! singlely periodic connection
+
+!   call ESMF_DistGridConnection(connection=connectionList(:,1),               &
+!                                patchIndexA=1, patchIndexB=1,                 &
+!                                positionVector=positionVector,                &
+!                                orientationVector=orientationVector,          &
+!                                repetitionVector=repetitionVector, rc=rc)
+
+!   distgrid = ESMF_DistGridCreate(minIndex=BIndx, maxIndex=EIndx,             &
+!                  regDecomp=decompOrder, decompflag=decompType,               &
+!                  connectionList=connectionList,rc=localrc)
+
+!   deallocate( repetitionVector )
+!   deallocate( positionVector,orientationVector )
+  endif
+
+  if (ESMF_LogMsgFoundError(localrc,"error creating distgrid",                 &
+             rcToReturn=rc)) return
+
+
+  !-----------------------------------------------------------------------------
+  ! clean up
+  !-----------------------------------------------------------------------------
+  deallocate( BIndx, EIndx )
+  deallocate( decompOrder, decompType )
+  deallocate( connectionList )
+
+  !-----------------------------------------------------------------------------
+  rc = ESMF_SUCCESS     
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  end subroutine create_distribution
+  !-----------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
   subroutine report_descriptor_string(PDS, nstatus, localrc)
@@ -221,7 +527,7 @@
   character(7) :: lsize, lorder, ltmpL, ltmpR  
 
   ! local integer variables
-  integer :: iDfile, iGfile, irank, igrid, idist, istatus
+  integer :: iDfile, iGfile, irank, iirank, igrid, idist, istatus
 
 
   ! initialize return flag
@@ -288,7 +594,8 @@
         ! for each dimension of the rank check if there is an associated
         ! distribution and/or grid dimension. If not, insert place holder
         if( PDS%SrcMem%DistOrder(irank) /= 0 ) then
-          write(lsize,"(i6)" ) PDS%Dfiles(iDfile)%src_dist(idist)%dsize(irank)
+          iirank = PDS%SrcMem%DistOrder(irank)
+          write(lsize,"(i6)" ) PDS%Dfiles(iDfile)%src_dist(idist)%dsize(iirank)
           write(lorder,"(i1)") PDS%SrcMem%DistOrder(irank)
           ldist = trim(adjustL(PDS%SrcMem%DistType(irank)%string)) //          &
                   trim(adjustL(lorder))// '{' // trim(adjustL(lsize)) // '}'
@@ -297,7 +604,8 @@
         endif
         ! now do the grid part
         if( PDS%SrcMem%GridOrder(irank) /= 0 ) then
-          write(lsize,"(i6)" ) PDS%Gfiles(iGfile)%src_grid(igrid)%gsize(irank)
+          iirank = PDS%SrcMem%GridOrder(irank)
+          write(lsize,"(i6)" ) PDS%Gfiles(iGfile)%src_grid(igrid)%gsize(iirank)
           write(lorder,"(i1)") PDS%SrcMem%GridOrder(irank)
           lgrid = trim(adjustL(PDS%SrcMem%GridType(irank)%string)) //          &
                   trim(adjustL(lorder)) // '{' // trim(adjustL(lsize)) // '}'
@@ -339,7 +647,8 @@
         ! for each dimension of the rank check if there is an associated
         ! distribution and/or grid dimension. If not, insert place holder
         if( PDS%DstMem%DistOrder(irank) /= 0 ) then
-          write(lsize,"(i6)" ) PDS%Dfiles(iDfile)%dst_dist(idist)%dsize(irank)
+          iirank = PDS%DstMem%DistOrder(irank)
+          write(lsize,"(i6)" ) PDS%Dfiles(iDfile)%dst_dist(idist)%dsize(iirank)
           write(lorder,"(i1)") PDS%DstMem%DistOrder(irank)
           ldist = trim(adjustL(PDS%DstMem%DistType(irank)%string)) //          &
                   trim(adjustL(lorder)) // '{' // trim(adjustL(lsize)) // '}'
@@ -348,7 +657,8 @@
         endif
         ! now do the grid part
         if( PDS%DstMem%GridOrder(irank) /= 0 ) then
-          write(lsize,"(i6)" ) PDS%Gfiles(iGfile)%src_grid(igrid)%gsize(irank)
+          iirank = PDS%DstMem%GridOrder(irank)
+          write(lsize,"(i6)" ) PDS%Gfiles(iGfile)%dst_grid(igrid)%gsize(iirank)
           write(lorder,"(i1)") PDS%DstMem%GridOrder(irank)
           lgrid = trim(adjustL(PDS%DstMem%GridType(irank)%string)) //          &
                   trim(adjustL(lorder)) // '{' // trim(adjustL(lsize)) // '}'
@@ -395,7 +705,6 @@
   ! set destination string
   !-----------------------------------------------------------------------------
 
-
   !-----------------------------------------------------------------------------
   ! if I've gotten this far without an error, then the routine has succeeded.
   !-----------------------------------------------------------------------------
@@ -406,8 +715,6 @@
   !-----------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
-
-
 
   !-----------------------------------------------------------------------------
   subroutine parse_descriptor_string(nstrings, pds, localrc)
@@ -453,7 +760,7 @@
   logical :: flag = .true.
 
   ! local integer variables
-  integer :: k, kstring
+  integer :: k
   integer :: tag, location(2)
   integer :: dst_beg, dst_end, src_beg, src_end
   integer :: srcMulti, dstMulti
@@ -579,6 +886,7 @@
         call interpret_descriptor_string( lsrc, src_mem_rank,                  & 
                  grid_rank, grid_order, grid_type, grid_HaloL, grid_HaloR,     &
                  grid_StagLoc, dist_rank, dist_order, dist_type, localrc)
+
         if( ESMF_LogMsgFoundError(localrc,"syntax error in SRC portion " //    &
                 "of problem descriptor string - interpret string " //          &
                 trim(adjustL(lstring)), rcToReturn=localrc) ) return
@@ -721,17 +1029,24 @@
 
   ! local variables
   character(ESMF_MAXSTR) :: ltmp, lstagger, intstr
-  integer :: k, kstring, rank, halo, ndelim
+  integer :: k, n, kstring, rank, halo, ndelim
   integer :: iloc(1), mloc(1)
   integer :: hbeg, hmid, hend, sbeg, send, slen
   integer :: itmp, itmp_beg, itmp_end
   integer, allocatable ::  sdelim(:)
+  integer, allocatable ::  assoc_grid(:)
 
 
   !-----------------------------------------------------------------------------
   ! initialize return variable
   !-----------------------------------------------------------------------------
   localrc = ESMF_RC_NOT_IMPL 
+
+  !-----------------------------------------------------------------------------
+  ! work array
+  !-----------------------------------------------------------------------------
+  allocate( assoc_grid(nstring) )
+  assoc_grid = 0
 
   !-----------------------------------------------------------------------------
   ! Determine grid layout (rank and order)
@@ -749,6 +1064,9 @@
         call set_locate(lstring(kstring)%string, 'GU', rank , mloc)
         grid_type(kstring)%string = lstring(kstring)%string(mloc(1):mloc(1))
         read( lstring(kstring)%string(mloc(1)+1:mloc(1)+1), *) grid_order(kstring)
+        !  keep track of associated dimensions
+        assoc_grid( grid_order(kstring) ) =  -1
+
         halo = set_query(lstring(kstring)%string, 'H') 
         if( halo == 1 ) then
         !-----------------------------------------------------------------------
@@ -820,6 +1138,19 @@
      endif
 
   enddo    !  kstring
+
+  !-----------------------------------------------------------------------------
+  ! fill in the sizes for the tensor dimensions
+  !-----------------------------------------------------------------------------
+  if( nstring > grid_rank ) then
+     n = nstring
+     do k=grid_rank+1, nstring
+        do while( assoc_grid(n) == -1 )
+           n = n-1
+        enddo   ! while
+        grid_order(k) = n 
+     enddo
+  endif
 
   !-----------------------------------------------------------------------------
   ! initialize stagger location
@@ -954,6 +1285,11 @@
      endif
 
   enddo    !  kstring
+
+  !-----------------------------------------------------------------------------
+  ! clean up 
+  !-----------------------------------------------------------------------------
+  deallocate( assoc_grid )
 
   !-----------------------------------------------------------------------------
   ! if I've gotten this far without an error, then the routine has succeeded.
@@ -1260,7 +1596,7 @@
  !------------------------------------------------------------------------------
 
     !---------------------------------------------------------------------------
-    integer function grid_rank(lstring, MemBeg, MemEnd, localrc)
+    integer function calc_grid_rank(lstring, MemBeg, MemEnd, localrc)
     !---------------------------------------------------------------------------
     ! This function returns the grid rank as specified by the descriptor
     ! string.
@@ -1282,7 +1618,7 @@
     ! Check each memory chunk to see if any of the dimensions are associated
     ! with a grid.
     !---------------------------------------------------------------------------
-    pattern3 = 'GSU'
+    pattern3 = 'GU'
     nGrid = set_query(lstring(MemBeg:MemEnd), pattern3)
 
     if ( nGrid == 0 ) then
@@ -1291,7 +1627,7 @@
        call ESMF_LogMsgSetError( ESMF_FAILURE, "syntax error, no grid " //     &
                 "layout specified", rcToReturn=localrc)
     endif
-    grid_rank = nGrid
+    calc_grid_rank = nGrid
 
     !---------------------------------------------------------------------------
     ! if I've gotten this far without an error, then the routine has succeeded.
@@ -1299,7 +1635,7 @@
     localrc = ESMF_SUCCESS
 
     !---------------------------------------------------------------------------
-    end function grid_rank
+    end function calc_grid_rank
     !---------------------------------------------------------------------------
 
  !------------------------------------------------------------------------------
@@ -1533,7 +1869,6 @@
        direction = -1
        ! find beginning of process symbol
        ib = findblank( lstring, iregrid, direction )
-       print*,'ib ',ib
        pattern = lstring(ib:iregrid+1)
        select case ( trim(adjustL(pattern)) )
 

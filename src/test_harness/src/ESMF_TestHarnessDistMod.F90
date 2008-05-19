@@ -85,7 +85,7 @@
 
   ! local character strings
   character(ESMF_MAXSTR) :: ltmp, lchar, lnumb, ltag
-  character(ESMF_MAXSTR) :: dtype, dtag
+  character(ESMF_MAXSTR) :: dtag
   character(ESMF_MAXSTR) :: distribution_label
 
   type(character_array) :: lop(56)  ! work space dimensioned 8*7 = max number
@@ -97,14 +97,14 @@
   real(ESMF_KIND_R8) :: opv(56)  ! work space dimensioned 8*7 = maximum number
                                  ! of operators * maximum rank of distribution
   real(ESMF_KIND_R8) :: op_val(7,8)  ! dimensioned 7x8 = rank of dist by # oper
-  real(ESMF_KIND_R8) :: arg, base, tvalue
+  real(ESMF_KIND_R8) :: tvalue
 
   ! local logical
   logical :: flag = .true.
 
   ! local integer variables
-  integer :: ntmp, drank, dsize, ibase, src_rank, dst_rank
-  integer :: irow, krow, nrows, idist, kdist, ndist, irank, erank
+  integer :: ntmp, src_rank, dst_rank
+  integer :: irow, krow, nrows, idist, ndist, irank, erank
   integer :: n, k, kelements
   integer :: counter, sanity_counter, out_counter
   integer, allocatable :: ncolumns(:), new_row(:)
@@ -144,12 +144,11 @@
   !----------------------------------------------------------------------------
   !  create label "distgrid_block_ndmd" using DstMem%DistRank SrcMem%DistRank
 10 format(i1,'d',i1,'d::')
-  write(ltmp,10)  DstMem%DistRank,SrcMem%DistRank
+  write(ltmp,10)  SrcMem%DistRank,DstMem%DistRank
   distribution_label = "distgrid_block_" // trim(adjustL(ltmp))
 
   if( debug_flag ) print*,' Dist Ranks ',DstMem%DistRank,SrcMem%DistRank,      &
                           trim(distribution_label)
-
   call ESMF_ConfigFindLabel(localcf, trim(distribution_label), rc=localrc )
 
   if (localrc .ne. ESMF_SUCCESS) print*,' could not find distribution label'
@@ -317,7 +316,8 @@
        return
     endif
 
-    allocate( Dfile%src_dist(idist)%dsize(src_rank) )
+!   allocate( Dfile%src_dist(idist)%dsize(Src_rank) )
+    allocate( Dfile%src_dist(idist)%dsize(SrcMem%memRank) )
     Dfile%src_dist(idist)%drank = src_rank
 
 
@@ -420,7 +420,8 @@
     !---------------------------------------------------------------------------
     ! compute the distribution dimension size.
     !---------------------------------------------------------------------------
-    call dist_size(nPEs, erank, numOp, loper, op_val, Dfile%src_dist(idist), rc)
+    call dist_size(nPEs, erank, numOp, loper, op_val, Dfile%src_dist(idist),   &
+                   SrcMem%memRank, rc)
 
   !-----------------------------------------------------------------------------
   ! DST Phase
@@ -460,7 +461,8 @@
        return
     endif
 
-    allocate( Dfile%dst_dist(idist)%dsize(dst_rank) )
+!   allocate( Dfile%dst_dist(idist)%dsize(dst_rank) )
+    allocate( Dfile%dst_dist(idist)%dsize(DstMem%memRank) )
     Dfile%dst_dist(idist)%drank = dst_rank
 
     !---------------------------------------------------------------------------
@@ -561,7 +563,8 @@
     !---------------------------------------------------------------------------
     ! compute the distribution dimension size.
     !---------------------------------------------------------------------------
-    call dist_size(nPEs, erank, numOp, loper, op_val, Dfile%dst_dist(idist), rc)
+    call dist_size(nPEs, erank, numOp, loper, op_val, Dfile%dst_dist(idist),   &
+                   DstMem%memRank, rc)
 
     !---------------------------------------------------------------------------
     ! both source and destination specifications have been read, more to next
@@ -613,7 +616,7 @@
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  subroutine dist_size(nPEs, erank, noper, oper, value, dist, rc)
+  subroutine dist_size(nPEs, erank, noper, oper, value, dist, memRank, rc)
   !-----------------------------------------------------------------------------
   ! routine to populate the distribution sizes according to the specification
   ! file.
@@ -624,6 +627,7 @@
   type(character_array), intent(in   ) :: oper(:,:)  ! operator
   real(ESMF_KIND_R8) :: value(:,:)  ! value for operator
   type(dist_specification_record), intent(inout) :: dist  ! dist spec record
+  integer, intent(in   ) :: memRank  ! rank of memory
   integer, intent(inout) :: rc
 
   ! local integers
@@ -686,10 +690,12 @@
   enddo    !irank
 
   !-----------------------------------------------------------------------------
-  ! check that each dimension has a minimum value of 1.
+  ! check that each dimension has a minimum value of 1, specifically the memory
+  ! locations beyond the dist rank. This means that tensor dimensions are
+  ! distributed by one processor.
   !-----------------------------------------------------------------------------
-  do irank=1, dist%drank
-     if( dist%dsize(irank) > 1 ) dist%dsize(irank) = 1
+  do irank=1, memRank
+     if( dist%dsize(irank) < 1 ) dist%dsize(irank) = 1
   enddo    !irank
 
   !-----------------------------------------------------------------------------
@@ -700,6 +706,7 @@
   end subroutine dist_size
   !-----------------------------------------------------------------------------
 
+!-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 
 !===============================================================================
