@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.41 2008/05/12 18:26:18 feiliu Exp $
+% $Id: Field_refdoc.ctex,v 1.42 2008/05/19 20:08:01 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -59,6 +59,7 @@
 \input{../Infrastructure/Field/doc/ESMF_FieldRegridEx_fapi}
 \input{../Infrastructure/FieldComm/doc/ESMF_FieldCommEx_fapi}
 \input{../Infrastructure/FieldComm/doc/ESMF_FieldRedistEx_fapi}
+\input{../Infrastructure/FieldComm/doc/ESMF_FieldSMMEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
@@ -94,11 +95,13 @@
 \input{../../FieldComm/doc/ESMF_FieldGather_fapi}
 \input{../../FieldComm/doc/ESMF_FieldRedist_fapi}
 \input{../../FieldComm/doc/ESMF_FieldScatter_fapi}
+\input{../../FieldComm/doc/ESMF_FieldSMM_fapi}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/FieldComm/doc/ESMF_FieldComm_fapi}
 \input{../Infrastructure/FieldComm/doc/ESMF_FieldGather_fapi}
 \input{../Infrastructure/FieldComm/doc/ESMF_FieldRedist_fapi}
 \input{../Infrastructure/FieldComm/doc/ESMF_FieldScatter_fapi}
+\input{../Infrastructure/FieldComm/doc/ESMF_FieldSMM_fapi}
 #endif
 
 #ifdef STANDALONE

@@ -1,4 +1,4 @@
-! $Id: ESMF.F90,v 1.57 2008/05/08 19:00:36 feiliu Exp $
+! $Id: ESMF.F90,v 1.58 2008/05/19 20:08:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -83,6 +83,7 @@ module ESMF_Mod
     use ESMF_FieldGatherMod
     use ESMF_FieldScatterMod
     use ESMF_FieldRedistMod
+    use ESMF_FieldSMMMod
 !    use ESMF_FieldBundleCommMod
 
     use ESMF_StateTypesMod

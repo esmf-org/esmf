@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.15 2008/05/15 20:25:04 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.16 2008/05/19 20:08:01 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -4012,6 +4012,16 @@ contains
 
         if(present(fieldget)) then
           if(fieldget) then
+            ! verify FieldGetDataBounds are correct
+            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+                exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
+                computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
+                totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
+                rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
             call ESMF_FieldGet(field, grid=grid1, array=array1, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
@@ -4063,79 +4073,69 @@ contains
                     ESMF_CONTEXT, rc)) return
             endif
 
-            ! call serialize and deserialize and verify again
-            call ESMF_FieldSerialize(field, buffer, length, offset, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+            !! call serialize and deserialize and verify again
+            !call ESMF_FieldSerialize(field, buffer, length, offset, rc=localrc)
+            !if (ESMF_LogMsgFoundError(localrc, &
+            !    ESMF_ERR_PASSTHRU, &
+            !    ESMF_CONTEXT, rc)) return
 
-            offset = 0
+            !offset = 0
 
-            field1 = ESMF_FieldDeserialize(vm, buffer, offset, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+            !field1 = ESMF_FieldDeserialize(vm, buffer, offset, rc=localrc)
+            !if (ESMF_LogMsgFoundError(localrc, &
+            !    ESMF_ERR_PASSTHRU, &
+            !    ESMF_CONTEXT, rc)) return
 
-            ! verify FieldGetDataBounds are correct
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
-                exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
-                computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
-                totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
-                rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+            !call ESMF_FieldGet(field1, grid=grid2, array=array2, typekind=typekind, &
+            !    dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
+            !    ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
+            !    maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+            !    rc=localrc)
+            !if (ESMF_LogMsgFoundError(localrc, &
+            !    ESMF_ERR_PASSTHRU, &
+            !    ESMF_CONTEXT, rc)) return
 
-            call ESMF_FieldGet(field1, grid=grid2, array=array2, typekind=typekind, &
-                dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
-                ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
-                rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
-
-            ! verify parameters from getdefault are correct from a deseriailzed field
-            if(present(gridToFieldMap)) then
-                do i = 1, size(gridToFieldMap)
-                    if(lgridToFieldMap(i) .ne. gridToFieldMap(i)) localrc = ESMF_FAILURE
-                enddo
-                if (ESMF_LogMsgFoundError(localrc, &
-                    ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
-            endif
-            if(present(ungriddedLBound)) then
-                do i = 1, size(ungriddedLBound)
-                    if(lungriddedLBound(i) .ne. ungriddedLBound(i)) localrc = ESMF_FAILURE
-                enddo
-                if (ESMF_LogMsgFoundError(localrc, &
-                    ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
-            endif
-            if(present(ungriddedUBound)) then
-                do i = 1, size(ungriddedUBound)
-                    if(lungriddedUBound(i) .ne. ungriddedUBound(i)) localrc = ESMF_FAILURE
-                enddo
-                if (ESMF_LogMsgFoundError(localrc, &
-                    ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
-            endif
-            if(present(maxHaloLWidth)) then
-                do i = 1, size(maxHaloLWidth)
-                    if(lmaxHaloLWidth(i) .ne. maxHaloLWidth(i)) localrc = ESMF_FAILURE
-                enddo
-                if (ESMF_LogMsgFoundError(localrc, &
-                    ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
-            endif
-            if(present(maxHaloUWidth)) then
-                do i = 1, size(maxHaloUWidth)
-                    if(lmaxHaloUWidth(i) .ne. maxHaloUWidth(i)) localrc = ESMF_FAILURE
-                enddo
-                if (ESMF_LogMsgFoundError(localrc, &
-                    ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
-            endif
+            !! verify parameters from getdefault are correct from a deseriailzed field
+            !if(present(gridToFieldMap)) then
+            !    do i = 1, size(gridToFieldMap)
+            !        if(lgridToFieldMap(i) .ne. gridToFieldMap(i)) localrc = ESMF_FAILURE
+            !    enddo
+            !    if (ESMF_LogMsgFoundError(localrc, &
+            !        ESMF_ERR_PASSTHRU, &
+            !        ESMF_CONTEXT, rc)) return
+            !endif
+            !if(present(ungriddedLBound)) then
+            !    do i = 1, size(ungriddedLBound)
+            !        if(lungriddedLBound(i) .ne. ungriddedLBound(i)) localrc = ESMF_FAILURE
+            !    enddo
+            !    if (ESMF_LogMsgFoundError(localrc, &
+            !        ESMF_ERR_PASSTHRU, &
+            !        ESMF_CONTEXT, rc)) return
+            !endif
+            !if(present(ungriddedUBound)) then
+            !    do i = 1, size(ungriddedUBound)
+            !        if(lungriddedUBound(i) .ne. ungriddedUBound(i)) localrc = ESMF_FAILURE
+            !    enddo
+            !    if (ESMF_LogMsgFoundError(localrc, &
+            !        ESMF_ERR_PASSTHRU, &
+            !        ESMF_CONTEXT, rc)) return
+            !endif
+            !if(present(maxHaloLWidth)) then
+            !    do i = 1, size(maxHaloLWidth)
+            !        if(lmaxHaloLWidth(i) .ne. maxHaloLWidth(i)) localrc = ESMF_FAILURE
+            !    enddo
+            !    if (ESMF_LogMsgFoundError(localrc, &
+            !        ESMF_ERR_PASSTHRU, &
+            !        ESMF_CONTEXT, rc)) return
+            !endif
+            !if(present(maxHaloUWidth)) then
+            !    do i = 1, size(maxHaloUWidth)
+            !        if(lmaxHaloUWidth(i) .ne. maxHaloUWidth(i)) localrc = ESMF_FAILURE
+            !    enddo
+            !    if (ESMF_LogMsgFoundError(localrc, &
+            !        ESMF_ERR_PASSTHRU, &
+            !        ESMF_CONTEXT, rc)) return
+            !endif
 
             ! verify that the field and array bounds agree with each other
             call ESMF_ArrayGet(array, rank=arank, dimCount=adimCount, rc=localrc)
