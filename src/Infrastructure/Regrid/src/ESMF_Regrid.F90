@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.127 2008/05/19 18:45:38 dneckels Exp $
+! $Id: ESMF_Regrid.F90,v 1.128 2008/05/19 19:55:55 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -125,7 +125,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.127 2008/05/19 18:45:38 dneckels Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.128 2008/05/19 19:55:55 dneckels Exp $'
 
 !==============================================================================
 !
@@ -312,7 +312,7 @@
       integer, intent(in)                    :: regridScheme
       type(ESMF_RouteHandle),  intent(inout) :: routehandle
       integer(ESMF_KIND_I4), pointer, intent(inout)   :: indicies(:,:)
-      real(ESMF_KIND_R4), pointer, intent(inout)      :: weights(:)
+      real(ESMF_KIND_R8), pointer, intent(inout)      :: weights(:)
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -407,7 +407,7 @@
        allocate(indicies(nentries,2))
        allocate(weights(nentries))
 
-       call c_ESMC_Copy_TempWeights(tweights, indicies, weights)
+       call c_ESMC_Copy_TempWeights(tweights, indicies(1,1), weights(1))
 
 
        ! Mark route handle created
@@ -435,7 +435,7 @@
       type(ESMF_RegridMethod), intent(in)    :: regridMethod
       integer, intent(in)                    :: regridScheme
       integer(ESMF_KIND_I4), pointer, intent(inout)   :: indicies(:,:)
-      real(ESMF_KIND_R4), pointer, intent(inout)      :: weights(:)
+      real(ESMF_KIND_R8), pointer, intent(inout)      :: weights(:)
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -531,7 +531,7 @@
        allocate(indicies(nentries,2))
        allocate(weights(nentries))
 
-       call c_ESMC_Copy_TempWeights(tweights, indicies, weights)
+       call c_ESMC_Copy_TempWeights(tweights, indicies(1,1), weights(1))
 
 
       end subroutine ESMF_RegridStoreIW

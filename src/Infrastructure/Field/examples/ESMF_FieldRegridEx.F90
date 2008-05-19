@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.11 2008/05/19 18:45:48 dneckels Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.12 2008/05/19 19:55:54 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.11 2008/05/19 18:45:48 dneckels Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.12 2008/05/19 19:55:54 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -80,7 +80,7 @@ program ESMF_FieldRegridEx
   integer, pointer :: larrayList(:)
 
   integer(ESMF_KIND_I4), pointer :: indicies(:,:)
-  real(ESMF_KIND_R4), pointer    :: weights(:)
+  real(ESMF_KIND_R8), pointer    :: weights(:)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
