@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.12 2008/05/19 15:07:32 feiliu Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.13 2008/05/19 15:51:02 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.12 2008/05/19 15:07:32 feiliu Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.13 2008/05/19 15:51:02 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -621,7 +621,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
 !       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
-!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
+!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored @\
 !       in preparation for the implementation of the halo method.  @\
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
