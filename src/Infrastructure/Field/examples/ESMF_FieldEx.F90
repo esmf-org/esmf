@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.1.2.4 2008/05/16 20:01:14 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.1.2.5 2008/05/19 17:38:11 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
     integer :: total_count(1:3)
 
     type(ESMF_TypeKind)        :: typekind
-    integer                    :: rank
+    integer                    :: dimCount
     type(ESMF_StaggerLoc)      :: staggerloc 
     integer                    :: gridToFieldMap(ESMF_MAXDIM)    
     integer                    :: ungriddedLBound(ESMF_MAXDIM)
@@ -88,19 +88,20 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Get Fortran data pointer, Bounds, and Counts information from a Field}
+!\subsubsection{Get Fortran data pointer, bounds, and counts information from a Field}
 !\label{sec:field:usage:field_get_dataptr}
 !
-!  User can get various bounds and counts information from a {\tt ESMF\_Field}
-!  through the {\tt ESMF\_FieldGet} interface in addition to the intrinsic
+!  A user can get bounds and counts information from an {\tt ESMF\_Field}
+!  through the {\tt ESMF\_FieldGet()} interface.  Also available through this interface
+!  is the intrinsic
 !  Fortran data pointer contained in the internal {\tt ESMF\_Array} object
-!  of a {\tt ESMF\_Field}. The bounds and counts information are DE specific
+!  of an {\tt ESMF\_Field}. The bounds and counts information are DE specific
 !  for the associated Fortran data pointer.
 !
 !  In this example, we first create a 3D Field based on a 3D Grid and Array.
-!  Then we use the {\tt ESMF\_FieldGet} interface to retrieve the data pointer,
-!  potentially update or verify its values. We also retrieve the bounds and counts
-!  information of the 3D Field to assist data element iteration.
+!  Then we use the {\tt ESMF\_FieldGet()} interface to retrieve the data pointer,
+!  potentially updating or verifying its values. We also retrieve the bounds and counts
+!  information of the 3D Field to assist in data element iteration.
 !
 !EOE
 !BOC
@@ -108,7 +109,7 @@
     ydim = 90
     zdim = 50
 
-    ! create a 3D data Field from Grid and Array
+    ! create a 3D data Field from a Grid and Array.
     ! first create a Grid 
     grid3d = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/xdim,ydim,zdim/), &
                               regDecomp=(/2,2,1/), name="grid", rc=rc)
@@ -167,18 +168,18 @@
 !\subsubsection{Get Grid and Array and other information from a Field}
 !\label{sec:field:usage:field_get_default}
 !
-!  User can get the internal {\tt ESMF\_Grid} and {\tt ESMF\_Array} 
-!  from a {\tt ESMF\_Field}. User should not issue any destroy command
+!  A user can get the internal {\tt ESMF\_Grid} and {\tt ESMF\_Array} 
+!  from a {\tt ESMF\_Field}.  Note that the user should not issue any destroy command
 !  on the retrieved grid or array object since they are referenced
 !  from within the {\tt ESMF\_Field}. The retrieved objects should be used
 !  in a read-only fashion to query additional information not directly
-!  available through FieldGet interface.
+!  available through the {\tt ESMF\_FieldGet()} interface.
 !
 !EOE
 
 !BOC
     call ESMF_FieldGet(field, grid=grid, array=array, &
-        typekind=typekind, dimCount=rank, staggerloc=staggerloc, &
+        typekind=typekind, dimCount=dimCount, staggerloc=staggerloc, &
         gridToFieldMap=gridToFieldMap, &
         ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
         maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & 
@@ -197,22 +198,22 @@
 !\subsubsection{Create Field with Grid and Arrayspec}
 !\label{sec:field:usage:create_grid_arrayspec}
 !
-!  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a
+!  A user can create an {\tt ESMF\_Field} from an {\tt ESMF\_Grid} and a
 !  {\tt ESMF\_Arrayspec} with corresponding rank and type.  
 !  This create method associates the two objects.  
 ! 
 !  We first create a Grid with a regular distribution that is
-!  10x20 index in 2x2 DEs.  This version of field create simply
+!  10x20 index in 2x2 DEs.  This version of Field create simply
 !  associates the data with the Grid.  The data is referenced
 !  explicitly on a regular 2x2 uniform grid. 
-!  Then we create an arrayspec. With grid and arrayspec,
-!  finally we create a field from the grid, arrayspec, and a
-!  user specified staggerloc.
+!  Then we create an ArraySpec.  Finally we create a Field from
+!  the Grid, ArraySpec, and a user specified StaggerLoc.
 !
 !  This example also illustrates a typical use of this Field creation
-!  method. By creating a Field from a Grid and an arrayspec, the
+!  method. By creating a Field from a Grid and an ArraySpec, the
 !  user allows the ESMF library to create a internal Array in the Field.
-!  Then the user can use FieldGet to retrieve the Fortran data array
+!  Then the user can use {\tt ESMF\_FieldGet()} to retrieve the Fortran
+!  data array
 !  and necessary bounds information to assign initial values to it.
 !EOE
 
@@ -251,18 +252,20 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!   User can also create an ArraySpec that has a different rank
+!   A user can also create an ArraySpec that has a different rank
 !   from the Grid, For example, the following code shows creation of 
-!   of 3D Field from a 2D Grid using 3D ArraySpec.
+!   of 3D Field from a 2D Grid using a 3D ArraySpec.
 !
 !   This example also demonstrates the technique to create a typical
 !   3D data Field that has 2 gridded dimensions and 1 ungridded
 !   dimension. 
 !
 !   First we create a 2D grid with an index space of 180x360 equivalent to
-!   180x360 Grid cells. In the FieldCreate call, we use gridToFieldMap
-!   to indicate the mapping between Grid dimension and Field dimension,
-!   for the ungridded dimension (typically the altitude), we use
+!   180x360 Grid cells (note that for a distributed memory computer, this
+!   means each 
+!   grid cell will be on a separate PE!). In the FieldCreate call, we use gridToFieldMap
+!   to indicate the mapping between Grid dimension and Field dimension.
+!   For the ungridded dimension (typically the altitude), we use
 !   ungriddedLBound and ungriddedUBound to describe its bounds. Internally
 !   the ungridded dimension has a stride of 1, so the number of elements
 !   of the ungridded dimension is ungriddedUBound - ungriddedLBound + 1.
@@ -297,8 +300,8 @@
 !\subsubsection{Create Field with Grid and Array}
 !\label{sec:field:usage:create_grid_array}
 !
-!  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a 
-!  {\tt ESMF\_Array}. Object grid is created in the previous example.
+!  A user can create an {\tt ESMF\_Field} from an {\tt ESMF\_Grid} and a 
+!  {\tt ESMF\_Array}. The Grid was created in the previous example.
 !  
 !  This example creates a 2D {\tt ESMF\_Field} from a 2D {\tt ESMF\_Grid}
 !  and a 2D {\tt ESMF\_Array}.
@@ -335,13 +338,13 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create Empty Field and Finish an empty Field with FieldSetCommit}
+!\subsubsection{Create an empty Field and finish it with FieldSetCommit}
 !\label{sec:field:usage:create_empty_setcommit}
 !
-!  User can create an empty {\tt ESMF\_Field} object.
+!  A user can create an empty {\tt ESMF\_Field}.
 !  Then the user can finalize the empty {\tt ESMF\_Field} from a {\tt ESMF\_Grid} 
 !  and a intrinsic 
-!  Fortran data array. This interface is overloaded for type, kind, rank of
+!  Fortran data array. This interface is overloaded for typekind and rank
 !  of the Fortran data array.
 !
 !  In this example, both grid and Fortran array pointer are 2 dimensional
@@ -349,20 +352,19 @@
 !  1st dimension of Fortran array pointer, 2nd dimension of grid maps to 2nd dimension of
 !  Fortran array pointer, so on and so forth. 
 !
-!  In order to create or finalize a Field from a Grid and a Fortran array pointer, 
+!  In order to create or finish a Field from a Grid and a Fortran array pointer, 
 !  certain rules of the Fortran array bounds must be obeyed. We will discuss these
-!  rules as we progress in Field creation examples. In general, we will make
-!  frequent references to a few terminologies in the ESMF framework. These terminologies
-!  reflects the fact that a {\tt ESMF\_Field} is a higher level data structure consisting of
-!  a {\tt ESMF\_Grid} and a {\tt ESMF\_Array}. For a better discussion of
+!  rules as we progress in Field creation examples.  We will make
+!  frequent reference to the terminologies for bounds and widths in ESMF. 
+!  For a better discussion of
 !  these terminologies and concepts behind them, 
 !  e.g. exclusive, computational, total bounds
 !  for the lower and upper corner of data region, etc.., users can refer to 
 !  the explanation of these concepts for Grid and Array in their respective sections 
-!  in the reference manual, e.g. Section \ref{Array_regions_and_default_bounds} on Array
+!  in the {\it Reference Manual}, e.g. Section \ref{Array_regions_and_default_bounds} on Array
 !  and Section \ref{sec:grid:usage:bounds} on Grid.
-!  The examples here are designed to help a user to get up to speed to
-!  create Fields for typical use.
+!  The examples here are designed to help a user to get up to speed with
+!  creating Fields for typical use.
 !
 !  This example introduces a helper method, part of the {\tt ESMF\_FieldGet}
 !  interface that facilitates the computation of Fortran data array bounds
@@ -403,7 +405,7 @@
 !
 ! We first create a 5D DistGrid and a 5D Grid based on the DistGrid; then
 ! {\tt ESMF\_FieldGet} computes the shape of a 7D array in fsize. We can then
-! create a 7D Field from the 5D grid and the 7D Fortran data array with
+! create a 7D Field from the 5D Grid and the 7D Fortran data array with
 ! other assimilating parameters.
 !EOE
 
@@ -487,16 +489,11 @@
 !!
 !!  When finished with an {\tt ESMF\_Field}, the destroy method
 !!  removes it.  However, the objects inside the {\tt ESMF\_Field}
-!!  but created externally should be deleted separately, 
+!!  but created externally should be destroyed separately, 
 !!  since objects can be added to
-!!  more than one {\tt ESMF\_Field}, for example the same {\tt ESMF\_Grid}
+!!  more than one {\tt ESMF\_Field}. For example, the same {\tt ESMF\_Grid}
 !!  can be used in multiple {\tt ESMF\_Field}s.
 !!  
-!!  For example, a single Grid object
-!!  can be shared by multiple Fields, the internal Grid is not deleted by
-!!  this call. Field provides copy behavior through creation 
-!!  interface, the internally created {\tt ESMF\_Array} object
-!!  will be deleted upon Field destruction to prevent memory leak.
 !!EremoveOE
 !!-------------------------------------------------------------------------
 !
