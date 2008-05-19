@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.13 2008/05/19 15:51:02 feiliu Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.14 2008/05/19 16:47:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.13 2008/05/19 15:51:02 feiliu Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.14 2008/05/19 16:47:32 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -544,7 +544,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
 ! {\tt ESMF\_FieldCreateEmpty()} call. For an example and @\
 ! associated documentation using this method see Section  @\
-! \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}. @\
+! \ref{sec:field:usage:create_empty_setcommit}. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
