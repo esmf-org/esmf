@@ -1,4 +1,4 @@
-% $Id: Field_usage.tex,v 1.9.2.3 2008/05/06 17:36:12 feiliu Exp $
+% $Id: Field_usage.tex,v 1.9.2.4 2008/05/19 17:10:51 cdeluca Exp $
 
 %\subsection{Use and Examples}
 
@@ -11,12 +11,7 @@ use of Fields is in the context of import and export States,
 which are the objects that carry coupling information between 
 Components.  Fields enable data to be self-describing, and a
 State holding ESMF Fields contains data in a standard format
-that is easy to query and manipulate.  
-
-The information that is necessary for describing a Field to 
-another Component is similar to the information needed to write 
-history files.  Another use of Fields is as a mechanism for 
-writing out data to files for history and restart.
+that can be queried and manipulated.  
 
 The sections below go into more detail about Field usage.
 
@@ -54,18 +49,15 @@ which case the data can be added at some later time.
 
 For versions of Create which do not specify data values,
 user code can create an ArraySpec object, which
-contains information about the Type, TypeKind, and Rank of the
+contains information about the typekind and rank of the
 data values in the array.  Then at Field create time, the
 appropriate amount of memory is allocated to contain the
 data which is local to each DE.
 
 When finished with a {\tt ESMF\_Field}, the {\tt ESMF\_FieldDestroy} method
 removes it.  However, the objects inside the {\tt ESMF\_Field}
-created externally should be deleted separately, 
+created externally should be destroyed separately, 
 since objects can be added to
-more than one {\tt ESMF\_Field}, for example the same {\tt ESMF\_Grid}
-can be used in multiple {\tt ESMF\_Field}s.  When a single Grid object
-is shared by multiple Fields, the internal Grid is not deleted by
-{\tt ESMF\_FieldDestroy} call. Field provides copy behavior through creation 
-interface, internally created {\tt ESMF\_Array} object
-will be deleted upon Field destruction to prevent memory leak.
+more than one {\tt ESMF\_Field}.  For example, the same {\tt ESMF\_Grid}
+can be referenced by multiple {\tt ESMF\_Field}s.  In this case the
+internal Grid is not deleted by the {\tt ESMF\_FieldDestroy} call.
