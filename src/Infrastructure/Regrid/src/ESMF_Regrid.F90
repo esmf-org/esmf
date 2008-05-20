@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.128 2008/05/19 19:55:55 dneckels Exp $
+! $Id: ESMF_Regrid.F90,v 1.129 2008/05/20 16:31:04 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -125,7 +125,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.128 2008/05/19 19:55:55 dneckels Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.129 2008/05/20 16:31:04 dneckels Exp $'
 
 !==============================================================================
 !
@@ -228,36 +228,6 @@
        localrc = ESMF_RC_NOT_IMPL
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-       ! For the moment only support bilinear
-       if (regridMethod .ne. ESMF_REGRID_METHOD_BILINEAR) then
-         localrc = ESMF_RC_NOT_IMPL
-       else
-         localrc = ESMF_SUCCESS
-       endif
-
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-       ! global vm for now
-       call ESMF_VMGetGlobal(vm, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Initialize return code; assume failure until success is certain
-       localrc = ESMF_RC_NOT_IMPL
-       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-       ! For the moment only support bilinear
-       if (regridMethod .ne. ESMF_REGRID_METHOD_BILINEAR) then
-         localrc = ESMF_RC_NOT_IMPL
-       else
-         localrc = ESMF_SUCCESS
-       endif
-
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
        ! global vm for now
        call ESMF_VMGetGlobal(vm, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -311,8 +281,8 @@
       type(ESMF_RegridMethod), intent(in)    :: regridMethod
       integer, intent(in)                    :: regridScheme
       type(ESMF_RouteHandle),  intent(inout) :: routehandle
-      integer(ESMF_KIND_I4), pointer, intent(inout)   :: indicies(:,:)
-      real(ESMF_KIND_R8), pointer, intent(inout)      :: weights(:)
+      integer(ESMF_KIND_I4), pointer         :: indicies(:,:)
+      real(ESMF_KIND_R8), pointer            :: weights(:)
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -345,36 +315,6 @@
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-       ! For the moment only support bilinear
-       if (regridMethod .ne. ESMF_REGRID_METHOD_BILINEAR) then
-         localrc = ESMF_RC_NOT_IMPL
-       else
-         localrc = ESMF_SUCCESS
-       endif
-
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-       ! global vm for now
-       call ESMF_VMGetGlobal(vm, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Initialize return code; assume failure until success is certain
-       localrc = ESMF_RC_NOT_IMPL
-       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-       ! For the moment only support bilinear
-       if (regridMethod .ne. ESMF_REGRID_METHOD_BILINEAR) then
-         localrc = ESMF_RC_NOT_IMPL
-       else
-         localrc = ESMF_SUCCESS
-       endif
-
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! global vm for now
        call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -434,8 +374,8 @@
       type(ESMF_Array), intent(inout)        :: dstArray
       type(ESMF_RegridMethod), intent(in)    :: regridMethod
       integer, intent(in)                    :: regridScheme
-      integer(ESMF_KIND_I4), pointer, intent(inout)   :: indicies(:,:)
-      real(ESMF_KIND_R8), pointer, intent(inout)      :: weights(:)
+      integer(ESMF_KIND_I4), pointer         :: indicies(:,:)
+      real(ESMF_KIND_R8), pointer            :: weights(:)
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -469,36 +409,6 @@
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-       ! For the moment only support bilinear
-       if (regridMethod .ne. ESMF_REGRID_METHOD_BILINEAR) then
-         localrc = ESMF_RC_NOT_IMPL
-       else
-         localrc = ESMF_SUCCESS
-       endif
-
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-       ! global vm for now
-       call ESMF_VMGetGlobal(vm, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Initialize return code; assume failure until success is certain
-       localrc = ESMF_RC_NOT_IMPL
-       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-       ! For the moment only support bilinear
-       if (regridMethod .ne. ESMF_REGRID_METHOD_BILINEAR) then
-         localrc = ESMF_RC_NOT_IMPL
-       else
-         localrc = ESMF_SUCCESS
-       endif
-
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! global vm for now
        call ESMF_VMGetGlobal(vm, rc=localrc)
