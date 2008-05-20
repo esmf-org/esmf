@@ -9,7 +9,7 @@ if [ "$SWITCHES" = "" ]; then
 $1 -show 2>&1 | awk 'BEGIN { RS=" "}; /^-l/ ' | xargs
 else
 # ...and newer systems
-echo $SWITCHES | awk 'BEGIN { RS=" "}; /^-/ ' | grep -v show | xargs
+echo $SWITCHES | awk 'BEGIN { RS=" "}; /^-l/ ' | grep -v show | xargs
 fi
 else
 # no Cray wrapper
