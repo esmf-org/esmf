@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.27 2008/05/16 21:58:36 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.28 2008/05/20 23:20:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -203,7 +203,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.272.2.27 2008/05/16 21:58:36 theurich Exp $'
+    '$Id: ESMF_Field.F90,v 1.272.2.28 2008/05/20 23:20:03 oehmke Exp $'
 
 !==============================================================================
 !
@@ -2054,7 +2054,7 @@ contains
               enddo
               deallocate(gridCompUBnd, gridCompLBnd)
           enddo
-          deallocate(distgridToGridMap, arrayCompUBnd, arrayCompLBnd)
+          deallocate(distgridToGridMap, arrayCompUBnd, arrayCompLBnd, distgridToPackedArrayMap)
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
