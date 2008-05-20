@@ -176,7 +176,7 @@ name that is expected for the compiler executables. Furthermore, the
 ESMF_COMPILER setting is used to select compiler and linker flags consistent
 with the compilers indicated.
 
-By default Fortran and C++ compiler executables are expected to be located in
+By default, Fortran and C++ compiler executables are expected to be located in
 a location contained in the user's PATH environment variable. This means that
 if you cannot locate the correct compiler executable via the "which" command
 on the shell prompt the ESMF build system won't find it either!
@@ -212,7 +212,7 @@ ESMF_OS
 Typically equal to the output of "uname -s" except for UNICOS/mp where
 ESMF_OS is set to Unicos. This variable is not normally set by the user unless 
 cross-compiling. ESMF_OS indicates the target system for which the ESMF library
-is being built. Under normal circumstances, i.e. ESMF is being build on the 
+is being built. Under normal circumstances, i.e. ESMF is being built on the 
 target system, ESMF_OS is set automatically. However, when cross-compiling for
 a different target system ESMF_OS must be set to the respective target OS. For
 example, when compiling for the Cray X1 on an interactive X1 node ESMF_OS will
@@ -222,13 +222,12 @@ the intended target platform.
 
 ESMF_INSTALL_PREFIX
 
-This variable specifies the prefix of the installation path used during the
-installation process accessible thought the install target. Libraries, F90
-module files, header files and documentation all are installed relative to
-ESMF_INSTALL_PREFIX by default. See the ESMF User's Guide on how to customize
-the installation location of the installed files using additional 
-"ESMF_INSTALL_..." environment variables. The ESMF_INSTALL_PREFIX may be
-provided as absolute path or relative to ESMF_DIR.
+This variable specifies the prefix of the installation path used with the
+install target. Libraries, F90 module files, header files and documentation
+all are installed relative to ESMF_INSTALL_PREFIX by default. See the ESMF
+User's Guide on how to customize the installation location of the installed
+files using additional "ESMF_INSTALL_..." environment variables.
+The ESMF_INSTALL_PREFIX may be provided as an absolute path or relative to ESMF_DIR.
 
 
 Supported Makefile Targets
@@ -237,7 +236,7 @@ Supported Makefile Targets
  info       : print out extensive system configuration information about what
               compilers, libraries, paths, flags, etc are being used
 
- clean      : remove all files built for this platform/compiler/wordsize.
+ clean      : remove all files built for this OS/compiler/ABI.
  distclean  : remove all files built for all architectures
  clobber    : same as distclean
 
@@ -291,7 +290,7 @@ Platform Specific Notes Related to Executing Test Targets
 After the ESMF library has been built successfully it is a good idea to test
 its functional integrity by building and executing a range of test applications.
 It is important to use the same environment settings for the ESMF gmake test 
-targets as were used during the library built.
+targets as were used during the library build.
 
 The ESMF library sources come with 4 flavors of test codes:
 - unit_tests:   separately test the functionality of individual ESMF code units
@@ -300,7 +299,7 @@ The ESMF library sources come with 4 flavors of test codes:
                 sources are quoted in the ESMF Reference Manual.
 - demos:        more complex applications to demonstrate ESMF's capabilities
 
-Unless the ESMF library was built in MPI-bypass mode (mpiuni) all applications
+Unless the ESMF library was built in MPI-bypass mode (mpiuni), all applications
 compiled and linked against ESMF automatically become MPI applications and must
 be executed as such. Details of how to execute MPI applications vary widely from
 system to system. The ESMF gmake test targets hide a good portion of this
@@ -355,7 +354,7 @@ Linux    -    The ESMF Linux configurations assume that resources to run the
               test applications have been made available prior to calling ESMF
               gmake test targets. The ESMF makefile uses the MPI startup 
               script according to the ESMF_COMM setting in order to launch
-              parallel execution. Only exception to this rule are IBM/Linux
+              parallel execution. The only exceptions to this rule are IBM/Linux
               clusters. Please see the IBM section for details.
               
 Unicos   -    The ESMF Unicos configuration assumes that resources to run the
@@ -488,7 +487,7 @@ Adding a New Platform
 
    Ignore the output of all other unit tests until the ESMF_ArrayF90PtrUTest
    passes cleanly without complaining about byte count mismatches.  Adjust the
-   sizes in the ESMC_Conf.h file until it passes, and then make clean and
+   sizes in the ESMC_Conf.h file until it passes, and then "make clean" and
    rebuild the entire library and test suite.
 
 5. Once it is working, post it back on the esmfcontrib sourceforge site and
@@ -567,4 +566,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.88.2.5 2008/05/14 05:47:10 theurich Exp $
+ $Id: README,v 1.88.2.6 2008/05/20 16:18:25 cdeluca Exp $

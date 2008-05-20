@@ -1,4 +1,4 @@
-% $Id: State_desc.tex,v 1.10.2.2 2008/04/05 03:14:22 cdeluca Exp $
+% $Id: State_desc.tex,v 1.10.2.3 2008/05/20 16:18:26 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -12,7 +12,8 @@
 
 A State contains the data and metadata to be transferred between 
 ESMF components.  It is an important class, because it defines a 
-standard for how data is represented in Earth science components.  The 
+standard for how data is represented in data transfers between Earth
+science Components.  The 
 State construct is a rational compromise between a fully prescribed 
 interface - one that would dictate what specific fields should be 
 transferred between components - and an interface in which data structures
@@ -23,17 +24,16 @@ An import State contains data that is necessary for a Gridded Component
 or Coupler Component to execute, and an export State contains the data
 that a Gridded Component or Coupler Component can make available.
 
-States can contain FieldBundles, Fields, Arrays, and other States.  They
+States can contain Arrays, ArrayBundles, Fields, FieldBundles, and other States.  They
 cannot directly contain Fortran arrays.   Objects in a State must span
 the VM on which they are running.  For sequentially executing components
 which run on the same set of PETs this happens by calling the object
 create methods on each PET creating the object in unison.   For
 concurrently executing components which are running on subsets of PETs,
-an additional method is provided by the ESMF to broadcast information
-about objects which were created in subcomponents.
+an additional reconcile method is provided by the ESMF to broadcast information
+about objects which were created in sub-components.
 
 State methods include creation and deletion, adding and retrieving 
 data items, adding and retrieving attributes, and performing queries.  
-An additional method, reconciliation, makes objects created on a subset
-of the current PETs available to all PETs in the current VM.
+
 
