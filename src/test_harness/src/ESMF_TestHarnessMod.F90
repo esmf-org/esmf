@@ -217,6 +217,7 @@
 
   ! local
   type(ESMF_DistGrid) :: src_distgrid, dst_distgrid
+  type(ESMF_Array) :: src_array, return_array, dst_array
   integer :: iDfile, iGfile, iD, iG
   character(ESMF_MAXSTR) :: liG, liD
 
@@ -242,6 +243,9 @@
       do iD=1, PDS%Dfiles(iDfile)%nDspecs   ! entries in distribution specifier
         do iG=1, PDS%Gfiles(iGfile)%nGspecs ! entries in grid specifier file
 
+          !---------------------------------------------------------------------
+          ! Create Source objects
+          !---------------------------------------------------------------------
         print*, &
          ' array redist test - src grid/dist/memory rank ', &
           pds%SrcMem%GridRank,pds%SrcMem%DistRank,pds%SrcMem%memRank
@@ -266,6 +270,29 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
+!         print*,'enter create src_array '
+          call create_array(PDS%SrcMem, src_distgrid, src_array, localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error creating source array "     &
+             // " with string "  // trim(adjustL(PDS%pds)) //                  &
+             " with entry "  // trim(adjustL(liD)) // " of file " //           &
+             trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
+             // " and entry " // trim(adjustL(liG)) // " of file " //          &
+             trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
+             rcToReturn=rc)) return
+
+!         print*,'enter create return_array '
+          call create_array(PDS%SrcMem, src_distgrid, return_array, localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error creating return array "     &
+             // " with string "  // trim(adjustL(PDS%pds)) //                  &
+             " with entry "  // trim(adjustL(liD)) // " of file " //           &
+             trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
+             // " and entry " // trim(adjustL(liG)) // " of file " //          &
+             trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
+             rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! Create Destination objects
+          !---------------------------------------------------------------------
           print*,iG,iD,iGfile,iDfile,' create dst dist '
           call create_distribution(PDS%DstMem, PDS%Dfiles(iDfile)%dst_dist(iD),&
                     PDS%Gfiles(iGfile)%dst_grid(iG), dst_distgrid, VM, localrc)
@@ -281,7 +308,16 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
-  !-----------------------------------------------------------------------------
+          print*,'enter create dst_array'
+          call create_array(PDS%DstMem, Dst_distgrid, dst_array, localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error creating destinationarray " &
+             // " with string "  // trim(adjustL(PDS%pds)) //                  &
+             " with entry "  // trim(adjustL(liD)) // " of file " //           &
+             trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
+             // " and entry " // trim(adjustL(liG)) // " of file " //          &
+             trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
+             rcToReturn=rc)) return
+
   !-----------------------------------------------------------------------------
   ! create source and destination distributions (in DistMod)
 
@@ -310,9 +346,14 @@
           !---------------------------------------------------------------------
           ! Destroy Array objects before moving to next test
           !---------------------------------------------------------------------
+!         print*,' destroy arrays '
+          call ESMF_ArrayDestroy(src_array, rc=localrc) ! original source
+          call ESMF_ArrayDestroy(dst_array, rc=localrc) ! redistribution 
+          call ESMF_ArrayDestroy(return_array, rc=localrc) ! return to source
           !---------------------------------------------------------------------
           ! Destroy DistGrid objects before running next test
           !---------------------------------------------------------------------
+!         print*,' destroy distgrids '
           call ESMF_DistGridDestroy(src_distgrid, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
              rcToReturn=rc)) return
@@ -393,8 +434,8 @@
   !-----------------------------------------------------------------------------
   nconnect = 0           ! assume number of connections is zero
 
-  print*,' memory rank ',Memory%memRank
-  print*,' grid rank',Memory%GridRank
+! print*,' memory rank ',Memory%memRank
+! print*,' grid rank',Memory%GridRank
   ! fill the array with gridRank number of elements 
   do k=1,Memory%GridRank
     EIndx(k) = GridRecord%gsize( Memory%GridOrder(k) )
@@ -407,7 +448,7 @@
   endif
 
 
-  print*,' dist rank',Memory%DistRank
+! print*,' dist rank',Memory%DistRank
   do k=1,Memory%DistRank
     decompOrder(k) = DistRecord%dsize( Memory%DistOrder(k) )
   enddo  ! k
@@ -426,7 +467,7 @@
     endif
   enddo  ! k
 
-  print*,' mem rank ',Memory%memRank
+! print*,' mem rank ',Memory%memRank
   do k=1,Memory%memRank
     print*,k,' order/size ',Memory%GridOrder(k),decompOrder(k),EIndx(k)
   enddo
@@ -439,20 +480,20 @@
     ! singlely periodic domain
     noconnections = .FALSE. 
     ! workspace
-!   allocate( repetitionVector(Memory%memRank) )
-!   allocate( positionVector(Memory%memRank),orientationVector(Memory%memRank) )
+    allocate( repetitionVector(Memory%memRank) )
+    allocate( positionVector(Memory%memRank),orientationVector(Memory%memRank) )
 
-!   do k=1, Memory%memRank
-!     positionVector(k) = 0
-!     orientationVector(k) = k
-!     repetitionVector(k) = 0
-!     if( pattern_query(GridRecord%gtype(Memory%GridOrder(k))%string,          &
-!       "_periodic") /= 0 .or. pattern_query(                                  &
-!       GridRecord%gtype(Memory%GridOrder(k))%string,"_PERIODIC") /= 0)  then
-!       positionVector(k) = EIndx(k)
-!       repetitionVector(k) = k 
-!     endif
-!   enddo
+    do k=1, Memory%memRank
+      positionVector(k) = 0
+      orientationVector(k) = k
+      repetitionVector(k) = 0
+      if( pattern_query(GridRecord%gtype(Memory%GridOrder(k))%string,          &
+        "_periodic") /= 0 .or. pattern_query(                                  &
+        GridRecord%gtype(Memory%GridOrder(k))%string,"_PERIODIC") /= 0)  then
+        positionVector(k) = EIndx(k)
+        repetitionVector(k) = k 
+      endif
+    enddo
   elseif( nconnect > 1 ) then
     ! multiply periodic domain
     noconnections = .FALSE. 
@@ -474,18 +515,18 @@
   else
     ! singlely periodic connection
 
-!   call ESMF_DistGridConnection(connection=connectionList(:,1),               &
-!                                patchIndexA=1, patchIndexB=1,                 &
-!                                positionVector=positionVector,                &
-!                                orientationVector=orientationVector,          &
-!                                repetitionVector=repetitionVector, rc=rc)
+    call ESMF_DistGridConnection(connection=connectionList(:,1),               &
+                                 patchIndexA=1, patchIndexB=1,                 &
+                                 positionVector=positionVector,                &
+                                 orientationVector=orientationVector,          &
+                                 repetitionVector=repetitionVector, rc=rc)
 
-!   distgrid = ESMF_DistGridCreate(minIndex=BIndx, maxIndex=EIndx,             &
-!                  regDecomp=decompOrder, decompflag=decompType,               &
-!                  connectionList=connectionList,rc=localrc)
+    distgrid = ESMF_DistGridCreate(minIndex=BIndx, maxIndex=EIndx,             &
+                   regDecomp=decompOrder, decompflag=decompType,               &
+                   connectionList=connectionList,rc=localrc)
 
-!   deallocate( repetitionVector )
-!   deallocate( positionVector,orientationVector )
+    deallocate( repetitionVector )
+    deallocate( positionVector,orientationVector )
   endif
 
   if (ESMF_LogMsgFoundError(localrc,"error creating distgrid",                 &
@@ -505,6 +546,156 @@
 
   !-----------------------------------------------------------------------------
   end subroutine create_distribution
+  !-----------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  subroutine create_array(Memory, DistGrid, Array, rc)
+  !-----------------------------------------------------------------------------
+  ! routine creates a single distribution from specifier files
+  !
+  !-----------------------------------------------------------------------------
+  ! arguments
+  type(memory_config), intent(in   ) :: Memory
+  type(ESMF_DistGrid), intent(in   ) :: DistGrid
+  type(ESMF_Array), intent(  out) :: Array
+  integer, intent(inout) :: rc
+ 
+  ! local ESMF types
+  type(ESMF_VM)        :: VM
+  type(ESMF_DELayout)  :: DELayout
+  type(ESMF_ArraySpec) :: ArraySpec
+
+  ! local parameters
+  integer :: localrc ! local error status
+
+  ! local integer variables
+  integer :: irank, k, myDE, DeCount
+  integer, allocatable :: local_size(:), local_grid_size(:,:)
+
+  ! local real variables
+  real(ESMF_KIND_R8), allocatable :: farray1(:), farray2(:,:), farray3(:,:,:)
+  real(ESMF_KIND_R8), allocatable :: farray4(:,:,:,:), farray5(:,:,:,:,:)
+  real(ESMF_KIND_R8), allocatable :: farray6(:,:,:,:,:,:)
+  real(ESMF_KIND_R8), allocatable :: farray7(:,:,:,:,:,:,:)
+
+  ! local logicals
+  logical :: nohaloflag
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  ! determine if halo is present
+  !-----------------------------------------------------------------------------
+  nohaloflag = .true.  
+  do irank=1, Memory%memRank
+     if( Memory%HaloL(irank) /= 0 ) nohaloflag = .false.
+     if( Memory%HaloR(irank) /= 0 ) nohaloflag = .false.
+  enddo   ! irank
+
+  !-----------------------------------------------------------------------------
+  ! if no halo specified, create array from ArraySpec object
+  !-----------------------------------------------------------------------------
+  if( nohaloflag ) then
+     call ESMF_ArraySpecSet(ArraySpec, typekind=ESMF_TYPEKIND_R8,              &
+                            rank=Memory%memRank, rc=localrc)
+     if (ESMF_LogMsgFoundError(localrc,"error creating ArraySpecSet",          &
+                               rcToReturn=rc)) return
+
+     Array = ESMF_ArrayCreate(arrayspec=ArraySpec, distgrid=DistGrid,          &
+                              rc=localrc)
+     if (ESMF_LogMsgFoundError(localrc,"error creating non-haloed ESMF Array", &
+                               rcToReturn=rc)) return
+
+  else
+  !-----------------------------------------------------------------------------
+  ! else if halo is specified, create array from allocated fortran array
+  !-----------------------------------------------------------------------------
+  ! we need the dimension sizes per DE, inorder to create a local fortran array.
+  ! the array dimensions are = local dimension size + total halo width. We
+  ! obtain the local dimension size from the DistGrid, but first need the
+  ! DeCount to size the output array "local_grid_size."
+  !-----------------------------------------------------------------------------
+
+     call ESMF_DistGridGet(DistGrid, deLayout= DELayout, rc=localrc)
+     call ESMF_DELayoutGet(DELayout, vm=VM, deCount=DeCount, rc=localrc )
+
+     allocate( local_grid_size(Memory%memRank, DeCount) )
+
+     call ESMF_DistGridGet(distgrid, indexCountPDimPDe=local_grid_size,        &
+                           rc=localrc)
+     call ESMF_VMGet(VM, localPet=myDE, rc=localrc)
+
+     allocate( local_size(Memory%memRank) )
+
+     do k=1,Memory%memRank
+        local_size(k) = local_grid_size(k,myDE) + Memory%HaloL(k)              &
+                        + Memory%HaloR(k)
+     enddo
+
+  !-----------------------------------------------------------------------------
+  ! now that we have the fortran array sizes, allocate a local fortran array and
+  ! create the esmf array from it.
+  !-----------------------------------------------------------------------------
+     select case(Memory%memRank)
+
+     case(1)
+        ! rank = 1
+        allocate( farray1(local_size(1)) )
+        Array = ESMF_ArrayCreate(farray=farray1, distgrid=DistGrid, rc=localrc)
+     case(2)
+        ! rank = 2
+        allocate( farray2(local_size(1), local_size(2)) )
+        Array = ESMF_ArrayCreate(farray=farray2, distgrid=DistGrid, rc=localrc)
+     case(3)
+        ! rank = 3
+        allocate( farray3( local_size(1),local_size(2), local_size(3) ) )
+        Array = ESMF_ArrayCreate(farray=farray3, distgrid=DistGrid, rc=localrc)
+     case(4)
+        ! rank = 4
+        allocate( farray4( local_size(1),local_size(2), local_size(3),         &
+                           local_size(4) ) )
+        Array = ESMF_ArrayCreate(farray=farray4, distgrid=DistGrid, rc=localrc)
+     case(5)
+        ! rank = 5
+        allocate( farray5( local_size(1),local_size(2), local_size(3),         &
+                           local_size(4), local_size(5) ) )
+        Array = ESMF_ArrayCreate(farray=farray5, distgrid=DistGrid, rc=localrc)
+     case(6)
+        ! rank = 6
+        allocate( farray6( local_size(1),local_size(2), local_size(3),         &
+                           local_size(4), local_size(5), local_size(6) ))  
+        Array = ESMF_ArrayCreate(farray=farray6, distgrid=DistGrid, rc=localrc)
+     case(7)
+        ! rank = 7
+        allocate( farray7( local_size(1),local_size(2), local_size(3),         &
+                           local_size(4), local_size(5), local_size(6),        &
+                           local_size(7) ) )
+        Array = ESMF_ArrayCreate(farray=farray7, distgrid=DistGrid, rc=localrc)
+   
+     case default
+        ! error
+        localrc = ESMF_FAILURE
+        call ESMF_LogMsgSetError(ESMF_FAILURE,"rank of problem "               &
+                 // " descriptor string is not between 1 and 7 ",              &
+                 rcToReturn=localrc)
+     end select
+     if (ESMF_LogMsgFoundError(localrc,"error creating haloed ESMF Array",     &
+                               rcToReturn=rc)) return
+
+     deallocate( local_grid_size )
+     deallocate( local_size )
+     
+  endif
+  !-----------------------------------------------------------------------------
+  rc = ESMF_SUCCESS     
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  end subroutine create_array
   !-----------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -980,17 +1171,6 @@
               rcToReturn=localrc)
   endif
 
-! do k=1,pds%SrcMem%memRank 
-!    print*,k,' in parse descriptor src gtype/dtype ', &
-!    trim(pds%SrcMem%GridType(k)%string), & 
-!    trim(pds%SrcMem%DistType(k)%string)
-! enddo
-! do k=1,pds%DstMem%memRank 
-!    print*,k,' in parse descriptor dst gtype/dtype ', &
-!    trim(pds%DstMem%GridType(k)%string), & 
-!    trim(pds%DstMem%DistType(k)%string)
-! enddo
-
   !-----------------------------------------------------------------------------
   ! if I've gotten this far without an error, then the routine has succeeded.
   !-----------------------------------------------------------------------------
@@ -1109,7 +1289,14 @@
               read (intstr, *) HaloL(kstring)
               intstr = adjustL( lstring(kstring)%string(hend-1:hmid+1) )
               read (intstr, *) HaloR(kstring)
-
+  ! drs begug
+              ! currently halo must be symmetric and non-negative
+              if( HaloR(kstring) < 0 .or. HaloL(kstring) < 0 .or.              &
+                  HaloL(kstring) /= HaloR(kstring)  )                          &
+                  call ESMF_LogMsgSetError( ESMF_FAILURE,                      &
+                      "halo specification "//trim(lstring(kstring)%string) //  &
+                      " is not symmetric and/or is negative ",                 &
+                      rcToReturn=localrc)
            else
            ! syntax error for halo specification
               call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
@@ -1123,8 +1310,8 @@
            HaloR(kstring) = 0
         else
         ! syntax error for halo specification
-           HaloL(kstring) = -1
-           HaloR(kstring) = -1
+           HaloL(kstring) = 0
+           HaloR(kstring) = 0
            call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
                    "halo specification wrong "//trim(lstring(kstring)%string), &
                    rcToReturn=localrc)

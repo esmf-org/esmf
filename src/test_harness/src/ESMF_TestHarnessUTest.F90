@@ -164,10 +164,11 @@
   ! record variable.
   !-----------------------------------------------------------------------------
   call parse_descriptors(rc)
-  if (rc .ne. ESMF_SUCCESS) then
+  if (rc /= ESMF_SUCCESS) then
      print*,'Error parsing problem descriptor files - see log file for details'
      finalrc = ESMF_FAILURE
      call ESMF_TestEnd(result, ESMF_SRCLINE)
+     ! if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   endif
 
   ! report results
