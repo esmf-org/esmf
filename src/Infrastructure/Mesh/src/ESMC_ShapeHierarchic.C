@@ -15,7 +15,7 @@
 #include <iostream>
 
  
-#ifdef ESMC_LAPACK
+#ifdef ESMF_LAPACK
 extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
 #endif
 
@@ -25,7 +25,7 @@ template<typename Real>
 void solve_sys(UInt nsamples, UInt ncoef, const Real vals[],
     double mat[], Real coef[])
 {
-#ifdef ESMC_LAPACK
+#ifdef ESMF_LAPACK
   int m = nsamples, n = ncoef, nrhs = 1, info = 0, rank, ldb;
   ldb = std::max(std::max(m,n),1);
   std::vector<Real> rhs(ldb);

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.16 2008/05/20 16:18:37 dneckels Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.17 2008/05/20 22:43:08 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -98,6 +98,18 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     ESMCI::GridToMesh(srcgrid, *srcstaggerLoc, srcmesh, std::vector<ESMCI::Array*>());
     ESMCI::GridToMesh(dstgrid, *dststaggerLoc, dstmesh, std::vector<ESMCI::Array*>());
 
+    MEField<> &scoord = *srcmesh.GetCoordField();
+    MEField<> &dcoord = *dstmesh.GetCoordField();
+
+
+    // Create a layer of ghost elements since the patch method needs
+    // a larger stencil.
+    if (*regridMethod == ESMF_REGRID_METHOD_PATCH) {
+      MEField<> *psc = &scoord;
+      srcmesh.CreateGhost();
+      srcmesh.GhostComm().SendFields(1, &psc, &psc);
+    }
+
     // If a spherical grid, mesh the poles, if they exist
     IWeights pole_constraints;
     if (srcgrid.isSphere()) {
@@ -119,8 +131,6 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     // Now we have the meshes, so go ahead and calc bilinear weights.
     // Since bilin needs a field, just do coords.
     // bilinear is bilinear.
-    MEField<> &scoord = *srcmesh.GetCoordField();
-    MEField<> &dcoord = *dstmesh.GetCoordField();
     std::vector<Interp::FieldPair> fpairs;
     
     switch (*regridMethod) {
@@ -201,12 +211,13 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
     } // for wi
 
-/*
 Par::Out() << "Matrix entries" << std::endl;
+/*
 for (UInt n = 0; n < num_entries; ++n) {
   Par::Out() << std::setw(5) << iientries[2*n] << std::setw(5) << iientries[2*n+1] << std::setw(15) << factors[n] << std::endl;
 }
 */
+wts.Print(Par::Out());
 
     // Build the ArraySMM
     if (*has_rh != 0) {

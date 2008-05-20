@@ -14,7 +14,7 @@
 #include <iterator>
 #include <iostream>
 
-#ifdef ESMC_LAPACK
+#ifdef ESMF_LAPACK
 extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
 #endif
 
@@ -110,7 +110,7 @@ void set_Ilegendre_coef(UInt K, std::vector<double> &coef) {
 template<typename POLY>
 void PolyFit1D(UInt nsamples, const double coord[], const double vals[], const std::vector<POLY*> &poly, double coef[])
 {
-#ifdef ESMC_LAPACK
+#ifdef ESMF_LAPACK
   UInt ncoef = poly.size();
   int m = nsamples, n = ncoef, nrhs = 1, info = 0, rank, ldb;
   ldb = std::max(std::max(m,n),1);

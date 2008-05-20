@@ -1,4 +1,3 @@
-//
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -32,7 +31,7 @@
 
 
 
-#ifdef ESMC_LAPACK
+#ifdef ESMF_LAPACK
 extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
 #endif
 
@@ -244,6 +243,8 @@ mc()
 {
 }
 
+//#define RESIDUALS
+
 /**
  * The default creates the pseudo-inverse and applies, in case we
  * need sensitivities of coef wrt field values.
@@ -262,9 +263,21 @@ void operator()(UInt ncoef, int ldb, int m, int n, int nrhs, std::vector<double>
   // Set up B=I
   for (int i = 0; i < m; i++) id_rhs[i*ldb + i] = 1.0;
 
-#ifdef ESMC_LAPACK
+#ifdef RESIDUALS
+Par::Out() << "A(" << m << "," << n << ")=" << std::endl;
+for (UInt i = 0; i < m; i++) {
+for (UInt j = 0; j < n; j++) {
+Par::Out() << std::setw(10) << mat[j*m+i] << " ";
+}
+Par::Out() << std::endl;
+}
+#endif
+
+#ifdef ESMF_LAPACK
   FTN(dgelsy)(
     &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
+
+  if (info !=0) Throw() << "Bad dgelsy solve, info=" << info;
 #else
   Throw() << "Please reconfigure with lapack enabled";
 #endif
@@ -279,6 +292,23 @@ void operator()(UInt ncoef, int ldb, int m, int n, int nrhs, std::vector<double>
       }
     }
   }
+#ifdef RESIDUALS
+Par::Out() << "PAInv=" << std::endl;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+Par::Out() << std::setw(15) << id_rhs[j*ldb+i];
+    }
+Par::Out() << std::endl;
+  }
+
+Par::Out() << "B=" << std::endl;
+    for (int j = 0; j < m; j++) {
+      for (int nr = 0; nr < nrhs; nr++) {
+         Par::Out() << std::setw(15) << b[nr*ldb+j].val();
+      }
+      Par::Out() << std::endl;
+    }
+#endif
 
   // fill return array
   for (UInt r = 0; r < (UInt) nrhs; r++) {
@@ -309,11 +339,11 @@ std::vector<double> saverhs = rhs;
 std::vector<double> matsav = mat;
 #endif
 
-#ifdef ESMC_LAPACK
+#ifdef ESMF_LAPACK
   FTN(dgelsy)(
     &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
 #else
-  Throw() << "Please recompile with ESMC_LAPACK enabled";
+  Throw() << "Please recompile with ESMF_LAPACK enabled";
 #endif
 
 #ifdef RESIDUALS
@@ -511,6 +541,13 @@ std::cout << "threshold  tripped.  nsamples=" << nsamples << ", ncoef=" << ncoef
         if (use_mc) {
           mc.Transform(&cdatas[q*sdim], &cdata[0]);
           cd = &cdata[0]; // point to transformed point
+#ifdef RESIDUALS
+Par::Out() << "Coords:" << std::endl;
+std::copy(&cdatas[q*sdim], &cdatas[(q+1)*sdim], std::ostream_iterator<double>(Par::Out(), " "));
+Par::Out() << "-->" << std::endl;
+std::copy(cd, cd + idim, std::ostream_iterator<double>(Par::Out(), " "));
+Par::Out() << std::endl;
+#endif
         }
       
         eval_poly(nsamples, sample++, ldb, cur_rhs,

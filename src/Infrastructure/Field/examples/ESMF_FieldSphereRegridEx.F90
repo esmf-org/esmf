@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.8 2008/05/16 22:14:22 dneckels Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.9 2008/05/20 22:43:07 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.8 2008/05/16 22:14:22 dneckels Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.9 2008/05/20 22:43:07 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -62,9 +62,12 @@ program ESMF_FieldSphereRegridEx
   type(ESMF_Grid) :: gridDst
   type(ESMF_Field) :: srcField
   type(ESMF_Field) :: dstField
+  type(ESMF_Field) :: dstField1
   type(ESMF_Array) :: dstArray
+  type(ESMF_Array) :: dstArray1
   type(ESMF_Array) :: srcArray
   type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_RouteHandle) :: routeHandle1
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
   real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
@@ -113,8 +116,8 @@ program ESMF_FieldSphereRegridEx
 
   ! Establish the resolution of the grids
   !dst_nx = 284
-  dst_nx = 254
-  dst_ny = 200
+  dst_nx = 154
+  dst_ny = 100
 
   src_nx = 75
   src_ny = 50
@@ -151,6 +154,12 @@ program ESMF_FieldSphereRegridEx
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
+   dstField1 = ESMF_FieldCreate(gridDst, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dest1", rc=rc)
+  write(failMsg, *) "ESMF_FieldCreate"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
   ! Allocate coordinates
   call ESMF_GridAddCoord(gridSrc, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -165,6 +174,12 @@ program ESMF_FieldSphereRegridEx
   ! Get arrays
   ! dstArray
   call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
+  write(failMsg, *) "ESMF_FieldGet"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+  call ESMF_FieldGet(dstField1, array=dstArray1, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
   write(failMsg, *) "ESMF_FieldGet"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -272,10 +287,10 @@ program ESMF_FieldSphereRegridEx
     write(*,*) lDE," ::",clbnd,":",cubnd
     write(*,*) lDE," ::",fclbnd,":",fcubnd
 
-    if (clbnd(1) .ne. fclbnd(1)) print *, 'Error clbnd != fclbnd'
-    if (clbnd(2) .ne. fclbnd(2)) print *, 'Error clbnd != fclbnd'
-    if (cubnd(1) .ne. fcubnd(1)) print *, 'Error cubnd != fcubnd'
-    if (cubnd(2) .ne. fcubnd(2)) print *, 'Error cubnd != fcubnd'
+    if (clbnd(1) .ne. fclbnd(1)) print *, 'Error dst clbnd != fclbnd'
+    if (clbnd(2) .ne. fclbnd(2)) print *, 'Error dst clbnd != fclbnd'
+    if (cubnd(1) .ne. fcubnd(1)) print *, 'Error dst cubnd != fcubnd'
+    if (cubnd(2) .ne. fcubnd(2)) print *, 'Error dst cubnd != fcubnd'
 
      !! set coords, interpolated function
      do i1=clbnd(1),cubnd(1)
@@ -314,8 +329,10 @@ program ESMF_FieldSphereRegridEx
 !\subsubsection{Creating a Regrid Operator from two Fields}
 ! To create the sparse matrix regrid operator we call the
 ! {\tt ESMF\_FieldSphereRegridStore()} routine.  In this example we
-! choose the {\tt ESMF_REGRID_METHOD_BILIONEAR} regridding method.  Other
-! methods are available and more we will be added in the future.
+! choose the {\tt ESMF_REGRID_METHOD_BILIONEAR} regridding method for
+! our first example, and {\tt ESMF_REGRID_METHOD_PATCH} for our
+! second example (The underlying C++ code process both matrices
+! simultaneously, but we do not yet have fortran interfaces for this).
 ! This method creates two meshes, and a Rendezvous decomposition of these
 ! meshes is computed.  An octree search is performed, followed by a determination
 ! of which source cell each destination gridpoint is in.  Bilinear weights
@@ -329,9 +346,19 @@ program ESMF_FieldSphereRegridEx
           routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
-!EOC
 
   write(failMsg, *) "FieldRegridStore"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+  ! The patch recovery interpolant
+  call ESMF_FieldRegridStore(srcField, dstField1, &
+          routeHandle1, &
+          regridMethod=ESMF_REGRID_METHOD_PATCH, &
+          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+!EOC
+
+  write(failMsg, *) "FieldRegridStore1"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
@@ -350,6 +377,11 @@ program ESMF_FieldSphereRegridEx
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
+  call ESMF_FieldRegridRun(srcField, dstField1, routeHandle1, localrc)
+  write(failMsg, *) "FieldRegridRun"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
 !BOE
 ! 
 !\subsubsection{Release a Regrid Operator}
@@ -357,6 +389,7 @@ program ESMF_FieldSphereRegridEx
 
 !BOC
   call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  call ESMF_FieldRegridRelease(routeHandle1, rc=localrc)
 !EOC
   write(failMsg, *) "FieldRegridRelease"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -368,9 +401,8 @@ program ESMF_FieldSphereRegridEx
                "srcmesh", srcArray, rc=localrc, &
                spherical=spherical_grid)
   call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
-               "dstmesh", dstArray, rc=localrc, &
+               "dstmesh", dstArray, dstArray1, rc=localrc, &
                spherical=spherical_grid)
-
 
 10   continue
 

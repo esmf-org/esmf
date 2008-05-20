@@ -37,8 +37,6 @@ committed(false)
 }
 
 Mesh::~Mesh() {
-  if (sghost)
-    RemoveGhost();
 }
 
 void Mesh::assign_new_ids() {

@@ -305,7 +305,7 @@ MasterElement<METRAITS> *Topo2ME<METRAITS>::operator()(const std::string &name) 
 
   // _L selects the higher order mapping, the low order field
 
-  if (name == "QUAD" || name == "QUAD4" || name == "QUAD_L") {
+  if (name == "QUAD" || name == "QUAD4" || name == "QUAD_L" || name == "QUAD_3D_L") {
       return MasterElementV<METRAITS>::instance(SFuncAdaptor<quad_shape_func>::instance());
   }
   if (name == "QUAD9") {

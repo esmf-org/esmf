@@ -553,7 +553,6 @@ void mat_patch_serial_transfer(MEField<> &src_coord_field, MEField<> &_sfield, _
         
             std::vector<IWeights::Entry> col;
             col.reserve(nlocal_dof);
-//#define CHECK_SENS
 #ifdef CHECK_SENS       
 Par::Out() << "sens=" << result[n*nrhs+d] << std::endl;
 
