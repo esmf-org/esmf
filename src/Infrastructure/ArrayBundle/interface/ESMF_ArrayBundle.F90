@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.4 2008/05/12 21:56:36 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.5 2008/05/20 20:31:28 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.4 2008/05/12 21:56:36 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.5 2008/05/20 20:31:28 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -668,7 +668,7 @@ contains
     type(ESMF_ArrayBundle), intent(in),   optional  :: srcArrayBundle
     type(ESMF_ArrayBundle), intent(out),  optional  :: dstArrayBundle
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    type(ESMF_Logical),     intent(in),   optional  :: checkflag
+    logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -685,11 +685,11 @@ contains
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[checkflag]}]
-!     If set to {\tt ESMF\_TRUE} the input Array pairs will be checked for
+!     If set to {\tt .TRUE.} the input Array pairs will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
-!     If set to {\tt ESMF\_FALSE} {\em (default)} only a very basic input check
+!     If set to {\tt .FALSE.} {\em (default)} only a very basic input check
 !     will be performed, leaving many inconsistencies undetected. Set
-!     {\tt checkflag} to {\tt ESMF\_FALSE} to achieve highest performance.
+!     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1231,7 +1231,7 @@ contains
     type(ESMF_ArrayBundle), intent(inout),optional  :: dstArrayBundle
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
-    type(ESMF_Logical),     intent(in),   optional  :: checkflag
+    logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -1259,11 +1259,11 @@ contains
 !     by the sparse matrix multiplication. See section \ref{opt:regionflag}
 !     for a complete list of valid settings.
 !   \item [{[checkflag]}]
-!     If set to {\tt ESMF\_TRUE} the input Array pairs will be checked for
+!     If set to {\tt .TRUE.} the input Array pairs will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
-!     If set to {\tt ESMF\_FALSE} {\em (default)} only a very basic input check
+!     If set to {\tt .FALSE.} {\em (default)} only a very basic input check
 !     will be performed, leaving many inconsistencies undetected. Set
-!     {\tt checkflag} to {\tt ESMF\_FALSE} to achieve highest performance.
+!     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

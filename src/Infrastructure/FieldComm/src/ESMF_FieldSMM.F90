@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.1 2008/05/19 18:53:04 feiliu Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.2 2008/05/20 20:33:19 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.1 2008/05/19 18:53:04 feiliu Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.2 2008/05/20 20:33:19 w6ws Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -84,7 +84,7 @@ contains
         type(ESMF_Field),       intent(inout),optional  :: dstField
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
         type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
-        type(ESMF_Logical),     intent(in),   optional  :: checkflag
+        logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -125,11 +125,11 @@ contains
 !     multiplication. See section \ref{opt:regionflag} for a complete list of
 !     valid settings.
 !   \item [{[checkflag]}]
-!     If set to {\tt ESMF\_TRUE} the input Field pair will be checked for
+!     If set to {\tt .TRUE.} the input Field pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
-!     If set to {\tt ESMF\_FALSE} {\em (default)} only a very basic input check
+!     If set to {\tt .FALSE.} {\em (default)} only a very basic input check
 !     will be performed, leaving many inconsistencies undetected. Set
-!     {\tt checkflag} to {\tt ESMF\_FALSE} to achieve highest performance.
+!     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -140,7 +140,7 @@ contains
         
         ! local variables to buffer optional arguments
         type(ESMF_RegionFlag)   :: l_zeroflag
-        type(ESMF_Logical)      :: l_checkflag! helper variable
+        logical                 :: l_checkflag! helper variable
         type(ESMF_Array)        :: l_srcArray ! helper variable
         type(ESMF_Array)        :: l_dstArray ! helper variable
 

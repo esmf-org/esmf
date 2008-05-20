@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayPr.F90,v 1.2 2008/05/14 21:03:47 theurich Exp $
+! $Id: ESMF_ArrayPr.F90,v 1.3 2008/05/20 20:31:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_ArrayPrMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayPr.F90,v 1.2 2008/05/14 21:03:47 theurich Exp $'
+    '$Id: ESMF_ArrayPr.F90,v 1.3 2008/05/20 20:31:27 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -172,7 +172,7 @@ contains
     type(ESMF_Array),       intent(in),   optional  :: srcArray
     type(ESMF_Array),       intent(inout),optional  :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    type(ESMF_Logical),     intent(in),   optional  :: checkflag
+    logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -199,11 +199,11 @@ contains
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[checkflag]}]
-!     If set to {\tt ESMF\_TRUE} the input Array pair will be checked for
+!     If set to {\tt .TRUE.} the input Array pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
-!     If set to {\tt ESMF\_FALSE} {\em (default)} only a very basic input check
+!     If set to {\tt .FALSE.} {\em (default)} only a very basic input check
 !     will be performed, leaving many inconsistencies undetected. Set
-!     {\tt checkflag} to {\tt ESMF\_FALSE} to achieve highest performance.
+!     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
