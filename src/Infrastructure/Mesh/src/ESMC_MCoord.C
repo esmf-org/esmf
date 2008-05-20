@@ -18,9 +18,16 @@ MCoord::MCoord(const double c[], const double n[]) {
     ct[i] = c[i];
   }
   double tmp = std::sqrt(n[1]*n[1] + n[2]*n[2]);
-  // An orthogonal basis for the cospace of the vector n;
-  u[0] = 0; u[1] = n[2]/tmp; u[2] = -n[1]/tmp;
-  u[3] = tmp; u[4] = -n[0]*n[1]/tmp; u[5] = -n[0]*n[2]/tmp;
+
+  if (std::abs(tmp) > 1e-8) { // vector could be in x direction
+    // An orthogonal basis for the cospace of the vector n;
+    u[0] = 0; u[1] = n[2]/tmp; u[2] = -n[1]/tmp;
+    u[3] = tmp; u[4] = -n[0]*n[1]/tmp; u[5] = -n[0]*n[2]/tmp;
+  } else {
+    tmp = std::sqrt(n[0]*n[0] + n[2]*n[2]);
+    u[0] = n[2]/tmp; u[1] = 0; u[2] = -n[0]/tmp;
+    u[3] = -n[1]*n[0]/tmp; u[4] = tmp; u[5] = -n[1]*n[2]/tmp;
+  }
 }
 
 MCoord::MCoord() {
