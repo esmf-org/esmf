@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUTest.F90,v 1.2 2008/04/28 06:38:20 rokuingh Exp $
+! $Id: ESMF_AttributeUTest.F90,v 1.3 2008/05/21 23:51:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeUTest.F90,v 1.2 2008/04/28 06:38:20 rokuingh Exp $'
+      '$Id: ESMF_AttributeUTest.F90,v 1.3 2008/05/21 23:51:02 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -84,14 +84,14 @@ program ESMF_AttributeUTest
       distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
         regDecomp=(/2,3/), rc=rc)
       array = ESMF_ArrayCreate(arrayspec, distgrid, rc=rc)
-      field = ESMF_FieldCreate(name="field 1", rc=rc)
+      field = ESMF_FieldCreateEmpty(name="field 1", rc=rc)
       grid = ESMF_GridCreateEmpty(rc=rc)
       state = ESMF_StateCreate("state 1", ESMF_STATE_IMPORT, rc=rc)
       state2 = ESMF_StateCreate("state 2", ESMF_STATE_EXPORT, rc=rc)
       fieldbundleforstate = ESMF_FieldBundleCreate(name="fieldbundleforstate1", rc=rc)
-      fieldforstate = ESMF_FieldCreate(name="fieldforstate1", rc=rc)
+      fieldforstate = ESMF_FieldCreateEmpty(name="fieldforstate1", rc=rc)
       fieldbundle = ESMF_FieldBundleCreate(name="bundle 1", rc=rc)
-      fieldforbundle = ESMF_FieldCreate(name="field 1", rc=rc)
+      fieldforbundle = ESMF_FieldCreateEmpty(name="field 1", rc=rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !-------------------------------------------------------------------------
