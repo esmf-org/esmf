@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.22 2008/05/07 00:15:21 rokuingh Exp $
+! $Id: user_model1.F90,v 1.23 2008/05/21 23:13:56 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -106,7 +106,7 @@ module user_model1
     value3 = 'm-2 s-1'
     value4 = 'xy'
       
-    evap = ESMF_FieldCreate("evap", rc=status)
+    evap = ESMF_FieldCreateEmpty("evap", rc=status)
     call ESMF_AttributeAdd(evap, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(evap, name1, value1, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(evap, name2, value2, convention=conv, purpose=purp, rc=status)
@@ -120,7 +120,7 @@ module user_model1
     value3 = 'm'
     value4 = 'xy'
       
-    h250 = ESMF_FieldCreate("h250", rc=status)
+    h250 = ESMF_FieldCreateEmpty("h250", rc=status)
     call ESMF_AttributeAdd(h250, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(h250, name1, value1, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(h250, name2, value2, convention=conv, purpose=purp, rc=status)
@@ -134,7 +134,7 @@ module user_model1
     value3 = 'Pa s-1'
     value4 = 'xyz'
       
-    omega = ESMF_FieldCreate("omega", rc=status)
+    omega = ESMF_FieldCreateEmpty("omega", rc=status)
     call ESMF_AttributeAdd(omega, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(omega, name1, value1, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(omega, name2, value2, convention=conv, purpose=purp, rc=status)
@@ -148,7 +148,7 @@ module user_model1
     value3 = 'unitless'
     value4 = 'xyz'
       
-    salt = ESMF_FieldCreate("salt", rc=status)
+    salt = ESMF_FieldCreateEmpty("salt", rc=status)
     call ESMF_AttributeAdd(salt, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(salt, name1, value1, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(salt, name2, value2, convention=conv, purpose=purp, rc=status)
@@ -162,7 +162,7 @@ module user_model1
     value3 = 'W m-2'
     value4 = 'xy'
       
-    sh = ESMF_FieldCreate("sh", rc=status)
+    sh = ESMF_FieldCreateEmpty("sh", rc=status)
     call ESMF_AttributeAdd(sh, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(sh, name1, value1, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(sh, name2, value2, convention=conv, purpose=purp, rc=status)
@@ -176,7 +176,7 @@ module user_model1
     value3 = 'kg m-2 s-1'
     value4 = 'xy'
       
-    sno = ESMF_FieldCreate("sno", rc=status)
+    sno = ESMF_FieldCreateEmpty("sno", rc=status)
     call ESMF_AttributeAdd(sno, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(sno, name1, value1, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(sno, name2, value2, convention=conv, purpose=purp, rc=status)
@@ -190,7 +190,7 @@ module user_model1
     value3 = 'unitless'
     value4 = 'xyz'
       
-    so4 = ESMF_FieldCreate("so4", rc=status)
+    so4 = ESMF_FieldCreateEmpty("so4", rc=status)
     call ESMF_AttributeAdd(so4, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(so4, name1, value1, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(so4, name2, value2, convention=conv, purpose=purp, rc=status)
@@ -204,7 +204,7 @@ module user_model1
     value3 = 'K'
     value4 = 'xyz'
       
-    t2m = ESMF_FieldCreate("t2m", rc=status)
+    t2m = ESMF_FieldCreateEmpty("t2m", rc=status)
     call ESMF_AttributeAdd(t2m, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(t2m, name1, value1, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(t2m, name2, value2, convention=conv, purpose=purp, rc=status)
@@ -218,7 +218,7 @@ module user_model1
     value3 = 'm s-1'
     value4 = 'xy'
       
-    ua = ESMF_FieldCreate("ua", rc=status)
+    ua = ESMF_FieldCreateEmpty("ua", rc=status)
     call ESMF_AttributeAdd(ua, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(ua, name1, value1, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(ua, name2, value2, convention=conv, purpose=purp, rc=status)
@@ -232,7 +232,7 @@ module user_model1
     value3 = 'unitless'
     value4 = 'xyz'
       
-    wet1 = ESMF_FieldCreate("wet1", rc=status)
+    wet1 = ESMF_FieldCreateEmpty("wet1", rc=status)
     call ESMF_AttributeAdd(wet1, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(wet1, name1, value1, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(wet1, name2, value2, convention=conv, purpose=purp, rc=status)
