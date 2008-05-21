@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1 2008/05/09 18:09:37 feiliu Exp $
+! $Id: user_model2.F90,v 1.2 2008/05/21 23:30:32 theurich Exp $
 !
 ! System test for Concurrent Components, user-written component 2.
 
@@ -31,6 +31,7 @@
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
  
+#undef ESMF_METHOD
 #define ESMF_METHOD "userm2_register"
     subroutine userm2_register(comp, rc)
         type(ESMF_GridComp)         :: comp
@@ -65,6 +66,7 @@
 !   !  User Comp Component created by higher level calls, here is the
 !   !   Initialization routine.
  
+#undef ESMF_METHOD
 #define ESMF_METHOD "userm2_init"
     subroutine user_init(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp)  :: comp
@@ -123,6 +125,7 @@
 !   !  The Run routine where data is computed.
 !   !
  
+#undef ESMF_METHOD
 #define ESMF_METHOD "userm2_run"
     subroutine user_run(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp)  :: comp
@@ -165,6 +168,7 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
+#undef ESMF_METHOD
 #define ESMF_METHOD "userm2_final"
     subroutine user_final(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp)  :: comp

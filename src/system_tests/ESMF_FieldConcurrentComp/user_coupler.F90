@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1 2008/05/09 18:09:36 feiliu Exp $
+! $Id: user_coupler.F90,v 1.2 2008/05/21 23:30:32 theurich Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -34,6 +34,7 @@
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
  
+#undef ESMF_METHOD
 #define ESMF_METHOD "usercpl_register"
     subroutine usercpl_register(comp, rc)
         type(ESMF_CplComp) :: comp
@@ -69,6 +70,7 @@
 !   ! Initialization routine.
  
     
+#undef ESMF_METHOD
 #define ESMF_METHOD "usercpl_init"
     subroutine user_init(comp, importState, exportState, clock, rc)
         type(ESMF_CplComp) :: comp
@@ -136,8 +138,8 @@
             ESMF_CONTEXT, rc)) return
 
         ! precompute redist handle
-        call ESMF_FieldRedistStore(sorted_data1, sorted_data2, redistRH12, &
-            rc=status)
+        call ESMF_FieldRedistStore(srcField=sorted_data1, &
+          dstField=sorted_data2, routehandle=redistRH12, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
@@ -149,7 +151,7 @@
 !-------------------------------------------------------------------------
 !   !  The Run routine where data is coupled.
 !   !
- 
+#undef ESMF_METHOD
 #define ESMF_METHOD "usercpl_run"
     subroutine user_run(comp, importState, exportState, clock, rc)
         type(ESMF_CplComp) :: comp
@@ -176,8 +178,8 @@
         ! preform data redistribution
         ! deliver sorted result from component 1 to component 2
         ! component 2 will verify component 1 result
-        call ESMF_FieldRedist(sorted_data1, sorted_data2, redistRH12, &
-            ESMF_TRUE, rc=status)
+        call ESMF_FieldRedist(srcField=sorted_data1, dstField=sorted_data2, &
+          routehandle= redistRH12, checkflag=.true., rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
@@ -190,6 +192,7 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
+#undef ESMF_METHOD
 #define ESMF_METHOD "usercpl_final"
     subroutine user_final(comp, importState, exportState, clock, rc)
         type(ESMF_CplComp) :: comp
