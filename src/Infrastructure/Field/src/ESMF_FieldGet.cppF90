@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.18 2008/05/08 02:27:19 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.19 2008/05/21 22:14:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.18 2008/05/08 02:27:19 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.19 2008/05/21 22:14:23 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -634,6 +634,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     integer, dimension(:), allocatable :: l_tlb, l_tub
     integer, dimension(:), allocatable :: l_ec, l_cc, l_tc
 
+
     if (present(rc)) rc = ESMF_RC_NOT_IMPL 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -866,6 +867,11 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         totalUBound(1:fieldrank) = l_tub
     if(present(totalCount)) &
         totalCount(1:fieldrank) = l_tc
+
+    ! Deallocate temporary arrays
+    deallocate(l_elb, l_eub, l_clb, l_cub)
+    deallocate(l_tlb, l_tub)
+    deallocate(l_ec, l_cc, l_tc)
 
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_FieldGetDataBounds
@@ -1193,6 +1199,12 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     if(present(totalLBound)) totalLBound(1:arrayrank) = l_alb(1:arrayrank)
     if(present(totalUBound)) totalUBound(1:arrayrank) = l_aub(1:arrayrank)
     if(present(totalCount))  totalCount(1:arrayrank)  = l_ac(1:arrayrank)
+
+    ! deallocate temporary arrays
+    if(uglb_size .ne. 0) then
+        deallocate(l_uglb, l_ugub)
+    endif
+    deallocate(l_alb, l_aub, l_ac)
 
     if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_FieldGetAllocBounds

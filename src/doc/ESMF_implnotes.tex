@@ -1,4 +1,4 @@
-% $Id: ESMF_implnotes.tex,v 1.7 2006/12/13 20:17:55 cdeluca Exp $
+% $Id: ESMF_implnotes.tex,v 1.8 2008/05/21 22:14:58 theurich Exp $
 
 \section{Overall Design and Implementation Notes}
 \label{sec:overallimpl}
@@ -14,13 +14,7 @@ that the user application is written in.  Deep classes are allocated
 off the process heap by the implementation language.  Shallow classes
 are allocated off the stack by the calling language.  
 
-\item {\bf Base class.} All ESMF classes are built upon a Base class.  The Base 
-is used to hold system-wide capabilities, such as Attributes.  Attributes 
-are implemented in the Base class so they can be attached to
-any object in the system which is built on the Base object.  (This is true
-for all deep objects in the system.)  Attributes are created by making a
-private copy of the information provided during the Set call.  Lists of
-values are supported, but they are not intended for large
-data arrays.   Attribute data is copied during a Get operation.
+\item {\bf Base class.} All ESMF classes are built upon a Base class,
+which holds a small set of system-wide capabilities.  
 
 \end{enumerate}

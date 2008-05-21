@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.27 2008/05/19 20:53:56 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.28 2008/05/21 22:14:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -54,6 +54,7 @@ module ESMF_FieldCreateMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
   public ESMF_FieldCreate
+  public ESMF_FieldCreateEmpty
   public ESMF_FieldCreateNoData       ! Create a new Field without data
   public ESMF_FieldDestroy            ! Destroy a Field
 
@@ -61,7 +62,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.27 2008/05/19 20:53:56 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.28 2008/05/21 22:14:23 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -82,7 +83,6 @@ module ESMF_FieldCreateMod
     module procedure ESMF_FieldCreateFromArraySpec
     module procedure ESMF_FieldCreateFromArray
     TypeKindRankInterfaceMacro(FieldCreateFromDataPtr)
-    module procedure ESMF_FieldCreateEmpty
 
 ! !DESCRIPTION:
 !   This interface provides an entry point for methods that create a complete
@@ -963,10 +963,9 @@ TypeKindRankDeclarationMacro(FieldCreateFromDataPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateEmpty"
 !BOP
-! !IROUTINE: ESMF_FieldCreate - Create an empty Field (no Grid)
+! !IROUTINE: ESMF_FieldCreateEmpty - Create an empty Field (no Grid)
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateEmpty(name, iospec, rc)
 !
 ! !RETURN VALUE:

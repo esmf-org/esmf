@@ -1,4 +1,4 @@
-% $Id: GridComp_rest.tex,v 1.8 2008/04/05 03:39:11 cdeluca Exp $
+% $Id: GridComp_rest.tex,v 1.9 2008/05/21 22:14:50 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -11,16 +11,6 @@
 %\subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
-
-\item {\bf No Transforms.}  Components must exchange data through   
-{\tt ESMF\_State} objects.  The input data are available at the time 
-the user Component code is called, and data to be returned to another 
-Component are available when that code returns.  
-
-\item {\bf Data isolation.} 
-Gridded Components must only communicate with other
-components via data in State objects.  They must 
-not make direct references to data in other States.
 
 \item {\bf Namespace isolation.}
 If possible, Gridded Components should attempt to make 

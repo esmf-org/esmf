@@ -164,7 +164,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.84 2008/05/01 22:43:43 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.85 2008/05/21 22:14:32 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -780,7 +780,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCommit"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCommit - Commit a Grid to a specified completion level
 
 ! !INTERFACE:
@@ -837,7 +837,7 @@ end interface
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
     integer :: localrc ! local error status
 
     ! Initialize return code; assume failure until success is certain
@@ -3959,10 +3959,10 @@ end interface
     ! Call C++ Subroutine to do the get
     call c_ESMC_gridget(grid%this, &
       coordTypeKind, dimCount, tileCount, distgrid,  staggerlocsCount, &
-      distgridToGridMapArg,  ESMF_NULL_POINTER, ESMF_NULL_POINTER, &
+      distgridToGridMapArg, &
       coordDimCountArg, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
-      indexflag, localDECount,  ESMF_NULL_POINTER, ESMF_NULL_POINTER, localrc)
+      indexflag, localDECount, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6738,7 +6738,7 @@ endif
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetFromDistGrid"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSet - Set the values in a Grid which has been created with CreateEmpty 
 
 ! !INTERFACE:
@@ -6822,7 +6822,7 @@ endif
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
     integer :: localrc ! local error status
     integer :: nameLen 
     type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var

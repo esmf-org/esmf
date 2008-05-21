@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.22 2008/04/02 20:43:02 cdeluca Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.23 2008/05/21 22:14:58 theurich Exp $
 
 \section{Overview of Infrastructure Data Handling}
 
@@ -91,6 +91,11 @@ a {\bf total} domain, which includes both the computational
 domain and data elements from other DEs which may be read 
 but are not updated in computations.
 
+\item {\bf ArrayBundle} ArrayBundles are collections of
+Arrays that are stored in a single object.  Unlike FieldBundles,
+they don't need to be distributed the same way across PETs.  The
+motivation for ArrayBundles is both convenience and performance.
+
 \item {\bf Field}  A Field holds model and/or observational 
 data together with its underlying grid or set of spatial 
 locations.  It provides methods for configuration, 
@@ -113,19 +118,6 @@ FieldBundle objects contain methods for setting and retrieving constituent
 fields, regridding, data I/O, and reordering of data in memory.
 
 \end{itemize}
-
-\subsection{Object Model}
-
-The following is a simplified UML diagram showing the relationships among
-ESMF Field, Grid and FieldBundle classes.  See Appendix A, {\it A Brief 
-Introduction to UML},
-for a translation table that lists the symbols in the diagram and their 
-meaning.
-
-\begin{center}
-\includegraphics{FieldBundle_obj}   
-\end{center}
-
 
 
 

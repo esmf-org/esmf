@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.75 2008/05/08 04:46:06 theurich Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.76 2008/05/21 22:14:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -57,13 +57,13 @@
 !\subsubsection{Create 2D Field with 2D Grid and Fortran data array}
 !\label{sec:field:usage:create_2dptr}
 !
-!  User can create a {\tt ESMF\_Field} directly from a {\tt ESMF\_Grid} and a intrinsic 
-!  Fortran data array. This interface is overloaded for type, kind, rank of
-!  of the Fortran data array. grid and farray are created in previous examples.
+!  A user can create an {\tt ESMF\_Field} directly from an {\tt ESMF\_Grid} and an intrinsic 
+!  Fortran data array. This interface is overloaded for typekind and rank
+!  of the Fortran data array.  
 !
 !  In the following example, each dimension size of the Fortran array must be no greater 
 !  than the maximum value of the computational and exclusive bounds of its corresponding 
-!  Grid dimension queried from the Grid through {\tt ESMF\_GridGet} public interface.
+!  Grid dimension queried from the Grid through {\tt ESMF\_GridGet()} public interface.
 !
 !  Formally let fa\_shape(i) be the shape of i-th dimension of user supplied Fortran array,
 !  then rule 1 states:  
@@ -83,8 +83,8 @@
 !  are true for most typical use of FieldCreate from Fortran data array. This is the easiest way
 !  to create a Field from a Grid and Fortran intrinsic data array.
 !  
-!  Fortran array dimension size (formally called shape in most Fortran language books) are equivalent
-!  to bounds, counts used in this manual because the following equation holds: 
+!  Fortran array dimension sizes (called shape in most Fortran language books) are equivalent
+!  to the bounds and counts used in this manual.  The following equation holds: 
 !  \begin{verbatim}
 ! 
 !  fa_shape(i) = shape(i) = counts(i) = upper_bound(i) - lower_bound(i) + 1
@@ -98,13 +98,13 @@
 !  Rule 1 is most useful for a user working with Field creation from a Grid and a Fortran
 !  data array in most scenarios. It extends to higher dimension count, 3D, 4D, etc...
 !  Typically, as the code example demonstrates, a user first creates a Grid 
-!  , then the user use {\tt ESMF\_GridGet}
-!  to retrieve the computational and exclusive counts, next the user calculates the shape
+!  , then uses {\tt ESMF\_GridGet()}
+!  to retrieve the computational and exclusive counts.  Next the user calculates the shape
 !  of each Fortran array dimension according to rule 1. The Fortran data array is allocated
-!  and initialized based on the computed shape and a Field can either be created or finalized
-!  from an empty field.
+!  and initialized based on the computed shape.  A Field can either be created in one shot
+!  created empty and finished using {\tt ESMF\_FieldSetCommit}.
 !
-!  There are important details that can be skipped but good to know for {\tt ESMF\_FieldSetCommit}
+!  There are important details that can be skipped but are good to know for {\tt ESMF\_FieldSetCommit}
 !  and {\tt ESMF\_FieldCreate} from a Fortran data array. 1) these methods require {\em each PET contains
 !  exactly one DE}. This implies that a code using FieldCreate from a data array or FieldSetCommit must
 !  have the same number of DEs and PETs, formally $n_{DE} = n_{PET}$. Violation of this condition
@@ -138,21 +138,18 @@
 !\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data array}
 !\label{sec:field:usage:create_2dgrid_3dptr}
 !
-!  User can create a {\tt ESMF\_Field} from a {\tt ESMF\_Grid} and a intrinsic 
-!  Fortran data array. This interface is overloaded for type, kind, rank of
-!  of the Fortran data array.
-!  
 !  This example demonstrates a typical use of {\tt ESMF\_Field} combining
-!  a 2D grid and 3D data array. One immediate problem follows: 
+!  a 2D grid and a 3D Fortran native data array. One immediate problem follows: 
 !  how does one define the bounds of the ungridded dimension? This is
-!  solved by the optional arguments ungriddedLBound and ungriddedUBound
-!  of FieldCreate interface. By definition, ungriddedLBound and ungriddedUBound
+!  solved by the optional arguments {\tt ungriddedLBound} and {\tt ungriddedUBound}
+!  of the {\tt ESMF\_FieldCreate} interface. By definition, {\tt ungriddedLBound}
+!  and {\tt ungriddedUBound}
 !  are both 1 dimensional integer Fortran arrays.
 !
-!  Formally, let fa\_shape(j=1...FieldDimCount-GridDimCount) be the shape of 
-!  ungridded dimensions of a Field relative to the Grid used in Field creation,
-!  here FieldDimCount is the number of dimensions of the Fortran array, which
-!  equals to the number of dimensions of the result Field. GridDimCount is
+!  Formally, let fa\_shape(j=1...FieldDimCount-GridDimCount) be the shape of the
+!  ungridded dimensions of a Field relative to the Grid used in Field creation.
+!  The Field dimension count is equal to the number of dimensions of the Fortran array, which
+!  equals the number of dimensions of the resultant Field. GridDimCount is
 !  the number of dimensions of the Grid. 
 ! 
 !  fa\_shape(j) is computed as:
@@ -174,7 +171,7 @@
 !
 !  Suppose we have a mapping from dimension index of ungriddedLBound (or
 !  ungriddedUBound) to Fortran array dimension index, called ugb2fa. 
-!  By defintion, $n_A$ equals to the dimension count of
+!  By definition, $n_A$ equals to the dimension count of
 !  ungriddedLBound (or ungriddedUBound), $n_B$ equals to the dimension count of
 !  the Fortran array. We can now formulate the computation of ungridded
 !  dimension shape as rule 2:
@@ -203,14 +200,13 @@
 !  under certain conditions. Rank is the total number of dimensions of a tensor object.
 !  Dimension count allows a finer description of the heterogeneous dimensions in that object.
 !  For example, A Field of rank 5 can have 3 gridded dimensions and 2 ungridded dimensions.
-!  Rank is precisely the summation of dimension count of all exclusive types of dimensions 
-!  of a tensor object. 
+!  Rank is precisely the summation of dimension count of all types of dimensions. 
 ! 
-!  For example, if a 5D array is used with 3D Grid, there are 2 ungridded dimensions.
-!  And ungriddedLBound=(/1,2/), ungriddedUBound=(/5,7/).
-!  Suppose, the distribution of dimensions look like (O, X, O, X, O), O means gridded,
+!  For example, if a 5D array is used with a 3D Grid, there are 2 ungridded dimensions:
+!  ungriddedLBound=(/1,2/) and ungriddedUBound=(/5,7/).
+!  Suppose the distribution of dimensions look like (O, X, O, X, O), O means gridded,
 !  X means ungridded. Then the mapping from ungridded bounds to Fortran array is
-!  ugb2fa=(/2, 4/). And the shape of 2nd and 4th dimension of Fortran array should equal to
+!  ugb2fa=(/2, 4/). The shape of 2nd and 4th dimension of Fortran array should equal
 !  (5, 8).
 ! 
 !  Back to our 3D Field created from a 2D Grid and 3D Fortran array example, suppose the 3rd
@@ -244,7 +240,7 @@
 !\label{sec:field:usage:create_2dgrid_3dptr_map}
 !
 !  Building upon the previous example, we will create a 3D Field from
-!  2D grid and 3D array but with a slight twist. In this example, we
+!  a 2D grid and 3D array but with a slight twist. In this example, we
 !  introduce the gridToFieldMap argument that allows a user to map Grid 
 !  dimension index to Field dimension index.
 !
@@ -268,7 +264,7 @@
 !
 !  First we use rule 3 to compute shapes of the gridded Fortran array dimension,
 !  then we use rule 2 to compute shapes of the ungridded Fortran array dimension.
-!  In this example, we used the computational and exclusive bounds obtained in previous
+!  In this example, we used the computational and exclusive bounds obtained in the previous
 !  example.
 !EOE
 !BOC
@@ -311,24 +307,24 @@
 !\end{figure}
 !\end{center}
 !  
-!  The {\tt ESMF\_FieldCreate} interface supports creating a Field from a Grid and a
+!  The {\tt ESMF\_FieldCreate()} interface supports creating a Field from a Grid and a
 !  Fortran array padded with halos on the distributed dimensions of the Fortran
 !  array. Using this technique one can avoid passing non-contiguous Fortran array
-!  slice to FieldCreate. It gurantees same computational region;
+!  slice to FieldCreate. It guarantees the same computational region,
 !  and by using halos, it also defines a bigger total region to contain 
 !  the entire contiguous memory block of the Fortran array.
 !
-!  The elements of maxHaloLWidth and maxHaloUWdith are applied in the order
+!  The elements of maxHaloLWidth and maxHaloUWidth are applied in the order
 !  distributed dimensions appear in the Fortran array. By definition, 
 !  maxHaloLWidth and maxHaloUWdith are 1 dimensional arrays of non-negative 
-!  integer values. The size of haloWidth arrays equal to the number of distributed
+!  integer values. The size of haloWidth arrays is equal to the number of distributed
 !  dimensions of the Fortran array, which is also equal to the number of
 !  distributed dimensions of the Grid used in the Field creation.
 !
 !  Because the order of maxHaloWidth (representing both maxHaloLWidth and
 !  maxHaloUWdith) element is applied to the order distributed dimensions
 !  appear in the Fortran array dimensions, it's quite simple to compute
-!  the shape of distributed dimensions of Fortran array. They are done
+!  the shape of distributed dimensions of the Fortran array. They are done
 !  in a similar manner when applying ungriddedLBound and ungriddedUBound 
 !  to ungridded dimensions of the Fortran array defined by rule 2.
 !
@@ -366,13 +362,13 @@
 !
 !  The only complication then is to figure out the mapping from Fortran
 !  array dimension index to Grid dimension index. This process can
-!  be done by compute reverse mapping from Field to Grid.
+!  be done by computing the reverse mapping from Field to Grid.
 !
 !  Typically, we don't have to consider these complications if the following
-!  conditions are met: 1) all Grid dimensions are distributed; 2) DistGrid
+!  conditions are met: 1) All Grid dimensions are distributed. 2) DistGrid
 !  in the Grid has a dimension index mapping to the Grid in the form of 
 !  natural order (/1,2,3,.../). This natural order mapping is the
-!  default mapping between various objects throughout ESMF; 3) Grid to Field
+!  default mapping between various objects throughout ESMF. 3) Grid to Field
 !  mapping is in the form of natural order, i.e. default mapping. These
 !  seem like a lot of conditions but they are the default case in the interaction
 !  among DistGrid, Grid, and Field. When these conditions are met, which

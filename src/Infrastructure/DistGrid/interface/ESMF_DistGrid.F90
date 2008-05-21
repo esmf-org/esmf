@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.39 2008/05/14 17:44:29 w6ws Exp $
+! $Id: ESMF_DistGrid.F90,v 1.40 2008/05/21 22:14:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.39 2008/05/14 17:44:29 w6ws Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.40 2008/05/21 22:14:18 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -186,7 +186,6 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  
   function ESMF_DistGridCreateRD(minIndex, maxIndex, regDecomp, &
     decompflag, regDecompFirstExtra, regDecompLastExtra, deLabelList, &
     indexflag, connectionList, connectionTransList, delayout, vm, rc)
@@ -425,8 +424,7 @@ contains
 ! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with DE blocks
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DistGridCreate()
-  
+  ! Private name; call using ESMF_DistGridCreate()  
   function ESMF_DistGridCreateDB(minIndex, maxIndex, deBlockList, &
     deLabelList, indexflag, connectionList, connectionTransList, delayout, &
     vm, rc)
@@ -2081,6 +2079,7 @@ contains
 ! !IROUTINE: ESMF_DistGridGet - Get DE local information about DistGrid
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_DistGridGet()
   subroutine ESMF_DistGridGetPDe(distgrid, de, regDecompDeCoord, patch, rc)
 !
 ! !ARGUMENTS:
@@ -2140,6 +2139,7 @@ contains
 ! !IROUTINE: ESMF_DistGridGet - Get DE local information about DistGrid
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_DistGridGet()
   subroutine ESMF_DistGridGetPLocalDe(distgrid, localDe, seqIndexList, rc)
 !
 ! !ARGUMENTS:
@@ -2206,6 +2206,7 @@ contains
 ! !IROUTINE: ESMF_DistGridGet - Get DE local information for dimension about DistGrid
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_DistGridGet()
   subroutine ESMF_DistGridGetPLocalDePDim(distgrid, localDe, dim, indexList, rc)
 !
 ! !ARGUMENTS:
@@ -2277,6 +2278,7 @@ contains
 ! !IROUTINE: ESMF_DistGridGet - Get DE local information about links
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_DistGridGet()
   subroutine ESMF_DistGridGetLinksPDe(distgrid, de, staggerLoc, lVecInner, &
     uVecInner, lVecOuter, uVecOuter, linkCount, linkList, rc)
 !

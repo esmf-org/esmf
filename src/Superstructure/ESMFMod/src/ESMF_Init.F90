@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.47 2008/04/05 03:39:15 cdeluca Exp $
+! $Id: ESMF_Init.F90,v 1.48 2008/05/21 22:14:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@
 !     such as MPICH, to do IO before the MPI environment is initialized. Please
 !     consult the documentation of your MPI implementation for details.
 !
-!     Note that when using MPICH as the mpi library, ESMF needs to use
+!     Note that when using MPICH as the MPI library, ESMF needs to use
 !     the application command line arguments for {\tt MPI\_Init()}. However,
 !     ESMF acquires these arguments internally and the user does not need
 !     to worry about providing them. Also, note that ESMF does not alter
@@ -152,7 +152,7 @@
 !     \item [{[mpiCommunicator]}]
 !           MPI communicator defining the group of processes on which the
 !           ESMF application is running.
-!           If not sepcified, defaults to {\tt MPI\_COMM\_WORLD}
+!           If not specified, defaults to {\tt MPI\_COMM\_WORLD}
 !     \item [{[vm]}]
 !           Returns the global {\tt ESMF\_VM} that was created 
 !           during initialization.

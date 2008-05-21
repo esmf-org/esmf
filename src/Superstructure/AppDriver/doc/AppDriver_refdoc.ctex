@@ -1,4 +1,4 @@
-% $Id: AppDriver_refdoc.ctex,v 1.16 2008/04/05 03:39:11 cdeluca Exp $
+% $Id: AppDriver_refdoc.ctex,v 1.17 2008/05/21 22:14:46 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -70,12 +70,12 @@
 \input{../Superstructure/AppDriver/doc/AppDriverSeqPrF_fapi}
 #endif
 
-\subsection{Restrictions and Future Work}
-#ifdef STANDALONE
-\input{AppDriver_rest}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/AppDriver/doc/AppDriver_rest}
-#endif
+%\subsection{Restrictions and Future Work}
+%#ifdef STANDALONE
+%\input{AppDriver_rest}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/AppDriver/doc/AppDriver_rest}
+%#endif
 
 \subsection{Required ESMF Methods}
 #ifdef STANDALONE

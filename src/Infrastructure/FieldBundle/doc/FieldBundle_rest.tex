@@ -1,4 +1,4 @@
-% $Id: FieldBundle_rest.tex,v 1.2 2008/04/02 20:42:52 cdeluca Exp $
+% $Id: FieldBundle_rest.tex,v 1.3 2008/05/21 22:14:29 theurich Exp $
 
 \label{sec:bundlerest}
 
@@ -25,12 +25,10 @@ in the FieldBundle and call the Field level communication routines instead.
 \item{\bf Packed data not supported.}
 One of the options that we are currently working on for FieldBundles is
 packing.  Packing means that the data from all the
-Fields that comprise the FieldBundle are copied into a single Array and
-manipulated collectively.  This operation can be done without 
+Fields that comprise the FieldBundle are manipulated collectively.
+This operation can be done without 
 destroying the original Field data.  Packing is being designed to 
 facilitate optimized regridding, data communication, and IO operations.  
-It will be possible to collectively manipulate all the Fields within 
-a FieldBundle at once, rather than operating on each Field separately.  
 This will reduce the latency overhead of the communication.  
 
 \item{\bf Interleaving Fields within a FieldBundle.}

@@ -1,4 +1,4 @@
-% $Id: GridComp_desc.tex,v 1.9 2008/04/05 03:39:11 cdeluca Exp $
+% $Id: GridComp_desc.tex,v 1.10 2008/05/21 22:14:49 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -9,49 +9,38 @@
 % Licensed under the University of Illinois-NCSA License.
 
 %\subsection{Description}
+\label{sec:GridComp}
 
 In Earth system modeling, the most natural way to think about an ESMF 
 Gridded Component, or {\tt ESMF\_GridComp}, is as a piece of code 
 representing a particular physical domain; for example, an atmospheric 
-model or an ocean model.  
-In many large modeling systems, each components is developed by its
-own group of domain experts.  The ESMF Gridded Component construct 
-provides domain experts with a structured, consistent set of component 
-interfaces so that it is straightforward, at least technically, to 
-combine software from a number of groups, representing different physical 
-domains, to form a complex application.  
+model or an ocean model.  Gridded Components may also represent individual
+processes, such as radiation or chemistry.  It's up to the application
+writer to decide how deeply to ``componentize.''
 
 Earth system software components tend to share a number of basic 
-features.  Most contain a variety of physical fields; refer to 
+features.  Most ingest and produce a variety of physical fields; refer to 
 a (possibly noncontiguous) spatial region and a grid that is 
 partitioned across a set of computational resources; and require 
 a clock, usually for stepping a governing set of PDEs forward in time.  
 Most can also be divided into distinct initialize, run, and finalize 
 computational phases.  These common characteristics are used 
 within ESMF to define a Gridded Component data structure that 
-is both tailored for Earth system modeling and yet is still flexible
+is tailored for Earth system modeling and yet is still flexible
 enough to represent a variety of domains.
-
-More broadly, an ESMF Gridded Component can be based on any 
-software with a computational function that is associated with 
-a grid.  This might be a convection or radiation scheme, a 
-dynamical core, or a data assimilation system.  ESMF allows you
-to nest Gridded Components, so that the physics and dynamics within 
-an atmospheric model can be considered Gridded Components, along
-with the atmospheric model itself.
 
 A well-designed Gridded Component does not store information 
 internally about how it couples to other Gridded Components.  That
 allows it to be used in different contexts without changes to source
-code.\footnote{The idea here is to avoid situations in which slightly
+code.  The idea here is to avoid situations in which slightly
 different versions of the same model source are maintained for use in 
-different contexts - standalone vs. coupled versions, for example.}
+different contexts - standalone vs. coupled versions, for example.
 Data is passed between Gridded Components using an intermediary 
 Coupler Component, described in Section \ref{sec:CplComp}.
 
 An ESMF Gridded Component has two parts, one which is user-written
 and another which is part of the framework.  The user-written
-part is software representing a physical domain or performing some
+part is software that represents a physical domain or performs some
 other computational function.  It forms the body of the Gridded 
 Component.  It may be a piece of legacy code, or it may be developed 
 expressly for use with the ESMF.  It must contain routines with
@@ -77,9 +66,6 @@ Inside the SetServices routine the user must call
 {\tt ESMF\_SetEntryPoint} methods that associate a standard ESMF 
 operation with the name of the corresponding Fortran subroutine in their user code.  
 
-For example, a user-written initialization routine called {\tt popOceanInit} 
-might be associated with the standard initialize routine of an ESMF 
-Gridded Component named ``POP'' that represents an ocean model.
 
 
 

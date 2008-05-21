@@ -2,8 +2,17 @@
 # this script expects the pgCC command (or a wrapper to pgCC, e.g. mpiCC)
 # and returns the required pgCC system libraries
 if [ $1 = "CC" ]; then
+# Cray wrapper on XT3/4 systems
+SWITCHES=`$1 -show 2>&1 | grep switches | grep =`
+if [ "$SWITCHES" = "" ]; then
+# -show output is different on older systems...
 $1 -show 2>&1 | awk 'BEGIN { RS=" "}; /^-l/ ' | xargs
 else
+# ...and newer systems
+echo $SWITCHES | awk 'BEGIN { RS=" "}; /^-l/ ' | grep -v show | xargs
+fi
+else
+# no Cray wrapper
 PGCCEXE=`$1 -dryrun 2>&1 | grep "\/\.pg" | head -1 | awk '{ print $3} '`
 PGCCEXE=$PGCCEXE"TermX"
 PGCCEXE=`echo $PGCCEXE | sed 's/\.pg.*TermX/pgCC/g'`

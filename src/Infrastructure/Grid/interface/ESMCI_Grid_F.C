@@ -141,15 +141,13 @@ extern "C" {
 			   ESMCI::DistGrid **_distgrid,
                            int *_staggerLocCount, 
 			   ESMCI::InterfaceInt **_distgridToGridMap, 
-			   ESMCI::InterfaceInt **_undistLBound,
-			   ESMCI::InterfaceInt **_undistUBound,
 			   ESMCI::InterfaceInt **_coordDimCount,
 			   ESMCI::InterfaceInt **_coordDimMap,		  
 			   ESMCI::InterfaceInt **_gridEdgeLWidth, 	  
 			   ESMCI::InterfaceInt **_gridEdgeUWidth,   
 			   ESMCI::InterfaceInt **_gridAlign,		  
 			   ESMC_IndexFlag *_indexflag,
-                           int *_localDECount, int *_distDimCount, int *_undistDimCount, 
+                           int *_localDECount,
 			   int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridget()"
@@ -191,18 +189,9 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(_dimCount) != ESMC_NULL_POINTER)
       *_dimCount = dimCount;
 
-    // distdimCount
-    if (ESMC_NOT_PRESENT_FILTER(_distDimCount) != ESMC_NULL_POINTER)
-      *_distDimCount = distDimCount;
-
-    // undistdimCount
-    if (ESMC_NOT_PRESENT_FILTER(_undistDimCount) != ESMC_NULL_POINTER)
-      *_undistDimCount = undistDimCount;
-
-    // undistdimCount
-    if (ESMC_NOT_PRESENT_FILTER(_localDECount) != ESMC_NULL_POINTER) {
-       *_localDECount = grid->getDistGrid()->getDELayout()->getLocalDeCount();
-    }
+    // localDeCount
+    if (ESMC_NOT_PRESENT_FILTER(_localDECount) != ESMC_NULL_POINTER)
+      *_localDECount = grid->getDistGrid()->getDELayout()->getLocalDeCount();
     
     // tileCount
     if (ESMC_NOT_PRESENT_FILTER(_tileCount) != ESMC_NULL_POINTER)
@@ -234,41 +223,6 @@ extern "C" {
       for (int i=0; i<distDimCount; i++) {
 	(*_distgridToGridMap)->array[i]=distgridToGridMap[i]+1;
       }
-    }
-
-
-    // get undistLBound
-    if (*_undistLBound != NULL){
-      // Error check
-      if ((*_undistLBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-          "- undistLBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
-        return;
-      }
-      if ((*_undistLBound)->extent[0] < undistDimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-          "- undistLBound array must be of size = the undistributed rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
-        return;
-      }
-      // fill in undistLBound
-      memcpy((*_undistLBound)->array, grid->getUndistLBound(), sizeof(int) * undistDimCount);
-    }
-
-    // get undistUBound
-    if (*_undistUBound != NULL){
-      // Error check
-      if ((*_undistUBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-          "- undistUBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
-        return;
-      }
-      if ((*_undistUBound)->extent[0] < undistDimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-          "- undistUBound array must be of size = the undistributed rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
-        return;
-      }
-      // fill in undistUBound
-      memcpy((*_undistUBound)->array, grid->getUndistUBound(), sizeof(int) * undistDimCount);
     }
 
     // get coordDimCount

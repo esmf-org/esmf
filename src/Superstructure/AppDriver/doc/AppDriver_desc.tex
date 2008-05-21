@@ -1,4 +1,4 @@
-% $Id: AppDriver_desc.tex,v 1.20 2008/04/05 03:39:10 cdeluca Exp $
+% $Id: AppDriver_desc.tex,v 1.21 2008/05/21 22:14:45 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -26,10 +26,9 @@ application include choices about:
 
 \item[Sequential vs. Concurrent Execution]
 
-In a serial execution model every PET executes the same Gridded 
-Component code until it has produced data needed by another 
-Gridded Component, and then all PETs change to running the next 
-Gridded Component or Coupler Component.  This has the appeal of 
+In a sequential execution model every Component executes
+on all PETs, with each Component completing execution before
+the next Component begins.  This has the appeal of 
 simplicity of data consumption and production: when a Gridded 
 Component starts all required data is available for use, and when 
 a Gridded Component finishes all data produced is ready for consumption 
@@ -39,15 +38,13 @@ data decomposition is done such that each processor's memory contains
 the data needed by the next Component.
 
 In a concurrent execution model subgroups of PETs run
-Gridded Components and all Gridded Components are active at the 
+Gridded Components and multiple Gridded Components are active at the 
 same time.  Data exchange must be coordinated between Gridded 
 Components so that data deadlock does not occur.  This strategy 
 has the advantage of allowing coupling to other Gridded Components 
 at any time during the computational process, including not 
 having to return to the calling level of code before making 
-data available.  ESMF supports the concurrent mode of execution
-but does not support asynchronous data transfer from within an 
-executing Component at this time.
+data available.  
 
 \item[Pairwise vs. Hub and Spoke]
 
@@ -77,18 +74,21 @@ increase over time.
 
 \item[Number of Executables]
 
-On a multiple processor machine a cooperating job can be run 
-by starting the same executable on all nodes.  All processors run the
-same code, but the computation proceeds in parallel by each processor 
-working on a different subset of data.  This is a {\bf SPMD} model, 
+The simplest way to run an application
+is to run the same executable program on all PETs.  Different Components
+can still be run on mutually exclusive PETs by using branching
+(e.g., if this is PET 1, 2, or 3, run Component A, if it is
+PET 4, 5, or 6 run Component B).  This is a {\bf SPMD} model, 
 Single Program Multiple Data.  
 
-The alternative is to start a different executable on different
-processors.  This is a {\bf MPMD} model, Multiple Program Multiple Data.
+The alternative is to start a different executable program on different
+PETs.  This is a {\bf MPMD} model, Multiple Program Multiple Data.
 There are complications with many job control systems on multiprocessor
 machines in getting the different executables started, and getting
-inter-process communcations established.  Currently ESMF does not
-support MPMD.
+inter-process communcations established.  ESMF currently has some
+support for MPMD: different Components can run as separate executables,
+but the Coupler that transfers data between the Components must still
+run on the union of their PETs.
 
 \end{description}
 
