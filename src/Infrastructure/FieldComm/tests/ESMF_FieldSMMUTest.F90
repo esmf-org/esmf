@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMUTest.F90,v 1.2 2008/05/19 19:11:30 feiliu Exp $
+! $Id: ESMF_FieldSMMUTest.F90,v 1.3 2008/05/21 14:46:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMUTest.F90,v 1.2 2008/05/19 19:11:30 feiliu Exp $'
+    '$Id: ESMF_FieldSMMUTest.F90,v 1.3 2008/05/21 14:46:06 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -228,6 +228,8 @@ contains
         call ESMF_ArrayDestroy(dstArray)
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
+        deallocate(src_farray, dst_farray)
+        if(lpe == 0) deallocate(factorList, factorIndexList)
         rc = ESMF_SUCCESS
     end subroutine test_smm_1d
 
@@ -360,6 +362,8 @@ contains
         call ESMF_ArrayDestroy(dstArray)
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
+        deallocate(src_farray, dst_farray)
+        deallocate(factorList, factorIndexList)
         rc = ESMF_SUCCESS
     end subroutine test_smm_1da
  
@@ -492,6 +496,8 @@ contains
         call ESMF_ArrayDestroy(dstArray)
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
+        deallocate(src_farray, dst_farray)
+        deallocate(factorList, factorIndexList)
         rc = ESMF_SUCCESS
     end subroutine test_smm_1db
 #endif
