@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.3 2008/05/22 17:26:12 feiliu Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.4 2008/05/22 18:22:12 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.3 2008/05/22 17:26:12 feiliu Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.4 2008/05/22 18:22:12 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -654,7 +654,7 @@ contains
 ! sequence is defined by the order of DistGrid dimensions and the order of 
 ! patches within the DistGrid or by user-supplied arbitrary sequence indices. See 
 ! section \ref{Array:SparseMatMul} for details on the definition of {\em sequence indices}. 
-! SMMribution corresponds to an identity mapping of the source Field vector to 
+! SMM corresponds to an identity mapping of the source Field vector to 
 ! the destination Field vector. 
 !  
 ! Source and destination Fields may be of different <type><kind>. Further source 
