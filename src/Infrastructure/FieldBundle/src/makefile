@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2008/05/22 17:28:25 feiliu Exp $ 
+# $Id: makefile,v 1.4 2008/05/22 18:22:44 feiliu Exp $ 
 
 
 ALL: build_here 
@@ -8,7 +8,7 @@ AUTOGEN   =
 # ESMF_FieldBundleGet.F90 
 
 SOURCEC	  = 
-SOURCEF	  = ESMF_FieldBundle.F90 ESMF_FieldBundleSMM.F90 $(AUTOGEN)
+SOURCEF	  = ESMF_FieldBundle.F90 ESMF_FieldBundleSMM.F90 ESMF_FieldBundleRedist.F90 $(AUTOGEN)
 SOURCEH	  = 
 
 
