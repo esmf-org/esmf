@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistUTest.F90,v 1.1 2008/05/08 19:00:37 feiliu Exp $
+! $Id: ESMF_FieldRedistUTest.F90,v 1.2 2008/05/22 20:34:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -18,12 +18,13 @@ program ESMF_FieldRedistUTest
 #include <ESMF_Macros.inc>
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !PROGRAM: ESMF_FieldRedistUTest - This test verifies FieldRedist functionality.
 !
 ! !DESCRIPTION:
 !
 ! The code in this file specializes on testing the usage of FiledRedist.
+!EOPI
 !
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -35,7 +36,7 @@ program ESMF_FieldRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistUTest.F90,v 1.1 2008/05/08 19:00:37 feiliu Exp $'
+    '$Id: ESMF_FieldRedistUTest.F90,v 1.2 2008/05/22 20:34:21 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -69,9 +70,9 @@ program ESMF_FieldRedistUTest
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
-contains
-
 #ifdef ESMF_TESTEXHAUSTIVE
+
+contains
 
 #undef ESMF_METHOD
 #define ESMF_METHOD "test_redist_1d"
@@ -193,6 +194,8 @@ contains
         call ESMF_ArrayDestroy(dstArray)
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
+        deallocate(src_farray, dst_farray)
+
         rc = ESMF_SUCCESS
     end subroutine test_redist_1d
  

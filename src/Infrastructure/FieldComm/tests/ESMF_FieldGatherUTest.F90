@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.29 2008/05/21 14:46:06 feiliu Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.30 2008/05/22 20:34:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -18,12 +18,13 @@ program ESMF_FieldGatherUTest
 #include <ESMF_Macros.inc>
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !PROGRAM: ESMF_FieldGatherUTest - This test verifies FieldGather functionality.
 !
 ! !DESCRIPTION:
 !
 ! The code in this file specializes on testing the usage of FiledGather.
+!EOPI
 !
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -35,7 +36,7 @@ program ESMF_FieldGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldGatherUTest.F90,v 1.29 2008/05/21 14:46:06 feiliu Exp $'
+    '$Id: ESMF_FieldGatherUTest.F90,v 1.30 2008/05/22 20:34:21 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
