@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.2 2008/05/20 20:33:19 w6ws Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.3 2008/05/22 17:26:12 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.2 2008/05/20 20:33:19 w6ws Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.3 2008/05/22 17:26:12 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -117,11 +117,11 @@ contains
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
 !     all DEs in {\tt dstField} will be initialized to zero before updating the 
 !     elements with the results of the sparse matrix multiplication. If set to
-!     {\tt ESMF\_REGION\_EMPTY} the elements in {\tt dstArray} will not be
+!     {\tt ESMF\_REGION\_EMPTY} the elements in {\tt dstField} will not be
 !     modified prior to the sparse matrix multiplication and results will be
 !     added to the incoming element values. Setting {\tt zeroflag} to 
 !     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
-!     destination Array that will be updated by the sparse matrix
+!     destination Field that will be updated by the sparse matrix
 !     multiplication. See section \ref{opt:regionflag} for a complete list of
 !     valid settings.
 !   \item [{[checkflag]}]
@@ -271,7 +271,7 @@ contains
 ! sequence is defined by the order of DistGrid dimensions and the order of 
 ! patches within the DistGrid or by user-supplied arbitrary sequence indices. See 
 ! section \ref{Array:SparseMatMul} for details on the definition of {\em sequence indices}. 
-! SMMribution corresponds to an identity mapping of the source Field vector to 
+! SMM corresponds to an identity mapping of the source Field vector to 
 ! the destination Field vector. 
 !  
 ! Source and destination Fields may be of different <type><kind>. Further source 
@@ -315,24 +315,24 @@ contains
 !     dimension of {\tt factorIndexList} is either of size 2 or size 4.
 !
 !     In the {\em size 2 format} {\tt factorIndexList(1,:)} specifies the
-!     sequence index of the source element in the {\tt srcArray} while
+!     sequence index of the source element in the {\tt srcField} while
 !     {\tt factorIndexList(2,:)} specifies the sequence index of the
-!     destination element in {\tt dstArray}. For this format to be a valid
-!     option source and destination Arrays must have matching number of
-!     tensor elements (the product of the sizes of all Array tensor dimensions).
+!     destination element in {\tt dstField}. For this format to be a valid
+!     option source and destination Fields must have matching number of
+!     tensor elements (the product of the sizes of all Field tensor dimensions).
 !     Under this condition an identiy matrix can be applied within the space of
 !     tensor elements for each sparse matrix factor.
 !
 !     The {\em size 4 format} is more general and does not require a matching
 !     tensor element count. Here the {\tt factorIndexList(1,:)} specifies the
 !     sequence index while {\tt factorIndexList(2,:)} specifies the tensor
-!     sequence index of the source element in the {\tt srcArray}. Further
+!     sequence index of the source element in the {\tt srcField}. Further
 !     {\tt factorIndexList(3,:)} specifies the sequence index and
 !     {\tt factorIndexList(4,:)} specifies the tensor sequence index of the 
-!     destination element in the {\tt dstArray}.
+!     destination element in the {\tt dstField}.
 !
 !     See section \ref{Array:SparseMatMul} for details on the definition of 
-!     Array {\em sequence indices} and {\em tensor sequence indices}.
+!     Field {\em sequence indices} and {\em tensor sequence indices}.
 ! \item [{[rc]}]  
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
