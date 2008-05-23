@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistUTest.F90,v 1.2 2008/05/22 20:34:21 feiliu Exp $
+! $Id: ESMF_FieldRedistUTest.F90,v 1.3 2008/05/23 19:07:34 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistUTest.F90,v 1.2 2008/05/22 20:34:21 feiliu Exp $'
+    '$Id: ESMF_FieldRedistUTest.F90,v 1.3 2008/05/23 19:07:34 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -65,6 +65,14 @@ program ESMF_FieldRedistUTest
         call test_redist_1d(rc)
         write(failMsg, *) ""
         write(name, *) "FieldRedist basic test"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Scatter test
+        call test_redist_3d(rc)
+        write(failMsg, *) ""
+        write(name, *) "FieldRedist basic test 3d field"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
@@ -198,6 +206,135 @@ contains
 
         rc = ESMF_SUCCESS
     end subroutine test_redist_1d
+
+    subroutine test_redist_3d(rc)
+        integer, intent(out)                        :: rc
+
+        ! local arguments used to create field etc
+        type(ESMF_Field)                            :: field, srcField, dstField
+        type(ESMF_Grid)                             :: grid
+        type(ESMF_DistGrid)                         :: distgrid
+        type(ESMF_VM)                               :: vm
+        type(ESMF_RouteHandle)                      :: routehandle
+        type(ESMF_ArraySpec)                        :: arrayspec
+        integer                                     :: localrc, lpe, i, j, k
+
+        integer(ESMF_KIND_I4), pointer              :: srcfptr(:,:,:), dstfptr(:,:,:), fptr(:,:,:)
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        call ESMF_VMGetCurrent(vm, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
+            regDecomp=(/2,2/), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        grid = ESMF_GridCreate(distgrid=distgrid, name="grid", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_I4, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        field = ESMF_FieldCreate(grid, arrayspec, &
+            ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
+            maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        srcField = ESMF_FieldCreate(grid, arrayspec, &
+            ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
+! comment out halos will pass the test
+            maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(srcField, localDe=0, farray=srcfptr, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        srcfptr = lpe
+
+        dstField = ESMF_FieldCreate(grid, arrayspec, &
+            ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
+! comment out halos will pass the test
+            maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(dstField, localDe=0, farray=dstfptr, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        dstfptr = 0
+
+        ! perform redist
+        call ESMF_FieldRedistStore(srcField, dstField, routehandle, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldRedist(srcField, dstField, routehandle, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! verify redist
+        call ESMF_FieldGet(dstField, localDe=0, farray=fptr, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! Verify that the redistributed data in dstField is correct.
+        ! Before the redist op, the dst Field contains all 0. 
+        ! The redist op reset the values to the PE value, verify this is the case.
+        do k = lbound(fptr, 3), ubound(fptr, 3)
+            do j = lbound(fptr, 2), ubound(fptr, 2)
+                do i = lbound(fptr, 1), ubound(fptr, 1)
+                    if(fptr(i,j,k) .ne. lpe) localrc = ESMF_FAILURE
+                enddo
+            enddo
+        enddo
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! release route handle
+        call ESMF_FieldRedistRelease(routehandle, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldDestroy(field)
+        call ESMF_FieldDestroy(srcField)
+        call ESMF_FieldDestroy(dstField)
+        call ESMF_GridDestroy(grid)
+        call ESMF_DistGridDestroy(distgrid)
+
+        rc = ESMF_SUCCESS
+    end subroutine test_redist_3d
  
 #endif
 
