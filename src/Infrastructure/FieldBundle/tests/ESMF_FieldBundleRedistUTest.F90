@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistUTest.F90,v 1.7 2008/05/23 17:54:37 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistUTest.F90,v 1.8 2008/05/23 20:26:53 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ program ESMF_RedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRedistUTest.F90,v 1.7 2008/05/23 17:54:37 feiliu Exp $'
+    '$Id: ESMF_FieldBundleRedistUTest.F90,v 1.8 2008/05/23 20:26:53 feiliu Exp $'
 !------------------------------------------------------------------------------
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
@@ -145,7 +145,7 @@ contains
         do i = 1, 3
             srcField(i) = ESMF_FieldCreate(grid, arrayspec, &
                 ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
-                maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
+!                maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -165,7 +165,7 @@ contains
 
             dstField(i) = ESMF_FieldCreate(grid, arrayspec, &
                 ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
-                maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
+!                maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -197,7 +197,7 @@ contains
 
         ! verify redist
         do l = 1, 3
-            call ESMF_FieldGet(dstField(i), localDe=0, farray=fptr, rc=localrc)
+            call ESMF_FieldGet(dstField(l), localDe=0, farray=fptr, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
