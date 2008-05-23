@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.5 2008/05/08 04:46:07 theurich Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.6 2008/05/23 17:54:36 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -168,7 +168,6 @@ contains
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray4
         type(ESMF_Field)    :: f1, f2, f3, f4, f5
         type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)  :: array8, array
         integer           :: i, j, localrc
         logical           :: ldo_slicing = .false.
         logical           :: ldo_slicing1 = .false.
@@ -273,9 +272,6 @@ contains
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray4
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray5
         type(ESMF_Field)    :: f1, f2, f3, f4, f5
-        type(ESMF_Grid)     :: grid
-        type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)  :: array8, array
         integer           :: fc, i, j, localrc
         logical           :: ldo_slicing = .false.
         logical           :: ldo_slicing1 = .false.

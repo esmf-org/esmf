@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.1 2008/05/22 18:22:43 feiliu Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.2 2008/05/23 17:54:36 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.1 2008/05/22 18:22:43 feiliu Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.2 2008/05/23 17:54:36 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -674,6 +674,7 @@ contains
 !   type(ESMF_FieldBundle),   intent(inout)         :: srcFieldBundle  
 !   type(ESMF_FieldBundle),   intent(inout)         :: dstFieldBundle  
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
+!   integer,                  intent(in) , optional :: srcToDstTransposeMap(:)
 !   integer,                  intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -727,6 +728,11 @@ contains
 !       {\tt ESMF\_FieldBundle} with destination data. 
 ! \item [routehandle] 
 !       Handle to the precomputed Route. 
+! \item [{[srcToDstTransposeMap]}] 
+!       List with as many entries as there are dimensions in {\tt srcFieldBundle}. Each 
+! entry maps the corresponding {\tt srcFieldBundle} dimension 
+! against the specified {\tt dstFieldBundle} 
+! dimension. Mixing of distributed and undistributed dimensions is supported.  
 ! \item [{[rc]}]  
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -742,12 +748,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
     subroutine ESMF_FieldBundleRedistStoreNF(srcFieldBundle, dstFieldBundle, & 
-        routehandle, rc) 
+        routehandle, srcToDstTransposeMap, rc) 
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(inout)         :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
+        integer,                intent(in) , optional :: srcToDstTransposeMap(:)
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -794,7 +801,7 @@ contains
         do i = 1, 1 !fcount
             srcField = srcFieldBundle%btypep%flist(i)
             dstField = dstFieldBundle%btypep%flist(i)
-            call ESMF_FieldRedistStore(srcField, dstField, routehandle, rc=localrc)
+            call ESMF_FieldRedistStore(srcField, dstField, routehandle, srcToDstTransposeMap, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, & 
                 ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rc)) return 

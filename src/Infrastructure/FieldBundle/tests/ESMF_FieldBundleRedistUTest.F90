@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistUTest.F90,v 1.6 2008/05/22 20:34:33 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistUTest.F90,v 1.7 2008/05/23 17:54:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ program ESMF_RedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRedistUTest.F90,v 1.6 2008/05/22 20:34:33 feiliu Exp $'
+    '$Id: ESMF_FieldBundleRedistUTest.F90,v 1.7 2008/05/23 17:54:37 feiliu Exp $'
 !------------------------------------------------------------------------------
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
@@ -93,7 +93,7 @@ contains
         type(ESMF_ArraySpec)                        :: arrayspec
         integer                                     :: localrc, lpe, i, j, k, l
 
-        integer(ESMF_KIND_I4), pointer              :: srcfptr(:,:,:), dstfptr(:,:,:), fptr(:)
+        integer(ESMF_KIND_I4), pointer              :: srcfptr(:,:,:), dstfptr(:,:,:), fptr(:,:,:)
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -151,6 +151,13 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
+            call ESMF_FieldGet(srcField(i), localDe=0, farray=srcfptr, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
+            srcfptr = lpe
+
             call ESMF_FieldBundleAdd(srcFieldBundle, srcField(i), rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -163,6 +170,13 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
+
+            call ESMF_FieldGet(dstField(i), localDe=0, farray=dstfptr, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
+            dstfptr = 0
 
             call ESMF_FieldBundleAdd(dstFieldBundle, dstField(i), rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
@@ -191,12 +205,16 @@ contains
             ! Verify that the redistributed data in dstField is correct.
             ! Before the redist op, the dst Field contains all 0. 
             ! The redist op reset the values to the PE value, verify this is the case.
-            !do i = lbound(fptr, 1), ubound(fptr, 1)
-            !    if(fptr(i) .ne. lpe) localrc = ESMF_FAILURE
-            !enddo
-            !if (ESMF_LogMsgFoundError(localrc, &
-            !    ESMF_ERR_PASSTHRU, &
-            !    ESMF_CONTEXT, rc)) return
+            do k = lbound(fptr, 3), ubound(fptr, 3)
+                do j = lbound(fptr, 2), ubound(fptr, 2)
+                    do i = lbound(fptr, 1), ubound(fptr, 1)
+                        if(fptr(i,j,k) .ne. lpe) localrc = ESMF_FAILURE
+                    enddo
+                enddo
+            enddo
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
         enddo
 
         ! release route handle
