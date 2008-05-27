@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistUTest.F90,v 1.3 2008/05/23 19:07:34 feiliu Exp $
+! $Id: ESMF_FieldRedistUTest.F90,v 1.4 2008/05/27 17:28:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistUTest.F90,v 1.3 2008/05/23 19:07:34 feiliu Exp $'
+    '$Id: ESMF_FieldRedistUTest.F90,v 1.4 2008/05/27 17:28:41 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -207,6 +207,8 @@ contains
         rc = ESMF_SUCCESS
     end subroutine test_redist_1d
 
+#undef ESMF_METHOD
+#define ESMF_METHOD "test_redist_3d"
     subroutine test_redist_3d(rc)
         integer, intent(out)                        :: rc
 
@@ -218,6 +220,7 @@ contains
         type(ESMF_RouteHandle)                      :: routehandle
         type(ESMF_ArraySpec)                        :: arrayspec
         integer                                     :: localrc, lpe, i, j, k
+        integer                                     :: exLB(3), exUB(3)
 
         integer(ESMF_KIND_I4), pointer              :: srcfptr(:,:,:), dstfptr(:,:,:), fptr(:,:,:)
 
@@ -260,7 +263,6 @@ contains
 
         srcField = ESMF_FieldCreate(grid, arrayspec, &
             ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
-! comment out halos will pass the test
             maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -276,7 +278,6 @@ contains
 
         dstField = ESMF_FieldCreate(grid, arrayspec, &
             ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
-! comment out halos will pass the test
             maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -302,7 +303,8 @@ contains
             ESMF_CONTEXT, rc)) return
 
         ! verify redist
-        call ESMF_FieldGet(dstField, localDe=0, farray=fptr, rc=localrc)
+        call ESMF_FieldGet(dstField, localDe=0, farray=fptr, &
+          exclusiveLBound=exLB, exclusiveUBound=exUB, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -310,10 +312,11 @@ contains
         ! Verify that the redistributed data in dstField is correct.
         ! Before the redist op, the dst Field contains all 0. 
         ! The redist op reset the values to the PE value, verify this is the case.
-        do k = lbound(fptr, 3), ubound(fptr, 3)
-            do j = lbound(fptr, 2), ubound(fptr, 2)
-                do i = lbound(fptr, 1), ubound(fptr, 1)
-                    if(fptr(i,j,k) .ne. lpe) localrc = ESMF_FAILURE
+        ! MUST use exclusive bounds because Redist operates within excl. region.
+        do k = exLB(3), exUB(3)
+            do j = exLB(2), exUB(2)
+                do i = exLB(1), exUB(1)
+                   if(fptr(i,j,k) .ne. lpe) localrc = ESMF_FAILURE
                 enddo
             enddo
         enddo
