@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMEx.F90,v 1.1 2008/05/19 20:57:14 feiliu Exp $
+! $Id: ESMF_FieldSMMEx.F90,v 1.2 2008/05/28 17:14:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMEx.F90,v 1.1 2008/05/19 20:57:14 feiliu Exp $'
+    '$Id: ESMF_FieldSMMEx.F90,v 1.2 2008/05/28 17:14:35 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -162,7 +162,7 @@
 
     ! Verify that the result data in dstField is correct.
     ! Before the SMM op, the dst Field contains all 0. 
-    ! The SMM op reset the values to the PE value, verify this is the case.
+    ! The SMM op reset the values to the index value, verify this is the case.
     ! +--------+--------+--------+--------+
     !  1 2 3 4  1 2 3 4  1 2 3 4  1 2 3 4          ! value
     ! 1        4        8        12       16       ! bounds
