@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.20 2008/05/12 18:41:56 feiliu Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.21 2008/05/28 20:03:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistEx.F90,v 1.20 2008/05/12 18:41:56 feiliu Exp $'
+    '$Id: ESMF_FieldRedistEx.F90,v 1.21 2008/05/28 20:03:05 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -61,7 +61,7 @@
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !------------------------------------------------------------------------------
 !BOE
-! \subsubsection{Redist data from source Field to destination Field}
+! \subsubsection{Redistribute data from source Field to destination Field}
 ! \label{sec:field:usage:redist_1dptr}
 !
 ! User can use {\tt ESMF\_FieldRedist} interface to redistribute data from 
