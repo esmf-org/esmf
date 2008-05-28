@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.4 2008/05/21 22:14:21 theurich Exp $
+! $Id: ESMF_FieldEx.F90,v 1.5 2008/05/28 20:12:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -135,11 +135,11 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
     ! retrieve the Fortran data pointer from the Field
-    call ESMF_FieldGet(field, 0, farray1, rc=rc)
+    call ESMF_FieldGet(field, localDe=0, farray=farray1, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! retrieve the Fortran data pointer from the Field
-    call ESMF_FieldGet(field, 0, farray1, &
+    call ESMF_FieldGet(field, localDe=0, farray=farray1, &
         computationalLBound=compLBnd, computationalUBound=compUBnd, &
         exclusiveLBound=exclLBnd, exclusiveUBound=exclUBnd, &
         totalLBound=totalLBnd, totalUBound=totalUBnd, &
