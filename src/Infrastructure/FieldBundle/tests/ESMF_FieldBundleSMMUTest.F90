@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistUTest.F90,v 1.10 2008/05/28 18:38:42 feiliu Exp $
+! $Id: ESMF_FieldBundleSMMUTest.F90,v 1.1 2008/05/28 18:39:02 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -10,39 +10,36 @@
 !
 !==============================================================================
 !
-program ESMF_RedistUTest
-
-#include "ESMF.h"
-#include "ESMF_Macros.inc"
+program ESMF_FieldBundleSMMUTest
 
 !------------------------------------------------------------------------------
+! INCLUDES
+#include <ESMF.h>
+#include <ESMF_Macros.inc>
 !
 !==============================================================================
-!BOP
-! !PROGRAM: ESMF_RedistUTest - Data redistribution tests
+!BOPI
+! !PROGRAM: ESMF_FieldBundleSMMUTest - This test verifies FieldBundleSMM functionality.
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 Redist unit tests, using the Route code.
-!
-!  "Redist" is sending data from one field to another, where the grids 
-!   themselves are identical, but the decompositions (which subsets of the
-!   grid are located on each processor) are different.  Redist sends data
-!   from one processor to another with no interpolation.  See Regrid for
-!   routines which do data interpolation from one igrid to another.
+! The code in this file specializes on testing the usage of FiledSMM.
+!EOPI
 !
 !-----------------------------------------------------------------------------
 ! !USES:
     use ESMF_TestMod     ! test methods
     use ESMF_Mod
-    use ESMF_FieldBundleRedistMod
+    use ESMF_FieldBundleSMMMod
+  
     implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRedistUTest.F90,v 1.10 2008/05/28 18:38:42 feiliu Exp $'
+    '$Id: ESMF_FieldBundleSMMUTest.F90,v 1.1 2008/05/28 18:39:02 feiliu Exp $'
 !------------------------------------------------------------------------------
+
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
 
@@ -63,11 +60,12 @@ program ESMF_RedistUTest
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 #ifdef ESMF_TESTEXHAUSTIVE
+
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        call test_redist_3d(rc)
+        call test_smm_1db(rc)
         write(failMsg, *) ""
-        write(name, *) "FieldRedist basic test"
+        write(name, *) "FieldBundleSMM test using lpe for both src and dst, with halos"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
@@ -78,22 +76,27 @@ program ESMF_RedistUTest
 contains
 
 #undef ESMF_METHOD
-#define ESMF_METHOD "test_redist_3d"
-    subroutine test_redist_3d(rc)
+#define ESMF_METHOD "test_smm_1d"
+ 
+    subroutine test_smm_1db(rc)
         integer, intent(out)                        :: rc
 
         ! local arguments used to create field etc
         type(ESMF_FieldBundle)                      :: srcFieldBundle, dstFieldBundle
-        type(ESMF_Field)                            :: field, srcField(3), dstField(3)
+        type(ESMF_Field)                            :: srcField(3), dstField(3)
         type(ESMF_Grid)                             :: grid
         type(ESMF_DistGrid)                         :: distgrid
         type(ESMF_VM)                               :: vm
         type(ESMF_RouteHandle)                      :: routehandle
         type(ESMF_ArraySpec)                        :: arrayspec
-        integer                                     :: localrc, lpe, i, j, k, l
-        integer                                     :: exLB(3), exUB(3)
+        integer                                     :: localrc, lpe, i, l
 
-        integer(ESMF_KIND_I4), pointer              :: srcfptr(:,:,:), dstfptr(:,:,:), fptr(:,:,:)
+        integer, pointer                            :: srcfptr(:), dstfptr(:)
+        integer, pointer                            :: fptr(:)
+        integer                                     :: exlb(1), exub(1)
+        
+        integer(ESMF_KIND_I4), allocatable          :: factorList(:)
+        integer, allocatable                        :: factorIndexList(:,:)
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -108,30 +111,27 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
-            regDecomp=(/2,2/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-
-        grid = ESMF_GridCreate(distgrid=distgrid, name="grid", rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-
-        call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_I4, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-
-        field = ESMF_FieldCreate(grid, arrayspec, &
-            ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
-            maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
+        ! create distgrid and grid
+        distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
+            regDecomp=(/4/), &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
+        grid = ESMF_GridCreate(distgrid=distgrid, &
+            gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
+            name="grid", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! create field bundles and fields
         srcFieldBundle = ESMF_FieldBundleCreate(grid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -144,8 +144,7 @@ contains
 
         do i = 1, 3
             srcField(i) = ESMF_FieldCreate(grid, arrayspec, &
-                ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
-                maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
+                maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -156,7 +155,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-            srcfptr = lpe
+            srcfptr = 1
 
             call ESMF_FieldBundleAdd(srcFieldBundle, srcField(i), rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
@@ -164,8 +163,7 @@ contains
                 ESMF_CONTEXT, rc)) return
 
             dstField(i) = ESMF_FieldCreate(grid, arrayspec, &
-                ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
-                maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
+                maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
                 rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -184,61 +182,62 @@ contains
                 ESMF_CONTEXT, rc)) return
         enddo
 
-        ! perform redist
-        call ESMF_FieldBundleRedistStore(srcFieldBundle, dstFieldBundle, routehandle, rc=localrc)
+        ! initialize factorList and factorIndexList
+        allocate(factorList(4))
+        allocate(factorIndexList(2,4))
+        factorList = (/1,2,3,4/)
+        factorIndexList(1,:) = (/lpe*4+1,lpe*4+2,lpe*4+3,lpe*4+4/)
+        factorIndexList(2,:) = (/lpe*4+1,lpe*4+2,lpe*4+3,lpe*4+4/)
+        call ESMF_FieldBundleSMMStore(srcFieldBundle, dstFieldBundle, routehandle, &
+            factorList, factorIndexList, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldBundleRedist(srcFieldBundle, dstFieldBundle, routehandle, rc=localrc)
+        ! perform smm
+        call ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, routehandle, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        ! verify redist
+        ! verify smm
         do l = 1, 3
             call ESMF_FieldGet(dstField(l), localDe=0, farray=fptr, &
-              exclusiveLBound=exLB, exclusiveUBound=exUB, rc=localrc)
+                exclusiveLBound=exlb, exclusiveUBound=exub, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-            ! Verify that the redistributed data in dstField is correct.
-            ! Before the redist op, the dst Field contains all 0. 
-            ! The redist op reset the values to the PE value, verify this is the case.
-            ! MUST use exclusive bounds because Redist operates within excl. region.
-            do k = exLB(3), exUB(3)
-                do j = exLB(2), exUB(2)
-                    do i = exLB(1), exUB(1)
-                       if(fptr(i,j,k) .ne. lpe) localrc = ESMF_FAILURE
-                    enddo
-                enddo
+            ! Verify that the smm data in dstField(l) is correct.
+            ! Before the smm op, the dst Field contains all 0. 
+            ! The smm op reset the values to the index value, verify this is the case.
+            !write(*, '(9I3)') l, lpe, fptr
+            do i = exlb(1), exub(1)
+                if(fptr(i) .ne. i) localrc = ESMF_FAILURE
             enddo
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
 
-        ! release route handle
-        call ESMF_FieldRedistRelease(routehandle, rc=localrc)
+        ! release SMM route handle
+        call ESMF_FieldBundleSMMRelease(routehandle, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
+        ! release all acquired resources
         call ESMF_FieldBundleDestroy(srcFieldBundle)
         call ESMF_FieldBundleDestroy(dstFieldBundle)
-        call ESMF_FieldDestroy(field)
-        do i = 1, 3
-            call ESMF_FieldDestroy(srcField(i))
-            call ESMF_FieldDestroy(dstField(i))
+        do l = 1, 3
+            call ESMF_FieldDestroy(srcField(l))
+            call ESMF_FieldDestroy(dstField(l))
         enddo
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
-
+        deallocate(factorList, factorIndexList)
         rc = ESMF_SUCCESS
-    end subroutine test_redist_3d
- 
+    end subroutine test_smm_1db
 #endif
 
-! -------- end of unit test code ------------------------
-end program ESMF_RedistUTest
+end program ESMF_FieldBundleSMMUTest
