@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.2 2008/05/23 17:54:36 feiliu Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.3 2008/05/28 18:44:30 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.2 2008/05/23 17:54:36 feiliu Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.3 2008/05/28 18:44:30 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -185,7 +185,7 @@ contains
             endif
             if(src_bundle .and. dst_bundle) &
                 call ESMF_FieldRedist(l_srcField, l_dstField, routehandle, &
-                    l_checkflag, localrc)
+                    checkflag=l_checkflag, rc=localrc)
             if(src_bundle .and. .not. dst_bundle) &
                 call ESMF_FieldRedist(srcField=l_srcField, routehandle=routehandle, &
                     checkflag=l_checkflag, rc=localrc)

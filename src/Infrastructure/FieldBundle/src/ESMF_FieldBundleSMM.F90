@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.2 2008/05/22 18:22:43 feiliu Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.3 2008/05/28 18:44:30 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.2 2008/05/22 18:22:43 feiliu Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.3 2008/05/28 18:44:30 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -144,6 +144,11 @@ contains
         type(ESMF_Field)        :: l_srcField ! helper variable
         type(ESMF_Field)        :: l_dstField ! helper variable
 
+        ! local internal variables
+        logical                 :: src_bundle = .true.
+        logical                 :: dst_bundle = .true.
+        integer                 :: fcount, i
+
         ! initialize return code; assume routine not implemented
         localrc = ESMF_RC_NOT_IMPL
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -151,39 +156,63 @@ contains
         ! Check init status of arguments, deal with optional FieldBundle args
         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
 
-!        if (present(srcFieldBundle)) then
-!          ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, srcFieldBundle, rc)
-!          call ESMF_FieldBundleGet(srcFieldBundle, array=l_srcField, rc=localrc)
-!          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rcToReturn=rc)) return
-!        else
-!          call ESMF_ArraySetThisNull(l_srcField, localrc)
-!          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rcToReturn=rc)) return
-!        endif
-!
-!        if (present(dstFieldBundle)) then
-!          ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, dstFieldBundle, rc)
-!          call ESMF_FieldBundleGet(dstFieldBundle, array=l_dstField, rc=localrc)
-!          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rcToReturn=rc)) return
-!        else
-!          call ESMF_ArraySetThisNull(l_dstField, localrc)
-!          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rcToReturn=rc)) return
-!        endif
-!        
-!        ! Set default flags
-!        l_checkflag = ESMF_FALSE
-!        if (present(checkflag)) l_checkflag = checkflag
-!        l_zeroflag = ESMF_REGION_TOTAL
-!        if (present(zeroflag)) l_zeroflag = zeroflag
-!            
-!        ! perform FieldBundle sparse matrix multiplication through internal array
-!        call ESMF_FieldSMM(l_srcField, l_dstField, routehandle, &
-!          l_zeroflag, l_checkflag, localrc)
-!        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!          ESMF_CONTEXT, rcToReturn=rc)) return
+        if (present(srcFieldBundle)) then
+            ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, srcFieldBundle, rc)
+        else
+            src_bundle = .false.
+        endif
+
+        if (present(dstFieldBundle)) then
+            ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, dstFieldBundle, rc)
+        else
+            dst_bundle = .false.
+        endif
+        
+        ! Set default flags
+        l_checkflag = ESMF_FALSE
+        if (present(checkflag)) l_checkflag = checkflag
+        l_zeroflag = ESMF_REGION_TOTAL
+        if (present(zeroflag)) l_zeroflag = zeroflag
+
+        ! loop over source and destination fields. 
+        ! verify src and dst FieldBundles can communicate
+        ! field_count match
+        if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+               "src and dst FieldBundle must have same number of fields", &
+                ESMF_CONTEXT, rc)
+            return
+        endif 
+
+        fcount = srcFieldBundle%btypep%field_count
+
+        ! perform FieldBundle redistribution
+        do i = 1, fcount
+            if(src_bundle) then
+                call ESMF_FieldBundleGet(srcFieldBundle, i, field=l_srcField, rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+            if(dst_bundle) then
+                call ESMF_FieldBundleGet(dstFieldBundle, i, field=l_dstField, rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+            if(src_bundle .and. dst_bundle) &
+                call ESMF_FieldSMM(l_srcField, l_dstField, routehandle, &
+                    zeroflag=l_zeroflag, checkflag=l_checkflag, rc=localrc)
+            if(src_bundle .and. .not. dst_bundle) &
+                call ESMF_FieldSMM(srcField=l_srcField, routehandle=routehandle, &
+                    zeroflag=l_zeroflag, checkflag=l_checkflag, rc=localrc)
+            if(.not. src_bundle .and. dst_bundle) &
+                call ESMF_FieldSMM(dstField=l_dstField, routehandle=routehandle, &
+                    zeroflag=l_zeroflag, checkflag=l_checkflag, rc=localrc)
+            if(.not. src_bundle .and. .not. dst_bundle) &
+                call ESMF_FieldSMM(routehandle=routehandle, &
+                    zeroflag=l_zeroflag, checkflag=l_checkflag, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
         
         ! return successfully
         if (present(rc)) rc = ESMF_SUCCESS
