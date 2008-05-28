@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistUTest.F90,v 1.5 2008/05/27 20:03:17 feiliu Exp $
+! $Id: ESMF_FieldRedistUTest.F90,v 1.6 2008/05/28 18:40:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistUTest.F90,v 1.5 2008/05/27 20:03:17 feiliu Exp $'
+    '$Id: ESMF_FieldRedistUTest.F90,v 1.6 2008/05/28 18:40:35 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -61,7 +61,6 @@ program ESMF_FieldRedistUTest
 #ifdef ESMF_TESTEXHAUSTIVE
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        ! Scatter test
         call test_redist_1d(rc)
         write(failMsg, *) ""
         write(name, *) "FieldRedist basic test"
@@ -69,7 +68,6 @@ program ESMF_FieldRedistUTest
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        ! Scatter test
         call test_redist_3d(rc)
         write(failMsg, *) ""
         write(name, *) "FieldRedist 3d fields with ungridded bounds and halos"
@@ -77,7 +75,6 @@ program ESMF_FieldRedistUTest
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        ! Scatter test
         call test_redist_5d(rc)
         write(failMsg, *) ""
         write(name, *) "FieldRedist congruent 5d fields with ungridded bounds and halos"
@@ -85,7 +82,6 @@ program ESMF_FieldRedistUTest
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        ! Scatter test
         call test_redist_5dt(rc)
         write(failMsg, *) ""
         write(name, *) "FieldRedist congruent 5d fields with ungridded bounds and halos " // &
