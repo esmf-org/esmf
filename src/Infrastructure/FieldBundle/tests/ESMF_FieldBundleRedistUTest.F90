@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistUTest.F90,v 1.10 2008/05/28 18:38:42 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistUTest.F90,v 1.11 2008/05/29 15:30:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ program ESMF_RedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRedistUTest.F90,v 1.10 2008/05/28 18:38:42 feiliu Exp $'
+    '$Id: ESMF_FieldBundleRedistUTest.F90,v 1.11 2008/05/29 15:30:17 feiliu Exp $'
 !------------------------------------------------------------------------------
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
@@ -84,7 +84,7 @@ contains
 
         ! local arguments used to create field etc
         type(ESMF_FieldBundle)                      :: srcFieldBundle, dstFieldBundle
-        type(ESMF_Field)                            :: field, srcField(3), dstField(3)
+        type(ESMF_Field)                            :: srcField(3), dstField(3)
         type(ESMF_Grid)                             :: grid
         type(ESMF_DistGrid)                         :: distgrid
         type(ESMF_VM)                               :: vm
@@ -98,6 +98,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
+        ! retrieve VM and its context info such as PET number
         call ESMF_VMGetCurrent(vm, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -108,6 +109,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
+        ! create distgrid and grid for field and fieldbundle creation
         distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
             regDecomp=(/2,2/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -124,14 +126,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, arrayspec, &
-            ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
-            maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
-            rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-
+        ! create src and dst FieldBundles pair
         srcFieldBundle = ESMF_FieldBundleCreate(grid, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -142,6 +137,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
+        ! create src and dst Fields and add the Fields into FieldBundles
         do i = 1, 3
             srcField(i) = ESMF_FieldCreate(grid, arrayspec, &
                 ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
@@ -227,7 +223,6 @@ contains
 
         call ESMF_FieldBundleDestroy(srcFieldBundle)
         call ESMF_FieldBundleDestroy(dstFieldBundle)
-        call ESMF_FieldDestroy(field)
         do i = 1, 3
             call ESMF_FieldDestroy(srcField(i))
             call ESMF_FieldDestroy(dstField(i))

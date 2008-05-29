@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.3 2008/05/28 18:44:30 feiliu Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.4 2008/05/29 15:30:16 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.3 2008/05/28 18:44:30 feiliu Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.4 2008/05/29 15:30:16 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -103,7 +103,7 @@ contains
 !   This call is {\em collective} across the current VM.
 !
 !   For examples and associated documentations using this method see Section  
-!   \ref{sec:fieldbundle:usage:smm_1dptr}. 
+!   \ref{sec:fieldbundle:usage:redist_1dptr}. 
 !
 !   \begin{description}
 !   \item [{[srcFieldBundle]}]
@@ -307,7 +307,7 @@ contains
 ! This call is collective across the current VM.  
 ! 
 ! For examples and associated documentations using this method see Section  
-! \ref{sec:fieldbundle:usage:smm_1dptr}. 
+! \ref{sec:fieldbundle:usage:redist_1dptr}. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -718,7 +718,7 @@ contains
 ! This call is collective across the current VM.  
 ! 
 ! For examples and associated documentations using this method see Section  
-! \ref{sec:fieldbundle:usage:smm_1dptr}. 
+! \ref{sec:fieldbundle:usage:redist_1dptr}. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
