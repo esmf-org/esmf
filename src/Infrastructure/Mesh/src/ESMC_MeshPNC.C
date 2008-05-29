@@ -21,8 +21,11 @@
 #include <Mesh/include/ESMC_MeshObj.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
 
-#ifdef ESMC_PNETCDF
+#ifdef ESMF_PNETCDF
 #include <pnetcdf.h>
+typedef MPI_Offset MPI_OffType;
+#else
+typedef long long MPI_OffType;
 #endif
 
 #include <cmath>
@@ -36,7 +39,7 @@ namespace ESMC {
 
 void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
   Trace __trace("LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad)");
-#ifdef ESMC_PNETCDF
+#ifdef ESMF_PNETCDF
 
   UInt rank = Par::Rank(), nproc = Par::Size();
   
@@ -44,7 +47,7 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
   int ncid, stat;
   std::vector<int> mask;
   std::map<int,int> node2idx;
-  MPI_Offset grid_size;
+  MPI_OffType grid_size;
 
 
     if ((stat = ncmpi_open(Par::Comm(), fname.c_str(), NC_NOWRITE, MPI_INFO_NULL, &ncid)) != NC_NOERR) {
@@ -52,7 +55,7 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
                  ncmpi_strerror(stat);
     }
   
-    MPI_Offset n, grid_rank, grid_corners;
+    MPI_OffType n, grid_rank, grid_corners;
   
     // Get ni, nj; verify nv=4
     int dimid;
@@ -102,8 +105,8 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
     min_row = my_start;
     max_row = min_row + my_num;
     
-    MPI_Offset local_grid_size;
-    MPI_Offset local_grid_start;
+    MPI_OffType local_grid_size;
+    MPI_OffType local_grid_start;
     
     if (my_num == 0) {
       local_grid_size = local_grid_start = 0;
@@ -128,7 +131,7 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
       }
       
       // Get units
-      MPI_Offset gclonattlen, gclatattlen;
+      MPI_OffType gclonattlen, gclatattlen;
       bool latdeg = false, londeg = false;
       char attbuf[1024];
       if ((stat = ncmpi_inq_attlen(ncid, gclatid, "units", &gclatattlen)) != NC_NOERR) {
@@ -179,8 +182,8 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
   std::copy(tst.begin(), tst.end(), std::ostream_iterator<double>(Par::Out(), "\n"));
   */
   
-  MPI_Offset starts[] = {local_grid_start, 0, 0, 0};
-  MPI_Offset counts[] = {local_grid_size, 0, 0, 0};
+  MPI_OffType starts[] = {local_grid_start, 0, 0, 0};
+  MPI_OffType counts[] = {local_grid_size, 0, 0, 0};
   
       ncmpi_get_vara_double_all(ncid, gclatid, starts, counts, &latcoord[0]);
       ncmpi_get_vara_double_all(ncid, gclonid, starts, counts, &loncoord[0]);

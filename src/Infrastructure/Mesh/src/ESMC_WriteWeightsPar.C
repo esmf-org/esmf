@@ -14,8 +14,11 @@
 #include <Mesh/include/ESMC_Migrator.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
 
-#ifdef ESMC_PNETCDF
+#ifdef ESMF_PNETCDF
 #include <pnetcdf.h>
+typedef MPI_Offset MPI_OffType;
+#else
+typedef long long MPI_OffType;
 #endif
 
 #include <limits>
@@ -77,8 +80,8 @@ struct nc_grid_file1 {
 int grid_size;
 int grid_corners;
 int grid_rank;
-MPI_Aint local_grid_start;
-MPI_Aint local_grid_size;
+MPI_OffType local_grid_start;
+MPI_OffType local_grid_size;
 
 std::vector<int> grid_dims;
 std::vector<double> grid_center_lat;
@@ -127,7 +130,7 @@ static void nc_grid_file1_2deg(nc_grid_file1 &ncf) {
 }
 
 static void get_nc_grid_file1(nc_grid_file1 &ncf, const std::string &ncfile, bool header_only) {
-#ifdef ESMC_PNETCDF
+#ifdef ESMF_PNETCDF
 
   int ncid, stat;
 
@@ -137,7 +140,7 @@ static void get_nc_grid_file1(nc_grid_file1 &ncf, const std::string &ncfile, boo
                ncmpi_strerror(stat);
   }
 
-  MPI_Aint n, grid_rank, grid_corners;
+  MPI_OffType n, grid_rank, grid_corners;
 
   // Get ni, nj; verify nv=4
   int dimid;
@@ -199,8 +202,8 @@ static void get_nc_grid_file1(nc_grid_file1 &ncf, const std::string &ncfile, boo
   min_row = my_start;
   max_row = min_row + my_num;
   
-  MPI_Aint local_grid_size;
-  MPI_Aint local_grid_start;
+  MPI_OffType local_grid_size;
+  MPI_OffType local_grid_start;
   
   if (my_num == 0) {
     local_grid_size = local_grid_start = 0;
@@ -223,8 +226,8 @@ static void get_nc_grid_file1(nc_grid_file1 &ncf, const std::string &ncfile, boo
   ncf.grid_corner_lat.resize(ncf.local_grid_size*ncf.grid_corners);
   ncf.grid_corner_lon.resize(ncf.local_grid_size*ncf.grid_corners);
   
-  MPI_Aint starts[] = {ncf.local_grid_start, 0};
-  MPI_Aint counts[] = {ncf.local_grid_size, 4};
+  MPI_OffType starts[] = {ncf.local_grid_start, 0};
+  MPI_OffType counts[] = {ncf.local_grid_size, 4};
   
   int gclatid, gclonid, gcrnrlatid, gcrnrlonid, imaskid;
   if ((stat = ncmpi_inq_varid(ncid, "grid_center_lon", &gclonid)) != NC_NOERR) {
@@ -246,7 +249,7 @@ static void get_nc_grid_file1(nc_grid_file1 &ncf, const std::string &ncfile, boo
    }
   
   // Get units
-  MPI_Aint gclonattlen, gclatattlen, gcrnrlatattlen, gcrnrlonattlen;
+  MPI_OffType gclonattlen, gclatattlen, gcrnrlatattlen, gcrnrlonattlen;
   bool latdeg = false, londeg = false, crnrlatdeg = false, crnrlondeg = false;
   char attbuf[1024];
   
@@ -336,7 +339,7 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
                     int ordering)
 {
   Trace __trace("WriteNCMatFilePar(const std::string &src_ncfile, const std::string &dst_ncfile, const std::string &outfile, const IWeights &w, int ordering"); 
-#ifdef ESMC_PNETCDF
+#ifdef ESMF_PNETCDF
 
   std::pair<int,int> pa = w.count_matrix_entries();
   int ln_s = pa.first;
@@ -543,8 +546,8 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
    
    
    if (Par::Rank() == 0) {
-     MPI_Aint starts[] = {0, 0};
-     MPI_Aint counts[] = {2,0};
+     MPI_OffType starts[] = {0, 0};
+     MPI_OffType counts[] = {2,0};
      if ((retval = ncmpi_put_vara_int(ncid, src_grid_dimsid, starts, counts, &ncsrc.grid_dims[0])))
        Throw() << "NC error:" << ncmpi_strerror(retval);
    
@@ -565,8 +568,8 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
    /*-------------------------------------------------------------------------*/
    // Write the src/dest grid variables
    /*-------------------------------------------------------------------------*/
-   MPI_Aint startsa[] = {ncsrc.local_grid_start, 0};
-   MPI_Aint countsa[] = {ncsrc.local_grid_size, ncsrc.grid_corners};
+   MPI_OffType startsa[] = {ncsrc.local_grid_start, 0};
+   MPI_OffType countsa[] = {ncsrc.local_grid_size, ncsrc.grid_corners};
    
    if ((retval = ncmpi_put_vara_double_all(ncid, yc_aid, startsa, countsa, &ncsrc.grid_center_lat[0])))
      Throw() << "NC error:" << ncmpi_strerror(retval);
@@ -614,8 +617,8 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
    /*-------------------------------------------------------------------------*/
    // Write the src/dest grid variables
    /*-------------------------------------------------------------------------*/
-   MPI_Aint startsb[] = {ncdst.local_grid_start, 0};
-   MPI_Aint countsb[] = {ncdst.local_grid_size, ncdst.grid_corners};
+   MPI_OffType startsb[] = {ncdst.local_grid_start, 0};
+   MPI_OffType countsb[] = {ncdst.local_grid_size, ncdst.grid_corners};
    
    if ((retval = ncmpi_put_vara_double_all(ncid, yc_bid, startsb, countsb, &ncdst.grid_center_lat[0])))
      Throw() << "NC error:" << ncmpi_strerror(retval);
@@ -689,8 +692,8 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
      
    }
    
-   MPI_Aint starts[] = {local_start_n_s, 0};
-   MPI_Aint counts[] = {ln_s, 0};
+   MPI_OffType starts[] = {local_start_n_s, 0};
+   MPI_OffType counts[] = {ln_s, 0};
    
    if ((retval = ncmpi_put_vara_int_all(ncid, colid, starts, counts, &col_data[0])))
       Throw() << "NC error:" << ncmpi_strerror(retval);
