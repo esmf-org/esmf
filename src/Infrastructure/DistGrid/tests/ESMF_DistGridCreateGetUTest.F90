@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.4.2.2 2008/04/08 22:13:18 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.4.2.3 2008/05/29 03:54:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.4.2.2 2008/04/08 22:13:18 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.4.2.3 2008/05/29 03:54:43 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -59,6 +59,7 @@ program ESMF_DistGridCreateGetUTest
   type(ESMF_Logical):: regDecompFlag
   integer, allocatable:: elementCountPPatch(:), patchListPDe(:), elementCountPDe(:)
   integer, allocatable:: minIndexPDimPPatch(:,:), maxIndexPDimPPatch(:,:)
+  integer, allocatable:: minIndexPDimPDe(:,:), maxIndexPDimPDe(:,:)
   integer, allocatable:: indexCountPDimPDe(:,:), localDeList(:)
   integer, allocatable:: indexList(:), seqIndexList(:)
   logical:: loopResult
@@ -189,6 +190,38 @@ program ESMF_DistGridCreateGetUTest
   call ESMF_Test((elementCountPPatch(1) == 1000), &
     name, failMsg, result, ESMF_SRCLINE)
   deallocate(elementCountPPatch)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridGet() - minIndexPDimPDe(:,:)"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(minIndexPDimPDe(dimCount,deCount))
+  call ESMF_DistGridGet(distgrid, minIndexPDimPDe=minIndexPDimPDe, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify minIndexPDimPDe(:,:)"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((minIndexPDimPDe(1,1) == 1), &
+    name, failMsg, result, ESMF_SRCLINE)
+  deallocate(minIndexPDimPDe)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridGet() - maxIndexPDimPDe(:,:)"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(maxIndexPDimPDe(dimCount,deCount))
+  call ESMF_DistGridGet(distgrid, maxIndexPDimPDe=maxIndexPDimPDe, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify maxIndexPDimPDe(:,:)"
+  write(failMsg, *) "Wrong result"
+  call ESMF_Test((maxIndexPDimPDe(1,deCount) == 1000), &
+    name, failMsg, result, ESMF_SRCLINE)
+  deallocate(maxIndexPDimPDe)
 
   !------------------------------------------------------------------------
   !NEX_UTest
