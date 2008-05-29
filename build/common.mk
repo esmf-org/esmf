@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.219 2008/04/28 22:22:37 cdeluca Exp $
+#  $Id: common.mk,v 1.220 2008/05/29 22:35:13 dneckels Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -691,6 +691,18 @@ CPPFLAGS		+= -DESMF_LAPACK=$(ESMF_LAPACK)
 ESMF_CXXLINKLIBS	+= $(ESMF_LAPACK_LIBS)
 FPPDEFS			+= -DESMF_LAPACK=$(ESMF_LAPACK)
 ESMF_F90LINKLIBS	+= $(ESMF_LAPACK_LIBS)
+endif
+
+#-------------------------------------------------------------------------------
+# PNETCDF is used by a few ESMF routines, when available.  The following links
+# them in.
+#-------------------------------------------------------------------------------
+ifdef ESMF_PNETCDF
+CPPFLAGS		+= -DESMF_PNETCDF=$(ESMF_PNETCDF)
+ESMF_CXXCOMPILEPATHS += -I$(ESMF_PNETCDF_INCLUDE)
+ESMF_CXXLINKLIBS	+= $(ESMF_PNETCDF_LIBS)
+FPPDEFS			+= -DESMF_PNETCDF=$(ESMF_PNETCDF)
+ESMF_F90LINKLIBS	+= $(ESMF_PNETCDF_LIBS)
 endif
 
 #-------------------------------------------------------------------------------
