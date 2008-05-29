@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.1.2.6 2008/05/05 22:57:42 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.1.2.7 2008/05/29 03:45:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -186,6 +186,8 @@ extern "C" {
     ESMCI::InterfaceInt **minIndexPDimPPatch,
     ESMCI::InterfaceInt **maxIndexPDimPPatch,
     ESMCI::InterfaceInt **elementCountPPatch,
+    ESMCI::InterfaceInt **minIndexPDimPDe,
+    ESMCI::InterfaceInt **maxIndexPDimPDe,
     ESMCI::InterfaceInt **elementCountPDe,
     ESMCI::InterfaceInt **patchListPDe,
     ESMCI::InterfaceInt **indexCountPDimPDe,
@@ -283,6 +285,68 @@ extern "C" {
       // fill in values
       memcpy((*elementCountPPatch)->array, (*ptr)->getElementCountPPatch(),
         sizeof(int)*(*ptr)->getPatchCount());
+    }
+    // fill minIndexPDimPDe
+    if (*minIndexPDimPDe != NULL){
+      // minIndexPDimPDe was provided -> do some error checking
+      if ((*minIndexPDimPDe)->dimCount != 2){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- minIndexPDimPDe array must be of rank 2", rc);
+        return;
+      }
+      if ((*minIndexPDimPDe)->extent[0] < (*ptr)->getDimCount()){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 1st dim of minIndexPDimPDe array must be of size 'dimCount'",
+          rc);
+        return;
+      }
+      if ((*minIndexPDimPDe)->extent[1] < (*ptr)->getDELayout()->getDeCount()){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 2nd dim of minIndexPDimPDe array must be of size 'deCount'",
+          rc);
+        return;
+      }
+      // fill in the values: The interface allows to pass in minIndexPDimPDe
+      // arrays which are larger than dimCount x deCount. Consequently it is
+      // necessary to memcpy strips of contiguous data since it cannot be
+      // assumed that all data ends up contiguous in the minIndexPDimPDe
+      // array.
+      for (int i=0; i<(*ptr)->getDELayout()->getDeCount(); i++)
+        memcpy(
+          &((*minIndexPDimPDe)->array[i*((*minIndexPDimPDe)->extent[0])]),
+          &(((*ptr)->getMinIndexPDimPDe())[i*(*ptr)->getDimCount()]),
+          sizeof(int)*(*ptr)->getDimCount());
+    }
+    // fill maxIndexPDimPDe
+    if (*maxIndexPDimPDe != NULL){
+      // maxIndexPDimPDe was provided -> do some error checking
+      if ((*maxIndexPDimPDe)->dimCount != 2){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- maxIndexPDimPDe array must be of rank 2", rc);
+        return;
+      }
+      if ((*maxIndexPDimPDe)->extent[0] < (*ptr)->getDimCount()){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 1st dim of maxIndexPDimPDe array must be of size 'dimCount'",
+          rc);
+        return;
+      }
+      if ((*maxIndexPDimPDe)->extent[1] < (*ptr)->getDELayout()->getDeCount()){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 2nd dim of maxIndexPDimPDe array must be of size 'deCount'",
+          rc);
+        return;
+      }
+      // fill in the values: The interface allows to pass in maxIndexPDimPDe
+      // arrays which are larger than dimCount x deCount. Consequently it is
+      // necessary to memcpy strips of contiguous data since it cannot be
+      // assumed that all data ends up contiguous in the maxIndexPDimPDe
+      // array.
+      for (int i=0; i<(*ptr)->getDELayout()->getDeCount(); i++)
+        memcpy(
+          &((*maxIndexPDimPDe)->array[i*((*maxIndexPDimPDe)->extent[0])]),
+          &(((*ptr)->getMaxIndexPDimPDe())[i*(*ptr)->getDimCount()]),
+          sizeof(int)*(*ptr)->getDimCount());
     }
     // fill elementCountPDe
     if (*elementCountPDe != NULL){

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.35.2.3 2008/05/20 23:48:40 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.35.2.4 2008/05/29 03:45:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.35.2.3 2008/05/20 23:48:40 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.35.2.4 2008/05/29 03:45:20 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1930,7 +1930,8 @@ contains
 ! !INTERFACE:
   subroutine ESMF_DistGridGet(distgrid, delayout, dimCount, patchCount, &
     minIndexPDimPPatch, maxIndexPDimPPatch, elementCountPPatch, &
-    elementCountPDe, patchListPDe, indexCountPDimPDe, regDecompFlag, rc)
+    minIndexPDimPDe, maxIndexPDimPDe, elementCountPDe, patchListPDe, &
+    indexCountPDimPDe, regDecompFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid
@@ -1940,6 +1941,8 @@ contains
     integer,                intent(out), optional :: minIndexPDimPPatch(:,:)
     integer,                intent(out), optional :: maxIndexPDimPPatch(:,:)
     integer,                intent(out), optional :: elementCountPPatch(:)
+    integer,                intent(out), optional :: minIndexPDimPDe(:,:)
+    integer,                intent(out), optional :: maxIndexPDimPDe(:,:)
     integer,                intent(out), optional :: elementCountPDe(:)
     integer,                intent(out), optional :: patchListPDe(:)
     integer,                intent(out), optional :: indexCountPDimPDe(:,:)
@@ -1969,6 +1972,12 @@ contains
 !   \item[{[elementCountPPatch]}]
 !     Number of elements in exclusive region per patch, with
 !     {\tt size(elementCountPPatch) == (/patchCount/)}
+!   \item[{[minIndexPDimPDe]}]
+!     Lower index space corner per {\tt dim}, per {\tt De}, with
+!     {\tt size(minIndexPDimPDe) == (/dimCount, deCount/)}.
+!   \item[{[maxIndexPDimPDe]}]
+!     Upper index space corner per {\tt dim}, per {\tt de}, with
+!     {\tt size(minIndexPDimPDe) == (/dimCount, deCount/)}.
 !   \item[{[elementCountPDe]}]
 !     Number of elements in exclusive region per DE, with
 !     {\tt size(elementCountPDe) == (/deCount/)}
@@ -1991,6 +2000,8 @@ contains
     type(ESMF_InterfaceInt) :: minIndexPDimPPatchArg  ! helper variable
     type(ESMF_InterfaceInt) :: maxIndexPDimPPatchArg  ! helper variable
     type(ESMF_InterfaceInt) :: elementCountPPatchArg  ! helper variable
+    type(ESMF_InterfaceInt) :: minIndexPDimPDeArg     ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexPDimPDeArg     ! helper variable
     type(ESMF_InterfaceInt) :: elementCountPDeArg     ! helper variable
     type(ESMF_InterfaceInt) :: patchListPDeArg        ! helper variable
     type(ESMF_InterfaceInt) :: indexCountPDimPDeArg   ! helper variable
@@ -2015,6 +2026,14 @@ contains
       rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    minIndexPDimPDeArg = &
+      ESMF_InterfaceIntCreate(farray2D=minIndexPDimPDe, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    maxIndexPDimPDeArg = &
+      ESMF_InterfaceIntCreate(farray2D=maxIndexPDimPDe, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     elementCountPDeArg = ESMF_InterfaceIntCreate(elementCountPDe, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2029,8 +2048,9 @@ contains
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridGet(distgrid, dimCount, patchCount, &
       minIndexPDimPPatchArg, maxIndexPDimPPatchArg, elementCountPPatchArg, &
-      elementCountPDeArg, patchListPDeArg, indexCountPDimPDeArg, regDecompFlag,&
-      delayout, localrc)
+      minIndexPDimPDeArg, maxIndexPDimPDeArg, elementCountPDeArg, &
+      patchListPDeArg, indexCountPDimPDeArg, regDecompFlag, delayout, &
+      localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2049,6 +2069,12 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(elementCountPPatchArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(minIndexPDimPDeArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(maxIndexPDimPDeArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(elementCountPDeArg, rc=localrc)
