@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2008/01/29 19:52:08 dneckels Exp $
+# $Id: makefile,v 1.4 2008/05/29 22:27:45 dneckels Exp $
 
 ALL: build_examples
 run: run_examples
@@ -20,7 +20,8 @@ LOCDIR	  = src/Infrastructure/Mesh/examples
 EXAMPLES_BUILD    = \
                       $(ESMF_EXDIR)/ESMC_RendEx \
                       $(ESMF_EXDIR)/ESMC_DCatEx \
-                      $(ESMF_EXDIR)/ESMC_RefineEx 
+                      $(ESMF_EXDIR)/ESMC_RefineEx \
+                      $(ESMF_EXDIR)/ESMC_PatchWghtEx 
 
 EXAMPLES_RUN      = run_ESMC_RefineEx 
 
