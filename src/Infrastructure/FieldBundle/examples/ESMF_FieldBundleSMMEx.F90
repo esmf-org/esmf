@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMEx.F90,v 1.1 2008/05/28 19:18:59 feiliu Exp $
+! $Id: ESMF_FieldBundleSMMEx.F90,v 1.2 2008/05/30 20:02:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleSMMEx.F90,v 1.1 2008/05/28 19:18:59 feiliu Exp $'
+    '$Id: ESMF_FieldBundleSMMEx.F90,v 1.2 2008/05/30 20:02:31 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -75,6 +75,12 @@
 ! In this example, we first create two FieldBundles, a source FieldBundle and a destination
 ! FieldBundle. Then we use {\tt ESMF\_FieldBundleSMM} to
 ! perform sparse matrix multiplication from source FieldBundle to destination FieldBundle.
+!
+! The operation performed in this example is better illustrated in 
+! section \ref{sec:field:usage:smm_1dptr}.
+! 
+! Section \ref{Array:SparseMatMul} provides a detailed discussion of the 
+! sparse matrix mulitiplication operation implemented in ESMF.
 !EOE
 !BOC 
     call ESMF_VMGetCurrent(vm, rc=rc)
