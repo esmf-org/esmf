@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.5 2008/05/28 20:12:48 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.6 2008/05/30 19:50:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -98,6 +98,13 @@
 !  of an {\tt ESMF\_Field}. The bounds and counts information are DE specific
 !  for the associated Fortran data pointer.
 !
+!  For a better discussion of the terminologies, bounds and widths in ESMF
+!  e.g. exclusive, computational, total bounds
+!  for the lower and upper corner of data region, etc.., user can refer to 
+!  the explanation of these concepts for Grid and Array in their respective sections 
+!  in the {\it Reference Manual}, e.g. Section \ref{Array_regions_and_default_bounds} on Array
+!  and Section \ref{sec:grid:usage:bounds} on Grid.
+!
 !  In this example, we first create a 3D Field based on a 3D Grid and Array.
 !  Then we use the {\tt ESMF\_FieldGet()} interface to retrieve the data pointer,
 !  potentially updating or verifying its values. We also retrieve the bounds and counts
@@ -115,31 +122,31 @@
                               regDecomp=(/2,2,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridGet(grid3d, distgrid=distgrid3d, rc=rc)
+    call ESMF_GridGet(grid=grid3d, distgrid=distgrid3d, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldGet(grid3d, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
+    call ESMF_FieldGet(grid=grid3d, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
         totalCount=fa_shape, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)) )
 
     ! create an Array 
-    array3d = ESMF_ArrayCreate(farray, distgrid=distgrid3d, &
+    array3d = ESMF_ArrayCreate(farray=farray, distgrid=distgrid3d, &
         staggerloc=0, computationalEdgeLWidth=(/0,0,0/), &
         computationalEdgeUWidth=(/-1,-1,-1/), rc=rc) 
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! create a Field
-    field = ESMF_FieldCreate(grid3d, array3d, rc=rc)
+    field = ESMF_FieldCreate(grid=grid3d, array=array3d, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
     ! retrieve the Fortran data pointer from the Field
-    call ESMF_FieldGet(field, localDe=0, farray=farray1, rc=rc)
+    call ESMF_FieldGet(field=field, localDe=0, farray=farray1, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! retrieve the Fortran data pointer from the Field
-    call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+    ! retrieve the Fortran data pointer from the Field and bounds
+    call ESMF_FieldGet(field=field, localDe=0, farray=farray1, &
         computationalLBound=compLBnd, computationalUBound=compUBnd, &
         exclusiveLBound=exclLBnd, exclusiveUBound=exclUBnd, &
         totalLBound=totalLBnd, totalUBound=totalUBnd, &
@@ -148,6 +155,7 @@
         totalCount=total_count, &
         rc=rc)   
 
+    ! iterate through the total bounds of the field data pointer
     do k = totalLBnd(3), totalUBnd(3)
         do j = totalLBnd(2), totalUBnd(2)
             do i = totalLBnd(1), totalUBnd(1)
