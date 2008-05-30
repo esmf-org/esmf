@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.30 2008/05/22 20:34:21 feiliu Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.31 2008/05/30 19:51:57 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldGatherUTest.F90,v 1.30 2008/05/22 20:34:21 feiliu Exp $'
+    '$Id: ESMF_FieldGatherUTest.F90,v 1.31 2008/05/30 19:51:57 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -61,7 +61,7 @@ program ESMF_FieldGatherUTest
 #ifdef ESMF_TESTEXHAUSTIVE
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
-        ! Scatter test
+        ! Gather test
         call test_gather_2d(rc)
         write(failMsg, *) ""
         write(name, *) "FieldGather basic test"
