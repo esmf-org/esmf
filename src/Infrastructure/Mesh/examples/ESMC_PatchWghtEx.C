@@ -39,6 +39,11 @@
 #include <stdexcept>
 #include <cmath>
 
+/**
+ * This program may be used to generate a patch-interpolation weight matrix from
+ * two SCRIP style input files.  The output is a SCRIP format matrix file.
+ */
+
 
 using namespace ESMC;
 
@@ -55,12 +60,15 @@ int main(int argc, char *argv[]) {
       Throw() << "Bye" << std::endl;
     }
 
+     if (Par::Rank() == 0) std::cout << "Loading " << argv[1] << std::endl;
      LoadNCDualMeshPar(srcmesh, argv[1]);
-     LoadNCDualMeshPar(dstmesh, argv[1]);
+     if (Par::Rank() == 0) std::cout << "Loading " << argv[2] << std::endl;
+     LoadNCDualMeshPar(dstmesh, argv[2]);
 
      // Commit the meshes
      srcmesh.Commit();
      dstmesh.Commit();
+
 
      // Use the coordinate fields for interpolation purposes
      MEField<> &scoord = *srcmesh.GetCoordField();
@@ -77,15 +85,22 @@ int main(int argc, char *argv[]) {
      MeshAddPole(srcmesh, 1, constraint_id, pole_constraints);
      MeshAddPole(srcmesh, 2, constraint_id, pole_constraints);
 
+/*
+WriteMesh(srcmesh, "src");
+WriteMesh(dstmesh, "dst");
+*/
+
      std::vector<Interp::FieldPair> fpairs;
      fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_PATCH));
 
      // Build the rendezvous grids
+     if (Par::Rank() == 0) std::cout << "Building rendezvous grids..." << std::endl;
      Interp interp(srcmesh, dstmesh, fpairs);
 
      IWeights wts;
 
      // Create the weight matrix
+     if (Par::Rank() == 0) std::cout << "Forming patch weights..." << std::endl;
      interp(0, wts);
 
      // Get the pole matrix on the right processors
@@ -98,13 +113,11 @@ int main(int argc, char *argv[]) {
      wts.Prune(dstmesh, 0);
 
      // Redistribute weights in an IO friendly decomposition
+     if (Par::Rank() == 0) std::cout << "Writing weights to " << argv[3] << std::endl;
      GatherForWrite(wts);
 
      // Write the weights
      WriteNCMatFilePar(argv[1], argv[2], argv[3], wts);
-
-
-
 
   } 
    catch (std::exception &x) {

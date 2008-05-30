@@ -37,8 +37,8 @@ typedef long long MPI_OffType;
 namespace ESMC {
 
 
-void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
-  Trace __trace("LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad)");
+void LoadNCDualMeshPar(Mesh &mesh, const std::string fname) {
+  Trace __trace("LoadNCDualMeshPar(Mesh &mesh, const std::string fname)");
 #ifdef ESMF_PNETCDF
 
   UInt rank = Par::Rank(), nproc = Par::Size();
@@ -164,11 +164,6 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
       xyz.resize(3*local_grid_size);
       std::vector<MeshObj*> nodevect; nodevect.reserve(local_grid_size);
       std::vector<MeshObj*> nodevect_r, nodevect_u, nodevect_c;
-      if (use_quad) {
-        nodevect_r.reserve(local_grid_size);
-        nodevect_u.reserve(local_grid_size);
-        nodevect_c.reserve(local_grid_size);
-      }
       
       {
       std::vector<double> latcoord(local_grid_size);
@@ -212,12 +207,19 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
         xyz[three_i] = x;
         xyz[three_i+1] = y;
         xyz[three_i+2] = z;
-        
+
         // Create a node
         MeshObj *node = new MeshObj(MeshObj::NODE, local_grid_start + i+1, i);
   //Par::Out() << "node_id=" << local_grid_start+i+1 << ", " << std::endl;
         
-        int nset = 1;
+        int nset = 0;
+
+        // If the bottom row make nset=1, if top, nset=2
+        if ((local_grid_start+i) < grid_dims[0]) {
+          nset = 1;
+        } else if ((local_grid_start+i) >= (grid_size-grid_dims[0])) {
+          nset = 2;
+        }
         
         node->set_owner(Par::Rank());
    
@@ -233,28 +235,6 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
         
         node2idx[node->get_id()] = i;
   
-        // If quad, then create edge nodes (possibly too many, but we remove them later).
-        if (use_quad) {
-          MeshObj *node_r = new MeshObj(MeshObj::NODE, grid_size + (i+1), 0);
-          MeshObj *node_u = new MeshObj(MeshObj::NODE, 2*grid_size + (i+1), 0);
-          MeshObj *node_c = new MeshObj(MeshObj::NODE, 3*grid_size + (i+1), 0);
-          node_r->set_owner(Par::Rank());
-          node_u->set_owner(Par::Rank());
-          node_c->set_owner(Par::Rank());
-          if (rank < nproc-1 && last_row) {
-            node_r->set_owner(Par::Rank()+1);
-            node_u->set_owner(Par::Rank()+1);
-            node_c->set_owner(Par::Rank()+1);
-          }
-          mesh.add_node(node_r, nset);
-          mesh.add_node(node_u, nset);
-          mesh.add_node(node_c, nset);
-          nodevect_r.push_back(node_r);
-          nodevect_u.push_back(node_u);
-          nodevect_c.push_back(node_c);
-          
-          // Don't worry about node2idx, since we don't have any data to retrive there.
-        }
       } // for i
     
       } // bye to xncoord, yncoord
@@ -267,7 +247,7 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
       ncmpi_get_vara_int_all(ncid, maskid, &local_grid_start, &local_grid_size, &mask[0]);
       
       // Create cells (use striding info).  Assume periodicity in lon.
-      MeshObjTopo *topo = use_quad ? GetTopo("SHELL9") : GetTopo("SHELL");
+      MeshObjTopo *topo = GetTopo("SHELL");
       UInt nnodes = topo->num_nodes;
       std::vector<MeshObj*> nvect(nnodes, static_cast<MeshObj*>(0));
       
@@ -283,14 +263,6 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
           nvect[2] = nodevect[(j+1)*local_grid_dims[0]+ip1];
           nvect[3] = nodevect[(j+1)*local_grid_dims[0]+i];
           
-          // If useing quadratics, create and add the interior nodes
-          if (use_quad) {
-            nvect[4] = nodevect_r[j*local_grid_dims[0]+i];
-            nvect[5] = nodevect_u[j*local_grid_dims[0]+ip1];
-            nvect[6] = nodevect_r[(j+1)*local_grid_dims[0]+i];
-            nvect[7] = nodevect_u[j*local_grid_dims[0]+i];
-            nvect[8] = nodevect_c[j*local_grid_dims[0] + i];
-          }
   
           // Check: if mask is 0 for all nodes, then don't add element
           bool elem_ok = false;
@@ -346,53 +318,6 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
 
   }
   
-  // Now set the quadratic node coordinates
-  if (use_quad) {
-    MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
-    for (; ei != ee; ++ei) {
-      const MeshObj &elem = *ei;
-      
-      MeshObj *node;
-      
-      const MeshObjTopo *topo = GetMeshObjTopo(elem);
-
-      double cn[3] = {0.0, 0.0, 0.0};
-      
-      for (UInt e = 0; e < topo->num_edges; e++) {
-        
-        const int *edge_nodes = topo->get_edge_nodes(e);
-        
-        ThrowRequire(topo->get_num_edge_nodes() == 3);
-        
-        MeshObj *node = elem.Relations[edge_nodes[2]].obj;
-        
-        MeshObj *node0 = elem.Relations[edge_nodes[0]].obj;
-        MeshObj *node1 = elem.Relations[edge_nodes[1]].obj;
-        
-        double *c = node_coord->data(*node);
-        
-        for (UInt d = 0; d < sdim; d++) {
-          c[d] = 0.5*(node_coord->data(*node0)[d] + node_coord->data(*node1)[d]);
-          cn[d] += node_coord->data(*node0)[d] + node_coord->data(*node1)[d];
-        }
-        
-        // normalize to circle
-        double nm = 1.0 / std::sqrt(c[0]*c[0]+c[1]*c[1]+c[2]*c[2]);
-        c[0] *= nm; c[1] *= nm; c[2] *= nm;
-        
-        
-      }
-      
-      // And, lastly, the center
-      const MeshObj *cnode = elem.Relations[8].obj;
-      
-      cn[0] /= 4.0; cn[1] /= 4.0; cn[2] /= 4.0;
-      
-      double nm = 1.0 / std::sqrt(cn[0]*cn[0]+cn[1]*cn[1]+cn[2]*cn[2]);
-      cn[0] *= nm; cn[1] *= nm; cn[2] *= nm;
-      
-    }
-  }
 
   ncmpi_close(ncid);
 //std::cout << "to end, P:" << Par::Rank() << std::endl;
@@ -433,7 +358,7 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname, bool use_quad) {
   
   }
   
-  Skin(mesh);
+ // Skin(mesh); // don't bother skinning; takes too much time.
 #else
   Throw() << "Please recompile with PNETCDF support";
 #endif
