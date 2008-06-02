@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2008/05/14 03:37:23 donstark Exp $ 
+# $Id: makefile,v 1.22 2008/06/02 22:32:29 svasquez Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -76,19 +76,19 @@ RUN_ESMC_ArrayUTestUNI:
 # ---
 
 RUN_ESMF_ArrayHarness2UTest:
-	echo "ESMF_ArrayHarness2UTest" >> $(ESMF_TESTDIR)/unit_tests.config
+	echo "ESMF_ArrayHarness2UTest" > $(ESMF_TESTDIR)/test_harness.list
 	cp -f test_harness.rc $(ESMF_TESTDIR)
 	cp -f harness_config/*.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness2 NP=2 htest
 
 RUN_ESMF_ArrayHarness4UTest:
-	echo "ESMF_ArrayHarness4UTest" >> $(ESMF_TESTDIR)/unit_tests.config
+	echo "ESMF_ArrayHarness4UTest" >> $(ESMF_TESTDIR)/test_harness.list
 	cp -f test_harness.rc $(ESMF_TESTDIR)
 	cp -f harness_config/*.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness4 NP=4 htest
 
 RUN_ESMF_ArrayHarness8UTest:
-	echo "ESMF_ArrayHarness8UTest" >> $(ESMF_TESTDIR)/unit_tests.config
+	echo "ESMF_ArrayHarness8UTest" >> $(ESMF_TESTDIR)/test_harness.list
 	cp -f test_harness.rc $(ESMF_TESTDIR)
 	cp -f harness_config/*.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness8 NP=8 htest
