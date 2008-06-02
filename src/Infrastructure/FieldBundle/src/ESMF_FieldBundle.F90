@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.5 2008/05/08 04:46:06 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.6 2008/06/02 20:05:14 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -966,8 +966,8 @@ end function
 
 
 ! TODO:FIELDINTEGRATION Restore FieldBundleIsCongruent
-#if 0
       ESMF_FieldBundleIsCongruent = .FALSE.
+#if 0
       bundle%btypep%isCongruent = .FALSE.
 
       ! Validate bundle before going further
