@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.27 2008/05/12 19:06:26 feiliu Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.28 2008/06/02 19:56:49 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -15,7 +15,6 @@
 !------------------------------------------------------------------------------
 !ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
-!BOC
 ! !PROGRAM: ESMF_FieldCommEx - Field level communication routines
 !
 ! !DESCRIPTION:
@@ -39,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.27 2008/05/12 19:06:26 feiliu Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.28 2008/06/02 19:56:49 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -50,7 +49,6 @@
     type(ESMF_Grid)                             :: grid
     type(ESMF_DistGrid)                         :: distgrid
     type(ESMF_VM)                               :: vm
-    !type(ESMF_ArraySpec)                        :: arrayspec
     type(ESMF_Array)                            :: array
     integer                                     :: localrc, lpe, i, j
 
