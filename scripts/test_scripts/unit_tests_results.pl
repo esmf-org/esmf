@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.14 2008/04/11 21:08:53 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.15 2008/06/02 22:39:04 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -346,6 +346,9 @@ use File::Find
 		}
 	}
 
+
+
+
 	if (@fail_test_list != ()){
 		# Delete date type and PET part of the fail message.
 		foreach (@fail_test_list) {
@@ -390,6 +393,70 @@ use File::Find
 			return 0;
 		}
 	}
+
+	# Section for handling test harness tests.
+	$harness_pass=0;
+	$harness_fail=0;
+	$harness_total=0;
+	# Try to open test harness file
+        $ok=open(F,"$TEST_DIR/test_harness.list");
+        if (!(defined $ok)) {
+                print "\n\n";
+                print "No test harness unit tests were found.\n\n";
+        }
+	else {
+		foreach $line (<F>){
+			#Put test harness files in list
+			push (test_harness, $line);
+		}
+		foreach (@test_harness){
+			s/UTest/UTest.stdout/;
+		}
+		foreach $file (@test_harness) {	
+			open(F,"$TEST_DIR/$file");
+			foreach $line (<F>){
+				push(file_lines, $line);
+			}
+			$count=grep ( /PASS/, @file_lines);
+			if ($count != 0) { 
+                                push (harness_pass, $file);
+                                $harness_pass=$harness_pass + 1;
+                        }       
+			else {
+				push (harness_fail, $file);
+                                $harness_fail=$harness_fail + 1;
+			}
+                        @file_lines=();
+			$harness_total=$harness_total + 1;
+		}
+	}
+	foreach (@harness_pass){
+                        s/UTest.stdout/UTest/;
+	}
+	foreach (@harness_fail){
+                        s/UTest.stdout/UTest/;
+	}
+
+
+	if (!$SUMMARY) { # Print only if full output requested
+		if ($harness_pass != 0) {
+			print "\n\nThe following test harness unit tests pass:\n";
+			print @harness_pass;
+		}
+	}
+
+
+	if (!$SUMMARY) { # Print only if full output requested
+		if ($harness_fail != 0) {
+			print "\n\nThe following test harness unit tests fail did not build, or did not execute:\n";
+			print @harness_fail;
+		}
+	}
+
+	$total_test_count = $total_test_count + harness_total;
+	$total_pass_count = $total_pass_count + harness_pass;
+	$total_fail_count = $total_fail_count + harness_fail;
+
 	if (!$SUMMARY) { # Print only if full output requested
 		print "\n\nThe log and stdout files for the unit tests can be found at:\n";
 		print "$TEST_DIR\n\n\n";
