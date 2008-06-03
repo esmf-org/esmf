@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUTest.F90,v 1.3 2008/05/21 23:51:02 theurich Exp $
+! $Id: ESMF_AttributeUTest.F90,v 1.4 2008/06/03 22:41:45 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeUTest.F90,v 1.3 2008/05/21 23:51:02 theurich Exp $'
+      '$Id: ESMF_AttributeUTest.F90,v 1.4 2008/06/03 22:41:45 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -532,7 +532,6 @@ program ESMF_AttributeUTest
 !  STATE
 !-------------------------------------------------------------------------
 
-
       !EX_UTest
       ! Add an integer attribute to a State Test
       call ESMF_AttributeSet(state, name="Sides", value=65, rc=rc)
@@ -663,7 +662,6 @@ program ESMF_AttributeUTest
       call ESMF_FieldBundleDestroy(fieldbundle, rc=rc)
       call ESMF_FieldDestroy(fieldforbundle, rc=rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
 #endif
 
   !-----------------------------------------------------------------------------

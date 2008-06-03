@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.8 2008/05/13 18:44:14 oehmke Exp $
+! $Id: ESMF_Attribute.F90,v 1.9 2008/06/03 22:41:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.8 2008/05/13 18:44:14 oehmke Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.9 2008/06/03 22:41:44 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -11652,11 +11652,6 @@ contains
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-      call ESMF_GridValidate(grid, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
 
       if (present(convention))  then
         fconvention = convention
