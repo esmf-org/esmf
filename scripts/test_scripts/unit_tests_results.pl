@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.15 2008/06/02 22:39:04 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.16 2008/06/03 15:50:21 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -409,6 +409,7 @@ use File::Find
 			#Put test harness files in list
 			push (test_harness, $line);
 		}
+		# Add "stdout" suffix to test names
 		foreach (@test_harness){
 			s/UTest/UTest.stdout/;
 		}
@@ -430,6 +431,7 @@ use File::Find
 			$harness_total=$harness_total + 1;
 		}
 	}
+	# Remove "stdout" suffix to test names
 	foreach (@harness_pass){
                         s/UTest.stdout/UTest/;
 	}
@@ -448,11 +450,11 @@ use File::Find
 
 	if (!$SUMMARY) { # Print only if full output requested
 		if ($harness_fail != 0) {
-			print "\n\nThe following test harness unit tests fail did not build, or did not execute:\n";
+			print "\n\nThe following test harness unit tests fail, did not build, or did not execute:\n";
 			print @harness_fail;
 		}
 	}
-
+	# Add results counts to total counts
 	$total_test_count = $total_test_count + harness_total;
 	$total_pass_count = $total_pass_count + harness_pass;
 	$total_fail_count = $total_fail_count + harness_fail;
