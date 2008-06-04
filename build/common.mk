@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.220 2008/05/29 22:35:13 dneckels Exp $
+#  $Id: common.mk,v 1.221 2008/06/04 21:39:18 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -428,6 +428,7 @@ DO_L2H		= $(ESMF_TEMPLATES)/scripts/do_l2h
 # test script variables
 UNIT_TESTS_CONFIG   = $(ESMF_TESTDIR)/unit_tests.config
 SYS_TESTS_CONFIG    = $(ESMF_TESTDIR)/sys_tests.config
+TEST_HARNESS_LIST   = $(ESMF_TESTDIR)/test_harness.list
 ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
@@ -1825,7 +1826,7 @@ exhaustive_flag_clobber:
 # so we can rebuild them with the proper flags if that is what is needed.
 #
 clean_unit_tests:
-	$(ESMF_RM) $(ESMF_TESTDIR)/*UTest* $(UNIT_TESTS_CONFIG)
+	$(ESMF_RM) $(ESMF_TESTDIR)/*UTest* $(UNIT_TESTS_CONFIG) $(TEST_HARNESS_LIST)
 	$(MAKE) ACTION=tree_cleanfiles tree
 
 
