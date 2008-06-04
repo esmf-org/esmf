@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.23 2008/05/21 23:13:56 theurich Exp $
+! $Id: user_model1.F90,v 1.24 2008/06/04 22:54:37 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -78,7 +78,7 @@ module user_model1
     type(ESMF_VM)          :: vm
     integer                :: petCount, status, myPet
     character(ESMF_MAXSTR) :: name1,name2,name3,name4,value1,value2,value3,value4,conv,purp
-    
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
@@ -158,7 +158,7 @@ module user_model1
  
     ! create a field, make an attribute package, and set attributes in the package
     value1 = 'sh'
-    value2 = 'sensible heat flux from turbulence'
+    value2 = 'heat flux from turbulence'
     value3 = 'W m-2'
     value4 = 'xy'
       
