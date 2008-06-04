@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2008/05/19 18:53:05 feiliu Exp $
+# $Id: makefile,v 1.10 2008/06/04 15:03:10 feiliu Exp $
 
 # leave alone.
 ALL: build_here 
@@ -13,7 +13,7 @@ FFLAGS    =
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = 
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_FieldComm.F90 ESMF_FieldGather.F90 ESMF_FieldScatter.F90 ESMF_FieldRedist.F90 ESMF_FieldSMM.F90
+SOURCEF	  =  ESMF_FieldComm.F90 $(AUTOGEN) ESMF_FieldRedist.F90 ESMF_FieldSMM.F90
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # list all .h files which should be copied to common include dir
@@ -32,7 +32,7 @@ LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/FieldComm/src
 
 CLEANDIRS  =
-CLEANFILES =
+CLEANFILES = $(AUTOGEN)
 CLOBBERDIS =
 
 include ${ESMF_DIR}/makefile
