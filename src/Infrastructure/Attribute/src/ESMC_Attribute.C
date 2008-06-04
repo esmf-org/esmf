@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.11 2008/05/06 23:54:28 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.12 2008/06/04 22:54:05 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.11 2008/05/06 23:54:28 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.12 2008/06/04 22:54:05 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -382,6 +382,12 @@
 
   char msgbuf[ESMF_MAXSTR];
   int localrc;
+  int slen,llen,ulen,dlen,tlen;
+  
+  slen = 8;
+  llen = 30;
+  ulen = 8;
+  dlen = 5;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
@@ -391,30 +397,39 @@
       basename,convention,purpose);
     printf(msgbuf);
     ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-    sprintf(msgbuf, "%-35s\t%-35s\t%-35s\t%-35s\t\r\n","Short Name","Long Name","Units","Dimensions");
+    sprintf(msgbuf, "%-*s\t%-*s\t%-*s\t%-*s\t\r\n",slen,"Short Name",llen,"Long Name",ulen,
+      "Units",dlen,"Dimensions");
     printf(msgbuf);
     ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     ++count;
   }
-  
+    
   if (strcmp(convention,attrConvention) == 0 && 
       strcmp(purpose,attrPurpose) == 0 &&
       strcmp(object,attrObject) == 0) {
+      if(strcmp("shortname",attrName) == 0)
+        tlen = slen;
+      else if(strcmp("longname",attrName) == 0)
+        tlen = llen;
+      else if(strcmp("units",attrName) == 0)
+        tlen = ulen;
+      else if(strcmp("dimensions",attrName) == 0)
+        tlen = dlen;
       if (items == 1) {
         if (tk == ESMC_TYPEKIND_I4)
-          sprintf(msgbuf, "%-35d\t",vi);
+          sprintf(msgbuf, "%-*d\t",tlen,vi);
         else if (tk == ESMC_TYPEKIND_I8) 
-          sprintf(msgbuf, "%-35ld\t",vtl); 
+          sprintf(msgbuf, "%-*ld\t",tlen,vtl); 
         else if (tk == ESMC_TYPEKIND_R4) 
-          sprintf(msgbuf, "%-35f\t",vf);  
+          sprintf(msgbuf, "%-*f\t",tlen,vf);  
         else if (tk == ESMC_TYPEKIND_R8) 
-          sprintf(msgbuf, "%-35g\t",vd);  
+          sprintf(msgbuf, "%-*g\t",tlen,vd);  
         else if (tk == ESMC_TYPEKIND_LOGICAL) 
-          sprintf(msgbuf, "%-35s\t",ESMC_LogicalString(vb));
+          sprintf(msgbuf, "%-*s\t",tlen,ESMC_LogicalString(vb));
         else if (tk == ESMC_TYPEKIND_CHARACTER)
-          sprintf(msgbuf, "%-35s\t",vcp);
+          sprintf(msgbuf, "%-*s\t",tlen,vcp);
         else {
-          sprintf(msgbuf, "%-35s\t","N/A");
+          sprintf(msgbuf, "%-*s\t",tlen,"N/A");
         }
         printf(msgbuf);
         ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
