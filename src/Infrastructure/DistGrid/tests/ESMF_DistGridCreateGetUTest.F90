@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.4.2.3 2008/05/29 03:54:43 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.4.2.4 2008/06/05 23:29:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.4.2.3 2008/05/29 03:54:43 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.4.2.4 2008/06/05 23:29:29 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -62,6 +62,7 @@ program ESMF_DistGridCreateGetUTest
   integer, allocatable:: minIndexPDimPDe(:,:), maxIndexPDimPDe(:,:)
   integer, allocatable:: indexCountPDimPDe(:,:), localDeList(:)
   integer, allocatable:: indexList(:), seqIndexList(:)
+  integer, allocatable:: deBlockList(:,:,:)
   logical:: loopResult
   type(ESMF_Logical):: matchResult
 
@@ -472,6 +473,59 @@ program ESMF_DistGridCreateGetUTest
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - 1D Single Patch w/ deBlockList incorrect deCount"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  allocate(deBlockList(1,2,petCount+1))
+  delayout = ESMF_DELayoutCreate(rc=rc) ! creates DELayout with petCount DEs
+  distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/100/), &
+    deBlockList=deBlockList, delayout=delayout, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(deBlockList)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - 1D Single Patch w/ deBlockList out-of-range"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  allocate(deBlockList(1,2,petCount))
+  deBlockList(1,:,1) = (/1,20/)
+  deBlockList(1,:,2) = (/21,40/)
+  deBlockList(1,:,3) = (/41,60/)
+  deBlockList(1,:,4) = (/61,101/)
+  distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/100/), &
+    deBlockList=deBlockList, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(deBlockList)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - 1D Single Patch w/ deBlockList"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(deBlockList(1,2,petCount))
+  deBlockList(1,:,1) = (/1,20/)
+  deBlockList(1,:,2) = (/21,40/)
+  deBlockList(1,:,3) = (/41,60/)
+  deBlockList(1,:,4) = (/61,100/)
+  distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/100/), &
+    deBlockList=deBlockList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(deBlockList)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridPrint()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridPrint(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridDestroy()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
   !------------------------------------------------------------------------
 10 continue
   call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally

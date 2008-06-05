@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.1.2.7 2008/05/09 05:52:16 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.1.2.8 2008/06/05 23:29:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.1.2.7 2008/05/09 05:52:16 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.1.2.8 2008/06/05 23:29:29 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -667,8 +667,14 @@ DistGrid *DistGrid::create(
     }
   }else{
     // delayout was provided -> get deCount
-    deCount = delayout->getDeCount();
     delayoutCreator = false;  // indicate that delayout was not created here
+    if (deCount != delayout->getDeCount()){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- deBlockList must provide deCount elements in third dimension", rc);
+      delete distgrid;
+      distgrid = ESMC_NULL_POINTER;
+      return ESMC_NULL_POINTER;
+    }
   }
   int *dummy;
   bool deLabelListDeleteFlag = false;  // reset
@@ -715,18 +721,36 @@ DistGrid *DistGrid::create(
   int *minIndexPDimPDe = new int[dimCount*deCount];
   int *maxIndexPDimPDe = new int[dimCount*deCount];
   for (int i=0; i<dimCount; i++){
-    int dimLength = maxIndex->array[i] - minIndex->array[i] + 1;
+    int min = minIndex->array[i];
+    int max = maxIndex->array[i];
     int de, extentIndex, deBlockIndexMin, deBlockIndexMax;
     for (int j=0; j<deCount; j++){
       de = deLabelList->array[j];
       extentIndex = de*dimCount+i;  // index into temp. arrays
       deBlockIndexMin = j*deBlockList->extent[0]*deBlockList->extent[1] + i;
       deBlockIndexMax = deBlockIndexMin + deBlockList->extent[0];
-      indexCountPDimPDe[extentIndex] = deBlockList->array[deBlockIndexMax]
-        - deBlockList->array[deBlockIndexMin] + 1;
       // determine min and max
       minIndexPDimPDe[extentIndex] = deBlockList->array[deBlockIndexMin];
       maxIndexPDimPDe[extentIndex] = deBlockList->array[deBlockIndexMax];
+      if (minIndexPDimPDe[extentIndex] < min ||
+        minIndexPDimPDe[extentIndex] > max){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- deBlockList contains out-of-bounds elements", rc);
+        delete distgrid;
+        distgrid = ESMC_NULL_POINTER;
+        return ESMC_NULL_POINTER;
+      }
+      if (maxIndexPDimPDe[extentIndex] < min ||
+        maxIndexPDimPDe[extentIndex] > max){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "- deBlockList contains out-of-bounds elements", rc);
+        delete distgrid;
+        distgrid = ESMC_NULL_POINTER;
+        return ESMC_NULL_POINTER;
+      }
+      // determine count
+      indexCountPDimPDe[extentIndex] = maxIndexPDimPDe[extentIndex]
+        - minIndexPDimPDe[extentIndex] + 1;
       // fill indexListPDimPLocalDe
       if (deList[j] > -1){
         // de is local
