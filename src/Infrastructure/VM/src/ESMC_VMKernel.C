@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.99.2.9 2008/04/23 18:19:19 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.99.2.10 2008/06/05 17:41:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -2453,6 +2453,8 @@ int VMK::commtest(commhandle **ch, int *completeFlag, status *status){
         delete [] (*ch)->mpireq;
     }else if ((*ch)->type==-1){
       // this is a dummy commhandle and there is nothing to wait for...
+      // ... but set localCompleteFlag
+      localCompleteFlag = 1;      
     }else{
       printf("VMK: only MPI non-blocking implemented\n");
       localrc = VMK_ERROR;
@@ -2730,6 +2732,7 @@ int VMK::send(const void *message, int size, int dest, int tag){
     break;
   case VM_COMM_TYPE_MPIUNI:
     // Shared memory hack for mpiuni
+    // TODO: this assumes that send will arrive first, otherwise this will hang
     shmp = sendChannel[dest].shmp;  // shared memory mp channel
     if (size<=SHARED_BUFFER){
       // buffer is sufficient
@@ -2806,25 +2809,22 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
     break;
   case VM_COMM_TYPE_MPIUNI:
     // Shared memory hack for mpiuni
-    // This shared memory implementation is naturally non-blocking as long as
-    // the message is smaller than the provided buffer. No need for a commhandle
+    // This shared memory implementation is naturally non-blocking.
     // Of course this allows only one message per sender - receiver channel.
     // TODO: To remove the single message per channel limitation there will need
     // TODO: to be one shared_mp element per request.
     (*ch)->type=-1; // indicate that this is a dummy commhandle
     shmp = sendChannel[dest].shmp;  // shared memory mp channel
-    if (size<=SHARED_BUFFER){
-      // buffer is sufficient
-      pdest = shmp->buffer;
-      // wait until buffer is ready to be used
-      sync_buffer_wait_empty(&shmp->shms, 0);
-      // do the actual memcpy
-      memcpy(pdest, message, size);
-      // set flag indicating that send's memcpy() is done and buffer is valid
-      sync_buffer_flag_fill(&shmp->shms, 0);
+    if (shmp->tcounter == 1){
+      // recv() already set the ptr_dest -> send() came second -> copy data
+      pdest = (char *)shmp->ptr_dest;
+      memcpy(pdest, message, size);      
+      // reset counter
+      shmp->tcounter = 0;
     }else{
-      // buffer is insufficient
-      // todo: need to throw error
+      // send() came first, set variables for recv() side
+      shmp->ptr_src = message;        // set the source pointer
+      shmp->tcounter++; // no need to sync for this in mpiuni
     }
     break;
   default:
@@ -2983,6 +2983,7 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
     break;
   case VM_COMM_TYPE_MPIUNI:
     // Shared memory hack for mpiuni
+    // TODO: this assumes that send will arrive first, otherwise this will hang
     shmp = recvChannel[source].shmp;   // shared memory mp channel
     if (size<=SHARED_BUFFER){
       // buffer is sufficient
@@ -3068,25 +3069,22 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
     break;
   case VM_COMM_TYPE_MPIUNI:
     // Shared memory hack for mpiuni
-    // This shared memory implementation is naturally non-blocking as long as
-    // the message is smaller than the provided buffer. No need for a commhandle
+    // This shared memory implementation is naturally non-blocking.
     // Of course this allows only one message per sender - receiver channel.
     // TODO: To remove the single message per channel limitation there will need
     // TODO: to be one shared_mp element per request.
     (*ch)->type=-1; // indicate that this is a dummy commhandle
-    shmp = recvChannel[source].shmp;   // shared memory mp channel
-    if (size<=SHARED_BUFFER){
-      // buffer is sufficient
-      psrc = shmp->buffer;
-      // wait until buffer is ready to be used
-      sync_buffer_wait_fill(&shmp->shms, 0);
-      // do actual memcpy
+    shmp = recvChannel[source].shmp;  // shared memory mp channel
+    if (shmp->tcounter == 1){
+      // send() already set the ptr_src -> recv() came second -> copy data
+      psrc = (char *)shmp->ptr_src;
       memcpy(message, psrc, size);
-      // set flag indicating that recv's memcpy() is done and buffer is empty
-      sync_buffer_flag_empty(&shmp->shms, 0);
+      // reset counter
+      shmp->tcounter = 0;
     }else{
-      // buffer is insufficient
-      // todo: need to throw error
+      // recv() came first, set variables for send() side
+      shmp->ptr_dest = message;        // set the destination pointer
+      shmp->tcounter++; // no need to sync for this in mpiuni
     }
     break;
   default:
