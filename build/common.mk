@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.221 2008/06/04 21:39:18 svasquez Exp $
+#  $Id: common.mk,v 1.222 2008/06/05 17:50:24 tjcnrl Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1001,7 +1001,7 @@ include: chkdir_include
 tree_include:
 	@for hfile in ${STOREH} foo ; do \
 	  if [ $$hfile != "foo" ]; then \
-	    cp -f ../include/$$hfile $(ESMF_INCDIR) ; \
+	    cp -fp ../include/$$hfile $(ESMF_INCDIR) ; \
 	  fi ; \
 	done
 
