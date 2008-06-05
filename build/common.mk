@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.222 2008/06/05 17:50:24 tjcnrl Exp $
+#  $Id: common.mk,v 1.223 2008/06/05 18:33:10 tjcnrl Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -299,7 +299,8 @@ export ESMF_TESTMPMD = OFF
 endif
 
 #-------------------------------------------------------------------------------
-# If INSTALL environment variables are not set give them default values #-------------------------------------------------------------------------------
+# If INSTALL environment variables are not set give them default values
+#-------------------------------------------------------------------------------
 
 ifndef ESMF_INSTALL_PREFIX
 ESMF_INSTALL_PREFIX := ./DEFAULTINSTALLDIR
@@ -383,6 +384,13 @@ ESMF_LIBDIR     = $(ESMF_BUILD)/lib/lib$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).
 # f90 module directory
 ESMF_MODDIR     = $(ESMF_BUILD)/mod/mod$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
 
+# object directory
+ifdef ESMF_DEFER_LIB_BUILD
+ESMF_OBJDIR     = $(ESMF_BUILD)/obj/obj$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
+else
+ESMF_OBJDIR     = $(ESMF_MODDIR)
+endif
+
 # test executable directory
 ESMF_TESTDIR    = $(ESMF_BUILD)/test/test$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
 
@@ -437,7 +445,7 @@ DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d
 DO_UTC_RESULTS	    = $(ESMF_UTCSCRIPTS)/do_utc_results.pl -h $(ESMF_UTCSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -e $(ESMF_MAX_PROCS)
 
 # C specific variables
-ESMC_OBJDIR	= $(ESMF_MODDIR)
+ESMC_OBJDIR	= $(ESMF_OBJDIR)
 ESMC_TESTDIR    = $(ESMF_TESTDIR)
 ESMC_DOCDIR	= $(ESMF_DOCDIR)
 
@@ -857,6 +865,11 @@ chkdir_lib:
 	@if [ ! -d $(ESMF_MODDIR) ]; then \
 	  echo Making directory $(ESMF_MODDIR) for *.mod files; \
 	  mkdir -p $(ESMF_MODDIR) ; fi
+ifdef ESMF_DEFER_LIB_BUILD
+	@if [ ! -d $(ESMF_OBJDIR) ]; then \
+	  echo Making directory $(ESMF_OBJDIR) for *.o files; \
+	  mkdir -p $(ESMF_OBJDIR) ; fi
+endif
 
 chkdir_doc:
 	@if [ ! -d $(ESMF_DOCDIR) ]; then \
@@ -940,10 +953,16 @@ foo:
 #-------------------------------------------------------------------------------
 
 # this is a magic gnumake variable which helps it find files.
-VPATH = $(ESMF_DIR)/$(LOCDIR):$(ESMF_DIR)/include
+VPATH = $(ESMF_DIR)/$(LOCDIR):$(ESMF_DIR)/$(LOCDIR)/../include:\
+	$(ESMF_INCDIR):$(ESMF_CONFDIR):$(ESMF_SITEDIR)
 
+ifdef ESMF_DEFER_LIB_BUILD
+libc: $(OBJSC)
+libf: $(OBJSF)
+else
 libc:$(LIBNAME)($(OBJSC))
 libf:$(LIBNAME)($(OBJSF))
+endif
 
 # TODO: the dependencies need fixing here.
 # the goal here is to only rebuild libesmf.a when a source file has
@@ -964,32 +983,37 @@ libf:$(LIBNAME)($(OBJSF))
 lib:  info build_libs info_mk
 
 build_libs: chkdir_lib include
+ifdef ESMF_DEFER_LIB_BUILD
+	cd $(ESMF_DIR) ;\
+	$(MAKE) ACTION=tree_lib tree defer shared
+else
 	cd $(ESMF_DIR) ;\
 	$(MAKE) ACTION=tree_lib tree shared
+endif
 	@echo "ESMF library built successfully."
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
 	@echo " or the more extensive: $(MAKE) all_tests"
 
 # Build only stuff in and below the current dir.
 build_here: chkdir_lib
+ifdef ESMF_DEFER_LIB_BUILD
+	$(MAKE) ACTION=tree_lib tree defer shared
+else
 	$(MAKE) ACTION=tree_lib tree shared
+endif
 
 # Builds library - action for the 'tree' target.
 tree_lib:
-	dir=`pwd`; cd $(ESMF_MODDIR); $(MAKE) -f $${dir}/makefile MAKEFILE=$${dir}/makefile esmflib
+	dir=`pwd`; cd $(ESMF_OBJDIR); $(MAKE) -f $${dir}/makefile MAKEFILE=$${dir}/makefile esmflib
 
 # Builds library
 esmflib:: chkdir_lib $(SOURCE)
 	@if [ "$(SOURCEC)" != "" ] ; then \
-	   $(MAKE) -f $(MAKEFILE) libc; fi
+		$(MAKE) -f $(MAKEFILE) libc ; fi
 	@if [ "$(SOURCEF)" != "" ] ; then \
-	    $(MAKE) -f $(MAKEFILE)  libf; fi
-	@if [ "$(OBJS)" != "" -a "$(OBJS)" != " " ] ; then \
-		$(ESMF_RANLIB) $(LIBNAME); \
-		$(ESMF_RM) $(OBJS); \
-	fi
+		$(MAKE) -f $(MAKEFILE) libf ; fi
 	@if [ "$(QUICKSTART)" != "" ] ; then \
-	   $(MAKE) -f $(MAKEFILE) tree_build_quick_start; fi
+		$(MAKE) -f $(MAKEFILE) tree_build_quick_start; fi
 
 
 # copy private include files into src/include directory.
@@ -2355,15 +2379,31 @@ endif
 
 .F90.o:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS) $<
+ifdef ESMF_DEFER_LIB_BUILD
+	@mods="`ls *.mod 2>/dev/null`"; \
+	if [ $$? = 0 ]; then $(ESMF_MV) $$mods $(ESMF_MODDIR)/.; fi;
+endif
 
 .f90.o:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREENOCPP) $<
+ifdef ESMF_DEFER_LIB_BUILD
+	@mods="`ls *.mod 2>/dev/null`"; \
+	if [ $$? = 0 ]; then $(ESMF_MV) $$mods $(ESMF_MODDIR)/.; fi;
+endif
 
 .F.o:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXCPP) $(ESMF_F90COMPILECPPFLAGS) $<
+ifdef ESMF_DEFER_LIB_BUILD
+	@mods="`ls *.mod 2>/dev/null`"; \
+	if [ $$? = 0 ]; then $(ESMF_MV) $$mods $(ESMF_MODDIR)/.; fi;
+endif
 
 .f.o:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXNOCPP) $<
+ifdef ESMF_DEFER_LIB_BUILD
+	@mods="`ls *.mod 2>/dev/null`"; \
+	if [ $$? = 0 ]; then $(ESMF_MV) $$mods $(ESMF_MODDIR)/.; fi;
+endif
 
 .c.o:
 	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
@@ -2460,6 +2500,34 @@ shared:
 		fi ;\
 		done ; \
 	fi
+
+
+#-------------------------------------------------------------------------------
+#  Build (deferred) static library from all objects
+#  Note: Test for existence and update of existing library is commented out.
+#        This code was left in for reference.  The alternate approach of
+#        completely rebuilding libesmf.a seems to be, in general, faster and
+#        more robust.  The primary issue with the "test and update" approach
+#        is that if one initially builds the library with ESMF_DEFER_LIB_BUILD
+#        not enabled and then subsequently enables it an rebuilds, then the
+#        final deferred library build will update the existing libesmf.a with
+#        all objects, one at a time.  This painfully slow and unacceptable.
+#-------------------------------------------------------------------------------
+
+##ifeq ($(shell if test -s $(ESMFLIB); then echo 1; fi;), 1)
+### library already created, so update with recently compiled objects
+##OBJECT_LIST = $(wildcard $(ESMF_OBJDIR)/*.o)
+##defer: $(ESMFLIB)($(OBJECT_LIST))
+##.o.a:
+##	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $@ $%
+##else
+### library does not exist, so create with all compiled objects
+OBJECT_LIST = $(notdir $(wildcard $(ESMF_OBJDIR)/*.o))
+defer:
+	cd $(ESMF_OBJDIR) ; \
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMFLIB) $(OBJECT_LIST)
+##endif
+
 
 #-------------------------------------------------------------------------------
 # Pattern rules for making Tex files using protex script.  Input to 

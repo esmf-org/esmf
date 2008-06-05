@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.86 2008/04/07 06:45:48 theurich Exp $
+# $Id: makefile,v 1.87 2008/06/05 18:33:09 tjcnrl Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -31,9 +31,9 @@ include $(ESMF_DIR)/build/common.mk
 #-------------------------------------------------------------------------------
 DIRS = src
 
-CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_TESTDIR) $(ESMF_EXDIR) \
+CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_OBJDIR) $(ESMF_TESTDIR) $(ESMF_EXDIR) \
 	    $(ESMF_BUILD)/src/include
-CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod \
+CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod $(ESMF_BUILD)/obj \
 	      $(ESMF_BUILD)/test $(ESMF_BUILD)/quick_start \
               $(ESMF_BUILD)/release $(ESMF_BUILD)/examples \
               $(ESMF_BUILD)/doc
@@ -152,6 +152,10 @@ info:   script_info
 	-@echo "ESMF_CXXLINKRPATHS: $(ESMF_CXXLINKRPATHS)"
 	-@echo "ESMF_CXXLINKLIBS: $(ESMF_CXXLINKLIBS)"
 	-@echo "ESMF_CXXESMFLINKLIBS: $(ESMF_CXXESMFLINKLIBS)"
+	-@if [ -n "$(ESMF_DEFER_LIB_BUILD)" ] ; then \
+	  echo "" ; \
+	  echo "ESMF_DEFER_LIB_BUILD is enabled. Object files are located in" ; \
+	  echo "$(ESMF_OBJDIR)" ; fi
 	-@echo ""
 	-@echo ""
 	-@echo "--------------------------------------------------------------"
