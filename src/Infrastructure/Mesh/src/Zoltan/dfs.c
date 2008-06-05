@@ -2,7 +2,7 @@
  * CVS File Information :
  *    $RCSfile: dfs.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:46 $
+ *    $Date: 2008/06/05 20:52:11 $
  *    Revision: 1.33 $
  ****************************************************************************/
 
@@ -22,7 +22,7 @@ extern "C" {
 
 static int DFS_Part_Count;      /* count of number of times Zoltan_Oct_dfs_partition
                                    was called */
-static int partition;              /* Partition number we are working on */
+static int lpartition;             /* Partition number we are working on */
 static float total;                /* Cost of all complete partitions so far */
 static float pcost;                /* Current partition cost */
 static float optcost;              /* Optimal partition cost */
@@ -79,45 +79,45 @@ void Zoltan_Oct_dfs_partition(ZZ *zz, int *counter, float *c1,
   optcost=globalcost/zz->Num_Proc;                /* Optimal partition size */
 #if 0
   if(optcost > 0)
-    partition=(int)(prefcost/optcost);      /* Start work on this partition */
+    lpartition=(int)(prefcost/optcost);      /* Start work on this partition */
   else
-    partition=0;
-  if (partition==zz->Num_Proc)
-    partition=zz->Num_Proc-1;
+    lpartition=0;
+  if (lpartition==zz->Num_Proc)
+    lpartition=zz->Num_Proc-1;
 #else
   tmpcost=0;
   prevwork = prefcost;
   if(optcost > 0) {
-    partition=(int)(prefcost/optcost);      /* Start work on this partition */
-    partition = 0;
-    optsize = part_sizes[partition]*globalcost;
-    pastwork = part_sizes[partition]*globalcost;
+    lpartition=(int)(prefcost/optcost);      /* Start work on this partition */
+    lpartition = 0;
+    optsize = part_sizes[lpartition]*globalcost;
+    pastwork = part_sizes[lpartition]*globalcost;
     
     while(pastwork < prevwork) {
-      tmpcost += part_sizes[partition];
-      partition++;
-      optsize = part_sizes[partition]*globalcost;
-      pastwork += (part_sizes[partition]*globalcost);
+      tmpcost += part_sizes[lpartition];
+      lpartition++;
+      optsize = part_sizes[lpartition]*globalcost;
+      pastwork += (part_sizes[lpartition]*globalcost);
     }
-    if((pastwork == prevwork) && (partition < (zz->Num_Proc - 1))){
-      tmpcost += part_sizes[partition];
-      partition++;
-      optsize = part_sizes[partition]*globalcost;
-      pastwork += (part_sizes[partition]*globalcost);
+    if((pastwork == prevwork) && (lpartition < (zz->Num_Proc - 1))){
+      tmpcost += part_sizes[lpartition];
+      lpartition++;
+      optsize = part_sizes[lpartition]*globalcost;
+      pastwork += (part_sizes[lpartition]*globalcost);
     }
   }
   else
-    partition=0;
-  while((part_sizes[partition] == 0) && (partition < (zz->Num_Proc - 1))) {
-    partition++;
-    optsize = part_sizes[partition]*globalcost;
+    lpartition=0;
+  while((part_sizes[lpartition] == 0) && (lpartition < (zz->Num_Proc - 1))) {
+    lpartition++;
+    optsize = part_sizes[lpartition]*globalcost;
   }
 #endif
   
-  /*optcost = part_sizes[partition]*globalcost;*/
-  /*total=partition*optcost;*/          /* Total cost of all previous parts */
+  /*optcost = part_sizes[lpartition]*globalcost;*/
+  /*total=lpartition*optcost;*/          /* Total cost of all previous parts */
   total=tmpcost*globalcost;             /* Total cost of all previous parts */
-  /*pcost=prefcost-(partition*optcost);*/         /* Current partition cost */
+  /*pcost=prefcost-(lpartition*optcost);*/         /* Current partition cost */
   pcost=prefcost-(tmpcost*globalcost);            /* Current partition cost */
 
   pmass=0.0;                           /* initialize octant volume variable */
@@ -185,7 +185,7 @@ static void Zoltan_Oct_visit_all_subtrees(ZZ *zz, float *part_sizes) {
  * 
  * This routine references the following (static) global variables:
  *
- *   partition - (RW) number of the partition we are currently working on
+ *   lpartition - (RW) number of the partition we are currently working on
  *   total     - (RW) total cost of all *previous* partitions
  *   pcost     - (RW) partition cost for current partition
  *   optcost   - (RO) optimal partition cost
@@ -203,17 +203,17 @@ static void Zoltan_Oct_visit(ZZ *zz, pOctant octant, float *part_sizes) {
 
   DFS_Part_Count++;
   cost = Zoltan_Oct_costs_value(octant);      /* get the cost of the octant */
-  /*behind = partition * optcost - total;*/     /* calcuate how much behind */
+  /*behind = lpartition * optcost - total;*/     /* calcuate how much behind */
   behind = (tmpcost*globalcost) - total;        /* calcuate how much behind */
   
   if(0)
-    fprintf(stderr,"LGG[%d] pc=%f, c=%f, ps=%f, b=%f\n", partition, pcost,
+    fprintf(stderr,"LGG[%d] pc=%f, c=%f, ps=%f, b=%f\n", lpartition, pcost,
 	    cost, optsize, behind);
   /* If octant does not overflow the current partition, then use it. */
   /*if( cost==0 || (pcost+cost) <= (optcost+behind)) {*/
   if(cost==0 || ((pcost+cost) <= (optsize+behind))) {
-    Zoltan_Oct_tag_subtree(OCT_info,octant,partition);
-    /*fprintf(stderr,"LGG[%d] pc=%f, c=%f, ps=%f, b=%f\n", partition, pcost,
+    Zoltan_Oct_tag_subtree(OCT_info,octant,lpartition);
+    /*fprintf(stderr,"LGG[%d] pc=%f, c=%f, ps=%f, b=%f\n", lpartition, pcost,
 	    cost, optsize, behind);*/
     pcost+=cost;
     
@@ -232,7 +232,7 @@ static void Zoltan_Oct_visit(ZZ *zz, pOctant octant, float *part_sizes) {
    */
   
   if (!Zoltan_Oct_isTerminal(octant)) {
-    Zoltan_Oct_modify_newpid(octant, partition);                 /* Nonterm */
+    Zoltan_Oct_modify_newpid(octant, lpartition);                 /* Nonterm */
     Zoltan_Oct_children(octant,children);
 
     for (i=0; i<8; i++)                    /* Simple - just visit in order */
@@ -249,19 +249,19 @@ static void Zoltan_Oct_visit(ZZ *zz, pOctant octant, float *part_sizes) {
   togo = behind + optsize - pcost;
 
   /*printf("proc=%d, part=%d, b=%f, pcost=%f, cost=%f, os=%f\n",
-	 zz->Proc, partition, behind, pcost, cost, optsize);*/
+	 zz->Proc, lpartition, behind, pcost, cost, optsize);*/
 
   if ((cost-togo) >= togo) {
     /*printf("proc=%d, part=%d, togo=%f, pcost=%f, cost=%f, g=%f\n",
-	   zz->Proc, partition, togo, pcost, cost, globalcost);*/
+	   zz->Proc, lpartition, togo, pcost, cost, globalcost);*/
     /*
      * End current part and start new one. We are more "over" than "under"
      */
-    tmpcost += part_sizes[partition];
-    partition++;                               /* Move on to next partition */
-    while((part_sizes[partition] == 0) && (partition < (zz->Num_Proc - 1)))
-      partition++;
-    optsize = part_sizes[partition]*globalcost;
+    tmpcost += part_sizes[lpartition];
+    lpartition++;                               /* Move on to next partition */
+    while((part_sizes[lpartition] == 0) && (lpartition < (zz->Num_Proc - 1)))
+      lpartition++;
+    optsize = part_sizes[lpartition]*globalcost;
     total += pcost;
     pcost = 0;
     pmass = 0;
@@ -269,7 +269,7 @@ static void Zoltan_Oct_visit(ZZ *zz, pOctant octant, float *part_sizes) {
   }
 
   /*** Add terminal octant to current partition */
-  Zoltan_Oct_modify_newpid(octant, partition);
+  Zoltan_Oct_modify_newpid(octant, lpartition);
   pcost += cost;
 
   Zoltan_Oct_origin_volume(octant, origin, &volume);

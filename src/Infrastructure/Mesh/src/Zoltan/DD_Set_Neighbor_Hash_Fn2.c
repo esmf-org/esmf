@@ -8,7 +8,7 @@
  * CVS File Information :
  *    $RCSfile: DD_Set_Neighbor_Hash_Fn2.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:42 $
+ *    $Date: 2008/06/05 20:52:11 $
  *    Revision: 1.9 $
  ****************************************************************************/
 
@@ -49,7 +49,7 @@ static int         nproc ;
 static int         low_limit ;
 static int         high_limit ;
 static int         debug_level ;
-static int         count ;
+static int         lcount ;
 
 
 /*************  Zoltan_DD_Set_Hash_Fn2()  ***********************/
@@ -104,7 +104,7 @@ int Zoltan_DD_Set_Neighbor_Hash_Fn2 (
    low_limit   = ptr[0].low ;
    high_limit  = ptr[n-1].high ;
    debug_level = dd->debug_level ;
-   count       = n ;
+   lcount       = n ;
    nproc       = dd->nproc ;
 
    return ZOLTAN_DD_NORMAL_RETURN ;
@@ -125,7 +125,7 @@ static unsigned int dd_nh2 (ZOLTAN_ID_PTR gid, int gid_length,
       return id % nproc ;
       }
 
-   p = (Range_Info *) bsearch (gid, ptr, count, sizeof (Range_Info),
+   p = (Range_Info *) bsearch (gid, ptr, lcount, sizeof (Range_Info),
     compare_search) ;
 
    if (p == NULL)              /* shouldn't happen */
