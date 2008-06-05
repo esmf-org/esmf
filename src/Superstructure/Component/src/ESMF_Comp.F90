@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.169 2008/04/17 18:58:38 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.170 2008/06/05 23:50:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -125,7 +125,7 @@
 #ifndef ESMF_SEQUENCE_BUG
       sequence
 #endif
-      private
+      !private
          type(ESMF_Pointer) :: this       ! C++ ftable pointer - MUST BE FIRST
          type(ESMF_Base) :: base                  ! base class
 #ifndef ESMF_NO_INITIALIZERS
@@ -270,7 +270,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.169 2008/04/17 18:58:38 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.170 2008/06/05 23:50:09 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
