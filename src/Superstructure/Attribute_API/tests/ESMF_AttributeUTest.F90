@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUTest.F90,v 1.4 2008/06/03 22:41:45 rokuingh Exp $
+! $Id: ESMF_AttributeUTest.F90,v 1.5 2008/06/05 23:48:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeUTest.F90,v 1.4 2008/06/03 22:41:45 rokuingh Exp $'
+      '$Id: ESMF_AttributeUTest.F90,v 1.5 2008/06/05 23:48:59 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -49,6 +49,8 @@ program ESMF_AttributeUTest
       type(ESMF_Array)       :: array
       type(ESMF_ArraySpec)   :: arrayspec
       type(ESMF_DistGrid)    :: distgrid
+      type(ESMF_CplComp)     :: cplcomp
+      type(ESMF_GridComp)    :: grdcomp
       type(ESMF_Field)       :: field
       type(ESMF_Grid)        :: grid
       type(ESMF_State)       :: state, state2
@@ -92,6 +94,8 @@ program ESMF_AttributeUTest
       fieldforstate = ESMF_FieldCreateEmpty(name="fieldforstate1", rc=rc)
       fieldbundle = ESMF_FieldBundleCreate(name="bundle 1", rc=rc)
       fieldforbundle = ESMF_FieldCreateEmpty(name="field 1", rc=rc)
+      cplcomp = ESMF_CplCompCreate(name="cplcomp", petList=(/0/), rc=rc)
+      grdcomp = ESMF_GridCompCreate(name="grdcomp", petList=(/0/), rc=rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !-------------------------------------------------------------------------
@@ -192,6 +196,224 @@ program ESMF_AttributeUTest
       call ESMF_AttributeGet(array, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute Count from a Array Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------
+!  CPLCOMP
+!-------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Add an integer attribute to a CplComp Test
+      call ESMF_AttributeSet(cplcomp, name="Sides", value=65, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding an integer attribute to a CplComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get an integer attribute from a CplComp Test
+      call ESMF_AttributeGet(cplcomp, name="Sides", value=number, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an integer attribute from a CplComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      defaultvalue = 7;
+
+      !EX_UTest
+      ! Get an integer attribute from a Field Test
+      call ESMF_AttributeGet(cplcomp, name="NotSides", value=number, &
+        defaultvalue=defaultvalue, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting a default integer attribute from a CplComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.7), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Get an integer attribute from a CplComp Test
+      call ESMF_AttributeGet(cplcomp, name="Sides", count=number, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an attribute info from a CplComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      conv = "defaultconvention"
+      purp = "defaultpurpose"
+
+      !EX_UTest
+      ! Create an attribute package on a CplComp Test
+      call ESMF_AttributeAdd(cplcomp, convention=conv, &
+        purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating an Attpack on a CplComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      attrList(1) = "Custom1"
+      attrList(2) = "Custom2"
+      attrList(3) = "Custom3"
+      count = 3
+      conv = "customconvention"
+      purp = "custompurpose"
+      
+      !EX_UTest
+      ! Create a custom attribute package on a CplComp Test
+      call ESMF_AttributeAdd(cplcomp, convention=conv, &
+        purpose=purp, attrList=attrList, count=count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating a custom Attpack on a CplComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      attrname = "units"
+      attrvalue = "m/s"
+      conv = "defaultconvention"
+      purp = "defaultpurpose"
+
+      !EX_UTest
+      ! Set an attribute in an attribute package on a CplComp Test
+      call ESMF_AttributeSet(cplcomp, name=attrname, value=attrvalue, &
+        convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting an Attribute in an Attpack from a CplComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Write the attribute package from a CplComp Test
+      call ESMF_AttributeWrite(cplcomp, convention=conv, &
+        purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing an Attpack from a CplComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Link a cplcomp attribute hierarchy to a state attribute hierarchy CplComp Test
+      call ESMF_AttributeSet(cplcomp, state, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a CplComp hierarchy to a State hierarchy Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Getting Attribute count from a CplComp
+      call ESMF_AttributeGet(cplcomp, count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Attribute Count from a CplComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------
+!  GRIDCOMP
+!-------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Add an integer attribute to a GridComp Test
+      call ESMF_AttributeSet(grdcomp, name="Sides", value=65, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding an integer attribute to a GridComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get an integer attribute from a GridComp Test
+      call ESMF_AttributeGet(grdcomp, name="Sides", value=number, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an integer attribute from a GridComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      defaultvalue = 7;
+
+      !EX_UTest
+      ! Get an integer attribute from a Field Test
+      call ESMF_AttributeGet(grdcomp, name="NotSides", value=number, &
+        defaultvalue=defaultvalue, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting a default integer attribute from a GridComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.7), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Get an integer attribute from a GridComp Test
+      call ESMF_AttributeGet(grdcomp, name="Sides", count=number, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an attribute info from a GridComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      conv = "defaultconvention"
+      purp = "defaultpurpose"
+
+      !EX_UTest
+      ! Create an attribute package on a GridComp Test
+      call ESMF_AttributeAdd(grdcomp, convention=conv, &
+        purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating an Attpack on a GridComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      attrList(1) = "Custom1"
+      attrList(2) = "Custom2"
+      attrList(3) = "Custom3"
+      count = 3
+      conv = "customconvention"
+      purp = "custompurpose"
+      
+      !EX_UTest
+      ! Create a custom attribute package on a GridComp Test
+      call ESMF_AttributeAdd(grdcomp, convention=conv, &
+        purpose=purp, attrList=attrList, count=count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating a custom Attpack on a GridComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      attrname = "units"
+      attrvalue = "m/s"
+      conv = "defaultconvention"
+      purp = "defaultpurpose"
+
+      !EX_UTest
+      ! Set an attribute in an attribute package on a GridComp Test
+      call ESMF_AttributeSet(grdcomp, name=attrname, value=attrvalue, &
+        convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting an Attribute in an Attpack from a GridComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Write the attribute package from a GridComp Test
+      call ESMF_AttributeWrite(grdcomp, convention=conv, &
+        purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing an Attpack from a GridComp Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Link a grdcomp attribute hierarchy to a state attribute hierarchy GridComp Test
+      call ESMF_AttributeSet(grdcomp, state, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a GridComp hierarchy to a State hierarchy Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Getting Attribute count from a GridComp
+      call ESMF_AttributeGet(grdcomp, count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Attribute Count from a GridComp Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
