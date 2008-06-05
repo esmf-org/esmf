@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2008/05/09 20:08:20 rosalind Exp $ 
+# $Id: makefile,v 1.24 2008/06/05 15:02:21 rosalind Exp $ 
 
 ALL: build_here 
 
@@ -34,7 +34,7 @@ CLOBBERDIRS =
 
 ESMC_Fraction_F.o:	ESMC_Base.h ESMC_Fraction.h makefile
 
-ESMC_BaseTime_F.o:	ESMC_Base.h ESMC_BaseTime.h makefile
+ESMC_BaseTime_F.o:	ESMC_Base.h ESMCI_BaseTime.h makefile
 
 ESMC_Calendar_F.o:	ESMC_Base.h ESMC_Calendar.h makefile
 
