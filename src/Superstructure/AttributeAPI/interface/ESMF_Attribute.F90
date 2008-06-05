@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.1.2.3 2008/05/06 04:31:22 cdeluca Exp $
+! $Id: ESMF_Attribute.F90,v 1.1.2.4 2008/06/05 19:17:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -49,6 +49,7 @@ module ESMF_AttributeMod
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_FieldBundleMod
   use ESMF_FieldMod
+  use ESMF_ArrayMod
   use ESMF_StateMod
 
 
@@ -76,7 +77,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.1.2.3 2008/05/06 04:31:22 cdeluca Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.1.2.4 2008/06/05 19:17:58 theurich Exp $'
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_AttributeGet - Get an Attribute
@@ -109,6 +110,18 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldGetLogicalListAttr
         module procedure ESMF_FieldGetCharAttr
 
+        module procedure ESMF_ArrayGetInt4Attr
+        module procedure ESMF_ArrayGetInt4ListAttr
+        module procedure ESMF_ArrayGetInt8Attr
+        module procedure ESMF_ArrayGetInt8ListAttr
+        module procedure ESMF_ArrayGetReal4Attr
+        module procedure ESMF_ArrayGetReal4ListAttr
+        module procedure ESMF_ArrayGetReal8Attr
+        module procedure ESMF_ArrayGetReal8ListAttr
+        module procedure ESMF_ArrayGetLogicalAttr
+        module procedure ESMF_ArrayGetLogicalListAttr
+        module procedure ESMF_ArrayGetCharAttr
+
         module procedure ESMF_StateGetInt4Attr
         module procedure ESMF_StateGetInt4ListAttr
         module procedure ESMF_StateGetInt8Attr
@@ -129,6 +142,9 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldGetAttrInfoByName
         module procedure ESMF_FieldGetAttrInfoByNum
 
+        module procedure ESMF_ArrayGetAttrInfoByName
+        module procedure ESMF_ArrayGetAttrInfoByNum
+
         module procedure ESMF_StateGetAttrInfoByName
         module procedure ESMF_StateGetAttrInfoByNum
 
@@ -136,6 +152,7 @@ module ESMF_AttributeMod
 
         module procedure ESMF_FieldBundleGetAttCount
         module procedure ESMF_FieldGetAttributeCount
+        module procedure ESMF_ArrayGetAttributeCount
         module procedure ESMF_StateGetAttributeCount
 
 
@@ -177,6 +194,18 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldSetLogicalAttr
         module procedure ESMF_FieldSetLogicalListAttr
         module procedure ESMF_FieldSetCharAttr
+
+        module procedure ESMF_ArraySetInt4Attr
+        module procedure ESMF_ArraySetInt4ListAttr
+        module procedure ESMF_ArraySetInt8Attr
+        module procedure ESMF_ArraySetInt8ListAttr
+        module procedure ESMF_ArraySetReal4Attr
+        module procedure ESMF_ArraySetReal4ListAttr
+        module procedure ESMF_ArraySetReal8Attr
+        module procedure ESMF_ArraySetReal8ListAttr
+        module procedure ESMF_ArraySetLogicalAttr
+        module procedure ESMF_ArraySetLogicalListAttr
+        module procedure ESMF_ArraySetCharAttr
 
         module procedure ESMF_StateSetInt4Attr
         module procedure ESMF_StateSetInt4ListAttr

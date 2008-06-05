@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.4 2008/04/05 03:12:30 cdeluca Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.5 2008/06/05 19:17:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.4 2008/04/05 03:12:30 cdeluca Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.5 2008/06/05 19:17:57 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -67,6 +67,15 @@ program ESMF_ArrayCreateGetUTest
   character (len=80)      :: arrayName
   integer, allocatable:: totalLWidth(:,:), totalUWidth(:,:)
   integer, allocatable:: totalLBound(:,:), totalUBound(:,:)
+  
+  integer:: count, i
+  integer(ESMF_KIND_I4) :: intattr, intattr2
+  integer(ESMF_KIND_I4) :: intattrlist(6)
+  real(ESMF_KIND_R8) :: rattr, rattrlist(2)
+  character (len=32) :: lattrstr
+  type(ESMF_Logical) :: lattr, lattrlist(6)
+  character (len=512) :: cattr, cattr2
+  
   
 
 !-------------------------------------------------------------------------------
@@ -130,6 +139,19 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Getting Attribute count from an Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeGet(array, count, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Attribute count from an Array"
+  write(failMsg, *) "Incorrect count"
+  call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -506,6 +528,149 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr4D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+
+
+
+  
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Adding Attribute to an Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeSet(array, "Scale Factor", 4, rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Getting Attribute count from an Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeGet(array, count, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Attribute count from an Array"
+  write(failMsg, *) "Incorrect count"
+  call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Getting Attribute info from an Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeGet(array, name="Scale Factor", count=count, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Attribute count from an Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  intattr = 0
+  write(name, *) "Getting an Integer Attribute back from an Array"
+  write(failMsg, *) "Incorrect result"
+  call ESMF_AttributeGet(array, "Scale Factor", intattr, rc)
+  call ESMF_Test((intattr.eq.4), name, failMsg, result, ESMF_SRCLINE)
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Getting a second Integer Attribute back from an Array"
+  write(failMsg, *) "Incorrect result"
+  call ESMF_AttributeSet(array, "Invalid Data Tag", -999, rc)
+  intattr2 = 0
+  call ESMF_AttributeGet(array, "Invalid Data Tag", intattr2, rc)
+  print *, "Invalid Data Tag should be -999, is: ", intattr2
+  call ESMF_Test((intattr2.eq.-999), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Getting an non-existant Integer Attribute from an Array"
+  write(failMsg, *) "Incorrect result"
+  print *, "ready to call no attr"
+  call ESMF_AttributeGet(array, "No such attribute", intattr, rc)
+  print *, "back from no attr"
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  print *, "done with test"
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Getting an Integer List Attribute back from an Array"
+  write(failMsg, *) "Incorrect result"
+  call ESMF_AttributeSet(array, "Multiple Scale Factors", 4, (/4,3,2,1/), rc)
+  intattr = 0
+  count = 4   ! expected number of values
+  call ESMF_AttributeGet(array, "Multiple Scale Factors", count, intattrlist, rc)
+  print *, count, "attributes found in list"
+  call ESMF_Test((intattrlist(1).eq.4), name, failMsg, result, ESMF_SRCLINE)
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Getting a real Attribute back from an Array"
+  write(failMsg, *) "Incorrect result"
+  rattr = 3.14159
+  call ESMF_AttributeSet(array, "Pi", 3.14159_ESMF_KIND_R8, rc)
+  rattr = 0.0
+  call ESMF_AttributeGet(array, "Pi", rattr, rc)
+  print *, "Pi should be 3.14159, is: ", rattr
+  call ESMF_Test((rattr-3.14159.lt.0.00001), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Getting a real list Attribute back from an Array"
+  write(failMsg, *) "Incorrect result"
+  rattrlist = (/ 1.1, 2.2 /)
+  call ESMF_AttributeSet(array, "Vertices", 2, rattrlist, rc)
+  rattr = 0.0
+  count = 2   ! expected count
+  call ESMF_AttributeGet(array, "Vertices", count, rattrlist, rc)
+  print *, count, "attributes found in list"
+  print *, "Vertices should be 1.1 and 2.2, are: ", rattrlist
+  call ESMF_Test((rattrlist(1).eq.1.1), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Getting a logical Attribute back from an Array"
+  write(failMsg, *) "Incorrect result"
+  call ESMF_AttributeSet(array, "Sky is Blue", ESMF_TRUE, rc)
+  lattr = ESMF_FALSE
+  call ESMF_AttributeGet(array, "Sky is Blue", lattr, rc)
+  call ESMF_LogicalString(lattr, lattrstr, rc)
+  print *, "Sky is Blue  should be true, is: ", lattrstr
+  call ESMF_Test((lattr.eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Getting a logical Attribute back from an Array"
+  write(failMsg, *) "Incorrect result"
+  call ESMF_AttributeSet(array, "FlipFlop", 3, (/ESMF_TRUE,ESMF_FALSE,ESMF_TRUE/), rc)
+  lattr = ESMF_FALSE
+  count = 3   ! expected count
+  call ESMF_AttributeGet(array, "FlipFlop", count, lattrlist, rc)
+  print *, count, "attributes found in list"
+  print *, "FlipFlop should be alternate, are: " 
+  do i=1, 3
+    call ESMF_LogicalString(lattrlist(i), lattrstr, rc)
+    print *, i, lattrstr
+  enddo
+  call ESMF_Test((lattrlist(1).eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Getting a character Attribute back from an Array"
+  write(failMsg, *) "Incorrect result"
+  cattr = "It was a dark and stormy night"
+  call ESMF_AttributeSet(array, "Book", cattr, rc)
+  call ESMF_AttributeGet(array, "Book", cattr2, rc)
+  print *, "Book  should be drivel, is: ", trim(cattr2)
+  call ESMF_Test((cattr.eq.cattr2), name, failMsg, result, ESMF_SRCLINE)
+  
+  
+  
+  
+  
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
