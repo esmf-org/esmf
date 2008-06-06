@@ -575,7 +575,7 @@ MCoord getMCoordElem(const MEField<> &nfield, const MeshObj &elem) {
   MEValues<> mev(nfield.GetMEFamily(), &nfield);
   mev.Setup(*elem.GetKernel(), MEV::update_map, &pintg);
   mev.ReInit(elem);
-  mev.GetNormals(&n[0]);
+  mev.GetUnitNormals(&n[0]);
 
   double ct[3];
   
