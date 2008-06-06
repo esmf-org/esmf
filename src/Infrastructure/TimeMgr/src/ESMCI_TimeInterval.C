@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.87 2008/05/09 20:08:21 rosalind Exp $
+// $Id: ESMCI_TimeInterval.C,v 1.1 2008/06/06 19:11:33 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
-// ESMC TimeInterval method code (body) file
+// ESMC ESMCI::TimeInterval method code (body) file
 //
 //-------------------------------------------------------------------------
 //
@@ -19,7 +19,7 @@
 //
 //-------------------------------------------------------------------------
 //
- #define ESMC_FILENAME "ESMC_TimeInterval.C"
+ #define ESMC_FILENAME "ESMCI::TimeInterval.C"
 
  // higher level, 3rd party or system includes
  #include <stdio.h>
@@ -31,34 +31,36 @@
  #include <ESMC_LogErr.h>
  #include <ESMF_LogMacros.inc>
  #include <ESMCI_Time.h>
+ #include <ESMC_Fraction.h>
 
  // associated class definition file
- #include <ESMCI_TimeInterval.h>
+ #include "ESMCI_TimeInterval.h"
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.87 2008/05/09 20:08:21 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.1 2008/06/06 19:11:33 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 //
-// This section includes all the ESMC_TimeInterval routines
+// This section includes all the ESMCI::TimeInterval routines
 //
 //
 
 //-------------------------------------------------------------------------
-// Class ESMC_TimeInterval Methods
+// Class ESMCI::TimeInterval Methods
 //-------------------------------------------------------------------------
 
+namespace ESMCI{
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalSet - initializer to support F90 interface
+// !IROUTINE:  ESMCI::TimeInterval::set - initializer to support F90 interface
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalSet(
+      int ESMCI::TimeInterval::set(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -107,9 +109,9 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeIntervalSet()"
+ #define ESMC_METHOD "ESMCI::TimeInterval::set()"
 
-    // TODO: Since ESMC_TimeInterval is a shallow statically allocated class,
+    // TODO: Since ESMCI::TimeInterval is a shallow statically allocated class,
     //       ensure initialization if called via F90 interface;
     //       cannot call constructor, because destructor is subsequently
     //       called automatically, returning initialized values to garbage.
@@ -117,7 +119,7 @@
     int rc = ESMF_SUCCESS;
 
     // save current value to restore in case of failure
-    ESMC_TimeInterval saveTimeInterval = *this;
+    ESMCI::TimeInterval saveTimeInterval = *this;
 
     ESMC_FractionSet(0,0,1);  // set seconds = 0
                               // set fractional seconds numerator = 0
@@ -210,20 +212,20 @@
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       { *this = saveTimeInterval; return(rc); }
 
-    rc = ESMC_TimeIntervalValidate();
+    rc = ESMCI::TimeInterval::validate();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       { *this = saveTimeInterval; return(rc); }
 
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimeIntervalSet
+ }  // end ESMCI::TimeInterval::set
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalGet - Get a TimeInterval value; supports F90 interface
+// !IROUTINE:  ESMCI::TimeInterval::get - Get a ESMCI::TimeInterval value; supports F90 interface
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalGet(
+      int ESMCI::TimeInterval::get(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -289,14 +291,14 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeIntervalGet()"
+ #define ESMC_METHOD "ESMCI::TimeInterval::get()"
 
     // TODO: fractional, sub-seconds
 
     // TODO: put calendar logic under test for any non-zero yy, mm, d ?
 
     // TODO: reduce size of this method by creating seperate methods on
-    //       ESMC_TimeInterval and ESMC_Calendar ?
+    //       ESMCI::TimeInterval and ESMC_Calendar ?
 
     int rc = ESMF_SUCCESS;
 
@@ -307,7 +309,7 @@
     // timeinterval-to-convert.  In this way, a requested unit is bounded
     // (normalized) by the next higher requested unit.
 
-    ESMC_TimeInterval tiToConvert = *this;
+    ESMCI::TimeInterval tiToConvert = *this;
 
     //---------------------------------------------------------------------
     // Determine startTime, endTime, and/or calendar, if any, we have to
@@ -391,7 +393,7 @@
     //   of units possible (ideally all seconds)
     //---------------------------------------------------------------------
 
-    tiToConvert.ESMC_TimeIntervalReduce();
+    tiToConvert.ESMCI::TimeInterval::reduce();
 
     //---------------------------------------------------------------------
     // convert from reduced units to user-requested units, keeping them
@@ -409,14 +411,14 @@
         case ESMC_CAL_JULIAN:
         case ESMC_CAL_NOLEAP:
           {
-            // TODO: use TimeInterval operators (/) and (-) when ready ?
+            // TODO: use ESMCI::TimeInterval operators (/) and (-) when ready ?
 
             // get years using startTime/endTime, if available
             if (tiToConvert.startTime.ESMC_TimeValidate("initialized")
                   == ESMF_SUCCESS ||
                 tiToConvert.endTime.ESMC_TimeValidate("initialized")
                   == ESMF_SUCCESS) {
-              ESMC_TimeInterval oneYear(0, 0, 1, 1);
+              ESMCI::TimeInterval oneYear(0, 0, 1, 1);
               ESMC_Time iTime = tiToConvert.startTime + oneYear;
               years = 0;
               while (iTime <= tiToConvert.endTime) {
@@ -428,7 +430,7 @@
               tiToConvert.startTime = iTime - oneYear;
 
               // calculate remaining baseTimeToConvert (remove years we got)
-              ESMC_TimeInterval ti =
+              ESMCI::TimeInterval ti =
                                    tiToConvert.endTime - tiToConvert.startTime;
               tiToConvert.ESMC_FractionSetw(ti.ESMC_FractionGetw());
               //TODO: tiToConvert = tiToConvert.endTime - tiToConvert.startTime;
@@ -532,14 +534,14 @@
         case ESMC_CAL_JULIAN:
         case ESMC_CAL_NOLEAP:
 
-          // TODO: use TimeInterval operators (/) and (-) when ready ?
+          // TODO: use ESMCI::TimeInterval operators (/) and (-) when ready ?
 
           // get months using startTime, if available
           if (tiToConvert.startTime.ESMC_TimeValidate("initialized")
                 == ESMF_SUCCESS ||
               tiToConvert.endTime.ESMC_TimeValidate("initialized")
                 == ESMF_SUCCESS) {
-            ESMC_TimeInterval oneMonth(0, 0, 1, 0, 1);
+            ESMCI::TimeInterval oneMonth(0, 0, 1, 0, 1);
             ESMC_Time iTime = tiToConvert.startTime + oneMonth;
             months = 0;
             while (iTime <= tiToConvert.endTime) {
@@ -551,7 +553,7 @@
             tiToConvert.startTime = iTime - oneMonth;
 
             // calculate remaining baseTimeToConvert (remove months we got)
-            ESMC_TimeInterval ti = tiToConvert.endTime - tiToConvert.startTime;
+            ESMCI::TimeInterval ti = tiToConvert.endTime - tiToConvert.startTime;
             tiToConvert.ESMC_FractionSetw(ti.ESMC_FractionGetw());
             //TODO: tiToConvert = tiToConvert.endTime - tiToConvert.startTime;
             //      should just copy base class part wholesale, rather than
@@ -788,31 +790,31 @@
 
     // if requested, return time interval in string format
     if (tempTimeString != ESMC_NULL_POINTER && timeStringLen > 0) {
-      rc = ESMC_TimeIntervalGetString(tempTimeString);
+      rc = ESMCI::TimeInterval::getString(tempTimeString);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLen = strlen(tempTimeString);
-      // see also method ESMC_TimeIntervalPrint()
+      // see also method ESMCI::TimeInterval::print()
     }
     if (tempTimeStringISOFrac != ESMC_NULL_POINTER &&
         timeStringLenISOFrac > 0) {
-      rc = ESMC_TimeIntervalGetString(tempTimeStringISOFrac, "isofrac");
+      rc = ESMCI::TimeInterval::getString(tempTimeStringISOFrac, "isofrac");
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLenISOFrac = strlen(tempTimeStringISOFrac);
-      // see also method ESMC_TimeIntervalPrint()
+      // see also method ESMCI::TimeInterval::print()
     }
 
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimeIntervalGet
+ }  // end ESMCI::TimeInterval::get
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalSet - Set a TimeInterval value
+// !IROUTINE:  ESMCI::TimeInterval::set - Set a ESMCI::TimeInterval value
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalSet(
+      int ESMCI::TimeInterval::set(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -831,14 +833,14 @@
     // TODO
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimeIntervalSet
+ }  // end ESMCI::TimeInterval::set
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalGet - Get a TimeInterval value
+// !IROUTINE:  ESMCI::TimeInterval::get - Get a ESMCI::TimeInterval value
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalGet(
+      int ESMCI::TimeInterval::get(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -857,14 +859,14 @@
     // TODO
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimeIntervalGet
+ }  // end ESMCI::TimeInterval::get
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalSet - direct property initializer
+// !IROUTINE:  ESMCI::TimeInterval::set - direct property initializer
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalSet(
+      int ESMCI::TimeInterval::set(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -882,7 +884,7 @@
       ESMC_CalendarType calendarType) { // in - associated calendar type
 //
 // !DESCRIPTION:
-//      Initialzes a {\tt TimeInterval} with given values.  Used to avoid
+//      Initialzes a {\tt ESMCI::TimeInterval} with given values.  Used to avoid
 //      constructor to cover case when initial entry is from F90, since
 //      destructor is called automatically when leaving scope to return to F90.
 //
@@ -890,7 +892,7 @@
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeIntervalSet(direct)"
+ #define ESMC_METHOD "ESMCI::TimeInterval::set(direct)"
 
     int rc = ESMF_SUCCESS;
 
@@ -937,18 +939,17 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_TimeIntervalSet
+}  // end ESMCI::TimeInterval::set
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalAbsValue - Get a Time Interval's absolute value
+// !IROUTINE:  ESMCI::TimeInterval::absValue - Get a Time Interval's absolute value
 //
 // !INTERFACE:
-      ESMC_TimeInterval
-                     ESMC_TimeInterval::ESMC_TimeIntervalAbsValue(void) const{
+      ESMCI::TimeInterval ESMCI::TimeInterval::absValue(void) const{
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //
 // !ARGUMENTS:
 //    none
@@ -959,20 +960,19 @@
 //EOP
 // !REQUIREMENTS:  TMG 1.5.8
 
-   return(ESMC_TimeIntervalAbsValue(ESMC_POSITIVE_ABS));
+   return(TimeInterval::absValue(ESMC_POSITIVE_ABS));
 
- }  // end ESMC_TimeIntervalAbsValue
+ }  // end ESMCI::TimeInterval::absValue
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalNegAbsValue - Get a Time Interval's negative absolute value
+// !IROUTINE:  ESMCI::TimeInterval::negAbsValue - Get a Time Interval's negative absolute value
 //
 // !INTERFACE:
-      ESMC_TimeInterval
-                  ESMC_TimeInterval::ESMC_TimeIntervalNegAbsValue(void) const {
+      ESMCI::TimeInterval ESMCI::TimeInterval::negAbsValue(void) const {
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //
 // !ARGUMENTS:
 //    none
@@ -983,19 +983,19 @@
 //EOP
 // !REQUIREMENTS:  TMG 1.5.8
 
-   return(ESMC_TimeIntervalAbsValue(ESMC_NEGATIVE_ABS));
+   return(TimeInterval::absValue(ESMC_NEGATIVE_ABS));
 
- }  // end ESMC_TimeIntervalNegAbsValue
+ }  // end ESMCI::TimeInterval::negAbsValue
 
 //-------------------------------------------------------------------------
 //BOPI
-// !IROUTINE:  ESMC_TimeIntervalAbsValue - TimeInterval absolute value common method
+// !IROUTINE:  ESMCI::TimeInterval::absValue - ESMCI::TimeInterval absolute value common method
 //
 // !INTERFACE:
-      ESMC_TimeInterval ESMC_TimeInterval::ESMC_TimeIntervalAbsValue(
+      ESMCI::TimeInterval ESMCI::TimeInterval::absValue(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //
 // !ARGUMENTS:
       ESMC_AbsValueType absValueType) const { // in - positive or negative type
@@ -1008,7 +1008,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeIntervalAbsValue()"
+ #define ESMC_METHOD "ESMCI::TimeInterval::absValue()"
 
     // TODO: use function pointer table instead of if-else to perform abs
     //       type?  or some other form of polymorphism ?
@@ -1018,7 +1018,7 @@
     //       (64-bit) on some platforms.  TODO: could use ISO llabs() if
     //       supported on all platforms.
 
-    ESMC_TimeInterval errorResult;  // zero
+    ESMCI::TimeInterval errorResult;  // zero
 
     // calendar must be defined
     if (this->calendar == ESMC_NULL_POINTER) {
@@ -1028,11 +1028,11 @@
     }
 
     // initialize result to subject time interval
-    ESMC_TimeInterval absValue = *this;
+    ESMCI::TimeInterval absValue = *this;
 
     // Reduce both time interval's units to the smallest and least number
     // of units possible
-    absValue.ESMC_TimeIntervalReduce();
+    absValue.ESMCI::TimeInterval::reduce();
 
     // if absolute, simply perform absolute value on baseTime seconds and return
     if (absValue.yy == 0 && absValue.mm == 0 && absValue.d == 0) {
@@ -1180,20 +1180,20 @@
                                           ESMC_NULL_POINTER);
     return(errorResult);
 
-}  // end ESMC_TimeIntervalAbsValue (common)
+}  // end ESMCI::TimeInterval::absValue (common)
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(/) - Divide two time intervals, return double precision result
+// !IROUTINE:  ESMCI::TimeInterval(/) - Divide two time intervals, return double precision result
 //
 // !INTERFACE:
-      ESMC_R8 ESMC_TimeInterval::operator/(
+      ESMC_R8 ESMCI::TimeInterval::operator/(
 //
 // !RETURN VALUE:
 //    ESMC_R8 result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) const {  // in - ESMCI::TimeInterval
                                                       //        to divide by
 //
 // !DESCRIPTION:
@@ -1204,7 +1204,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeInterval::operator/(timeinterval)"
+ #define ESMC_METHOD "ESMCI::TimeInterval::operator/(timeinterval)"
 
     // TODO: use some form of polymorphism to share logic with operator% and
     //       Compare method ?
@@ -1223,13 +1223,13 @@
     ESMCI::BaseTime zeroBaseTime;
 
     // create local copies to manipulate and divide 
-    ESMC_TimeInterval ti1 = *this;
-    ESMC_TimeInterval ti2 = timeinterval;
+    ESMCI::TimeInterval ti1 = *this;
+    ESMCI::TimeInterval ti2 = timeinterval;
 
     // Reduce both time interval's units to the smallest and least number
     // of units possible
-    ti1.ESMC_TimeIntervalReduce();
-    ti2.ESMC_TimeIntervalReduce();
+    ti1.ESMCI::TimeInterval::reduce();
+    ti2.ESMCI::TimeInterval::reduce();
 
     // if both absolute, simply divide baseTime seconds and return
     if (ti1.yy == 0 && ti2.yy == 0 &&
@@ -1379,17 +1379,17 @@
                                           ESMC_NULL_POINTER);
     return(0.0);
 
-}  // end ESMC_TimeInterval::operator/
+}  // end ESMCI::TimeInterval::operator/
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(/) - Divide time interval by an integer, return time interval result
+// !IROUTINE:  ESMCI::TimeInterval(/) - Divide time interval by an integer, return time interval result
 //
 // !INTERFACE:
-      ESMC_TimeInterval ESMC_TimeInterval::operator/(
+      ESMCI::TimeInterval ESMCI::TimeInterval::operator/(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //
 // !ARGUMENTS:
       const ESMC_I4 &divisor) const {   // in - integer divisor
@@ -1402,13 +1402,13 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeInterval::operator/(integer)"
+ #define ESMC_METHOD "ESMCI::TimeInterval::operator/(integer)"
 
     // copy calendar, startTime, endTime from this time interval
-    ESMC_TimeInterval quotient = *this;
+    ESMCI::TimeInterval quotient = *this;
 
     // reduce to smallest and least number of units
-    quotient.ESMC_TimeIntervalReduce();
+    quotient.ESMCI::TimeInterval::reduce();
 
     // TODO: fractional interval parts
 
@@ -1424,7 +1424,7 @@
     } else {
       // TODO: write LogErr message (divide-by-zero)
       ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
-      ESMC_TimeInterval zeroInterval;
+      ESMCI::TimeInterval zeroInterval;
       return(zeroInterval);
     }
 
@@ -1433,17 +1433,17 @@
 
     return(quotient);
 
-}  // end ESMC_TimeInterval::operator/
+}  // end ESMCI::TimeInterval::operator/
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(/=) - Divide time interval by an integer
+// !IROUTINE:  ESMCI::TimeInterval(/=) - Divide time interval by an integer
 //
 // !INTERFACE:
-      ESMC_TimeInterval& ESMC_TimeInterval::operator/=(
+      ESMCI::TimeInterval& ESMCI::TimeInterval::operator/=(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval& result
+//    ESMCI::TimeInterval& result
 //
 // !ARGUMENTS:
       const ESMC_I4 &divisor) {   // in - integer divisor
@@ -1456,17 +1456,17 @@
 
     return(*this = *this / divisor);
 
-}  // end ESMC_TimeInterval::operator/=
+}  // end ESMCI::TimeInterval::operator/=
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(/) - Divide time interval by a double precision, return time interval result
+// !IROUTINE:  ESMCI::TimeInterval(/) - Divide time interval by a double precision, return time interval result
 //
 // !INTERFACE:
-      ESMC_TimeInterval ESMC_TimeInterval::operator/(
+      ESMCI::TimeInterval ESMCI::TimeInterval::operator/(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //
 // !ARGUMENTS:
       const ESMC_R8 &divisor) const {   // in - double precision divisor
@@ -1479,13 +1479,13 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeInterval::operator/(ESMC_R8)"
+ #define ESMC_METHOD "ESMCI::TimeInterval::operator/(ESMC_R8)"
 
     // copy calendar, startTime, endTime from this time interval
-    ESMC_TimeInterval quotient = *this;
+    ESMCI::TimeInterval quotient = *this;
 
     // reduce to smallest and least number of units
-    quotient.ESMC_TimeIntervalReduce();
+    quotient.ESMCI::TimeInterval::reduce();
 
     // TODO: fractional interval parts
 
@@ -1502,7 +1502,7 @@
     } else {
       // TODO: write LogErr message (divide-by-zero)
       ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
-      ESMC_TimeInterval zeroInterval;
+      ESMCI::TimeInterval zeroInterval;
       return(zeroInterval);
     }
 
@@ -1511,17 +1511,17 @@
 
     return(quotient);
 
-}  // end ESMC_TimeInterval::operator/
+}  // end ESMCI::TimeInterval::operator/
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(/=) - Divide time interval by a double precision
+// !IROUTINE:  ESMCI::TimeInterval(/=) - Divide time interval by a double precision
 //
 // !INTERFACE:
-      ESMC_TimeInterval& ESMC_TimeInterval::operator/=(
+      ESMCI::TimeInterval& ESMCI::TimeInterval::operator/=(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval& result
+//    ESMCI::TimeInterval& result
 //
 // !ARGUMENTS:
       const ESMC_R8 &divisor) {   // in - double precision divisor
@@ -1534,20 +1534,20 @@
 
     return(*this = *this / divisor);
 
-}  // end ESMC_TimeInterval::operator/=
+}  // end ESMCI::TimeInterval::operator/=
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalDiv - Divide two time intervals, return fraction result
+// !IROUTINE:  ESMCI::TimeInterval::div - Divide two time intervals, return fraction result
 //
 // !INTERFACE:
-      ESMC_Fraction ESMC_TimeInterval::ESMC_TimeIntervalDiv(
+      ESMC_Fraction ESMCI::TimeInterval::div(
 //
 // !RETURN VALUE:
 //    ESMC_Fraction result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) const {  // in - ESMCI::TimeInterval
                                                       //        to divide by
 //
 // !DESCRIPTION:
@@ -1563,20 +1563,20 @@
 
     return(quotient);
 
-}  // end ESMC_TimeInterval::ESMC_TimeIntervalDiv
+}  // end ESMCI::TimeInterval::div
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(\%) - Divide two time intervals, return time interval remainder
+// !IROUTINE:  ESMCI::TimeInterval(\%) - Divide two time intervals, return time interval remainder
 //
 // !INTERFACE:
-      ESMC_TimeInterval ESMC_TimeInterval::operator%(
+      ESMCI::TimeInterval ESMCI::TimeInterval::operator%(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) const {  // in - ESMCI::TimeInterval
                                                       //        to modulo by
 //
 // !DESCRIPTION:
@@ -1587,7 +1587,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeInterval::operator%(timeinterval)"
+ #define ESMC_METHOD "ESMCI::TimeInterval::operator%(timeinterval)"
 
     // TODO: use some form of polymorphism to share logic with
     //       operator/ (return real) and Compare method ?
@@ -1596,7 +1596,7 @@
     ESMCI::BaseTime zeroBaseTime;
 
     // initialize result to zero
-    ESMC_TimeInterval remainder;
+    ESMCI::TimeInterval remainder;
 
     // copy calendar, startTime, endTime from this time interval
     remainder.calendar  = this->calendar;
@@ -1614,13 +1614,13 @@
     }
 
     // create local copies to manipulate and modulus 
-    ESMC_TimeInterval ti1 = *this;
-    ESMC_TimeInterval ti2 = timeinterval;
+    ESMCI::TimeInterval ti1 = *this;
+    ESMCI::TimeInterval ti2 = timeinterval;
 
     // Reduce both time interval's units to the smallest and least number
     // of units possible
-    ti1.ESMC_TimeIntervalReduce();
-    ti2.ESMC_TimeIntervalReduce();
+    ti1.ESMCI::TimeInterval::reduce();
+    ti2.ESMCI::TimeInterval::reduce();
 
     // if both absolute, simply modulus baseTime seconds and return
     if (ti1.yy == 0 && ti2.yy == 0 &&
@@ -1775,20 +1775,20 @@
                                           ESMC_NULL_POINTER);
     return(remainder);
 
-}  // end ESMC_TimeInterval::operator%
+}  // end ESMCI::TimeInterval::operator%
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(\%=) - Takes the modulus of two time intervals
+// !IROUTINE:  ESMCI::TimeInterval(\%=) - Takes the modulus of two time intervals
 //
 // !INTERFACE:
-      ESMC_TimeInterval& ESMC_TimeInterval::operator%=(
+      ESMCI::TimeInterval& ESMCI::TimeInterval::operator%=(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval& result
+//    ESMCI::TimeInterval& result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) {  // in - ESMCI::TimeInterval
                                                 //        to modulo by
 //
 // !DESCRIPTION:
@@ -1799,17 +1799,17 @@
 
     return(*this = *this % timeinterval);
 
-}  // end ESMC_TimeInterval::operator%=
+}  // end ESMCI::TimeInterval::operator%=
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(*) - Multiply a time interval by an integer
+// !IROUTINE:  ESMCI::TimeInterval(*) - Multiply a time interval by an integer
 //
 // !INTERFACE:
-      ESMC_TimeInterval ESMC_TimeInterval::operator*(
+      ESMCI::TimeInterval ESMCI::TimeInterval::operator*(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //
 // !ARGUMENTS:
       const ESMC_I4 &multiplier) const {   // in - integer multiplier
@@ -1822,7 +1822,7 @@
 // !REQUIREMENTS:  
 
     // copy calendar, startTime, endTime from this time interval
-    ESMC_TimeInterval product = *this;
+    ESMCI::TimeInterval product = *this;
 
     // TODO: fractional interval parts
     // TODO: check for overflow/underflow, return 0 with LogErr message
@@ -1840,21 +1840,21 @@
 
     return(product);
 
-}  // end ESMC_TimeInterval::operator*
+}  // end ESMCI::TimeInterval::operator*
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(*) - Multiply a time interval by an integer
+// !IROUTINE:  ESMCI::TimeInterval(*) - Multiply a time interval by an integer
 //
 // !INTERFACE:
-      ESMC_TimeInterval operator*(
+      ESMCI::TimeInterval operator*(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //
 // !ARGUMENTS:
       const ESMC_I4 &multiplier,  // in - integer multiplier
-      const ESMC_TimeInterval &ti) {   // in - TimeInterval multiplicand
+      const ESMCI::TimeInterval &ti) {   // in - ESMCI::TimeInterval multiplicand
 //
 // !DESCRIPTION:
 //     Multiply a {\tt ESMC\_TimeInterval} by an integer, return product as a
@@ -1866,17 +1866,17 @@
     // use commutative complement
     return(ti * multiplier);
 
-}  // end operator*
+}  // end ESMCI::TimeInterval::operator*
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(*=) - Multiply a time interval by an integer
+// !IROUTINE:  ESMCI::TimeInterval(*=) - Multiply a time interval by an integer
 //
 // !INTERFACE:
-      ESMC_TimeInterval& ESMC_TimeInterval::operator*=(
+      ESMCI::TimeInterval& ESMCI::TimeInterval::operator*=(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval& result
+//    ESMCI::TimeInterval& result
 //
 // !ARGUMENTS:
       const ESMC_I4 &multiplier) {   // in - integer multiplier
@@ -1889,17 +1889,17 @@
 
     return(*this = *this * multiplier);
 
-}  // end ESMC_TimeInterval::operator*=
+}  // end ESMCI::TimeInterval::operator*=
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(*) - Multiply a time interval by an fraction
+// !IROUTINE:  ESMCI::TimeInterval(*) - Multiply a time interval by an fraction
 //
 // !INTERFACE:
-      ESMC_TimeInterval ESMC_TimeInterval::operator*(
+      ESMCI::TimeInterval ESMCI::TimeInterval::operator*(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //
 // !ARGUMENTS:
       const ESMC_Fraction &multiplier) const {   // in - fraction multiplier
@@ -1911,27 +1911,27 @@
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_TimeInterval product;
+    ESMCI::TimeInterval product;
 
     // TODO: whole, fractional & calendar interval parts
 
     return(product);
 
-}  // end ESMC_TimeInterval::operator*
+}  // end ESMCI::TimeInterval::operator*
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(*) - Multiply a time interval by an fraction
+// !IROUTINE:  ESMCI::TimeInterval(*) - Multiply a time interval by an fraction
 //
 // !INTERFACE:
-      ESMC_TimeInterval operator*(
+      ESMCI::TimeInterval operator*(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //
 // !ARGUMENTS:
       const ESMC_Fraction &multiplier, // in - fraction multiplier
-      const ESMC_TimeInterval &ti) {   // in - TimeInterval multiplicand
+      const ESMCI::TimeInterval &ti) {   // in - ESMCI::TimeInterval multiplicand
 //
 // !DESCRIPTION:
 //     Multiply a {\tt ESMC\_TimeInterval} by an fraction, return product as a
@@ -1943,17 +1943,17 @@
     // use commutative complement
     return(ti * multiplier);
 
-}  // end operator*
+}  // end ESMCI::TimeInterval::operator*
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(*=) - Multiply a time interval by an fraction
+// !IROUTINE:  ESMCI::TimeInterval(*=) - Multiply a time interval by an fraction
 //
 // !INTERFACE:
-      ESMC_TimeInterval& ESMC_TimeInterval::operator*=(
+      ESMCI::TimeInterval& ESMCI::TimeInterval::operator*=(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval& result
+//    ESMCI::TimeInterval& result
 //
 // !ARGUMENTS:
       const ESMC_Fraction &multiplier) {   // in - fraction multiplier
@@ -1966,17 +1966,17 @@
 
     return(*this = *this * multiplier);
 
-}  // end ESMC_TimeInterval::operator*=
+}  // end ESMCI::TimeInterval::operator*=
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(*) - Multiply a time interval by a double precision
+// !IROUTINE:  ESMCI::TimeInterval(*) - Multiply a time interval by a double precision
 //
 // !INTERFACE:
-      ESMC_TimeInterval ESMC_TimeInterval::operator*(
+      ESMCI::TimeInterval ESMCI::TimeInterval::operator*(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //
 // !ARGUMENTS:
       const ESMC_R8 &multiplier) const {   // in - double precision
@@ -1990,10 +1990,10 @@
 // !REQUIREMENTS:  
 
     // copy calendar, startTime, endTime from this time interval
-    ESMC_TimeInterval product = *this;
+    ESMCI::TimeInterval product = *this;
 
     // reduce to smallest and least number of units
-    product.ESMC_TimeIntervalReduce();
+    product.ESMCI::TimeInterval::reduce();
 
     // TODO: fractional interval parts
     // TODO: check for overflow/underflow, return 0 with LogErr message
@@ -2012,21 +2012,21 @@
 
     return(product);
 
-}  // end ESMC_TimeInterval::operator*
+}  // end ESMCI::TimeInterval::operator*
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(*) - Multiply a time interval by a double precision
+// !IROUTINE:  ESMCI::TimeInterval(*) - Multiply a time interval by a double precision
 //
 // !INTERFACE:
-      ESMC_TimeInterval operator*(
+      ESMCI::TimeInterval operator*(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //
 // !ARGUMENTS:
       const ESMC_R8 &multiplier,  // in - double precision
-      const ESMC_TimeInterval &ti) {   // in - TimeInterval multiplicand
+      const ESMCI::TimeInterval &ti) {   // in - ESMCI::TimeInterval multiplicand
                                                  //   multiplier
 //
 // !DESCRIPTION:
@@ -2039,17 +2039,17 @@
     // use commutative complement
     return(ti * multiplier);
 
-}  // end operator*
+}  // end ESMCI::TimeInterval::operator*
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(*=) - Multiply a time interval by a double precision
+// !IROUTINE:  ESMCI::TimeInterval(*=) - Multiply a time interval by a double precision
 //
 // !INTERFACE:
-      ESMC_TimeInterval& ESMC_TimeInterval::operator*=(
+      ESMCI::TimeInterval& ESMCI::TimeInterval::operator*=(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval& result
+//    ESMCI::TimeInterval& result
 //
 // !ARGUMENTS:
       const ESMC_R8 &multiplier) {   // in - double precision multiplier
@@ -2062,20 +2062,20 @@
 
     return(*this = *this * multiplier);
 
-}  // end ESMC_TimeInterval::operator*=
+}  // end ESMCI::TimeInterval::operator*=
 
 //-------------------------------------------------------------------------
 //BOP 
-// !IROUTINE:  ESMC_TimeInterval(+) - Sum of two TimeIntervals
+// !IROUTINE:  ESMCI::TimeInterval(+) - Sum of two ESMCI::TimeIntervals
 //    
 // !INTERFACE:
-      ESMC_TimeInterval ESMC_TimeInterval::operator+(
+      ESMCI::TimeInterval ESMCI::TimeInterval::operator+(
 //    
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //    
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) const {  // in - ESMCI::TimeInterval
                                                       //      to add
 //
 // !DESCRIPTION:
@@ -2085,7 +2085,7 @@
 // !REQUIREMENTS:
 
     // copy calendar, startTime, endTime from this time interval
-    ESMC_TimeInterval sum = *this;
+    ESMCI::TimeInterval sum = *this;
 
     // TODO: fractional interval parts
     // TODO: check for overflow/underflow, return 0 with LogErr message
@@ -2103,20 +2103,20 @@
 
     return(sum);
 
-}  // end ESMC_TimeInterval::operator+
+}  // end ESMCI::TimeInterval::operator+
 
 //-------------------------------------------------------------------------
 //BOP 
-// !IROUTINE:  ESMC_TimeInterval(-) - Difference between two TimeIntervals
+// !IROUTINE:  ESMCI::TimeInterval(-) - Difference between two ESMCI::TimeIntervals
 //    
 // !INTERFACE:
-      ESMC_TimeInterval ESMC_TimeInterval::operator-(
+      ESMCI::TimeInterval ESMCI::TimeInterval::operator-(
 //    
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //    
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) const {  // in - ESMCI::TimeInterval
                                                       //      to subtract
 //
 // !DESCRIPTION:
@@ -2127,7 +2127,7 @@
 // !REQUIREMENTS:
 
     // copy calendar, startTime, endTime from this time interval
-    ESMC_TimeInterval diff = *this;
+    ESMCI::TimeInterval diff = *this;
 
     // TODO: fractional interval parts
     // TODO: check for overflow/underflow, return 0 with LogErr message
@@ -2145,17 +2145,17 @@
 
     return(diff);
 
-}  // end ESMC_TimeInterval::operator-
+}  // end ESMCI::TimeInterval::operator-
 
 //-------------------------------------------------------------------------
 //BOP 
-// !IROUTINE:  ESMC_TimeInterval(-) - Unary negation of a TimeInterval
+// !IROUTINE:  ESMCI::TimeInterval(-) - Unary negation of a ESMCI::TimeInterval
 //    
 // !INTERFACE:
-      ESMC_TimeInterval ESMC_TimeInterval::operator-(void) const {
+      ESMCI::TimeInterval ESMCI::TimeInterval::operator-(void) const {
 //    
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //    
 // !ARGUMENTS:
 //    none
@@ -2167,22 +2167,23 @@
 // !REQUIREMENTS:  TMG1.5.10
 
     // simply re-use multiplication by an integer!
-    return(-1 * *this);
+    return( *this * -1);
+  //return(-1 * *this);
 
-}  // end ESMC_TimeInterval::operator-
+}  // end ESMCI::TimeInterval::operator-
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(==) - TimeInterval equality comparison
+// !IROUTINE:  ESMCI::TimeInterval(==) - ESMCI::TimeInterval equality comparison
 //
 // !INTERFACE:
-      bool ESMC_TimeInterval::operator==(
+      bool ESMCI::TimeInterval::operator==(
 //
 // !RETURN VALUE:
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) const {  // in - ESMCI::TimeInterval
                                                       //      to compare
 //
 // !DESCRIPTION:
@@ -2193,22 +2194,22 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(ESMC_TimeIntervalCompare(timeinterval, ESMC_EQ));
+    return(TimeInterval::compare(timeinterval, ESMC_EQ));
 
-}  // end ESMC_TimeInterval::operator==
+}  // end ESMCI::TimeInterval::operator==
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(!=) - TimeInterval inequality comparison
+// !IROUTINE:  ESMCI::TimeInterval(!=) - ESMCI::TimeInterval inequality comparison
 //
 // !INTERFACE:
-      bool ESMC_TimeInterval::operator!=(
+      bool ESMCI::TimeInterval::operator!=(
 //
 // !RETURN VALUE:
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) const {  // in - ESMCI::TimeInterval
                                                       //      to compare
 //
 // !DESCRIPTION:
@@ -2221,22 +2222,22 @@
 
     // TODO: define as !(*this == timeinterval) ?
 
-    return(ESMC_TimeIntervalCompare(timeinterval, ESMC_NE));
+    return(TimeInterval::compare(timeinterval, ESMC_NE));
 
-}  // end ESMC_TimeInterval::operator!=
+}  // end ESMCI::TimeInterval::operator!=
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(<) - TimeInterval less than comparison
+// !IROUTINE:  ESMCI::TimeInterval(<) - ESMCI::TimeInterval less than comparison
 //
 // !INTERFACE:
-      bool ESMC_TimeInterval::operator<(
+      bool ESMCI::TimeInterval::operator<(
 //
 // !RETURN VALUE:
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) const {  // in - ESMCI::TimeInterval
                                                       //      to compare
 //
 // !DESCRIPTION:
@@ -2247,22 +2248,22 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(ESMC_TimeIntervalCompare(timeinterval, ESMC_LT));
+    return(TimeInterval::compare(timeinterval, ESMC_LT));
 
-}  // end ESMC_TimeInterval::operator<
+}  // end ESMCI::TimeInterval::operator<
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(>) - TimeInterval greater than comparison
+// !IROUTINE:  ESMCI::TimeInterval(>) - ESMCI::TimeInterval greater than comparison
 //
 // !INTERFACE:
-      bool ESMC_TimeInterval::operator>(
+      bool ESMCI::TimeInterval::operator>(
 //
 // !RETURN VALUE:
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) const {  // in - ESMCI::TimeInterval
                                                       //      to compare
 //
 // !DESCRIPTION:
@@ -2273,22 +2274,22 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(ESMC_TimeIntervalCompare(timeinterval, ESMC_GT));
+    return(TimeInterval::compare(timeinterval, ESMC_GT));
 
-}  // end ESMC_TimeInterval::operator>
+}  // end ESMCI::TimeInterval::operator>
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(<=) - TimeInterval less or equal than comparison
+// !IROUTINE:  ESMCI::TimeInterval(<=) - ESMCI::TimeInterval less or equal than comparison
 //
 // !INTERFACE:
-      bool ESMC_TimeInterval::operator<=(
+      bool ESMCI::TimeInterval::operator<=(
 //
 // !RETURN VALUE:
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) const {  // in - ESMCI::TimeInterval
                                                       //      to compare
 //
 // !DESCRIPTION:
@@ -2301,22 +2302,22 @@
 
     // TODO: define as !(*this > timeinterval) ?
 
-    return(ESMC_TimeIntervalCompare(timeinterval, ESMC_LE));
+    return(TimeInterval::compare(timeinterval, ESMC_LE));
 
-}  // end ESMC_TimeInterval::operator<=
+}  // end ESMCI::TimeInterval::operator<=
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(>=) - TimeInterval greater than or equal comparison
+// !IROUTINE:  ESMCI::TimeInterval(>=) - ESMCI::TimeInterval greater than or equal comparison
 //
 // !INTERFACE:
-      bool ESMC_TimeInterval::operator>=(
+      bool ESMCI::TimeInterval::operator>=(
 //
 // !RETURN VALUE:
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) const {  // in - ESMCI::TimeInterval
                                                       //      to compare
 //
 // !DESCRIPTION:
@@ -2329,22 +2330,22 @@
 
     // TODO: define as !(*this < timeinterval) ?
 
-    return(ESMC_TimeIntervalCompare(timeinterval, ESMC_GE));
+    return(TimeInterval::compare(timeinterval, ESMC_GE));
 
-}  // end ESMC_TimeInterval::operator>=
+}  // end ESMCI::TimeInterval::operator>=
 
 //-------------------------------------------------------------------------
 //BOPI
-// !IROUTINE:  ESMC_TimeIntervalCompare - TimeInterval comparison common method
+// !IROUTINE:  ESMCI::TimeInterval::compare - ESMCI::TimeInterval comparison common method
 //
 // !INTERFACE:
-      bool ESMC_TimeInterval::ESMC_TimeIntervalCompare(
+      bool ESMCI::TimeInterval::compare(
 //
 // !RETURN VALUE:
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval,            // in - 2nd to compare
+      const ESMCI::TimeInterval &timeinterval,            // in - 2nd to compare
             ESMC_ComparisonType comparisonType) const { // in - operator type
 //
 // !DESCRIPTION:
@@ -2355,7 +2356,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeIntervalCompare()"
+ #define ESMC_METHOD "ESMCI::TimeInterval::compare()"
 
     // TODO: use function pointer table instead of switch to perform comparison
     //       type?  or some other form of polymorphism ?
@@ -2377,13 +2378,13 @@
     ESMCI::BaseTime zeroBaseTime;
 
     // create local copies to manipulate and compare 
-    ESMC_TimeInterval ti1 = *this;
-    ESMC_TimeInterval ti2 = timeinterval;
+    ESMCI::TimeInterval ti1 = *this;
+    ESMCI::TimeInterval ti2 = timeinterval;
 
     // Reduce both time interval's units to the smallest and least number
     // of units possible
-    ti1.ESMC_TimeIntervalReduce();
-    ti2.ESMC_TimeIntervalReduce();
+    ti1.ESMCI::TimeInterval::reduce();
+    ti2.ESMCI::TimeInterval::reduce();
 
     // if both absolute, simply compare baseTime seconds and return
     if (ti1.yy == 0 && ti2.yy == 0 &&
@@ -2592,17 +2593,17 @@
                                           ESMC_NULL_POINTER);
     return(false);
 
-}  // end ESMC_TimeIntervalCompare
+}  // end ESMCI::TimeInterval::compare
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(=) - copy or assign from ESMC_Fraction expression
+// !IROUTINE:  ESMCI::TimeInterval(=) - copy or assign from ESMC_Fraction expression
 //
 // !INTERFACE:
-      ESMC_TimeInterval& ESMC_TimeInterval::operator=(
+      ESMCI::TimeInterval& ESMCI::TimeInterval::operator=(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval& result
+//    ESMCI::TimeInterval& result
 //
 // !ARGUMENTS:
       const ESMC_Fraction &fraction) {   // in - ESMC_Fraction to copy
@@ -2620,14 +2621,14 @@
 
     return(*this);
 
-}  // end ESMC_TimeInterval::operator=
+}  // end ESMCI::TimeInterval::operator=
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalReadRestart - restore TimeInterval state
+// !IROUTINE:  ESMCI::TimeInterval::readRestart - restore ESMCI::TimeInterval state
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalReadRestart(
+      int ESMCI::TimeInterval::readRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -2638,7 +2639,7 @@
       ESMC_IOSpec *iospec) {  // in
 //
 // !DESCRIPTION:
-//      restore {\tt TimeInterval} state for persistence/checkpointing.
+//      restore {\tt ESMCI::TimeInterval} state for persistence/checkpointing.
 //
 //EOP
 // !REQUIREMENTS:
@@ -2646,21 +2647,21 @@
     int rc = ESMF_SUCCESS;
 
     // TODO:  read time interval state from iospec/name, then restore
-    //        (share code with ESMC_TimeIntervalSet()).
+    //        (share code with ESMCI::TimeInterval::set()).
 
     // TODO: use base class ReadRestart() first
     // rc = ESMCI::BaseTime::readRestart(s, sN, sD);
 
     return(rc);
 
- }  // end ESMC_TimeIntervalReadRestart
+ }  // end ESMCI::TimeInterval::readRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalWriteRestart - return TimeInterval state
+// !IROUTINE:  ESMCI::TimeInterval::writeRestart - return ESMCI::TimeInterval state
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalWriteRestart(
+      int ESMCI::TimeInterval::writeRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -2669,7 +2670,7 @@
       ESMC_IOSpec *iospec) const {
 //
 // !DESCRIPTION:
-//      Save {\tt TimeInterval} state for persistence/checkpointing
+//      Save {\tt ESMCI::TimeInterval} state for persistence/checkpointing
 //
 //EOP
 // !REQUIREMENTS: 
@@ -2684,14 +2685,14 @@
                                //  calendar.
     return(rc);
 
- }  // end ESMC_TimeIntervalWriteRestart
+ }  // end ESMCI::TimeInterval::writeRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalValidate - validate TimeInterval state
+// !IROUTINE:  ESMCI::TimeInterval::validate - validate ESMCI::TimeInterval state
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalValidate(
+      int ESMCI::TimeInterval::validate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -2706,7 +2707,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeIntervalValidate()"
+ #define ESMC_METHOD "ESMCI::TimeInterval::validate()"
 
     int rc = ESMF_SUCCESS;
 
@@ -2715,14 +2716,14 @@
 
     return(rc);
 
- }  // end ESMC_TimeIntervalValidate
+ }  // end ESMCI::TimeInterval::validate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalPrint - print TimeInterval state
+// !IROUTINE:  ESMCI::TimeInterval::print - print ESMCI::TimeInterval state
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalPrint(
+      int ESMCI::TimeInterval::print(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -2742,9 +2743,9 @@
     if (options != ESMC_NULL_POINTER) {
       if (strncmp(options, "string", 6) == 0) {
         char timeString[ESMF_MAXSTR];
-        ESMC_TimeIntervalGetString(timeString, &options[6]);
+        ESMCI::TimeInterval::getString(timeString, &options[6]);
         printf("%s\n", timeString);
-        // see also method ESMC_TimeIntervalGet()
+        // see also method ESMCI::TimeInterval::get()
       }
     } else {
       // default
@@ -2754,18 +2755,18 @@
       printf("d  = %lld\n", d);
     }
 
-    printf("end TimeInterval -----------------------\n\n");
+    printf("end ESMCI::TimeInterval -----------------------\n\n");
 
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimeIntervalPrint
+ }  // end ESMCI::TimeInterval::print
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval - native default C++ constructor
+// !IROUTINE:  ESMCI::TimeInterval - native default C++ constructor
 //
 // !INTERFACE:
-      ESMC_TimeInterval::ESMC_TimeInterval(void) {
+      ESMCI::TimeInterval::TimeInterval(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -2780,12 +2781,12 @@
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeInterval::ESMC_TimeInterval(void) constructor"
+ #define ESMC_METHOD "ESMCI::TimeInterval(void) constructor"
 
 //   ESMCI::BaseTime(0, 0, 1) { // TODO: F90 issue with base class constructor?
 
    ESMC_FractionSet(0,0,1);
-   yy = 0;
+
    mm = 0;
    d  = 0;
 
@@ -2804,14 +2805,14 @@
    // startTime, endTime initialized via their own constructor when
    // time interval instantiated.
 
-} // end ESMC_TimeInterval
+} // end ESMCI::TimeInterval
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval - native C++ constructor
+// !IROUTINE:  ESMCI::TimeInterval - native C++ constructor
 //
 // !INTERFACE:
-     ESMC_TimeInterval::ESMC_TimeInterval(
+     ESMCI::TimeInterval::TimeInterval(
 //
 // !RETURN VALUE:
 //    none
@@ -2826,7 +2827,7 @@
       ESMC_Time *startTime,       // in - interval start time
       ESMC_Time *endTime,         // in - interval end time
       ESMC_Calendar *calendar,    // in - calendar
-      ESMC_CalendarType calendarType) :  // in - calendar type
+      ESMC_CalendarType calendarType) :   // in - calendar type
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_TimeInterval} via {\tt ESMC\_BaseTime}
@@ -2836,7 +2837,7 @@
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeInterval::ESMC_TimeInterval(direct) constructor"
+ #define ESMC_METHOD "ESMCI::TimeInterval(direct) constructor"
 
    ESMCI::BaseTime(s, sN, sD) {  // pass to base class constructor
 
@@ -2879,14 +2880,14 @@
 
    // TODO: catch & throw exceptions above, and/or LogErr
 
-} // end ESMC_TimeInterval
+} // end ESMCI::TimeInterval
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ~ESMC_TimeInterval - native default C++ destructor
+// !IROUTINE:  ~ESMCI::TimeInterval - native default C++ destructor
 //
 // !INTERFACE:
-      ESMC_TimeInterval::~ESMC_TimeInterval(void) {
+      ESMCI::TimeInterval::~TimeInterval(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -2900,7 +2901,7 @@
 //EOP
 // !REQUIREMENTS:
 
-}  // end ~ESMC_TimeInterval
+}  // end ~ESMCI::TimeInterval
 
 //-------------------------------------------------------------------------
 //  Private methods
@@ -2908,10 +2909,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalGetString - Get a Time Interval value in string format
+// !IROUTINE:  ESMCI::TimeInterval::getString - Get a Time Interval value in string format
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalGetString(
+      int ESMCI::TimeInterval::getString(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -2926,13 +2927,13 @@
 //      PyYmMdDThHmMs[:n/d]S (hybrid) (default, options == "")
 //      PyYmMdDThHmMs[.f]S   (strict) (options == "isofrac")
 //      Supports {\tt ESMC\_TimeIntervalGet()} and
-//               {\tt ESMC\_TimeIntervalPrint()}
+//               {\tt ESMC\_TimeInterval::print()}
 //
 //EOP
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeInterval::ESMC_TimeIntervalGetString()"
+ #define ESMC_METHOD "ESMCI::TimeInterval::getString()"
 
     int rc = ESMF_SUCCESS;
 
@@ -2947,7 +2948,7 @@
     ESMC_I4 h, m, s, sN, sD;
 
     // TODO: use native C++ Get, not F90 entry point, when ready
-    rc = ESMC_TimeIntervalGet((ESMC_I4 *)ESMC_NULL_POINTER,
+    rc = ESMCI::TimeInterval::get((ESMC_I4 *)ESMC_NULL_POINTER,
                           &yy_i8, ESMC_NULL_POINTER,
                           &mm_i8, ESMC_NULL_POINTER,
                           &d_i8, &h, &m, &s, ESMC_NULL_POINTER,
@@ -2994,14 +2995,14 @@
 
     return(rc);
 
- }  // end ESMC_TimeIntervalGetString
+ }  // end ESMCI::TimeInterval::getString
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalReduce - reduce a Time Interval to the smallest and least number of units
+// !IROUTINE:  ESMCI::TimeInterval::reduce - reduce a Time Interval to the smallest and least number of units
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalReduce(void) {
+      int ESMCI::TimeInterval::reduce(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -3018,7 +3019,7 @@
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeIntervalReduce()"
+ #define ESMC_METHOD "ESMCI::TimeInterval::reduce()"
 
     // Note:  Don't return ESMF_FAILURE; just reduce what we can.  Failure is
     //        determined by the method which tries to satisfy the user's
@@ -3034,7 +3035,7 @@
         // use startTime to reduce yy,mm,d to seconds
         if (startTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
           endTime = startTime + *this;
-          ESMC_TimeInterval ti = endTime - startTime;
+          ESMCI::TimeInterval ti = endTime - startTime;
           ESMC_FractionSetw(ti.ESMC_FractionGetw());
           //TODO: *this = endTime - startTime;
           //      should just copy base class part wholesale, rather than
@@ -3045,7 +3046,7 @@
         // use endTime to reduce yy,mm,d to seconds
         } else if (endTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
           startTime = endTime - *this;
-          ESMC_TimeInterval ti = endTime - startTime;
+          ESMCI::TimeInterval ti = endTime - startTime;
           ESMC_FractionSetw(ti.ESMC_FractionGetw());
           //TODO: *this = endTime - startTime;
           //      should just copy base class part wholesale, rather than
@@ -3122,4 +3123,6 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_TimeIntervalReduce
+}  // end ESMCI::TimeInterval::reduce
+
+}

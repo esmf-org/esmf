@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.83 2008/04/05 03:38:59 cdeluca Exp $
+// $Id: ESMC_Clock.C,v 1.84 2008/06/06 19:11:33 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.83 2008/04/05 03:38:59 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.84 2008/06/06 19:11:33 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -63,10 +63,10 @@ int ESMC_Clock::count=0;
 // !ARGUMENTS:
       int                nameLen,          // in
       const char        *name,             // in
-      ESMC_TimeInterval *timeStep,         // in
+      ESMCI::TimeInterval *timeStep,         // in
       ESMC_Time         *startTime,        // in
       ESMC_Time         *stopTime,         // in
-      ESMC_TimeInterval *runDuration,      // in
+      ESMCI::TimeInterval *runDuration,      // in
       int               *runTimeStepCount, // in
       ESMC_Time         *refTime,          // in
       int               *rc) {             // out - return code
@@ -130,7 +130,7 @@ int ESMC_Clock::count=0;
     }
     if (runTimeStepCount != ESMC_NULL_POINTER) {
       // use passed-in timestep if specified, otherwise use the clock's
-      ESMC_TimeInterval duration;
+      ESMCI::TimeInterval duration;
       if (timeStep != ESMC_NULL_POINTER) {
         duration = *runTimeStepCount * *timeStep;
       } else {
@@ -156,7 +156,7 @@ int ESMC_Clock::count=0;
     // This does not break the lower limit of the Fliegel or Hatcher 
     // algorithms (for Gregorian or Julian calendars) since those are based on
     //   whole seconds.
-    ESMC_TimeInterval oneNanosecond(0, 1, 1000000000);
+    ESMCI::TimeInterval oneNanosecond(0, 1, 1000000000);
     clock->prevTime = clock->currTime - oneNanosecond;
 
     returnCode = clock->ESMC_ClockValidate();
@@ -257,10 +257,10 @@ int ESMC_Clock::count=0;
 // !ARGUMENTS:
       int                nameLen,          // in
       const char        *name,             // in
-      ESMC_TimeInterval *timeStep,         // in
+      ESMCI::TimeInterval *timeStep,         // in
       ESMC_Time         *startTime,        // in
       ESMC_Time         *stopTime,         // in
-      ESMC_TimeInterval *runDuration,      // in
+      ESMCI::TimeInterval *runDuration,      // in
       int               *runTimeStepCount, // in
       ESMC_Time         *refTime,          // in
       ESMC_Time         *currTime,         // in
@@ -319,7 +319,7 @@ int ESMC_Clock::count=0;
     }
     if (runTimeStepCount != ESMC_NULL_POINTER) {
       // use passed-in timestep if specified, otherwise use the clock's
-      ESMC_TimeInterval duration;
+      ESMCI::TimeInterval duration;
       if (timeStep != ESMC_NULL_POINTER) {
         duration = *runTimeStepCount * *timeStep;
       } else {
@@ -369,16 +369,16 @@ int ESMC_Clock::count=0;
       int                nameLen,          // in
       int               *tempNameLen,      // out
       char              *tempName,         // out
-      ESMC_TimeInterval *timeStep,         // out
+      ESMCI::TimeInterval *timeStep,         // out
       ESMC_Time         *startTime,        // out
       ESMC_Time         *stopTime,         // out
-      ESMC_TimeInterval *runDuration,      // out
+      ESMCI::TimeInterval *runDuration,      // out
       ESMC_R8      *runTimeStepCount, // out
       ESMC_Time         *refTime,          // out
       ESMC_Time         *currTime,         // out
       ESMC_Time         *prevTime,         // out
-      ESMC_TimeInterval *currSimTime,      // out
-      ESMC_TimeInterval *prevSimTime,      // out
+      ESMCI::TimeInterval *currSimTime,      // out
+      ESMCI::TimeInterval *prevSimTime,      // out
       ESMC_Calendar    **calendar,         // out
       ESMC_CalendarType *calendarType,     // out
       int               *timeZone,         // out
@@ -519,7 +519,7 @@ int ESMC_Clock::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *timeStep,               // in  - optional new timestep
+      ESMCI::TimeInterval *timeStep,               // in  - optional new timestep
       char              *ringingAlarmList1stElementPtr, // out - optional array
                                                  //        of ringing alarms
       char              *ringingAlarmList2ndElementPtr, // in - address of 2nd
@@ -921,7 +921,7 @@ int ESMC_Clock::count=0;
 //
 // !ARGUMENTS:
       ESMC_Time         *nextTime,       // out
-      ESMC_TimeInterval *timeStep) {     // in
+      ESMCI::TimeInterval *timeStep) {     // in
 
 // !DESCRIPTION:
 //      Calculates what the next time of the {\tt ESMF\_Clock} will be, based
@@ -1034,7 +1034,7 @@ int ESMC_Clock::count=0;
       int                sizeofAlarmList,        // in  - size of given array
                                                  //       of alarms
       int               *alarmCount,             // out - number of alarms
-      ESMC_TimeInterval *timeStep) {             // in  - optional time step to
+      ESMCI::TimeInterval *timeStep) {             // in  - optional time step to
                                                  //         use instead of the
                                                  //         clock's (only use
                                                  //         with alarm list type
@@ -1535,8 +1535,8 @@ int ESMC_Clock::count=0;
     }
 
     // validate required individual properties
-    if(ESMC_LogDefault.ESMC_LogMsgFoundError(timeStep.ESMC_TimeIntervalValidate(),
-                          "timeStep.ESMC_TimeIntervalValidate() failed", &rc) ||
+    if(ESMC_LogDefault.ESMC_LogMsgFoundError(timeStep.ESMCI::TimeInterval::validate(),
+                          "timeStep.ESMCI::TimeInterval::validate() failed", &rc) ||
        ESMC_LogDefault.ESMC_LogMsgFoundError(startTime.ESMC_TimeValidate(),
                                  "startTime.ESMC_TimeValidate() failed", &rc) ||
        ESMC_LogDefault.ESMC_LogMsgFoundError(refTime.ESMC_TimeValidate(),
@@ -1618,7 +1618,7 @@ int ESMC_Clock::count=0;
         return(ESMC_RC_OBJ_BAD); 
       }
 
-      ESMC_TimeInterval zeroTimeStep(0,0,1,0,0,0);
+      ESMCI::TimeInterval zeroTimeStep(0,0,1,0,0,0);
 
       // The following checks only produce ESMC_LOG_WARN because
       // the user may want or need to do these things.
@@ -1722,11 +1722,11 @@ int ESMC_Clock::count=0;
       }
       else if (strncmp(opts, "timestep", 8) == 0) {
         printf("timeStep = \n");
-        // TODO:  timeStep.ESMC_TimeIntervalPrint(&opts(8)); ?
+        // TODO:  timeStep.ESMCI::TimeInterval::print(&opts(8)); ?
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          timeStep.ESMC_TimeIntervalPrint("string");
+          timeStep.ESMCI::TimeInterval::print("string");
         } else {
-          timeStep.ESMC_TimeIntervalPrint();
+          timeStep.ESMCI::TimeInterval::print();
         }
       }
       else if (strncmp(opts, "starttime", 9) == 0) {
@@ -1793,7 +1793,7 @@ int ESMC_Clock::count=0;
       // default:  print out all properties
 
       printf("name = %s\n", name);
-      printf("timeStep = \n");  timeStep.ESMC_TimeIntervalPrint(options);
+      printf("timeStep = \n");  timeStep.ESMCI::TimeInterval::print(options);
       printf("startTime = \n"); startTime.ESMC_TimePrint(options);
       printf("stopTime = \n");  stopTime.ESMC_TimePrint(options);
       printf("stopTimeEnabled = %s\n", stopTimeEnabled ? "true" : "false");

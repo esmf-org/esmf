@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.31 2008/04/05 03:38:57 cdeluca Exp $
+// $Id: ESMC_Alarm_F.C,v 1.32 2008/06/06 19:12:29 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,8 +37,8 @@ extern "C" {
 
        void FTN(c_esmc_alarmcreatenew)(ESMC_Alarm **ptr, int *nameLen, 
                 const char *name, ESMC_Clock **clock,
-                ESMC_Time *ringTime, ESMC_TimeInterval *ringInterval,
-                ESMC_Time *stopTime, ESMC_TimeInterval *ringDuration, 
+                ESMC_Time *ringTime, ESMCI::TimeInterval *ringInterval,
+                ESMC_Time *stopTime, ESMCI::TimeInterval *ringDuration, 
                 int *ringTimeStepCount, ESMC_Time *refTime,
                 bool *enabled, bool *sticky, int *status) {
           *ptr = ESMC_AlarmCreate(          
@@ -72,8 +72,8 @@ extern "C" {
 
        void FTN(c_esmc_alarmset)(ESMC_Alarm **ptr, int *nameLen, 
                                  const char *name, ESMC_Clock **clock,
-                ESMC_Time *ringTime, ESMC_TimeInterval *ringInterval,
-                ESMC_Time *stopTime, ESMC_TimeInterval *ringDuration, 
+                ESMC_Time *ringTime, ESMCI::TimeInterval *ringInterval,
+                ESMC_Time *stopTime, ESMCI::TimeInterval *ringDuration, 
                 int *ringTimeStepCount, ESMC_Time *refTime,
                 bool *ringing, bool *enabled, bool *sticky,
                 int *status) {
@@ -99,8 +99,8 @@ extern "C" {
                                  int *tempNameLen, char *tempName,
                                  ESMC_Clock **clock,
                 ESMC_Time *ringTime, ESMC_Time *prevRingTime, 
-                ESMC_TimeInterval *ringInterval, ESMC_Time *stopTime,
-                ESMC_TimeInterval *ringDuration, int *ringTimeStepCount,
+                ESMCI::TimeInterval *ringInterval, ESMC_Time *stopTime,
+                ESMCI::TimeInterval *ringDuration, int *ringTimeStepCount,
                 int *timeStepRingingCount, ESMC_Time *ringBegin,
                 ESMC_Time *ringEnd, ESMC_Time *refTime, bool *ringing,
                 bool *ringingOnPrevTimeStep, bool *enabled, bool *sticky,
@@ -168,7 +168,7 @@ extern "C" {
        }
 
        void FTN(c_esmc_alarmwillringnext)(ESMC_Alarm **ptr, 
-                ESMC_TimeInterval *timeStep, int *esmf_alarmWillRingNext,
+                ESMCI::TimeInterval *timeStep, int *esmf_alarmWillRingNext,
                 int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           *esmf_alarmWillRingNext = (int) (*ptr)->ESMC_AlarmWillRingNext(
@@ -190,7 +190,7 @@ extern "C" {
        }
 
        void FTN(c_esmc_alarmnotsticky)(ESMC_Alarm **ptr,
-                                          ESMC_TimeInterval *ringDuration, 
+                                          ESMCI::TimeInterval *ringDuration, 
                                           int *ringTimeStepCount,
                                           int *status) {
           ESMF_CHECK_POINTER(*ptr, status)

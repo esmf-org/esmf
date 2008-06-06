@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.15 2008/05/09 20:08:21 rosalind Exp $
+# $Id: makefile,v 1.16 2008/06/06 19:11:33 rosalind Exp $
 
 ALL: build_here
 
 CFLAGS    =
 FFLAGS    =
-SOURCEC   = ESMCI_BaseTime.C ESMC_TimeInterval.C ESMC_Time.C \
+SOURCEC   = ESMCI_BaseTime.C ESMCI_TimeInterval.C ESMCI_Time.C \
             ESMC_Calendar.C ESMC_Alarm.C ESMC_Clock.C
 SOURCEF   =
 STOREH    = ESMCI_BaseTime.h ESMCI_TimeInterval.h ESMCI_Time.h \

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.89 2008/05/09 20:08:20 rosalind Exp $
+// $Id: ESMC_Calendar.C,v 1.90 2008/06/06 19:11:33 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,8 +41,9 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.89 2008/05/09 20:08:20 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.90 2008/06/06 19:11:33 rosalind Exp $";
 //-------------------------------------------------------------------------
+
 
 // initialize static array of calendar type names
 const char *const ESMC_Calendar::calendarTypeName[CALENDAR_TYPE_COUNT] =
@@ -1372,10 +1373,10 @@ int ESMC_Calendar::count=0;
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, &cal);
-              ESMC_TimeInterval secondsOfTheYear;
+              ESMCI::TimeInterval secondsOfTheYear;
               secondsOfTheYear = *t - begnningOfYear;
               ESMC_I8 seconds;
-              secondsOfTheYear.ESMC_TimeIntervalGet(ESMC_NULL_POINTER,
+              secondsOfTheYear.ESMCI::TimeInterval::get(ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
@@ -1494,10 +1495,10 @@ int ESMC_Calendar::count=0;
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, &cal);
-              ESMC_TimeInterval secondsOfTheYear;
+              ESMCI::TimeInterval secondsOfTheYear;
               secondsOfTheYear = *t - begnningOfYear;
               ESMC_I8 seconds;
-              secondsOfTheYear.ESMC_TimeIntervalGet(ESMC_NULL_POINTER,
+              secondsOfTheYear.ESMCI::TimeInterval::get(ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
@@ -1743,7 +1744,7 @@ int ESMC_Calendar::count=0;
 //
 // !ARGUMENTS:
       const ESMC_Time *time,                            // in
-      const ESMC_TimeInterval &timeinterval) const {    // in
+      const ESMCI::TimeInterval &timeinterval) const {    // in
 
 //
 // !DESCRIPTION:
@@ -1776,7 +1777,7 @@ int ESMC_Calendar::count=0;
     ESMC_Time sum = *time;
 
     // prepare for increment with any non-calendar units (h,m,s)
-    ESMC_TimeInterval nonCalTi = timeinterval;
+    ESMCI::TimeInterval nonCalTi = timeinterval;
 
     switch (calendarType)
     {
@@ -1870,7 +1871,7 @@ int ESMC_Calendar::count=0;
     //   on this calendar and add to non-calendar units increment
     //   (applies to all calendars since secondsPerDay is defined for all)
     if (timeinterval.d != 0) {
-        ESMC_TimeInterval daysTi(timeinterval.d * secondsPerDay);
+        ESMCI::TimeInterval daysTi(timeinterval.d * secondsPerDay);
         nonCalTi.ESMCI::BaseTime::operator+=(daysTi);
     }
 
@@ -1894,7 +1895,7 @@ int ESMC_Calendar::count=0;
 //
 // !ARGUMENTS:
       const ESMC_Time *time,                            // in
-      const ESMC_TimeInterval &timeinterval) const {    // in
+      const ESMCI::TimeInterval &timeinterval) const {    // in
 
 //
 // !DESCRIPTION:
@@ -1927,7 +1928,7 @@ int ESMC_Calendar::count=0;
     ESMC_Time diff = *time;
 
     // prepare for decrement with any non-calendar units (h,m,s)
-    ESMC_TimeInterval nonCalTi = timeinterval;
+    ESMCI::TimeInterval nonCalTi = timeinterval;
 
     switch (calendarType)
     {
@@ -2021,7 +2022,7 @@ int ESMC_Calendar::count=0;
     //   on this calendar and add to non-calendar units increment
     //   (applies to all calendars since secondsPerDay is defined for all)
     if (timeinterval.d != 0) {
-        ESMC_TimeInterval daysTi(timeinterval.d * secondsPerDay);
+        ESMCI::TimeInterval daysTi(timeinterval.d * secondsPerDay);
         nonCalTi.ESMCI::BaseTime::operator+=(daysTi);
     }
 
@@ -2662,3 +2663,4 @@ int ESMC_Calendar::count=0;
   // delete[] daysPerMonth;
 
 } // end ~ESMC_Calendar
+

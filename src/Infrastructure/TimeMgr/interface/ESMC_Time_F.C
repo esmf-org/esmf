@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.42 2008/05/09 20:08:20 rosalind Exp $
+// $Id: ESMC_Time_F.C,v 1.43 2008/06/06 19:12:29 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@ extern "C" {
                               ESMC_Time *midMonth,
                               ESMC_I4 *dayOfYear,
                               ESMC_R8 *dayOfYear_r8,
-                              ESMC_TimeInterval *dayOfYear_intvl,
+                              ESMCI::TimeInterval *dayOfYear_intvl,
                               int *status) {
           int rc = (ptr)->ESMC_TimeGet(
                        ESMC_NOT_PRESENT_FILTER(yy),
@@ -173,20 +173,20 @@ extern "C" {
        }
 
        void FTN(c_esmc_timeinc)(ESMC_Time *time,
-                                ESMC_TimeInterval *timeinterval,
+                                ESMCI::TimeInterval *timeinterval,
                                 ESMC_Time *esmf_baseTimeInc) {
            *esmf_baseTimeInc = (*time + *timeinterval);
        }
 
        void FTN(c_esmc_timedec)(ESMC_Time *time,
-                                ESMC_TimeInterval *timeinterval,
+                                ESMCI::TimeInterval *timeinterval,
                                 ESMC_Time *esmf_baseTimeDec) {
            *esmf_baseTimeDec = (*time - *timeinterval);
        }
 
        void FTN(c_esmc_timediff)(ESMC_Time *time1,
                                  ESMC_Time *time2,
-                                 ESMC_TimeInterval *esmf_timeDiff) {
+                                 ESMCI::TimeInterval *esmf_timeDiff) {
            *esmf_timeDiff = (*time1 - *time2);
        }
 

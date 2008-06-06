@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.42 2008/04/05 03:38:57 cdeluca Exp $
+// $Id: ESMC_Clock_F.C,v 1.43 2008/06/06 19:12:29 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,10 +37,10 @@ extern "C" {
        void FTN(c_esmc_clockcreatenew)(ESMC_Clock **ptr,
                                        int *nameLen,
                                        const char *name,
-                                       ESMC_TimeInterval *timeStep,
+                                       ESMCI::TimeInterval *timeStep,
                                        ESMC_Time *startTime,
                                        ESMC_Time *stopTime,
-                                       ESMC_TimeInterval *runDuration,
+                                       ESMCI::TimeInterval *runDuration,
                                        int *runTimeStepCount,
                                        ESMC_Time *refTime,
                                        int *status) {
@@ -73,10 +73,10 @@ extern "C" {
        void FTN(c_esmc_clockset)(ESMC_Clock **ptr,
                                  int *nameLen,
                                  const char *name,
-                                 ESMC_TimeInterval *timeStep,
+                                 ESMCI::TimeInterval *timeStep,
                                  ESMC_Time *startTime,
                                  ESMC_Time *stopTime,
-                                 ESMC_TimeInterval *runDuration,
+                                 ESMCI::TimeInterval *runDuration,
                                  int *runTimeStepCount,
                                  ESMC_Time *refTime,
                                  ESMC_Time *currTime,
@@ -104,16 +104,16 @@ extern "C" {
                                  int *nameLen,
                                  int *tempNameLen,
                                  char *tempName,
-                                 ESMC_TimeInterval *timeStep,
+                                 ESMCI::TimeInterval *timeStep,
                                  ESMC_Time *startTime,
                                  ESMC_Time *stopTime,
-                                 ESMC_TimeInterval *runDuration,
+                                 ESMCI::TimeInterval *runDuration,
                                  ESMC_R8 *runTimeStepCount,
                                  ESMC_Time *refTime,
                                  ESMC_Time *currTime,
                                  ESMC_Time *prevTime,
-                                 ESMC_TimeInterval *currSimTime,
-                                 ESMC_TimeInterval *prevSimTime,
+                                 ESMCI::TimeInterval *currSimTime,
+                                 ESMCI::TimeInterval *prevSimTime,
                                  ESMC_Calendar **calendar, 
                                  ESMC_CalendarType *calendarType, 
                                  int *timeZone,
@@ -148,7 +148,7 @@ extern "C" {
 
        // for ringingAlarmList() size > 1
        void FTN(c_esmc_clockadvance2)(ESMC_Clock **ptr,
-                                   ESMC_TimeInterval *timeStep,
+                                   ESMCI::TimeInterval *timeStep,
                                    char *ringingAlarmList1stElementPtr,
                                    char *ringingAlarmList2ndElementPtr,
                                    int *sizeofRingingAlarmList,
@@ -168,7 +168,7 @@ extern "C" {
 
        // for ringingAlarmList() size == 1
        void FTN(c_esmc_clockadvance1)(ESMC_Clock **ptr,
-                                   ESMC_TimeInterval *timeStep,
+                                   ESMCI::TimeInterval *timeStep,
                                    char *ringingAlarmList1stElementPtr,
                                    int *sizeofRingingAlarmList,
                                    int *ringingAlarmCount, int *status) {
@@ -187,7 +187,7 @@ extern "C" {
 
        // for ringingAlarmList() size == 0 (missing) 
        void FTN(c_esmc_clockadvance0)(ESMC_Clock **ptr,
-                                   ESMC_TimeInterval *timeStep,
+                                   ESMCI::TimeInterval *timeStep,
                                    int *sizeofRingingAlarmList,
                                    int *ringingAlarmCount, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
@@ -247,7 +247,7 @@ extern "C" {
 
        void FTN(c_esmc_clockgetnexttime)(ESMC_Clock **ptr,
                                  ESMC_Time *nextTime,
-                                 ESMC_TimeInterval *timeStep,
+                                 ESMCI::TimeInterval *timeStep,
                                  int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockGetNextTime(
@@ -273,7 +273,7 @@ extern "C" {
                                            char *AlarmList2ndElementPtr,
                                            int *sizeofAlarmList,
                                            int *alarmCount,
-                                           ESMC_TimeInterval *timeStep,
+                                           ESMCI::TimeInterval *timeStep,
                                            int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockGetAlarmList(*type,
@@ -291,7 +291,7 @@ extern "C" {
                                            char *AlarmList1stElementPtr,
                                            int *sizeofAlarmList,
                                            int *alarmCount,
-                                           ESMC_TimeInterval *timeStep,
+                                           ESMCI::TimeInterval *timeStep,
                                            int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockGetAlarmList(*type,
