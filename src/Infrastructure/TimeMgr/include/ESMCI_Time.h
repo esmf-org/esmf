@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.h,v 1.1 2008/05/06 02:18:20 rosalind Exp $
+// $Id: ESMCI_Time.h,v 1.2 2008/06/06 19:10:10 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -17,8 +17,8 @@
  // these lines prevent this file from being read more than once if it
  // ends up being included multiple times
 
- #ifndef ESMC_TIME_H
- #define ESMC_TIME_H
+ #ifndef ESMCI_TIME_H
+ #define ESMCI_TIME_H
 
 //-------------------------------------------------------------------------
 
@@ -59,7 +59,10 @@
  #include <ESMC_Base.h>           // inherited Base class
  #include <ESMCI_BaseTime.h>       // inherited BaseTime class
  #include <ESMC_Calendar.h>       // associated Calendar class
- class ESMC_TimeInterval;
+
+// namespace ESMCI{
+
+ class TimeInterval;
 
 // !PUBLIC TYPES:
  class ESMC_Time;
@@ -125,7 +128,7 @@
                      ESMC_Time *midMonth=0,
                      ESMC_I4 *dayOfYear=0,
                      ESMC_R8 *dayOfYear_r8=0,
-                     ESMC_TimeInterval *dayOfYear_intvl=0) const;
+                     ESMCI::TimeInterval *dayOfYear_intvl=0) const;
 
     // native C++ interface -- via variable argument lists
     //   corresponds to F90 named-optional-arguments interface
@@ -147,14 +150,14 @@
 
     // override BaseTime +/- operators in order to copy ESMC_Time-only
     // properties (calendar & timeZone) to the result
-    ESMC_Time operator+(const ESMC_TimeInterval &) const; // time + timeinterval
-    ESMC_Time operator-(const ESMC_TimeInterval &) const; // time - timeinterval
-    ESMC_Time& operator+=(const ESMC_TimeInterval &); // time += timeinterval
-    ESMC_Time& operator-=(const ESMC_TimeInterval &); // time -= timeinterval
+    ESMC_Time operator+(const ESMCI::TimeInterval &) const; // time + timeinterval
+    ESMC_Time operator-(const ESMCI::TimeInterval &) const; // time - timeinterval
+    ESMC_Time& operator+=(const ESMCI::TimeInterval &); // time += timeinterval
+    ESMC_Time& operator-=(const ESMCI::TimeInterval &); // time -= timeinterval
 
     // override 2nd BaseTime (-) operator because 1st (-) operator is overridden
     // (compiler can't find 2nd (-) operator at ESMC_Fraction!)
-    ESMC_TimeInterval operator-(const ESMC_Time&) const;  // time1 - time2
+    ESMCI::TimeInterval operator-(const ESMC_Time&) const;  // time1 - time2
 
     // TODO: ? override BaseTime arithmetic operators with same operators
     //         which use the BaseTime operators and then specialize
@@ -202,9 +205,9 @@
 
     int ESMC_TimeGetDayOfYear(ESMC_I4 *dayOfYear) const;
     int ESMC_TimeGetDayOfYear(ESMC_R8 *dayOfYear) const; // (TMG 2.5.2)
-    int ESMC_TimeGetDayOfYear(ESMC_TimeInterval *dayOfYear) const;
+    int ESMC_TimeGetDayOfYear(ESMCI::TimeInterval *dayOfYear) const;
 
-    friend class ESMC_TimeInterval;
+    friend class ESMCI::TimeInterval;
     friend class ESMC_Calendar;
                                                         // (TMG 2.5.5)
 //
@@ -215,4 +218,6 @@
 
  };   // end class ESMC_Time
 
- #endif // ESMC_TIME_H
+// } // namespace ESMCI
+
+ #endif // ESMCI_TIME_H

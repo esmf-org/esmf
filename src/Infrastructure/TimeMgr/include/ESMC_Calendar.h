@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.53 2008/05/06 02:18:20 rosalind Exp $
+// $Id: ESMC_Calendar.h,v 1.54 2008/06/06 19:10:11 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -70,9 +70,13 @@
  #include <ESMC_Base.h>           // inherited Base class
  #include <ESMCI_BaseTime.h>       // inherited BaseTime class
 
+
 // forward reference to prevent #include recursion
 class ESMC_Time;
-class ESMC_TimeInterval;
+// class ESMCI::TimeInterval;
+namespace ESMCI{
+   class TimeInterval;
+}
 
 // TODO: replace with monthsPerYear property
 #define MONTHS_PER_YEAR 12
@@ -185,11 +189,11 @@ class ESMC_Calendar {
                                    ESMC_R8 *d_r8=0) const;
 
     ESMC_Time ESMC_CalendarIncrement(const ESMC_Time *time,
-                                     const ESMC_TimeInterval &timeinterval)
+                                     const ESMCI::TimeInterval &timeinterval)
                                      const;
 
     ESMC_Time ESMC_CalendarDecrement(const ESMC_Time *time,
-                                     const ESMC_TimeInterval &timeinterval)
+                                     const ESMCI::TimeInterval &timeinterval)
                                      const;
 
     bool ESMC_CalendarIsLeapYear(ESMC_I8 yy, int *rc=0) const;
@@ -263,7 +267,7 @@ class ESMC_Calendar {
   private:
 
     friend class ESMC_Time;
-    friend class ESMC_TimeInterval;
+    friend class ESMCI::TimeInterval;
 
 //
  // < declare private interface methods here >

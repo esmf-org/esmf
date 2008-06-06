@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.49 2008/05/09 20:08:20 rosalind Exp $
+// $Id: ESMC_Clock.h,v 1.50 2008/06/06 19:10:11 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -71,6 +71,7 @@
  #include <ESMCI_Time.h>
  #include <ESMC_Alarm.h>
 
+
 // !PUBLIC TYPES:
  class ESMC_Clock;
 
@@ -84,7 +85,7 @@
 
   private:   // corresponds to F90 module 'type ESMF_Clock' members
     char              name[ESMF_MAXSTR];  // name of clock
-    ESMC_TimeInterval timeStep;
+    ESMCI::TimeInterval timeStep;
     ESMC_Time         startTime;
     ESMC_Time         stopTime;
     ESMC_Time         refTime;   // reference time
@@ -127,10 +128,10 @@
 
     int ESMC_ClockSet(int                nameLen,
                       const char        *name=0,
-                      ESMC_TimeInterval *timeStep=0,
+                      ESMCI::TimeInterval *timeStep=0,
                       ESMC_Time         *startTime=0,
                       ESMC_Time         *stopTime=0,
-                      ESMC_TimeInterval *runDuration=0,
+                      ESMCI::TimeInterval *runDuration=0,
                       int               *runTimeStepCount=0,
 // TODO: add overload for ESMC_R8  *runTimeStepCount=0,
                       ESMC_Time         *refTime=0,    // (TMG 3.1, 3.4.4)
@@ -141,16 +142,16 @@
     int ESMC_ClockGet(int                nameLen,
                       int               *tempNameLen,
                       char              *tempName=0,
-                      ESMC_TimeInterval *timeStep=0,
+                      ESMCI::TimeInterval *timeStep=0,
                       ESMC_Time         *startTime=0,
                       ESMC_Time         *stopTime=0,
-                      ESMC_TimeInterval *runDuration=0,
+                      ESMCI::TimeInterval *runDuration=0,
                       ESMC_R8      *runTimeStepCount=0,
                       ESMC_Time         *refTime=0,    // (TMG 3.1, 3.4.4)
                       ESMC_Time         *currTime=0, 
                       ESMC_Time         *prevTime=0, 
-                      ESMC_TimeInterval *currSimTime=0, 
-                      ESMC_TimeInterval *prevSimTime=0, 
+                      ESMCI::TimeInterval *currSimTime=0, 
+                      ESMCI::TimeInterval *prevSimTime=0, 
                       ESMC_Calendar    **calendar=0,
                       ESMC_CalendarType *calendarType=0,
                       int               *timeZone=0,
@@ -158,7 +159,7 @@
                       int               *alarmCount=0,
                       ESMC_Direction    *direction=0);
 
-    int ESMC_ClockAdvance(ESMC_TimeInterval *timeStep=0,
+    int ESMC_ClockAdvance(ESMCI::TimeInterval *timeStep=0,
                           char *ringingAlarmList1stElementPtr=0, 
                           char *ringingAlarmList2ndElementPtr=0, 
                           int  sizeofRingingAlarmList=0, 
@@ -176,7 +177,7 @@
     bool ESMC_ClockIsReverse(int *rc=0) const;        // TMG3.4.6
 
     int ESMC_ClockGetNextTime(ESMC_Time         *nextTime,
-                              ESMC_TimeInterval *timeStep=0);
+                              ESMCI::TimeInterval *timeStep=0);
 
     int ESMC_ClockGetAlarm(int nameLen, char *name, ESMC_Alarm **alarm);
 
@@ -185,7 +186,7 @@
                                char *AlarmList2ndElementPtr,
                                int  sizeofAlarmList, 
                                int *alarmCount,
-                               ESMC_TimeInterval *timeStep=0);
+                               ESMCI::TimeInterval *timeStep=0);
 
     int ESMC_ClockSyncToRealTime(void); // TMG3.4.5
     // (see ESMC_Time::SyncToRealTime()
@@ -221,8 +222,8 @@
     //
 
     // friend function to allocate and initialize clock from heap
-    friend ESMC_Clock *ESMC_ClockCreate(int, const char*, ESMC_TimeInterval*,
-                                 ESMC_Time*, ESMC_Time*, ESMC_TimeInterval*,
+    friend ESMC_Clock *ESMC_ClockCreate(int, const char*, ESMCI::TimeInterval*,
+                                 ESMC_Time*, ESMC_Time*, ESMCI::TimeInterval*,
                                  int*, ESMC_Time*, int*);
 // TODO: add overload for ESMC_R8  *runTimeStepCount
 
@@ -235,8 +236,8 @@
     // friend to allocate and initialize alarm from heap
     //   (needs access to clock current time to initialize alarm ring time)
     friend ESMC_Alarm *ESMC_AlarmCreate(int, const char*, ESMC_Clock*, 
-                                 ESMC_Time*, ESMC_TimeInterval*, ESMC_Time*, 
-                                 ESMC_TimeInterval*, int*, ESMC_Time*, bool*,
+                                 ESMC_Time*, ESMCI::TimeInterval*, ESMC_Time*, 
+                                 ESMCI::TimeInterval*, int*, ESMC_Time*, bool*,
                                  bool*, int*);
 
 // !PRIVATE MEMBER FUNCTIONS:
@@ -264,10 +265,10 @@
     // friend function to allocate and initialize clock from heap
     ESMC_Clock *ESMC_ClockCreate(int                nameLen,
                                  const char*        name=0,
-                                 ESMC_TimeInterval* timeStep=0,
+                                 ESMCI::TimeInterval* timeStep=0,
                                  ESMC_Time*         startTime=0,
                                  ESMC_Time*         stopTime=0,
-                                 ESMC_TimeInterval *runDuration=0,
+                                 ESMCI::TimeInterval *runDuration=0,
                                  int               *runTimeStepCount=0,
 // TODO: add overload for ESMC_R8             *runTimeStepCount=0,
                                  ESMC_Time*         refTime=0,
@@ -284,5 +285,6 @@
                                       const char*  name=0,
                                       ESMC_IOSpec* iospec=0,
                                       int*         rc=0);
+
 
 #endif // ESMC_CLOCK_H

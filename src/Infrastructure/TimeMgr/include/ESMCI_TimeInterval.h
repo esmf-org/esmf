@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.h,v 1.1 2008/05/09 20:11:04 rosalind Exp $
+// $Id: ESMCI_TimeInterval.h,v 1.2 2008/06/06 19:10:10 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -17,8 +17,8 @@
  // these lines prevent this file from being read more than once if it
  // ends up being included multiple times
 
-#ifndef ESMC_TIME_INTERVAL_H
-#define ESMC_TIME_INTERVAL_H
+#ifndef ESMCI_TIME_INTERVAL_H
+#define ESMCI_TIME_INTERVAL_H
 
 //-------------------------------------------------------------------------
 
@@ -28,12 +28,21 @@
 #include <ESMC_Start.h>
 #include <ESMF_TimeMgr.inc>
 #include <ESMC_Fraction.h>
-class ESMC_TimeInterval;
+// !USES:
+ #include <ESMC_Base.h>           // inherited Base class
+ #include <ESMCI_BaseTime.h>       // inherited BaseTime class
+ #include <ESMCI_Time.h>
+
+
+namespace ESMCI {
+
+// PUBLIC TYPES:
+class TimeInterval;
 
 //-------------------------------------------------------------------------
 //BOP
 //
-// !CLASS:  ESMC_TimeInterval - represents a time interval
+// !CLASS:  ESMCI::TimeInterval - represents a time interval
 //
 // !DESCRIPTION:
 //   A {\tt TimeInterval} inherits from the {\tt BaseTime} base class and is
@@ -65,24 +74,17 @@ class ESMC_TimeInterval;
 //
 //-------------------------------------------------------------------------
 
-// !USES:
- #include <ESMC_Base.h>           // inherited Base class
- #include <ESMCI_BaseTime.h>       // inherited BaseTime class
- #include <ESMCI_Time.h>
-
 enum ESMC_ComparisonType {ESMC_EQ, ESMC_NE,
                           ESMC_LT, ESMC_GT,
                           ESMC_LE, ESMC_GE};
 
 enum ESMC_AbsValueType {ESMC_POSITIVE_ABS, ESMC_NEGATIVE_ABS};
 
-// !PUBLIC TYPES:
- class ESMC_TimeInterval;
 
 // !PRIVATE TYPES:
 
  // class definition type
-class ESMC_TimeInterval : public ESMCI::BaseTime { 
+class TimeInterval : public ESMCI::BaseTime { 
                                              // inherits ESMCI::BaseTime
                                              // TODO: (& ESMC_Base class when
                                              // fully aligned with F90 equiv)
@@ -103,10 +105,10 @@ class ESMC_TimeInterval : public ESMCI::BaseTime {
 
     // all get/set routines perform signed conversions, where applicable;
     //   direct, one-to-one access to core time elements is provided by the
-    //   ESMC_BaseTime base class
+    //   ESMCI::BaseTime base class
 
     // Get/Set methods to support the F90 optional arguments interface
-    int ESMC_TimeIntervalSet(ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
+    int set(ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
                              ESMC_I4 *mm=0, ESMC_I8 *mm_i8=0,
                              ESMC_I4 *d=0,  ESMC_I8 *d_i8=0,
                              ESMC_I4 *h=0,  ESMC_I4 *m=0,
@@ -122,7 +124,7 @@ class ESMC_TimeInterval : public ESMCI::BaseTime {
                              ESMC_Calendar **calendar=0,
                              ESMC_CalendarType *calendarType=0);
 
-    int ESMC_TimeIntervalGet(ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
+    int get(ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
                              ESMC_I4 *mm=0, ESMC_I8 *mm_i8=0,
                              ESMC_I4 *d=0,  ESMC_I8 *d_i8=0,
                              ESMC_I4 *h=0,  ESMC_I4 *m=0,
@@ -149,82 +151,82 @@ class ESMC_TimeInterval : public ESMCI::BaseTime {
     // native C++ interface -- via variable argument lists
     //   corresponds to F90 named-optional-arguments interface
 
-    int ESMC_TimeIntervalSet(const char *timeList, ...);
+    int set(const char *timeList, ...);
     // e.g. Set("s" , (ESMC_R8) s);
 
     // (TMG 1.1)
-    int ESMC_TimeIntervalGet(const char *timeList, ...) const;
+    int get(const char *timeList, ...) const;
     // e.g. Get("D:S",(int *)D, (int *)S);
 
     // return positive value (TMG 1.5.8)
-    ESMC_TimeInterval ESMC_TimeIntervalAbsValue(void) const;
+    TimeInterval absValue(void) const;
 
     // return negative value (TMG 1.5.8)
-    ESMC_TimeInterval ESMC_TimeIntervalNegAbsValue(void) const;
+    TimeInterval negAbsValue(void) const;
 
     // subdivision (TMG 1.5.6, 5.3, 7.2)
-    ESMC_TimeInterval  operator/ (const ESMC_I4 &) const;
-    ESMC_TimeInterval& operator/=(const ESMC_I4 &);
-    ESMC_TimeInterval  operator/ (const ESMC_R8 &) const;
-    ESMC_TimeInterval& operator/=(const ESMC_R8 &);
+    TimeInterval  operator/ (const ESMC_I4 &) const;
+    TimeInterval& operator/=(const ESMC_I4 &);
+    TimeInterval  operator/ (const ESMC_R8 &) const;
+    TimeInterval& operator/=(const ESMC_R8 &);
 
     // division (TMG 1.5.5)
-    ESMC_Fraction ESMC_TimeIntervalDiv(const ESMC_TimeInterval &) const;
-    ESMC_R8 operator/(const ESMC_TimeInterval &) const;
+    ESMC_Fraction div(const TimeInterval &) const;
+    ESMC_R8 operator/(const TimeInterval &) const;
 
     // modulus
-    ESMC_TimeInterval  operator% (const ESMC_TimeInterval &) const;
-    ESMC_TimeInterval& operator%=(const ESMC_TimeInterval &);
+    TimeInterval  operator% (const TimeInterval &) const;
+    TimeInterval& operator%=(const TimeInterval &);
 
     // multiplication (TMG 1.5.7, 7.2)
-    ESMC_TimeInterval  operator* (const ESMC_I4 &) const;
-    ESMC_TimeInterval& operator*=(const ESMC_I4 &);
-    ESMC_TimeInterval  operator* (const ESMC_Fraction &) const;
-    ESMC_TimeInterval& operator*=(const ESMC_Fraction &);
-    ESMC_TimeInterval  operator* (const ESMC_R8 &) const;
-    ESMC_TimeInterval& operator*=(const ESMC_R8 &);
+    TimeInterval  operator* (const ESMC_I4 &) const;
+    TimeInterval& operator*=(const ESMC_I4 &);
+    TimeInterval  operator* (const ESMC_Fraction &) const;
+    TimeInterval& operator*=(const ESMC_Fraction &);
+    TimeInterval  operator* (const ESMC_R8 &) const;
+    TimeInterval& operator*=(const ESMC_R8 &);
 
     // addition, subtraction
-    ESMC_TimeInterval operator+(const ESMC_TimeInterval &) const;
-    ESMC_TimeInterval operator-(const ESMC_TimeInterval &) const;
+    TimeInterval operator+(const TimeInterval &) const;
+    TimeInterval operator-(const TimeInterval &) const;
 
     // unary negation
-    ESMC_TimeInterval operator-(void) const;
+    TimeInterval operator-(void) const;
 
     // comparison methods (TMG 1.5.3, 7.2)
-    bool operator==(const ESMC_TimeInterval &) const;
-    bool operator!=(const ESMC_TimeInterval &) const;
-    bool operator< (const ESMC_TimeInterval &) const;
-    bool operator> (const ESMC_TimeInterval &) const;
-    bool operator<=(const ESMC_TimeInterval &) const;
-    bool operator>=(const ESMC_TimeInterval &) const;
+    bool operator==(const TimeInterval &) const;
+    bool operator!=(const TimeInterval &) const;
+    bool operator< (const TimeInterval &) const;
+    bool operator> (const TimeInterval &) const;
+    bool operator<=(const TimeInterval &) const;
+    bool operator>=(const TimeInterval &) const;
 
     // copy or assign from ESMC_Fraction expressions, supports Time1-Time2
     // operator in ESMC_Time.
     // TODO:  should be implicit ?
-    ESMC_TimeInterval& operator=(const ESMC_Fraction &);
+    TimeInterval& operator=(const ESMC_Fraction &);
 
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int ESMC_TimeIntervalReadRestart(int nameLen, const char *name=0,
+    int readRestart(int nameLen, const char *name=0,
                                      ESMC_IOSpec *iospec=0);
-    int ESMC_TimeIntervalWriteRestart(ESMC_IOSpec *iospec=0) const;
+    int writeRestart(ESMC_IOSpec *iospec=0) const;
 
     // internal validation (TMG 7.1.1)
-    int ESMC_TimeIntervalValidate(const char *options=0) const;
+    int validate(const char *options=0) const;
 
     // for testing/debugging
-    int ESMC_TimeIntervalPrint(const char *options=0) const;
+    int print(const char *options=0) const;
 
     // native C++ constructors/destructors
-    ESMC_TimeInterval(void);
-    ESMC_TimeInterval(ESMC_I8 s, int sN=0, int sD=1,
+    TimeInterval(void);
+    TimeInterval(ESMC_I8 s, int sN=0, int sD=1,
                       ESMC_I8 yy=0, ESMC_I8 mm=0, ESMC_I8 d=0,
                       ESMC_Time *startTime=0, ESMC_Time *endTime=0,
                       ESMC_Calendar *calendar=0,
                       ESMC_CalendarType calendarType=(ESMC_CalendarType)0);
-    int ESMC_TimeIntervalSet(ESMC_I8 s, int sN=0, int sD=1,
+    int set(ESMC_I8 s, int sN=0, int sD=1,
                       ESMC_I8 yy=0, ESMC_I8 mm=0, ESMC_I8 d=0,
                       ESMC_Time *startTime=0, ESMC_Time *endTime=0,
                       ESMC_Calendar *calendar=0,
@@ -234,35 +236,35 @@ class ESMC_TimeInterval : public ESMCI::BaseTime {
                                    // to avoid automatic destructor invocation
                                    // when leaving scope to return to F90.
 
-    ~ESMC_TimeInterval(void);
+    ~TimeInterval(void);
 
  // < declare the rest of the public interface methods here >
 
-    // commutative complements to ESMC_TimeInterval class member overloaded
+    // commutative complements to TimeInterval class member overloaded
     //   "*" operators
-    friend ESMC_TimeInterval
-                   operator* (const ESMC_I4 &, const ESMC_TimeInterval &);
-    friend ESMC_TimeInterval
-                   operator* (const ESMC_Fraction &, const ESMC_TimeInterval &);
-    friend ESMC_TimeInterval
-                   operator* (const ESMC_R8 &, const ESMC_TimeInterval &);
+    friend TimeInterval
+                   operator* (const ESMC_I4 &, const TimeInterval &);
+    friend TimeInterval
+                   operator* (const ESMC_Fraction &, const TimeInterval &);
+    friend TimeInterval
+                   operator* (const ESMC_R8 &, const TimeInterval &);
 
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private:
     // return in string format (TMG 1.5.9)
-    int ESMC_TimeIntervalGetString(char *timeString, 
+    int getString(char *timeString, 
                                    const char *options=0) const;
 
     // common method for overloaded comparison operators
-    bool ESMC_TimeIntervalCompare(const ESMC_TimeInterval &,
+    bool compare(const TimeInterval &,
                                   ESMC_ComparisonType) const;
 
     // common method for positive and negative absolute value
-    ESMC_TimeInterval ESMC_TimeIntervalAbsValue(ESMC_AbsValueType) const;
+    TimeInterval absValue(ESMC_AbsValueType) const;
 
     // reduce time interval to smallest and least number of units
-    int ESMC_TimeIntervalReduce(void);
+    int reduce(void);
 
     friend class ESMC_Time;
     friend class ESMC_Calendar;
@@ -275,5 +277,6 @@ class ESMC_TimeInterval : public ESMCI::BaseTime {
 
 };     // end clase TimeInterval
 
+}      // end namespace ESMCI
 
-#endif // ESMC_TIME_INTERVAL_H
+#endif // ESMCI_TIME_INTERVAL_H

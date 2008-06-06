@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.38 2008/05/09 20:08:20 rosalind Exp $
+// $Id: ESMC_Alarm.h,v 1.39 2008/06/06 19:10:11 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -87,6 +87,10 @@
                           ESMF_ALARMLIST_NEXTRINGING,
                           ESMF_ALARMLIST_PREVRINGING};
 
+// get rid of this statement when Alarm is included in the ESMCI namespace
+//   using namespace ESMCI;
+// namespace ESMCI{
+
 // !PUBLIC TYPES:
  class ESMC_Alarm;
  typedef ESMC_Alarm* ESMC_AlarmPtr;
@@ -99,12 +103,13 @@ class ESMC_Alarm {
 //class ESMC_Alarm : public ESMC_Base { // TODO: inherit from ESMC_Base class
                                         // when fully aligned with F90 equiv
 
+
   private:   // corresponds to F90 module 'type ESMF_Alarm' members
     char              name[ESMF_MAXSTR];  // name of alarm
                                           // TODO: inherit from ESMC_Base class
     ESMC_Clock       *clock;        // associated clock
-    ESMC_TimeInterval ringInterval; // (TMG 4.5.2) for periodic alarming
-    ESMC_TimeInterval ringDuration; // how long alarm stays on
+    ESMCI::TimeInterval ringInterval; // (TMG 4.5.2) for periodic alarming
+    ESMCI::TimeInterval ringDuration; // how long alarm stays on
     ESMC_Time         ringTime;     // (TMG 4.5.1) next time to ring
     ESMC_Time         firstRingTime;    // the first ring time
                                         //   (save for reverse mode)
@@ -162,9 +167,9 @@ class ESMC_Alarm {
                       const char        *name=0,
                       ESMC_Clock       **clock=0,
                       ESMC_Time         *ringTime=0,
-                      ESMC_TimeInterval *ringInterval=0,
+                      ESMCI::TimeInterval *ringInterval=0,
                       ESMC_Time         *stopTime=0,
-                      ESMC_TimeInterval *ringDuration=0,
+                      ESMCI::TimeInterval *ringDuration=0,
                       int               *ringTimeStepCount=0,
                       ESMC_Time         *refTime=0,
                       bool              *ringing=0,
@@ -177,9 +182,9 @@ class ESMC_Alarm {
                       ESMC_Clock       **clock=0,
                       ESMC_Time         *ringTime=0,
                       ESMC_Time         *prevRingTime=0,
-                      ESMC_TimeInterval *ringInterval=0,
+                      ESMCI::TimeInterval *ringInterval=0,
                       ESMC_Time         *stopTime=0,
-                      ESMC_TimeInterval *ringDuration=0,
+                      ESMCI::TimeInterval *ringDuration=0,
                       int               *ringTimeStepCount=0,
                       int               *timeStepRingingCount=0,
                       ESMC_Time         *ringBegin=0,
@@ -198,11 +203,11 @@ class ESMC_Alarm {
     int  ESMC_AlarmRingerOff(void);
     bool ESMC_AlarmIsRinging(int *rc=0) const;
                                          // TMG 4.4: synchronous query for apps
-    bool ESMC_AlarmWillRingNext(ESMC_TimeInterval *timeStep, int *rc=0) const;
+    bool ESMC_AlarmWillRingNext(ESMCI::TimeInterval *timeStep, int *rc=0) const;
     bool ESMC_AlarmWasPrevRinging(int *rc=0) const;
 
     int  ESMC_AlarmSticky(void);
-    int  ESMC_AlarmNotSticky(ESMC_TimeInterval *ringDuration=0,
+    int  ESMC_AlarmNotSticky(ESMCI::TimeInterval *ringDuration=0,
                              int *ringTimeStepCount=0);
     bool ESMC_AlarmIsSticky(int *rc=0) const;
 
@@ -241,8 +246,8 @@ class ESMC_Alarm {
 
     // friend to allocate and initialize alarm from heap
     friend ESMC_Alarm *ESMC_AlarmCreate(int, const char*, ESMC_Clock*, 
-                                 ESMC_Time*, ESMC_TimeInterval*, ESMC_Time*, 
-                                 ESMC_TimeInterval*, int*, ESMC_Time*, bool*,
+                                 ESMC_Time*, ESMCI::TimeInterval*, ESMC_Time*, 
+                                 ESMCI::TimeInterval*, int*, ESMC_Time*, bool*,
                                  bool*, int*);
 
     // friend function to copy an alarm
@@ -282,9 +287,9 @@ class ESMC_Alarm {
                                  const char*        name=0,
                                  ESMC_Clock*        clock=0, 
                                  ESMC_Time*         ringTime=0,
-                                 ESMC_TimeInterval* ringInterval=0,
+                                 ESMCI::TimeInterval* ringInterval=0,
                                  ESMC_Time*         stopTime=0, 
-                                 ESMC_TimeInterval* ringDuration=0,
+                                 ESMCI::TimeInterval* ringDuration=0,
                                  int*               ringTimeStepCount=0,
                                  ESMC_Time*         refTime=0,
                                  bool*              enabled=0,
@@ -303,4 +308,5 @@ class ESMC_Alarm {
                                       ESMC_IOSpec* iospec=0,
                                       int*         rc=0);
 
+// }  // namespace ESMCI
 #endif // ESMC_ALARM_H
