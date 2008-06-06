@@ -49,7 +49,7 @@ using namespace ESMC;
 
 int main(int argc, char *argv[]) {
 
-  Par::Init("PATCHLOG");
+  Par::Init("PATCHLOG", true);
 
   Mesh srcmesh, dstmesh;
 
@@ -85,10 +85,8 @@ int main(int argc, char *argv[]) {
      MeshAddPole(srcmesh, 1, constraint_id, pole_constraints);
      MeshAddPole(srcmesh, 2, constraint_id, pole_constraints);
 
-/*
 WriteMesh(srcmesh, "src");
 WriteMesh(dstmesh, "dst");
-*/
 
      std::vector<Interp::FieldPair> fpairs;
      fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_PATCH));
@@ -110,14 +108,18 @@ WriteMesh(dstmesh, "dst");
      wts.AssimilateConstraints(pole_constraints);
 
      // Remove non-locally owned weights (assuming destination mesh decomposition)
-     wts.Prune(dstmesh, 0);
+     MEField<> *mask = dstmesh.GetField("mask");
+     ThrowRequire(mask);
+     wts.Prune(dstmesh, mask);
 
      // Redistribute weights in an IO friendly decomposition
      if (Par::Rank() == 0) std::cout << "Writing weights to " << argv[3] << std::endl;
      GatherForWrite(wts);
 
+wts.Print(Par::Out());
+
      // Write the weights
-     WriteNCMatFilePar(argv[1], argv[2], argv[3], wts);
+     WriteNCMatFilePar(argv[1], argv[2], argv[3], wts, NCMATPAR_ORDER_SEQ);
 
   } 
    catch (std::exception &x) {

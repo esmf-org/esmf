@@ -1162,7 +1162,8 @@ void ElemPatch<NFIELD,Real>::CreateElemPatch(UInt _pdeg,
   for (UInt i = 0; i < numfields; i++) 
     flen += rfield[i]->dim();
 
-  bool use_mc = (pcfield->dim() > (UInt)pmesh->parametric_dim());
+  //bool use_mc = (pcfield->dim() > (UInt)pmesh->parametric_dim());
+  bool use_mc = false;
 
 
   const MeshObjTopo *topo = GetMeshObjTopo(elem);

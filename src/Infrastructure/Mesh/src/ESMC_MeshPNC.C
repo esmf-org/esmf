@@ -296,6 +296,7 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname) {
   IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", mesh.spatial_dim());
   
   IOField<NodalField> *mask_f = mesh.RegisterNodalField(mesh, "mask");
+  mask_f->set_output_status(true);
   
   MeshDB::const_iterator Ni = mesh.node_begin(), Ne = mesh.node_end();
   {
