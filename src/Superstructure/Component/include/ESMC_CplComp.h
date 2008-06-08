@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.h,v 1.18 2008/05/06 14:34:06 rosalind Exp $
+// $Id: ESMC_CplComp.h,v 1.19 2008/06/08 03:34:45 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -66,13 +66,13 @@
   int ESMC_CplCompSetServices(void (*)(ESMC_CplComp *, int *));
 
   int ESMC_CplCompInitialize(ESMC_State *importState, ESMC_State *exportState, 
-                             ESMC_Clock *clock, int phase, 
+                             ESMCI::ESMC_Clock *clock, int phase, 
                              ESMC_BlockingFlag blockingFlag);
   int ESMC_CplCompRun(ESMC_State *importState, ESMC_State *exportState, 
-                      ESMC_Clock *clock, int phase, 
+                      ESMCI::ESMC_Clock *clock, int phase, 
                       ESMC_BlockingFlag blockingFlag);
   int ESMC_CplCompFinalize(ESMC_State *importState, ESMC_State *exportState, 
-                           ESMC_Clock *clock, int phase, 
+                           ESMCI::ESMC_Clock *clock, int phase, 
                            ESMC_BlockingFlag blockingFlag);
 
 
@@ -107,7 +107,7 @@
 // an ESMC_CplComp object.
 
  ESMC_CplComp *ESMC_CplCompCreate(char *name, char *configFile, 
-                                  ESMC_Clock *clock, int *rc);
+                                  ESMCI::ESMC_Clock *clock, int *rc);
  int ESMC_CplCompDestroy(ESMC_CplComp *comp);
 
 
@@ -115,20 +115,20 @@
 extern "C" {
  void FTN(f_esmf_cplcompcreate)(ESMC_CplComp *comp, char *name, 
                          ESMC_Config *config, char *configFile, 
-                         ESMC_Clock *clock, int *rc,
+                         ESMCI::ESMC_Clock *clock, int *rc,
 			 ESMCI_FortranStrLenArg nlen, ESMCI_FortranStrLenArg clen);
  void FTN(f_esmf_cplcompdestroy)(ESMC_CplComp *comp, int *rc);
  void FTN(f_esmf_cplcompinitialize)(ESMC_CplComp *ccomp, 
                          ESMC_State *importState, ESMC_State *exportState, 
-                         ESMC_Clock *clock, int *phase, 
+                         ESMCI::ESMC_Clock *clock, int *phase, 
                          ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_cplcomprun)(ESMC_CplComp *ccomp, 
                          ESMC_State *importState, ESMC_State *exportState, 
-                         ESMC_Clock *clock, int *phase,
+                         ESMCI::ESMC_Clock *clock, int *phase,
                          ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_cplcompfinalize)(ESMC_CplComp *ccomp, 
                          ESMC_State *importState, ESMC_State *exportState, 
-                         ESMC_Clock *clock, int *phase, 
+                         ESMCI::ESMC_Clock *clock, int *phase, 
                          ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_cplcompget)(const ESMC_CplComp *ccomp, int *rc);
  void FTN(f_esmf_cplcompset)(ESMC_CplComp *ccomp, int *rc);

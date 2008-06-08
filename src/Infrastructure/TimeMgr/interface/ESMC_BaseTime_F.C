@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime_F.C,v 1.18 2008/05/06 02:21:35 rosalind Exp $
+// $Id: ESMC_BaseTime_F.C,v 1.19 2008/06/08 03:33:45 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -27,6 +27,7 @@
 //
 //EOP
 
+namespace ESMCI{
 
 // the interface subroutine names MUST be in lower case
 extern "C" {
@@ -87,3 +88,5 @@ extern "C" {
            *esmf_baseTimeDiff = (*baseTime1 - *baseTime2);
        }
 };
+
+}  // namespace ESMCI

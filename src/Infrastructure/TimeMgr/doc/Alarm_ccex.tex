@@ -1,4 +1,4 @@
-% $Id: Alarm_ccex.tex,v 1.2 2003/02/11 18:58:53 eschwab Exp $
+% $Id: Alarm_ccex.tex,v 1.3 2008/06/08 03:33:43 rosalind Exp $
 
 A Alarm is used in conjunction with a clock to ring at certain points in time.
 The following shows how to create and initialize two in C++, based on the
@@ -18,7 +18,7 @@ AlarmTime.Init("YY:MM:DD", 2002, 8, 30, Gregorian);
 Alarm1.Init(NULL, &AlarmTime, NULL, true);
 
 // Initialize other to ring on an interval
-ESMC_TimeInterval AlarmInterval;
+ESMCI::TimeInterval AlarmInterval;
 AlarmInterval.Init("DD", 1);
 Alarm2.Init(&AlarmInterval, NULL, NULL, true);
 

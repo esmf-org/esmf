@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.h,v 1.2 2008/06/06 19:10:10 rosalind Exp $
+// $Id: ESMCI_Time.h,v 1.3 2008/06/08 03:33:44 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
  #include <ESMCI_BaseTime.h>       // inherited BaseTime class
  #include <ESMC_Calendar.h>       // associated Calendar class
 
-// namespace ESMCI{
+ namespace ESMCI{
 
  class TimeInterval;
 
@@ -218,6 +218,6 @@
 
  };   // end class ESMC_Time
 
-// } // namespace ESMCI
+ } // namespace ESMCI
 
  #endif // ESMCI_TIME_H

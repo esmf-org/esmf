@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockEx.C,v 1.24 2008/04/05 03:38:56 cdeluca Exp $
+// $Id: ESMC_ClockEx.C,v 1.25 2008/06/08 03:33:44 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockEx.C,v 1.24 2008/04/05 03:38:56 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_ClockEx.C,v 1.25 2008/06/08 03:33:44 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -46,7 +46,7 @@
    ESMC_Calendar *gregorianCalendar;
 
    // instantiate timestep, start and stop times
-   ESMC_TimeInterval timeStep;
+   ESMCI::TimeInterval timeStep;
    ESMC_Time startTime;
    ESMC_Time stopTime;
 
@@ -60,7 +60,7 @@
 
    // initialize time interval to 1 hour
    int h = 1;
-   rc = timeStep.ESMC_TimeIntervalSet(0, 0, 0, 0, 0, 0, &h);
+   rc = timeStep.ESMCI::TimeInterval::set(0, 0, 0, 0, 0, 0, &h);
 
    if (rc != ESMF_SUCCESS) {
        finalrc = ESMF_FAILURE;

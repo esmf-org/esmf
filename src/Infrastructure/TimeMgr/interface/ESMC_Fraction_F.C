@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction_F.C,v 1.20 2008/04/05 03:38:57 cdeluca Exp $
+// $Id: ESMC_Fraction_F.C,v 1.21 2008/06/08 03:33:46 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -30,6 +30,8 @@
 //  passes ESMC_BAD_POINTER or ESMC_NULL_POINTER.
 //
 //EOP
+
+namespace ESMCI{
 
 // TODO: remove this once this file contains real code.  otherwise ranlib
 // moans about no visible symbols.  sigh.
@@ -95,3 +97,5 @@ extern "C" {
        }
 #endif
 };
+
+}  // namespace ESMCI

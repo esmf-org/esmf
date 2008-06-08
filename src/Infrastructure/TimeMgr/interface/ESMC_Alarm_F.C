@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.32 2008/06/06 19:12:29 rosalind Exp $
+// $Id: ESMC_Alarm_F.C,v 1.33 2008/06/08 03:33:45 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -31,6 +31,7 @@
 //
 //EOP
 
+namespace ESMCI{
 
 // the interface subroutine names MUST be in lower case
 extern "C" {
@@ -256,3 +257,5 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 };
+
+}  // namespace ESMCI

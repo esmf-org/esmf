@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.54 2008/06/06 19:10:11 rosalind Exp $
+// $Id: ESMC_Calendar.h,v 1.55 2008/06/08 03:33:45 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -70,14 +70,6 @@
  #include <ESMC_Base.h>           // inherited Base class
  #include <ESMCI_BaseTime.h>       // inherited BaseTime class
 
-
-// forward reference to prevent #include recursion
-class ESMC_Time;
-// class ESMCI::TimeInterval;
-namespace ESMCI{
-   class TimeInterval;
-}
-
 // TODO: replace with monthsPerYear property
 #define MONTHS_PER_YEAR 12
 
@@ -96,6 +88,12 @@ enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
                         // and ESMC_CAL_NOCALENDAR so Validate() doesn't need
                         // to change.  Also add to static intializers at top
                         // of ESMC_Calendar.C
+
+namespace ESMCI{
+
+// forward reference to prevent #include recursion
+class ESMC_Time;
+class TimeInterval;
 
 // !PUBLIC TYPES:
  class ESMC_Calendar;
@@ -323,4 +321,5 @@ class ESMC_Calendar {
     int ESMC_CalendarSetDefault(ESMC_Calendar **calendar);
     int ESMC_CalendarSetDefault(ESMC_CalendarType *calendarType);
 
+} // namespace ESMCI
 #endif // ESMC_CALENDAR_H

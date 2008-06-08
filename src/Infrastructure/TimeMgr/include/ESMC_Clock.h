@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.50 2008/06/06 19:10:11 rosalind Exp $
+// $Id: ESMC_Clock.h,v 1.51 2008/06/08 03:33:45 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -71,6 +71,7 @@
  #include <ESMCI_Time.h>
  #include <ESMC_Alarm.h>
 
+namespace ESMCI{
 
 // !PUBLIC TYPES:
  class ESMC_Clock;
@@ -286,5 +287,6 @@
                                       ESMC_IOSpec* iospec=0,
                                       int*         rc=0);
 
+}   // namespace ESMCI
 
 #endif // ESMC_CLOCK_H

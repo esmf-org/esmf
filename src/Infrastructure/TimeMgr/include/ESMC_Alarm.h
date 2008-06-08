@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.39 2008/06/06 19:10:11 rosalind Exp $
+// $Id: ESMC_Alarm.h,v 1.40 2008/06/08 03:33:45 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -79,7 +79,6 @@
  #include <ESMC_IOSpec.h>    // IOSpec class for ReadRestart()/WriteRestart()
  #include <ESMCI_TimeInterval.h>
  #include <ESMCI_Time.h>
- class ESMC_Clock;
 
  // alarm list types to query from clock
  enum ESMC_AlarmListType {ESMF_ALARMLIST_ALL = 1,
@@ -87,9 +86,9 @@
                           ESMF_ALARMLIST_NEXTRINGING,
                           ESMF_ALARMLIST_PREVRINGING};
 
-// get rid of this statement when Alarm is included in the ESMCI namespace
-//   using namespace ESMCI;
-// namespace ESMCI{
+namespace ESMCI{
+
+ class ESMC_Clock;
 
 // !PUBLIC TYPES:
  class ESMC_Alarm;
@@ -308,5 +307,5 @@ class ESMC_Alarm {
                                       ESMC_IOSpec* iospec=0,
                                       int*         rc=0);
 
-// }  // namespace ESMCI
+ }  // namespace ESMCI
 #endif // ESMC_ALARM_H

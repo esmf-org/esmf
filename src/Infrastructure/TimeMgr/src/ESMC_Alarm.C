@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.63 2008/06/06 19:11:33 rosalind Exp $
+// $Id: ESMC_Alarm.C,v 1.64 2008/06/08 03:33:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -36,9 +36,10 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.63 2008/06/06 19:11:33 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.64 2008/06/08 03:33:47 rosalind Exp $";
 //-------------------------------------------------------------------------
 
+namespace ESMCI{
 
 // initialize static alarm instance counter
 // TODO: inherit from ESMC_Base class
@@ -1836,3 +1837,5 @@ int ESMC_Alarm::count=0;
     return(rc);
 
 } // end ESMC_AlarmResetRingBegin
+
+} // namespace ESMCI

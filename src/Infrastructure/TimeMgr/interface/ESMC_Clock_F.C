@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.43 2008/06/06 19:12:29 rosalind Exp $
+// $Id: ESMC_Clock_F.C,v 1.44 2008/06/08 03:33:46 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -30,6 +30,8 @@
 //  passes ESMC_BAD_POINTER or ESMC_NULL_POINTER.
 //
 //EOP
+
+namespace ESMCI{
 
 // the interface subroutine names MUST be in lower case
 extern "C" {
@@ -358,3 +360,5 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 };
+
+} // namespace ESMCI

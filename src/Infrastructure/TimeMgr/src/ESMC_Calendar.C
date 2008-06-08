@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.90 2008/06/06 19:11:33 rosalind Exp $
+// $Id: ESMC_Calendar.C,v 1.91 2008/06/08 03:33:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,9 +41,10 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.90 2008/06/06 19:11:33 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.91 2008/06/08 03:33:47 rosalind Exp $";
 //-------------------------------------------------------------------------
 
+namespace ESMCI{
 
 // initialize static array of calendar type names
 const char *const ESMC_Calendar::calendarTypeName[CALENDAR_TYPE_COUNT] =
@@ -2664,3 +2665,4 @@ int ESMC_Calendar::count=0;
 
 } // end ~ESMC_Calendar
 
+}  // namespace ESMCI

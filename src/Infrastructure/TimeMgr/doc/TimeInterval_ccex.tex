@@ -1,4 +1,4 @@
-% $Id: TimeInterval_ccex.tex,v 1.1 2002/10/08 18:13:10 eschwab Exp $
+% $Id: TimeInterval_ccex.tex,v 1.2 2008/06/08 03:33:43 rosalind Exp $
 
 A TimeInterval will typically be used as a timestep for a clock or an alarm
 interval.  The following shows how to create and initialize one in C++, based
@@ -9,7 +9,7 @@ on the example shown in Figure 2:
 #include <ESMF_TimeInterval.h>
 
 // instantiate a TimeInterval
-ESMC_TimeInterval TimeStep;
+ESMCI::TimeInterval TimeStep;
 
 // initialize it to 3 days, 5 hours, 15 minutes, 30 seconds
 TimeStep.Init("D:H:M:S", 3, 5, 15, 30);
