@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.20.2.6 2008/04/28 23:22:58 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.20.2.7 2008/06/08 05:45:06 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.20.2.6 2008/04/28 23:22:58 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.20.2.7 2008/06/08 05:45:06 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -96,7 +96,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Set/Get Coordinates from Array"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -182,7 +182,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Set/Get Coordinates from Array check distgridToArrayMap matching"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -250,7 +250,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Get fortran pointer from coordinate array"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -299,7 +299,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test ESMF_StaggerLocSet"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Test StaggerLocSet by creating a custom stagger to  like a predefined and then
   ! using then interchangeably.
@@ -352,7 +352,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test StaggerLoc .eq. and .ne."
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -370,7 +370,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test StaggerLocString"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -395,7 +395,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D GridAddCoord, by allocating coordinates for every stagger"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -436,7 +436,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure default CENTER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -472,7 +472,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure default EDGE1 bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -508,7 +508,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure default EDGE2 bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -545,7 +545,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure default CORNER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -588,7 +588,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D GridAddCoord with staggerWidths, by allocating coordinates for every stagger with different widths"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -633,7 +633,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure set CENTER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -671,7 +671,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure set EDGE1 bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -708,7 +708,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure set EDGE2 bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -746,7 +746,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D CoordAlloc and GridGetCoord, by making sure set CORNER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -786,7 +786,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D coordDep, by flipping coord2 and allocating CENTER and CORNER staggers"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -828,7 +828,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D CoordDep, by making sure set CENTER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -866,7 +866,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D CoordDep, by making sure default CORNER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -911,7 +911,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D plus 1 GridAddCoord, by allocating coordinates for every stagger"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -970,7 +970,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default CENTER_VCENTER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1016,7 +1016,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default EDGE1_VCENTER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1064,7 +1064,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default EDGE2_VCENTER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1111,7 +1111,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default CORNER_VCENTER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1157,7 +1157,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default CENTER_VFACE bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1203,7 +1203,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default EDGE1_VFACE bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1251,7 +1251,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default EDGE2_VFACE bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1298,7 +1298,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default CORNER_VFACE bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1354,7 +1354,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D plus 1 GridAddCoord with non-default stagger widths, by allocating coordinates for every stagger"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -1417,7 +1417,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure user set CENTER_VCENTER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1466,7 +1466,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure user set EDGE1_VCENTER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1519,7 +1519,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure user set EDGE2_VCENTER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1570,7 +1570,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure user set CORNER_VCENTER bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1618,7 +1618,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure user set CENTER_VFACE bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1666,7 +1666,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default EDGE1_VFACE bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1716,7 +1716,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default EDGE2_VFACE bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1768,7 +1768,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 CoordAlloc and GridGetCoord, by making sure default CORNER_VFACE bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1829,7 +1829,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D plus 1 GridAddCoord with non-default stagger widths and non-defaults coordDep"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -1889,7 +1889,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 GridGetCoord with non-default coordDep, by making sure EDGE1_VFACE bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1940,7 +1940,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 GridGetCoord with non-default coordDep, by making sure EDGE2_VFACE bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -1992,7 +1992,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 GridGetCoord with non-default coordDep, by making sure CORNER_VFACE bounds are as expected"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
   ! and the fact that the grid was created with the ESMF_INDEX_GLOBAL flag
@@ -2052,7 +2052,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D plus 1 GridAddCoord with DELOCAL Index"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -2100,7 +2100,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D PLUS 1 GridGetCoord with ESMF_INDEX_DELOCAL"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! Note that this test depends on coordinates allocated above
 
@@ -2153,7 +2153,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test ESMF_GridGet getting bounds from grid"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   correct=.true.
@@ -2220,7 +2220,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test ESMF_GridGet getting computationalEdgeWidths and bounds from grid"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -2288,7 +2288,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D Grid Bounds with Factorized Coordinate Arrays"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init  flags
   rc=ESMF_SUCCESS
@@ -2353,7 +2353,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 3D Grid Bounds with 2D+1 Factorized Coordinate Arrays"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -2430,7 +2430,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D plus 1 GridCreateShapeTileReg Bounds"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -2481,7 +2481,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D plus 1 GridCreateShapeTileReg Bounds with even cell division"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -2534,7 +2534,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D plus 1 SetCommitShapeTileReg Bounds with even cell division"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -2593,7 +2593,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 2D plus 1 GridCreateArray"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -2664,7 +2664,7 @@ program ESMF_GridCoordUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test 3D GridAddCoord, by allocating coordinates and then getting fortran pointer"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
