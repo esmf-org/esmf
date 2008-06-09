@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.4.2.4 2008/06/05 23:29:29 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.4.2.5 2008/06/09 22:13:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.4.2.4 2008/06/05 23:29:29 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.4.2.5 2008/06/09 22:13:57 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -488,7 +488,7 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "DistGridCreate() - 1D Single Patch w/ deBlockList out-of-range"
   write(failMsg, *) "Did return ESMF_SUCCESS"
-  allocate(deBlockList(1,2,petCount))
+  allocate(deBlockList(1,2,4))
   deBlockList(1,:,1) = (/1,20/)
   deBlockList(1,:,2) = (/21,40/)
   deBlockList(1,:,3) = (/41,60/)
@@ -502,7 +502,7 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "DistGridCreate() - 1D Single Patch w/ deBlockList"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(deBlockList(1,2,petCount))
+  allocate(deBlockList(1,2,4))
   deBlockList(1,:,1) = (/1,20/)
   deBlockList(1,:,2) = (/21,40/)
   deBlockList(1,:,3) = (/41,60/)
