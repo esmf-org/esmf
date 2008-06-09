@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.19 2008/05/21 22:14:23 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.20 2008/06/09 15:37:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.19 2008/05/21 22:14:23 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.20 2008/06/09 15:37:07 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -75,6 +75,7 @@ module ESMF_FieldGetMod
 !
     module procedure ESMF_FieldGetDefault
     module procedure ESMF_FieldGetAllocBounds
+    module procedure ESMF_FieldGetDataBounds
     !module procedure ESMF_FieldGetLocalArray !TODO: FIELDINTEGRATION
     TypeKindRankInterfaceMacro(FieldGetDataPtr)
 
@@ -537,10 +538,11 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldGetDataBounds"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldGetDataBounds -  Get Field data bounds
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_FieldGet()
   subroutine ESMF_FieldGetDataBounds(field, localDe, exclusiveLBound, &
     exclusiveUBound, exclusiveCount, computationalLBound, computationalUBound, &
     computationalCount, totalLBound, totalUBound, totalCount, rc)
@@ -569,7 +571,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! The arguments are:
 ! \begin{description}
 ! \item[field]
-!    Field to get the information from.
+!     Field to get the information from.
 ! \item[localDe]
 !     The local DE from which to get the information.  
 ! \item[{[exclusiveLBound]}]
@@ -617,7 +619,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: gridCompLBnd(ESMF_MAXDIM), gridCompUBnd(ESMF_MAXDIM)
     integer :: gridExclLBnd(ESMF_MAXDIM), gridExclUBnd(ESMF_MAXDIM)
