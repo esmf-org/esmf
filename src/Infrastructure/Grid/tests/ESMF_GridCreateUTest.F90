@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.67.2.11 2008/06/08 05:45:06 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.67.2.12 2008/06/09 19:57:29 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.67.2.11 2008/06/08 05:45:06 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.67.2.12 2008/06/09 19:57:29 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -116,6 +116,56 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Grid Match"
+  write(failMsg, *) "Incorrect result"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Grid 1
+  grid=ESMF_GridCreate(distgrid=distgrid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Copy Grid 1
+  grid2=grid
+
+  ! Check that match returns true
+  if (ESMF_GridMatch(grid,grid2,rc=localrc)) then
+     correct=.true.
+  else
+     correct=.false.
+  endif
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Create Grid 2
+  grid2=ESMF_GridCreate(distgrid=distgrid, coordTypeKind=ESMF_TYPEKIND_I4,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check that match returns false
+  if (ESMF_GridMatch(grid,grid2,rc=localrc)) then
+     correct=.false.
+  else
+     correct=.true.
+  endif
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+  ! get rid of first grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get rid of second grid
+  call ESMF_GridDestroy(grid2,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
