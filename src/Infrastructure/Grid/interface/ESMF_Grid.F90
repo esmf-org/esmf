@@ -147,6 +147,8 @@ public  ESMF_DefaultFlag
   public ESMF_GridSerialize
   public ESMF_GridDeserialize
 
+  public ESMF_GridMatch
+
   public ESMF_GridValidate
 
   public operator(.eq.), operator(.ne.) 
@@ -193,7 +195,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.25 2008/06/08 05:45:05 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.26 2008/06/09 19:57:54 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -6660,7 +6662,72 @@ endif
 
       end function ESMF_GridDeserialize
 
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMatch()"
+!BOP
+! !IROUTINE: ESMF_GridMatch - Check if two Grid objects match
 
+! !INTERFACE:
+  function ESMF_GridMatch(grid1, grid2, rc)
+!
+! !RETURN VALUE:
+    logical :: ESMF_GridMatch
+      
+! !ARGUMENTS:
+    type(ESMF_Grid),  intent(in)              :: grid1
+    type(ESMF_Grid),  intent(in)              :: grid2
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Check if {\tt grid1} and {\tt grid2} match. Returns
+!      .true. if Grid objects match, .false. otherwise. This
+!      method current just checks if grid1 and grid2 are the
+!      same object, future work will do a more complex check.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid1] 
+!          {\tt ESMF\_Grid} object.
+!     \item[grid2] 
+!          {\tt ESMF\_Grid} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer      :: localrc      ! local return code
+    integer      :: matchResult
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! init to one setting in case of error
+    ESMF_GridMatch = .false.
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid1, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid2, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_GridMatch(grid1, grid2, matchResult, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (matchResult .eq. 1) then
+       ESMF_GridMatch = .true.
+    else
+       ESMF_GridMatch = .false.
+    endif
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end function ESMF_GridMatch
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

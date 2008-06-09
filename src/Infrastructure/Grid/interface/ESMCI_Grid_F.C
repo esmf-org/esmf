@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.23.2.14 2008/05/13 22:17:03 theurich Exp $
+// $Id: ESMCI_Grid_F.C,v 1.23.2.15 2008/06/09 19:57:54 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -1474,6 +1474,36 @@ extern "C" {
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
+
+
+  void FTN(c_esmc_gridmatch)(ESMCI::Grid **ptr1, ESMCI::Grid **ptr2,
+    int *matchResult, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridmatch()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // if null return error
+    if ((ptr1==NULL) || (ptr2==NULL)) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- both grids must be present for comparison", ESMC_NOT_PRESENT_FILTER(rc));
+        return;
+
+    }
+
+    // match based on pointers
+    if (*ptr1 == *ptr2) {
+      *matchResult=1;
+    } else {
+      *matchResult=0;
+    }
+   
+   
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
 
 
 
