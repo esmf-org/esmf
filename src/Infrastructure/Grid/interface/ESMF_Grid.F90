@@ -195,7 +195,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.26 2008/06/09 19:57:54 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.27 2008/06/09 23:31:03 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -4176,7 +4176,8 @@ end subroutine ESMF_GridGet
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
       subroutine ESMF_GridGetPSloc(grid, staggerloc, &
-          computationalEdgeLWidth, computationalEdgeUWidth, rc)
+          computationalEdgeLWidth, computationalEdgeUWidth,  &
+          minIndex, maxIndex, rc)
 
 !
 ! !ARGUMENTS:
@@ -4184,6 +4185,8 @@ end subroutine ESMF_GridGet
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
       integer,                intent(out), optional :: computationalEdgeLWidth(:)
       integer,                intent(out), optional :: computationalEdgeUWidth(:)
+      integer,                intent(out), optional :: minIndex(:)
+      integer,                intent(out), optional :: maxIndex(:)
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4211,6 +4214,16 @@ end subroutine ESMF_GridGet
 !     mapped to correspond to those dimensions. 
 !     {\tt computationalEdgeUWidth} must be allocated to be of size equal to the grid distDimCount
 !     (i.e. the grid's distgrid's dimCount).
+!\item[{[minIndex]}]
+!     Upon return this holds the global lower index of this stagger location.
+!     {\tt minIndex} must be allocated to be of size equal to the grid DimCount.
+!     Note that this value is only for the first Grid tile, as multigrid support
+!     is added, this interface will likely be changed or moved to adapt.  
+!\item[{[maxIndex]}]
+!     Upon return this holds the global upper index of this stagger location.
+!     {\tt maxIndex} must be allocated to be of size equal to the grid DimCount.
+!     Note that this value is only for the first Grid tile, as multigrid support
+!     is added, this interface will likely be changed or moved to adapt.  
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -4220,6 +4233,8 @@ end subroutine ESMF_GridGet
     integer :: localrc ! local error status
     type(ESMF_InterfaceInt) :: computationalEdgeLWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalEdgeUWidthArg ! helper variable
+    type(ESMF_InterfaceInt) :: minIndexArg ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -4237,12 +4252,19 @@ end subroutine ESMF_GridGet
     computationalEdgeUWidthArg=ESMF_InterfaceIntCreate(computationalEdgeUWidth, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    minIndexArg=ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    maxIndexArg=ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
 
     call c_ESMC_GridGetPSloc(grid, tmp_staggerLoc, &
       computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
-      ESMF_NULL_POINTER, ESMF_NULL_POINTER,localrc)
+      ESMF_NULL_POINTER, ESMF_NULL_POINTER, &
+     minIndexArg, maxIndexArg,localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4251,6 +4273,12 @@ end subroutine ESMF_GridGet
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalEdgeUWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

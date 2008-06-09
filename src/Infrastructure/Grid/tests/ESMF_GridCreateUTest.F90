@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.67.2.12 2008/06/09 19:57:29 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.67.2.13 2008/06/09 23:31:04 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.67.2.12 2008/06/09 19:57:29 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.67.2.13 2008/06/09 23:31:04 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -63,6 +63,7 @@ program ESMF_GridCreateUTest
   integer :: clbnd(3),cubnd(3)
   integer(ESMF_KIND_I4), pointer :: buf(:)
   integer :: bufCount, offset, localDECount, rank
+  integer :: minIndex(3), maxIndex(3) 
 
   integer:: count, i
   integer(ESMF_KIND_I4) :: intattr, intattr2
@@ -937,6 +938,143 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test getting minIndex and maxIndex for 2D Grid"
+  write(failMsg, *) "Incorrect result"
+
+  ! init output flags
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! create grid 
+
+  grid=ESMF_GridCreateShapeTile(minIndex=(/1,2/), maxIndex=(/4,3/), rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 1)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+
+  if (maxIndex(1) .ne. 4)  correct=.false.
+  if (maxIndex(2) .ne. 3)  correct=.false.
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CORNER, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 1)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+
+  if (maxIndex(1) .ne. 5)  correct=.false.
+  if (maxIndex(2) .ne. 4)  correct=.false.
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 1)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+
+  if (maxIndex(1) .ne. 5)  correct=.false.
+  if (maxIndex(2) .ne. 3)  correct=.false.
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_EDGE2, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 1)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+
+  if (maxIndex(1) .ne. 4)  correct=.false.
+  if (maxIndex(2) .ne. 4)  correct=.false.
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test getting minIndex and maxIndex for 3D Grid"
+  write(failMsg, *) "Incorrect result"
+
+  ! init output flags
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! create grid 
+
+  grid=ESMF_GridCreateShapeTile(minIndex=(/1,2,3/), maxIndex=(/4,5,6/), &
+       gridEdgeLWidth=(/1,1,1/), gridEdgeUWidth=(/0,0,0/), rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 1)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+  if (minIndex(3) .ne. 3)  correct=.false.
+
+  if (maxIndex(1) .ne. 4)  correct=.false.
+  if (maxIndex(2) .ne. 5)  correct=.false.
+  if (maxIndex(3) .ne. 6)  correct=.false.
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 1)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+  if (minIndex(3) .ne. 2)  correct=.false.
+
+  if (maxIndex(1) .ne. 4)  correct=.false.
+  if (maxIndex(2) .ne. 5)  correct=.false.
+  if (maxIndex(3) .ne. 6)  correct=.false.
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 0)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+  if (minIndex(3) .ne. 2)  correct=.false.
+
+  if (maxIndex(1) .ne. 4)  correct=.false.
+  if (maxIndex(2) .ne. 5)  correct=.false.
+  if (maxIndex(3) .ne. 6)  correct=.false.
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
 
 
   !-----------------------------------------------------------------------------

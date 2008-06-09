@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.23.2.15 2008/06/09 19:57:54 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.23.2.16 2008/06/09 23:31:02 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -1200,6 +1200,8 @@ extern "C" {
                                 ESMCI::InterfaceInt **_computationalEdgeUWidth,
                                 ESMCI::InterfaceInt **_lbound,
                                 ESMCI::InterfaceInt **_ubound,
+                                ESMCI::InterfaceInt **_minIndex,
+                                ESMCI::InterfaceInt **_maxIndex,
                                 int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetpsloc()"
@@ -1212,10 +1214,12 @@ extern "C" {
     int *gridMapDim;
     bool *gridIsDist;
     ESMCI::Grid *grid;
+    const ESMCI::DistGrid *distgrid;
     int offsetL[ESMF_MAXDIM];
     int offsetU[ESMF_MAXDIM];
     int gridExLBnd[ESMF_MAXDIM];
     int gridExUBnd[ESMF_MAXDIM];
+   
 
     // Get Grid pointer
     grid=*_grid;
@@ -1239,7 +1243,7 @@ extern "C" {
     gridMapDim=grid->getGridMapDim();
     gridUndistLBound=grid->getUndistLBound();
     gridUndistUBound=grid->getUndistUBound();
-
+    distgrid = grid->getDistGrid();
 
     // staggerloc
     if (ESMC_NOT_PRESENT_FILTER(_staggerloc) == ESMC_NULL_POINTER) {
@@ -1371,6 +1375,72 @@ extern "C" {
 	}
       }
     }
+
+
+    // fill minIndex
+    if (*_minIndex != NULL){
+      // computationalEdgeLWidth was provided -> do some error checking
+      if ((*_minIndex)->dimCount != 1){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- minIndex array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+      if ((*_minIndex)->extent[0] < distDimCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- minIndex must at least be the same dimCount as the grid's distgrid'", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+
+      // Get stagger width
+     staggerEdgeLWidth=grid->getStaggerEdgeLWidth(staggerloc);
+
+     // get the minIndex of the first patch
+     const int *minIndexDG=distgrid->getMinIndexPDimPPatch();
+
+
+      // Fill in the output array
+     int j=0;
+     for (int i=0; i<dimCount; i++) {
+       if (gridIsDist[i]) {
+	  (*_minIndex)->array[j]=minIndexDG[gridMapDim[i]]+(gridEdgeLWidth[i]-staggerEdgeLWidth[i]);
+          j++;
+       }
+     }
+    }
+
+
+
+    // fill maxIndex
+    if (*_maxIndex != NULL){
+      // computationalEdgeLWidth was provided -> do some error checking
+      if ((*_maxIndex)->dimCount != 1){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- minIndex array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+      if ((*_maxIndex)->extent[0] < distDimCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- minIndex must at least be the same dimCount as the grid's distgrid'", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+
+      // Get stagger width
+     staggerEdgeUWidth=grid->getStaggerEdgeUWidth(staggerloc);
+
+     // get the minIndex of the first patch
+     const int *maxIndexDG=distgrid->getMaxIndexPDimPPatch();
+
+      // Fill in the output array
+     int j=0;
+     for (int i=0; i<dimCount; i++) {
+       if (gridIsDist[i]) {
+	  (*_maxIndex)->array[j]=maxIndexDG[gridMapDim[i]]-(gridEdgeUWidth[i]-staggerEdgeUWidth[i]);
+          j++;
+       }
+     }
+    }
+
+
 
     // return successfully
     if (_rc!=NULL) *_rc = ESMF_SUCCESS;
