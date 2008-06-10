@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.1.2.6 2008/06/10 03:41:28 cdeluca Exp $
+! $Id: ESMF_Attribute.F90,v 1.1.2.7 2008/06/10 03:54:43 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.1.2.6 2008/06/10 03:41:28 cdeluca Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.1.2.7 2008/06/10 03:54:43 cdeluca Exp $'
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_AttributeGet - Get an Attribute
@@ -289,6 +289,8 @@ module ESMF_AttributeMod
 !
 !     Supported values for <object> are:
 !     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
 !     \item type(ESMF\_State), intent(inout) :: state
@@ -337,6 +339,8 @@ module ESMF_AttributeMod
 !
 !     Supported values for <object> are:
 !     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
 !     \item type(ESMF\_State), intent(inout) :: state
@@ -386,6 +390,8 @@ module ESMF_AttributeMod
 !
 !     Supported values for <object> are:
 !     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
 !     \item type(ESMF\_State), intent(inout) :: state
@@ -426,6 +432,8 @@ module ESMF_AttributeMod
 !
 !     Supported values for <object> are:
 !     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
 !     \item type(ESMF\_State), intent(inout) :: state
@@ -471,6 +479,8 @@ module ESMF_AttributeMod
 !
 !     Supported values for <object> are:
 !     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
 !     \item type(ESMF\_State), intent(inout) :: state
@@ -513,6 +523,8 @@ module ESMF_AttributeMod
 !
 !     Supported values for <object> are:
 !     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
 !     \item type(ESMF\_State), intent(inout) :: state
@@ -561,6 +573,8 @@ module ESMF_AttributeMod
 !
 !     Supported values for <object> are:
 !     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
 !     \item type(ESMF\_State), intent(inout) :: state
