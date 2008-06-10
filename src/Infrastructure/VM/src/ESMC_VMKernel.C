@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.99.2.10 2008/06/05 17:41:43 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.99.2.11 2008/06/10 04:32:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -1308,8 +1308,6 @@ void *VMK::startup(class VMKPlan *vmp,
   for (int i=0; i<num_diff_pids; i++){
     grouplist[i] = vmp->lpid_mpi_g_part_map[lpid_list[0][i]];
   }
-  MPI_Group_incl(vmp->mpi_g_part, num_diff_pids, grouplist, &new_mpi_g);
-  delete [] grouplist;
   
 #if (VERBOSITY > 9)
   printf("successfully derived new_mpi_g\n");
@@ -1337,6 +1335,7 @@ void *VMK::startup(class VMKPlan *vmp,
         // I am this pet
         if (foundfirstpet == i){
           // I am the first under this lpid and must create communicator
+          MPI_Group_incl(vmp->mpi_g_part, num_diff_pids, grouplist, &new_mpi_g);
           MPI_Comm_create(vmp->mpi_c_part, new_mpi_g, &new_mpi_c);
         }else{
           // I am not the first under this lpid and must receive 
@@ -1354,6 +1353,7 @@ void *VMK::startup(class VMKPlan *vmp,
       }
     }
   }
+  delete [] grouplist;
   
 #if (VERBOSITY > 9)
   printf("now valid new_mpi_g and new_mpi_c exist\n");
