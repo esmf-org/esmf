@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.78 2008/04/28 23:24:15 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.79 2008/06/10 22:09:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.78 2008/04/28 23:24:15 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.79 2008/06/10 22:09:21 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -65,6 +65,10 @@ program ESMF_GridCreateUTest
   real(ESMF_KIND_R8), pointer :: fptr2D(:,:)
   integer :: bufCount, offset, localDECount, rank, i1,i2,lDE
   type(ESMF_StaggerLoc)          :: staggerloc8
+  integer :: minIndex(3), maxIndex(3) 
+
+
+
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -85,7 +89,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Testing Grid Validate"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! initialize check variables
   correct=.true.
@@ -110,10 +114,61 @@ program ESMF_GridCreateUTest
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Grid Match"
+  write(failMsg, *) "Incorrect result"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Grid 1
+  grid=ESMF_GridCreate(distgrid=distgrid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Copy Grid 1
+  grid2=grid
+
+  ! Check that match returns true
+  if (ESMF_GridMatch(grid,grid2,rc=localrc)) then
+     correct=.true.
+  else
+     correct=.false.
+  endif
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Create Grid 2
+  grid2=ESMF_GridCreate(distgrid=distgrid, coordTypeKind=ESMF_TYPEKIND_I4,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check that match returns false
+  if (ESMF_GridMatch(grid,grid2,rc=localrc)) then
+     correct=.false.
+  else
+     correct=.true.
+  endif
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+  ! get rid of first grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get rid of second grid
+  call ESMF_GridDestroy(grid2,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a Grid with only a distgrid and the rest defaults"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
   rc=ESMF_SUCCESS
 
   ! create a grid with all defaults
@@ -148,7 +203,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Destroying a Grid"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
   call ESMF_GridDestroy(grid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
@@ -165,7 +220,7 @@ program ESMF_GridCreateUTest
   !NEX_UTest
   grid_name="GRID"
   write(name, *) "Creating a Grid with a non-default name"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -190,7 +245,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a Grid with non-default coordTypeKind"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -214,7 +269,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a Grid with non-default coordDimCount"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -239,7 +294,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a Grid with non-default coordDimMap"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -269,7 +324,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a Grid with non-default distgridToGridMap"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -294,7 +349,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a Grid with non-default indexflag"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -320,7 +375,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a Grid with non-default EdgeWidths and Aligns"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -352,7 +407,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a 2D distributed Grid with CreateShapeTileIrreg"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -382,7 +437,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a 3D distributed Grid with CreateShapeTileIrreg"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -414,7 +469,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test GetGridStatus"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -452,7 +507,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a 1 DE 3D  Grid with CreateShapeTileIrreg"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -482,7 +537,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a 1 DE 3D  Grid with SetCommitShapeTileIrreg"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -516,7 +571,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a 2D distributed Grid with 1 non-distributed dim. with CreateShapeTileIrreg"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -547,7 +602,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a Grid with non-default coordDeps"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -585,7 +640,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a 2D distributed Grid with 1 undistributed dim. with CreateShapeTileIrreg and no-default gridEdgeWidths"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -623,7 +678,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a Grid with default coordDeps"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -660,7 +715,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating/Destroying an Empty Grid"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create empty grid
   rc=ESMF_SUCCESS
@@ -679,7 +734,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a 2D  Grid with all defaults with CreateShapeTileReg"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -707,7 +762,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a 2D  Grid with non-default regDecomp with CreateShapeTileReg"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -735,7 +790,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a 2D  Grid with non-default 2D regDecomp with CreateShapeTileReg"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -762,7 +817,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a 2D  1 DE Grid with CreateShapeTileReg"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -791,7 +846,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a Grid with CreateShapeTileReg and non-default gridEdgeWidths"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -827,7 +882,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a 3D  Grid with non-default minIndex and non-default regDecomp with CreateShapeTileReg"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -856,7 +911,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a Grid using CreateEmpty/Set/Commit with only a distgrid and the rest defaults"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
   rc=ESMF_SUCCESS
 
   ! create a grid with all defaults
@@ -894,7 +949,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Creating a 2D  Grid with all defaults with SetCommitShapeTileReg"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
@@ -927,8 +982,143 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Test getting minIndex and maxIndex for 2D Grid"
+  write(failMsg, *) "Incorrect result"
+
+  ! init output flags
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! create grid 
+
+  grid=ESMF_GridCreateShapeTile(minIndex=(/1,2/), maxIndex=(/4,3/), rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 1)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+
+  if (maxIndex(1) .ne. 4)  correct=.false.
+  if (maxIndex(2) .ne. 3)  correct=.false.
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CORNER, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 1)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+
+  if (maxIndex(1) .ne. 5)  correct=.false.
+  if (maxIndex(2) .ne. 4)  correct=.false.
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 1)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+
+  if (maxIndex(1) .ne. 5)  correct=.false.
+  if (maxIndex(2) .ne. 3)  correct=.false.
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_EDGE2, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 1)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+
+  if (maxIndex(1) .ne. 4)  correct=.false.
+  if (maxIndex(2) .ne. 4)  correct=.false.
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test getting minIndex and maxIndex for 3D Grid"
+  write(failMsg, *) "Incorrect result"
+
+  ! init output flags
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! create grid 
+
+  grid=ESMF_GridCreateShapeTile(minIndex=(/1,2,3/), maxIndex=(/4,5,6/), &
+       gridEdgeLWidth=(/1,1,1/), gridEdgeUWidth=(/0,0,0/), rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 1)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+  if (minIndex(3) .ne. 3)  correct=.false.
+
+  if (maxIndex(1) .ne. 4)  correct=.false.
+  if (maxIndex(2) .ne. 5)  correct=.false.
+  if (maxIndex(3) .ne. 6)  correct=.false.
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 1)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+  if (minIndex(3) .ne. 2)  correct=.false.
+
+  if (maxIndex(1) .ne. 4)  correct=.false.
+  if (maxIndex(2) .ne. 5)  correct=.false.
+  if (maxIndex(3) .ne. 6)  correct=.false.
+
+  ! get info back from grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  if (minIndex(1) .ne. 0)  correct=.false.
+  if (minIndex(2) .ne. 2)  correct=.false.
+  if (minIndex(3) .ne. 2)  correct=.false.
+
+  if (maxIndex(1) .ne. 4)  correct=.false.
+  if (maxIndex(2) .ne. 5)  correct=.false.
+  if (maxIndex(3) .ne. 6)  correct=.false.
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Test ArrayCreateFromGrid with only distributed bounds"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -974,7 +1164,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test ArrayCreateFromGrid with non-default ungriddedBounds"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! init success flag
   rc=ESMF_SUCCESS
@@ -1026,7 +1216,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test Serialize and Deserialize"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
   rc=ESMF_SUCCESS
   correct=.true.
 
@@ -1095,7 +1285,7 @@ program ESMF_GridCreateUTest
   !-----------------------------------------------------------------------------
   !
   write(name, *) "Creating a 2D  Grid with non-default minIndex and non-default 2D regDecomp with CreateShapeTileReg"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS

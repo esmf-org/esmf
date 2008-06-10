@@ -1116,9 +1116,6 @@ extern "C" {
 
 
 
-
-
-
   ///////////////////////////////////////////////////////////////////////////////////
   
   void FTN(c_esmc_gridgetpsloc)(ESMCI::Grid **_grid, 
@@ -1127,6 +1124,8 @@ extern "C" {
                                 ESMCI::InterfaceInt **_computationalEdgeUWidth,
                                 ESMCI::InterfaceInt **_lbound,
                                 ESMCI::InterfaceInt **_ubound,
+                                ESMCI::InterfaceInt **_minIndex,
+                                ESMCI::InterfaceInt **_maxIndex,
                                 int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetpsloc()"
@@ -1139,10 +1138,12 @@ extern "C" {
     int *gridMapDim;
     bool *gridIsDist;
     ESMCI::Grid *grid;
+    const ESMCI::DistGrid *distgrid;
     int offsetL[ESMF_MAXDIM];
     int offsetU[ESMF_MAXDIM];
     int gridExLBnd[ESMF_MAXDIM];
     int gridExUBnd[ESMF_MAXDIM];
+   
 
     // Get Grid pointer
     grid=*_grid;
@@ -1166,7 +1167,7 @@ extern "C" {
     gridMapDim=grid->getGridMapDim();
     gridUndistLBound=grid->getUndistLBound();
     gridUndistUBound=grid->getUndistUBound();
-
+    distgrid = grid->getDistGrid();
 
     // staggerloc
     if (ESMC_NOT_PRESENT_FILTER(_staggerloc) == ESMC_NULL_POINTER) {
@@ -1197,12 +1198,12 @@ extern "C" {
       // computationalEdgeLWidth was provided -> do some error checking
       if ((*_computationalEdgeLWidth)->dimCount != 1){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-          "- computationalEdgeLWidth array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
+          "- computationalEdgeLWidth array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_computationalEdgeLWidth)->extent[0] < distDimCount){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-          "- computationalEdgeLWidth must at least be the same rank as the grid's distgrid'", ESMC_NOT_PRESENT_FILTER(_rc));
+          "- computationalEdgeLWidth must at least be the same dimCount as the grid's distgrid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
@@ -1226,12 +1227,12 @@ extern "C" {
       // computationalEdgeUWidth was provided -> do some error checking
       if ((*_computationalEdgeUWidth)->dimCount != 1){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-          "- computationalEdgeUWidth array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
+          "- computationalEdgeUWidth array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_computationalEdgeUWidth)->extent[0] < distDimCount){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-          "- computationalEdgeUWidth must at least be the same rank as the grid's distgrid'", ESMC_NOT_PRESENT_FILTER(_rc));
+          "- computationalEdgeUWidth must at least be the same dimCount as the grid's distgrid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
@@ -1255,12 +1256,12 @@ extern "C" {
       // lbound was provided -> do some error checking
       if ((*_lbound)->dimCount != 1){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-          "- lbound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
+          "- lbound array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_lbound)->extent[0] < undistDimCount){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-          "- lbound must at least be the same rank as the undistributed part of the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
+          "- lbound must at least be the same dimCount as the undistributed part of the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
@@ -1280,12 +1281,12 @@ extern "C" {
       // ubound was provided -> do some error checking
       if ((*_ubound)->dimCount != 1){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-          "- ubound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
+          "- ubound array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_ubound)->extent[0] < undistDimCount){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-          "- ubound must at least be the same rank as the undistributed part of the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
+          "- ubound must at least be the same dimCount as the undistributed part of the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
@@ -1299,12 +1300,75 @@ extern "C" {
       }
     }
 
+
+    // fill minIndex
+    if (*_minIndex != NULL){
+      // computationalEdgeLWidth was provided -> do some error checking
+      if ((*_minIndex)->dimCount != 1){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- minIndex array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+      if ((*_minIndex)->extent[0] < distDimCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- minIndex must at least be the same dimCount as the grid's distgrid'", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+
+      // Get stagger width
+     staggerEdgeLWidth=grid->getStaggerEdgeLWidth(staggerloc);
+
+     // get the minIndex of the first patch
+     const int *minIndexDG=distgrid->getMinIndexPDimPPatch();
+
+
+      // Fill in the output array
+     int j=0;
+     for (int i=0; i<dimCount; i++) {
+       if (gridIsDist[i]) {
+	  (*_minIndex)->array[j]=minIndexDG[gridMapDim[i]]+(gridEdgeLWidth[i]-staggerEdgeLWidth[i]);
+          j++;
+       }
+     }
+    }
+
+
+
+    // fill maxIndex
+    if (*_maxIndex != NULL){
+      // computationalEdgeLWidth was provided -> do some error checking
+      if ((*_maxIndex)->dimCount != 1){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+          "- minIndex array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+      if ((*_maxIndex)->extent[0] < distDimCount){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+          "- minIndex must at least be the same dimCount as the grid's distgrid'", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+
+      // Get stagger width
+     staggerEdgeUWidth=grid->getStaggerEdgeUWidth(staggerloc);
+
+     // get the minIndex of the first patch
+     const int *maxIndexDG=distgrid->getMaxIndexPDimPPatch();
+
+      // Fill in the output array
+     int j=0;
+     for (int i=0; i<dimCount; i++) {
+       if (gridIsDist[i]) {
+	  (*_maxIndex)->array[j]=maxIndexDG[gridMapDim[i]]-(gridEdgeUWidth[i]-staggerEdgeUWidth[i]);
+          j++;
+       }
+     }
+    }
+
+
     // return successfully
     if (_rc!=NULL) *_rc = ESMF_SUCCESS;
   
   }
-
-
 
 
   ///////////////////////////////////////////////////////////////////////////////////
@@ -1401,6 +1465,42 @@ extern "C" {
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
+
+
+
+
+  void FTN(c_esmc_gridmatch)(ESMCI::Grid **ptr1, ESMCI::Grid **ptr2,
+    int *matchResult, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridmatch()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // if null return error
+    if ((ptr1==NULL) || (ptr2==NULL)) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- both grids must be present for comparison", ESMC_NOT_PRESENT_FILTER(rc));
+        return;
+
+    }
+
+    // match based on pointers
+    if (*ptr1 == *ptr2) {
+      *matchResult=1;
+    } else {
+      *matchResult=0;
+    }
+   
+   
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+
 
   void FTN(c_esmc_gridvalidate)(ESMCI::Grid **_grid, int *rc){
 #undef  ESMC_METHOD

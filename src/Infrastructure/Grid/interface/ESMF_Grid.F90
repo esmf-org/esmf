@@ -149,6 +149,8 @@ public  ESMF_DefaultFlag
   public ESMF_GridSerialize
   public ESMF_GridDeserialize
 
+  public ESMF_GridMatch
+
   public ESMF_GridValidate
 
   public operator(.eq.), operator(.ne.)
@@ -164,7 +166,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.85 2008/05/21 22:14:32 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.86 2008/06/10 22:09:20 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -4170,7 +4172,8 @@ end subroutine ESMF_GridGet
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
       subroutine ESMF_GridGetPSloc(grid, staggerloc, &
-          computationalEdgeLWidth, computationalEdgeUWidth, rc)
+          computationalEdgeLWidth, computationalEdgeUWidth,  &
+          minIndex, maxIndex, rc)
 
 !
 ! !ARGUMENTS:
@@ -4178,6 +4181,8 @@ end subroutine ESMF_GridGet
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
       integer,                intent(out), optional :: computationalEdgeLWidth(:)
       integer,                intent(out), optional :: computationalEdgeUWidth(:)
+      integer,                intent(out), optional :: minIndex(:)
+      integer,                intent(out), optional :: maxIndex(:)
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4205,6 +4210,16 @@ end subroutine ESMF_GridGet
 !     mapped to correspond to those dimensions. 
 !     {\tt computationalEdgeUWidth} must be allocated to be of size equal to the grid distDimCount
 !     (i.e. the grid's distgrid's dimCount).
+!\item[{[minIndex]}]
+!     Upon return this holds the global lower index of this stagger location.
+!     {\tt minIndex} must be allocated to be of size equal to the grid DimCount.
+!     Note that this value is only for the first Grid tile, as multigrid support
+!     is added, this interface will likely be changed or moved to adapt.  
+!\item[{[maxIndex]}]
+!     Upon return this holds the global upper index of this stagger location.
+!     {\tt maxIndex} must be allocated to be of size equal to the grid DimCount.
+!     Note that this value is only for the first Grid tile, as multigrid support
+!     is added, this interface will likely be changed or moved to adapt.  
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -4214,6 +4229,8 @@ end subroutine ESMF_GridGet
     integer :: localrc ! local error status
     type(ESMF_InterfaceInt) :: computationalEdgeLWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalEdgeUWidthArg ! helper variable
+    type(ESMF_InterfaceInt) :: minIndexArg ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexArg ! helper variable
     integer :: tmp_staggerloc
 
     ! Initialize return code
@@ -4231,12 +4248,19 @@ end subroutine ESMF_GridGet
     computationalEdgeUWidthArg=ESMF_InterfaceIntCreate(computationalEdgeUWidth, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    minIndexArg=ESMF_InterfaceIntCreate(minIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    maxIndexArg=ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
 
     call c_ESMC_GridGetPSloc(grid, tmp_staggerLoc, &
       computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
-      ESMF_NULL_POINTER,ESMF_NULL_POINTER,localrc)
+      ESMF_NULL_POINTER, ESMF_NULL_POINTER, &
+     minIndexArg, maxIndexArg,localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4247,11 +4271,19 @@ end subroutine ESMF_GridGet
     call ESMF_InterfaceIntDestroy(computationalEdgeUWidthArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetPSloc
+
+
 
 !------------------------------------------------------------------------------
 !BOP
@@ -6733,7 +6765,72 @@ endif
 
       end function ESMF_GridDeserialize
 
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMatch()"
+!BOP
+! !IROUTINE: ESMF_GridMatch - Check if two Grid objects match
 
+! !INTERFACE:
+  function ESMF_GridMatch(grid1, grid2, rc)
+!
+! !RETURN VALUE:
+    logical :: ESMF_GridMatch
+      
+! !ARGUMENTS:
+    type(ESMF_Grid),  intent(in)              :: grid1
+    type(ESMF_Grid),  intent(in)              :: grid2
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Check if {\tt grid1} and {\tt grid2} match. Returns
+!      .true. if Grid objects match, .false. otherwise. This
+!      method current just checks if grid1 and grid2 are the
+!      same object, future work will do a more complex check.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid1] 
+!          {\tt ESMF\_Grid} object.
+!     \item[grid2] 
+!          {\tt ESMF\_Grid} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer      :: localrc      ! local return code
+    integer      :: matchResult
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! init to one setting in case of error
+    ESMF_GridMatch = .false.
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid1, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid2, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_GridMatch(grid1, grid2, matchResult, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (matchResult .eq. 1) then
+       ESMF_GridMatch = .true.
+    else
+       ESMF_GridMatch = .false.
+    endif
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end function ESMF_GridMatch
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
