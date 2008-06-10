@@ -14,6 +14,7 @@
 #include <Mesh/include/ESMC_MeshUtils.h>
 #include <Mesh/include/ESMC_Mapping.h>
 #include <Mesh/include/ESMC_MeshllField.h>
+#include <Mesh/include/ESMC_ParEnv.h>
 
 #include <limits>
 #include <vector>
@@ -217,10 +218,10 @@ BBox BBoxParUnion(const BBox &b1) {
   for (UInt i = 0; i < b1.dimension(); i++) {
     // Find max 
     val = b1.getMax()[i];
-    MPI_Allreduce(&val, &valres, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+    MPI_Allreduce(&val, &valres, 1, MPI_DOUBLE, MPI_MAX, Par::Comm());
     newbox.setMax(i, valres);
     val = b1.getMin()[i];
-    MPI_Allreduce(&val, &valres, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+    MPI_Allreduce(&val, &valres, 1, MPI_DOUBLE, MPI_MIN, Par::Comm());
     newbox.setMin(i, valres);
   }
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.3 2008/04/05 03:38:49 cdeluca Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.4 2008/06/10 20:16:50 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ extern "C" void FTN(c_esmc_meshcreate)(ESMC::Mesh **meshpp,
     int localrc;
 
     //Initialize return code
-    localrc = ESMC_RC_NOT_IMPL;
+    localrc = ESMF_SUCCESS;
 
     *meshpp = new ESMC::Mesh();
 
@@ -56,6 +56,7 @@ extern "C" void FTN(c_esmc_meshcreate)(ESMC::Mesh **meshpp,
       ESMC_NOT_PRESENT_FILTER(rc));
 
 
+    *rc = localrc;
 
 } // meshcreate
 

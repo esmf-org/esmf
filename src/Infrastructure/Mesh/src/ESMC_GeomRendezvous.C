@@ -549,7 +549,7 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
   int rank = Par::Rank(); 
   int csize = Par::Size(); 
 
-  zz = Zoltan_Create(MPI_COMM_WORLD);
+  zz = Zoltan_Create(Par::Comm());
 
   // Zoltan Parameters
   set_zolt_param(zz);

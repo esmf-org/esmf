@@ -170,18 +170,6 @@ void CommRel::BuildFromOwner(MeshDB  &dom, const std::vector<CommNode> &obj)
   // Send messages
   msg.communicate();
 
-//MPI_Barrier(MPI_COMM_WORLD);
-
-/*
-  std::cout << "Proc:" << msg.commRank() << ", msg.inproc:";
-  for (UInt *p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
-    std::cout << *p << ", ";
-  }
-  std::cout << std::endl;
-  std::cout << "P:" << msg.commRank() << "rangeproc:"; std::copy(bootStrap.range_begin(), bootStrap.range_end(), std::ostream_iterator<CommNode>(std::cout, ", "));
-  std::cout << std::endl;
-MPI_Barrier(MPI_COMM_WORLD);
-*/
 
   MapType new_domain_objs;
   MapType::iterator ri = bootStrap.range_begin();

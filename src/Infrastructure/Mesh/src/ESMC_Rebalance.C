@@ -499,7 +499,7 @@ static bool form_rebalance_comm(Mesh &mesh, CommReg &migration) {
   int rank = Par::Rank(); 
 
   if (zz == NULL) {
-    zz = Zoltan_Create(MPI_COMM_WORLD);
+    zz = Zoltan_Create(Par::Comm());
   
     Zoltan_Set_Param(zz, "DEBUG_LEVEL", "0");
     Zoltan_Set_Param(zz, "LB_METHOD", "RCB");

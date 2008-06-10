@@ -40,8 +40,9 @@ int Par::rank = 0;
 int Par::psize = 0;
 bool Par::serial = false;
 ParLog *Par::log = NULL;
+MPI_Comm Par::comm = MPI_COMM_WORLD;
 
-void Par::Init(const std::string &logfile, bool use_log) {
+void Par::Init(const std::string &logfile, bool use_log, MPI_Comm _comm) {
   int mpi_init = 0;
   MPI_Initialized(&mpi_init);
   if (!mpi_init) {
@@ -49,9 +50,16 @@ void Par::Init(const std::string &logfile, bool use_log) {
     char **argv = 0;
     MPI_Init(&argc, &argv);
   }
-  MPI_Comm_size(MPI_COMM_WORLD, &psize);
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  comm = _comm;
+  MPI_Comm_size(comm, &psize);
+  MPI_Comm_rank(comm, &rank);
   log = ParLog::instance(logfile, rank, use_log);
+}
+
+void Par::SetComm(MPI_Comm _comm) {
+  comm = _comm;
+  MPI_Comm_size(comm, &psize);
+  MPI_Comm_rank(comm, &rank);
 }
 
 void Par::Abort() {
@@ -60,7 +68,7 @@ void Par::Abort() {
   std::cerr << "Process:" << Par::Rank() << " aborting!!" << std::endl;
   ParLog::flush();
   if (!serial)
-    MPI_Abort(MPI_COMM_WORLD, 911);
+    MPI_Abort(comm, 911);
 }
 
 void Par::End() {

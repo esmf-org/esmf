@@ -46,8 +46,8 @@ void DDir<HASH>::Create(UInt ngid, const UInt gid[], const UInt lid[])
   std::vector<dentry>().swap(my_managed);
 
   int csize, rank;
-  MPI_Comm_size(MPI_COMM_WORLD, &csize);
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(Par::Comm(), &csize);
+  MPI_Comm_rank(Par::Comm(), &rank);
 
   // Find local min,max and global
   int lmin = std::numeric_limits<UInt>::max(),
@@ -58,8 +58,8 @@ void DDir<HASH>::Create(UInt ngid, const UInt gid[], const UInt lid[])
   }
 
   int t_gmin, t_gmax;
-  MPI_Allreduce(&lmin, &t_gmin, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
-  MPI_Allreduce(&lmax, &t_gmax, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&lmin, &t_gmin, 1, MPI_INT, MPI_MIN, Par::Comm());
+  MPI_Allreduce(&lmax, &t_gmax, 1, MPI_INT, MPI_MAX, Par::Comm());
   gmin = t_gmin; gmax = t_gmax;
 
   // Loop gids, set up sends
@@ -142,8 +142,8 @@ if (sizes[i] != sizest[i]) std::cout << "sizes mismatch:" << sizes[i] << ", " <<
 template<typename HASH>
 void DDir<HASH>::Print(std::ostream &os) {
   int csize, rank;
-  MPI_Comm_size(MPI_COMM_WORLD, &csize);
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(Par::Comm(), &csize);
+  MPI_Comm_rank(Par::Comm(), &rank);
 
   os << "P:" << rank << " manages:" << std::endl;
 

@@ -75,10 +75,11 @@ bool use_log;
 /// *********** Wrap MPI junk *************
 class Par {
 public:
-static void Init(const std::string &logfile= "PARLOG", bool use_log=false);
+static void Init(const std::string &logfile= "PARLOG", bool use_log=false, MPI_Comm _comm = MPI_COMM_WORLD);
 static void Abort();
 static void End();
-static MPI_Comm Comm() { return MPI_COMM_WORLD;}
+static MPI_Comm Comm() { return comm;}
+void SetComm(MPI_Comm _comm);
 
 static UInt Rank() { return rank; }
 static UInt Size() { return psize; }
@@ -92,6 +93,7 @@ static bool serial;
 static int rank;
 static int psize;
 static ParLog *log;
+static MPI_Comm comm;
 };
 
 } // namespace

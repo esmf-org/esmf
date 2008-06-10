@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.2 2008/04/05 03:38:49 cdeluca Exp $
+! $Id: ESMF_Mesh.F90,v 1.3 2008/06/10 20:16:50 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.2 2008/04/05 03:38:49 cdeluca Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.3 2008/06/10 20:16:50 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -161,6 +161,8 @@ module ESMF_MeshMod
 
     ! Check init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreate)
+
+    rc = localrc
     
   end function ESMF_MeshCreate
 !------------------------------------------------------------------------------
