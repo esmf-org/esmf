@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.1.2.5 2008/06/08 12:56:42 oehmke Exp $
+! $Id: ESMF_Attribute.F90,v 1.1.2.6 2008/06/10 03:41:28 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.1.2.5 2008/06/08 12:56:42 oehmke Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.1.2.6 2008/06/10 03:41:28 cdeluca Exp $'
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_AttributeGet - Get an Attribute
@@ -273,7 +273,7 @@ module ESMF_AttributeMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet  - Retrieve an Attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve the value of an Attribute
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, <value argument>, rc)
@@ -297,15 +297,10 @@ module ESMF_AttributeMod
 !     Supported values for <value argument> are:
 !     \begin{description}
 !     \item integer(ESMF\_KIND\_I4), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
 !     \item integer(ESMF\_KIND\_I8), intent(out) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
 !     \item real (ESMF\_KIND\_R4), intent(out) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
 !     \item real (ESMF\_KIND\_R8), intent(out) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
 !     \item type(ESMF\_Logical), intent(out) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
 !     \item character (len = *), intent(out), value
 !     \end{description}
 !
@@ -315,6 +310,55 @@ module ESMF_AttributeMod
 !           The object containing the Attribute.
 !     \item [name]
 !           The name of the Attribute to retrieve.
+!     \item [<value argument>]
+!           The value of the named Attribute.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Retrieve the values of a list Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, count, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *), intent(in) :: name
+!     integer, intent(in) :: count
+!     <value argument>, see below for supported values
+!     integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Returns the values of a list Attribute given its name.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Field), intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+!
+!     Supported values for <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
+!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           The object containing the Attribute.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The number of values in the Attribute.
 !     \item [<value argument>]
 !           The value of the named Attribute.
 !     \item [{[rc]}]
@@ -477,15 +521,10 @@ module ESMF_AttributeMod
 !     Supported values for the <value argument> are:
 !     \begin{description}
 !     \item integer(ESMF\_KIND\_I4), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
 !     \item integer(ESMF\_KIND\_I8), intent(in) :: value
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
 !     \item real (ESMF\_KIND\_R4), intent(in) :: value
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
 !     \item real (ESMF\_KIND\_R8), intent(in) :: value
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
 !     \item type(ESMF\_Logical), intent(in) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
 !     \item character (len = *), intent(in), value
 !     \end{description}
 !
@@ -495,6 +534,55 @@ module ESMF_AttributeMod
 !           The object containing the Attribute to set.
 !     \item [name]
 !           The name of the Attribute to set.
+!     \item [<value argument>]
+!           The value of the Attribute to set.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set the values of a list Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(<object>, name, count, <value argument>, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *), intent(in) :: name
+!     integer, intent(in) :: count
+!     <value argument>, see below for supported values
+!     integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Sets the value of an Attribute.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Field), intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+!
+!     Supported values for the <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
+!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           The object containing the Attribute to set.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [count]
+!           The number of values in the Attribute.
 !     \item [<value argument>]
 !           The value of the Attribute to set.
 !     \item [{[rc]}]
