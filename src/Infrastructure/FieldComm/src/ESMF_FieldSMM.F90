@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.4 2008/05/22 18:22:12 feiliu Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.5 2008/06/10 19:55:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.4 2008/05/22 18:22:12 feiliu Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.5 2008/06/10 19:55:07 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -66,7 +66,7 @@ module ESMF_FieldSMMMod
         module procedure ESMF_FieldSMMStoreR4
         module procedure ESMF_FieldSMMStoreR8
         module procedure ESMF_FieldSMMStoreNF
-    end interface ESMF_FieldSMMStore
+    end interface
 !------------------------------------------------------------------------------
 contains
 
@@ -364,9 +364,6 @@ contains
         ! internal local variables 
         integer                                     :: localrc 
         type(ESMF_Array)                            :: srcArray, dstArray   
-        !integer                                     :: srcEle, dstEle ! n elements
-        !integer                                     :: sfdc, dfdc ! dimcount
-        !integer, dimension(:), allocatable          :: sftc, dftc ! total count
 
         ! Initialize return code; assume routine not implemented 
         localrc = ESMF_RC_NOT_IMPL 
@@ -376,58 +373,6 @@ contains
         ! rely on ArraySMM to check the sanity of other variables 
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc) 
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc) 
-
-        !! src and dst Field cannot be same object
-        !if(srcField%ftypep .eq. dstField%ftypep) then
-        !    call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-        !       "src and dst Field cannot be same object", &
-        !        ESMF_CONTEXT, rc)
-        !    return
-        !endif
-
-        !!! src and dst Field must have same number of data elements
-        !call ESMF_FieldGet(srcField, dimCount=sfdc, rc=localrc)
-        !if (ESMF_LogMsgFoundError(localrc, & 
-        !    ESMF_ERR_PASSTHRU, & 
-        !    ESMF_CONTEXT, rc)) return 
-
-        !call ESMF_FieldGet(dstField, dimCount=dfdc, rc=localrc)
-        !if (ESMF_LogMsgFoundError(localrc, & 
-        !    ESMF_ERR_PASSTHRU, & 
-        !    ESMF_CONTEXT, rc)) return 
-
-        !allocate(sftc(sfdc), dftc(dfdc))
-        !
-        ! TODO: there needs to be a way to loop through all DEs on all PETs to
-        ! get the total number of data elements...
-        !call ESMF_FieldGet(srcField, localDe=0, totalCount=sftc, rc=localrc)
-        !if (ESMF_LogMsgFoundError(localrc, & 
-        !    ESMF_ERR_PASSTHRU, & 
-        !    ESMF_CONTEXT, rc)) return 
-
-        !call ESMF_FieldGet(dstField, localDe=0, totalCount=dftc, rc=localrc)
-        !if (ESMF_LogMsgFoundError(localrc, & 
-        !    ESMF_ERR_PASSTHRU, & 
-        !    ESMF_CONTEXT, rc)) return 
-
-        !srcEle = 1
-        !do i = 1, sfdc
-        !    srcEle = srcEle * sftc(i)
-        !enddo
-
-        !dstEle = 1
-        !do i = 1, dfdc
-        !    dstEle = dstEle * dftc(i)
-        !enddo
-    
-        !deallocate(sftc, dftc)
-
-        !if(srcEle .ne. dstEle) then
-        !    call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-        !       "src and dst Field must have same number of data elements", &
-        !        ESMF_CONTEXT, rc)
-        !    return
-        !endif
 
         ! Retrieve source and destination arrays. 
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
