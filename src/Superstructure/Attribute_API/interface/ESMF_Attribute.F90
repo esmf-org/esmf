@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.10 2008/06/05 23:48:59 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.11 2008/06/10 19:42:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -102,7 +102,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.10 2008/06/05 23:48:59 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.11 2008/06/10 19:42:19 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -537,12 +537,13 @@ contains
 ! !IROUTINE: ESMF_AttributeGet  - Retrieve an attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeGet(<object>, name, <value argument>, &
+!     subroutine ESMF_AttributeGet(<object>, name, count, <value argument>, &
 !                            <defaultvalue argument>, convention, purpose, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character (len = *), intent(in) :: name
+!     integer, intent(in), optional :: count
 !     <value argument>, see below for supported values
 !     <defaultvalue>, see below for supported values   
 !     character(ESMF_MAXSTR), intent(in), optional :: convention
@@ -553,7 +554,7 @@ contains
 !     Returns an attribute from the <object>, or from the attribute package
 !     specified by {\tt convention} and {\tt purpose}.  A default value 
 !     argument may be given if a return code is not desired when the 
-!     attibute is not found.
+!     attribute is not found.
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -594,6 +595,8 @@ contains
 !           An {\tt ESMF} object.
 !     \item [name]
 !           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of items in a multi-valued attribute.
 !     \item [<value argument>]
 !           The value of the named attribute.
 !     \item [<defaultvalue argument>]
@@ -741,15 +744,18 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttSet - Set an attribute
+! !IROUTINE: ESMF_AttributeSet - Set an attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttSet(<object>, name, <value argument>, rc)
+!     subroutine ESMF_AttributeSet(<object>, name, count, <value argument>, &
+!                            <defaultvalue argument>, convention, purpose, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character (len = *), intent(in) :: name
+!     integer, intent(in), optional :: count
 !     <value argument>, see below for supported values
+!     <defaultvalue>, see below for supported values   
 !     character(ESMF_MAXSTR), intent(in), optional :: convention
 !     character(ESMF_MAXSTR), intent(in), optional :: purpose
 !     integer, intent(out), optional :: rc   
@@ -758,7 +764,7 @@ contains
 !     Attaches an attribute to <object>, or sets an attribute on an 
 !     attribute package.
 !     The attribute has a {\tt name} and either a {\tt value} or a 
-!     {\tt valueList} and a {\tt convention} and {\tt purpose}.
+!     {\tt valueList}, with a {\tt count}, and a {\tt convention} and {\tt purpose}.
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -790,6 +796,8 @@ contains
 !           An {\tt ESMF} object.
 !     \item [name]
 !           The name of the attribute to set.
+!     \item [count]
+!           The number of items in a multi-valued attribute.
 !     \item [<value argument>]
 !           The value of the attribute to set.
 !     \item [convention]
