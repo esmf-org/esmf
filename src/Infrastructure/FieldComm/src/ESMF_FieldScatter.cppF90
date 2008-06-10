@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldScatter.cppF90,v 1.3 2008/05/12 19:06:28 feiliu Exp $
+! $Id: ESMF_FieldScatter.cppF90,v 1.4 2008/06/10 20:12:59 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,12 +55,13 @@ module ESMF_FieldScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldScatter.cppF90,v 1.3 2008/05/12 19:06:28 feiliu Exp $'
+      '$Id: ESMF_FieldScatter.cppF90,v 1.4 2008/06/10 20:12:59 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldScatter
         TypeKindRankInterfaceMacro(FieldScatterDPtr)
-    end interface ESMF_FieldScatter
+        module procedure ESMF_FieldScatterNotRoot
+    end interface
 !------------------------------------------------------------------------------
 contains
 
@@ -125,14 +126,9 @@ contains
         type(ESMF_VM), intent(in), optional                    :: vm  @\
         integer, intent(out), optional                         :: rc  @\
 @\
-        ! local variables as temporary input/output arguments @\
-        type(ESMF_VM)                               :: l_vm @\
-@\
         ! internal local variables @\
-        integer                                     :: localrc, lpe, petc @\
+        integer                                     :: localrc @\
         type(ESMF_Array)                            :: array   @\
-        integer                                     :: fa_rank @\
-        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
 @\
         ! Initialize return code; assume routine not implemented @\
         localrc = ESMF_RC_NOT_IMPL @\
@@ -141,70 +137,18 @@ contains
         ! check variable: focus on field and farray @\
         ! rely on ArrayScatter to check the sanity of other variables @\
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, field, rc) @\
-        if(present(vm)) then @\
-            ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc) @\
-            l_vm = vm @\
-        else @\
-            call ESMF_VMGetCurrent(l_vm, rc=localrc) @\
-            if (ESMF_LogMsgFoundError(localrc, & @\
-                ESMF_ERR_PASSTHRU, & @\
-                ESMF_CONTEXT, rc)) return @\
-        endif @\
-@\
-        call ESMF_VMGet(l_vm, localPet=lpe, petCount=petc, rc=localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-            ESMF_ERR_PASSTHRU, & @\
-            ESMF_CONTEXT, rc)) return @\
-@\
-        if( (rootPet .lt. 0) .or. (rootPet .ge. petc) ) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
-            "- rootPet must be within range of 0...petCount-1)", & @\
-            ESMF_CONTEXT, rc)  @\
-          return @\
-        endif @\
-@\
-        ! farray only needs to be checked on rootPet @\
-        if(lpe .eq. rootPet) then @\
-            ! Check the size of the native array. @\
-            ! The following use of fptr is a bit of trickery to get all F90 @\
-            ! compilers to cooperate. For some compilers the associated() test @\
-            ! will return .false. for farray of size 0. Some of those compilers @\
-            ! will produce a run-time error in size(fptr). Other compilers will @\
-            ! return .true. for the associated() test but return 0 in size(). @\
-            fpointer => farray @\
-            if(.not. associated(fpointer,farray)) then @\
-              call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
-                "- farray is not associated with memory allocation)", & @\
-                ESMF_CONTEXT, rc)  @\
-              return @\
-            endif @\
-@\
-            if (size(fpointer)==0) then @\
-              call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
-                "- farray is not associated with memory allocation)", & @\
-                ESMF_CONTEXT, rc)  @\
-              return @\
-            endif @\
-        endif @\
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc) @\
 @\
         ! Check the rank of the native array. @\
-        call ESMF_FieldGet(field, array=array, dimCount=fa_rank, rc=localrc) @\
+        call ESMF_FieldGet(field, array=array, rc=localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
             ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rc)) return @\
-@\
-        if(fa_rank .ne. mrank) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
-            "- farray must have same dimension count as field)", & @\
-            ESMF_CONTEXT, rc)  @\
-          return @\
-        endif @\
 @\
         ! perform scatter through internal array @\
         ! For performance consideration: @\
         ! Rely on ArrayScatter to perform sanity checking of the other parameters @\
-        ! Otherwise, we need to make sure patch is a reasonable value @\
-        call ESMF_ArrayScatter(array, farray, patch, rootPet, l_vm, rc=localrc) @\
+        call ESMF_ArrayScatter(array, farray, patch, rootPet, vm, rc=localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
             ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rc)) return @\
@@ -214,5 +158,42 @@ contains
 !------------------------------------------------------------------------------ @\
 
 TypeKindRankDeclarationMacro(FieldScatterDPtr)
+
+! -------------------------- ESMF-public method -----------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldScatter"
+subroutine ESMF_FieldScatterNotRoot(field, patch, rootPet, vm, rc)
+
+    type(ESMF_Field),           intent(inout)           :: field
+    integer,                    intent(in),   optional  :: patch
+    integer,                    intent(in)              :: rootPet
+    type(ESMF_VM),              intent(in),   optional  :: vm
+    integer,                    intent(out),  optional  :: rc
+
+    ! Local variables
+    integer                       :: localrc        ! local return code
+    type(ESMF_Array)              :: array
+
+    ! Initialize return code
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, field, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    call ESMF_FieldGet(field, array=array, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    call ESMF_ArrayScatter(array, patch, rootPet, vm, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_FieldScatterNotRoot
 
 end module
