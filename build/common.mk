@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.225 2008/06/11 14:39:20 tjcnrl Exp $
+#  $Id: common.mk,v 1.226 2008/06/11 20:52:05 tjcnrl Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2385,31 +2385,15 @@ endif
 
 .F90.o:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS) $<
-ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
-	@mods="`ls *.mod 2>/dev/null`"; \
-	if [ $$? = 0 ]; then $(ESMF_MV) $$mods $(ESMF_MODDIR)/.; fi;
-endif
 
 .f90.o:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREENOCPP) $<
-ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
-	@mods="`ls *.mod 2>/dev/null`"; \
-	if [ $$? = 0 ]; then $(ESMF_MV) $$mods $(ESMF_MODDIR)/.; fi;
-endif
 
 .F.o:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXCPP) $(ESMF_F90COMPILECPPFLAGS) $<
-ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
-	@mods="`ls *.mod 2>/dev/null`"; \
-	if [ $$? = 0 ]; then $(ESMF_MV) $$mods $(ESMF_MODDIR)/.; fi;
-endif
 
 .f.o:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXNOCPP) $<
-ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
-	@mods="`ls *.mod 2>/dev/null`"; \
-	if [ $$? = 0 ]; then $(ESMF_MV) $$mods $(ESMF_MODDIR)/.; fi;
-endif
 
 .c.o:
 	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
@@ -2520,10 +2504,13 @@ shared:
 #        all objects, one at a time.  This painfully slow and unacceptable.
 #-------------------------------------------------------------------------------
 
+MODULE_LIST = $(notdir $(wildcard $(ESMF_OBJDIR)/*.mod))
 ##ifeq ($(shell if test -s $(ESMFLIB); then echo 1; fi;), 1)
 ### library already created, so update with recently compiled objects
 ##OBJECT_LIST = $(wildcard $(ESMF_OBJDIR)/*.o)
 ##defer: $(ESMFLIB)($(OBJECT_LIST))
+##	cd $(ESMF_OBJDIR) ; \
+##	$(ESMF_MV) $(MODULE_LIST) $(ESMF_MODDIR)/.
 ##.o.a:
 ##	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $@ $%
 ##else
@@ -2532,6 +2519,8 @@ OBJECT_LIST = $(notdir $(wildcard $(ESMF_OBJDIR)/*.o))
 defer:
 	cd $(ESMF_OBJDIR) ; \
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMFLIB) $(OBJECT_LIST)
+	cd $(ESMF_OBJDIR) ; \
+	$(ESMF_MV) $(MODULE_LIST) $(ESMF_MODDIR)/.
 ##endif
 
 
