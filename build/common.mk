@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.224 2008/06/11 00:25:17 theurich Exp $
+#  $Id: common.mk,v 1.225 2008/06/11 14:39:20 tjcnrl Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -991,24 +991,22 @@ endif
 lib:  info build_libs info_mk
 
 build_libs: chkdir_lib include
+	cd $(ESMF_DIR) ; $(MAKE) ACTION=tree_lib tree
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
-	cd $(ESMF_DIR) ;\
-	$(MAKE) ACTION=tree_lib tree defer shared
-else
-	cd $(ESMF_DIR) ;\
-	$(MAKE) ACTION=tree_lib tree shared
+	cd $(ESMF_DIR) ; $(MAKE) defer
 endif
+	cd $(ESMF_DIR) ; $(MAKE) shared
 	@echo "ESMF library built successfully."
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
 	@echo " or the more extensive: $(MAKE) all_tests"
 
 # Build only stuff in and below the current dir.
 build_here: chkdir_lib
+	$(MAKE) ACTION=tree_lib tree
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
-	$(MAKE) ACTION=tree_lib tree defer shared
-else
-	$(MAKE) ACTION=tree_lib tree shared
+	$(MAKE) defer
 endif
+	$(MAKE) shared
 
 # Builds library - action for the 'tree' target.
 tree_lib:
