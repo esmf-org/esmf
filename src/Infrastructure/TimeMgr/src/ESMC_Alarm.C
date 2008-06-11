@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.65 2008/06/11 21:14:59 rosalind Exp $
+// $Id: ESMC_Alarm.C,v 1.66 2008/06/11 21:32:31 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -31,12 +31,12 @@
  #include "ESMC_Clock.h"
 
  // associated class definition file
- #include <ESMC_Alarm.h>
+ #include <ESMCI_Alarm.h>
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.65 2008/06/11 21:14:59 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.66 2008/06/11 21:32:31 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -1032,10 +1032,10 @@ int ESMC_Alarm::count=0;
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmCheckRingTime - check if time to ring
+// !IROUTINE:  ESMCI_Alarm.heckRingTime - check if time to ring
 //
 // !INTERFACE:
-      bool ESMC_Alarm::ESMC_AlarmCheckRingTime(
+      bool ESMC_Alarm::ESMCI_Alarm.heckRingTime(
 //
 // !RETURN VALUE:
 //    bool is ringing or not
@@ -1052,7 +1052,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  TMG4.4, 4.6
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmCheckRingTime()"
+ #define ESMC_METHOD "ESMCI_Alarm.heckRingTime()"
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1082,7 +1082,7 @@ int ESMC_Alarm::count=0;
     
       // check if time to turn on alarm
       if (!ringing && enabled) 
-         ESMC_AlarmCheckTurnOn(positive);
+         ESMCI_Alarm.heckTurnOn(positive);
 
       // else if not sticky, check if time to turn off alarm
       //   (user is responsible for turning off sticky alarms via RingerOff())
@@ -1090,7 +1090,7 @@ int ESMC_Alarm::count=0;
 
         // first check if next alarm time has been reached,
         // then check if time to turn off alarm.
-        if (!ESMC_AlarmCheckTurnOn(positive)) {
+        if (!ESMCI_Alarm.heckTurnOn(positive)) {
           if (ringTimeStepCount > 0) { // use ringTimeStepCount ...
             if (timeStepRingingCount >= ringTimeStepCount) {
               ringingOnCurrTimeStep = ringing = false;
@@ -1250,7 +1250,7 @@ int ESMC_Alarm::count=0;
 
     return(ringing && enabled);
 
- } // end ESMC_AlarmCheckRingTime
+ } // end ESMCI_Alarm.heckRingTime
 
 //-------------------------------------------------------------------------
 //BOP
@@ -1739,10 +1739,10 @@ int ESMC_Alarm::count=0;
 
 //-------------------------------------------------------------------------
 //BOPI
-// !IROUTINE:  ESMC_AlarmCheckTurnOn - check if time to turn on alarm
+// !IROUTINE:  ESMCI_Alarm.heckTurnOn - check if time to turn on alarm
 //
 // !INTERFACE:
-      bool ESMC_Alarm::ESMC_AlarmCheckTurnOn(
+      bool ESMC_Alarm::ESMCI_Alarm.heckTurnOn(
 //
 // !RETURN VALUE:
 //    bool whether to turn on alarm
@@ -1758,7 +1758,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmCheckTurnOn()"
+ #define ESMC_METHOD "ESMCI_Alarm.heckTurnOn()"
 
     // The original comment few lines below indicates that the ringing state
     // would be turned off elsewhere. However, it is initialized (turn off) 
@@ -1792,7 +1792,7 @@ int ESMC_Alarm::count=0;
 
     return(checkRinging);
 
-} // end ESMC_AlarmCheckTurnOn
+} // end ESMCI_Alarm.heckTurnOn
 
 //-------------------------------------------------------------------------
 //BOPI

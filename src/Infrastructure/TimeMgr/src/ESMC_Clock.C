@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.86 2008/06/11 21:15:00 rosalind Exp $
+// $Id: ESMC_Clock.C,v 1.87 2008/06/11 21:32:31 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
  #include <ctype.h>
  #include <ESMC_LogErr.h>
  #include <ESMF_LogMacros.inc>
- #include <ESMC_Alarm.h>
+ #include <ESMCI_Alarm.h>
 
  // associated class definition file
  #include <ESMC_Clock.h>
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.86 2008/06/11 21:15:00 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.87 2008/06/11 21:32:31 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -154,7 +154,7 @@ int ESMC_Clock::count=0;
 
     // Initialize previous time a fraction of second before the current time
     //   so any alarm defined to ring at the clock start time will ring before
-    //   the first clock advance (timestep).  See ESMC_AlarmCheckRingTime().
+    //   the first clock advance (timestep).  See ESMCI_Alarm.heckRingTime().
     // This does not break the lower limit of the Fliegel or Hatcher 
     // algorithms (for Gregorian or Julian calendars) since those are based on
     //   whole seconds.
@@ -617,7 +617,7 @@ int ESMC_Clock::count=0;
       bool ringing;
 
       // check each alarm to see if it's time to ring
-      ringing = alarmList[i]->ESMC_AlarmCheckRingTime(&rc);
+      ringing = alarmList[i]->ESMCI_Alarm.heckRingTime(&rc);
 
       // report ringing alarms if requested
       if (ringing) {
@@ -2009,7 +2009,7 @@ int ESMC_Clock::count=0;
     alarmList[alarmCount++] = alarm;
 
     // check new alarm to see if it's time to ring
-    alarm->ESMC_AlarmCheckRingTime(&rc);
+    alarm->ESMCI_Alarm.heckRingTime(&rc);
 
     return(rc);
 

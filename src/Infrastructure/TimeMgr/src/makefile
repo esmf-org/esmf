@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2008/06/06 19:11:33 rosalind Exp $
+# $Id: makefile,v 1.17 2008/06/11 21:32:31 rosalind Exp $
 
 ALL: build_here
 
@@ -8,7 +8,7 @@ SOURCEC   = ESMCI_BaseTime.C ESMCI_TimeInterval.C ESMCI_Time.C \
             ESMC_Calendar.C ESMC_Alarm.C ESMC_Clock.C
 SOURCEF   =
 STOREH    = ESMCI_BaseTime.h ESMCI_TimeInterval.h ESMCI_Time.h \
-            ESMC_Calendar.h ESMC_Alarm.h ESMC_Clock.h
+            ESMC_Calendar.h ESMCI_Alarm.h ESMC_Clock.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
