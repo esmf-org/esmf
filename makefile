@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.87 2008/06/05 18:33:09 tjcnrl Exp $
+# $Id: makefile,v 1.88 2008/06/11 00:25:17 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -99,6 +99,7 @@ script_info:
 	-@echo "ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)"
 	-@echo "ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)"
 	-@echo "ESMF_FORTRANSYMBOLS:    $(ESMF_FORTRANSYMBOLS)"
+	-@echo "ESMF_DEFER_LIB_BUILD:   $(ESMF_DEFER_LIB_BUILD)"
 	-@echo "ESMF_TESTEXHAUSTIVE:    $(ESMF_TESTEXHAUSTIVE)"
 	-@echo "ESMF_TESTWITHTHREADS:   $(ESMF_TESTWITHTHREADS)"
 	-@echo "ESMF_TESTMPMD:          $(ESMF_TESTMPMD)"
@@ -152,10 +153,6 @@ info:   script_info
 	-@echo "ESMF_CXXLINKRPATHS: $(ESMF_CXXLINKRPATHS)"
 	-@echo "ESMF_CXXLINKLIBS: $(ESMF_CXXLINKLIBS)"
 	-@echo "ESMF_CXXESMFLINKLIBS: $(ESMF_CXXESMFLINKLIBS)"
-	-@if [ -n "$(ESMF_DEFER_LIB_BUILD)" ] ; then \
-	  echo "" ; \
-	  echo "ESMF_DEFER_LIB_BUILD is enabled. Object files are located in" ; \
-	  echo "$(ESMF_OBJDIR)" ; fi
 	-@echo ""
 	-@echo ""
 	-@echo "--------------------------------------------------------------"
@@ -233,6 +230,7 @@ info_mk:
 	-@echo "# ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)" >> $(MKINFO)
 	-@echo "# ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)" >> $(MKINFO)
 	-@echo "# ESMF_FORTRANSYMBOLS: $(ESMF_FORTRANSYMBOLS)" >> $(MKINFO)
+	-@echo "# ESMF_DEFER_LIB_BUILD:   $(ESMF_DEFER_LIB_BUILD)" >> $(MKINFO)
 	-@echo "# ESMF_TESTEXHAUSTIVE: $(ESMF_TESTEXHAUSTIVE)" >> $(MKINFO)
 	-@echo "# ESMF_TESTWITHTHREADS: $(ESMF_TESTWITHTHREADS)" >> $(MKINFO)
 	-@echo "# ESMF_TESTMPMD: $(ESMF_TESTMPMD)" >> $(MKINFO)

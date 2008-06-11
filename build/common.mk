@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.223 2008/06/05 18:33:10 tjcnrl Exp $
+#  $Id: common.mk,v 1.224 2008/06/11 00:25:17 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -156,6 +156,10 @@ ifndef ESMF_NO_INTEGER_2_BYTE
 export ESMF_NO_INTEGER_2_BYTE = default
 endif
 
+ifndef ESMF_DEFER_LIB_BUILD
+export ESMF_DEFER_LIB_BUILD = default
+endif
+
 ifndef ESMF_FORTRANSYMBOLS
 export ESMF_FORTRANSYMBOLS = default
 endif
@@ -290,6 +294,10 @@ ifneq ($(ESMF_TESTEXHAUSTIVE),ON)
 export ESMF_TESTEXHAUSTIVE = OFF
 endif
 
+ifneq ($(ESMF_DEFER_LIB_BUILD),OFF)
+export ESMF_DEFER_LIB_BUILD = ON
+endif
+
 ifneq ($(ESMF_TESTWITHTHREADS),ON)
 export ESMF_TESTWITHTHREADS = OFF
 endif
@@ -385,7 +393,7 @@ ESMF_LIBDIR     = $(ESMF_BUILD)/lib/lib$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).
 ESMF_MODDIR     = $(ESMF_BUILD)/mod/mod$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
 
 # object directory
-ifdef ESMF_DEFER_LIB_BUILD
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 ESMF_OBJDIR     = $(ESMF_BUILD)/obj/obj$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
 else
 ESMF_OBJDIR     = $(ESMF_MODDIR)
@@ -865,7 +873,7 @@ chkdir_lib:
 	@if [ ! -d $(ESMF_MODDIR) ]; then \
 	  echo Making directory $(ESMF_MODDIR) for *.mod files; \
 	  mkdir -p $(ESMF_MODDIR) ; fi
-ifdef ESMF_DEFER_LIB_BUILD
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	@if [ ! -d $(ESMF_OBJDIR) ]; then \
 	  echo Making directory $(ESMF_OBJDIR) for *.o files; \
 	  mkdir -p $(ESMF_OBJDIR) ; fi
@@ -956,7 +964,7 @@ foo:
 VPATH = $(ESMF_DIR)/$(LOCDIR):$(ESMF_DIR)/$(LOCDIR)/../include:\
 	$(ESMF_INCDIR):$(ESMF_CONFDIR):$(ESMF_SITEDIR)
 
-ifdef ESMF_DEFER_LIB_BUILD
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 libc: $(OBJSC)
 libf: $(OBJSF)
 else
@@ -983,7 +991,7 @@ endif
 lib:  info build_libs info_mk
 
 build_libs: chkdir_lib include
-ifdef ESMF_DEFER_LIB_BUILD
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	cd $(ESMF_DIR) ;\
 	$(MAKE) ACTION=tree_lib tree defer shared
 else
@@ -996,7 +1004,7 @@ endif
 
 # Build only stuff in and below the current dir.
 build_here: chkdir_lib
-ifdef ESMF_DEFER_LIB_BUILD
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	$(MAKE) ACTION=tree_lib tree defer shared
 else
 	$(MAKE) ACTION=tree_lib tree shared
@@ -2379,28 +2387,28 @@ endif
 
 .F90.o:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS) $<
-ifdef ESMF_DEFER_LIB_BUILD
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	@mods="`ls *.mod 2>/dev/null`"; \
 	if [ $$? = 0 ]; then $(ESMF_MV) $$mods $(ESMF_MODDIR)/.; fi;
 endif
 
 .f90.o:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREENOCPP) $<
-ifdef ESMF_DEFER_LIB_BUILD
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	@mods="`ls *.mod 2>/dev/null`"; \
 	if [ $$? = 0 ]; then $(ESMF_MV) $$mods $(ESMF_MODDIR)/.; fi;
 endif
 
 .F.o:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXCPP) $(ESMF_F90COMPILECPPFLAGS) $<
-ifdef ESMF_DEFER_LIB_BUILD
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	@mods="`ls *.mod 2>/dev/null`"; \
 	if [ $$? = 0 ]; then $(ESMF_MV) $$mods $(ESMF_MODDIR)/.; fi;
 endif
 
 .f.o:
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXNOCPP) $<
-ifdef ESMF_DEFER_LIB_BUILD
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	@mods="`ls *.mod 2>/dev/null`"; \
 	if [ $$? = 0 ]; then $(ESMF_MV) $$mods $(ESMF_MODDIR)/.; fi;
 endif
