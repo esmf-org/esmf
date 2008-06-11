@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.11 2008/06/10 19:42:19 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.12 2008/06/11 21:21:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -102,7 +102,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.11 2008/06/10 19:42:19 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.12 2008/06/11 21:21:31 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -305,6 +305,8 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttSetLogical
         module procedure ESMF_CplCompAttSetLogicalList
         module procedure ESMF_CplCompAttSetChar
+        module procedure ESMF_CplCompAttSetLinkCplComp
+        module procedure ESMF_CplCompAttSetLinkGridComp
         module procedure ESMF_CplCompAttSetLinkState
         module procedure ESMF_GridCompAttSetInt4
         module procedure ESMF_GridCompAttSetInt4List
@@ -317,6 +319,8 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttSetLogical
         module procedure ESMF_GridCompAttSetLogicalList
         module procedure ESMF_GridCompAttSetChar
+        module procedure ESMF_GridCompAttSetLinkCplComp
+        module procedure ESMF_GridCompAttSetLinkGridComp
         module procedure ESMF_GridCompAttSetLinkState
         module procedure ESMF_FieldAttSetInt4
         module procedure ESMF_FieldAttSetInt4List
@@ -408,7 +412,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add an attribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add an Attribute package
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
@@ -421,7 +425,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Adds an attribute package to <object> with four attributes named 
+!     Adds an Attribute package to <object> with four Attributes named 
 !     {\tt shortname}, {\tt longname}, {\tt units}, and {\tt coordinates}.
 !     Supported values for <object> are:
 !     \begin{description}
@@ -439,9 +443,9 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -450,7 +454,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add an attribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add an Attribute package
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
@@ -466,7 +470,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Adds a customized attribute package to <object>.
+!     Adds a customized Attribute package to <object>.
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -483,13 +487,13 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [attrList]
-!           The list of attribute names to specify the custom attribute package.
+!           The list of Attribute names to specify the custom Attribute package.
 !     \item [count]
-!           The number of attributes to add to the custom attribute package.
+!           The number of Attributes to add to the custom Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -498,7 +502,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeCopy - Copy an attribute or attribute hierarchy
+! !IROUTINE: ESMF_AttributeCopy - Copy an Attribute or Attribute hierarchy
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeCopy() 
@@ -510,7 +514,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Copies an attribute hierarchy from <object1> to <object2>.
+!     Copies an Attribute hierarchy from <object1> to <object2>.
 !     Supported values for <object1> are:
 !     \begin{description}
 !     \item type(ESMF\_State), intent(inout) :: state
@@ -534,7 +538,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet  - Retrieve an attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an Attribute
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, count, <value argument>, &
@@ -551,10 +555,10 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns an attribute from the <object>, or from the attribute package
+!     Returns an Attribute from the <object>, or from the Attribute package
 !     specified by {\tt convention} and {\tt purpose}.  A default value 
 !     argument may be given if a return code is not desired when the 
-!     attribute is not found.
+!     Attribute is not found.
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -594,17 +598,17 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of items in a multi-valued attribute.
+!           The number of items in a multi-valued Attribute.
 !     \item [<value argument>]
-!           The value of the named attribute.
+!           The value of the named Attribute.
 !     \item [<defaultvalue argument>]
-!           The default value of the named attribute.
+!           The default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -613,7 +617,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet - Get the attribute count
+! !IROUTINE: ESMF_AttributeGet - Get the Attribute count
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGetCount(<object>, count, rc)
@@ -624,7 +628,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns the attribute count for <object>
+!     Returns the Attribute count for <object>
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -641,7 +645,7 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object.
 !     \item [count] 
-!           The attribute count for <object>.
+!           The Attribute count for <object>.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -650,7 +654,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet - Get attribute info by name
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by name
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGetInfoByName(<object>, name, typekind, count, rc)
@@ -663,7 +667,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns information associated with the named attribute, 
+!     Returns information associated with the named Attribute, 
 !     including {\tt typekind} and {\tt count}.
 !     Supported values for <object> are:
 !     \begin{description}
@@ -681,11 +685,11 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the attribute to query.
+!           The name of the Attribute to query.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           The number of items in this attribute.  For character types,
+!           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -695,7 +699,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet - Get attribute info by index number
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGetInfoByNum(<object>, attributeIndex, name, &
@@ -710,7 +714,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns information associated with the indexed attribute, 
+!     Returns information associated with the indexed Attribute, 
 !     including {\tt name}, {\tt typekind} and {\tt count}.
 !     Supported values for <object> are:
 !     \begin{description}
@@ -728,13 +732,13 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object.
 !     \item [attributeIndex]
-!           The index number of the attribute to query.
+!           The index number of the Attribute to query.
 !     \item [name]
-!           Returns the name of the attribute.
+!           Returns the name of the Attribute.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           Returns the number of items in this attribute.  For character types,
+!           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -744,7 +748,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Set an attribute
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(<object>, name, count, <value argument>, &
@@ -761,9 +765,9 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Attaches an attribute to <object>, or sets an attribute on an 
-!     attribute package.
-!     The attribute has a {\tt name} and either a {\tt value} or a 
+!     Attaches an Attribute to <object>, or sets an Attribute on an 
+!     Attribute package.
+!     The Attribute has a {\tt name} and either a {\tt value} or a 
 !     {\tt valueList}, with a {\tt count}, and a {\tt convention} and {\tt purpose}.
 !     Supported values for <object> are:
 !     \begin{description}
@@ -795,15 +799,15 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the Attribute to set.
 !     \item [count]
-!           The number of items in a multi-valued attribute.
+!           The number of items in a multi-valued Attribute.
 !     \item [<value argument>]
-!           The value of the attribute to set.
+!           The value of the Attribute to set.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -819,7 +823,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttAddPack"
 !BOPI
-! !IROUTINE: ESMF_ArrayAttAddPack - Create an array attribute package
+! !IROUTINE: ESMF_ArrayAttAddPack - Create an array Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -833,9 +837,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up the attribute package for the {\tt array}.
-!     The attribute package defines the convention, purpose, and object type 
-!     of the three associated attributes {\tt longname}, {\tt shortname}, 
+!     Sets up the Attribute package for the {\tt array}.
+!     The Attribute package defines the convention, purpose, and object type 
+!     of the three associated Attributes {\tt longname}, {\tt shortname}, 
 !     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
@@ -843,13 +847,13 @@ contains
 !     \item [array]
 !      An {\tt ESMF\_Array} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -897,7 +901,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttAddPackCustom"
 !BOPI
-! !IROUTINE: ESMF_ArrayAttAddPackCustom - Create the attribute package
+! !IROUTINE: ESMF_ArrayAttAddPackCustom - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -914,21 +918,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up a custom attribute package for the {\tt array}, or adds to an 
-!     existing attribute package.
+!     Sets up a custom Attribute package for the {\tt array}, or adds to an 
+!     existing Attribute package.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !      An {\tt ESMF\_Array} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -978,7 +982,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -995,22 +999,22 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns an integer attribute from the {\tt array}.
+!     Returns an integer Attribute from the {\tt array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1083,7 +1087,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -1102,25 +1106,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte integer list attribute from the {\tt array}.
+!      Returns a 4-byte integer list Attribute from the {\tt array}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1201,7 +1205,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -1219,22 +1223,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns an 8-byte integer attribute from the {\tt array}.
+!     Returns an 8-byte integer Attribute from the {\tt array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1307,7 +1311,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -1326,25 +1330,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte integer list attribute from the {\tt array}.
+!      Returns an 8-byte integer list Attribute from the {\tt array}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1425,7 +1429,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -1443,22 +1447,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from the {\tt array}.
+!      Returns a 4-byte real Attribute from the {\tt array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1531,7 +1535,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -1550,25 +1554,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from an {\tt ESMF\_Array}.
+!      Returns a 4-byte real Attribute from an {\tt ESMF\_Array}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1649,7 +1653,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -1667,22 +1671,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from the {\tt array}.
+!      Returns an 8-byte real Attribute from the {\tt array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1755,7 +1759,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -1774,25 +1778,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from an {\tt ESMF\_Array}.
+!      Returns an 8-byte real Attribute from an {\tt ESMF\_Array}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1873,7 +1877,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -1891,22 +1895,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical attribute from the {\tt array}.
+!      Returns a logical Attribute from the {\tt array}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The logical value of the named attribute.
+!           The logical value of the named Attribute.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1979,7 +1983,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -1998,25 +2002,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical list attribute from the {\tt array}.
+!      Returns a logical list Attribute from the {\tt array}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The logical values of the named attribute.
+!           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2097,7 +2101,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a character attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -2115,22 +2119,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a character attribute from the {\tt array}.
+!      Returns a character Attribute from the {\tt array}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The character value of the named attribute.
+!           The character value of the named Attribute.
 !     \item [defaultvalue]
-!           The character default value of the named attribute.
+!           The character default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2202,7 +2206,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetCount"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query the number of attributes
+! !IROUTINE: ESMF_AttributeGet - Query the number of Attributes
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet() 
@@ -2215,7 +2219,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns the number of attributes associated with the given {\tt array} 
+!     Returns the number of Attributes associated with the given {\tt array} 
 !     in the argument {\tt count}.
 ! 
 !     The arguments are:
@@ -2223,7 +2227,7 @@ contains
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [count]
-!           The number of attributes associated with this object.
+!           The number of Attributes associated with this object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2254,7 +2258,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetInfoByName"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query Array attributes by name
+! !IROUTINE: ESMF_AttributeGet - Query Array Attributes by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -2269,7 +2273,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns information associated with the named attribute, 
+!     Returns information associated with the named Attribute, 
 !     including {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -2277,11 +2281,11 @@ contains
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to query.
+!           The name of the Attribute to query.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           The number of items in this attribute.  For character types,
+!           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2319,7 +2323,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttGetInfoByNum"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query Array attributes by index number
+! !IROUTINE: ESMF_AttributeGet - Query Array Attributes by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -2336,7 +2340,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns information associated with the indexed attribute, 
+!      Returns information associated with the indexed Attribute, 
 !      including {\tt name}, {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -2344,13 +2348,13 @@ contains
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [attributeIndex]
-!           The index number of the attribute to query.
+!           The index number of the Attribute to query.
 !     \item [name]
-!           Returns the name of the attribute.
+!           Returns the name of the Attribute.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           Returns the number of items in this attribute.  For character types,
+!           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2390,7 +2394,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -2407,21 +2411,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte integer attribute to the {\tt array}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte integer Attribute to the {\tt array}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2482,7 +2486,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -2500,8 +2504,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte integer list attribute to the {\tt array}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte integer list Attribute to the {\tt array}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -2510,15 +2514,15 @@ contains
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2587,7 +2591,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -2604,21 +2608,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte integer attribute to the {\tt array}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte integer Attribute to the {\tt array}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2679,7 +2683,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -2697,8 +2701,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte integer list attribute to the {\tt array}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte integer list Attribute to the {\tt array}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -2707,15 +2711,15 @@ contains
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2784,7 +2788,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -2801,21 +2805,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte real attribute to the {\tt array}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte real Attribute to the {\tt array}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2876,7 +2880,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -2894,8 +2898,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte real list attribute to the {\tt array}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte real list Attribute to the {\tt array}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -2904,15 +2908,15 @@ contains
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2981,7 +2985,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -2998,21 +3002,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte real attribute to the {\tt array}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte real Attribute to the {\tt array}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3073,7 +3077,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -3091,8 +3095,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte real list attribute to the {\tt array}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte real list Attribute to the {\tt array}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -3101,15 +3105,15 @@ contains
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3179,7 +3183,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -3196,21 +3200,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical attribute to the {\tt array}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!     Attaches a logical Attribute to the {\tt array}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The logical true/false value of the attribute to add.
+!           The logical true/false value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3271,7 +3275,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -3289,8 +3293,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical list attribute to the {\tt array}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a logical list Attribute to the {\tt array}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of logical items in the {\tt valueList} is
 !     given by {\tt count}.
 ! 
@@ -3299,15 +3303,15 @@ contains
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of logicals in the {\tt valueList}.
 !     \item [value]
-!           The logical true/false values of the attribute.
+!           The logical true/false values of the Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3376,7 +3380,7 @@ contains
 #define ESMF_METHOD "ESMF_ArrayAttSetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a character attribute
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -3393,21 +3397,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to the {\tt array}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a character Attribute to the {\tt array}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The character value of the attribute to add.
+!           The character value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3464,7 +3468,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttWrite"
 !BOPI
-! !IROUTINE: ESMF_AttributeWrite - Print the attribute package
+! !IROUTINE: ESMF_AttributeWrite - Print the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
@@ -3478,9 +3482,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Print the attribute package for the {\tt array}.
-!     The attribute package defines the convention, purpose, and object type
-!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     Print the Attribute package for the {\tt array}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
 !     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
@@ -3488,9 +3492,9 @@ contains
 !     \item [array]
 !      An {\tt ESMF\_Array} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3544,7 +3548,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompAttAddPack"
 !BOPI
-! !IROUTINE: ESMF_CplCompAttAddPack - Create the attribute package
+! !IROUTINE: ESMF_CplCompAttAddPack - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -3558,9 +3562,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up the attribute package for the {\tt comp}.
-!     The attribute package defines the convention, purpose, and object type
-!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     Sets up the Attribute package for the {\tt comp}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
 !     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
@@ -3568,13 +3572,13 @@ contains
 !     \item [comp]
 !      An {\tt ESMF\_CplComp} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3622,7 +3626,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompAttAddPackCustom"
 !BOPI
-! !IROUTINE: ESMF_CplCompAttAddPackCustom - Create the attribute package
+! !IROUTINE: ESMF_CplCompAttAddPackCustom - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -3639,21 +3643,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up a custom attribute package for the {\tt comp}, or adds to an 
-!     existing attribute package.
+!     Sets up a custom Attribute package for the {\tt comp}, or adds to an 
+!     existing Attribute package.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !      An {\tt ESMF\_CplComp} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3704,7 +3708,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -3721,22 +3725,22 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns an integer attribute from the {\tt comp}.
+!     Returns an integer Attribute from the {\tt comp}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3809,7 +3813,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -3828,25 +3832,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte integer list attribute from the {\tt comp}.
+!      Returns a 4-byte integer list Attribute from the {\tt comp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3927,7 +3931,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -3945,22 +3949,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns an 8-byte integer attribute from the {\tt comp}.
+!     Returns an 8-byte integer Attribute from the {\tt comp}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4033,7 +4037,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -4052,25 +4056,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte integer list attribute from the {\tt comp}.
+!      Returns an 8-byte integer list Attribute from the {\tt comp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4151,7 +4155,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -4169,22 +4173,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from the {\tt comp}.
+!      Returns a 4-byte real Attribute from the {\tt comp}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4257,7 +4261,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -4276,25 +4280,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from an {\tt ESMF\_CplComp}.
+!      Returns a 4-byte real Attribute from an {\tt ESMF\_CplComp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4375,7 +4379,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -4393,22 +4397,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from the {\tt comp}.
+!      Returns an 8-byte real Attribute from the {\tt comp}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4481,7 +4485,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -4500,25 +4504,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from an {\tt ESMF\_CplComp}.
+!      Returns an 8-byte real Attribute from an {\tt ESMF\_CplComp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4599,7 +4603,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -4617,22 +4621,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical attribute from the {\tt comp}.
+!      Returns a logical Attribute from the {\tt comp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The logical value of the named attribute.
+!           The logical value of the named Attribute.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4705,7 +4709,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -4724,25 +4728,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical list attribute from the {\tt comp}.
+!      Returns a logical list Attribute from the {\tt comp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The logical values of the named attribute.
+!           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4823,7 +4827,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a character attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -4841,22 +4845,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a character attribute from the {\tt comp}.
+!      Returns a character Attribute from the {\tt comp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The character value of the named attribute.
+!           The character value of the named Attribute.
 !     \item [defaultvalue]
-!           The character default value of the named attribute.
+!           The character default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4928,7 +4932,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetCount"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query the number of attributes
+! !IROUTINE: ESMF_AttributeGet - Query the number of Attributes
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet() 
@@ -4941,7 +4945,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns the number of attributes associated with the given {\tt comp} 
+!     Returns the number of Attributes associated with the given {\tt comp} 
 !     in the argument {\tt count}.
 ! 
 !     The arguments are:
@@ -4949,7 +4953,7 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [count]
-!           The number of attributes associated with this object.
+!           The number of Attributes associated with this object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4980,7 +4984,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetInfoByName"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query Comp attributes by name
+! !IROUTINE: ESMF_AttributeGet - Query Comp Attributes by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -4995,7 +4999,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns information associated with the named attribute, 
+!     Returns information associated with the named Attribute, 
 !     including {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -5003,11 +5007,11 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to query.
+!           The name of the Attribute to query.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           The number of items in this attribute.  For character types,
+!           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5045,7 +5049,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttGetInfoByNum"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query Comp attributes by index number
+! !IROUTINE: ESMF_AttributeGet - Query Comp Attributes by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -5062,7 +5066,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns information associated with the indexed attribute, 
+!      Returns information associated with the indexed Attribute, 
 !      including {\tt name}, {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -5070,13 +5074,13 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [attributeIndex]
-!           The index number of the attribute to query.
+!           The index number of the Attribute to query.
 !     \item [name]
-!           Returns the name of the attribute.
+!           Returns the name of the Attribute.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           Returns the number of items in this attribute.  For character types,
+!           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5116,7 +5120,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttSetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -5133,21 +5137,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte integer attribute to the {\tt comp}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte integer Attribute to the {\tt comp}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5208,7 +5212,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttSetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -5226,8 +5230,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte integer list attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte integer list Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -5236,15 +5240,15 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5313,7 +5317,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttSetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -5330,21 +5334,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte integer attribute to the {\tt comp}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte integer Attribute to the {\tt comp}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5405,7 +5409,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttSetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -5423,8 +5427,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte integer list attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte integer list Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -5433,15 +5437,15 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5510,7 +5514,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttSetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -5527,21 +5531,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte real attribute to the {\tt comp}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte real Attribute to the {\tt comp}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5602,7 +5606,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttSetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -5620,8 +5624,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte real list attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte real list Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -5630,15 +5634,15 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5707,7 +5711,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttSetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -5724,21 +5728,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte real attribute to the {\tt comp}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte real Attribute to the {\tt comp}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5799,7 +5803,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttSetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -5817,8 +5821,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte real list attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte real list Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -5827,15 +5831,15 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5905,7 +5909,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttSetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -5922,21 +5926,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!     Attaches a logical Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The logical true/false value of the attribute to add.
+!           The logical true/false value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5997,7 +6001,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttSetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -6015,8 +6019,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical list attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a logical list Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of logical items in the {\tt valueList} is
 !     given by {\tt count}.
 ! 
@@ -6025,15 +6029,15 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of logicals in the {\tt valueList}.
 !     \item [value]
-!           The logical true/false values of the attribute.
+!           The logical true/false values of the Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -6102,7 +6106,7 @@ contains
 #define ESMF_METHOD "ESMF_CplCompAttSetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a character attribute
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -6119,21 +6123,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a character Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_CplComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The character value of the attribute to add.
+!           The character value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -6187,30 +6191,67 @@ contains
       end subroutine ESMF_CplCompAttSetChar
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompAttSetLinkState"
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Link an CplComp attribute hierarchy to a State
+! !IROUTINE: ESMF_AttributeSet - Link a CplComp Attribute hierarchy with the
+!                               {\bf hierarchy of CplComp, GridComp, or State}
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeSet()
+!      subroutine ESMF_CplCompAttSetLink(comp1, <object>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF\_CplComp), intent(inout) :: comp1  
+!      <object>, see below for supported values
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Attaches a {\tt CplComp} Attribute hierarchy to the hierarchy of
+!     a {\tt CplComp}, {\tt GridComp}, or {\tt State},. 
+!     Supported values for the <object> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: comp2
+!     \item type(ESMF\_GridComp), intent(inout) :: comp2
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [comp1]
+!       An {\tt ESMF\_CplComp} object.
+!     \item [<object>]
+!       The object with which to link hierarchies.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompAttSetLinkCplComp"
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Link an CplComp Attribute hierarchy to a CplComp
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_CplCompAttSetLinkState(comp, state, rc)
+      subroutine ESMF_CplCompAttSetLinkCplComp(comp1, comp2, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout)  :: state
+      type(ESMF_CplComp), intent(inout) :: comp1
+      type(ESMF_CplComp), intent(inout)  :: comp2
       integer, intent(out), optional  :: rc   
 
 !
 ! !DESCRIPTION:
-!     Attaches a comp to a Field in an attribute hierarchy
+!     Attaches a CplComp to a CplComp in an Attribute hierarchy
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [comp]
+!     \item [comp1]
 !      An {\tt ESMF\_CplComp} object.
-!     \item [state]
-!      An {\tt ESMF\_State} derived object.
+!     \item [comp2]
+!      An {\tt ESMF\_CplComp} object.
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -6223,14 +6264,136 @@ contains
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp1,rc)
 
-      call ESMF_CplCompValidate(comp, rc=localrc)
+      call ESMF_CplCompValidate(comp1, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetLink(comp%compp%base, state%statep%base, &
+      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp2,rc)
+
+      call ESMF_CplCompValidate(comp2, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
+        localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_CplCompAttSetLinkCplComp
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompAttSetLinkGridComp"
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Link an CplComp Attribute hierarchy to a GridComp
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeSet()
+      subroutine ESMF_CplCompAttSetLinkGridComp(comp1, comp2, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp), intent(inout) :: comp1
+      type(ESMF_GridComp), intent(inout)  :: comp2
+      integer, intent(out), optional  :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a CplComp to a GridComp in an Attribute hierarchy
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [comp1]
+!      An {\tt ESMF\_CplComp} object.
+!     \item [comp2]
+!      An {\tt ESMF\_GridComp} object.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp1,rc)
+
+      call ESMF_CplCompValidate(comp1, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp2,rc)
+
+      call ESMF_GridCompValidate(comp2, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
+        localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_CplCompAttSetLinkGridComp
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompAttSetLinkState"
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Link an CplComp Attribute hierarchy to a State
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeSet()
+      subroutine ESMF_CplCompAttSetLinkState(comp1, state, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp), intent(inout) :: comp1
+      type(ESMF_State), intent(inout)  :: state
+      integer, intent(out), optional  :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a comp to a Field in an Attribute hierarchy
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [comp1]
+!      An {\tt ESMF\_CplComp} object.
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp1,rc)
+
+      call ESMF_CplCompValidate(comp1, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetLink(comp1%compp%base, state%statep%base, &
         localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -6244,7 +6407,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompAttWrite"
 !BOPI
-! !IROUTINE: ESMF_CplCompAttWrite - Print the attribute package
+! !IROUTINE: ESMF_CplCompAttWrite - Print the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
@@ -6258,9 +6421,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Write the attribute package for the {\tt comp}.
-!     The attribute package defines the convention, purpose, and object type
-!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     Write the Attribute package for the {\tt comp}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
 !     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
@@ -6268,9 +6431,9 @@ contains
 !     \item [comp]
 !      An {\tt ESMF\_CplComp} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -6324,7 +6487,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompAttAddPack"
 !BOPI
-! !IROUTINE: ESMF_GridCompAttAddPack - Create the attribute package
+! !IROUTINE: ESMF_GridCompAttAddPack - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -6338,9 +6501,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up the attribute package for the {\tt comp}.
-!     The attribute package defines the convention, purpose, and object type
-!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     Sets up the Attribute package for the {\tt comp}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
 !     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
@@ -6348,13 +6511,13 @@ contains
 !     \item [comp]
 !      An {\tt ESMF\_GridComp} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -6402,7 +6565,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompAttAddPackCustom"
 !BOPI
-! !IROUTINE: ESMF_GridCompAttAddPackCustom - Create the attribute package
+! !IROUTINE: ESMF_GridCompAttAddPackCustom - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -6419,21 +6582,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up a custom attribute package for the {\tt comp}, or adds to an 
-!     existing attribute package.
+!     Sets up a custom Attribute package for the {\tt comp}, or adds to an 
+!     existing Attribute package.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !      An {\tt ESMF\_GridComp} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -6483,7 +6646,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -6500,22 +6663,22 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns an integer attribute from the {\tt comp}.
+!     Returns an integer Attribute from the {\tt comp}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -6588,7 +6751,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -6607,25 +6770,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte integer list attribute from the {\tt comp}.
+!      Returns a 4-byte integer list Attribute from the {\tt comp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -6706,7 +6869,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -6724,22 +6887,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns an 8-byte integer attribute from the {\tt comp}.
+!     Returns an 8-byte integer Attribute from the {\tt comp}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -6812,7 +6975,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -6831,25 +6994,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte integer list attribute from the {\tt comp}.
+!      Returns an 8-byte integer list Attribute from the {\tt comp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -6930,7 +7093,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -6948,22 +7111,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from the {\tt comp}.
+!      Returns a 4-byte real Attribute from the {\tt comp}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -7036,7 +7199,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -7055,25 +7218,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from an {\tt ESMF\_GridComp}.
+!      Returns a 4-byte real Attribute from an {\tt ESMF\_GridComp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -7154,7 +7317,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -7172,22 +7335,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from the {\tt comp}.
+!      Returns an 8-byte real Attribute from the {\tt comp}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -7260,7 +7423,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -7279,25 +7442,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from an {\tt ESMF\_GridComp}.
+!      Returns an 8-byte real Attribute from an {\tt ESMF\_GridComp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -7378,7 +7541,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -7396,22 +7559,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical attribute from the {\tt comp}.
+!      Returns a logical Attribute from the {\tt comp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The logical value of the named attribute.
+!           The logical value of the named Attribute.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -7484,7 +7647,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -7503,25 +7666,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical list attribute from the {\tt comp}.
+!      Returns a logical list Attribute from the {\tt comp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The logical values of the named attribute.
+!           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -7602,7 +7765,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a character attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -7620,22 +7783,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a character attribute from the {\tt comp}.
+!      Returns a character Attribute from the {\tt comp}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The character value of the named attribute.
+!           The character value of the named Attribute.
 !     \item [defaultvalue]
-!           The character default value of the named attribute.
+!           The character default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -7707,7 +7870,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetCount"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query the number of attributes
+! !IROUTINE: ESMF_AttributeGet - Query the number of Attributes
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet() 
@@ -7720,7 +7883,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns the number of attributes associated with the given {\tt comp} 
+!     Returns the number of Attributes associated with the given {\tt comp} 
 !     in the argument {\tt count}.
 ! 
 !     The arguments are:
@@ -7728,7 +7891,7 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [count]
-!           The number of attributes associated with this object.
+!           The number of Attributes associated with this object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -7759,7 +7922,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetInfoByName"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query Comp attributes by name
+! !IROUTINE: ESMF_AttributeGet - Query Comp Attributes by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -7774,7 +7937,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns information associated with the named attribute, 
+!     Returns information associated with the named Attribute, 
 !     including {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -7782,11 +7945,11 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to query.
+!           The name of the Attribute to query.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           The number of items in this attribute.  For character types,
+!           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -7824,7 +7987,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttGetInfoByNum"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query Comp attributes by index number
+! !IROUTINE: ESMF_AttributeGet - Query Comp Attributes by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -7841,7 +8004,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns information associated with the indexed attribute, 
+!      Returns information associated with the indexed Attribute, 
 !      including {\tt name}, {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -7849,13 +8012,13 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [attributeIndex]
-!           The index number of the attribute to query.
+!           The index number of the Attribute to query.
 !     \item [name]
-!           Returns the name of the attribute.
+!           Returns the name of the Attribute.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           Returns the number of items in this attribute.  For character types,
+!           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -7895,7 +8058,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttSetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -7912,21 +8075,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte integer attribute to the {\tt comp}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte integer Attribute to the {\tt comp}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -7987,7 +8150,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttSetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -8005,8 +8168,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte integer list attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte integer list Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -8015,15 +8178,15 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8092,7 +8255,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttSetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -8109,21 +8272,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte integer attribute to the {\tt comp}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte integer Attribute to the {\tt comp}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8184,7 +8347,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttSetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -8202,8 +8365,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte integer list attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte integer list Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -8212,15 +8375,15 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8289,7 +8452,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttSetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -8306,21 +8469,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte real attribute to the {\tt comp}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte real Attribute to the {\tt comp}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8381,7 +8544,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttSetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -8399,8 +8562,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte real list attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte real list Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -8409,15 +8572,15 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8486,7 +8649,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttSetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -8503,21 +8666,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte real attribute to the {\tt comp}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte real Attribute to the {\tt comp}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8578,7 +8741,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttSetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -8596,8 +8759,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte real list attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte real list Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -8606,15 +8769,15 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8684,7 +8847,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttSetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -8701,21 +8864,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!     Attaches a logical Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The logical true/false value of the attribute to add.
+!           The logical true/false value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8776,7 +8939,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttSetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -8794,8 +8957,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical list attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a logical list Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of logical items in the {\tt valueList} is
 !     given by {\tt count}.
 ! 
@@ -8804,15 +8967,15 @@ contains
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of logicals in the {\tt valueList}.
 !     \item [value]
-!           The logical true/false values of the attribute.
+!           The logical true/false values of the Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8881,7 +9044,7 @@ contains
 #define ESMF_METHOD "ESMF_GridCompAttSetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a character attribute
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -8898,21 +9061,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to the {\tt comp}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a character Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [comp]
 !           An {\tt ESMF\_GridComp} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The character value of the attribute to add.
+!           The character value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -8966,30 +9129,67 @@ contains
       end subroutine ESMF_GridCompAttSetChar
 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCompAttSetLinkState"
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Link an GridComp attribute hierarchy to a State
+! !IROUTINE: ESMF_AttributeSet - Link a GridComp Attribute hierarchy with the
+!                               {\bf hierarchy of CplComp, GridComp, or State}
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeSet()
+!      subroutine ESMF_GridCompAttSetLink(comp1, <object>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF\_GridComp), intent(inout) :: comp1  
+!      <object>, see below for supported values
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Attaches a {\tt GridComp} Attribute hierarchy to the hierarchy of
+!     a {\tt CplComp}, {\tt GridComp}, or {\tt State},. 
+!     Supported values for the <object> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: comp2
+!     \item type(ESMF\_GridComp), intent(inout) :: comp2
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [comp1]
+!       An {\tt ESMF\_GridComp} object.
+!     \item [<object>]
+!       The object with which to link hierarchies.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompAttSetLinkCplComp"
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Link an GridComp Attribute hierarchy to a CplComp
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_GridCompAttSetLinkState(comp, state, rc)
+      subroutine ESMF_GridCompAttSetLinkCplComp(comp1, comp2, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout)  :: state
+      type(ESMF_GridComp), intent(inout) :: comp1
+      type(ESMF_CplComp), intent(inout)  :: comp2
       integer, intent(out), optional  :: rc   
 
 !
 ! !DESCRIPTION:
-!     Attaches a comp to a Field in an attribute hierarchy
+!     Attaches a GridComp to a CplComp in an Attribute hierarchy
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [comp]
+!     \item [comp1]
 !      An {\tt ESMF\_GridComp} object.
-!     \item [state]
-!      An {\tt ESMF\_State} derived object.
+!     \item [comp2]
+!      An {\tt ESMF\_CplComp} object.
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -9002,14 +9202,136 @@ contains
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp1,rc)
 
-      call ESMF_GridCompValidate(comp, rc=localrc)
+      call ESMF_GridCompValidate(comp1, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetLink(comp%compp%base, state%statep%base, &
+      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp2,rc)
+
+      call ESMF_CplCompValidate(comp2, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
+        localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridCompAttSetLinkCplComp
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompAttSetLinkGridComp"
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Link an GridComp Attribute hierarchy to a GridComp
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeSet()
+      subroutine ESMF_GridCompAttSetLinkGridComp(comp1, comp2, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(inout) :: comp1
+      type(ESMF_GridComp), intent(inout)  :: comp2
+      integer, intent(out), optional  :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a GridComp to a GridComp in an Attribute hierarchy
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [comp1]
+!      An {\tt ESMF\_GridComp} object.
+!     \item [comp2]
+!      An {\tt ESMF\_GridComp} object.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp1,rc)
+
+      call ESMF_GridCompValidate(comp1, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp2,rc)
+
+      call ESMF_GridCompValidate(comp2, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
+        localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridCompAttSetLinkGridComp
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompAttSetLinkState"
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Link an GridComp Attribute hierarchy to a State
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeSet()
+      subroutine ESMF_GridCompAttSetLinkState(comp1, state, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(inout) :: comp1
+      type(ESMF_State), intent(inout)  :: state
+      integer, intent(out), optional  :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a comp to a Field in an Attribute hierarchy
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [comp1]
+!      An {\tt ESMF\_GridComp} object.
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+      integer :: localrc                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp1,rc)
+
+      call ESMF_GridCompValidate(comp1, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_AttributeSetLink(comp1%compp%base, state%statep%base, &
         localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -9023,7 +9345,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompAttWrite"
 !BOPI
-! !IROUTINE: ESMF_GridCompAttWrite - Print the attribute package
+! !IROUTINE: ESMF_GridCompAttWrite - Print the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
@@ -9037,9 +9359,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Write the attribute package for the {\tt comp}.
-!     The attribute package defines the convention, purpose, and object type
-!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     Write the Attribute package for the {\tt comp}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
 !     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
@@ -9047,9 +9369,9 @@ contains
 !     \item [comp]
 !      An {\tt ESMF\_GridComp} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -9103,7 +9425,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAttAddPack"
 !BOPI
-! !IROUTINE: ESMF_FieldAttAddPack - Create the attribute package
+! !IROUTINE: ESMF_FieldAttAddPack - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -9117,9 +9439,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up the attribute package for the {\tt field}.
-!     The attribute package defines the convention, purpose, and object type
-!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     Sets up the Attribute package for the {\tt field}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
 !     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
@@ -9127,13 +9449,13 @@ contains
 !     \item [field]
 !      An {\tt ESMF\_Field} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -9181,7 +9503,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAttAddPackCustom"
 !BOPI
-! !IROUTINE: ESMF_FieldAttAddPackCustom - Create the attribute package
+! !IROUTINE: ESMF_FieldAttAddPackCustom - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -9198,21 +9520,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up a custom attribute package for the {\tt field}, or adds to an 
-!     existing attribute package.
+!     Sets up a custom Attribute package for the {\tt field}, or adds to an 
+!     existing Attribute package.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !      An {\tt ESMF\_Field} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -9262,7 +9584,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -9279,22 +9601,22 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns an integer attribute from the {\tt field}.
+!     Returns an integer Attribute from the {\tt field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -9367,7 +9689,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -9386,25 +9708,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte integer list attribute from the {\tt field}.
+!      Returns a 4-byte integer list Attribute from the {\tt field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -9485,7 +9807,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -9503,22 +9825,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns an 8-byte integer attribute from the {\tt field}.
+!     Returns an 8-byte integer Attribute from the {\tt field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -9591,7 +9913,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -9610,25 +9932,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte integer list attribute from the {\tt field}.
+!      Returns an 8-byte integer list Attribute from the {\tt field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -9709,7 +10031,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -9727,22 +10049,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from the {\tt field}.
+!      Returns a 4-byte real Attribute from the {\tt field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -9815,7 +10137,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -9834,25 +10156,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from an {\tt ESMF\_Field}.
+!      Returns a 4-byte real Attribute from an {\tt ESMF\_Field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -9933,7 +10255,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -9951,22 +10273,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from the {\tt field}.
+!      Returns an 8-byte real Attribute from the {\tt field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -10039,7 +10361,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -10058,25 +10380,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from an {\tt ESMF\_Field}.
+!      Returns an 8-byte real Attribute from an {\tt ESMF\_Field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -10157,7 +10479,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -10175,22 +10497,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical attribute from the {\tt field}.
+!      Returns a logical Attribute from the {\tt field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The logical value of the named attribute.
+!           The logical value of the named Attribute.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -10263,7 +10585,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -10282,25 +10604,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical list attribute from the {\tt field}.
+!      Returns a logical list Attribute from the {\tt field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The logical values of the named attribute.
+!           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -10381,7 +10703,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a character attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -10399,22 +10721,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a character attribute from the {\tt field}.
+!      Returns a character Attribute from the {\tt field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The character value of the named attribute.
+!           The character value of the named Attribute.
 !     \item [defaultvalue]
-!           The character default value of the named attribute.
+!           The character default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -10486,7 +10808,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetCount"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query the number of attributes
+! !IROUTINE: ESMF_AttributeGet - Query the number of Attributes
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet() 
@@ -10499,7 +10821,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns the number of attributes associated with the given {\tt field} 
+!     Returns the number of Attributes associated with the given {\tt field} 
 !     in the argument {\tt count}.
 ! 
 !     The arguments are:
@@ -10507,7 +10829,7 @@ contains
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [count]
-!           The number of attributes associated with this object.
+!           The number of Attributes associated with this object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -10538,7 +10860,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetInfoByName"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query Field attributes by name
+! !IROUTINE: ESMF_AttributeGet - Query Field Attributes by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -10553,7 +10875,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns information associated with the named attribute, 
+!     Returns information associated with the named Attribute, 
 !     including {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -10561,11 +10883,11 @@ contains
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to query.
+!           The name of the Attribute to query.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           The number of items in this attribute.  For character types,
+!           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -10603,7 +10925,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttGetInfoByNum"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query Field attributes by index number
+! !IROUTINE: ESMF_AttributeGet - Query Field Attributes by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -10620,7 +10942,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns information associated with the indexed attribute, 
+!      Returns information associated with the indexed Attribute, 
 !      including {\tt name}, {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -10628,13 +10950,13 @@ contains
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [attributeIndex]
-!           The index number of the attribute to query.
+!           The index number of the Attribute to query.
 !     \item [name]
-!           Returns the name of the attribute.
+!           Returns the name of the Attribute.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           Returns the number of items in this attribute.  For character types,
+!           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -10674,7 +10996,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -10691,21 +11013,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte integer attribute to the {\tt field}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte integer Attribute to the {\tt field}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -10766,7 +11088,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -10784,8 +11106,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte integer list attribute to the {\tt field}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte integer list Attribute to the {\tt field}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -10794,15 +11116,15 @@ contains
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -10871,7 +11193,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -10888,21 +11210,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte integer attribute to the {\tt field}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte integer Attribute to the {\tt field}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -10963,7 +11285,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -10981,8 +11303,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte integer list attribute to the {\tt field}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte integer list Attribute to the {\tt field}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -10991,15 +11313,15 @@ contains
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -11068,7 +11390,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -11085,21 +11407,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte real attribute to the {\tt field}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte real Attribute to the {\tt field}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -11160,7 +11482,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -11178,8 +11500,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte real list attribute to the {\tt field}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte real list Attribute to the {\tt field}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -11188,15 +11510,15 @@ contains
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -11265,7 +11587,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -11282,21 +11604,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte real attribute to the {\tt field}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte real Attribute to the {\tt field}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -11357,7 +11679,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -11375,8 +11697,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte real list attribute to the {\tt field}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte real list Attribute to the {\tt field}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -11385,15 +11707,15 @@ contains
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -11463,7 +11785,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -11480,21 +11802,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical attribute to the {\tt field}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!     Attaches a logical Attribute to the {\tt field}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The logical true/false value of the attribute to add.
+!           The logical true/false value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -11555,7 +11877,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -11573,8 +11895,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical list attribute to the {\tt field}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a logical list Attribute to the {\tt field}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of logical items in the {\tt valueList} is
 !     given by {\tt count}.
 ! 
@@ -11583,15 +11905,15 @@ contains
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of logicals in the {\tt valueList}.
 !     \item [value]
-!           The logical true/false values of the attribute.
+!           The logical true/false values of the Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -11660,7 +11982,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldAttSetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a character attribute
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -11677,21 +11999,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to the {\tt field}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a character Attribute to the {\tt field}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The character value of the attribute to add.
+!           The character value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -11748,7 +12070,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAttWrite"
 !BOPI
-! !IROUTINE: ESMF_AttributeWrite - Print the attribute package
+! !IROUTINE: ESMF_AttributeWrite - Print the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
@@ -11762,9 +12084,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Write the attribute package for the {\tt field}.
-!     The attribute package defines the convention, purpose, and object type
-!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     Write the Attribute package for the {\tt field}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
 !     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
@@ -11772,9 +12094,9 @@ contains
 !     \item [field]
 !      An {\tt ESMF\_Field} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -11828,7 +12150,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttAddPack"
 !BOPI
-! !IROUTINE: ESMF_FBundleAttAddPack - Create the attribute package
+! !IROUTINE: ESMF_FBundleAttAddPack - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -11842,9 +12164,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up the attribute package for the {\tt fieldbundle}.
-!     The attribute package defines the convention, purpose, and object type
-!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     Sets up the Attribute package for the {\tt fieldbundle}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
 !     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
@@ -11852,13 +12174,13 @@ contains
 !     \item [fieldbundle]
 !      An {\tt ESMF\_FieldBundle} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -11906,7 +12228,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttAddPackCustom"
 !BOPI
-! !IROUTINE: ESMF_FBundleAttAddPackCustom - Create the attribute package
+! !IROUTINE: ESMF_FBundleAttAddPackCustom - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -11923,21 +12245,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up a custom attribute package for the {\tt fieldbundle}, or adds to an 
-!     existing attribute package.
+!     Sets up a custom Attribute package for the {\tt fieldbundle}, or adds to an 
+!     existing Attribute package.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !      An {\tt ESMF\_FieldBundle} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -11987,7 +12309,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -12004,22 +12326,22 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns an integer attribute from the {\tt fieldbundle}.
+!     Returns an integer Attribute from the {\tt fieldbundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -12092,7 +12414,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -12111,25 +12433,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte integer list attribute from the {\tt fieldbundle}.
+!      Returns a 4-byte integer list Attribute from the {\tt fieldbundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -12210,7 +12532,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -12228,22 +12550,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns an 8-byte integer attribute from the {\tt fieldbundle}.
+!     Returns an 8-byte integer Attribute from the {\tt fieldbundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -12316,7 +12638,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -12335,25 +12657,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte integer list attribute from the {\tt fieldbundle}.
+!      Returns an 8-byte integer list Attribute from the {\tt fieldbundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -12434,7 +12756,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -12452,22 +12774,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from the {\tt fieldbundle}.
+!      Returns a 4-byte real Attribute from the {\tt fieldbundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -12540,7 +12862,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -12559,25 +12881,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from an {\tt ESMF\_FieldBundle}.
+!      Returns a 4-byte real Attribute from an {\tt ESMF\_FieldBundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -12658,7 +12980,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -12676,22 +12998,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from the {\tt fieldbundle}.
+!      Returns an 8-byte real Attribute from the {\tt fieldbundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -12764,7 +13086,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -12783,25 +13105,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from an {\tt ESMF\_FieldBundle}.
+!      Returns an 8-byte real Attribute from an {\tt ESMF\_FieldBundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -12882,7 +13204,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -12900,22 +13222,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical attribute from the {\tt fieldbundle}.
+!      Returns a logical Attribute from the {\tt fieldbundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The logical value of the named attribute.
+!           The logical value of the named Attribute.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -12988,7 +13310,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -13007,25 +13329,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical list attribute from the {\tt fieldbundle}.
+!      Returns a logical list Attribute from the {\tt fieldbundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The logical values of the named attribute.
+!           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -13106,7 +13428,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a character attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -13124,22 +13446,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a character attribute from the {\tt fieldbundle}.
+!      Returns a character Attribute from the {\tt fieldbundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The character value of the named attribute.
+!           The character value of the named Attribute.
 !     \item [defaultvalue]
-!           The character default value of the named attribute.
+!           The character default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -13211,7 +13533,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetCount"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query the number of attributes
+! !IROUTINE: ESMF_AttributeGet - Query the number of Attributes
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet() 
@@ -13224,7 +13546,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns the number of attributes associated with the given {\tt fieldbundle} 
+!     Returns the number of Attributes associated with the given {\tt fieldbundle} 
 !     in the argument {\tt count}.
 ! 
 !     The arguments are:
@@ -13232,7 +13554,7 @@ contains
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [count]
-!           The number of attributes associated with this object.
+!           The number of Attributes associated with this object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -13263,7 +13585,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetInfoByName"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query FBundle attributes by name
+! !IROUTINE: ESMF_AttributeGet - Query FBundle Attributes by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -13278,7 +13600,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns information associated with the named attribute, 
+!     Returns information associated with the named Attribute, 
 !     including {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -13286,11 +13608,11 @@ contains
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to query.
+!           The name of the Attribute to query.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           The number of items in this attribute.  For character types,
+!           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -13328,7 +13650,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttGetInfoByNum"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query FBundle attributes by index number
+! !IROUTINE: ESMF_AttributeGet - Query FBundle Attributes by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -13345,7 +13667,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns information associated with the indexed attribute, 
+!      Returns information associated with the indexed Attribute, 
 !      including {\tt name}, {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -13353,13 +13675,13 @@ contains
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [attributeIndex]
-!           The index number of the attribute to query.
+!           The index number of the Attribute to query.
 !     \item [name]
-!           Returns the name of the attribute.
+!           Returns the name of the Attribute.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           Returns the number of items in this attribute.  For character types,
+!           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -13399,7 +13721,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -13416,21 +13738,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte integer attribute to the {\tt fieldbundle}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte integer Attribute to the {\tt fieldbundle}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -13491,7 +13813,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -13509,8 +13831,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte integer list attribute to the {\tt fieldbundle}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte integer list Attribute to the {\tt fieldbundle}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -13519,15 +13841,15 @@ contains
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -13596,7 +13918,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -13613,21 +13935,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte integer attribute to the {\tt fieldbundle}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte integer Attribute to the {\tt fieldbundle}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -13688,7 +14010,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -13706,8 +14028,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte integer list attribute to the {\tt fieldbundle}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte integer list Attribute to the {\tt fieldbundle}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -13716,15 +14038,15 @@ contains
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -13793,7 +14115,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -13810,21 +14132,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte real attribute to the {\tt fieldbundle}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte real Attribute to the {\tt fieldbundle}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -13885,7 +14207,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -13903,8 +14225,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte real list attribute to the {\tt fieldbundle}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte real list Attribute to the {\tt fieldbundle}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -13913,15 +14235,15 @@ contains
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -13990,7 +14312,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -14007,21 +14329,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte real attribute to the {\tt fieldbundle}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte real Attribute to the {\tt fieldbundle}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -14082,7 +14404,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -14100,8 +14422,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte real list attribute to the {\tt fieldbundle}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte real list Attribute to the {\tt fieldbundle}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -14110,15 +14432,15 @@ contains
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -14188,7 +14510,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -14205,21 +14527,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical attribute to the {\tt fieldbundle}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!     Attaches a logical Attribute to the {\tt fieldbundle}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The logical true/false value of the attribute to add.
+!           The logical true/false value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -14280,7 +14602,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -14298,8 +14620,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical list attribute to the {\tt fieldbundle}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a logical list Attribute to the {\tt fieldbundle}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of logical items in the {\tt valueList} is
 !     given by {\tt count}.
 ! 
@@ -14308,15 +14630,15 @@ contains
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of logicals in the {\tt valueList}.
 !     \item [value]
-!           The logical true/false values of the attribute.
+!           The logical true/false values of the Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -14385,7 +14707,7 @@ contains
 #define ESMF_METHOD "ESMF_FBundleAttSetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a character attribute
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -14402,21 +14724,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to the {\tt fieldbundle}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a character Attribute to the {\tt fieldbundle}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The character value of the attribute to add.
+!           The character value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -14473,7 +14795,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttSetLinkField"
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Link an FBundle attribute hierarchy to a Field
+! !IROUTINE: ESMF_AttributeSet - Link an FBundle Attribute hierarchy to a Field
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -14486,14 +14808,14 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a FieldBundle to a Field in an attribute hierarchy
+!     Attaches a FieldBundle to a Field in an Attribute hierarchy
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
 !      An {\tt ESMF\_FieldBundle} object.
 !     \item [field]
-!      An {\tt ESMF\_Field} derived object.
+!      An {\tt ESMF\_Field} object.
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -14527,7 +14849,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttWrite"
 !BOPI
-! !IROUTINE: ESMF_FBundleAttWrite - Print the attribute package
+! !IROUTINE: ESMF_FBundleAttWrite - Print the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
@@ -14541,9 +14863,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Write the attribute package for the {\tt fieldbundle}.
-!     The attribute package defines the convention, purpose, and object type
-!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     Write the Attribute package for the {\tt fieldbundle}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
 !     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
@@ -14551,9 +14873,9 @@ contains
 !     \item [fieldbundle]
 !      An {\tt ESMF\_FieldBundle} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -14607,7 +14929,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttAddPack"
 !BOPI
-! !IROUTINE: ESMF_GridAttAddPack - Create the attribute package
+! !IROUTINE: ESMF_GridAttAddPack - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -14621,9 +14943,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up the attribute package for the {\tt grid}.
-!     The attribute package defines the convention, purpose, and object type
-!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     Sets up the Attribute package for the {\tt grid}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
 !     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
@@ -14631,13 +14953,13 @@ contains
 !     \item [grid]
 !      An {\tt ESMF\_Grid} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -14685,7 +15007,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttAddPackCustom"
 !BOPI
-! !IROUTINE: ESMF_GridAttAddPackCustom - Create the attribute package
+! !IROUTINE: ESMF_GridAttAddPackCustom - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -14702,21 +15024,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up a custom attribute package for the {\tt grid}, or adds to an 
-!     existing attribute package.
+!     Sets up a custom Attribute package for the {\tt grid}, or adds to an 
+!     existing Attribute package.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !      An {\tt ESMF\_Grid} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -14766,7 +15088,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -14783,22 +15105,22 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns an integer attribute from the {\tt grid}.
+!     Returns an integer Attribute from the {\tt grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -14871,7 +15193,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -14890,25 +15212,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte integer list attribute from the {\tt grid}.
+!      Returns a 4-byte integer list Attribute from the {\tt grid}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -14989,7 +15311,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -15007,22 +15329,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns an 8-byte integer attribute from the {\tt grid}.
+!     Returns an 8-byte integer Attribute from the {\tt grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -15095,7 +15417,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -15114,25 +15436,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte integer list attribute from the {\tt grid}.
+!      Returns an 8-byte integer list Attribute from the {\tt grid}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -15213,7 +15535,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -15231,22 +15553,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from the {\tt grid}.
+!      Returns a 4-byte real Attribute from the {\tt grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -15319,7 +15641,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -15338,25 +15660,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from an {\tt ESMF\_Grid}.
+!      Returns a 4-byte real Attribute from an {\tt ESMF\_Grid}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -15437,7 +15759,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -15455,22 +15777,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from the {\tt grid}.
+!      Returns an 8-byte real Attribute from the {\tt grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -15543,7 +15865,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -15562,25 +15884,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from an {\tt ESMF\_Grid}.
+!      Returns an 8-byte real Attribute from an {\tt ESMF\_Grid}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -15661,7 +15983,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -15679,22 +16001,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical attribute from the {\tt grid}.
+!      Returns a logical Attribute from the {\tt grid}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The logical value of the named attribute.
+!           The logical value of the named Attribute.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -15767,7 +16089,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -15786,25 +16108,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical list attribute from the {\tt grid}.
+!      Returns a logical list Attribute from the {\tt grid}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The logical values of the named attribute.
+!           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -15885,7 +16207,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a character attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -15903,22 +16225,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a character attribute from the {\tt grid}.
+!      Returns a character Attribute from the {\tt grid}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The character value of the named attribute.
+!           The character value of the named Attribute.
 !     \item [defaultvalue]
-!           The character default value of the named attribute.
+!           The character default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -15990,7 +16312,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetCount"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query the number of attributes
+! !IROUTINE: ESMF_AttributeGet - Query the number of Attributes
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet() 
@@ -16003,7 +16325,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns the number of attributes associated with the given {\tt grid} 
+!     Returns the number of Attributes associated with the given {\tt grid} 
 !     in the argument {\tt count}.
 ! 
 !     The arguments are:
@@ -16011,7 +16333,7 @@ contains
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [count]
-!           The number of attributes associated with this object.
+!           The number of Attributes associated with this object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -16042,7 +16364,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetInfoByName"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query Grid attributes by name
+! !IROUTINE: ESMF_AttributeGet - Query Grid Attributes by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -16057,7 +16379,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns information associated with the named attribute, 
+!     Returns information associated with the named Attribute, 
 !     including {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -16065,11 +16387,11 @@ contains
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to query.
+!           The name of the Attribute to query.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           The number of items in this attribute.  For character types,
+!           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -16107,7 +16429,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttGetInfoByNum"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query Grid attributes by index number
+! !IROUTINE: ESMF_AttributeGet - Query Grid Attributes by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -16124,7 +16446,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns information associated with the indexed attribute, 
+!      Returns information associated with the indexed Attribute, 
 !      including {\tt name}, {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -16132,13 +16454,13 @@ contains
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [attributeIndex]
-!           The index number of the attribute to query.
+!           The index number of the Attribute to query.
 !     \item [name]
-!           Returns the name of the attribute.
+!           Returns the name of the Attribute.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           Returns the number of items in this attribute.  For character types,
+!           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -16178,7 +16500,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -16195,21 +16517,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte integer attribute to the {\tt grid}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte integer Attribute to the {\tt grid}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -16270,7 +16592,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -16288,8 +16610,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte integer list attribute to the {\tt grid}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte integer list Attribute to the {\tt grid}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -16298,15 +16620,15 @@ contains
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -16375,7 +16697,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -16392,21 +16714,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte integer attribute to the {\tt grid}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte integer Attribute to the {\tt grid}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -16467,7 +16789,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -16485,8 +16807,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte integer list attribute to the {\tt grid}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte integer list Attribute to the {\tt grid}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -16495,15 +16817,15 @@ contains
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -16572,7 +16894,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -16589,21 +16911,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte real attribute to the {\tt grid}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte real Attribute to the {\tt grid}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -16664,7 +16986,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -16682,8 +17004,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte real list attribute to the {\tt grid}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte real list Attribute to the {\tt grid}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -16692,15 +17014,15 @@ contains
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -16769,7 +17091,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -16786,21 +17108,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte real attribute to the {\tt grid}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte real Attribute to the {\tt grid}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -16861,7 +17183,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -16879,8 +17201,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte real list attribute to the {\tt grid}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte real list Attribute to the {\tt grid}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -16889,15 +17211,15 @@ contains
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -16967,7 +17289,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -16984,21 +17306,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical attribute to the {\tt grid}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!     Attaches a logical Attribute to the {\tt grid}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The logical true/false value of the attribute to add.
+!           The logical true/false value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -17059,7 +17381,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -17077,8 +17399,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical list attribute to the {\tt grid}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a logical list Attribute to the {\tt grid}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of logical items in the {\tt valueList} is
 !     given by {\tt count}.
 ! 
@@ -17087,15 +17409,15 @@ contains
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of logicals in the {\tt valueList}.
 !     \item [value]
-!           The logical true/false values of the attribute.
+!           The logical true/false values of the Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -17164,7 +17486,7 @@ contains
 #define ESMF_METHOD "ESMF_GridAttSetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a character attribute
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -17181,21 +17503,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to the {\tt grid}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a character Attribute to the {\tt grid}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [grid]
 !           An {\tt ESMF\_Grid} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The character value of the attribute to add.
+!           The character value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -17252,7 +17574,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttWrite"
 !BOPI
-! !IROUTINE: ESMF_GridAttWrite - Print the attribute package
+! !IROUTINE: ESMF_GridAttWrite - Print the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
@@ -17266,9 +17588,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Write the attribute package for the {\tt grid}.
-!     The attribute package defines the convention, purpose, and object type
-!     of the four associated attributes {\tt longname}, {\tt shortname}, 
+!     Write the Attribute package for the {\tt grid}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
 !     {\tt units}, and {\tt coordinates}.
 !
 !     The arguments are:
@@ -17276,9 +17598,9 @@ contains
 !     \item [grid]
 !      An {\tt ESMF\_Grid} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -17327,7 +17649,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttAddPack"
 !BOPI
-! !IROUTINE: ESMF_StateAttAddPack - Create the attribute package
+! !IROUTINE: ESMF_StateAttAddPack - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -17341,9 +17663,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up the attribute package for the {\tt state}.
-!     The attribute package defines the convention, purpose, and object type 
-!     of the three associated attributes {\tt name}, {\tt organization}, and 
+!     Sets up the Attribute package for the {\tt state}.
+!     The Attribute package defines the convention, purpose, and object type 
+!     of the three associated Attributes {\tt name}, {\tt organization}, and 
 !     {\tt discipline}.
 !
 !     The arguments are:
@@ -17351,13 +17673,13 @@ contains
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -17405,7 +17727,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttributeCopyAll"
 !BOPI
-! !IROUTINE: ESMF_StateAttributeCopyAll - Copy an attribute hierarchy between states
+! !IROUTINE: ESMF_StateAttributeCopyAll - Copy an Attribute hierarchy between states
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeCopy()
@@ -17418,7 +17740,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Copy all attributes in one {\tt state} hierarchy to another.
+!     Copy all Attributes in one {\tt state} hierarchy to another.
 !
 !     The arguments are:
 !     \begin{description}
@@ -17467,7 +17789,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttAddPackCustom"
 !BOPI
-! !IROUTINE: ESMF_StateAttAddPackCustom - Create the attribute package
+! !IROUTINE: ESMF_StateAttAddPackCustom - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
@@ -17484,21 +17806,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Sets up a custom attribute package for the {\tt state}, or adds to an 
-!     existing attribute package.
+!     Sets up a custom Attribute package for the {\tt state}, or adds to an 
+!     existing Attribute package.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [attrList]
-!      An array of character strings specifying the names of the user defined attributes
+!      An array of character strings specifying the names of the user defined Attributes
 !     \item [count]
-!      The count of the number of attributes in a user specified attribute package
+!      The count of the number of Attributes in a user specified Attribute package
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -17548,7 +17870,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -17565,22 +17887,22 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns an integer attribute from the {\tt state}.
+!     Returns an integer Attribute from the {\tt state}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -17653,7 +17975,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -17672,25 +17994,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte integer list attribute from the {\tt state}.
+!      Returns a 4-byte integer list Attribute from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -17771,7 +18093,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeGet  - Retrieve an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -17789,22 +18111,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns an 8-byte integer attribute from the {\tt state}.
+!     Returns an 8-byte integer Attribute from the {\tt state}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The integer value of the named attribute.
+!           The integer value of the named Attribute.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -17877,7 +18199,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -17896,25 +18218,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte integer list attribute from the {\tt state}.
+!      Returns an 8-byte integer list Attribute from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The integer values of the named attribute.
+!           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The default integer value of the named attribute.
+!           The default integer value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -17995,7 +18317,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -18013,22 +18335,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from the {\tt state}.
+!      Returns a 4-byte real Attribute from the {\tt state}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -18101,7 +18423,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -18120,25 +18442,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a 4-byte real attribute from an {\tt ESMF\_State}.
+!      Returns a 4-byte real Attribute from an {\tt ESMF\_State}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -18219,7 +18541,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -18237,22 +18559,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from the {\tt state}.
+!      Returns an 8-byte real Attribute from the {\tt state}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The real value of the named attribute.
+!           The real value of the named Attribute.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -18325,7 +18647,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -18344,25 +18666,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns an 8-byte real attribute from an {\tt ESMF\_State}.
+!      Returns an 8-byte real Attribute from an {\tt ESMF\_State}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The real values of the named attribute.
+!           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The real default value of the named attribute.
+!           The real default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -18443,7 +18765,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -18461,22 +18783,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical attribute from the {\tt state}.
+!      Returns a logical Attribute from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The logical value of the named attribute.
+!           The logical value of the named Attribute.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -18549,7 +18871,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -18568,25 +18890,25 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a logical list attribute from the {\tt state}.
+!      Returns a logical list Attribute from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [count]
-!           The number of values in the attribute.
+!           The number of values in the Attribute.
 !     \item [valueList]
-!           The logical values of the named attribute.
+!           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [defaultvalue]
-!           The logical default value of the named attribute.
+!           The logical default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -18667,7 +18989,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Retrieve a character attribute
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -18685,22 +19007,22 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns a character attribute from the {\tt state}.
+!      Returns a character Attribute from the {\tt state}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to retrieve.
+!           The name of the Attribute to retrieve.
 !     \item [value]
-!           The character value of the named attribute.
+!           The character value of the named Attribute.
 !     \item [defaultvalue]
-!           The character default value of the named attribute.
+!           The character default value of the named Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -18772,7 +19094,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetCount"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query the number of attributes
+! !IROUTINE: ESMF_AttributeGet - Query the number of Attributes
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet() 
@@ -18785,7 +19107,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns the number of attributes associated with the given {\tt state} 
+!     Returns the number of Attributes associated with the given {\tt state} 
 !     in the argument {\tt count}.
 ! 
 !     The arguments are:
@@ -18793,7 +19115,7 @@ contains
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [count]
-!           The number of attributes associated with this object.
+!           The number of Attributes associated with this object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -18824,7 +19146,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetInfoByName"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query State attributes by name
+! !IROUTINE: ESMF_AttributeGet - Query State Attributes by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -18839,7 +19161,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Returns information associated with the named attribute, 
+!     Returns information associated with the named Attribute, 
 !     including {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -18847,11 +19169,11 @@ contains
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to query.
+!           The name of the Attribute to query.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           The number of items in this attribute.  For character types,
+!           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -18889,7 +19211,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttGetInfoByNum"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeGet - Query State attributes by index number
+! !IROUTINE: ESMF_AttributeGet - Query State Attributes by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
@@ -18906,7 +19228,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Returns information associated with the indexed attribute, 
+!      Returns information associated with the indexed Attribute, 
 !      including {\tt name}, {\tt typekind} and {\tt count}.
 ! 
 !     The arguments are:
@@ -18914,13 +19236,13 @@ contains
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [attributeIndex]
-!           The index number of the attribute to query.
+!           The index number of the Attribute to query.
 !     \item [name]
-!           Returns the name of the attribute.
+!           Returns the name of the Attribute.
 !     \item [{[typekind]}]
-!           The typekind of the attribute.
+!           The typekind of the Attribute.
 !     \item [{[count]}]
-!           Returns the number of items in this attribute.  For character types,
+!           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -18960,7 +19282,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetInt4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -18977,21 +19299,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte integer attribute to the {\tt state}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte integer Attribute to the {\tt state}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -19052,7 +19374,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetInt4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -19070,8 +19392,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte integer list attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte integer list Attribute to the {\tt state}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -19080,15 +19402,15 @@ contains
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -19157,7 +19479,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetInt8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -19174,21 +19496,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte integer attribute to the {\tt state}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte integer Attribute to the {\tt state}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The integer value of the attribute to add.
+!           The integer value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -19249,7 +19571,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetInt8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -19267,8 +19589,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte integer list attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte integer list Attribute to the {\tt state}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -19277,15 +19599,15 @@ contains
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of integers in the {\tt valueList}.
 !     \item [valueList]
-!           The integer values of the attribute to add.
+!           The integer values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -19354,7 +19676,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetReal4"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -19371,21 +19693,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a 4-byte real attribute to the {\tt state}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a 4-byte real Attribute to the {\tt state}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -19446,7 +19768,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetReal4List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a 4-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -19464,8 +19786,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a 4-byte real list attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a 4-byte real list Attribute to the {\tt state}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -19474,15 +19796,15 @@ contains
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -19551,7 +19873,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetReal8"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -19568,21 +19890,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches an 8-byte real attribute to the {\tt state}.
-!      The attribute has a {\tt name} and a {\tt value}.
+!      Attaches an 8-byte real Attribute to the {\tt state}.
+!      The Attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The real value of the attribute to add.
+!           The real value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -19643,7 +19965,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetReal8List"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list attribute
+! !IROUTINE: ESMF_AttributeSet - Set an 8-byte real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -19661,8 +19983,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches an 8-byte real list attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches an 8-byte real list Attribute to the {\tt state}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 !
@@ -19671,15 +19993,15 @@ contains
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute to add.
+!           The real values of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -19749,7 +20071,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetLogical"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -19766,21 +20088,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!     Attaches a logical Attribute to the {\tt state}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The logical true/false value of the attribute to add.
+!           The logical true/false value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -19841,7 +20163,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetLogicalList"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a logical list attribute
+! !IROUTINE: ESMF_AttributeSet - Set a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -19859,8 +20181,8 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a logical list attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt valueList}.
+!     Attaches a logical list Attribute to the {\tt state}.
+!     The Attribute has a {\tt name} and a {\tt valueList}.
 !     The number of logical items in the {\tt valueList} is
 !     given by {\tt count}.
 ! 
@@ -19869,15 +20191,15 @@ contains
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [count]
 !           The number of logicals in the {\tt valueList}.
 !     \item [value]
-!           The logical true/false values of the attribute.
+!           The logical true/false values of the Attribute.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -19946,7 +20268,7 @@ contains
 #define ESMF_METHOD "ESMF_StateAttSetChar"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Set a character attribute
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -19963,21 +20285,21 @@ contains
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!      Attaches a character Attribute to the {\tt state}.
+!     The Attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !           An {\tt ESMF\_State} object.
 !     \item [name]
-!           The name of the attribute to add.
+!           The name of the Attribute to add.
 !     \item [value]
-!           The character value of the attribute to add.
+!           The character value of the Attribute to add.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -20032,12 +20354,12 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Link a state attribute hierarchy with the
-!                               {\bf hierarchy of bundle, field, or state}
+! !IROUTINE: ESMF_AttributeSet - Link a State Attribute hierarchy with the
+!                               {\bf hierarchy of Bundle, Field, or State}
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeSet()
-!      subroutine ESMF_StateAttributeSetLink(state, name, <value argument>, rc)
+!      subroutine ESMF_StateAttributeSetLink(state, <object>, rc)
 !
 ! !ARGUMENTS:
 !      type(ESMF\_State), intent(inout) :: state  
@@ -20046,8 +20368,8 @@ contains
 !
 !
 ! !DESCRIPTION:
-!     Attaches a {\tt state} attribute hierarchy to the hierarchy of
-!     a {\tt fieldbundle}, {\tt field}, or another {\tt state},. 
+!     Attaches a {\tt State} Attribute hierarchy to the hierarchy of
+!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State},. 
 !     Supported values for the <object> are:
 !     \begin{description}
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle
@@ -20071,7 +20393,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttSetLinkFB"
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Link a State to a FieldBundle in an attribute hierarchy
+! !IROUTINE: ESMF_AttributeSet - Link a State to a FieldBundle in an Attribute hierarchy
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -20084,14 +20406,14 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a state to a FieldBundle in an attribute hierarchy
+!     Attaches a state to a FieldBundle in an Attribute hierarchy
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [bundle]
-!      An {\tt ESMF\_FieldBundle} derived object.
+!      An {\tt ESMF\_FieldBundle} object.
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -20124,7 +20446,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttSetLinkField"
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Link a State to a Field in an attribute hierarchy
+! !IROUTINE: ESMF_AttributeSet - Link a State to a Field in an Attribute hierarchy
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -20137,14 +20459,14 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a State to a Field in an attribute hierarchy
+!     Attaches a State to a Field in an Attribute hierarchy
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [field]
-!      An {\tt ESMF\_Field} derived object.
+!      An {\tt ESMF\_Field} object.
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -20177,7 +20499,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttSetLinkState"
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Link a State to a State in an attribute hierarchy
+! !IROUTINE: ESMF_AttributeSet - Link a State to a State in an Attribute hierarchy
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -20190,14 +20512,14 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Attaches a State to a State in an attribute hierarchy
+!     Attaches a State to a State in an Attribute hierarchy
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [state1]
 !      An {\tt ESMF\_State} object.
 !     \item [state2]
-!      An {\tt ESMF\_State} derived object.
+!      An {\tt ESMF\_State} object.
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -20236,7 +20558,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttWrite"
 !BOPI
-! !IROUTINE: ESMF_StateAttWrite - Print the attribute package
+! !IROUTINE: ESMF_StateAttWrite - Print the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
@@ -20250,9 +20572,9 @@ contains
 
 !
 ! !DESCRIPTION:
-!     Write the attribute package for the {\tt state}.
-!     The attribute package defines the convention, purpose, and object type 
-!     of the three associated attributes {\tt name}, {\tt organization}, and 
+!     Write the Attribute package for the {\tt state}.
+!     The Attribute package defines the convention, purpose, and object type 
+!     of the three associated Attributes {\tt name}, {\tt organization}, and 
 !     {\tt discipline}.
 !
 !     The arguments are:
@@ -20260,9 +20582,9 @@ contains
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [convention]
-!      The convention of the attribute package.
+!      The convention of the Attribute package.
 !     \item [purpose]
-!      The purpose of the attribute package.
+!      The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -20309,7 +20631,7 @@ contains
       end subroutine ESMF_StateAttWrite
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeWrite  - Write an attribute package
+! !IROUTINE: ESMF_AttributeWrite  - Write an Attribute package
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeWrite(<object>, convention, purpose, rc)
@@ -20321,8 +20643,8 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Write the attribute package for object.  The attribute package defines 
-!     the convention, purpose, and object type of the associated attributes.
+!     Write the Attribute package for object.  The Attribute package defines 
+!     the convention, purpose, and object type of the associated Attributes.
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -20339,9 +20661,9 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object.
 !     \item [convention]
-!           The convention of the attribute package.
+!           The convention of the Attribute package.
 !     \item [purpose]
-!           The purpose of the attribute package.
+!           The purpose of the Attribute package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

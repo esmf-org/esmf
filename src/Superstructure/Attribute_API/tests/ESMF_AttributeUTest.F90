@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUTest.F90,v 1.5 2008/06/05 23:48:59 rokuingh Exp $
+! $Id: ESMF_AttributeUTest.F90,v 1.6 2008/06/11 21:21:32 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeUTest.F90,v 1.5 2008/06/05 23:48:59 rokuingh Exp $'
+      '$Id: ESMF_AttributeUTest.F90,v 1.6 2008/06/11 21:21:32 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -49,8 +49,8 @@ program ESMF_AttributeUTest
       type(ESMF_Array)       :: array
       type(ESMF_ArraySpec)   :: arrayspec
       type(ESMF_DistGrid)    :: distgrid
-      type(ESMF_CplComp)     :: cplcomp
-      type(ESMF_GridComp)    :: grdcomp
+      type(ESMF_CplComp)     :: cplcomp, cplcomp2
+      type(ESMF_GridComp)    :: grdcomp, grdcomp2
       type(ESMF_Field)       :: field
       type(ESMF_Grid)        :: grid
       type(ESMF_State)       :: state, state2
@@ -95,7 +95,9 @@ program ESMF_AttributeUTest
       fieldbundle = ESMF_FieldBundleCreate(name="bundle 1", rc=rc)
       fieldforbundle = ESMF_FieldCreateEmpty(name="field 1", rc=rc)
       cplcomp = ESMF_CplCompCreate(name="cplcomp", petList=(/0/), rc=rc)
+      cplcomp2 = ESMF_CplCompCreate(name="cplcomp2", petList=(/0/), rc=rc)
       grdcomp = ESMF_GridCompCreate(name="grdcomp", petList=(/0/), rc=rc)
+      grdcomp2 = ESMF_GridCompCreate(name="grdcomp2", petList=(/0/), rc=rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !-------------------------------------------------------------------------
@@ -301,6 +303,22 @@ program ESMF_AttributeUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
+      ! Link a cplcomp attribute hierarchy to a cplcomp attribute hierarchy CplComp Test
+      call ESMF_AttributeSet(cplcomp, cplcomp2, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a CplComp hierarchy to a CplComp hierarchy Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Link a cplcomp attribute hierarchy to a gridcomp attribute hierarchy CplComp Test
+      call ESMF_AttributeSet(cplcomp, grdcomp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a CplComp hierarchy to a GridComp hierarchy Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
       ! Getting Attribute count from a CplComp
       call ESMF_AttributeGet(cplcomp, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -406,6 +424,22 @@ program ESMF_AttributeUTest
       call ESMF_AttributeSet(grdcomp, state, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a GridComp hierarchy to a State hierarchy Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Link a grdcomp attribute hierarchy to a cplcomp attribute hierarchy GridComp Test
+      call ESMF_AttributeSet(grdcomp, cplcomp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a GridComp hierarchy to a CplComp hierarchy Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Link a grdcomp attribute hierarchy to a gridcomp attribute hierarchy GridComp Test
+      call ESMF_AttributeSet(grdcomp, grdcomp2, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a GridComp hierarchy to a GridComp hierarchy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
