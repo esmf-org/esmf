@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.91 2008/06/08 03:33:47 rosalind Exp $
+// $Id: ESMC_Calendar.C,v 1.92 2008/06/11 21:14:59 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.91 2008/06/08 03:33:47 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.92 2008/06/11 21:14:59 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -1361,8 +1361,8 @@ int ESMC_Calendar::count=0;
             } else if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) {
               // TODO: use native C++ Set(), not F90 entry point
               ESMC_Calendar *cal = (ESMC_Calendar *) this;
-              ESMC_Time begnningOfYear; 
-              begnningOfYear.ESMC_TimeSet((ESMC_I4 *)ESMC_NULL_POINTER,
+              ESMCI::Time begnningOfYear; 
+              begnningOfYear.ESMCI::Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                                            &year, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1483,8 +1483,8 @@ int ESMC_Calendar::count=0;
             } else if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) {
               // TODO: use native C++ Set(), not F90 entry point
               ESMC_Calendar *cal = (ESMC_Calendar *) this;
-              ESMC_Time begnningOfYear; 
-              begnningOfYear.ESMC_TimeSet((ESMC_I4 *)ESMC_NULL_POINTER,
+              ESMCI::Time begnningOfYear; 
+              begnningOfYear.ESMCI::Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                                            &year, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1738,13 +1738,13 @@ int ESMC_Calendar::count=0;
 // !IROUTINE:  ESMC_CalendarIncrement - increment a Time by a TimeInterval
 //
 // !INTERFACE:
-      ESMC_Time ESMC_Calendar::ESMC_CalendarIncrement(
+      ESMCI::Time ESMC_Calendar::ESMC_CalendarIncrement(
 //
 // !RETURN VALUE:
-//    ESMC_Time sum
+//    ESMCI::Time sum
 //
 // !ARGUMENTS:
-      const ESMC_Time *time,                            // in
+      const ESMCI::Time *time,                            // in
       const ESMCI::TimeInterval &timeinterval) const {    // in
 
 //
@@ -1764,7 +1764,7 @@ int ESMC_Calendar::count=0;
 
     int rc = ESMF_SUCCESS;
 
-    ESMC_Time zero;
+    ESMCI::Time zero;
 
     if (this == ESMC_NULL_POINTER || time == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1775,7 +1775,7 @@ int ESMC_Calendar::count=0;
     // intialize result to given time to prepare for the case of
     //   only a non-calendar (h,m,s) increment
     //    (copies calendar & timezone properties)
-    ESMC_Time sum = *time;
+    ESMCI::Time sum = *time;
 
     // prepare for increment with any non-calendar units (h,m,s)
     ESMCI::TimeInterval nonCalTi = timeinterval;
@@ -1809,7 +1809,7 @@ int ESMC_Calendar::count=0;
 
                 // get calendar units from given time, while saving time-of-day
                 //   units and calendar & timezone properties
-                rc = time->ESMC_TimeGet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                rc = time->ESMCI::Time::get(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         &h, &m, &s,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1846,7 +1846,7 @@ int ESMC_Calendar::count=0;
 
                 // convert resulting calendar sum back to base time, while also
                 // restoring time-of-day units and properties from given time
-                rc = sum.ESMC_TimeSet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                rc = sum.ESMCI::Time::set(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       &h, &m, &s,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1889,13 +1889,13 @@ int ESMC_Calendar::count=0;
 // !IROUTINE:  ESMC_CalendarDecrement - decrement a Time by a TimeInterval
 //
 // !INTERFACE:
-      ESMC_Time ESMC_Calendar::ESMC_CalendarDecrement(
+      ESMCI::Time ESMC_Calendar::ESMC_CalendarDecrement(
 //
 // !RETURN VALUE:
-//    ESMC_Time diff
+//    ESMCI::Time diff
 //
 // !ARGUMENTS:
-      const ESMC_Time *time,                            // in
+      const ESMCI::Time *time,                            // in
       const ESMCI::TimeInterval &timeinterval) const {    // in
 
 //
@@ -1912,7 +1912,7 @@ int ESMC_Calendar::count=0;
 
     int rc = ESMF_SUCCESS;
 
-    ESMC_Time zero;
+    ESMCI::Time zero;
 
     if (this == ESMC_NULL_POINTER || time == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1926,7 +1926,7 @@ int ESMC_Calendar::count=0;
     // intialize result to given time to prepare for the case of
     //   only a non-calendar (h,m,s) decrement
     //    (copies calendar & timezone properties)
-    ESMC_Time diff = *time;
+    ESMCI::Time diff = *time;
 
     // prepare for decrement with any non-calendar units (h,m,s)
     ESMCI::TimeInterval nonCalTi = timeinterval;
@@ -1960,7 +1960,7 @@ int ESMC_Calendar::count=0;
 
                 // get calendar units from given time, while saving time-of-day
                 //   units and calendar & timezone properties
-                rc = time->ESMC_TimeGet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                rc = time->ESMCI::Time::get(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         &h, &m, &s,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1997,7 +1997,7 @@ int ESMC_Calendar::count=0;
 
                 // convert resulting calendar diff back to base time, while also
                 // restoring time-of-day units and properties from given time
-                rc = diff.ESMC_TimeSet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                rc = diff.ESMCI::Time::set(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                        &h, &m, &s,
                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -2386,7 +2386,7 @@ int ESMC_Calendar::count=0;
 //
 // !ARGUMENTS:
       const char *options,            // in - print options
-      const ESMC_Time *time) const {  // in - optional time context in which
+      const ESMCI::Time *time) const {  // in - optional time context in which
                                       //      to print
                                       //      (e.g. Leap Year => Feb. 29 days)
 //
@@ -2408,12 +2408,12 @@ int ESMC_Calendar::count=0;
     }
 
     // determine leap year, if requested
-    // TODO:  replace with leap year method for ESMC_Time (which calls
+    // TODO:  replace with leap year method for ESMCI::Time (which calls
     //        ESMC_CalendarIsLeapYear() )
     bool isLeapYear = false;
     if (time != ESMC_NULL_POINTER) {
       ESMC_I8 yy_i8;
-      rc = time->ESMC_TimeGet(ESMC_NULL_POINTER, &yy_i8);
+      rc = time->ESMCI::Time::get(ESMC_NULL_POINTER, &yy_i8);
                               // TODO: use native C++ interface when ready
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
           ESMF_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(rc);

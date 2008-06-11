@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.46 2008/06/08 03:33:46 rosalind Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.47 2008/06/11 21:14:58 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@ extern "C" {
                                  ESMC_R8 *ms_r8, ESMC_R8 *us_r8,
                                  ESMC_R8 *ns_r8,
                                  ESMC_I4 *sN, ESMC_I4 *sD,
-                                 ESMC_Time *startTime,
+                                 ESMCI::Time *startTime,
                                  int *status) {
           int rc = (ptr)->ESMCI::TimeInterval::set(
                        ESMC_NOT_PRESENT_FILTER(yy),
@@ -228,7 +228,7 @@ extern "C" {
                                  ESMC_R8 *ms_r8, ESMC_R8 *us_r8,
                                  ESMC_R8 *ns_r8,
                                  ESMC_I4 *sN, ESMC_I4 *sD,
-                                 ESMC_Time *startTime,
+                                 ESMCI::Time *startTime,
                                  ESMC_Calendar **calendar,
                                  ESMC_CalendarType *calendarType,
                                  int *timeStringLen, int *tempTimeStringLen,
@@ -290,10 +290,10 @@ extern "C" {
                                  ESMC_R8 *ms_r8, ESMC_R8 *us_r8,
                                  ESMC_R8 *ns_r8,
                                  ESMC_I4 *sN, ESMC_I4 *sD,
-                                 ESMC_Time *startTime,
+                                 ESMCI::Time *startTime,
                                  ESMC_Calendar **calendar, 
                                  ESMC_CalendarType *calendarType, 
-                                 ESMC_Time *startTimeIn,
+                                 ESMCI::Time *startTimeIn,
                                  int *timeStringLen, int *tempTimeStringLen,
                                  char *tempTimeString,
                                  int *timeStringLenISOFrac,
@@ -353,7 +353,7 @@ extern "C" {
                                  ESMC_R8 *ms_r8, ESMC_R8 *us_r8,
                                  ESMC_R8 *ns_r8,
                                  ESMC_I4 *sN, ESMC_I4 *sD,
-                                 ESMC_Time *startTime,
+                                 ESMCI::Time *startTime,
                                  ESMC_Calendar **calendar, 
                                  ESMC_CalendarType *calendarType, 
                                  ESMC_Calendar **calendarIn, 
@@ -416,7 +416,7 @@ extern "C" {
                                  ESMC_R8 *ms_r8, ESMC_R8 *us_r8,
                                  ESMC_R8 *ns_r8,
                                  ESMC_I4 *sN, ESMC_I4 *sD,
-                                 ESMC_Time *startTime,
+                                 ESMCI::Time *startTime,
                                  ESMC_Calendar **calendar, 
                                  ESMC_CalendarType *calendarType, 
                                  ESMC_CalendarType *calendarTypeIn, 

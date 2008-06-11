@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.90 2008/05/09 20:08:20 rosalind Exp $"
+// $Id: ESMC_Time.C,v 1.91 2008/06/11 21:15:00 rosalind Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -15,11 +15,11 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ {\tt Time} methods declared
-// in the companion file {\tt ESMC_Time.h}
+// in the companion file {\tt ESMCI::Time.h}
 //
 //-------------------------------------------------------------------------
 //
- #define ESMC_FILENAME "ESMC_Time.C"
+ #define ESMC_FILENAME "ESMCI::Time.C"
 
  // higher level, 3rd party or system includes
  #include <stdio.h>
@@ -37,21 +37,21 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.90 2008/05/09 20:08:20 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.91 2008/06/11 21:15:00 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
 //-------------------------------------------------------------------------
 //
-// This section includes all the ESMC_Time routines
+// This section includes all the ESMCI::Time routines
 //
 //
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeSet - initializer to support F90 interface
+// !IROUTINE:  ESMCI::Time::set - initializer to support F90 interface
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeSet(
+      int ESMCI::Time::ESMCI::Time::set(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -92,9 +92,9 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeSet()"
+ #define ESMC_METHOD "ESMCI::Time::set()"
 
-    // TODO: Since ESMC_Time is a shallow statically allocated class,
+    // TODO: Since ESMCI::Time is a shallow statically allocated class,
     //       ensure initialization if called via F90 interface;
     //       cannot call constructor, because destructor is subsequently
     //       called automatically, returning initialized values to garbage.
@@ -103,13 +103,13 @@
     // user is specifying a complete time and not relying on any past settings.
     // (if only calendar or timezone is specified, don't initialize, but do
     //  validate calendar and/or timezone)
-    // (this if-else logic avoids the need for a separate ESMC_TimeSetup()
+    // (this if-else logic avoids the need for a separate ESMCI::Time::setup()
     //  method)
 
     int rc = ESMF_SUCCESS;
 
     // save current time to restore in case there is a failure
-    ESMC_Time saveTime = *this;
+    ESMCI::Time saveTime = *this;
 
     if (yy    != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER ||
         mm    != ESMC_NULL_POINTER || dd    != ESMC_NULL_POINTER ||
@@ -148,7 +148,7 @@
       // set calendar type
       if (calendar != ESMC_NULL_POINTER) {             // 1st choice
         this->calendar = *calendar;
-        rc = ESMC_TimeValidate("calendar");
+        rc = ESMCI::Time::validate("calendar");
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
 
@@ -163,7 +163,7 @@
       // set timezone
       if (timeZone != ESMC_NULL_POINTER) {
         this->timeZone = *timeZone;
-        rc = ESMC_TimeValidate("timezone");
+        rc = ESMCI::Time::validate("timezone");
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
       }
@@ -321,20 +321,20 @@
     ESMCI::BaseTime::set(h, m, s, s_i8, ms, us, ns, h_r8, m_r8, s_r8,
                      ms_r8, us_r8, ns_r8, sN, sD);
 
-    rc = ESMC_TimeValidate();
+    rc = ESMCI::Time::validate();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         { *this = saveTime; return(rc); }
 
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimeSet
+ }  // end ESMCI::Time::set
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeGet - Get a Time value; supports F90 interface
+// !IROUTINE:  ESMCI::Time::get - Get a Time value; supports F90 interface
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeGet(
+      int ESMCI::Time::ESMCI::Time::get(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -374,10 +374,10 @@
       char *tempTimeStringISOFrac,    // out - ISO 8601 format
                                   //       YYYY-MM-DDThh:mm:ss[.f]
       int          *dayOfWeek,    // out - day of the week (Mon = 1, Sun = 7)
-      ESMC_Time    *midMonth,     // out - middle of the month time instant
+      ESMCI::Time    *midMonth,     // out - middle of the month time instant
       ESMC_I4 *dayOfYear,    // out - day of the year as an integer
       ESMC_R8 *dayOfYear_r8, // out - day of the year as a floating point
-      ESMC_TimeInterval *dayOfYear_intvl) const {  // out - day of the year
+      ESMCI::TimeInterval *dayOfYear_intvl) const {  // out - day of the year
                                                    //       as a time interval
 //
 // !DESCRIPTION:
@@ -388,13 +388,13 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeGet()"
+ #define ESMC_METHOD "ESMCI::Time::get()"
 
     // TODO: fractional, sub-seconds
 
     int rc = ESMF_SUCCESS;
 
-    ESMC_Time timeToConvert = *this;
+    ESMCI::Time timeToConvert = *this;
 
     // convert base time to date according to calendar type
     if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER ||
@@ -414,22 +414,22 @@
 
     // get any other "day" units
     if (dayOfYear != ESMC_NULL_POINTER) {
-      rc = ESMC_TimeGetDayOfYear(dayOfYear);
+      rc = ESMCI::TimeGetDayOfYear(dayOfYear);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
     }
     if (dayOfYear_r8 != ESMC_NULL_POINTER) {
-      rc = ESMC_TimeGetDayOfYear(dayOfYear_r8);
+      rc = ESMCI::TimeGetDayOfYear(dayOfYear_r8);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
     }
     if (dayOfYear_intvl != ESMC_NULL_POINTER) {
-      rc = ESMC_TimeGetDayOfYear(dayOfYear_intvl);
+      rc = ESMCI::TimeGetDayOfYear(dayOfYear_intvl);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
     }
     if (dayOfWeek != ESMC_NULL_POINTER) {
-      rc = ESMC_TimeGetDayOfWeek(dayOfWeek);
+      rc = ESMCI::TimeGetDayOfWeek(dayOfWeek);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
     }
@@ -457,7 +457,7 @@
     // handle remaining miscellaneous get arguments
 
     if (midMonth != ESMC_NULL_POINTER) {
-      rc = ESMC_TimeGetMidMonth(midMonth);
+      rc = ESMCI::TimeGetMidMonth(midMonth);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
     }
@@ -475,31 +475,31 @@
       *timeZone = this->timeZone;
     }
     if (tempTimeString != ESMC_NULL_POINTER && timeStringLen > 0) {
-      rc = ESMC_TimeGetString(tempTimeString);
+      rc = ESMCI::TimeGetString(tempTimeString);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLen = strlen(tempTimeString);
-      // see also method ESMC_TimePrint()
+      // see also method ESMCI::Time::print()
     }
     if (tempTimeStringISOFrac != ESMC_NULL_POINTER &&
         timeStringLenISOFrac > 0) {
-      rc = ESMC_TimeGetString(tempTimeStringISOFrac, "isofrac");
+      rc = ESMCI::TimeGetString(tempTimeStringISOFrac, "isofrac");
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLenISOFrac = strlen(tempTimeStringISOFrac);
-      // see also method ESMC_TimePrint()
+      // see also method ESMCI::Time::print()
     }
 
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimeGet
+ }  // end ESMCI::TimeGet
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeGet - Get a Time value
+// !IROUTINE:  ESMCI::TimeGet - Get a Time value
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeGet(
+      int ESMCI::Time::ESMCI::TimeGet(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -518,14 +518,14 @@
     // TODO
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimeGet
+ }  // end ESMCI::TimeGet
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeSet - Set a Time value (1)
+// !IROUTINE:  ESMCI::Time::set - Set a Time value (1)
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeSet(
+      int ESMCI::Time::ESMCI::Time::set(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -555,14 +555,14 @@
 
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimeSet
+ }  // end ESMCI::Time::set
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeSet - Set a Time value (2)
+// !IROUTINE:  ESMCI::Time::set - Set a Time value (2)
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeSet(
+      int ESMCI::Time::ESMCI::Time::set(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -581,14 +581,14 @@
     // TODO
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimeSet
+ }  // end ESMCI::Time::set
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeSet - direct property initializer
+// !IROUTINE:  ESMCI::Time::set - direct property initializer
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeSet(
+      int ESMCI::Time::ESMCI::Time::set(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -610,7 +610,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeSet(direct)"
+ #define ESMC_METHOD "ESMCI::Time::set(direct)"
 
     int rc = ESMF_SUCCESS;
 
@@ -640,14 +640,14 @@
 
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimeSet
+ }  // end ESMCI::Time::set
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIsLeapYear - Determines if this time is in a leap year
+// !IROUTINE:  ESMCI::Time::isLeapYear - Determines if this time is in a leap year
 //
 // !INTERFACE:
-      bool ESMC_Time::ESMC_TimeIsLeapYear(
+      bool ESMCI::Time::ESMCI::Time::isLeapYear(
 //
 // !RETURN VALUE:
 //    bool true if this time is in a leap year, false otherwise.
@@ -662,7 +662,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeIsLeapYear()"
+ #define ESMC_METHOD "ESMCI::Time::isLeapYear()"
 
     // must have a calendar
     if (this->calendar == ESMC_NULL_POINTER) {
@@ -673,7 +673,7 @@
 
     // get the year of this time
     ESMC_I8 yy_i8;
-    int rc2 = ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8);
+    int rc2 = ESMCI::TimeGet((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc2, ESMF_ERR_PASSTHRU, rc)) {
       return(false);
     }
@@ -681,20 +681,20 @@
     // check if it's a leap year within this calendar
     return(this->calendar->ESMC_CalendarIsLeapYear(yy_i8, rc));
 
- }  // end ESMC_TimeIsLeapYear
+ }  // end ESMCI::Time::isLeapYear
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIsSameCalendar - Compares 2 ESMC_Time's Calendar types
+// !IROUTINE:  ESMCI::Time::isSameCalendar - Compares 2 ESMCI::Time's Calendar types
 //
 // !INTERFACE:
-      bool ESMC_Time::ESMC_TimeIsSameCalendar(
+      bool ESMCI::Time::ESMCI::Time::isSameCalendar(
 //
 // !RETURN VALUE:
 //    bool true if same calendars, false if different calendars
 //
 // !ARGUMENTS:
-      const ESMC_Time *time,    // in  - Time to compare Calendar types against
+      const ESMCI::Time *time,    // in  - Time to compare Calendar types against
       int *rc) const {          // out - return code
 //
 // !DESCRIPTION:
@@ -705,7 +705,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeIsSameCalendar()"
+ #define ESMC_METHOD "ESMCI::Time::isSameCalendar()"
 
     if (this->calendar != ESMC_NULL_POINTER &&
         time->calendar != ESMC_NULL_POINTER)
@@ -719,14 +719,14 @@
       return(false);
     }
 
- }  // end ESMC_TimeIsSameCalendar
+ }  // end ESMCI::Time::isSameCalendar
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeSyncToRealTime - Sync this Time to wall clock time
+// !IROUTINE:  ESMCI::Time::syncToRealTime - Sync this Time to wall clock time
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeSyncToRealTime(void) {
+      int ESMCI::Time::ESMCI::Time::syncToRealTime(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -741,10 +741,10 @@
 // !REQUIREMENTS:  
 
 // TODO: Add optional calendar/calendarType arguments; default to 
-//       Gregorian if not specified and no calendar within this given ESMC_Time.
+//       Gregorian if not specified and no calendar within this given ESMCI::Time.
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeSyncToRealTime()"
+ #define ESMC_METHOD "ESMCI::Time::syncToRealTime()"
 
     int rc = ESMF_SUCCESS;
 
@@ -781,7 +781,7 @@
     // TODO: use native C++ Set() version when ready
     ESMC_Calendar *cal = this->calendar; // allows reset
     int tz = this->timeZone;             //   after Set() clears it
-    rc = ESMC_TimeSet((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+    rc = ESMCI::Time::set((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, &h, &m,
                  &s, ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -793,20 +793,20 @@
 
     return(rc);
 
- }  // end ESMC_TimeSyncToRealTime
+ }  // end ESMCI::Time::syncToRealTime
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Time(+) - Increment a Time with a TimeInterval
+// !IROUTINE:  ESMCI::Time(+) - Increment a Time with a TimeInterval
 //
 // !INTERFACE:
-      ESMC_Time ESMC_Time::operator+(
+      ESMCI::Time ESMCI::Time::operator+(
 //
 // !RETURN VALUE:
-//    ESMC_Time result
+//    ESMCI::Time result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) const {  // in - ESMCI::TimeInterval
                                                       //      to add
 //
 // !DESCRIPTION:
@@ -816,26 +816,26 @@
 // !REQUIREMENTS:  
 
 //    Implementation note:  This overrides the ESMC_Fraction (+) operator
-//                          in order to copy the ESMC_Time-only properties
+//                          in order to copy the ESMCI::Time-only properties
 //                          (calendar & timeZone) to the result. 
 //
     // delegate the increment operation to my calendar associate
     return(calendar->ESMC_CalendarIncrement(this, timeinterval));
 
-}  // end ESMC_Time::operator+
+}  // end ESMCI::Time::operator+
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Time(-) - Decrement a Time with a TimeInterval
+// !IROUTINE:  ESMCI::Time(-) - Decrement a Time with a TimeInterval
 //
 // !INTERFACE:
-      ESMC_Time ESMC_Time::operator-(
+      ESMCI::Time ESMCI::Time::operator-(
 //
 // !RETURN VALUE:
-//    ESMC_Time result
+//    ESMCI::Time result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) const {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) const {  // in - ESMCI::TimeInterval
                                                       //      to subtract
 //
 // !DESCRIPTION:
@@ -845,26 +845,26 @@
 // !REQUIREMENTS:  
 
 //    Implementation note:  This overrides the ESMC_Fraction (-) operator
-//                          in order to copy the ESMC_Time-only properties
+//                          in order to copy the ESMCI::Time-only properties
 //                          (calendar & timeZone) to the result. 
 //
     // delegate the decrement operation to my calendar associate
     return(calendar->ESMC_CalendarDecrement(this, timeinterval));
 
-}  // end ESMC_Time::operator-
+}  // end ESMCI::Time::operator-
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Time(+=) - Increment a Time with a TimeInterval
+// !IROUTINE:  ESMCI::Time(+=) - Increment a Time with a TimeInterval
 //
 // !INTERFACE:
-      ESMC_Time& ESMC_Time::operator+=(
+      ESMCI::Time& ESMCI::Time::operator+=(
 //
 // !RETURN VALUE:
-//    ESMC_Time& result
+//    ESMCI::Time& result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) {  // in - ESMCI::TimeInterval
                                                 //      to add
 //
 // !DESCRIPTION:
@@ -878,20 +878,20 @@
 
     return(*this);
 
-}  // end ESMC_Time::operator+=
+}  // end ESMCI::Time::operator+=
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Time(-=) - Decrement a Time with a TimeInterval
+// !IROUTINE:  ESMCI::Time(-=) - Decrement a Time with a TimeInterval
 //
 // !INTERFACE:
-      ESMC_Time& ESMC_Time::operator-=(
+      ESMCI::Time& ESMCI::Time::operator-=(
 //
 // !RETURN VALUE:
-//    ESMC_Time& result
+//    ESMCI::Time& result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeinterval) {  // in - ESMC_TimeInterval
+      const ESMCI::TimeInterval &timeinterval) {  // in - ESMCI::TimeInterval
                                                 //      to subtract
 //
 // !DESCRIPTION:
@@ -905,20 +905,20 @@
 
     return(*this);
 
-}  // end ESMC_Time::operator-=
+}  // end ESMCI::Time::operator-=
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Time(-) - Return the difference between two Times
+// !IROUTINE:  ESMCI::Time(-) - Return the difference between two Times
 //
 // !INTERFACE:
-      ESMC_TimeInterval ESMC_Time::operator-(
+      ESMCI::TimeInterval ESMCI::Time::operator-(
 //
 // !RETURN VALUE:
-//    ESMC_TimeInterval result
+//    ESMCI::TimeInterval result
 //
 // !ARGUMENTS:
-      const ESMC_Time &time) const {  // in - ESMC_Time to subtract
+      const ESMCI::Time &time) const {  // in - ESMCI::Time to subtract
 //
 // !DESCRIPTION:
 //    Subtracts given {\tt time} expression from this time, returns
@@ -935,7 +935,7 @@
 
     // the calendars of the two times must be the same
     int rc;
-    if (!ESMC_TimeIsSameCalendar(&time, &rc)) {
+    if (!ESMCI::Time::isSameCalendar(&time, &rc)) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
         "; The calendars of the two times to difference are not the same", &rc);
       return(rc);
@@ -943,7 +943,7 @@
 
     // given times' calendars are the same, so set difference time interval's
     //   calendar to be the same
-    ESMC_TimeInterval diff;
+    ESMCI::TimeInterval diff;
     diff.calendar = this->calendar;
 
     // perform the difference using the ESMC_Fraction operator
@@ -951,14 +951,14 @@
 
     return(diff);
 
-}  // end ESMC_Time::operator-
+}  // end ESMCI::Time::operator-
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeReadRestart - restore Time state
+// !IROUTINE:  ESMCI::TimeReadRestart - restore Time state
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeReadRestart(
+      int ESMCI::Time::ESMCI::TimeReadRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -977,21 +977,21 @@
     int rc = ESMF_SUCCESS;
 
     // TODO:  read time state from iospec/name, then restore
-    //        (share code with ESMC_TimeSet()).
+    //        (share code with ESMCI::Time::set()).
 
     // TODO: use base class ReadRestart() first
     // rc = ESMCI::BaseTime::readRestart(s, sN, sD);
 
     return(rc);
 
- }  // end ESMC_TimeReadRestart
+ }  // end ESMCI::TimeReadRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeWriteRestart - save Time state
+// !IROUTINE:  ESMCI::TimeWriteRestart - save Time state
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeWriteRestart(
+      int ESMCI::Time::ESMCI::TimeWriteRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1015,14 +1015,14 @@
                                //  calendar.
     return(rc);
 
- }  // end ESMC_TimeWriteRestart
+ }  // end ESMCI::TimeWriteRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeValidate - validate Time state
+// !IROUTINE:  ESMCI::Time::validate - validate Time state
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeValidate(
+      int ESMCI::Time::ESMCI::Time::validate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1037,7 +1037,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeValidate()"
+ #define ESMC_METHOD "ESMCI::Time::validate()"
 
     int rc = ESMF_SUCCESS;
     bool check_initialized = false;
@@ -1111,14 +1111,14 @@
 
     return(rc);
 
- }  // end ESMC_TimeValidate
+ }  // end ESMCI::Time::validate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimePrint - print Time state
+// !IROUTINE:  ESMCI::Time::print - print Time state
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimePrint(
+      int ESMCI::Time::ESMCI::Time::print(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1138,9 +1138,9 @@
     if (options != ESMC_NULL_POINTER) {
       if (strncmp(options, "string", 6) == 0) {
         char timeString[ESMF_MAXSTR];
-        ESMC_TimeGetString(timeString, &options[6]);
+        ESMCI::TimeGetString(timeString, &options[6]);
         printf("%s\n", timeString);
-        // see also method ESMC_TimeGet()
+        // see also method ESMCI::TimeGet()
       }
     } else {
       // default
@@ -1155,14 +1155,14 @@
 
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimePrint
+ }  // end ESMCI::Time::print
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Time - native default C++ constructor
+// !IROUTINE:  ESMCI::Time - native default C++ constructor
 //
 // !INTERFACE:
-      ESMC_Time::ESMC_Time(void) {
+      ESMCI::Time::ESMCI::Time(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -1184,14 +1184,14 @@
                                   // TODO: replace with ESMC_Base logic
    timeZone = 0;
 
- }  // end ESMC_Time
+ }  // end ESMCI::Time
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Time - native C++ constructor
+// !IROUTINE:  ESMCI::Time - native C++ constructor
 //
 // !INTERFACE:
-      ESMC_Time::ESMC_Time(
+      ESMCI::Time::ESMCI::Time(
 //
 // !RETURN VALUE:
 //    none
@@ -1231,14 +1231,14 @@
 
   this->timeZone = timeZone;
 
- }  // end ESMC_Time
+ }  // end ESMCI::Time
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ~ESMC_Time - native default C++ destructor
+// !IROUTINE:  ~ESMCI::Time - native default C++ destructor
 //
 // !INTERFACE:
-      ESMC_Time::~ESMC_Time(void) {
+      ESMCI::Time::~ESMCI::Time(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -1252,18 +1252,18 @@
 //EOP
 // !REQUIREMENTS:  
 
- }  // end ~ESMC_Time
+ }  // end ~ESMCI::Time
 
 //-------------------------------------------------------------------------
-//  Private methods to support ESMC_TimeGet() API
+//  Private methods to support ESMCI::TimeGet() API
 //-------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeGetString - Get a Time value
+// !IROUTINE:  ESMCI::TimeGetString - Get a Time value
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeGetString(
+      int ESMCI::Time::ESMCI::TimeGetString(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1277,13 +1277,13 @@
 //      Gets a {\tt time}'s value in ISO 8601 string format
 //      YYYY-MM-DDThh:mm:ss[:n/d]  (hybrid) (default, options == "")
 //      or YYYY-MM-DDThh:mm:ss[.f] (strict) (options == "isofrac")
-//      Supports {\tt ESMC\_TimeGet()} and {\tt ESMC\_TimePrint()}.
+//      Supports {\tt ESMC\_TimeGet()} and {\tt ESMC\_Time::print()}.
 //
 //EOP
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeGetString()"
+ #define ESMC_METHOD "ESMCI::TimeGetString()"
 
     int rc = ESMF_SUCCESS;
 
@@ -1310,7 +1310,7 @@
     ESMC_I4 h, m, s, sN, sD; 
 
     // TODO: use native C++ Get, not F90 entry point, when ready
-    rc = ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+    rc = ESMCI::TimeGet((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                   &h, &m, &s, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1355,14 +1355,14 @@
 
     return(rc);
 
- }  // end ESMC_TimeGetString
+ }  // end ESMCI::TimeGetString
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeGetDayOfWeek - Get a Time's day of the week value
+// !IROUTINE:  ESMCI::TimeGetDayOfWeek - Get a Time's day of the week value
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeGetDayOfWeek(
+      int ESMCI::Time::ESMCI::TimeGetDayOfWeek(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1378,7 +1378,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeGetDayOfWeek()"
+ #define ESMC_METHOD "ESMCI::TimeGetDayOfWeek()"
 
     int rc = ESMF_SUCCESS;
 
@@ -1429,11 +1429,11 @@
 
     // TODO: put the above reference dates into a pre-initialized lookup table
     //       to skip this step
-    ESMC_Time referenceMonday;
+    ESMCI::Time referenceMonday;
     // TODO: use native C++ Set() when ready
     ESMC_Calendar *cal = this->calendar; // allows reset
     int tz = this->timeZone;             //   after Set() clears it
-    rc = referenceMonday.ESMC_TimeSet((ESMC_I4 *)ESMC_NULL_POINTER,
+    rc = referenceMonday.ESMCI::Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                                       &yy_i8, &mm, &dd, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1451,12 +1451,12 @@
 
     // calculate the difference in days between the given date and
     //  the reference date
-    ESMC_TimeInterval delta;
+    ESMCI::TimeInterval delta;
     delta = *this - referenceMonday;
     delta.calendar = this->calendar;
     ESMC_I8 diffDays;
     // TODO: use native C++ Get() when ready
-    rc = delta.ESMC_TimeIntervalGet((ESMC_I4 *)ESMC_NULL_POINTER,
+    rc = delta.ESMCI::TimeIntervalGet((ESMC_I4 *)ESMC_NULL_POINTER,
                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                      &diffDays);
@@ -1472,20 +1472,20 @@
 
     return(rc);
 
- }  // end ESMC_TimeGetDayOfWeek
+ }  // end ESMCI::TimeGetDayOfWeek
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeGetMidMonth - Get a Time's middle of the month value
+// !IROUTINE:  ESMCI::TimeGetMidMonth - Get a Time's middle of the month value
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeGetMidMonth(
+      int ESMCI::Time::ESMCI::TimeGetMidMonth(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Time *midMonth) const {    // out - time's middle of month value
+      ESMCI::Time *midMonth) const {    // out - time's middle of month value
 //
 // !DESCRIPTION:
 //      Gets a {\tt Time}'s middle of the month value
@@ -1494,7 +1494,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeGetMidMonth()"
+ #define ESMC_METHOD "ESMCI::TimeGetMidMonth()"
 
     int rc = ESMF_SUCCESS;
 
@@ -1523,16 +1523,16 @@
     // get this date
     ESMC_I8 yy_i8;
     int mm, dd;
-    rc = ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd);
+    rc = ESMCI::TimeGet((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // set start of this month
     dd = 1;
-    ESMC_Time startOfMonth;
+    ESMCI::Time startOfMonth;
     ESMC_Calendar *cal = this->calendar; // allows reset
     int tz = this->timeZone;             //   after Set() clears it
-    rc = startOfMonth.ESMC_TimeSet((ESMC_I4 *)ESMC_NULL_POINTER,
+    rc = startOfMonth.ESMCI::Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                                    &yy_i8, &mm, &dd, ESMC_NULL_POINTER,
                                    ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                    ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1556,8 +1556,8 @@
       mm = 1;
       yy_i8++;
     }
-    ESMC_Time endOfMonth;
-    rc = endOfMonth.ESMC_TimeSet((ESMC_I4 *)ESMC_NULL_POINTER,
+    ESMCI::Time endOfMonth;
+    rc = endOfMonth.ESMCI::Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                                  &yy_i8, &mm, &dd, ESMC_NULL_POINTER,
                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1574,7 +1574,7 @@
       return(rc);
 
     // size of this month
-    ESMC_TimeInterval month;
+    ESMCI::TimeInterval month;
     month = endOfMonth - startOfMonth;
 
     // calculate and return the middle of this month
@@ -1586,14 +1586,14 @@
 
     return(rc);
 
- }  // end ESMC_TimeGetMidMonth
+ }  // end ESMCI::TimeGetMidMonth
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeGetDayOfYear - Get a Time's day of the year value
+// !IROUTINE:  ESMCI::TimeGetDayOfYear - Get a Time's day of the year value
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeGetDayOfYear(
+      int ESMCI::Time::ESMCI::TimeGetDayOfYear(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1608,7 +1608,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeGetDayOfYear(integer)"
+ #define ESMC_METHOD "ESMCI::TimeGetDayOfYear(integer)"
 
     int rc = ESMF_SUCCESS;
 
@@ -1631,15 +1631,15 @@
     }
     
     // get day of year as time interval between now and 1/1/yy
-    ESMC_TimeInterval yearDay;
-    rc = ESMC_TimeGetDayOfYear(&yearDay);
+    ESMCI::TimeInterval yearDay;
+    rc = ESMCI::TimeGetDayOfYear(&yearDay);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // get difference in integer days
     ESMC_I8 diffDays;
     // TODO: use native C++ Get, not F90 entry point
-    rc = yearDay.ESMC_TimeIntervalGet((ESMC_I4 *)ESMC_NULL_POINTER,
+    rc = yearDay.ESMCI::TimeIntervalGet((ESMC_I4 *)ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       &diffDays);
@@ -1652,14 +1652,14 @@
 
     return(rc);
 
- }  // end ESMC_TimeGetDayOfYear
+ }  // end ESMCI::TimeGetDayOfYear
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeGetDayOfYear - Get a Time's day of the year value
+// !IROUTINE:  ESMCI::TimeGetDayOfYear - Get a Time's day of the year value
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeGetDayOfYear(
+      int ESMCI::Time::ESMCI::TimeGetDayOfYear(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1677,7 +1677,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeGetDayOfYear(ESMC_R8)"
+ #define ESMC_METHOD "ESMCI::TimeGetDayOfYear(ESMC_R8)"
 
     int rc = ESMF_SUCCESS;
 
@@ -1700,15 +1700,15 @@
     }
 
     // get day of year as time interval between now and 1/1/yy
-    ESMC_TimeInterval yearDay;
-    rc = ESMC_TimeGetDayOfYear(&yearDay);
+    ESMCI::TimeInterval yearDay;
+    rc = ESMCI::TimeGetDayOfYear(&yearDay);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // get difference in floating point days
     ESMC_R8 diffDays;
     // TODO: use native C++ Get, not F90 entry point
-    rc = yearDay.ESMC_TimeIntervalGet((ESMC_I4 *)ESMC_NULL_POINTER,
+    rc = yearDay.ESMCI::TimeIntervalGet((ESMC_I4 *)ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1725,20 +1725,20 @@
 
     return(rc);
 
- }  // end ESMC_TimeGetDayOfYear
+ }  // end ESMCI::TimeGetDayOfYear
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeGetDayOfYear - Get a Time's day of the year value
+// !IROUTINE:  ESMCI::TimeGetDayOfYear - Get a Time's day of the year value
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_TimeGetDayOfYear(
+      int ESMCI::Time::ESMCI::TimeGetDayOfYear(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *dayOfYear) const {   // out - time's day of year value
+      ESMCI::TimeInterval *dayOfYear) const {   // out - time's day of year value
 //
 // !DESCRIPTION:
 //      Gets a {\tt Time}'s day of the year value as an {\tt ESMC\_TimeInterval}
@@ -1747,7 +1747,7 @@
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_TimeGetDayOfYear(timeinterval)"
+ #define ESMC_METHOD "ESMCI::TimeGetDayOfYear(timeinterval)"
 
     int rc = ESMF_SUCCESS;
 
@@ -1773,17 +1773,17 @@
     ESMC_I8 yy_i8;
     int mm, dd;
     // TODO: use native C++ Get, not F90 entry point
-    rc = ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd);
+    rc = ESMCI::TimeGet((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // create time for 1/1/yy
-    ESMC_Time dayOne;
+    ESMCI::Time dayOne;
     mm=1, dd=1;
     // TODO: use native C++ Set(), not F90 entry point
     ESMC_Calendar *cal = this->calendar; // allows reset
     int tz = this->timeZone;             //   after Set() clears it
-    rc = dayOne.ESMC_TimeSet((ESMC_I4 *)ESMC_NULL_POINTER,
+    rc = dayOne.ESMCI::Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                              &yy_i8, &mm, &dd,
                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1805,4 +1805,4 @@
     
     return(rc);
 
- }  // end ESMC_TimeGetDayOfYear
+ }  // end ESMCI::TimeGetDayOfYear

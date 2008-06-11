@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.44 2008/06/08 03:33:46 rosalind Exp $
+// $Id: ESMC_Clock_F.C,v 1.45 2008/06/11 21:14:57 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,11 +40,11 @@ extern "C" {
                                        int *nameLen,
                                        const char *name,
                                        ESMCI::TimeInterval *timeStep,
-                                       ESMC_Time *startTime,
-                                       ESMC_Time *stopTime,
+                                       ESMCI::Time *startTime,
+                                       ESMCI::Time *stopTime,
                                        ESMCI::TimeInterval *runDuration,
                                        int *runTimeStepCount,
-                                       ESMC_Time *refTime,
+                                       ESMCI::Time *refTime,
                                        int *status) {
           *ptr = ESMC_ClockCreate(
                                            *nameLen,   // always present 
@@ -76,12 +76,12 @@ extern "C" {
                                  int *nameLen,
                                  const char *name,
                                  ESMCI::TimeInterval *timeStep,
-                                 ESMC_Time *startTime,
-                                 ESMC_Time *stopTime,
+                                 ESMCI::Time *startTime,
+                                 ESMCI::Time *stopTime,
                                  ESMCI::TimeInterval *runDuration,
                                  int *runTimeStepCount,
-                                 ESMC_Time *refTime,
-                                 ESMC_Time *currTime,
+                                 ESMCI::Time *refTime,
+                                 ESMCI::Time *currTime,
                                  ESMC_I8 *advanceCount,
                                  ESMC_Direction *direction,
                                  int *status) {
@@ -107,13 +107,13 @@ extern "C" {
                                  int *tempNameLen,
                                  char *tempName,
                                  ESMCI::TimeInterval *timeStep,
-                                 ESMC_Time *startTime,
-                                 ESMC_Time *stopTime,
+                                 ESMCI::Time *startTime,
+                                 ESMCI::Time *stopTime,
                                  ESMCI::TimeInterval *runDuration,
                                  ESMC_R8 *runTimeStepCount,
-                                 ESMC_Time *refTime,
-                                 ESMC_Time *currTime,
-                                 ESMC_Time *prevTime,
+                                 ESMCI::Time *refTime,
+                                 ESMCI::Time *currTime,
+                                 ESMCI::Time *prevTime,
                                  ESMCI::TimeInterval *currSimTime,
                                  ESMCI::TimeInterval *prevSimTime,
                                  ESMC_Calendar **calendar, 
@@ -212,7 +212,7 @@ extern "C" {
        }
 
        void FTN(c_esmc_clockstoptimeenable)(ESMC_Clock **ptr,
-                                            ESMC_Time *stopTime, int *status) {
+                                            ESMCI::Time *stopTime, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockStopTimeEnable(
                                          ESMC_NOT_PRESENT_FILTER(stopTime) );
@@ -248,7 +248,7 @@ extern "C" {
        }
 
        void FTN(c_esmc_clockgetnexttime)(ESMC_Clock **ptr,
-                                 ESMC_Time *nextTime,
+                                 ESMCI::Time *nextTime,
                                  ESMCI::TimeInterval *timeStep,
                                  int *status) {
           ESMF_CHECK_POINTER(*ptr, status)

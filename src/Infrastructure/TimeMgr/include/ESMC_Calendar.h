@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.55 2008/06/08 03:33:45 rosalind Exp $
+// $Id: ESMC_Calendar.h,v 1.56 2008/06/11 21:14:56 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@ enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
 namespace ESMCI{
 
 // forward reference to prevent #include recursion
-class ESMC_Time;
+class Time;
 class TimeInterval;
 
 // !PUBLIC TYPES:
@@ -186,11 +186,11 @@ class ESMC_Calendar {
                                    ESMC_I4 *d=0, ESMC_I8 *d_i8=0,
                                    ESMC_R8 *d_r8=0) const;
 
-    ESMC_Time ESMC_CalendarIncrement(const ESMC_Time *time,
+    ESMCI::Time ESMC_CalendarIncrement(const ESMCI::Time *time,
                                      const ESMCI::TimeInterval &timeinterval)
                                      const;
 
-    ESMC_Time ESMC_CalendarDecrement(const ESMC_Time *time,
+    ESMCI::Time ESMC_CalendarDecrement(const ESMCI::Time *time,
                                      const ESMCI::TimeInterval &timeinterval)
                                      const;
 
@@ -218,7 +218,7 @@ class ESMC_Calendar {
 
     // for testing/debugging
     int ESMC_CalendarPrint(const char *options=0, 
-                           const ESMC_Time *time=0) const;
+                           const ESMCI::Time *time=0) const;
 
     // native C++ constructors/destructors
     ESMC_Calendar(void);
@@ -264,7 +264,7 @@ class ESMC_Calendar {
 //
   private:
 
-    friend class ESMC_Time;
+    friend class ESMCI::Time;
     friend class ESMCI::TimeInterval;
 
 //

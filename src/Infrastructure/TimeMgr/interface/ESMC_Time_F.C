@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.44 2008/06/08 03:33:46 rosalind Exp $
+// $Id: ESMC_Time_F.C,v 1.45 2008/06/11 21:14:58 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ namespace ESMCI{
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_timeset)(ESMC_Time *ptr,
+       void FTN(c_esmc_timeset)(ESMCI::Time *ptr,
                                 ESMC_I4 *yy, ESMC_I8 *yy_i8,
                                 int *mm, int *dd,
                                 ESMC_I4 *d,  ESMC_I8 *d_i8,
@@ -54,7 +54,7 @@ extern "C" {
                                 ESMC_CalendarType *calendarType,
                                 int *timeZone,
                                 int *status) {
-          int rc = (ptr)->ESMC_TimeSet(
+          int rc = (ptr)->ESMCI::Time::set(
                        ESMC_NOT_PRESENT_FILTER(yy),
                        ESMC_NOT_PRESENT_FILTER(yy_i8),
                        ESMC_NOT_PRESENT_FILTER(mm),
@@ -83,7 +83,7 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_timeget)(ESMC_Time *ptr,
+       void FTN(c_esmc_timeget)(ESMCI::Time *ptr,
                               ESMC_I4 *yy, ESMC_I8 *yy_i8,
                               int *mm, int *dd,
                               ESMC_I4 *d,  ESMC_I8 *d_i8,
@@ -105,12 +105,12 @@ extern "C" {
                               int *tempTimeStringLenISOFrac, 
                               char *tempTimeStringISOFrac,
                               int *dayOfWeek,
-                              ESMC_Time *midMonth,
+                              ESMCI::Time *midMonth,
                               ESMC_I4 *dayOfYear,
                               ESMC_R8 *dayOfYear_r8,
                               ESMCI::TimeInterval *dayOfYear_intvl,
                               int *status) {
-          int rc = (ptr)->ESMC_TimeGet(
+          int rc = (ptr)->ESMCI::Time::get(
                        ESMC_NOT_PRESENT_FILTER(yy),
                        ESMC_NOT_PRESENT_FILTER(yy_i8),
                        ESMC_NOT_PRESENT_FILTER(mm),
@@ -151,51 +151,51 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_timeisleapyear)(ESMC_Time *ptr,
+       void FTN(c_esmc_timeisleapyear)(ESMCI::Time *ptr,
                                        int *esmf_timeIsLeapYear,
                                        int *status) {
            *esmf_timeIsLeapYear =
-                 (int) (ptr)->ESMC_TimeIsLeapYear(
+                 (int) (ptr)->ESMCI::Time::isLeapYear(
                               ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_timeissamecalendar)(ESMC_Time *ptr, ESMC_Time *time,
+       void FTN(c_esmc_timeissamecalendar)(ESMCI::Time *ptr, ESMCI::Time *time,
                                            int *esmf_timeIsSameCalendar,
                                            int *status) {
            *esmf_timeIsSameCalendar =
-                 (int) (ptr)->ESMC_TimeIsSameCalendar(time, 
+                 (int) (ptr)->ESMCI::Time::isSameCalendar(time, 
                               ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_timesynctorealtime)(ESMC_Time *ptr,
+       void FTN(c_esmc_timesynctorealtime)(ESMCI::Time *ptr,
                                            int *status) {                 
-          int rc = (ptr)->ESMC_TimeSyncToRealTime();      
+          int rc = (ptr)->ESMCI::Time::syncToRealTime();      
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_timeinc)(ESMC_Time *time,
+       void FTN(c_esmc_timeinc)(ESMCI::Time *time,
                                 ESMCI::TimeInterval *timeinterval,
-                                ESMC_Time *esmf_baseTimeInc) {
+                                ESMCI::Time *esmf_baseTimeInc) {
            *esmf_baseTimeInc = (*time + *timeinterval);
        }
 
-       void FTN(c_esmc_timedec)(ESMC_Time *time,
+       void FTN(c_esmc_timedec)(ESMCI::Time *time,
                                 ESMCI::TimeInterval *timeinterval,
-                                ESMC_Time *esmf_baseTimeDec) {
+                                ESMCI::Time *esmf_baseTimeDec) {
            *esmf_baseTimeDec = (*time - *timeinterval);
        }
 
-       void FTN(c_esmc_timediff)(ESMC_Time *time1,
-                                 ESMC_Time *time2,
+       void FTN(c_esmc_timediff)(ESMCI::Time *time1,
+                                 ESMCI::Time *time2,
                                  ESMCI::TimeInterval *esmf_timeDiff) {
            *esmf_timeDiff = (*time1 - *time2);
        }
 
-       void FTN(c_esmc_timereadrestart)(ESMC_Time *ptr, int *nameLen,
+       void FTN(c_esmc_timereadrestart)(ESMCI::Time *ptr, int *nameLen,
                                         const char *name,
                                         ESMC_IOSpec *iospec,   
                                         int *status) {
-          int rc = (ptr)->ESMC_TimeReadRestart(
+          int rc = (ptr)->ESMCI::Time::readRestart(
                                                *nameLen,  // always present 
                                                           //  internal argument.
                                                 name,      // required.
@@ -203,24 +203,24 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_timewriterestart)(ESMC_Time *ptr, 
+       void FTN(c_esmc_timewriterestart)(ESMCI::Time *ptr, 
                                          ESMC_IOSpec *iospec,
                                          int *status) {
-          int rc = (ptr)->ESMC_TimeWriteRestart(
+          int rc = (ptr)->ESMCI::Time::writeRestart(
                         ESMC_NOT_PRESENT_FILTER(iospec) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_timevalidate)(ESMC_Time *ptr, const char *options,
+       void FTN(c_esmc_timevalidate)(ESMCI::Time *ptr, const char *options,
                                      int *status) {
-          int rc = (ptr)->ESMC_TimeValidate(
+          int rc = (ptr)->ESMCI::Time::validate(
                     ESMC_NOT_PRESENT_FILTER(options) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_timeprint)(ESMC_Time *ptr, const char *options,
+       void FTN(c_esmc_timeprint)(ESMCI::Time *ptr, const char *options,
                                   int *status) {
-          int rc = (ptr)->ESMC_TimePrint(
+          int rc = (ptr)->ESMCI::Time::print(
                  ESMC_NOT_PRESENT_FILTER(options) );
           if (ESMC_PRESENT(status)) *status = rc;
        }

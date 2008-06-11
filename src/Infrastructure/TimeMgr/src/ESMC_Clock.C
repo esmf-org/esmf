@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.85 2008/06/08 03:33:48 rosalind Exp $
+// $Id: ESMC_Clock.C,v 1.86 2008/06/11 21:15:00 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.85 2008/06/08 03:33:48 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.86 2008/06/11 21:15:00 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -66,11 +66,11 @@ int ESMC_Clock::count=0;
       int                nameLen,          // in
       const char        *name,             // in
       ESMCI::TimeInterval *timeStep,         // in
-      ESMC_Time         *startTime,        // in
-      ESMC_Time         *stopTime,         // in
+      ESMCI::Time         *startTime,        // in
+      ESMCI::Time         *stopTime,         // in
       ESMCI::TimeInterval *runDuration,      // in
       int               *runTimeStepCount, // in
-      ESMC_Time         *refTime,          // in
+      ESMCI::Time         *refTime,          // in
       int               *rc) {             // out - return code
 
 // !DESCRIPTION:
@@ -260,12 +260,12 @@ int ESMC_Clock::count=0;
       int                nameLen,          // in
       const char        *name,             // in
       ESMCI::TimeInterval *timeStep,         // in
-      ESMC_Time         *startTime,        // in
-      ESMC_Time         *stopTime,         // in
+      ESMCI::Time         *startTime,        // in
+      ESMCI::Time         *stopTime,         // in
       ESMCI::TimeInterval *runDuration,      // in
       int               *runTimeStepCount, // in
-      ESMC_Time         *refTime,          // in
-      ESMC_Time         *currTime,         // in
+      ESMCI::Time         *refTime,          // in
+      ESMCI::Time         *currTime,         // in
       ESMC_I8      *advanceCount,     // in
       ESMC_Direction    *direction) {      // in
 
@@ -372,13 +372,13 @@ int ESMC_Clock::count=0;
       int               *tempNameLen,      // out
       char              *tempName,         // out
       ESMCI::TimeInterval *timeStep,         // out
-      ESMC_Time         *startTime,        // out
-      ESMC_Time         *stopTime,         // out
+      ESMCI::Time         *startTime,        // out
+      ESMCI::Time         *stopTime,         // out
       ESMCI::TimeInterval *runDuration,      // out
       ESMC_R8      *runTimeStepCount, // out
-      ESMC_Time         *refTime,          // out
-      ESMC_Time         *currTime,         // out
-      ESMC_Time         *prevTime,         // out
+      ESMCI::Time         *refTime,          // out
+      ESMCI::Time         *currTime,         // out
+      ESMCI::Time         *prevTime,         // out
       ESMCI::TimeInterval *currSimTime,      // out
       ESMCI::TimeInterval *prevSimTime,      // out
       ESMC_Calendar    **calendar,         // out
@@ -454,7 +454,7 @@ int ESMC_Clock::count=0;
       // get calendar from currTime, but could get from any other clock Time,
       //   since they all use the same calendar
       // TODO: use native C++ Get, not F90 entry point, when ready
-      rc = this->currTime.ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER,
+      rc = this->currTime.ESMCI::Time::get((ESMC_I4 *)ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -464,14 +464,14 @@ int ESMC_Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       calendar);
       ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
-                                         "ESMC_TimeGet(...calendar) failed.",
+                                         "ESMCI::Time::get(...calendar) failed.",
                                          &rc);
     }
     if (calendarType != ESMC_NULL_POINTER) {
       // get calendar type from currTime, but could get from any other clock
       // Time, since they all use the same calendar
       // TODO: use native C++ Get, not F90 entry point, when ready
-      rc = this->currTime.ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER,
+      rc = this->currTime.ESMCI::Time::get((ESMC_I4 *)ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -481,14 +481,14 @@ int ESMC_Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, calendarType);
       ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
-                                       "ESMC_TimeGet(...calendarType) failed.",
+                                       "ESMCI::Time::get(...calendarType) failed.",
                                        &rc);
     }
     if (timeZone != ESMC_NULL_POINTER) {
       // get timeZone from currTime, but could get from any other clock Time,
       //   since they all are in the same timezone
       // TODO: use native C++ Get, not F90 entry point, when ready
-      rc = this->currTime.ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER,
+      rc = this->currTime.ESMCI::Time::get((ESMC_I4 *)ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -498,7 +498,7 @@ int ESMC_Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, timeZone);
       ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
-                                         "ESMC_TimeGet(...timeZone) failed.",
+                                         "ESMCI::Time::get(...timeZone) failed.",
                                          &rc);
     }
 
@@ -709,7 +709,7 @@ int ESMC_Clock::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Time *stopTime) {              // in  - optional new stop time
+      ESMCI::Time *stopTime) {              // in  - optional new stop time
 //
 // !DESCRIPTION:
 //      ESMF routine which enables a {\tt ESMC\_Clock}'s stopTime to function.
@@ -922,7 +922,7 @@ int ESMC_Clock::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Time         *nextTime,       // out
+      ESMCI::Time         *nextTime,       // out
       ESMCI::TimeInterval *timeStep) {     // in
 
 // !DESCRIPTION:
@@ -1294,7 +1294,7 @@ int ESMC_Clock::count=0;
 
     // set current time to wall clock time
     // TODO:  ensure current time is within startTime and stopTime
-    rc = currTime.ESMC_TimeSyncToRealTime();
+    rc = currTime.ESMCI::Time::syncToRealTime();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
     return(ESMC_ClockValidate());
@@ -1539,14 +1539,14 @@ int ESMC_Clock::count=0;
     // validate required individual properties
     if(ESMC_LogDefault.ESMC_LogMsgFoundError(timeStep.ESMCI::TimeInterval::validate(),
                           "timeStep.ESMCI::TimeInterval::validate() failed", &rc) ||
-       ESMC_LogDefault.ESMC_LogMsgFoundError(startTime.ESMC_TimeValidate(),
-                                 "startTime.ESMC_TimeValidate() failed", &rc) ||
-       ESMC_LogDefault.ESMC_LogMsgFoundError(refTime.ESMC_TimeValidate(),
-                                 "refTime.ESMC_TimeValidate() failed", &rc)   ||
-       ESMC_LogDefault.ESMC_LogMsgFoundError(currTime.ESMC_TimeValidate(),
-                                 "currTime.ESMC_TimeValidate() failed", &rc)  ||
-       ESMC_LogDefault.ESMC_LogMsgFoundError(prevTime.ESMC_TimeValidate(),
-                                 "prevTime.ESMC_TimeValidate() failed", &rc)) {
+       ESMC_LogDefault.ESMC_LogMsgFoundError(startTime.ESMCI::Time::validate(),
+                                 "startTime.ESMCI::Time::validate() failed", &rc) ||
+       ESMC_LogDefault.ESMC_LogMsgFoundError(refTime.ESMCI::Time::validate(),
+                                 "refTime.ESMCI::Time::validate() failed", &rc)   ||
+       ESMC_LogDefault.ESMC_LogMsgFoundError(currTime.ESMCI::Time::validate(),
+                                 "currTime.ESMCI::Time::validate() failed", &rc)  ||
+       ESMC_LogDefault.ESMC_LogMsgFoundError(prevTime.ESMCI::Time::validate(),
+                                 "prevTime.ESMCI::Time::validate() failed", &rc)) {
        return(rc);
     }
 
@@ -1560,8 +1560,8 @@ int ESMC_Clock::count=0;
 
     // validate optional stopTime property if set
     if (stopTimeEnabled) {
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(stopTime.ESMC_TimeValidate(),
-                                     "stopTime.ESMC_TimeValidate() failed",
+      if(ESMC_LogDefault.ESMC_LogMsgFoundError(stopTime.ESMCI::Time::validate(),
+                                     "stopTime.ESMCI::Time::validate() failed",
                                      &rc)) return(rc);
 
 //  The following fixes bugs 801366, 801409, & 806784
@@ -1572,7 +1572,7 @@ int ESMC_Clock::count=0;
       //   (TODO: check only if stopTime set)
       // TODO: use native C++ Get, not F90 entry point, when ready
       ESMC_Calendar *startCal, *stopCal;
-      int rc = startTime.ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER, 
+      int rc = startTime.ESMCI::Time::get((ESMC_I4 *)ESMC_NULL_POINTER, 
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1586,11 +1586,11 @@ int ESMC_Clock::count=0;
                           ESMC_NULL_POINTER, &startCal);
 
       if(ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
-         "startTime.ESMC_TimeGet(...startCal) failed.", &rc)) {
+         "startTime.ESMCI::Time::get(...startCal) failed.", &rc)) {
         return(rc);   
       }
 
-      rc = stopTime.ESMC_TimeGet((ESMC_I4 *)ESMC_NULL_POINTER, 
+      rc = stopTime.ESMCI::Time::get((ESMC_I4 *)ESMC_NULL_POINTER, 
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1604,7 +1604,7 @@ int ESMC_Clock::count=0;
                           ESMC_NULL_POINTER, &stopCal);
 
       if(ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
-         "stopTime.ESMC_TimeGet(...stopCal) failed.", &rc)) {
+         "stopTime.ESMCI::Time::get(...stopCal) failed.", &rc)) {
         return(rc);   
       }
 
@@ -1734,17 +1734,17 @@ int ESMC_Clock::count=0;
       else if (strncmp(opts, "starttime", 9) == 0) {
         printf("startTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          startTime.ESMC_TimePrint("string");
+          startTime.ESMCI::Time::print("string");
         } else {
-          startTime.ESMC_TimePrint();
+          startTime.ESMCI::Time::print();
         }
       }
       else if (strncmp(opts, "stoptime", 8) == 0) {
         printf("stopTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          stopTime.ESMC_TimePrint("string");
+          stopTime.ESMCI::Time::print("string");
         } else {
-          stopTime.ESMC_TimePrint();
+          stopTime.ESMCI::Time::print();
         }
       }
       else if (strncmp(opts, "stoptimeenabled", 15) == 0) {
@@ -1753,25 +1753,25 @@ int ESMC_Clock::count=0;
       else if (strncmp(opts, "reftime", 7) == 0) {
         printf("refTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          refTime.ESMC_TimePrint("string");
+          refTime.ESMCI::Time::print("string");
         } else {
-          refTime.ESMC_TimePrint();
+          refTime.ESMCI::Time::print();
         }
       }
       else if (strncmp(opts, "currtime", 8) == 0) {
         printf("currTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          currTime.ESMC_TimePrint("string");
+          currTime.ESMCI::Time::print("string");
         } else {
-          currTime.ESMC_TimePrint();
+          currTime.ESMCI::Time::print();
         }
       }
       else if (strncmp(opts, "prevtime", 8) == 0) {
         printf("prevTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          prevTime.ESMC_TimePrint("string");
+          prevTime.ESMCI::Time::print("string");
         } else {
-          prevTime.ESMC_TimePrint();
+          prevTime.ESMCI::Time::print();
         }
       }
       else if (strncmp(opts, "advancecount", 12) == 0) {
@@ -1796,12 +1796,12 @@ int ESMC_Clock::count=0;
 
       printf("name = %s\n", name);
       printf("timeStep = \n");  timeStep.ESMCI::TimeInterval::print(options);
-      printf("startTime = \n"); startTime.ESMC_TimePrint(options);
-      printf("stopTime = \n");  stopTime.ESMC_TimePrint(options);
+      printf("startTime = \n"); startTime.ESMCI::Time::print(options);
+      printf("stopTime = \n");  stopTime.ESMCI::Time::print(options);
       printf("stopTimeEnabled = %s\n", stopTimeEnabled ? "true" : "false");
-      printf("refTime = \n");   refTime.ESMC_TimePrint(options);
-      printf("currTime = \n");  currTime.ESMC_TimePrint(options);
-      printf("prevTime = \n");  prevTime.ESMC_TimePrint(options);
+      printf("refTime = \n");   refTime.ESMCI::Time::print(options);
+      printf("currTime = \n");  currTime.ESMCI::Time::print(options);
+      printf("prevTime = \n");  prevTime.ESMCI::Time::print(options);
       printf("advanceCount = %lld\n", advanceCount);
       printf("direction = %d\n", direction);
       printf("alarmCount = %d\n", alarmCount);

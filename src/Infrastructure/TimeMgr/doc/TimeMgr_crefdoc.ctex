@@ -278,7 +278,7 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_Time_ccapi}
+\input{ESMCI::Time*_ccapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/ESMF_Time_fapi}
 #endif
@@ -301,10 +301,10 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-%\input{ESMC_Time_chapi}
+%\input{ESMCI::Time*_chapi}
 %\input{Time_ccapi}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/ESMC_Time_chapi}
+%\input{../Infrastructure/TimeMgr/doc/ESMCI::Time*_chapi}
 %\input{../Infrastructure/TimeMgr/doc/Time_ccapi}
 #endif
 

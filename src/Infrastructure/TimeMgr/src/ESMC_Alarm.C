@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.64 2008/06/08 03:33:47 rosalind Exp $
+// $Id: ESMC_Alarm.C,v 1.65 2008/06/11 21:14:59 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.64 2008/06/08 03:33:47 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.65 2008/06/11 21:14:59 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -67,12 +67,12 @@ int ESMC_Alarm::count=0;
       int                nameLen,           // in
       const char        *name,              // in
       ESMC_Clock        *clock,             // in
-      ESMC_Time         *ringTime,          // in
+      ESMCI::Time         *ringTime,          // in
       ESMCI::TimeInterval *ringInterval,      // in
-      ESMC_Time         *stopTime,          // in
+      ESMCI::Time         *stopTime,          // in
       ESMCI::TimeInterval *ringDuration,      // in
       int               *ringTimeStepCount, // in
-      ESMC_Time         *refTime,           // in
+      ESMCI::Time         *refTime,           // in
       bool              *enabled,           // in
       bool              *sticky,            // in
       int               *rc ) {             // out - return code
@@ -292,12 +292,12 @@ int ESMC_Alarm::count=0;
       int                nameLen,           // in
       const char        *name,              // in
       ESMC_Clock       **clock,             // in
-      ESMC_Time         *ringTime,          // in
+      ESMCI::Time         *ringTime,          // in
       ESMCI::TimeInterval *ringInterval,      // in
-      ESMC_Time         *stopTime,          // in
+      ESMCI::Time         *stopTime,          // in
       ESMCI::TimeInterval *ringDuration,      // in
       int               *ringTimeStepCount, // in
-      ESMC_Time         *refTime,           // in
+      ESMCI::Time         *refTime,           // in
       bool              *ringing,           // in
       bool              *enabled,           // in
       bool              *sticky) {          // in
@@ -408,16 +408,16 @@ int ESMC_Alarm::count=0;
       int               *tempNameLen,            // out
       char              *tempName,               // out
       ESMC_Clock       **clock,                  // out
-      ESMC_Time         *ringTime,               // out
-      ESMC_Time         *prevRingTime,           // out
+      ESMCI::Time         *ringTime,               // out
+      ESMCI::Time         *prevRingTime,           // out
       ESMCI::TimeInterval *ringInterval,           // out
-      ESMC_Time         *stopTime,               // out
+      ESMCI::Time         *stopTime,               // out
       ESMCI::TimeInterval *ringDuration,           // out
       int               *ringTimeStepCount,      // out
       int               *timeStepRingingCount,   // out
-      ESMC_Time         *ringBegin,              // out
-      ESMC_Time         *ringEnd,                // out
-      ESMC_Time         *refTime,                // out
+      ESMCI::Time         *ringBegin,              // out
+      ESMCI::Time         *ringEnd,                // out
+      ESMCI::Time         *refTime,                // out
       bool              *ringing,                // out
       bool              *ringingOnPrevTimeStep,  // out
       bool              *enabled,                // out
@@ -830,7 +830,7 @@ int ESMC_Alarm::count=0;
     }
 
     // get clock's next time
-    ESMC_Time clockNextTime;
+    ESMCI::Time clockNextTime;
     clock->ESMC_ClockGetNextTime(&clockNextTime, timeStep);
 
     // if specified, use passed-in timestep, otherwise use clock's
@@ -1140,7 +1140,7 @@ int ESMC_Alarm::count=0;
 
       // if sticky alarm, must have traversed forward far enough to have
       //   called RingerOff(), causing the ringEnd time to be saved.
-      if(sticky && ringEnd.ESMC_TimeValidate("initialized") != ESMF_SUCCESS) {
+      if(sticky && ringEnd.ESMCI::Time::validate("initialized") != ESMF_SUCCESS) {
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "Sticky alarm %s cannot be reversed since it has "
                         "not been traversed forward and turned off via "
@@ -1152,7 +1152,7 @@ int ESMC_Alarm::count=0;
       }
 
       // determine when alarm ends ringing in forward mode
-      ESMC_Time ringTimeEnd;
+      ESMCI::Time ringTimeEnd;
       if (sticky) {
         ringTimeEnd = ringEnd;
       } else { // non-sticky
@@ -1429,7 +1429,7 @@ int ESMC_Alarm::count=0;
     }
 
     // must have a ring time; ringDuration, stopTime, prevRingTime optional
-    if (ringTime.ESMC_TimeValidate() != ESMF_SUCCESS) {
+    if (ringTime.ESMCI::Time::validate() != ESMF_SUCCESS) {
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "Alarm %s: invalid ringTime.", name);
       ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
@@ -1528,57 +1528,57 @@ int ESMC_Alarm::count=0;
       else if (strncmp(opts, "ringtime", 8) == 0) {
         printf("ringTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          ringTime.ESMC_TimePrint("string");
+          ringTime.ESMCI::Time::print("string");
         } else {
-          ringTime.ESMC_TimePrint();
+          ringTime.ESMCI::Time::print();
         }
       }
       else if (strncmp(opts, "firstringtime", 13) == 0) {
         printf("firstRingTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          firstRingTime.ESMC_TimePrint("string");
+          firstRingTime.ESMCI::Time::print("string");
         } else {
-          firstRingTime.ESMC_TimePrint();
+          firstRingTime.ESMCI::Time::print();
         }
       }
       else if (strncmp(opts, "prevringtime", 12) == 0) {
         printf("prevRingTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          prevRingTime.ESMC_TimePrint("string");
+          prevRingTime.ESMCI::Time::print("string");
         } else {
-          prevRingTime.ESMC_TimePrint();
+          prevRingTime.ESMCI::Time::print();
         }
       }
       else if (strncmp(opts, "stoptime", 8) == 0) {
         printf("stopTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          stopTime.ESMC_TimePrint("string");
+          stopTime.ESMCI::Time::print("string");
         } else {
-          stopTime.ESMC_TimePrint();
+          stopTime.ESMCI::Time::print();
         }
       }
       else if (strncmp(opts, "ringbegin", 9) == 0) {
         printf("ringBegin = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          ringBegin.ESMC_TimePrint("string");
+          ringBegin.ESMCI::Time::print("string");
         } else {
-          ringBegin.ESMC_TimePrint();
+          ringBegin.ESMCI::Time::print();
         }
       }
       else if (strncmp(opts, "ringend", 7) == 0) {
         printf("ringEnd = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          ringEnd.ESMC_TimePrint("string");
+          ringEnd.ESMCI::Time::print("string");
         } else {
-          ringEnd.ESMC_TimePrint();
+          ringEnd.ESMCI::Time::print();
         }
       }
       else if (strncmp(opts, "reftime", 7) == 0) {
         printf("refTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          refTime.ESMC_TimePrint("string");
+          refTime.ESMCI::Time::print("string");
         } else {
-          refTime.ESMC_TimePrint();
+          refTime.ESMCI::Time::print();
         }
       }
       else if (strncmp(opts, "ringtimestepcount", 17) == 0) {
@@ -1607,13 +1607,13 @@ int ESMC_Alarm::count=0;
       printf("name = %s\n", name);
       printf("ringInterval = \n"); ringInterval.ESMCI::TimeInterval::print(options);
       printf("ringDuration = \n"); ringDuration.ESMCI::TimeInterval::print(options);
-      printf("ringTime = \n");      ringTime.ESMC_TimePrint(options);
-      printf("firstRingTime = \n"); firstRingTime.ESMC_TimePrint(options);
-      printf("prevRingTime = \n");  prevRingTime.ESMC_TimePrint(options);
-      printf("stopTime = \n");      stopTime.ESMC_TimePrint(options);
-      printf("ringBegin = \n");     ringBegin.ESMC_TimePrint(options);
-      printf("ringEnd = \n");       ringEnd.ESMC_TimePrint(options);
-      printf("refTime = \n");       refTime.ESMC_TimePrint(options);
+      printf("ringTime = \n");      ringTime.ESMCI::Time::print(options);
+      printf("firstRingTime = \n"); firstRingTime.ESMCI::Time::print(options);
+      printf("prevRingTime = \n");  prevRingTime.ESMCI::Time::print(options);
+      printf("stopTime = \n");      stopTime.ESMCI::Time::print(options);
+      printf("ringBegin = \n");     ringBegin.ESMCI::Time::print(options);
+      printf("ringEnd = \n");       ringEnd.ESMCI::Time::print(options);
+      printf("refTime = \n");       refTime.ESMCI::Time::print(options);
       printf("ringTimeStepCount = %d\n",    ringTimeStepCount);
       printf("timeStepRingingCount = %d\n", timeStepRingingCount);
       printf("ringing = %s\n", ringing ? "true" : "false");
@@ -1779,7 +1779,7 @@ int ESMC_Alarm::count=0;
 
       // and update next ringing time
       bool updateNextRingingTime = true;
-      if (stopTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
+      if (stopTime.ESMCI::Time::validate("initialized") == ESMF_SUCCESS) {
         updateNextRingingTime = (timeStepPositive) ?
                                clock->currTime < (stopTime - ringInterval):
                                clock->currTime > (stopTime - ringInterval);

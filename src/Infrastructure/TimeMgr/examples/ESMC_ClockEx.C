@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockEx.C,v 1.25 2008/06/08 03:33:44 rosalind Exp $
+// $Id: ESMC_ClockEx.C,v 1.26 2008/06/11 21:14:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockEx.C,v 1.25 2008/06/08 03:33:44 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_ClockEx.C,v 1.26 2008/06/11 21:14:55 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -47,8 +47,8 @@
 
    // instantiate timestep, start and stop times
    ESMCI::TimeInterval timeStep;
-   ESMC_Time startTime;
-   ESMC_Time stopTime;
+   ESMCI::Time startTime;
+   ESMCI::Time stopTime;
 
    // initialize calendar to be Gregorian type
    gregorianCalendar = ESMC_CalendarCreate(9, "Gregorian", 
@@ -69,7 +69,7 @@
    // initialize start time to 3/27/2003
    int yy = 2003;
    int mm = 3, dd = 27;
-   rc = startTime.ESMC_TimeSet(&yy, 0, &mm, &dd, 0, 0, 0, 0, 0, 0, 0, 0, 
+   rc = startTime.ESMCI::Time*Set(&yy, 0, &mm, &dd, 0, 0, 0, 0, 0, 0, 0, 0, 
                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                &gregorianCalendar);
 
@@ -80,7 +80,7 @@
 
    // initialize stop time to 3/29/2003
    yy = 2003; mm = 3; dd = 29;
-   rc = stopTime.ESMC_TimeSet(&yy, 0, &mm, &dd, 0, 0, 0, 0, 0, 0, 0, 0, 
+   rc = stopTime.ESMCI::Time*Set(&yy, 0, &mm, &dd, 0, 0, 0, 0, 0, 0, 0, 0, 
                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                               &gregorianCalendar);
 

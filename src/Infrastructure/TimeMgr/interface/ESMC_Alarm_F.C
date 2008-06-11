@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.33 2008/06/08 03:33:45 rosalind Exp $
+// $Id: ESMC_Alarm_F.C,v 1.34 2008/06/11 21:14:56 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,9 +38,9 @@ extern "C" {
 
        void FTN(c_esmc_alarmcreatenew)(ESMC_Alarm **ptr, int *nameLen, 
                 const char *name, ESMC_Clock **clock,
-                ESMC_Time *ringTime, ESMCI::TimeInterval *ringInterval,
-                ESMC_Time *stopTime, ESMCI::TimeInterval *ringDuration, 
-                int *ringTimeStepCount, ESMC_Time *refTime,
+                ESMCI::Time *ringTime, ESMCI::TimeInterval *ringInterval,
+                ESMCI::Time *stopTime, ESMCI::TimeInterval *ringDuration, 
+                int *ringTimeStepCount, ESMCI::Time *refTime,
                 bool *enabled, bool *sticky, int *status) {
           *ptr = ESMC_AlarmCreate(          
                                            *nameLen, // always present
@@ -73,9 +73,9 @@ extern "C" {
 
        void FTN(c_esmc_alarmset)(ESMC_Alarm **ptr, int *nameLen, 
                                  const char *name, ESMC_Clock **clock,
-                ESMC_Time *ringTime, ESMCI::TimeInterval *ringInterval,
-                ESMC_Time *stopTime, ESMCI::TimeInterval *ringDuration, 
-                int *ringTimeStepCount, ESMC_Time *refTime,
+                ESMCI::Time *ringTime, ESMCI::TimeInterval *ringInterval,
+                ESMCI::Time *stopTime, ESMCI::TimeInterval *ringDuration, 
+                int *ringTimeStepCount, ESMCI::Time *refTime,
                 bool *ringing, bool *enabled, bool *sticky,
                 int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
@@ -99,11 +99,11 @@ extern "C" {
        void FTN(c_esmc_alarmget)(ESMC_Alarm **ptr, int *nameLen, 
                                  int *tempNameLen, char *tempName,
                                  ESMC_Clock **clock,
-                ESMC_Time *ringTime, ESMC_Time *prevRingTime, 
-                ESMCI::TimeInterval *ringInterval, ESMC_Time *stopTime,
+                ESMCI::Time *ringTime, ESMCI::Time *prevRingTime, 
+                ESMCI::TimeInterval *ringInterval, ESMCI::Time *stopTime,
                 ESMCI::TimeInterval *ringDuration, int *ringTimeStepCount,
-                int *timeStepRingingCount, ESMC_Time *ringBegin,
-                ESMC_Time *ringEnd, ESMC_Time *refTime, bool *ringing,
+                int *timeStepRingingCount, ESMCI::Time *ringBegin,
+                ESMCI::Time *ringEnd, ESMCI::Time *refTime, bool *ringing,
                 bool *ringingOnPrevTimeStep, bool *enabled, bool *sticky,
                 int *status) {
           ESMF_CHECK_POINTER(*ptr, status)

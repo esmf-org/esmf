@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.C,v 1.2 2008/06/08 03:33:47 rosalind Exp $
+// $Id: ESMCI_TimeInterval.C,v 1.3 2008/06/11 21:14:59 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.2 2008/06/08 03:33:47 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.3 2008/06/11 21:14:59 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -94,9 +94,9 @@ namespace ESMCI{
       ESMC_R8 *ns_r8,     // in - floating point nanoseconds
       ESMC_I4 *sN,        // in - fractional seconds numerator
       ESMC_I4 *sD,        // in - fractional seconds denominator
-      ESMC_Time *startTime,    // in - starting time for absolute calendar
+      ESMCI::Time *startTime,    // in - starting time for absolute calendar
                                //      interval
-      ESMC_Time *endTime,      // in - ending time for absolute calendar
+      ESMCI::Time *endTime,      // in - ending time for absolute calendar
                                //      interval
       ESMC_Calendar **calendar, // in - calendar for calendar interval
       ESMC_CalendarType *calendarType) { // in - calendar type for calendar interval
@@ -127,8 +127,8 @@ namespace ESMCI{
     this->yy = 0;
     this->mm = 0;
     this->d  = 0;
-    this->startTime.ESMC_TimeSet((ESMC_I8) 0); // |
-    this->endTime.ESMC_TimeSet((ESMC_I8) 0);   //  > init to invalid, unset
+    this->startTime.ESMCI::Time::set((ESMC_I8) 0); // |
+    this->endTime.ESMCI::Time::set((ESMC_I8) 0);   //  > init to invalid, unset
     this->calendar = ESMC_NULL_POINTER;             // |    state
                                                     // TODO: replace with
                                                     //       ESMC_Base logic
@@ -144,7 +144,7 @@ namespace ESMCI{
     if (endTime != ESMC_NULL_POINTER) {
       if (startTime != ESMC_NULL_POINTER) {
         // when both are given, check that their calendars are the same
-        if (!startTime->ESMC_TimeIsSameCalendar(endTime)) {
+        if (!startTime->ESMCI::Time::isSameCalendar(endTime)) {
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
                           "; startTime & endTime calendars not the same", &rc);
           *this = saveTimeInterval; return(rc);
@@ -186,7 +186,7 @@ namespace ESMCI{
     // is used only at the point of evaluation (when performing a unit
     // conversion, arithmetic operation, or comparison), so the time interval's
     // own calendar property can be overridden at that point by a subject
-    // ESMC_Time's calendar or a method argument.
+    // ESMCI::Time's calendar or a method argument.
 
     // hold yy, mm, d parts as relative calendar interval to allow "float"
     // across all calendars (see note above).
@@ -259,16 +259,16 @@ namespace ESMCI{
       ESMC_R8 *ns_r8,      // out - floating point nanoseconds
       ESMC_I4 *sN,         // out - fractional seconds numerator
       ESMC_I4 *sD,         // out - fractional seconds denominator
-      ESMC_Time *startTime,     // out - starting time of absolute calendar
+      ESMCI::Time *startTime,     // out - starting time of absolute calendar
                                 //       interval
-      ESMC_Time *endTime,       // out - ending time of absolute calendar
+      ESMCI::Time *endTime,       // out - ending time of absolute calendar
                                 //       interval
       ESMC_Calendar **calendar, // out - calendar of calendar interval
       ESMC_CalendarType *calendarType, // out - calendar type of
                                        //       calendar interval
-      ESMC_Time *startTimeIn,   // in  - starting time for calendar interval
+      ESMCI::Time *startTimeIn,   // in  - starting time for calendar interval
                                 //       unit conversions
-      ESMC_Time *endTimeIn,     // in  - ending time for calendar interval
+      ESMCI::Time *endTimeIn,     // in  - ending time for calendar interval
                                 //       unit conversions
       ESMC_Calendar **calendarIn, // in  - calendar for calendar interval
                                   //       unit conversions
@@ -414,12 +414,12 @@ namespace ESMCI{
             // TODO: use ESMCI::TimeInterval operators (/) and (-) when ready ?
 
             // get years using startTime/endTime, if available
-            if (tiToConvert.startTime.ESMC_TimeValidate("initialized")
+            if (tiToConvert.startTime.ESMCI::Time::validate("initialized")
                   == ESMF_SUCCESS ||
-                tiToConvert.endTime.ESMC_TimeValidate("initialized")
+                tiToConvert.endTime.ESMCI::Time::validate("initialized")
                   == ESMF_SUCCESS) {
               ESMCI::TimeInterval oneYear(0, 0, 1, 1);
-              ESMC_Time iTime = tiToConvert.startTime + oneYear;
+              ESMCI::Time iTime = tiToConvert.startTime + oneYear;
               years = 0;
               while (iTime <= tiToConvert.endTime) {
                 years++;
@@ -537,12 +537,12 @@ namespace ESMCI{
           // TODO: use ESMCI::TimeInterval operators (/) and (-) when ready ?
 
           // get months using startTime, if available
-          if (tiToConvert.startTime.ESMC_TimeValidate("initialized")
+          if (tiToConvert.startTime.ESMCI::Time::validate("initialized")
                 == ESMF_SUCCESS ||
-              tiToConvert.endTime.ESMC_TimeValidate("initialized")
+              tiToConvert.endTime.ESMCI::Time::validate("initialized")
                 == ESMF_SUCCESS) {
             ESMCI::TimeInterval oneMonth(0, 0, 1, 0, 1);
-            ESMC_Time iTime = tiToConvert.startTime + oneMonth;
+            ESMCI::Time iTime = tiToConvert.startTime + oneMonth;
             months = 0;
             while (iTime <= tiToConvert.endTime) {
               months++;
@@ -878,8 +878,8 @@ namespace ESMCI{
       ESMC_I8 yy,           // in - calendar interval number of years
       ESMC_I8 mm,           // in - calendar interval number of months
       ESMC_I8 d,            // in - calendar interval number of days
-      ESMC_Time *startTime,      // in - interval startTime
-      ESMC_Time *endTime,        // in - interval endTime
+      ESMCI::Time *startTime,      // in - interval startTime
+      ESMCI::Time *endTime,        // in - interval endTime
       ESMC_Calendar *calendar,   // in - associated calendar
       ESMC_CalendarType calendarType) { // in - associated calendar type
 //
@@ -907,11 +907,11 @@ namespace ESMCI{
 
     if (startTime != ESMC_NULL_POINTER) {
       this->startTime = *startTime;
-    } else this->startTime.ESMC_TimeSet((ESMC_I8) 0);
+    } else this->startTime.ESMCI::Time::set((ESMC_I8) 0);
 
     if (endTime != ESMC_NULL_POINTER) {
       this->endTime = *endTime;
-    } else this->endTime.ESMC_TimeSet((ESMC_I8) 0);
+    } else this->endTime.ESMCI::Time::set((ESMC_I8) 0);
 
     if (calendar != ESMC_NULL_POINTER) {
       // set to user's calendar
@@ -2616,7 +2616,7 @@ namespace ESMCI{
 // !REQUIREMENTS:  
 
     // invoke fraction assignment operator; supports Time1-Time2 operator
-    // in ESMC_Time.  TODO:  should be implicit ?
+    // in ESMCI::Time.  TODO:  should be implicit ?
     ESMC_Fraction::operator=(fraction);
 
     return(*this);
@@ -2824,8 +2824,8 @@ namespace ESMCI{
       ESMC_I8 yy,            // in - calendar interval number of years
       ESMC_I8 mm,            // in - calendar interval number of months
       ESMC_I8 d,             // in - calendar interval number of days
-      ESMC_Time *startTime,       // in - interval start time
-      ESMC_Time *endTime,         // in - interval end time
+      ESMCI::Time *startTime,       // in - interval start time
+      ESMCI::Time *endTime,         // in - interval end time
       ESMC_Calendar *calendar,    // in - calendar
       ESMC_CalendarType calendarType) :   // in - calendar type
 //
@@ -3033,7 +3033,7 @@ namespace ESMCI{
       case ESMC_CAL_JULIAN:
       case ESMC_CAL_NOLEAP:
         // use startTime to reduce yy,mm,d to seconds
-        if (startTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
+        if (startTime.ESMCI::Time::validate("initialized") == ESMF_SUCCESS) {
           endTime = startTime + *this;
           ESMCI::TimeInterval ti = endTime - startTime;
           ESMC_FractionSetw(ti.ESMC_FractionGetw());
@@ -3044,7 +3044,7 @@ namespace ESMCI{
           yy = mm = d = 0;  // yy, mm, d all reduced to base seconds
 
         // use endTime to reduce yy,mm,d to seconds
-        } else if (endTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
+        } else if (endTime.ESMCI::Time::validate("initialized") == ESMF_SUCCESS) {
           startTime = endTime - *this;
           ESMCI::TimeInterval ti = endTime - startTime;
           ESMC_FractionSetw(ti.ESMC_FractionGetw());
