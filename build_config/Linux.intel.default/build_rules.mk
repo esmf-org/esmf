@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.71 2008/04/17 18:58:26 theurich Exp $
+# $Id: build_rules.mk,v 1.72 2008/06/12 18:58:48 dneckels Exp $
 #
 # Linux.intel.default
 #
@@ -39,6 +39,7 @@ ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_CXXCOMPILECPPFLAGS+= -DMPICH_IGNORE_CXX_SEEK
 ifeq ($(ESMF_BATCH),sge.batch)
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.sge.batch
 endif
@@ -48,6 +49,7 @@ ifeq ($(ESMF_COMM),mpich2)
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_CXXCOMPILECPPFLAGS+= -DMPICH_IGNORE_CXX_SEEK
 ifeq ($(ESMF_BATCH),sge.batch)
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.sge.batch
 endif
@@ -58,6 +60,7 @@ ifeq ($(ESMF_COMM),intelmpi)
 ESMF_F90DEFAULT         = mpiifort
 ESMF_CXXDEFAULT         = mpiicpc
 ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_CXXCOMPILECPPFLAGS+= -DMPICH_IGNORE_CXX_SEEK
 ifeq ($(ESMF_BATCH),lsf.ibmpjl.batch)
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl.batch
 endif
