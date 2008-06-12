@@ -1,13 +1,10 @@
-# $Id: makefile,v 1.3 2007/08/20 19:34:51 dneckels Exp $
+# $Id: makefile,v 1.4 2008/06/12 20:49:24 theurich Exp $
 
 # leave alone.
 ALL: build_here 
 
-# Don't set these unless absolutely necessary - they've got to be
-# architecture and compiler independent and should be inherited
-# from the upper level makefile if possible.
-CFLAGS    =
-FFLAGS    =
+# Workaround an MPICH(2) issue
+ESMF_CXXCOMPILECPPFLAGS += -DMPICH_IGNORE_CXX_SEEK
 
 # If you have C files in this directory, list them all on the line below.
 SOURCEC	  = all_allo.c assign_param_vals.c bind_param.c box_assign.c \
@@ -65,15 +62,3 @@ include ${ESMF_DIR}/makefile
 
 # Leave the following line blank.
 DIRS	  = 
-
-
-
-# If you have class files which need to be compiled in a particular
-# order, list the dependencies below, with no rules following.
-#
-# e.g.:
-#
-
-
-
-
