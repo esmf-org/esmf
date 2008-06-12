@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.7.2.2 2008/04/14 19:05:06 theurich Exp $
+# $Id: build_rules.mk,v 1.7.2.3 2008/06/12 17:45:24 theurich Exp $
 #
 # Linux.pathscale.default
 #
@@ -57,6 +57,7 @@ endif
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun

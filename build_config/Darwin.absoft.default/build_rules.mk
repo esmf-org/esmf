@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.22.2.2 2008/04/14 19:04:59 theurich Exp $
+# $Id: build_rules.mk,v 1.22.2.3 2008/06/12 17:45:08 theurich Exp $
 #
 # Darwin.absoft.default
 #
@@ -50,6 +50,7 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun

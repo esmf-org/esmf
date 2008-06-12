@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.2 2008/04/14 19:04:59 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.3 2008/06/12 17:45:08 theurich Exp $
 #
 # Cygwin.gfortran.default
 #
@@ -51,6 +51,7 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lmpi_cxx
 ESMF_CXXDEFAULT         = mpicxx

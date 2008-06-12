@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.60.2.7 2008/04/14 19:05:03 theurich Exp $
+# $Id: build_rules.mk,v 1.60.2.8 2008/06/12 17:45:21 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -83,6 +83,7 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun

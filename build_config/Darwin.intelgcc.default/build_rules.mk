@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2.2.2 2008/04/14 19:05:00 theurich Exp $
+# $Id: build_rules.mk,v 1.2.2.3 2008/06/12 17:45:09 theurich Exp $
 #
 # Darwin.intelgcc.default
 #
@@ -64,6 +64,7 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
