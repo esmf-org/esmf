@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.34 2008/06/11 21:14:56 rosalind Exp $
+// $Id: ESMC_Alarm_F.C,v 1.35 2008/06/12 18:08:21 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include <ESMCI_F90Interface.h>
-#include <ESMC_Alarm.h>
+#include <ESMCI_Alarm.h>
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -36,13 +36,13 @@ namespace ESMCI{
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_alarmcreatenew)(ESMC_Alarm **ptr, int *nameLen, 
+       void FTN(c_esmc_alarmcreatenew)(ESMCI::Alarm **ptr, int *nameLen, 
                 const char *name, ESMC_Clock **clock,
                 ESMCI::Time *ringTime, ESMCI::TimeInterval *ringInterval,
                 ESMCI::Time *stopTime, ESMCI::TimeInterval *ringDuration, 
                 int *ringTimeStepCount, ESMCI::Time *refTime,
                 bool *enabled, bool *sticky, int *status) {
-          *ptr = ESMC_AlarmCreate(          
+          *ptr = ESMCI_alarmCreate(          
                                            *nameLen, // always present
                                                      //   internal argument.
                     ESMC_NOT_PRESENT_FILTER(name),
@@ -58,20 +58,20 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_alarmcreatecopy)(ESMC_Alarm **ptr,
-                                        ESMC_Alarm **alarm,
+       void FTN(c_esmc_alarmcreatecopy)(ESMCI::Alarm **ptr,
+                                        ESMCI::Alarm **alarm,
                                         int *status) {
-          *ptr = ESMC_AlarmCreate(
+          *ptr = ESMCI_alarmCreate(
                                            *alarm,   // required
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_alarmdestroy)(ESMC_Alarm **ptr, int *status) {
-          int rc = ESMC_AlarmDestroy(ptr);
+       void FTN(c_esmc_alarmdestroy)(ESMCI::Alarm **ptr, int *status) {
+          int rc = ESMCI_alarmDestroy(ptr);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_alarmset)(ESMC_Alarm **ptr, int *nameLen, 
+       void FTN(c_esmc_alarmset)(ESMCI::Alarm **ptr, int *nameLen, 
                                  const char *name, ESMC_Clock **clock,
                 ESMCI::Time *ringTime, ESMCI::TimeInterval *ringInterval,
                 ESMCI::Time *stopTime, ESMCI::TimeInterval *ringDuration, 
@@ -79,7 +79,7 @@ extern "C" {
                 bool *ringing, bool *enabled, bool *sticky,
                 int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMC_AlarmSet(
+          int rc = (*ptr)->ESMCI::Alarm::set(
                                            *nameLen, // always present
                                                      //   internal argument.
                     ESMC_NOT_PRESENT_FILTER(name),
@@ -96,7 +96,7 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_alarmget)(ESMC_Alarm **ptr, int *nameLen, 
+       void FTN(c_esmc_alarmget)(ESMCI::Alarm **ptr, int *nameLen, 
                                  int *tempNameLen, char *tempName,
                                  ESMC_Clock **clock,
                 ESMCI::Time *ringTime, ESMCI::Time *prevRingTime, 
@@ -107,7 +107,7 @@ extern "C" {
                 bool *ringingOnPrevTimeStep, bool *enabled, bool *sticky,
                 int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMC_AlarmGet(
+          int rc = (*ptr)->ESMCI::Alarm::get(
 			                 // always presnet internal arguments
                                            *nameLen, 
                                             tempNameLen,
@@ -130,101 +130,101 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_alarmenable)(ESMC_Alarm **ptr, int *status) {
+       void FTN(c_esmc_alarmenable)(ESMCI::Alarm **ptr, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMC_AlarmEnable();
+          int rc = (*ptr)->ESMCI::Alarm::enable();
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_alarmdisable)(ESMC_Alarm **ptr, int *status) {
+       void FTN(c_esmc_alarmdisable)(ESMCI::Alarm **ptr, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMC_AlarmDisable();
+          int rc = (*ptr)->ESMCI::Alarm::disable();
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_alarmisenabled)(ESMC_Alarm **ptr, 
+       void FTN(c_esmc_alarmisenabled)(ESMCI::Alarm **ptr, 
                 int *esmf_alarmIsEnabled, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          *esmf_alarmIsEnabled = (int) (*ptr)->ESMC_AlarmIsEnabled(
+          *esmf_alarmIsEnabled = (int) (*ptr)->ESMCI::Alarm::isEnabled(
                                            ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_alarmringeron)(ESMC_Alarm **ptr, int *status) {
+       void FTN(c_esmc_alarmringeron)(ESMCI::Alarm **ptr, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMC_AlarmRingerOn();
+          int rc = (*ptr)->ESMCI::Alarm::ringerOn();
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_alarmringeroff)(ESMC_Alarm **ptr, int *status) {
+       void FTN(c_esmc_alarmringeroff)(ESMCI::Alarm **ptr, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMC_AlarmRingerOff();
+          int rc = (*ptr)->ESMCI::Alarm::ringerOff();
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_alarmisringing)(ESMC_Alarm **ptr, 
+       void FTN(c_esmc_alarmisringing)(ESMCI::Alarm **ptr, 
                 int *esmf_alarmIsRinging, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          *esmf_alarmIsRinging = (int) (*ptr)->ESMC_AlarmIsRinging(
+          *esmf_alarmIsRinging = (int) (*ptr)->ESMCI::Alarm::isRinging(
                                            ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_alarmwillringnext)(ESMC_Alarm **ptr, 
+       void FTN(c_esmc_alarmwillringnext)(ESMCI::Alarm **ptr, 
                 ESMCI::TimeInterval *timeStep, int *esmf_alarmWillRingNext,
                 int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          *esmf_alarmWillRingNext = (int) (*ptr)->ESMC_AlarmWillRingNext(
+          *esmf_alarmWillRingNext = (int) (*ptr)->ESMCI::Alarm::willRingNext(
                                              ESMC_NOT_PRESENT_FILTER(timeStep),
                                              ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_alarmwasprevringing)(ESMC_Alarm **ptr, 
+       void FTN(c_esmc_alarmwasprevringing)(ESMCI::Alarm **ptr, 
                 int *esmf_alarmWasPrevRinging, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          *esmf_alarmWasPrevRinging = (int) (*ptr)->ESMC_AlarmWasPrevRinging(
+          *esmf_alarmWasPrevRinging = (int) (*ptr)->ESMCI::Alarm::wasPrevRinging(
                                              ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_alarmsticky)(ESMC_Alarm **ptr, int *status) {
+       void FTN(c_esmc_alarmsticky)(ESMCI::Alarm **ptr, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMC_AlarmSticky();
+          int rc = (*ptr)->ESMCI::Alarm::setToSticky();
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_alarmnotsticky)(ESMC_Alarm **ptr,
+       void FTN(c_esmc_alarmnotsticky)(ESMCI::Alarm **ptr,
                                           ESMCI::TimeInterval *ringDuration, 
                                           int *ringTimeStepCount,
                                           int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMC_AlarmNotSticky(
+          int rc = (*ptr)->ESMCI::Alarm::notSticky(
                        ESMC_NOT_PRESENT_FILTER(ringDuration),
                        ESMC_NOT_PRESENT_FILTER(ringTimeStepCount) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_alarmissticky)(ESMC_Alarm **ptr, 
+       void FTN(c_esmc_alarmissticky)(ESMCI::Alarm **ptr, 
                 int *esmf_alarmIsSticky, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          *esmf_alarmIsSticky = (int) (*ptr)->ESMC_AlarmIsSticky(
+          *esmf_alarmIsSticky = (int) (*ptr)->ESMCI::Alarm::isSticky(
                                          ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_alarmeq)(ESMC_Alarm **alarm1, ESMC_Alarm **alarm2,
+       void FTN(c_esmc_alarmeq)(ESMCI::Alarm **alarm1, ESMCI::Alarm **alarm2,
                                    int *esmf_alarmEQ) {
           ESMF_CHECK_BINARY_OPERATOR_POINTERS(*alarm1, *alarm2, esmf_alarmEQ)
           *esmf_alarmEQ = (int) (**alarm1 == **alarm2);
        }
 
-       void FTN(c_esmc_alarmne)(ESMC_Alarm **alarm1, ESMC_Alarm **alarm2,
+       void FTN(c_esmc_alarmne)(ESMCI::Alarm **alarm1, ESMCI::Alarm **alarm2,
                                    int *esmf_alarmNE) {
           ESMF_CHECK_BINARY_OPERATOR_POINTERS(*alarm1, *alarm2, esmf_alarmNE)
           *esmf_alarmNE = (int) (**alarm1 != **alarm2);
        }
 
-       void FTN(c_esmc_alarmreadrestart)(ESMC_Alarm **ptr, int *nameLen,
+       void FTN(c_esmc_alarmreadrestart)(ESMCI::Alarm **ptr, int *nameLen,
                                          const char *name,
                                          ESMC_IOSpec *iospec,
                                          int *status) {
-          *ptr = ESMC_AlarmReadRestart(
+          *ptr = ESMCI_alarmReadRestart(
                                            *nameLen,  // always present
                                                       //   internal argument.
                                             name,     // required.
@@ -232,27 +232,27 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_alarmwriterestart)(ESMC_Alarm **ptr,
+       void FTN(c_esmc_alarmwriterestart)(ESMCI::Alarm **ptr,
                                           ESMC_IOSpec *iospec,
                                           int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMC_AlarmWriteRestart(
+          int rc = (*ptr)->ESMCI::Alarm::writeRestart(
                           ESMC_NOT_PRESENT_FILTER(iospec) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_alarmvalidate)(ESMC_Alarm **ptr, const char *options,
+       void FTN(c_esmc_alarmvalidate)(ESMCI::Alarm **ptr, const char *options,
                                       int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMC_AlarmValidate(
+          int rc = (*ptr)->ESMCI::Alarm::validate(
                       ESMC_NOT_PRESENT_FILTER(options) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_alarmprint)(ESMC_Alarm **ptr, const char *options,
+       void FTN(c_esmc_alarmprint)(ESMCI::Alarm **ptr, const char *options,
                                       int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMC_AlarmPrint(
+          int rc = (*ptr)->ESMCI::Alarm::print(
                    ESMC_NOT_PRESENT_FILTER(options) );
           if (ESMC_PRESENT(status)) *status = rc;
        }

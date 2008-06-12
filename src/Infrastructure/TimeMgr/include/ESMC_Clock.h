@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.52 2008/06/11 21:14:56 rosalind Exp $
+// $Id: ESMC_Clock.h,v 1.53 2008/06/12 18:08:21 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -69,7 +69,7 @@
  #include <ESMC_IOSpec.h>  // IOSpec class for ReadRestart()/WriteRestart()
  #include <ESMCI_TimeInterval.h>
  #include <ESMCI_Time.h>
- #include <ESMC_Alarm.h>
+ #include <ESMCI_Alarm.h>
 
 namespace ESMCI{
 
@@ -104,7 +104,7 @@ namespace ESMCI{
     int               alarmListCapacity;        // max number of defined alarms
                                                 //  before a reallocation is
                                                 //  necessary
-    ESMC_Alarm      **alarmList;                // associated alarm array
+    ESMCI::Alarm      **alarmList;                // associated alarm array
 
     bool              stopTimeEnabled;  // true if optional property set
 
@@ -167,7 +167,7 @@ namespace ESMCI{
                           int *ringingAlarmCount=0);
 
     // TMG3.4.1  after increment, for each alarm,
-    //           calls ESMC_Alarm::CheckActive()
+    //           calls ESMCI::Alarm::CheckActive()
 
     bool ESMC_ClockIsStopTime(int *rc=0) const;           // TMG3.5.6
     int  ESMC_ClockStopTimeEnable(ESMCI::Time *stopTime=0); // WRF
@@ -180,7 +180,7 @@ namespace ESMCI{
     int ESMC_ClockGetNextTime(ESMCI::Time         *nextTime,
                               ESMCI::TimeInterval *timeStep=0);
 
-    int ESMC_ClockGetAlarm(int nameLen, char *name, ESMC_Alarm **alarm);
+    int ESMC_ClockGetAlarm(int nameLen, char *name, ESMCI::Alarm **alarm);
 
     int ESMC_ClockGetAlarmList(ESMC_AlarmListType type,
                                char *AlarmList1stElementPtr, 
@@ -236,7 +236,7 @@ namespace ESMCI{
 
     // friend to allocate and initialize alarm from heap
     //   (needs access to clock current time to initialize alarm ring time)
-    friend ESMC_Alarm *ESMC_AlarmCreate(int, const char*, ESMC_Clock*, 
+    friend ESMCI::Alarm *ESMCI_alarmCreate(int, const char*, ESMC_Clock*, 
                                  ESMCI::Time*, ESMCI::TimeInterval*, ESMCI::Time*, 
                                  ESMCI::TimeInterval*, int*, ESMCI::Time*, bool*,
                                  bool*, int*);
@@ -247,10 +247,10 @@ namespace ESMCI{
 //
  // < declare private interface methods here >
 
-    // called only by friend class ESMC_Alarm
-    int ESMC_ClockAddAlarm(ESMC_Alarm *alarm);  // (TMG 4.1, 4.2)
+    // called only by friend class ESMCI::Alarm
+    int ESMC_ClockAddAlarm(ESMCI::Alarm *alarm);  // (TMG 4.1, 4.2)
 
-    friend class ESMC_Alarm;
+    friend class ESMCI::Alarm;
 
 //
 //EOP

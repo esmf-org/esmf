@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.67 2008/06/12 16:26:09 theurich Exp $
+// $Id: ESMCI_Alarm.C,v 1.1 2008/06/12 18:08:22 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 //
 //-------------------------------------------------------------------------
 //
- #define ESMC_FILENAME "ESMC_Alarm.C"
+ #define ESMC_FILENAME "ESMCI::Alarm.C"
 
  // insert any higher level, 3rd party or system includes here
  #include <stdio.h>
@@ -31,19 +31,19 @@
  #include "ESMC_Clock.h"
 
  // associated class definition file
- #include <ESMC_Alarm.h>
+ #include <ESMCI_Alarm.h>
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.67 2008/06/12 16:26:09 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_Alarm.C,v 1.1 2008/06/12 18:08:22 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
 
 // initialize static alarm instance counter
 // TODO: inherit from ESMC_Base class
-int ESMC_Alarm::count=0;
+int ESMCI::Alarm::count=0;
 
 //
 //-------------------------------------------------------------------------
@@ -55,13 +55,13 @@ int ESMC_Alarm::count=0;
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmCreate - allocates and initializes an Alarm object
+// !IROUTINE:  ESMCI_alarmCreate - allocates and initializes an Alarm object
 //
 // !INTERFACE:
-      ESMC_Alarm *ESMC_AlarmCreate(
+      ESMCI::Alarm *ESMCI_alarmCreate(
 //
 // !RETURN VALUE:
-//    pointer to newly allocated ESMC_Alarm
+//    pointer to newly allocated ESMCI::Alarm
 //
 // !ARGUMENTS:
       int                nameLen,           // in
@@ -84,9 +84,9 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  developer's guide for classes
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmCreate(new)"
+ #define ESMC_METHOD "ESMCI_alarmCreate(new)"
 
-    ESMC_Alarm *alarm;
+    ESMCI::Alarm *alarm;
     int returnCode;
 
     // default return code
@@ -99,7 +99,7 @@ int ESMC_Alarm::count=0;
     }
  
     try {
-      alarm = new ESMC_Alarm;
+      alarm = new ESMCI::Alarm;
     }
     catch (...) {
       ESMC_LogDefault.ESMC_LogAllocError(rc);
@@ -176,14 +176,14 @@ int ESMC_Alarm::count=0;
       alarm->sticky = *sticky;
     }
 
-    // TODO:  invoke private method, shared with ESMC_AlarmSet(), to calculate
+    // TODO:  invoke private method, shared with ESMCI::Alarm::set(), to calculate
     //        first ringTime for interval alarms, given ringInterval and none,
     //        one or both of refTime and ringTime.  Will replace logic in
     //        corresponding above sections.
     //        this->ringTime > clock->currTime &&
     //        this->ringTime > (passed in) ringTime
 
-    returnCode = alarm->ESMC_AlarmValidate();
+    returnCode = alarm->ESMCI::Alarm::validate();
     ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
 
     // add this new valid alarm to the given clock
@@ -194,20 +194,20 @@ int ESMC_Alarm::count=0;
 
     return(alarm);
 
- } // end ESMC_AlarmCreate (new)
+ } // end ESMCI_alarmCreate (new)
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmCreate- Creates a copy of an alarm
+// !IROUTINE:  ESMCI_alarmCreate- Creates a copy of an alarm
 //
 // !INTERFACE:
-      ESMC_Alarm *ESMC_AlarmCreate(
+      ESMCI::Alarm *ESMCI_alarmCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Alarm
+//     pointer to newly allocated ESMCI::Alarm
 //
 // !ARGUMENTS:
-      ESMC_Alarm *alarm,  // in  - alarm to copy
+      ESMCI::Alarm *alarm,  // in  - alarm to copy
       int        *rc) {   // out - return code 
 
 // !DESCRIPTION:
@@ -217,9 +217,9 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmCreate(copy)"
+ #define ESMC_METHOD "ESMCI_alarmCreate(copy)"
 
-    ESMC_Alarm *alarmCopy;
+    ESMCI::Alarm *alarmCopy;
     int returnCode;
 
     // default return code
@@ -234,56 +234,56 @@ int ESMC_Alarm::count=0;
 
     try {
       // allocate new alarm and pass given alarm to copy constructor.
-      alarmCopy = new ESMC_Alarm(*alarm);
+      alarmCopy = new ESMCI::Alarm(*alarm);
     }
     catch (...) {
       ESMC_LogDefault.ESMC_LogAllocError(rc);
       return(ESMC_NULL_POINTER);
     }
 
-    returnCode = alarmCopy->ESMC_AlarmValidate();
+    returnCode = alarmCopy->ESMCI::Alarm::validate();
     ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
                                           ESMF_ERR_PASSTHRU, rc);
     return(alarmCopy);     
 
- } // end ESMC_AlarmCreate (copy)
+ } // end ESMCI_alarmCreate (copy)
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmDestroy - free a Alarm created with Create
+// !IROUTINE:  ESMCI_alarmDestroy - free an Alarm created with Create
 //
 // !INTERFACE:
-      int ESMC_AlarmDestroy(
+      int ESMCI_alarmDestroy(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Alarm **alarm) {  // in - ESMC_Alarm to destroy
+      ESMCI::Alarm **alarm) {  // in - ESMCI::Alarm to destroy
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Alarm object previously allocated
-//      via an {\tt ESMC\_AlarmCreate} routine.  Define for deep classes only.
+//      via an {\tt ESMCI_alarmCreate} routine.  Define for deep classes only.
 //
 //EOP
 
   // Initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;
 
-  // TODO: alarm->ESMC_AlarmDestruct(); constructor calls it!
+  // TODO: alarm->ESMCI::Alarm::destruct(); constructor calls it!
   delete *alarm;   // ok to delete null pointer
   *alarm = ESMC_NULL_POINTER;
   rc = ESMF_SUCCESS;
   return(rc);
 
- } // end ESMC_AlarmDestroy
+ } // end ESMCI_alarmDestroy
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmSet - Sets an Alarm's properties
+// !IROUTINE:  ESMCI::Alarm::set - Sets an Alarm's properties
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmSet(
+      int ESMCI::Alarm::set(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -310,7 +310,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  developer's guide for classes
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmSet()"
+ #define ESMC_METHOD "ESMCI::Alarm::set()"
 
   // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
@@ -322,7 +322,7 @@ int ESMC_Alarm::count=0;
     }
 
     // save current values to restore in case of failure
-    ESMC_Alarm saveAlarm = *this;
+    ESMCI::Alarm saveAlarm = *this;
 
     // TODO: use inherited methods from ESMC_Base
     if (name != ESMC_NULL_POINTER) {
@@ -375,14 +375,14 @@ int ESMC_Alarm::count=0;
       this->sticky = *sticky;
     }
      
-    // TODO:  invoke private method, shared with ESMC_AlarmCreate(), to
+    // TODO:  invoke private method, shared with ESMCI_alarmCreate(), to
     //        calculate next ringTime for interval alarms, given ringInterval
     //        and none, one or both of refTime and ringTime.  Will replace
     //        logic in corresponding above sections.
     //        this->ringTime > clock->currTime &&
     //        this->ringTime > (passed in) ringTime
 
-    rc = ESMC_AlarmValidate();
+    rc = ESMCI::Alarm::validate();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc)) {
       // restore original alarm values
       *this = saveAlarm;
@@ -391,14 +391,14 @@ int ESMC_Alarm::count=0;
     rc = ESMF_SUCCESS;
     return(rc);
 
- } // end ESMC_AlarmSet
+ } // end ESMCI::Alarm::set
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmGet - Gets an alarm's properties
+// !IROUTINE:  ESMCI::Alarm::get - Gets an alarm's properties
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmGet(
+      int ESMCI::Alarm::get(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -430,7 +430,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  developer's guide for classes
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmGet()"
+ #define ESMC_METHOD "ESMCI::Alarm::get()"
 
   // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
@@ -511,14 +511,14 @@ int ESMC_Alarm::count=0;
     rc = ESMF_SUCCESS;
     return(rc);
      
- } // end ESMC_AlarmGet
+ } // end ESMCI::Alarm::get
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmEnable - enables an Alarm object to function
+// !IROUTINE:  ESMCI::Alarm::enable - enables an Alarm object to function
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmEnable(void) {
+      int ESMCI::Alarm::enable(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -533,7 +533,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  developer's guide for classes
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmEnable()"
+ #define ESMC_METHOD "ESMCI::Alarm::enable()"
 
   // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
@@ -549,14 +549,14 @@ int ESMC_Alarm::count=0;
     rc = ESMF_SUCCESS;
     return(rc);           
 
- } // end ESMC_AlarmEnable
+ } // end ESMCI::Alarm::enable
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmDisable - disables an Alarm object from functioning
+// !IROUTINE:  ESMCI::Alarm::disable - disables an Alarm object from functioning
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmDisable(void) {
+      int ESMCI::Alarm::disable(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -571,7 +571,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  developer's guide for classes
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmDisable()"
+ #define ESMC_METHOD "ESMCI::Alarm::disable()"
 
   // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
@@ -588,14 +588,14 @@ int ESMC_Alarm::count=0;
     rc = ESMF_SUCCESS;
     return(rc);           
 
- } // end ESMC_AlarmDisable
+ } // end ESMCI::Alarm::disable
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmIsEnabled - check if Alarm is enabled
+// !IROUTINE:  ESMCI::Alarm::isEnabled - check if Alarm is enabled
 //
 // !INTERFACE:
-      bool ESMC_Alarm::ESMC_AlarmIsEnabled(
+      bool ESMCI::Alarm::isEnabled(
 //
 // !RETURN VALUE:
 //    bool is enabled or not
@@ -610,7 +610,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmIsEnabled()"
+ #define ESMC_METHOD "ESMCI::Alarm::isEnabled()"
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -623,14 +623,14 @@ int ESMC_Alarm::count=0;
 
     return(enabled);
 
- } // end ESMC_AlarmIsEnabled
+ } // end ESMCI::Alarm::isEnabled
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmRingerOn - sets an Alarm to the ringing state
+// !IROUTINE:  ESMCI::Alarm::ringerOn - sets an Alarm to the ringing state
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmRingerOn(void) {
+      int ESMCI::Alarm::ringerOn(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -646,7 +646,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  developer's guide for classes
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmRingerOn()"
+ #define ESMC_METHOD "ESMCI::Alarm::ringerOn()"
 
   // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
@@ -672,14 +672,14 @@ int ESMC_Alarm::count=0;
     rc = ESMF_SUCCESS;
     return(rc);      
 
- } // end ESMC_AlarmRingerOn
+ } // end ESMCI::Alarm::ringerOn
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmRingerOff - turns off an Alarm's ringing state
+// !IROUTINE:  ESMCI::Alarm::ringerOff - turns off an Alarm's ringing state
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmRingerOff(void) {
+      int ESMCI::Alarm::ringerOff(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -694,7 +694,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  developer's guide for classes
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmRingerOff()"
+ #define ESMC_METHOD "ESMCI::Alarm::ringerOff()"
 
   // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
@@ -741,14 +741,14 @@ int ESMC_Alarm::count=0;
     rc = ESMF_SUCCESS;
     return(rc);    
 
- } // end ESMC_AlarmRingerOff
+ } // end ESMCI::Alarm::ringerOff
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmIsRinging - check if Alarm is ringing
+// !IROUTINE:  ESMCI::Alarm::isRinging - check if Alarm is ringing
 //
 // !INTERFACE:
-      bool ESMC_Alarm::ESMC_AlarmIsRinging(
+      bool ESMCI::Alarm::isRinging(
 //
 // !RETURN VALUE:
 //    bool is ringing or not
@@ -766,7 +766,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmIsRinging()"
+ #define ESMC_METHOD "ESMCI::Alarm::isRinging()"
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -779,14 +779,14 @@ int ESMC_Alarm::count=0;
 
     return(enabled && ringing);
 
- } // end ESMC_AlarmIsRinging
+ } // end ESMCI::Alarm::isRinging
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmWillRingNext - check if Alarm will ring upon the next clock timestep
+// !IROUTINE:  ESMCI::Alarm::willRingNext - check if Alarm will ring upon the next clock timestep
 //
 // !INTERFACE:
-      bool ESMC_Alarm::ESMC_AlarmWillRingNext(
+      bool ESMCI::Alarm::willRingNext(
 //
 // !RETURN VALUE:
 //    bool will ring or not
@@ -810,7 +810,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmWillRingNext()"
+ #define ESMC_METHOD "ESMCI::Alarm::willRingNext()"
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -851,14 +851,14 @@ int ESMC_Alarm::count=0;
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
     return(willRing);
 
- } // end ESMC_AlarmWillRingNext
+ } // end ESMCI::Alarm::willRingNext
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmWasPrevRinging - check if Alarm was ringing on the previous clock timestep
+// !IROUTINE:  ESMCI::Alarm::wasPrevRinging - check if Alarm was ringing on the previous clock timestep
 //
 // !INTERFACE:
-      bool ESMC_Alarm::ESMC_AlarmWasPrevRinging(
+      bool ESMCI::Alarm::wasPrevRinging(
 //
 // !RETURN VALUE:
 //    bool was previously ringing or not
@@ -879,7 +879,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmWasPrevRinging()"
+ #define ESMC_METHOD "ESMCI::Alarm::wasPrevRinging()"
 
     // Initialize return code; assume routine not implemented
     if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
@@ -894,14 +894,14 @@ int ESMC_Alarm::count=0;
 
     return(ringingOnPrevTimeStep);
 
- } // end ESMC_AlarmWasPrevRinging
+ } // end ESMCI::Alarm::wasPrevRinging
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmSticky - sets an Alarm's sticky state 
+// !IROUTINE:  ESMCI::Alarm::setToSticky - sets an Alarm's sticky state 
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmSticky(void) {
+      int ESMCI::Alarm::setToSticky(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -916,7 +916,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmSticky()"
+ #define ESMC_METHOD "ESMCI::Alarm::setToSticky()"
 
   // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
@@ -932,14 +932,14 @@ int ESMC_Alarm::count=0;
     rc = ESMF_SUCCESS;
     return(rc);          
 
- } // end ESMC_AlarmSticky
+ } // end ESMCI::Alarm::setToSticky
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmNotSticky - unsets an Alarm's sticky state 
+// !IROUTINE:  ESMCI::Alarm::notSticky - unsets an Alarm's sticky state 
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmNotSticky(ESMCI::TimeInterval *ringDuration,
+      int ESMCI::Alarm::notSticky(ESMCI::TimeInterval *ringDuration,
                                           int *ringTimeStepCount) {
 //
 // !RETURN VALUE:
@@ -957,7 +957,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmNotSticky()"
+ #define ESMC_METHOD "ESMCI::Alarm::notSticky()"
 
   // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
@@ -991,14 +991,14 @@ int ESMC_Alarm::count=0;
     rc = ESMF_SUCCESS;
     return(rc);          
 
- } // end ESMC_AlarmNotSticky
+ } // end ESMCI::Alarm::notSticky
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmIsSticky - check if Alarm is sticky
+// !IROUTINE:  ESMCI::Alarm::isSticky - check if Alarm is sticky
 //
 // !INTERFACE:
-      bool ESMC_Alarm::ESMC_AlarmIsSticky(
+      bool ESMCI::Alarm::isSticky(
 //
 // !RETURN VALUE:
 //    bool is sticky or not
@@ -1013,7 +1013,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmIsSticky()"
+ #define ESMC_METHOD "ESMCI::Alarm::isSticky()"
 
     // Initialize return code; assume routine not implemented
     if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
@@ -1028,14 +1028,14 @@ int ESMC_Alarm::count=0;
 
     return(sticky);
 
- } // end ESMC_AlarmIsSticky
+ } // end ESMCI::Alarm::isSticky
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmCheckRingTime - check if time to ring
+// !IROUTINE:  ESMCI::Alarm::checkRingTime - check if time to ring
 //
 // !INTERFACE:
-      bool ESMC_Alarm::ESMC_AlarmCheckRingTime(
+      bool ESMCI::Alarm::checkRingTime(
 //
 // !RETURN VALUE:
 //    bool is ringing or not
@@ -1052,7 +1052,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  TMG4.4, 4.6
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmCheckRingTime()"
+ #define ESMC_METHOD "ESMCI::Alarm::checkRingTime()"
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1082,7 +1082,7 @@ int ESMC_Alarm::count=0;
     
       // check if time to turn on alarm
       if (!ringing && enabled) 
-         ESMC_AlarmCheckTurnOn(positive);
+         ESMCI::Alarm::checkTurnOn(positive);
 
       // else if not sticky, check if time to turn off alarm
       //   (user is responsible for turning off sticky alarms via RingerOff())
@@ -1090,7 +1090,7 @@ int ESMC_Alarm::count=0;
 
         // first check if next alarm time has been reached,
         // then check if time to turn off alarm.
-        if (!ESMC_AlarmCheckTurnOn(positive)) {
+        if (!ESMCI::Alarm::checkTurnOn(positive)) {
           if (ringTimeStepCount > 0) { // use ringTimeStepCount ...
             if (timeStepRingingCount >= ringTimeStepCount) {
               ringingOnCurrTimeStep = ringing = false;
@@ -1178,7 +1178,7 @@ int ESMC_Alarm::count=0;
 
         if (ringing) {
           // determine what ringBegin was for this alarm event
-          ESMC_AlarmResetRingBegin(positive);
+          ESMCI::Alarm::resetRingBegin(positive);
 
           // determine what the ending timeStepRingingCount was
           //   for this alarm event
@@ -1228,7 +1228,7 @@ int ESMC_Alarm::count=0;
           }
 
           // determine what ringBegin was for *previous* alarm event
-          ESMC_AlarmResetRingBegin(positive);
+          ESMCI::Alarm::resetRingBegin(positive);
 
         } else {  // keep alarm ringing
           // reverse count for how many clock time steps the alarm was ringing
@@ -1250,20 +1250,20 @@ int ESMC_Alarm::count=0;
 
     return(ringing && enabled);
 
- } // end ESMC_AlarmCheckRingTime
+ } // end ESMCI::Alarm::checkRingTime
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Alarm(==) - Alarm equality comparison    
+// !IROUTINE:  ESMCI::Alarm(==) - Alarm equality comparison    
 //
 // !INTERFACE:
-      bool ESMC_Alarm::operator==(
+      bool ESMCI::Alarm::operator==(
 //
 // !RETURN VALUE:
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_Alarm &alarm) const {   // in - ESMC_Alarm to compare
+      const ESMCI::Alarm &alarm) const {   // in - ESMCI::Alarm to compare
 //
 // !DESCRIPTION:
 //      Compare for equality the current object's (this) {\tt ESMC\_Alarm} with
@@ -1273,7 +1273,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_Alarm::operator==()"
+ #define ESMC_METHOD "ESMCI::Alarm::operator==()"
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1283,20 +1283,20 @@ int ESMC_Alarm::count=0;
 
     return(id == alarm.id);
 
-}  // end ESMC_Alarm::operator==
+}  // end ESMCI::Alarm::operator==
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Alarm(!=) - Alarm inequality comparison    
+// !IROUTINE:  ESMCI::Alarm(!=) - Alarm inequality comparison    
 //
 // !INTERFACE:
-      bool ESMC_Alarm::operator!=(
+      bool ESMCI::Alarm::operator!=(
 //
 // !RETURN VALUE:
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_Alarm &alarm) const {   // in - ESMC_Alarm to compare
+      const ESMCI::Alarm &alarm) const {   // in - ESMCI::Alarm to compare
 //
 // !DESCRIPTION:
 //      Compare for inequality the current object's (this)
@@ -1307,7 +1307,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_Alarm::operator!=()"
+ #define ESMC_METHOD "ESMCI::Alarm::operator!=()"
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1317,17 +1317,17 @@ int ESMC_Alarm::count=0;
 
     return(id != alarm.id);
 
-}  // end ESMC_Alarm::operator!=
+}  // end ESMCI::Alarm::operator!=
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmReadRestart - restore contents of an Alarm
+// !IROUTINE:  ESMCI_alarmReadRestart - restore contents of an Alarm
 //
 // !INTERFACE:
-      ESMC_Alarm *ESMC_AlarmReadRestart(
+      ESMCI::Alarm *ESMCI_alarmReadRestart(
 //
 // !RETURN VALUE:
-//    pointer to newly allocated and restored ESMC_Alarm
+//    pointer to newly allocated and restored ESMCI::Alarm
 //
 // !ARGUMENTS:
       int          nameLen,  // in
@@ -1344,24 +1344,24 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmReadRestart()"
+ #define ESMC_METHOD "ESMCI_alarmReadRestart()"
 
     // TODO:  read alarm state from iospec/name, then allocate/restore
-    //        (share code with ESMC_AlarmCreate()).
+    //        (share code with ESMCI_alarmCreate()).
 
     // Initialize return code; assume routine not implemented
     if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
 
     return(ESMC_NULL_POINTER);
 
- } // end ESMC_AlarmReadRestart
+ } // end ESMCI_alarmReadRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmWriteRestart - save contents of an Alarm
+// !IROUTINE:  ESMCI::Alarm::writeRestart - save contents of an Alarm
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmWriteRestart(
+      int ESMCI::Alarm::writeRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1377,7 +1377,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmWriteRestart()"
+ #define ESMC_METHOD "ESMCI::Alarm::writeRestart()"
 
   // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
@@ -1393,14 +1393,14 @@ int ESMC_Alarm::count=0;
     rc = ESMF_SUCCESS;
     return(rc);
 
- } // end ESMC_AlarmWriteRestart
+ } // end ESMCI::Alarm::writeRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmValidate - internal consistency check for an Alarm
+// !IROUTINE:  ESMCI::Alarm::validate - internal consistency check for an Alarm
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmValidate(
+      int ESMCI::Alarm::validate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1417,7 +1417,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmValidate()"
+ #define ESMC_METHOD "ESMCI::Alarm::validate()"
 
   // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
@@ -1449,14 +1449,14 @@ int ESMC_Alarm::count=0;
     rc = ESMF_SUCCESS;
     return(rc);
 
- } // end ESMC_AlarmValidate
+ } // end ESMCI::Alarm::validate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmPrint - print contents of an Alarm
+// !IROUTINE:  ESMCI::Alarm::print - print contents of an Alarm
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmPrint(
+      int ESMCI::Alarm::print(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1471,7 +1471,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmPrint()"
+ #define ESMC_METHOD "ESMCI::Alarm::print()"
 
   // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
@@ -1628,14 +1628,14 @@ int ESMC_Alarm::count=0;
     rc = ESMF_SUCCESS;
     return(rc);
 
- } // end ESMC_AlarmPrint
+ } // end ESMCI::Alarm::print
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Alarm - native C++ constructor
+// !IROUTINE:  ESMCI::Alarm - native C++ constructor
 //
 // !INTERFACE:
-      ESMC_Alarm::ESMC_Alarm(void) {
+      Alarm::Alarm(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -1652,7 +1652,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_Alarm(void) constructor"
+ #define ESMC_METHOD "ESMCI::Alarm(void) constructor"
 
     // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
@@ -1678,20 +1678,20 @@ int ESMC_Alarm::count=0;
 
     ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
 
- } // end ESMC_Alarm
+ } // end ESMCI::Alarm
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Alarm - native C++ copy constructor
+// !IROUTINE:  ESMCI::Alarm - native C++ copy constructor
 //
 // !INTERFACE:
-      ESMC_Alarm::ESMC_Alarm(
+      Alarm::Alarm(
 //
 // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
-      const ESMC_Alarm &alarm) {  // in - alarm to copy
+      const ESMCI::Alarm &alarm) {  // in - alarm to copy
 //
 // !DESCRIPTION:
 //      Copies members of given alarm.
@@ -1705,14 +1705,14 @@ int ESMC_Alarm::count=0;
                       //       overloaded method and interface from F90.
                       //       Also, inherit from ESMC_Base class.
 
- } // end ESMC_Alarm
+ } // end ESMCI::Alarm
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ~ESMC_Alarm - native C++ destructor
+// !IROUTINE:  ~ESMCI::Alarm - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_Alarm::~ESMC_Alarm(void) {
+      Alarm::~Alarm(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -1731,7 +1731,7 @@ int ESMC_Alarm::count=0;
   //       assignment method, and provide interface from F90. 
   // if (!copy) count--;
 
- } // end ~ESMC_Alarm
+ } // end ~ESMCI::Alarm
 
 //-------------------------------------------------------------------------
 //  Private methods 
@@ -1739,10 +1739,10 @@ int ESMC_Alarm::count=0;
 
 //-------------------------------------------------------------------------
 //BOPI
-// !IROUTINE:  ESMC_AlarmCheckTurnOn - check if time to turn on alarm
+// !IROUTINE:  ESMCI::Alarm::checkTurnOn - check if time to turn on alarm
 //
 // !INTERFACE:
-      bool ESMC_Alarm::ESMC_AlarmCheckTurnOn(
+      bool ESMCI::Alarm::checkTurnOn(
 //
 // !RETURN VALUE:
 //    bool whether to turn on alarm
@@ -1758,7 +1758,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmCheckTurnOn()"
+ #define ESMC_METHOD "ESMCI::Alarm::checkTurnOn()"
 
     // The original comment few lines below indicates that the ringing state
     // would be turned off elsewhere. However, it is initialized (turn off) 
@@ -1792,14 +1792,14 @@ int ESMC_Alarm::count=0;
 
     return(checkRinging);
 
-} // end ESMC_AlarmCheckTurnOn
+} // end ESMCI::Alarm::checkTurnOn
 
 //-------------------------------------------------------------------------
 //BOPI
-// !IROUTINE:  ESMC_AlarmResetRingBegin - reset ringBegin during ESMF_MODE_REVERSE
+// !IROUTINE:  ESMCI::Alarm::resetRingBegin - reset ringBegin during ESMF_MODE_REVERSE
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmResetRingBegin(
+      int ESMCI::Alarm::resetRingBegin(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1816,7 +1816,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_AlarmResetRingBegin()"
+ #define ESMC_METHOD "ESMCI::Alarm::resetRingBegin()"
 
     int rc = ESMC_RC_NOT_IMPL;
 
@@ -1836,6 +1836,6 @@ int ESMC_Alarm::count=0;
     rc = ESMF_SUCCESS;
     return(rc);
 
-} // end ESMC_AlarmResetRingBegin
+} // end ESMCI::Alarm::resetRingBegin
 
 } // namespace ESMCI

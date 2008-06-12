@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.88 2008/06/12 16:26:09 theurich Exp $
+// $Id: ESMC_Clock.C,v 1.89 2008/06/12 18:08:23 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
  #include <ctype.h>
  #include <ESMC_LogErr.h>
  #include <ESMF_LogMacros.inc>
- #include <ESMC_Alarm.h>
+ #include <ESMCI_Alarm.h>
 
  // associated class definition file
  #include <ESMC_Clock.h>
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.88 2008/06/12 16:26:09 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.89 2008/06/12 18:08:23 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -154,7 +154,7 @@ int ESMC_Clock::count=0;
 
     // Initialize previous time a fraction of second before the current time
     //   so any alarm defined to ring at the clock start time will ring before
-    //   the first clock advance (timestep).  See ESMC_AlarmCheckRingTime().
+    //   the first clock advance (timestep).  See ESMCI::Alarm::checkRingTime().
     // This does not break the lower limit of the Fliegel or Hatcher 
     // algorithms (for Gregorian or Julian calendars) since those are based on
     //   whole seconds.
@@ -594,7 +594,7 @@ int ESMC_Clock::count=0;
 
     if (ringingAlarmCount != ESMC_NULL_POINTER) *ringingAlarmCount = 0;
 
-    // Calculate element size of F90 array of ESMC_Alarm pointers since we
+    // Calculate element size of F90 array of ESMCI::Alarm pointers since we
     // cannont depend on C++ element size to be the same as F90's across all
     // platforms.  It is assumed that all F90 platforms allocate arrays
     // contiguously and uniformly in memory, in either ascending or descending
@@ -617,7 +617,7 @@ int ESMC_Clock::count=0;
       bool ringing;
 
       // check each alarm to see if it's time to ring
-      ringing = alarmList[i]->ESMC_AlarmCheckRingTime(&rc);
+      ringing = alarmList[i]->ESMCI::Alarm::checkRingTime(&rc);
 
       // report ringing alarms if requested
       if (ringing) {
@@ -634,7 +634,7 @@ int ESMC_Clock::count=0;
             f90ArrayElementJ = ringingAlarmList1stElementPtr +
                                (j++ * f90ArrayElementSize);
             // ... then copy it in!
-            *((ESMC_Alarm**)f90ArrayElementJ) = alarmList[i];
+            *((ESMCI::Alarm**)f90ArrayElementJ) = alarmList[i];
           } else {
             // list overflow!
             char logMsg[ESMF_MAXSTR];
@@ -969,7 +969,7 @@ int ESMC_Clock::count=0;
 // !ARGUMENTS:
       int          nameLen,   // in  - the length of the alarm name
       char        *name,      // in  - the alarm "name" to get
-      ESMC_Alarm **alarm) {   // out - the alarm named "name"
+      ESMCI::Alarm **alarm) {   // out - the alarm named "name"
 //
 // !DESCRIPTION:
 //     Retrieve's the clock's alarm named "name" from the alarm list
@@ -1061,7 +1061,7 @@ int ESMC_Clock::count=0;
 
     *alarmCount = 0;
 
-    // Calculate element size of F90 array of ESMC_Alarm pointers since we
+    // Calculate element size of F90 array of ESMCI::Alarm pointers since we
     // cannont depend on C++ element size to be the same as F90's across all
     // platforms.  It is assumed that all F90 platforms allocate arrays
     // contiguously and uniformly in memory, in either ascending or descending
@@ -1093,17 +1093,17 @@ int ESMC_Clock::count=0;
 
         case ESMF_ALARMLIST_RINGING:
           // return alarm if it's ringing
-          returnAlarm = alarmList[i]->ESMC_AlarmIsRinging(&rc);
+          returnAlarm = alarmList[i]->ESMCI::Alarm::isRinging(&rc);
           break;
 
         case ESMF_ALARMLIST_NEXTRINGING:
           // return alarm if it will ring upon the next clock time step
-          returnAlarm = alarmList[i]->ESMC_AlarmWillRingNext(timeStep, &rc);
+          returnAlarm = alarmList[i]->ESMCI::Alarm::willRingNext(timeStep, &rc);
           break;
 
         case ESMF_ALARMLIST_PREVRINGING:
           // return alarm if it was ringing on the previous clock time step
-          returnAlarm = alarmList[i]->ESMC_AlarmWasPrevRinging(&rc);
+          returnAlarm = alarmList[i]->ESMCI::Alarm::wasPrevRinging(&rc);
           break;
 
         default :
@@ -1129,7 +1129,7 @@ int ESMC_Clock::count=0;
           f90ArrayElementJ = alarmList1stElementPtr +
                                                 (j++ * f90ArrayElementSize);
           // ... then copy it in!
-          *((ESMC_Alarm**)f90ArrayElementJ) = alarmList[i];
+          *((ESMCI::Alarm**)f90ArrayElementJ) = alarmList[i];
         } else {
           // list overflow!
           char logMsg[ESMF_MAXSTR];
@@ -1161,7 +1161,7 @@ int ESMC_Clock::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Alarm ***alarmList,            // out - alarm list
+      ESMCI::Alarm ***alarmList,            // out - alarm list
       int          *alarmCount) const {   // out - number of alarms in list
 //
 // !DESCRIPTION:
@@ -1199,7 +1199,7 @@ int ESMC_Clock::count=0;
 //
 // !ARGUMENTS:
       int          i,         // in  - the i'th alarm to get
-      ESMC_Alarm **alarm) {   // out - the i'th alarm
+      ESMCI::Alarm **alarm) {   // out - the i'th alarm
 //
 // !DESCRIPTION:
 //     Retrieve's the clock's i'th ringing alarm from the alarm list
@@ -1214,7 +1214,7 @@ int ESMC_Clock::count=0;
 
     int rc;
     for (int j=0, r=0; j < alarmCount; j++) {
-      if (alarmList[j]->ESMC_AlarmIsRinging(&rc)) {
+      if (alarmList[j]->ESMCI::Alarm::isRinging(&rc)) {
         if (++r == i) *alarm = alarmList[j];
         return(ESMF_SUCCESS);
       }
@@ -1235,7 +1235,7 @@ int ESMC_Clock::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Alarm **alarmList,            // out - alarm list
+      ESMCI::Alarm **alarmList,            // out - alarm list
       int         *alarmCount) const {   // out - number of alarms in list
 //
 // !DESCRIPTION:
@@ -1327,7 +1327,7 @@ int ESMC_Clock::count=0;
       if (alarmListCapacity != clock.alarmListCapacity) {
         delete [] alarmList;
         try {
-          alarmList = new ESMC_AlarmPtr[clock.alarmListCapacity];
+          alarmList = new ESMCI_AlarmPtr[clock.alarmListCapacity];
         }
         catch (...) {
           ESMC_LogDefault.ESMC_LogAllocError(ESMC_NULL_POINTER);
@@ -1786,7 +1786,7 @@ int ESMC_Clock::count=0;
       else if (strncmp(opts, "alarmlist", 9) == 0) {
         printf("alarmList = \n");
         for (int i=0; i<alarmCount; i++) {
-          alarmList[i]->ESMC_AlarmPrint(&opts[9]);
+          alarmList[i]->ESMCI::Alarm::print(&opts[9]);
         }
       }
 
@@ -1807,7 +1807,7 @@ int ESMC_Clock::count=0;
       printf("alarmCount = %d\n", alarmCount);
       printf("alarmList = \n");
       for (int i=0; i<alarmCount; i++) {
-        alarmList[i]->ESMC_AlarmPrint(options);
+        alarmList[i]->ESMCI::Alarm::print(options);
       }
     }
 
@@ -1842,7 +1842,7 @@ int ESMC_Clock::count=0;
 
     // allocate the clock's alarm list (array of pointers)
     try {
-      alarmList = new ESMC_AlarmPtr[ESMF_ALARM_BLOCK_SIZE];
+      alarmList = new ESMCI_AlarmPtr[ESMF_ALARM_BLOCK_SIZE];
     }
     catch (...) {
       ESMC_LogDefault.ESMC_LogAllocError(ESMC_NULL_POINTER);
@@ -1884,7 +1884,7 @@ int ESMC_Clock::count=0;
 
     // allocate the new clock's own alarm list (array of pointers)
     try {
-      alarmList = new ESMC_AlarmPtr[clock.alarmListCapacity];
+      alarmList = new ESMCI_AlarmPtr[clock.alarmListCapacity];
     }
     catch (...) {
       ESMC_LogDefault.ESMC_LogAllocError(ESMC_NULL_POINTER);
@@ -1946,7 +1946,7 @@ int ESMC_Clock::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Alarm *alarm) {   // in - alarm to add
+      ESMCI::Alarm *alarm) {   // in - alarm to add
 //
 // !DESCRIPTION:
 //     Adds given alarm to a clock's alarm list. 
@@ -1985,9 +1985,9 @@ int ESMC_Clock::count=0;
       ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_INFO);
 
       // re-allocate clock's alarm list to next block size
-      ESMC_Alarm **tempList;
+      ESMCI::Alarm **tempList;
       try {
-        tempList = new ESMC_AlarmPtr[alarmListCapacity + ESMF_ALARM_BLOCK_SIZE];
+        tempList = new ESMCI_AlarmPtr[alarmListCapacity + ESMF_ALARM_BLOCK_SIZE];
       }
       catch (...) {
         ESMC_LogDefault.ESMC_LogAllocError(&rc);
@@ -2009,7 +2009,7 @@ int ESMC_Clock::count=0;
     alarmList[alarmCount++] = alarm;
 
     // check new alarm to see if it's time to ring
-    alarm->ESMC_AlarmCheckRingTime(&rc);
+    alarm->ESMCI::Alarm::checkRingTime(&rc);
 
     return(rc);
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmType.F90,v 1.16 2008/05/09 18:35:28 rosalind Exp $
+! $Id: ESMF_AlarmType.F90,v 1.17 2008/06/12 18:08:22 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -33,9 +33,9 @@
 ! !DESCRIPTION:
 ! Part of Time Manager Fortran API wrapper of C++ implemenation.
 !
-! Defines Fortran types for corresponding C++ class {\tt ESMC\_Alarm}.
+! Defines Fortran types for corresponding C++ class {\tt ESMCI\_Alarm}.
 !
-! See {\tt ../include/ESMC\_Alarm.h} for complete description.
+! See {\tt ../include/ESMCI\_Alarm.h} for complete description.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -86,7 +86,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_AlarmType.F90,v 1.16 2008/05/09 18:35:28 rosalind Exp $'
+      '$Id: ESMF_AlarmType.F90,v 1.17 2008/06/12 18:08:22 rosalind Exp $'
 !------------------------------------------------------------------------------
 
       contains
