@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.100 2008/05/16 01:09:55 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.101 2008/06/12 23:41:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.100 2008/05/16 01:09:55 w6ws Exp $"
+      "$Id: ESMF_VM.F90,v 1.101 2008/06/12 23:41:49 theurich Exp $"
 
 !==============================================================================
 
@@ -2778,9 +2778,9 @@ module ESMF_VMMod
 !
 !EOP
 !------------------------------------------------------------------------------
-    type(ESMF_Logical)      :: localsupportPthreadsFlag
-    type(ESMF_Logical)      :: localsupportOpenMPFlag
-    integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: supportPthreadsFlagArg ! helper variable
+    type(ESMF_Logical)      :: supportOpenMPFlagArg   ! helper variable
+    integer                 :: localrc                ! local return code
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2791,11 +2791,11 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
-      localsupportPthreadsFlag, localsupportOpenMPFlag, localrc)
+      supportPthreadsFlagArg, supportOpenMPFlagArg, localrc)
     if (present (supportPthreadsFlag))  &
-      supportPthreadsFlag = localsupportPthreadsFlag
+      supportPthreadsFlag = supportPthreadsFlagArg
     if (present (supportOpenMPFlag))  &
-      supportOpenMPFlag = localsupportOpenMPFlag
+      supportOpenMPFlag = supportOpenMPFlagArg
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

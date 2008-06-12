@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.40 2008/05/21 22:14:18 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.41 2008/06/12 23:41:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.40 2008/05/21 22:14:18 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.41 2008/06/12 23:41:48 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -424,7 +424,7 @@ contains
 ! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with DE blocks
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_DistGridCreate()  
+  ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDB(minIndex, maxIndex, deBlockList, &
     deLabelList, indexflag, connectionList, connectionTransList, delayout, &
     vm, rc)
@@ -1994,7 +1994,7 @@ contains
     type(ESMF_InterfaceInt) :: elementCountPDeArg     ! helper variable
     type(ESMF_InterfaceInt) :: patchListPDeArg        ! helper variable
     type(ESMF_InterfaceInt) :: indexCountPDimPDeArg   ! helper variable
-    type(ESMF_Logical)      :: regDecompFlag_local
+    type(ESMF_Logical)      :: regDecompFlagArg       ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2030,13 +2030,13 @@ contains
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridGet(distgrid, dimCount, patchCount, &
       minIndexPDimPPatchArg, maxIndexPDimPPatchArg, elementCountPPatchArg, &
-      elementCountPDeArg, patchListPDeArg, indexCountPDimPDeArg, regDecompFlag_local,&
+      elementCountPDeArg, patchListPDeArg, indexCountPDimPDeArg, regDecompFlagArg,&
       delayout, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
-    if (present (regDecompFlag))  &
-      regDecompFlag = regDecompFlag_local
+    if (present (regDecompFlag)) &
+      regDecompFlag = regDecompFlagArg
     
     ! Set init code for deep C++ objects
     if (present(delayout)) then

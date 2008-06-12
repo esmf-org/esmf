@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.71 2008/05/15 23:40:27 w6ws Exp $
+! $Id: ESMF_DELayout.F90,v 1.72 2008/06/12 23:41:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.71 2008/05/15 23:40:27 w6ws Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.72 2008/06/12 23:41:48 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -822,7 +822,7 @@ contains
     type(ESMF_InterfaceInt) :: vasMapArg              ! helper variable
     type(ESMF_InterfaceInt) :: localDeListArg         ! helper variable
     type(ESMF_InterfaceInt) :: vasLocalDeListArg      ! helper variable
-    type(ESMF_Logical)      :: localoneToOneFlag      ! helper variable
+    type(ESMF_Logical)      :: oneToOneFlagArg        ! helper variable
     
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -861,12 +861,12 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutGet(delayout, vm, deCount, petMapArg, vasMapArg, &
-      localoneToOneFlag, dePinFlag, localDeCount, localDeListArg, &
+      oneToOneFlagArg, dePinFlag, localDeCount, localDeListArg, &
       vasLocalDeCount, vasLocalDeListArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    if (present (oneToOneFlag))  &
-      oneToOneFlag = localoneToOneFlag == ESMF_TRUE
+    if (present (oneToOneFlag)) &
+      oneToOneFlag = oneToOneFlagArg
       
     ! Set init code for deep C++ objects
     if (present(vm)) then
