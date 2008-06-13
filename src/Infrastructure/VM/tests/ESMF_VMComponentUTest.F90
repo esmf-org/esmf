@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.17 2008/05/08 02:27:22 theurich Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.18 2008/06/13 04:46:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@ module ESMF_VMComponentUTest_gcomp_mod
     integer, intent(out):: rc
 #ifdef ESMF_TESTWITHTHREADS
     type(ESMF_VM) :: vm
-    type(ESMF_Logical) :: supportPthreads
+    logical :: supportPthreads
 #endif
     
     ! Initialize
@@ -59,7 +59,7 @@ module ESMF_VMComponentUTest_gcomp_mod
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
     call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-    if (supportPthreads == ESMF_True) then
+    if (supportPthreads) then
       call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
     endif
 #endif
@@ -72,7 +72,7 @@ module ESMF_VMComponentUTest_gcomp_mod
     integer, intent(out):: rc
 #ifdef ESMF_TESTWITHTHREADS
     type(ESMF_VM) :: vm
-    type(ESMF_Logical) :: supportPthreads
+    logical :: supportPthreads
 #endif
     
     ! Initialize
@@ -101,7 +101,7 @@ module ESMF_VMComponentUTest_gcomp_mod
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
     call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-    if (supportPthreads == ESMF_True) then
+    if (supportPthreads) then
       call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
     endif
     ! TODO: Some systems are not able to run the exhaustive version of this
@@ -189,7 +189,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.17 2008/05/08 02:27:22 theurich Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.18 2008/06/13 04:46:56 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0

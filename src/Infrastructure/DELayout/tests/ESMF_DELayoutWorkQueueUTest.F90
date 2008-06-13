@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.11 2008/04/17 18:58:32 theurich Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.12 2008/06/13 04:48:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -175,7 +175,7 @@ program ESMF_DELayoutWQUTest
   type(ESMF_GridComp):: gcomp
   real(ESMF_KIND_R8):: timeStart, timeEnd
   type(ESMF_VM):: vm
-  type(ESMF_Logical):: supportPthreads
+  logical:: supportPthreads
   integer:: localPet
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
@@ -236,7 +236,7 @@ program ESMF_DELayoutWQUTest
   !NEX_UTest
   write(name, *) "GridCompSetServices() - round 2"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  if (supportPthreads==ESMF_TRUE) then
+  if (supportPthreads) then
     call ESMF_GridCompSetServices(gcomp, mygcomp_register_withthreads, rc)
   else
     call ESMF_GridCompSetServices(gcomp, mygcomp_register_withoutthreads, rc)
