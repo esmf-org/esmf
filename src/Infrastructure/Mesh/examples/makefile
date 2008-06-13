@@ -1,19 +1,12 @@
-# $Id: makefile,v 1.6 2008/06/12 18:58:48 dneckels Exp $
+# $Id: makefile,v 1.7 2008/06/13 04:32:30 theurich Exp $
 
 ALL: build_examples
 run: run_examples
 run_uni: run_examples_uni
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-MANSEC	  = 
-LIBBASE	  = 
+# Work around an MPICH(2) issue
+ESMF_CXXCOMPILECPPFLAGS += -DMPICH_IGNORE_CXX_SEEK
+
 LOCDIR	  = src/Infrastructure/Mesh/examples
 
 
@@ -22,8 +15,9 @@ EXAMPLES_BUILD    = \
                       $(ESMF_EXDIR)/ESMC_DCatEx \
                       $(ESMF_EXDIR)/ESMC_RefineEx \
                       $(ESMF_EXDIR)/ESMC_PatchWghtEx \
-                      $(ESMF_EXDIR)/ESMC_BreckEx \
                       $(ESMF_EXDIR)/ESMF_MeshEx \
+                      
+#                      $(ESMF_EXDIR)/ESMC_BreckEx \
 
 EXAMPLES_RUN      = run_ESMC_RefineEx 
 
