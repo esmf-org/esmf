@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.226 2008/06/11 20:52:05 tjcnrl Exp $
+#  $Id: common.mk,v 1.227 2008/06/13 05:29:38 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1006,6 +1006,7 @@ build_here: chkdir_lib
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	$(MAKE) defer
 endif
+	$(MAKE) ranlib
 	$(MAKE) shared
 
 # Builds library - action for the 'tree' target.
