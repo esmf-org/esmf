@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.2 2008/05/21 23:30:32 theurich Exp $
+! $Id: user_model1.F90,v 1.3 2008/06/13 16:06:54 feiliu Exp $
 !
 ! System test for Concurrent Components.  User-code, component 1.
 
@@ -37,6 +37,10 @@
     subroutine userm1_register(comp, rc)
         type(ESMF_GridComp)  :: comp
         integer, intent(out) :: rc
+#ifdef ESMF_TESTWITHTHREADS
+        type(ESMF_VM) :: vm
+        logical :: supportPthreads
+#endif
 
         integer                             :: status = ESMF_SUCCESS
 
@@ -55,6 +59,21 @@
                                        user_final, ESMF_SINGLEPHASE, status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
+
+#ifdef ESMF_TESTWITHTHREADS
+        ! The following call will turn on ESMF-threading (single threaded)
+        ! for this component. If you are using this file as a template for
+        ! your own code development you probably don't want to include the
+        ! following call unless you are interested in exploring ESMF's
+        ! threading features.
+
+        ! First test whether ESMF-threading is supported on this machine
+        call ESMF_VMGetGlobal(vm, rc=status)
+        call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=status)
+        if (supportPthreads) then
+              call ESMF_GridCompSetVMMinThreads(comp, rc=status)
+        endif
+#endif
 
         !print *, "Registered Initialize, Run, and Finalize routines"
 

@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.5 2008/05/21 23:20:52 theurich Exp $
+! $Id: user_coupler.F90,v 1.6 2008/06/13 16:03:17 feiliu Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -39,6 +39,11 @@
     subroutine usercpl_register(comp, rc)
         type(ESMF_CplComp) :: comp
         integer, intent(out) :: rc
+
+#ifdef ESMF_TESTWITHTHREADS
+        type(ESMF_VM) :: vm
+        logical :: supportPthreads
+#endif
   
         integer :: status = ESMF_SUCCESS
   
@@ -58,10 +63,25 @@
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
   
+#ifdef ESMF_TESTWITHTHREADS
+        ! The following call will turn on ESMF-threading (single threaded)
+        ! for this component. If you are using this file as a template for
+        ! your own code development you probably don't want to include the
+        ! following call unless you are interested in exploring ESMF's
+        ! threading features.
+
+        ! First test whether ESMF-threading is supported on this machine
+        call ESMF_VMGetGlobal(vm, rc=status)
+        call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=status)
+        if (supportPthreads) then
+              call ESMF_CplCompSetVMMinThreads(comp, rc=status)
+        endif
+#endif
         !print *, "Registered Initialize, Run, and Finalize routines"
   
         ! set return code
         rc = status
+
 
     end subroutine
 
@@ -81,7 +101,6 @@
         ! Local variables
         integer :: status = ESMF_SUCCESS
         integer :: itemcount
-        type(ESMF_Array) :: rawdata
         type(ESMF_Array) :: sorted_data1, sorted_data2
         type(ESMF_VM) :: vm
         integer :: pet_id
@@ -162,7 +181,6 @@
 
         ! Local variables
         integer :: status = ESMF_SUCCESS
-        type(ESMF_Array) :: rawdata
         type(ESMF_Array) :: sorted_data1, sorted_data2
 
         print *, "User Coupler Run starting"
