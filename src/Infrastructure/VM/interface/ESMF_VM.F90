@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.101 2008/06/12 23:41:49 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.102 2008/06/13 00:07:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.101 2008/06/12 23:41:49 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.102 2008/06/13 00:07:12 theurich Exp $"
 
 !==============================================================================
 
@@ -2729,8 +2729,8 @@ module ESMF_VMMod
     integer,            intent(out),  optional  :: petCount
     integer,            intent(out),  optional  :: peCount
     integer,            intent(out),  optional  :: mpiCommunicator
-    type(ESMF_Logical), intent(out),  optional  :: supportPthreadsFlag
-    type(ESMF_Logical), intent(out),  optional  :: supportOpenMPFlag
+    logical,            intent(out),  optional  :: supportPthreadsFlag
+    logical,            intent(out),  optional  :: supportOpenMPFlag
     integer,            intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
