@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.228 2008/06/13 05:36:38 theurich Exp $
+#  $Id: common.mk,v 1.229 2008/06/13 07:09:29 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1003,6 +1003,7 @@ endif
 
 # Build only stuff in and below the current dir.
 build_here: chkdir_lib
+	$(MAKE) ACTION=tree_include tree
 	$(MAKE) ACTION=tree_lib tree
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	$(MAKE) defer
@@ -2506,7 +2507,7 @@ shared:
 #        all objects, one at a time.  This painfully slow and unacceptable.
 #-------------------------------------------------------------------------------
 
-MODULE_LIST = $(notdir $(wildcard $(ESMF_OBJDIR)/*.mod))
+MODULE_LIST = $(notdir $(wildcard $(ESMF_OBJDIR)/*.[^o]*))
 ##ifeq ($(shell if test -s $(ESMFLIB); then echo 1; fi;), 1)
 ### library already created, so update with recently compiled objects
 ##OBJECT_LIST = $(wildcard $(ESMF_OBJDIR)/*.o)
@@ -2521,8 +2522,10 @@ OBJECT_LIST = $(notdir $(wildcard $(ESMF_OBJDIR)/*.o))
 defer:
 	cd $(ESMF_OBJDIR) ; \
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMFLIB) $(OBJECT_LIST)
-	cd $(ESMF_OBJDIR) ; \
-	$(ESMF_MV) $(MODULE_LIST) $(ESMF_MODDIR)/.
+	@if [ "$(MODULE_LIST)" != "" ] ; then \
+          cd $(ESMF_OBJDIR) ; \
+	  $(ESMF_MV) $(MODULE_LIST) $(ESMF_MODDIR)/. ; \
+        fi
 ##endif
 
 
