@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.18 2008/05/21 22:14:26 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.19 2008/06/13 17:16:40 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1502,6 +1502,20 @@
             "data copy, corner stagger"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        !    create a 3d array.
+        !    add it to a field with the ESMF_DATA_COPY flag set (not REF).
+        !    delete the original array� (i should have made a copy inside the
+        !    field)
+
+        !    get the array from the field
+        !    get a data pointer from the array
+        !    it crashes for him here.
+        call test_eric_klusek(rc)
+        write(failMsg, *) ""
+        write(name, *) "Testing Eric Klusek's case #852717"
+        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
 contains 
@@ -4220,5 +4234,63 @@ contains
         deallocate(farray)
         deallocate(buffer)
     end subroutine test7d4_generic
+
+!----------------------------------------------------------------------------------
+    subroutine test_eric_klusek(rc)
+
+        integer, intent(out)                :: rc
+
+        type(ESMF_Array)                    :: array, o_array
+        type(ESMF_Field)                    :: field
+        type(ESMF_ArraySpec)                :: arrayspec
+        type(ESMF_DistGrid)                 :: distgrid
+        type(ESMF_Grid)                     :: grid
+        integer(ESMF_KIND_I4), pointer      :: fptr(:,:,:)
+        integer                             :: localrc
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        call ESMF_ArraySpecSet(arrayspec, rank=3, typekind=ESMF_TYPEKIND_I4, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        distgrid = ESMF_DistGridCreate(minIndex=(/1, 1/), maxIndex=(/10, 10/), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        
+        array = ESMF_ArrayCreate(arrayspec, distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+    
+        grid = ESMF_GridCreate(distgrid=distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        field = ESMF_FieldCreate(grid, array, copyflag=ESMF_DATA_COPY, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        
+        call ESMF_ArrayDestroy(array, rc=localrc) 
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(field, array=o_array, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_ArrayGet(array, localDe=0, farrayPtr=fptr, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+    end subroutine test_eric_klusek
 
 end program ESMF_FieldCreateGetUTest
