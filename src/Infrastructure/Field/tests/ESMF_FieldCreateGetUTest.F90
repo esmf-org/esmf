@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.19 2008/06/13 17:16:40 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.20 2008/06/13 20:53:49 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1503,7 +1503,7 @@
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         !    create a 3d array.
         !    add it to a field with the ESMF_DATA_COPY flag set (not REF).
         !    delete the original array� (i should have made a copy inside the
