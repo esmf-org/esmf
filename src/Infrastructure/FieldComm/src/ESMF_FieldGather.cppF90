@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather.cppF90,v 1.5 2008/06/10 20:12:59 feiliu Exp $
+! $Id: ESMF_FieldGather.cppF90,v 1.6 2008/06/13 18:27:38 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,67 +55,81 @@ module ESMF_FieldGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGather.cppF90,v 1.5 2008/06/10 20:12:59 feiliu Exp $'
+      '$Id: ESMF_FieldGather.cppF90,v 1.6 2008/06/13 18:27:38 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldGather
-        TypeKindRankInterfaceMacro(FieldGatherDPtr)
+        TypeKindRankInterfaceMacro(FieldGather)
         module procedure ESMF_FieldGatherNotRoot
     end interface
 !------------------------------------------------------------------------------
 contains
 
-#define FieldGatherDPtrDoc() \
+#define FieldGatherDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
+! @\
 ! !IROUTINE: ESMF_FieldGather - Gather a Fortran90 array from an ESMF_Field @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldGather() @\
-! subroutine ESMF_FieldGather<rank><type><kind>(field, farray, & @\
-!        patch, rootPet, vm, rc) @\
+! subroutine ESMF_FieldGather<rank><type><kind>(array, farray, patch, & @\
+!   rootPet, vm, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Field)                                     :: field  @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
-!   integer, intent(in), optional                        :: patch     @\
-!   integer, intent(in)                                  :: rootPet @\
-!   type(ESMF_VM), intent(in), optional                  :: vm  @\
-!   integer, intent(out), optional                       :: rc  @\
+!   type(ESMF_Field),           intent(inout)           :: field @\
+!   mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
+!   integer,                    intent(in),   optional  :: patch @\
+!   integer,                    intent(in)              :: rootPet @\
+!   type(ESMF_VM),              intent(in),   optional  :: vm @\
+!   integer,                    intent(out),  optional  :: rc @\
+! @\
 ! @\
 ! !DESCRIPTION: @\
-! This method gathers the data contained in a Field and stores the gathered @\
-! data into a Fortran array located on rootPet. Optionally for Field distributed @\
-! on multi-patch distgrid, user can specify a patch number from where to collect data. @\
+!   Gather the data of an {ESMF\_Field} object into the {\tt farray} located on @\
+!   {\tt rootPET}. A single DistGrid patch of {\tt array} must be @\
+!   gathered into {\tt farray}. The optional {\tt patch} @\
+!   argument allows selection of the patch. For Fields defined on a single @\
+!   patch DistGrid the default selection (patch 1) will be correct. The @\
+!   shape of {\tt farray} must match the shape of the patch in Field. @\
 ! @\
-! For examples and associated documentations using this method see Section  @\
-! \ref{sec:field:usage:gather_2dptr}. @\
+!   If the Field contains replicating DistGrid dimensions data will be @\
+!   gathered from the numerically higher DEs. Replicated data elements in @\
+!   numericaly lower DEs will be ignored. @\
 ! @\
-! The arguments are: @\
-! \begin{description} @\
-! \item [field]  @\
-!       {\tt ESMF\_Field} object. @\
-! \item [farray] @\
-!       Native Fortran data array to store gathered data from the {\tt field} @\
-! \item [{[patch]}] @\
-!       Patch number of a multi-patch {\tt field} from where to gather data @\
-! \item [rootPet] @\
-!       Pet number where farray is located to store gathered data @\
-! \item [{[vm]}] @\
-!       Optionally a user speicified vm object of the concurrent context @\
-!       to improve gather performance @\
-! \item [{[rc]}]  @\
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
-! \end{description} @\
+!   This version of the interface implements the PET-based blocking paradigm: @\
+!   Each PET of the VM must issue this call exactly once for {\em all} of its @\
+!   DEs. The call will block until all PET-local data objects are accessible. @\
+! @\
+!   For examples and associated documentations using this method see Section  @\
+!   \ref{sec:field:usage:gather_2dptr}. @\
+! @\
+!   The arguments are: @\
+!   \begin{description} @\
+!   \item[array] @\
+!     The {\tt ESMF\_Field} object from which data will be gathered. @\
+!   \item[{[farray]}] @\
+!     The Fortran90 array into which to gather data. Only root @\
+!     must provide a valid {\tt farray}. @\
+!   \item[{[patch]}] @\
+!     The DistGrid patch in {\tt array} from which to gather {\tt farray}. @\
+!     By default {\tt farray} will be gathered from patch 1. @\
+!   \item[rootPet] @\
+!     PET that holds the valid destination array, i.e. {\tt farray}. @\
+!   \item[{[vm]}] @\
+!     Optional {\tt ESMF\_VM} object of the current context. Providing the @\
+!     VM of the current context will lower the method|s overhead. @\
+!   \item[{[rc]}] @\
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!   \end{description} @\
 ! @\
 !EOP @\
 !---------------------------------------------------------------------------- @\
 
-#define FieldGatherDPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+#define FieldGatherMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !---------------------------------------------------------------------------- @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_FieldGatherDPtr" @\
-    subroutine ESMF_FieldGatherDPtr##mrank##D##mtypekind(field,  farray, & @\
+^define ESMF_METHOD "ESMF_FieldGather" @\
+    subroutine ESMF_FieldGather##mrank##D##mtypekind(field,  farray, & @\
         patch, rootPet, vm, rc) @\
 @\
         ! input arguments @\
@@ -145,19 +159,16 @@ contains
             ESMF_CONTEXT, rc)) return @\
 @\
         ! perform gather through internal array @\
-        ! For performance consideration: @\
-        ! Rely on ArrayGather to perform sanity checking of the other parameters @\
-        ! Otherwise, we need to make sure patch is a reasonable value @\
         call ESMF_ArrayGather(array, farray, patch, rootPet, vm, rc=localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
             ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rc)) return @\
 @\
         if (present(rc)) rc = ESMF_SUCCESS @\
-    end subroutine ESMF_FieldGatherDPtr##mrank##D##mtypekind @\
+    end subroutine ESMF_FieldGather##mrank##D##mtypekind @\
 !------------------------------------------------------------------------------ @\
 
-TypeKindRankDeclarationMacro(FieldGatherDPtr)
+TypeKindRankDeclarationMacro(FieldGather)
 
 ! -------------------------- ESMF-public method -----------------------------
 ^undef  ESMF_METHOD
