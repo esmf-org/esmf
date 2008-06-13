@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.227 2008/06/13 05:29:38 theurich Exp $
+#  $Id: common.mk,v 1.228 2008/06/13 05:36:38 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -995,6 +995,7 @@ build_libs: chkdir_lib include
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	cd $(ESMF_DIR) ; $(MAKE) defer
 endif
+	cd $(ESMF_DIR) ; $(MAKE) ranlib
 	cd $(ESMF_DIR) ; $(MAKE) shared
 	@echo "ESMF library built successfully."
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
