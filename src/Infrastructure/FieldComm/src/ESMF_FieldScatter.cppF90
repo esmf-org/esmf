@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldScatter.cppF90,v 1.4 2008/06/10 20:12:59 feiliu Exp $
+! $Id: ESMF_FieldScatter.cppF90,v 1.5 2008/06/13 18:30:36 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,67 +55,80 @@ module ESMF_FieldScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldScatter.cppF90,v 1.4 2008/06/10 20:12:59 feiliu Exp $'
+      '$Id: ESMF_FieldScatter.cppF90,v 1.5 2008/06/13 18:30:36 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldScatter
-        TypeKindRankInterfaceMacro(FieldScatterDPtr)
+        TypeKindRankInterfaceMacro(FieldScatter)
         module procedure ESMF_FieldScatterNotRoot
     end interface
 !------------------------------------------------------------------------------
 contains
 
-#define FieldScatterDPtrDoc() \
+#define FieldScatterDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldScatter - Scatter a Fortran90 array to an ESMF_Field @\
+! @\
+! !IROUTINE: ESMF_FieldScatter - Scatter a Fortran90 array across the ESMF_Field @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldScatter() @\
-! function ESMF_FieldScatter<rank><type><kind>(field, farray, & @\
-!        patch, rootPet, vm, rc) @\
+! subroutine ESMF_FieldScatter<rank><type><kind>(array, farray, patch, & @\
+!   rootPet, vm, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Field)                                     :: field  @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
-!   integer, intent(in), optional                        :: patch     @\
-!   integer, intent(in)                                  :: rootPet @\
-!   type(ESMF_VM), intent(in), optional                  :: vm  @\
-!   integer, intent(out), optional                       :: rc  @\
+!   type(ESMF_Field),           intent(inout)           :: field @\
+!   mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
+!   integer,                    intent(in),   optional  :: patch @\
+!   integer,                    intent(in)              :: rootPet @\
+!   type(ESMF_VM),              intent(in),   optional  :: vm @\
+!   integer,                    intent(out),  optional  :: rc @\
+! @\
 ! @\
 ! !DESCRIPTION: @\
-! This method takes the data from a Fortran data array located on rootPet @\
-! and scatters the data into a Field. Optionally for Field distributed @\
-! on multi-patch distgrid, user can specify a patch number to where to scatter data. @\
+!   Scatter the data of {\tt farray} located on {\tt rootPET} @\
+!   across an {ESMF\_Field} object. A single {\tt farray} must be @\
+!   scattered across a single DistGrid patch in Field. The optional {\tt patch} @\
+!   argument allows selection of the patch. For Fields defined on a single @\
+!   patch DistGrid the default selection (patch 1) will be correct. The @\
+!   shape of {\tt farray} must match the shape of the patch in Field. @\
+! @\
+!   If the Field contains replicating DistGrid dimensions data will be @\
+!   scattered across all of the replicated pieces. @\
+! @\
+!   This version of the interface implements the PET-based blocking paradigm: @\
+!   Each PET of the VM must issue this call exactly once for {\em all} of its @\
+!   DEs. The call will block until all PET-local data objects are accessible. @\
 ! @\
 ! For examples and associated documentations using this method see Section  @\
 ! \ref{sec:field:usage:scatter_2dptr}. @\
 ! @\
-! The arguments are: @\
-! \begin{description} @\
-! \item [field]  @\
-!       {\tt ESMF\_Field} object. @\
-! \item [farray] @\
-!       Native Fortran data array to scatter data to the {\tt field} @\
-! \item [{[patch]}] @\
-!       Patch number of a multi-patch {\tt field} to where to scatter data @\
-! \item [rootPet] @\
-!       Pet number where farray is located to retrieve scattered data @\
-! \item [{[vm]}] @\
-!       Optionally a user speicified vm object of the concurrent context @\
-!       to improve scatter performance @\
-! \item [{[rc]}]  @\
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
-! \end{description} @\
+!   The arguments are: @\
+!   \begin{description} @\
+!   \item[array] @\
+!     The {\tt ESMF\_Field} object across which data will be scattered. @\
+!   \item[{[farray]}] @\
+!     The Fortran90 array that is to be scattered. Only root @\
+!     must provide a valid {\tt farray}. @\
+!   \item[{[patch]}] @\
+!     The DistGrid patch in {\tt array} into which to scatter {\tt farray}. @\
+!     By default {\tt farray} will be scattered into patch 1. @\
+!   \item[rootPet] @\
+!     PET that holds the valid data in {\tt farray}. @\
+!   \item[{[vm]}] @\
+!     Optional {\tt ESMF\_VM} object of the current context. Providing the @\
+!     VM of the current context will lower the method|s overhead. @\
+!   \item[{[rc]}] @\
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!   \end{description} @\
 ! @\
 !EOP @\
 !---------------------------------------------------------------------------- @\
 
-#define FieldScatterDPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+#define FieldScatterMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !---------------------------------------------------------------------------- @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_FieldScatterDPtr" @\
-    subroutine ESMF_FieldScatterDPtr##mrank##D##mtypekind(field,  farray, & @\
+^define ESMF_METHOD "ESMF_FieldScatter" @\
+    subroutine ESMF_FieldScatter##mrank##D##mtypekind(field,  farray, & @\
         patch, rootPet, vm, rc) @\
 @\
         ! input arguments @\
@@ -154,10 +167,10 @@ contains
             ESMF_CONTEXT, rc)) return @\
 @\
         if (present(rc)) rc = ESMF_SUCCESS @\
-    end subroutine ESMF_FieldScatterDPtr##mrank##D##mtypekind @\
+    end subroutine ESMF_FieldScatter##mrank##D##mtypekind @\
 !------------------------------------------------------------------------------ @\
 
-TypeKindRankDeclarationMacro(FieldScatterDPtr)
+TypeKindRankDeclarationMacro(FieldScatter)
 
 ! -------------------------- ESMF-public method -----------------------------
 ^undef  ESMF_METHOD
