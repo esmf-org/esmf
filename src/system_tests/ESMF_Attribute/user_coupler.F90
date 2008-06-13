@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.11 2008/06/04 22:54:37 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.12 2008/06/13 00:29:34 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -32,6 +32,11 @@ module user_coupler
     type(ESMF_CplComp) :: comp
     integer, intent(out) :: rc
 
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    logical :: supportPthreads
+#endif
+
     ! Initialize return code
     rc = ESMF_SUCCESS
     
@@ -52,8 +57,13 @@ module user_coupler
     ! your own code development you probably don't want to include the 
     ! following call unless you are interested in exploring ESMF's 
     ! threading features.
-    call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads) then
+      call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
+    endif
 #endif
 
   end subroutine
