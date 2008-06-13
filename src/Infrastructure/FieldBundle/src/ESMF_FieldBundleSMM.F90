@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.3 2008/05/28 18:44:30 feiliu Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.4 2008/06/13 16:34:50 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.3 2008/05/28 18:44:30 feiliu Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.4 2008/06/13 16:34:50 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -66,7 +66,7 @@ module ESMF_FieldBundleSMMMod
         module procedure ESMF_FieldBundleSMMStoreR4
         module procedure ESMF_FieldBundleSMMStoreR8
         module procedure ESMF_FieldBundleSMMStoreNF
-    end interface ESMF_FieldBundleSMMStore
+    end interface
 !------------------------------------------------------------------------------
 contains
 
@@ -393,9 +393,6 @@ contains
         ! internal local variables 
         integer                                       :: localrc, fcount, i 
         type(ESMF_Field)                              :: srcField, dstField   
-        !integer                                     :: srcEle, dstEle ! n elements
-        !integer                                     :: sfdc, dfdc ! dimcount
-        !integer, dimension(:), allocatable          :: sftc, dftc ! total count
 
         ! Initialize return code; assume routine not implemented 
         localrc = ESMF_RC_NOT_IMPL 
@@ -404,58 +401,6 @@ contains
         ! check variables
         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, srcFieldBundle, rc) 
         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, dstFieldBundle, rc) 
-
-        !! src and dst FieldBundle cannot be same object
-        !if(srcFieldBundle%ftypep .eq. dstFieldBundle%ftypep) then
-        !    call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-        !       "src and dst FieldBundle cannot be same object", &
-        !        ESMF_CONTEXT, rc)
-        !    return
-        !endif
-
-        !!! src and dst FieldBundle must have same number of data elements
-        !call ESMF_FieldBundleGet(srcFieldBundle, dimCount=sfdc, rc=localrc)
-        !if (ESMF_LogMsgFoundError(localrc, & 
-        !    ESMF_ERR_PASSTHRU, & 
-        !    ESMF_CONTEXT, rc)) return 
-
-        !call ESMF_FieldBundleGet(dstFieldBundle, dimCount=dfdc, rc=localrc)
-        !if (ESMF_LogMsgFoundError(localrc, & 
-        !    ESMF_ERR_PASSTHRU, & 
-        !    ESMF_CONTEXT, rc)) return 
-
-        !allocate(sftc(sfdc), dftc(dfdc))
-        !
-        ! TODO: there needs to be a way to loop through all DEs on all PETs to
-        ! get the total number of data elements...
-        !call ESMF_FieldBundleGet(srcFieldBundle, localDe=0, totalCount=sftc, rc=localrc)
-        !if (ESMF_LogMsgFoundError(localrc, & 
-        !    ESMF_ERR_PASSTHRU, & 
-        !    ESMF_CONTEXT, rc)) return 
-
-        !call ESMF_FieldBundleGet(dstFieldBundle, localDe=0, totalCount=dftc, rc=localrc)
-        !if (ESMF_LogMsgFoundError(localrc, & 
-        !    ESMF_ERR_PASSTHRU, & 
-        !    ESMF_CONTEXT, rc)) return 
-
-        !srcEle = 1
-        !do i = 1, sfdc
-        !    srcEle = srcEle * sftc(i)
-        !enddo
-
-        !dstEle = 1
-        !do i = 1, dfdc
-        !    dstEle = dstEle * dftc(i)
-        !enddo
-    
-        !deallocate(sftc, dftc)
-
-        !if(srcEle .ne. dstEle) then
-        !    call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-        !       "src and dst FieldBundle must have same number of data elements", &
-        !        ESMF_CONTEXT, rc)
-        !    return
-        !endif
 
         ! loop over source and destination fields. 
         ! verify src and dst FieldBundles can communicate
@@ -468,8 +413,9 @@ contains
         endif 
 
         ! Retrieve source and destination fields. 
+        ! TODO: change loop end variable if necessary
         fcount = srcFieldBundle%btypep%field_count
-        do i = 1, fcount
+        do i = 1, 1
             call ESMF_FieldBundleGet(srcFieldBundle, i, field=srcField, rc=localrc) 
             if (ESMF_LogMsgFoundError(localrc, & 
                 ESMF_ERR_PASSTHRU, & 
@@ -479,9 +425,6 @@ contains
                 ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rc)) return 
 
-            ! perform sparse matrix multiplication through array 
-            ! For performance consideration: 
-            ! Rely on underlying ArraySMM to perform sanity checking of the other parameters 
             call ESMF_FieldSMMStore(srcField, dstField, routehandle, factorList, & 
                 factorIndexList, rc=localrc) 
             if (ESMF_LogMsgFoundError(localrc, & 
@@ -538,7 +481,7 @@ contains
 
         ! Retrieve source and destination fields. 
         fcount = srcFieldBundle%btypep%field_count
-        do i = 1, fcount
+        do i = 1, 1
             call ESMF_FieldBundleGet(srcFieldBundle, i, field=srcField, rc=localrc) 
             if (ESMF_LogMsgFoundError(localrc, & 
                 ESMF_ERR_PASSTHRU, & 
@@ -548,9 +491,6 @@ contains
                 ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rc)) return 
 
-            ! perform sparse matrix multiplication through array 
-            ! For performance consideration: 
-            ! Rely on underlying ArraySMM to perform sanity checking of the other parameters 
             call ESMF_FieldSMMStore(srcField, dstField, routehandle, factorList, & 
                 factorIndexList, rc=localrc) 
             if (ESMF_LogMsgFoundError(localrc, & 
@@ -607,7 +547,7 @@ contains
 
         ! Retrieve source and destination fields. 
         fcount = srcFieldBundle%btypep%field_count
-        do i = 1, fcount
+        do i = 1, 1
             call ESMF_FieldBundleGet(srcFieldBundle, i, field=srcField, rc=localrc) 
             if (ESMF_LogMsgFoundError(localrc, & 
                 ESMF_ERR_PASSTHRU, & 
@@ -617,9 +557,6 @@ contains
                 ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rc)) return 
 
-            ! perform sparse matrix multiplication through array 
-            ! For performance consideration: 
-            ! Rely on underlying ArraySMM to perform sanity checking of the other parameters 
             call ESMF_FieldSMMStore(srcField, dstField, routehandle, factorList, & 
                 factorIndexList, rc=localrc) 
             if (ESMF_LogMsgFoundError(localrc, & 
@@ -676,7 +613,7 @@ contains
 
         ! Retrieve source and destination fields. 
         fcount = srcFieldBundle%btypep%field_count
-        do i = 1, fcount
+        do i = 1, 1
             call ESMF_FieldBundleGet(srcFieldBundle, i, field=srcField, rc=localrc) 
             if (ESMF_LogMsgFoundError(localrc, & 
                 ESMF_ERR_PASSTHRU, & 
@@ -686,9 +623,6 @@ contains
                 ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rc)) return 
 
-            ! perform sparse matrix multiplication through array 
-            ! For performance consideration: 
-            ! Rely on underlying ArraySMM to perform sanity checking of the other parameters 
             call ESMF_FieldSMMStore(srcField, dstField, routehandle, factorList, & 
                 factorIndexList, rc=localrc) 
             if (ESMF_LogMsgFoundError(localrc, & 
