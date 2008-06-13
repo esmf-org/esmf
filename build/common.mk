@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.229 2008/06/13 07:09:29 theurich Exp $
+#  $Id: common.mk,v 1.230 2008/06/13 07:40:59 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -991,6 +991,9 @@ endif
 lib:  info build_libs info_mk
 
 build_libs: chkdir_lib include
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
+	cd $(ESMF_DIR) ; $(MAKE) preparedefer
+endif
 	cd $(ESMF_DIR) ; $(MAKE) ACTION=tree_lib tree
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	cd $(ESMF_DIR) ; $(MAKE) defer
@@ -1003,6 +1006,9 @@ endif
 
 # Build only stuff in and below the current dir.
 build_here: chkdir_lib
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
+	cd $(ESMF_DIR) ; $(MAKE) preparedefer
+endif
 	$(MAKE) ACTION=tree_include tree
 	$(MAKE) ACTION=tree_lib tree
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
@@ -2528,6 +2534,14 @@ defer:
         fi
 ##endif
 
+
+PREPARE_MODULE_LIST = $(notdir $(wildcard $(ESMF_MODDIR)/*.[^o]*))
+preparedefer:
+	@if [ "$(PREPARE_MODULE_LIST)" != "" ] ; then \
+          cd $(ESMF_MODDIR) ; \
+	  $(ESMF_MV) $(PREPARE_MODULE_LIST) $(ESMF_OBJDIR)/. ; \
+        fi
+	
 
 #-------------------------------------------------------------------------------
 # Pattern rules for making Tex files using protex script.  Input to 
