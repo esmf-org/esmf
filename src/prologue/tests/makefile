@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2008/05/08 04:46:08 theurich Exp $ 
+# $Id: makefile,v 1.14 2008/06/13 05:13:40 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -109,14 +109,3 @@ RUN_ESMF_LAPACKUTest:
 
 RUN_ESMF_LAPACKUTestUNI:
 	$(MAKE) TNAME=LAPACK NP=1 ftest
-
-#
-# Test for pointers to derived types changing size based on type
-#
-
-RUN_ESMF_F95PtrUTest:
-	$(MAKE) TNAME=F95Ptr NP=2 ftest
-
-RUN_ESMF_F95PtrUTestUNI:
-	$(MAKE) TNAME=F95Ptr NP=1 ftest
-
