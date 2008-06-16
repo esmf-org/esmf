@@ -7,7 +7,7 @@
  * CVS File Information :
  *    $RCSfile: timer.c,v $
  *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:54 $
+ *    $Date: 2008/06/16 19:13:03 $
  *    Revision: 1.2 $
  ****************************************************************************/
 
@@ -61,7 +61,8 @@ double Zoltan_Time(int timer)
   else if (timer==ZOLTAN_TIME_CPU) {
 #if defined(__PUMAGON__) || defined(__LIBCATAMOUNT__)
     /* CPU time on ASCI Red and Red Storm. */
-    t = dclock();
+    //t = dclock();
+    t = 1.0;
 #else
     /* CPU time */
     num_ticks = clock();
