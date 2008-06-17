@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.231 2008/06/17 21:20:19 theurich Exp $
+#  $Id: common.mk,v 1.232 2008/06/17 21:56:23 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -724,8 +724,7 @@ endif
 # them in.
 #-------------------------------------------------------------------------------
 ifdef ESMF_LAPACK
-CPPFLAGS                += -DESMF_LAPACK=$(ESMF_LAPACK)
-FPPDEFS                 += -DESMF_LAPACK=$(ESMF_LAPACK)
+CPPFLAGS                += -DESMF_LAPACK=1
 ifdef ESMF_LAPACK_LIBS
 ESMF_CXXLINKLIBS        += $(ESMF_LAPACK_LIBS)
 ESMF_F90LINKLIBS        += $(ESMF_LAPACK_LIBS)
@@ -737,28 +736,51 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
-# PNETCDF is used by a few ESMF routines, when available.  The following links
-# them in.
+# Set LAPACK default libs according to ESMF_LAPACK (if not set in user environment)
 #-------------------------------------------------------------------------------
-ifdef ESMF_PNETCDF
-CPPFLAGS		+= -DESMF_PNETCDF=$(ESMF_PNETCDF)
-ESMF_CXXCOMPILEPATHS += -I$(ESMF_PNETCDF_INCLUDE)
-ESMF_CXXLINKLIBS	+= $(ESMF_PNETCDF_LIBS)
-FPPDEFS			+= -DESMF_PNETCDF=$(ESMF_PNETCDF)
-ESMF_F90LINKLIBS	+= $(ESMF_PNETCDF_LIBS)
+ifeq ($(ESMF_NETCDF),standard)
+ifneq ($(origin ESMF_NETCDF_LIBS), environment)
+ESMF_NETCDF_LIBS = -lnetcdf
+endif
 endif
 
 #-------------------------------------------------------------------------------
 # For convenience ESMF_NETCDF_INCLUDE and ESMF_NETCDF_LIBPATH variables are 
 # appended to the appropriate variables.
 #-------------------------------------------------------------------------------
+ifdef ESMF_NETCDF
+CPPFLAGS                += -DESMF_NETCDF=1
 ifdef ESMF_NETCDF_INCLUDE
-ESMF_CXXCOMPILEPATHS += -I$(ESMF_NETCDF_INCLUDE)
-ESMF_CXXLINKPATHS    += -L$(ESMF_NETCDF_LIBPATH)
-ESMF_CXXLINKLIBS     += -lnetcdf
-ESMF_F90COMPILEPATHS += -I$(ESMF_NETCDF_INCLUDE)
-ESMF_F90LINKPATHS    += -L$(ESMF_NETCDF_LIBPATH)
-ESMF_F90LINKLIBS     += -lnetcdf
+ESMF_CXXCOMPILEPATHS    += -I$(ESMF_NETCDF_INCLUDE)
+ESMF_F90COMPILEPATHS    += -I$(ESMF_NETCDF_INCLUDE)
+endif
+ifdef ESMF_NETCDF_LIBS
+ESMF_CXXLINKLIBS        += $(ESMF_NETCDF_LIBS)
+ESMF_F90LINKLIBS        += $(ESMF_NETCDF_LIBS)
+endif
+ifdef ESMF_NETCDF_LIBPATH
+ESMF_CXXLINKPATHS       += -L$(ESMF_NETCDF_LIBPATH)
+ESMF_F90LINKPATHS       += -L$(ESMF_NETCDF_LIBPATH)
+endif
+endif
+
+#-------------------------------------------------------------------------------
+# PNETCDF is used by a few ESMF routines, when available.  The following links
+# them in.
+#-------------------------------------------------------------------------------
+ifdef ESMF_PNETCDF
+CPPFLAGS                += -DESMF_PNETCDF=1
+ifdef ESMF_PNETCDF_INCLUDE
+ESMF_CXXCOMPILEPATHS    += -I$(ESMF_PNETCDF_INCLUDE)
+endif
+ifdef ESMF_PNETCDF_LIBS
+ESMF_CXXLINKLIBS        += $(ESMF_PNETCDF_LIBS)
+ESMF_F90LINKLIBS        += $(ESMF_PNETCDF_LIBS)
+endif
+ifdef ESMF_PNETCDF_LIBPATH
+ESMF_CXXLINKPATHS       += -L$(ESMF_PNETCDF_LIBPATH)
+ESMF_F90LINKPATHS       += -L$(ESMF_PNETCDF_LIBPATH)
+endif
 endif
 
 #-------------------------------------------------------------------------------

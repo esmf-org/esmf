@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.89 2008/06/17 21:20:18 theurich Exp $
+# $Id: makefile,v 1.90 2008/06/17 21:56:23 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -115,10 +115,30 @@ script_info:
 	    echo "ESMF_LAPACK_LIBPATH:       $(ESMF_LAPACK_LIBPATH)" ; \
           fi; \
          fi
-	-@if [ -n "$(ESMF_NETCDF_INCLUDE)" ] ; then \
-	  echo "ESMF_NETCDF_INCLUDE: $(ESMF_NETCDF_INCLUDE)" ; fi
-	-@if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
-	  echo "ESMF_NETCDF_LIBPATH: $(ESMF_NETCDF_LIBPATH)" ; fi
+	-@if [ -n "$(ESMF_NETCDF)" ] ; then \
+	  echo "ESMF_NETCDF:            $(ESMF_NETCDF)" ; \
+	  if [ -n "$(ESMF_NETCDF_INCLUDE)" ] ; then \
+	    echo "ESMF_NETCDF_INCLUDE:    $(ESMF_NETCDF_INCLUDE)" ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDF_LIBS)" ] ; then \
+	    echo "ESMF_NETCDF_LIBS:       $(ESMF_NETCDF_LIBS)" ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
+	    echo "ESMF_NETCDF_LIBPATH:    $(ESMF_NETCDF_LIBPATH)" ; \
+          fi; \
+         fi
+	-@if [ -n "$(ESMF_PNETCDF)" ] ; then \
+	  echo "ESMF_PNETCDF:           $(ESMF_PNETCDF)" ; \
+	  if [ -n "$(ESMF_PNETCDF_INCLUDE)" ] ; then \
+	    echo "ESMF_PNETCDF_INCLUDE:   $(ESMF_PNETCDF_INCLUDE)" ; \
+          fi; \
+	  if [ -n "$(ESMF_PNETCDF_LIBS)" ] ; then \
+	    echo "ESMF_PNETCDF_LIBS:      $(ESMF_PNETCDF_LIBS)" ; \
+          fi; \
+	  if [ -n "$(ESMF_PNETCDF_LIBPATH)" ] ; then \
+	    echo "ESMF_PNETCDF_LIBPATH:   $(ESMF_PNETCDF_LIBPATH)" ; \
+          fi; \
+         fi
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF environment variables for final installation *"
@@ -254,10 +274,30 @@ info_mk:
 	    echo "# ESMF_LAPACK_LIBPATH:       $(ESMF_LAPACK_LIBPATH)" >> $(MKINFO) ; \
           fi; \
          fi
-	-@if [ -n "$(ESMF_NETCDF_INCLUDE)" ] ; then \
-	  echo "# ESMF_NETCDF_INCLUDE: $(ESMF_NETCDF_INCLUDE)" >> $(MKINFO) ; fi
-	-@if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
-	  echo "# ESMF_NETCDF_LIBPATH: $(ESMF_NETCDF_LIBPATH)" >> $(MKINFO) ; fi
+	-@if [ -n "$(ESMF_NETCDF)" ] ; then \
+	  echo "# ESMF_NETCDF:            $(ESMF_NETCDF)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_NETCDF_INCLUDE)" ] ; then \
+	    echo "# ESMF_NETCDF_INCLUDE:    $(ESMF_NETCDF_INCLUDE)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDF_LIBS)" ] ; then \
+	    echo "# ESMF_NETCDF_LIBS:       $(ESMF_NETCDF_LIBS)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
+	    echo "# ESMF_NETCDF_LIBPATH:    $(ESMF_NETCDF_LIBPATH)" >> $(MKINFO) ; \
+          fi; \
+         fi
+	-@if [ -n "$(ESMF_PNETCDF)" ] ; then \
+	  echo "# ESMF_PNETCDF:           $(ESMF_PNETCDF)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_PNETCDF_INCLUDE)" ] ; then \
+	    echo "# ESMF_PNETCDF_INCLUDE:   $(ESMF_PNETCDF_INCLUDE)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_PNETCDF_LIBS)" ] ; then \
+	    echo "# ESMF_PNETCDF_LIBS:      $(ESMF_PNETCDF_LIBS)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_PNETCDF_LIBPATH)" ] ; then \
+	    echo "# ESMF_PNETCDF_LIBPATH:   $(ESMF_PNETCDF_LIBPATH)" >> $(MKINFO) ; \
+          fi; \
+         fi
 
 install_info_mk:
 	$(MAKE) info_mk ESMF_LDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_LIBDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_MODDIR=$(ESMF_INSTALL_MODDIR_ABSPATH) ESMF_INCDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)
