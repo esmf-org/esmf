@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.90 2008/06/17 21:56:23 theurich Exp $
+# $Id: makefile,v 1.91 2008/06/17 22:31:49 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -112,7 +112,7 @@ script_info:
 	    echo "ESMF_LAPACK_LIBS:       $(ESMF_LAPACK_LIBS)" ; \
           fi; \
 	  if [ -n "$(ESMF_LAPACK_LIBPATH)" ] ; then \
-	    echo "ESMF_LAPACK_LIBPATH:       $(ESMF_LAPACK_LIBPATH)" ; \
+	    echo "ESMF_LAPACK_LIBPATH:    $(ESMF_LAPACK_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_NETCDF)" ] ; then \
@@ -271,7 +271,7 @@ info_mk:
 	    echo "# ESMF_LAPACK_LIBS:       $(ESMF_LAPACK_LIBS)" >> $(MKINFO) ; \
           fi; \
 	  if [ -n "$(ESMF_LAPACK_LIBPATH)" ] ; then \
-	    echo "# ESMF_LAPACK_LIBPATH:       $(ESMF_LAPACK_LIBPATH)" >> $(MKINFO) ; \
+	    echo "# ESMF_LAPACK_LIBPATH:    $(ESMF_LAPACK_LIBPATH)" >> $(MKINFO) ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_NETCDF)" ] ; then \

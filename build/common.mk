@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.232 2008/06/17 21:56:23 theurich Exp $
+#  $Id: common.mk,v 1.233 2008/06/17 22:31:49 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -730,8 +730,8 @@ ESMF_CXXLINKLIBS        += $(ESMF_LAPACK_LIBS)
 ESMF_F90LINKLIBS        += $(ESMF_LAPACK_LIBS)
 endif
 ifdef ESMF_LAPACK_LIBPATH
-ESMF_CXXLINKPATHS       += $(ESMF_LAPACK_LIBPATH)
-ESMF_F90LINKPATHS       += $(ESMF_LAPACK_LIBPATH)
+ESMF_CXXLINKPATHS       += -L$(ESMF_LAPACK_LIBPATH)
+ESMF_F90LINKPATHS       += -L$(ESMF_LAPACK_LIBPATH)
 endif
 endif
 
