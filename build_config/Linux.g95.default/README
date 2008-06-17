@@ -4,19 +4,3 @@ GNU C++ compiler (g++).
 Requires the following environment settings:
 
 ESMF_COMPILER g95
-
-If a g95-compatible LAPACK library is available, specify the following
-environment variables:
-
-	ESMF_LAPACK		Defined when LAPACK is available
-	ESMF_LAPACK_LIBS	Linker directives to link the library
-
-If your system does not appear to have a precompiled, g95-compatible, LAPACK
-available, source code is available from the netlib website.  The URL is
-http://www.netlib.org/lapack.  Likewise, a sample implementation of the
-companion BLAS source code is available at http://www.netlib.org/blas.
-
-If ESMF_LAPACK is not defined during the library build, a few portions of ESMF
-which depend on it, notably the meshing routines, will be non-functional.
-If these areas of the code are called, they will typically give an error
-message and then STOP the run.

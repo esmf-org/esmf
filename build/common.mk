@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.230 2008/06/13 07:40:59 theurich Exp $
+#  $Id: common.mk,v 1.231 2008/06/17 21:20:19 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -658,7 +658,6 @@ ifneq ($(origin ESMF_MPIMPMDRUN), environment)
 ESMF_MPIMPMDRUN = $(ESMF_MPIMPMDRUNDEFAULT)
 endif
 
-
 #-------------------------------------------------------------------------------
 # Up to here there have only been definitions, no targets.  This is the 
 # first (and therefore default) target.  The definition of what "all" is
@@ -700,14 +699,41 @@ endif
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
+# Set LAPACK default libs according to ESMF_LAPACK (if not set in user environment)
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_LAPACK),netlib)
+ifneq ($(origin ESMF_LAPACK_LIBS), environment)
+ESMF_LAPACK_LIBS = -llapack -lblas
+endif
+endif
+
+ifeq ($(ESMF_LAPACK),mkl)
+ifneq ($(origin ESMF_LAPACK_LIBS), environment)
+ESMF_LAPACK_LIBS = -lmkl_lapack -lmkl
+endif
+endif
+
+ifeq ($(ESMF_LAPACK),scsl)
+ifneq ($(origin ESMF_LAPACK_LIBS), environment)
+ESMF_LAPACK_LIBS = -lscs
+endif
+endif
+
+#-------------------------------------------------------------------------------
 # LAPACK is used by a few ESMF routines, when available.  The following links
 # them in.
 #-------------------------------------------------------------------------------
 ifdef ESMF_LAPACK
-CPPFLAGS		+= -DESMF_LAPACK=$(ESMF_LAPACK)
-ESMF_CXXLINKLIBS	+= $(ESMF_LAPACK_LIBS)
-FPPDEFS			+= -DESMF_LAPACK=$(ESMF_LAPACK)
-ESMF_F90LINKLIBS	+= $(ESMF_LAPACK_LIBS)
+CPPFLAGS                += -DESMF_LAPACK=$(ESMF_LAPACK)
+FPPDEFS                 += -DESMF_LAPACK=$(ESMF_LAPACK)
+ifdef ESMF_LAPACK_LIBS
+ESMF_CXXLINKLIBS        += $(ESMF_LAPACK_LIBS)
+ESMF_F90LINKLIBS        += $(ESMF_LAPACK_LIBS)
+endif
+ifdef ESMF_LAPACK_LIBPATH
+ESMF_CXXLINKPATHS       += $(ESMF_LAPACK_LIBPATH)
+ESMF_F90LINKPATHS       += $(ESMF_LAPACK_LIBPATH)
+endif
 endif
 
 #-------------------------------------------------------------------------------

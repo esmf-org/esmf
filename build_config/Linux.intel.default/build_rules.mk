@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.73 2008/06/12 20:49:23 theurich Exp $
+# $Id: build_rules.mk,v 1.74 2008/06/17 21:20:20 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -151,23 +151,6 @@ ESMF_F90COMPILEOPTS +=  -threads
 ESMF_CXXCOMPILEOPTS +=  -pthread
 ESMF_F90LINKOPTS    += -threads
 ESMF_CXXLINKOPTS    += -pthread
-endif
-
-############################################################
-# Add LAPACK libraries
-#
-# The MKL locaion may either be set externally via
-# LD_LIBRARY_PATH or internally via ESMF_LAPACK_LIBPATH.
-#
-ifeq ($(ESMF_LAPACK),MKL)
-ifeq ($(ESMF_MACHINE),x86_64)
-# ESMf_LAPACK_LIBPATH =
-ESMF_LAPACK_LIBS    = -lmkl_intel_lp64 -lmkl_core -lmkl_sequential
-endif
-ifeq ($(ESMF_MACHINE),ia64)
-# ESMF_LAPACK_LIBPATH =
-ESMF_LAPACK_LIBS    = -lmkl_intel_lp64 -lmkl_core -lmkl_sequential
-endif
 endif
 
 ############################################################

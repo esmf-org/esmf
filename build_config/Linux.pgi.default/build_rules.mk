@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.36 2008/04/21 20:04:47 w6ws Exp $
+# $Id: build_rules.mk,v 1.37 2008/06/17 21:20:21 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -130,16 +130,9 @@ ESMF_F90COMPILEFREENOCPP = -Mfreeform
 ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
 
 ############################################################
-# Add LAPACK libraries
+# Assume standard LAPACK libraries available by default
 #
-# Use the PGI version of LAPACK
-#
-ESMF_LAPACK         = PGI
-# ESMf_LAPACK_LIBPATH =
-ESMF_LAPACK_LIBS    = -llapack -lblas
-# PGI releases prior to 7.1-6 also need -lpgsse2.  For later
-# releases, this can be removed.
-ESMF_LAPACK_LIBS   += -lpgsse2
+ESMF_LAPACK         = netlib
 
 ############################################################
 # Determine where pgf90's libraries are located

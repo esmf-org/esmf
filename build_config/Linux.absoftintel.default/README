@@ -4,6 +4,3 @@ commercial Intel C++ compiler (icpc).
 Requires the following environment settings:
 
 ESMF_COMPILER absoftintel
-
-Absofts precompiled version of LAPACK is assumed to be available.  No additional
-environment variables need to be set.

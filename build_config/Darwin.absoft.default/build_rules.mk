@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25 2008/04/17 18:58:23 theurich Exp $
+# $Id: build_rules.mk,v 1.26 2008/06/17 21:20:19 theurich Exp $
 #
 # Darwin.absoft.default
 #
@@ -114,13 +114,9 @@ ESMF_F90COMPILEFREENOCPP = -ffree
 ESMF_F90COMPILEFIXCPP    = -ffixed
 
 ############################################################
-# Add LAPACK libraries
+# Assume standard LAPACK libraries available by default
 #
-# Use the Absoft version of LAPACK
-#
-ESMF_LAPACK         = 1
-# ESMF_LAPACK_LIBPATH =
-ESMF_LAPACK_LIBS    = -llapack -lblas
+ESMF_LAPACK         = netlib
 
 ############################################################
 # Determine where absoft f90's libraries are located
