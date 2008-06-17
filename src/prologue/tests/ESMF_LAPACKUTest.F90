@@ -86,7 +86,9 @@ program ESMF_LAPACKUTest
   write (failMsg, *) trim (name) // ': info =', info
   call ESMF_Test (info == 0, name, failMsg, result, ESMF_SRCLINE)
 #else
-  ! Add two passes so test won't show up as crashed
+  ! Add two dummy passes so test won't show up as crashed
+  name = "dummy test without LAPACK"
+  failMsg = "dummy failure"
   call ESMF_Test((.TRUE.), name, failMsg, result, ESMF_SRCLINE)
   call ESMF_Test((.TRUE.), name, failMsg, result, ESMF_SRCLINE)
 
