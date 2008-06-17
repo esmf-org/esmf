@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.33 2008/06/17 21:20:19 theurich Exp $
+# $Id: build_rules.mk,v 1.34 2008/06/17 22:48:33 theurich Exp $
 # 
 # IRIX64.default.default
 #
@@ -75,7 +75,7 @@ ESMF_PTHREADSDEFAULT       = OFF
 ############################################################
 # Assume SCSL LAPACK libraries available by default
 #
-ESMF_LAPACK         = scsl
+ESMF_LAPACKDEFAULT         = scsl
 
 ############################################################
 # Special compiler flags

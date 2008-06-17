@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.233 2008/06/17 22:31:49 theurich Exp $
+#  $Id: common.mk,v 1.234 2008/06/17 22:48:32 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -701,6 +701,16 @@ endif
 #-------------------------------------------------------------------------------
 # Set LAPACK default libs according to ESMF_LAPACK (if not set in user environment)
 #-------------------------------------------------------------------------------
+ifneq ($(origin ESMF_LAPACK), environment)
+ifdef ESMF_LAPACKDEFAULT
+ESMF_LAPACK = $(ESMF_LAPACKDEFAULT)
+endif
+endif
+
+ifeq ($(ESMF_LAPACK),OFF)
+ESMF_LAPACK=
+endif
+
 ifeq ($(ESMF_LAPACK),netlib)
 ifneq ($(origin ESMF_LAPACK_LIBS), environment)
 ESMF_LAPACK_LIBS = -llapack -lblas

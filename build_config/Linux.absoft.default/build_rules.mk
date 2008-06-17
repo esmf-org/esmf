@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.26 2008/06/17 21:20:19 theurich Exp $
+# $Id: build_rules.mk,v 1.27 2008/06/17 22:48:33 theurich Exp $
 #
 # Linux.absoft.default
 #
@@ -91,7 +91,7 @@ ESMF_F90COMPILEFIXCPP    = -ffixed
 ############################################################
 # Assume standard LAPACK libraries available by default
 #
-ESMF_LAPACK         = netlib
+ESMF_LAPACKDEFAULT       = netlib
 
 ############################################################
 # Determine where absoft f90's libraries are located

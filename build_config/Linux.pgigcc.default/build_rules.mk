@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2008/06/17 21:20:21 theurich Exp $
+# $Id: build_rules.mk,v 1.10 2008/06/17 22:48:34 theurich Exp $
 #
 # Linux.pgigcc.default
 #
@@ -89,7 +89,7 @@ ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
 ############################################################
 # Assume standard LAPACK libraries available by default
 #
-ESMF_LAPACK         = netlib
+ESMF_LAPACKDEFAULT       = netlib
 
 ############################################################
 # Determine where pgf90's libraries are located
