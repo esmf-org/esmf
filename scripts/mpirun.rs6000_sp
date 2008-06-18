@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.rs6000_sp,v 1.8.14.1 2008/06/05 16:49:59 theurich Exp $
+# $Id: mpirun.rs6000_sp,v 1.8.14.2 2008/06/18 18:15:31 theurich Exp $
 # This script provides an interface such that the simple command
 # mpirun -np # runs # copies of the program in parallel.
 # The IBM poe command does not fit this paradigm.
@@ -12,6 +12,7 @@ then
 	exit 1
 fi
 
+if [ "$MP_RESD" != "no" ]; then
 if [ x$MP_RMPOOL == x ]; then
 if [ x$MP_HOSTFILE == x ]; then
   echo "***ERROR***"
@@ -21,6 +22,7 @@ if [ x$MP_HOSTFILE == x ]; then
   echo "if available. Please see your system documentation for details on how"
   echo "to execute parallel applications."
   exit 1
+fi
 fi
 fi
 
