@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.15 2008/04/17 18:58:26 theurich Exp $
+# $Id: build_rules.mk,v 1.16 2008/06/18 05:07:09 theurich Exp $
 #
 # Linux.g95.default
 #
@@ -51,6 +51,7 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lmpi_cxx
 ESMF_CXXDEFAULT         = mpicxx

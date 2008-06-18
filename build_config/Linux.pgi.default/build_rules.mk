@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.38 2008/06/17 22:48:34 theurich Exp $
+# $Id: build_rules.mk,v 1.39 2008/06/18 05:07:11 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -72,6 +72,7 @@ endif
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
