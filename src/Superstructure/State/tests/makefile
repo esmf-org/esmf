@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16.2.1 2008/02/14 03:56:26 theurich Exp $ 
+# $Id: makefile,v 1.16.2.2 2008/06/18 19:14:54 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -16,20 +16,20 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Superstructure/State/tests
 
-TESTS_BUILD   =
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_StateCreateUTest
 # TODO:FIELDINTEGRATION Restore State reconcile and other tests.
 #TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_StateCreateUTest \
 #		$(ESMF_TESTDIR)/ESMF_StateUTest
 #		$(ESMF_TESTDIR)/ESMF_StateReconcileUTest \
 #		$(ESMF_TESTDIR)/ESMF_StateLimitUTest \
 
-TESTS_RUN     =
+TESTS_RUN     = RUN_ESMF_StateCreateUTest
 #TESTS_RUN     =	RUN_ESMF_StateCreateUTest \
 #		RUN_ESMF_StateUTest
 #		RUN_ESMF_StateReconcileUTest \
 #		RUN_ESMF_StateLimitUTest \
 
-TESTS_RUN_UNI =
+TESTS_RUN_UNI = RUN_ESMF_StateCreateUTestUNI
 #TESTS_RUN_UNI =	RUN_ESMF_StateCreateUTestUNI \
 #		RUN_ESMF_StateUTestUNI
 #		RUN_ESMF_StateReconcileUTestUNI \
