@@ -81,10 +81,10 @@ The following compilers and utilities are required for compiling, linking and
 testing the ESMF software:
 * Fortran90 (or later) compiler
 * C++ compiler
-* LAPACK library compatible with the above compilers (but see below)
-* MPI implementation compatible with the above compilers (but see below)
 * GNU's gcc compiler - for a standard cpp preprocessor implementation
 * GNU make
+* MPI implementation compatible with the above compilers (but see below)
+* LAPACK library compatible with the above compilers (but see below)
 * Perl - for running test scripts
 
 Alternatively ESMF can be built using a single-processor MPI-bypass library
@@ -127,10 +127,12 @@ Environment Variables
 ---------------------
 
 The following environment variables are the most likely ones to be used
-for the ESMF library build under normal circumstances. In most situations only
-one or two environment variables must be set. There are other environment
-variables which can be set to customize the ESMF library build process. The 
-ESMF User's Guide documents these in detail.
+for a typical ESMF library build under normal circumstances. In most
+situations only one or two environment variables need to be set. There are
+other environment variables which can be set to customize the ESMF library
+build process. In particular, ESMF's dependency on 3rd party libraries, such as
+LAPACK, NETCDF, etc., is controlled by special environment variables. The ESMF
+User's Guide documents all environment variables in detail. 
 
 ESMF_DIR
 
@@ -229,25 +231,6 @@ all are installed relative to ESMF_INSTALL_PREFIX by default. See the ESMF
 User's Guide on how to customize the installation location of the installed
 files using additional "ESMF_INSTALL_..." environment variables.
 The ESMF_INSTALL_PREFIX may be provided as an absolute path or relative to ESMF_DIR.
-
-ESMF_LAPACK
-
-This variable specifies the existence of an optional LAPACK library.  When
-ESMF_LAPACK is defined, certain portions of ESMF are conditionally
-enabled - notably in some of the meshing algorithms.
-
-On some targets, an LAPACK library is known to exist and is used by
-default.  However others need an optional user-supplied library.  To
-indicate that a user-supplied LAPACK library is available, ESMF_LAPACK
-can be defined.  For more details, see the README files for the individual
-targets in the build_config directory.
-
-ESMF_LAPACK_LIBS
-
-This variable specifies the linker directives to access an optional
-user-supplied LAPACK library, and perhaps its companion BLAS library.
-Typically this might have a -L directive to specify the path to the
-library, and will have a -l directive to specify the name of the library.
 
 
 Supported Makefile Targets
@@ -586,4 +569,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.92 2008/05/21 22:14:15 theurich Exp $
+ $Id: README,v 1.93 2008/06/18 05:54:42 theurich Exp $
