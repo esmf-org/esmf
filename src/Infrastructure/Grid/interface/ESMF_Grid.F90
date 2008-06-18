@@ -166,7 +166,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.86 2008/06/10 22:09:20 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.87 2008/06/18 05:13:09 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -244,7 +244,7 @@ end interface
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_GridGet
+      module procedure ESMF_GridGetDefault
       module procedure ESMF_GridGetPLocalDePSloc
       module procedure ESMF_GridGetPSloc
       
@@ -3830,12 +3830,13 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGet"
+#define ESMF_METHOD "ESMF_GridGetDefault"
 !BOP
 ! !IROUTINE: ESMF_GridGet - Get information about a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGet(grid, name, coordTypeKind, &
+  ! Private name; call using ESMF_GridGet()
+      subroutine ESMF_GridGetDefault(grid, name, coordTypeKind, &
           dimCount, tileCount, staggerlocsCount, localDECount, distgrid, &
           distgridToGridMap, coordDimCount, coordDimMap, &
           gridEdgeLWidth, gridEdgeUWidth, gridAlign,  &
@@ -3999,7 +4000,7 @@ end interface
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-end subroutine ESMF_GridGet
+end subroutine ESMF_GridGetDefault
 
 
 !------------------------------------------------------------------------------
