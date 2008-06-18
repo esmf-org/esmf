@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.234 2008/06/17 22:48:32 theurich Exp $
+#  $Id: common.mk,v 1.235 2008/06/18 05:40:54 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -726,6 +726,12 @@ endif
 ifeq ($(ESMF_LAPACK),scsl)
 ifneq ($(origin ESMF_LAPACK_LIBS), environment)
 ESMF_LAPACK_LIBS = -lscs
+endif
+endif
+
+ifeq ($(ESMF_LAPACK),essl)
+ifneq ($(origin ESMF_LAPACK_LIBS), environment)
+ESMF_LAPACK_LIBS = -lessl
 endif
 endif
 
