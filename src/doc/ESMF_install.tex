@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.60 2008/05/08 02:27:28 theurich Exp $
+% $Id: ESMF_install.tex,v 1.61 2008/06/18 06:26:53 theurich Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -17,6 +17,25 @@ to build the library and link it with your application.
 \subsection{System Requirements}
 \label{sec:systemreq}
 \input{ESMF_systemreq}
+
+\subsection{3rd Party Libraries}
+\label{sec:3rdParty}
+
+Some pieces of the ESMF library require access to 3rd party library code. This
+section describes these dependencies and the associated environment settings
+that allow the user to control them.
+
+TODO: Need to discuss LAPACK dependency in Mesh code and how {\tt ESMF\_LAPACK},
+{\tt ESMF\_LAPACK\_LIBS} and {\tt ESMF\_LAPACK\_LIBPATH} variables are used
+during ESMF library build.
+
+TODO: Need to discuss NETCDF dependency in library and test code and how 
+{\tt ESMF\_NETCDF}, {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBS} and 
+{\tt ESMF\_NETCDF\_LIBPATH} variables are used during ESMF library build.
+
+TODO: Need to discuss PNETCDF dependency in library and test code and how 
+{\tt ESMF\_PNETCDF}, {\tt ESMF\_PNETCDF\_INCLUDE}, {\tt ESMF\_PNETCDF\_LIBS} and
+{\tt ESMF\_PNETCDF\_LIBPATH} variables are used during ESMF library build.
 
 \subsection{ESMF Environment Variables}
 \label{EnvironmentVariables}
