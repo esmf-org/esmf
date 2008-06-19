@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.h,v 1.1 2008/06/12 18:08:20 rosalind Exp $
+// $Id: ESMCI_Alarm.h,v 1.2 2008/06/19 05:33:05 tjcnrl Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -86,7 +86,7 @@
                           ESMF_ALARMLIST_NEXTRINGING,
                           ESMF_ALARMLIST_PREVRINGING};
 
-namespace ESMCI{
+namespace ESMCI {
 
  class ESMC_Clock;
 
@@ -98,8 +98,8 @@ namespace ESMCI{
  // class configuration type:  not needed for Alarm
 
  // class definition type
-class ESMCI::Alarm {
-//class ESMCI::Alarm : public ESMC_Base { // TODO: inherit from ESMC_Base class
+class Alarm {
+//class Alarm : public ESMC_Base { // TODO: inherit from ESMC_Base class
                                         // when fully aligned with F90 equiv
 
 
