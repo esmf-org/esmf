@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.32.2.2 2008/04/05 03:13:45 cdeluca Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.32.2.3 2008/06/19 00:30:41 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.32.2.2 2008/04/05 03:13:45 cdeluca Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.32.2.3 2008/06/19 00:30:41 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1703,6 +1703,32 @@
 
       call ESMF_Test((bool.and.rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Alarm ringTime = clock startTime *and* ringInterval specified
+      !  upon alarm creation => should ring immediately.
+      !  From Tom Black in Support ticket 1989990.
+      write(failMsg, *) " Did not return alarm ringing and ESMF_SUCCESS"
+      write(name, *) "Test Alarm ringTime = Clock startTime with ringInterval"
+      call ESMF_TimeIntervalSet(timeStep, m=2, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, s=60, rc=rc)
+      call ESMF_TimeSet(startTime, yy=2007, mm=9, dd=18, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2007, mm=9, dd=19, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=startTime, &
+                                ringInterval=alarmStep, rc=rc)
+
+      call ESMF_AlarmGet(alarm4, ringTime=alarmTime, rc=rc)
+      bool = ESMF_AlarmIsRinging(alarm4)
+
+      call ESMF_Test(((alarmTime==startTime+alarmStep).and.bool.and. &
+                       rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)

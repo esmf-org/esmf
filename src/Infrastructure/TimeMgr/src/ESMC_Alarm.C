@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.61.2.1 2008/04/05 03:13:42 cdeluca Exp $
+// $Id: ESMC_Alarm.C,v 1.61.2.2 2008/06/19 00:30:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.61.2.1 2008/04/05 03:13:42 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.61.2.2 2008/06/19 00:30:41 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -135,17 +135,13 @@ int ESMC_Alarm::count=0;
     if (ringInterval != ESMC_NULL_POINTER) {
       alarm->ringInterval = *ringInterval;
 
-      // if ringTime not specified, or ringTime == clockCurrTime, calculate
+      // if ringTime not specified, calculate
       //   ringTime from the current clock time
 
-      bool ringTimeIsCurrTime;
-      if (ringTime != ESMC_NULL_POINTER) {
-         ringTimeIsCurrTime = (*ringTime == clock->currTime);
-         // TODO: handle case where *ringTime < clock->currTime;
-         //       same or similar to refTime
-      }
+      // TODO: handle case where *ringTime < clock->currTime;
+      //       same or similar to refTime
       
-      if (ringTime == ESMC_NULL_POINTER || ringTimeIsCurrTime) {
+      if (ringTime == ESMC_NULL_POINTER) {
         // works for positive or negative ringInterval
         alarm->ringTime = clock->currTime + alarm->ringInterval;
         alarm->prevRingTime = alarm->firstRingTime = alarm->ringTime;
