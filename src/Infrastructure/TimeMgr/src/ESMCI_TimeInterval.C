@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.C,v 1.3 2008/06/11 21:14:59 rosalind Exp $
+// $Id: ESMCI_TimeInterval.C,v 1.4 2008/06/21 05:31:58 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.3 2008/06/11 21:14:59 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.4 2008/06/21 05:31:58 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -2787,6 +2787,7 @@ namespace ESMCI{
 
    ESMC_FractionSet(0,0,1);
 
+   yy = 0;
    mm = 0;
    d  = 0;
 
