@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.8 2008/04/21 21:40:09 dneckels Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.9 2008/06/23 18:53:57 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -94,6 +94,8 @@ extern "C" void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *
     char *meshname = ESMC_F90toCstring(name, nlen);
 
     WriteMesh(mesh, meshname);
+
+    delete [] meshname;
 
   }
   catch(std::exception &x) {
