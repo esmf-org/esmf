@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2008/04/29 00:38:14 theurich Exp $
+# $Id: makefile,v 1.16 2008/06/23 20:06:15 feiliu Exp $
 
 # Leave alone.
 ALL: build_here 
@@ -14,7 +14,7 @@ AUTOGEN   =
 #TODO:FIELDINTEGRATION Restore StateGet
 
 SOURCEC	  = 
-SOURCEF	  = ESMF_StateTypes.F90 ESMF_State.F90 ESMF_StateReconcile.F90 $(AUTOGEN)
+SOURCEF	  = ESMF_StateTypes.F90 ESMF_StateVa.F90 ESMF_State.F90 ESMF_StateReconcile.F90 $(AUTOGEN)
 SOURCEH	  = 
 STOREH    = ESMC_State.h
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
@@ -42,7 +42,7 @@ CLOBBERDIRS =
 
 ESMF_StateGet.o: ESMF_StateGet.cppF90 ESMF_State.o
 
-ESMF_State.o: ESMF_StateTypes.o
+ESMF_State.o: ESMF_StateTypes.o ESMF_StateVa.o
 
 ESMF_StateReconcile.o: ESMF_StateTypes.o ESMF_State.o
 
