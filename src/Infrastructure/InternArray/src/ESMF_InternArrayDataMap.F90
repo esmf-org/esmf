@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayDataMap.F90,v 1.12.2.1 2008/04/05 03:12:52 cdeluca Exp $
+! $Id: ESMF_InternArrayDataMap.F90,v 1.12.2.2 2008/06/24 21:53:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@ module ESMF_InternArrayDataMapMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version =  &
-    '$Id: ESMF_InternArrayDataMap.F90,v 1.12.2.1 2008/04/05 03:12:52 cdeluca Exp $'
+    '$Id: ESMF_InternArrayDataMap.F90,v 1.12.2.2 2008/06/24 21:53:56 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -421,6 +421,13 @@ end function
 !
 ! !DESCRIPTION:
 !     Prints information about the {\tt arraydatamap} to {\tt stdout}.
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, it is recommended to use the
+!     standard Fortran call {\tt flush(6)} as a workaround until this issue
+!     is fixed in a future release. 
 !
 !     The arguments are:
 !     \begin{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.12.2.1 2008/04/05 03:13:49 cdeluca Exp $
+! $Id: ESMF_Util.F90,v 1.12.2.2 2008/06/24 21:53:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.12.2.1 2008/04/05 03:13:49 cdeluca Exp $'
+               '$Id: ESMF_Util.F90,v 1.12.2.2 2008/06/24 21:53:59 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -221,8 +221,15 @@
       type(ESMF_DomainList) :: domainlist
 !
 ! !DESCRIPTION:
-! Dump the contents of a domain list to screen, i.e. for 
-! debugging during development.
+!     Dump the contents of a domain list to screen, i.e. for 
+!     debugging during development.
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, it is recommended to use the
+!     standard Fortran call {\tt flush(6)} as a workaround until this issue
+!     is fixed in a future release. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -555,7 +562,14 @@
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
-!   Print the contents of an AxisIndex type.
+!     Print the contents of an AxisIndex type.
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, it is recommended to use the
+!     standard Fortran call {\tt flush(6)} as a workaround until this issue
+!     is fixed in a future release. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -592,7 +606,14 @@
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
-!   Print the contents of an AxisIndex type.
+!     Print the contents of an AxisIndex type.
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, it is recommended to use the
+!     standard Fortran call {\tt flush(6)} as a workaround until this issue
+!     is fixed in a future release. 
 !
 !     The arguments are:
 !     \begin{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.1.2.8 2008/05/06 18:43:29 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.1.2.9 2008/06/24 21:53:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -2269,8 +2269,15 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Prints diagnostic information about the {\tt bundle}
-!      to {\tt stdout}.  
+!     Prints diagnostic information about the {\tt bundle}
+!     to {\tt stdout}.  
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, it is recommended to use the
+!     standard Fortran call {\tt flush(6)} as a workaround until this issue
+!     is fixed in a future release. 
 !
 !     The arguments are:
 !     \begin{description}

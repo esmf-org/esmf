@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.39.2.2 2008/04/05 03:13:28 cdeluca Exp $
+! $Id: ESMF_RHandle.F90,v 1.39.2.3 2008/06/24 21:53:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -155,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.39.2.2 2008/04/05 03:13:28 cdeluca Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.39.2.3 2008/06/24 21:53:57 eschwab Exp $'
 
 !==============================================================================
 
@@ -656,6 +656,13 @@ end function ESMF_TransformValuesGetInit
 !
 ! !DESCRIPTION:
 !     Print information about an {\tt ESMF\_TransformValues}.  
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, it is recommended to use the
+!     standard Fortran call {\tt flush(6)} as a workaround until this issue
+!     is fixed in a future release. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -1401,7 +1408,14 @@ end function ESMF_RouteHandleGetInit
       integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!      Print information about a RouteHandle.  
+!     Print information about a RouteHandle.  
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, it is recommended to use the
+!     standard Fortran call {\tt flush(6)} as a workaround until this issue
+!     is fixed in a future release. 
 !
 !     The arguments are:
 !     \begin{description}
