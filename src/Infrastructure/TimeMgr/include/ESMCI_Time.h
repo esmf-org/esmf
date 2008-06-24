@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.h,v 1.4 2008/06/11 21:14:55 rosalind Exp $
+// $Id: ESMCI_Time.h,v 1.5 2008/06/24 14:23:54 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -145,7 +145,7 @@
     bool isLeapYear(int *rc=0) const;
     bool isSameCalendar(const ESMCI::Time *time, int *rc=0) const;
 
-    // to support ESMC_Clock::SyncToWallClock() and TMG 2.5.7
+    // to support ESMCI::Clock::syncToWallClock() and TMG 2.5.7
     int syncToRealTime(void);
 
     // override BaseTime +/- operators in order to copy ESMCI::Time-only

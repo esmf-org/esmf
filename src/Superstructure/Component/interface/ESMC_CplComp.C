@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.C,v 1.15 2008/06/08 03:34:46 rosalind Exp $
+// $Id: ESMC_CplComp.C,v 1.16 2008/06/24 14:23:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_CplComp.C,v 1.15 2008/06/08 03:34:46 rosalind Exp $";
+           "$Id: ESMC_CplComp.C,v 1.16 2008/06/24 14:23:55 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -71,7 +71,7 @@
       char *name,
       enum ESMC_GridCompType mtype,
       char *configFile,
-      ESMCI::ESMC_Clock *clock,
+      ESMCI::Clock *clock,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -151,7 +151,7 @@
 // !ARGUMENTS:
       ESMC_State *importState,   // in/out: required data
       ESMC_State *exportState,   // in/out: produced data
-      ESMCI::ESMC_Clock *clock,         // in: model clock
+      ESMCI::Clock *clock,         // in: model clock
       int phase,                 // in: if > 0, which phase of init to invoke
       ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //
@@ -185,7 +185,7 @@
 // !ARGUMENTS:
       ESMC_State *importState,   // in/out: required data
       ESMC_State *exportState,   // in/out: produced data
-      ESMCI::ESMC_Clock *clock,         // in: model clock
+      ESMCI::Clock *clock,         // in: model clock
       int phase,                 // in: if > 0, which phase of init to invoke
       ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //
@@ -219,7 +219,7 @@
 // !ARGUMENTS:
       ESMC_State *importState,   // in/out: required data
       ESMC_State *exportState,   // in/out: produced data
-      ESMCI::ESMC_Clock *clock,         // in: model clock
+      ESMCI::Clock *clock,         // in: model clock
       int phase,                 // in: if > 0, which phase of init to invoke
       ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //

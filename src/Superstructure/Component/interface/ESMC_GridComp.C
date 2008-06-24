@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.C,v 1.18 2008/06/08 03:34:46 rosalind Exp $
+// $Id: ESMC_GridComp.C,v 1.19 2008/06/24 14:23:56 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_GridComp.C,v 1.18 2008/06/08 03:34:46 rosalind Exp $";
+           "$Id: ESMC_GridComp.C,v 1.19 2008/06/24 14:23:56 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -100,7 +100,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 // !ARGUMENTS:
       const char *functionType,                          // in: function type
       void (*functionPtr)(ESMC_GridComp *, ESMC_State *,
-                          ESMC_State *, ESMCI::ESMC_Clock *),   // in: function pointer
+                          ESMC_State *, ESMCI::Clock *),   // in: function pointer
       int phase) {                                       // in: phase
 //
 // !DESCRIPTION:
@@ -161,7 +161,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
       enum ESMC_GridCompType mtype,
       ESMC_Grid *grid,
       char *configFile,
-      ESMCI::ESMC_Clock *clock,
+      ESMCI::Clock *clock,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -240,7 +240,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 // !ARGUMENTS:
       ESMC_State *importState,   // in/out: required data
       ESMC_State *exportState,   // in/out: produced data
-      ESMCI::ESMC_Clock *clock,         // in: model clock
+      ESMCI::Clock *clock,         // in: model clock
       int phase,                 // in: if > 0, which phase of init to invoke
       ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //
@@ -274,7 +274,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 // !ARGUMENTS:
       ESMC_State *importState,   // in/out: required data
       ESMC_State *exportState,   // in/out: produced data
-      ESMCI::ESMC_Clock *clock,         // in: model clock
+      ESMCI::Clock *clock,         // in: model clock
       int phase,                 // in: if > 0, which phase of init to invoke
       ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //
@@ -308,7 +308,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 // !ARGUMENTS:
       ESMC_State *importState,   // in/out: required data
       ESMC_State *exportState,   // in/out: produced data
-      ESMCI::ESMC_Clock *clock,         // in: model clock
+      ESMCI::Clock *clock,         // in: model clock
       int phase,                 // in: if > 0, which phase of init to invoke
       ESMC_BlockingFlag blockingFlag) {  // in: run sync or async
 //

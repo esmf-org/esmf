@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.24 2008/06/08 03:34:45 rosalind Exp $
+// $Id: ESMC_GridComp.h,v 1.25 2008/06/24 14:23:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
 #include "ESMCI_Time.h"
-#include "ESMC_Clock.h"
+#include "ESMCI_Clock.h"
 #include "ESMC_Grid.h"
 #include "ESMC_FTable.h"  // function & data pointer table 
 #include "ESMC_State.h"
@@ -68,17 +68,17 @@
 
   int ESMC_GridCompSetEntryPoint(const char *functionType,
                                  void (*)(ESMC_GridComp *, ESMC_State *,
-                                          ESMC_State *, ESMCI::ESMC_Clock *),
+                                          ESMC_State *, ESMCI::Clock *),
                                  int phase=ESMF_SINGLEPHASE);
 
   int ESMC_GridCompInitialize(ESMC_State *importState, ESMC_State *exportState, 
-                              ESMCI::ESMC_Clock *clock, int phase=ESMF_SINGLEPHASE,
+                              ESMCI::Clock *clock, int phase=ESMF_SINGLEPHASE,
                               ESMC_BlockingFlag blockingFlag=ESMF_BLOCKING);
   int ESMC_GridCompRun(ESMC_State *importState, ESMC_State *exportState, 
-                       ESMCI::ESMC_Clock *clock, int phase=ESMF_SINGLEPHASE,
+                       ESMCI::Clock *clock, int phase=ESMF_SINGLEPHASE,
                        ESMC_BlockingFlag blockingFlag=ESMF_BLOCKING);
   int ESMC_GridCompFinalize(ESMC_State *importState, ESMC_State *exportState, 
-                            ESMCI::ESMC_Clock *clock, int phase=ESMF_SINGLEPHASE,
+                            ESMCI::Clock *clock, int phase=ESMF_SINGLEPHASE,
                             ESMC_BlockingFlag blockingFlag=ESMF_BLOCKING);
 
  // accessor methods for class members.  these need more options.
@@ -113,7 +113,7 @@
 
  ESMC_GridComp *ESMC_GridCompCreate(char *name, enum ESMC_GridCompType mtype,
                                     ESMC_Grid *grid, char *configFile, 
-                                    ESMCI::ESMC_Clock *clock, int *rc);
+                                    ESMCI::Clock *clock, int *rc);
  int ESMC_GridCompDestroy(ESMC_GridComp *comp);
 
 
@@ -122,7 +122,7 @@ extern "C" {
  void FTN(f_esmf_gridcompcreate)(ESMC_GridComp *comp, char *name, 
                          ESMC_GridCompType *mtype, 
                          ESMC_Grid *grid, ESMC_Config *config, 
-                         char *configFile, ESMCI::ESMC_Clock *clock, 
+                         char *configFile, ESMCI::Clock *clock, 
                          int *rc, ESMCI_FortranStrLenArg nlen,
 			 ESMCI_FortranStrLenArg clen);
  void FTN(f_esmf_gridcompdestroy)(ESMC_GridComp *comp, int *rc);
@@ -130,15 +130,15 @@ extern "C" {
 		         int *phase, int *status, ESMCI_FortranStrLenArg slen);
  void FTN(f_esmf_gridcompinitialize)(ESMC_GridComp *gcomp, 
                          ESMC_State *importState, ESMC_State *exportState, 
-                         ESMCI::ESMC_Clock *clock, int *phase, 
+                         ESMCI::Clock *clock, int *phase, 
                          ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_gridcomprun)(ESMC_GridComp *gcomp, 
                          ESMC_State *importState, ESMC_State *exportState, 
-                         ESMCI::ESMC_Clock *clock, int *phase,
+                         ESMCI::Clock *clock, int *phase,
                          ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_gridcompfinalize)(ESMC_GridComp *gcomp, 
                          ESMC_State *importState, ESMC_State *exportState, 
-                         ESMCI::ESMC_Clock *clock, int *phase, 
+                         ESMCI::Clock *clock, int *phase, 
                          ESMC_BlockingFlag *blockingFlag, int *rc);
  void FTN(f_esmf_gridcompget)(const ESMC_GridComp *gcomp, int *rc);
  void FTN(f_esmf_gridcompset)(ESMC_GridComp *gcomp, int *rc);

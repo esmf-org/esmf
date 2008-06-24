@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.h,v 1.2 2008/06/19 05:33:05 tjcnrl Exp $
+// $Id: ESMCI_Alarm.h,v 1.3 2008/06/24 14:23:54 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -88,7 +88,7 @@
 
 namespace ESMCI {
 
- class ESMC_Clock;
+ class Clock;
 
 // !PUBLIC TYPES:
  class Alarm;
@@ -106,7 +106,7 @@ class Alarm {
   private:   // corresponds to F90 module 'type ESMF_Alarm' members
     char              name[ESMF_MAXSTR];  // name of alarm
                                           // TODO: inherit from ESMC_Base class
-    ESMC_Clock       *clock;        // associated clock
+    ESMCI::Clock       *clock;        // associated clock
     ESMCI::TimeInterval ringInterval; // (TMG 4.5.2) for periodic alarming
     ESMCI::TimeInterval ringDuration; // how long alarm stays on
     ESMCI::Time         ringTime;     // (TMG 4.5.1) next time to ring
@@ -164,7 +164,7 @@ class Alarm {
 
                int    set(int                nameLen,
                       const char        *name=0,
-                      ESMC_Clock       **clock=0,
+                      ESMCI::Clock       **clock=0,
                       ESMCI::Time         *ringTime=0,
                       ESMCI::TimeInterval *ringInterval=0,
                       ESMCI::Time         *stopTime=0,
@@ -178,7 +178,7 @@ class Alarm {
               int     get(int                nameLen,
                       int               *tempNameLen,
                       char              *tempName=0,
-                      ESMC_Clock       **clock=0,
+                      ESMCI::Clock       **clock=0,
                       ESMCI::Time         *ringTime=0,
                       ESMCI::Time         *prevRingTime=0,
                       ESMCI::TimeInterval *ringInterval=0,
@@ -244,7 +244,7 @@ class Alarm {
  // < declare the rest of the public interface methods here >
 
     // friend to allocate and initialize alarm from heap
-    friend ESMCI::Alarm *ESMCI_alarmCreate(int, const char*, ESMC_Clock*, 
+    friend ESMCI::Alarm *ESMCI_alarmCreate(int, const char*, ESMCI::Clock*, 
                                  ESMCI::Time*, ESMCI::TimeInterval*, ESMCI::Time*, 
                                  ESMCI::TimeInterval*, int*, ESMCI::Time*, bool*,
                                  bool*, int*);
@@ -269,7 +269,7 @@ class Alarm {
     int resetRingBegin(bool timeStepPositive);
 
     // friend class alarm
-    friend class ESMC_Clock;
+    friend class ESMCI::Clock;
 
 //
 //EOP
@@ -284,7 +284,7 @@ class Alarm {
 
     ESMCI::Alarm *ESMCI_alarmCreate(int nameLen,
                                  const char*        name=0,
-                                 ESMC_Clock*        clock=0, 
+                                 ESMCI::Clock*        clock=0, 
                                  ESMCI::Time*         ringTime=0,
                                  ESMCI::TimeInterval* ringInterval=0,
                                  ESMCI::Time*         stopTime=0, 

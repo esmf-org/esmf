@@ -1,4 +1,4 @@
-// $Id: ESMC_CompRun.C,v 1.16 2007/08/23 17:16:03 cdeluca Exp $
+// $Id: ESMC_CompRun.C,v 1.17 2008/06/24 14:23:56 rosalind Exp $
 //
 // Test code which creates a new Component in C++.  The called
 // component is still in F90.
@@ -29,7 +29,7 @@ main(int argc, char **argv)
     ESMC_DELayout *delayout;
     ESMC_GridComp *comp1;
     ESMC_State *instate, *outstate;
-    ESMC_Clock *clock = NULL;
+    ESMCI::Clock *clock = NULL;
         
 //-------------------------------------------------------------------------
 //   // Test 1:

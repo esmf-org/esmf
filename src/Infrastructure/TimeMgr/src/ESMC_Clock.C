@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.89 2008/06/12 18:08:23 rosalind Exp $
+// $Id: ESMC_Clock.C,v 1.90 2008/06/24 14:23:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -15,11 +15,11 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ {\tt ESMC\_Clock} methods declared
-// in the companion file {\tt ESMC\_Clock.h}
+// in the companion file {\tt ESMCI\_Clock.h}
 //
 //-------------------------------------------------------------------------
 //
- #define ESMC_FILENAME "ESMC_Clock.C"
+ #define ESMC_FILENAME "ESMCI_Clock.C"
 
  // higher level, 3rd party or system includes here
  #include <stdio.h>
@@ -30,19 +30,19 @@
  #include <ESMCI_Alarm.h>
 
  // associated class definition file
- #include <ESMC_Clock.h>
+ #include <ESMCI_Clock.h>
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.89 2008/06/12 18:08:23 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.90 2008/06/24 14:23:55 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
 
 // initialize static clock instance counter
 // TODO: inherit from ESMC_Base class
-int ESMC_Clock::count=0;
+int ESMCI::Clock::count=0;
 
 //
 //-------------------------------------------------------------------------
@@ -54,13 +54,13 @@ int ESMC_Clock::count=0;
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockCreate - Allocates and Initializes a Clock object
+// !IROUTINE:  ESMCI_ClockCreate - Allocates and Initializes a Clock object
 //
 // !INTERFACE:
-      ESMC_Clock *ESMC_ClockCreate(
+      ESMCI::Clock *ESMCI_ClockCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Clock
+//     pointer to newly allocated Clock
 //
 // !ARGUMENTS:
       int                nameLen,          // in
@@ -80,17 +80,17 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockCreate(new)"
+ #define ESMC_METHOD "ESMCI_ClockCreate(new)"
 
     int returnCode;
-    ESMC_Clock *clock;
+    ESMCI::Clock *clock;
 
     // default return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
 
     // allocate a clock object & set defaults via constructor
     try {
-      clock = new ESMC_Clock;
+      clock = new Clock;
     }
     catch (...) {
       ESMC_LogDefault.ESMC_LogAllocError(rc);
@@ -161,24 +161,24 @@ int ESMC_Clock::count=0;
     ESMCI::TimeInterval oneNanosecond(0, 1, 1000000000);
     clock->prevTime = clock->currTime - oneNanosecond;
 
-    returnCode = clock->ESMC_ClockValidate();
+    returnCode = clock->validate();
     ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
     return(clock);
 
- } // end ESMC_ClockCreate (new)
+ } // end ESMCI_ClockCreate (new)
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockCreate - Creates a copy of a clock
+// !IROUTINE:  ESMCI_ClockCreate - Creates a copy of a clock
 //
 // !INTERFACE:
-      ESMC_Clock *ESMC_ClockCreate(
+      ESMCI::Clock *ESMCI_ClockCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Clock
+//     pointer to newly allocated Clock
 //
 // !ARGUMENTS:
-      ESMC_Clock *clock,  // in  - clock to copy
+      ESMCI::Clock *clock,  // in  - clock to copy
       int        *rc) {   // out - return code
 
 // !DESCRIPTION:
@@ -188,10 +188,10 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockCreate(copy)"
+ #define ESMC_METHOD "ESMCI_ClockCreate(copy)"
 
     int returnCode;
-    ESMC_Clock *clockCopy;
+    ESMCI::Clock *clockCopy;
 
     // default return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
@@ -205,53 +205,53 @@ int ESMC_Clock::count=0;
 
     try {
       // allocate new clock and pass given clock to copy constructor.
-      clockCopy = new ESMC_Clock(*clock);
+      clockCopy = new ESMCI::Clock(*clock);
     }
     catch (...) {
       ESMC_LogDefault.ESMC_LogAllocError(rc);
       return(ESMC_NULL_POINTER);
     }
 
-    returnCode = clockCopy->ESMC_ClockValidate();
+    returnCode = clockCopy->validate();
     ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
 
     return(clockCopy);
 
- } // end ESMC_ClockCreate (copy)
+ } // end ESMCI_ClockCreate (copy)
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockDestroy - free a Clock created with Create
+// !IROUTINE:  ESMCI_ClockDestroy - free a Clock created with Create
 //
 // !INTERFACE:
-      int ESMC_ClockDestroy(
+      int ESMCI_ClockDestroy(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Clock **clock) {  // in - ESMC_Clock to destroy
+      ESMCI::Clock **clock) {  // in - Clock to destroy
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Clock object previously allocated
-//      via an {\tt ESMC\_ClockCreate} routine.  Define for deep classes only.
+//      via an {\tt ESMCI\_ClockCreate} routine.  Define for deep classes only.
 //
 //EOP
 
-   // TODO: clock->ESMC_ClockDestruct(); constructor calls it!
+   // TODO: clock->destruct(); constructor calls it!
    delete *clock; // ok to delete null pointer
 
    *clock = ESMC_NULL_POINTER;
    return(ESMF_SUCCESS);
 
- } // end ESMC_ClockDestroy
+ } // end ESMCI_ClockDestroy
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockSet - Sets a Clock object's properties
+// !IROUTINE:  ESMCI::Clock::set - Sets a Clock object's properties
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockSet(
+      int ESMCI::Clock::set(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -276,7 +276,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockSet()"
+ #define ESMC_METHOD "ESMCI::Clock::set()"
 
     int rc = ESMF_SUCCESS;
 
@@ -287,7 +287,7 @@ int ESMC_Clock::count=0;
     }
 
     // save current values to restore in case of failure;
-    ESMC_Clock saveClock = *this;
+    ESMCI::Clock saveClock = *this;
 
     // TODO: use inherited methods from ESMC_Base
     if (name != ESMC_NULL_POINTER) {
@@ -347,7 +347,7 @@ int ESMC_Clock::count=0;
 
     if (direction != ESMC_NULL_POINTER) this->direction = *direction;
 
-    rc = ESMC_ClockValidate();
+    rc = ESMCI::Clock::validate();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc)) {
       // restore original clock values
       *this = saveClock;
@@ -355,14 +355,14 @@ int ESMC_Clock::count=0;
 
     return(rc);
 
- } // end ESMC_ClockSet
+ } // end ESMCI::Clock::set
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockGet - gets a Clock object's properties
+// !IROUTINE:  ESMCI::Clock::get - gets a Clock object's properties
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockGet(
+      int ESMCI::Clock::get(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -395,7 +395,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockGet()"
+ #define ESMC_METHOD "ESMCI::Clock::get()"
 
     int rc = ESMF_SUCCESS;
 
@@ -508,14 +508,14 @@ int ESMC_Clock::count=0;
 
     return(rc);
 
- } // end ESMC_ClockGet
+ } // end ESMCI::Clock::get
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockAdvance - increment a clock's time
+// !IROUTINE:  ESMCI::Clock::advance - increment a clock's time
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockAdvance(
+      int ESMCI::Clock::advance(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -541,7 +541,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  TMG 3.4.1
  
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockAdvance()"
+ #define ESMC_METHOD "ESMCI_Clock::advance()"
 
     int rc = ESMF_SUCCESS;
 
@@ -572,8 +572,8 @@ int ESMC_Clock::count=0;
       //        the prevTime state variable in order to step back; the
       //        currTime state variable must be reconstructed from timeStep.
       //        advanceCount represents the number of actual calls to
-      //        ClockAdvance(), so if a clock is jumped forward via a
-      //        ClockSet() and then reversed, the advanceCount does not
+      //        Clock::advance(), so if a clock is jumped forward via a
+      //        Clock::set() and then reversed, the advanceCount does not
       //        account for the "missing" timeSteps.
 
       // step backwards; use passed-in timestep if specified, otherwise
@@ -602,7 +602,7 @@ int ESMC_Clock::count=0;
     // TODO:  calculate once during ESMF_FrameworkInitialize() (runtime),
     //        since this is a platform constant. compile-time constant ?
     //        put into src/prologue directory.
-    // see also ESMC_ClockGetAlarmList().
+    // see also ESMCI::Clock::getAlarmList().
 
     int f90ArrayElementSize = 0; 
     if (ringingAlarmList1stElementPtr != ESMC_NULL_POINTER &&
@@ -651,14 +651,14 @@ int ESMC_Clock::count=0;
 
     return(rc);
 
- } // end ESMC_ClockAdvance
+ } // end ESMCI::Clock::advance
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockIsStopTime - check if Clock's stop time has been reached
+// !IROUTINE:  ESMCI::Clock::isStopTime - check if Clock's stop time has been reached
 //
 // !INTERFACE:
-      bool ESMC_Clock::ESMC_ClockIsStopTime(
+      bool ESMCI::Clock::isStopTime(
 //
 // !RETURN VALUE:
 //    bool is stop time or not
@@ -667,13 +667,13 @@ int ESMC_Clock::count=0;
       int  *rc) const {        // out - error return code
 //
 // !DESCRIPTION:
-//    checks if {\tt ESMC\_Clock}'s stop time has been reached.
+//    checks if {\tt ESMCI::Clock}'s stop time has been reached.
 //
 //EOP
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockIsStopTime()"
+ #define ESMC_METHOD "ESMCI::Clock::isStopTime()"
 
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
@@ -696,14 +696,14 @@ int ESMC_Clock::count=0;
     // or no time step? (stopTime == startTime)
     } else return(currTime == stopTime);
 
- } // end ESMC_ClockIsStopTime
+ } // end ESMCI::Clock::isStopTime
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockStopTimeEnable - enables a Clock's stopTime to function
+// !IROUTINE:  ESMCI::Clock::stopTimeEnable - enables a Clock's stopTime to function
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockStopTimeEnable(
+      int ESMCI::Clock::stopTimeEnable(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -718,7 +718,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  WRF
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockStopTimeEnable()"
+ #define ESMC_METHOD "ESMCI::Clock::stopTimeEnable()"
 
     int rc = ESMF_SUCCESS;
 
@@ -736,14 +736,14 @@ int ESMC_Clock::count=0;
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_ClockStopTimeEnable
+ } // end ESMCI::Clock::stopTimeEnable
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockStopTimeDisable - disables a Clock's stopTime from functioning
+// !IROUTINE:  ESMCI::Clock::stopTimeDisable - disables a Clock's stopTime from functioning
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockStopTimeDisable(void) {
+      int ESMCI::Clock::stopTimeDisable(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -759,7 +759,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  WRF
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockStopTimeDisable()"
+ #define ESMC_METHOD "ESMCI::Clock::stopTimeDisable()"
 
     int rc = ESMF_SUCCESS;
 
@@ -773,14 +773,14 @@ int ESMC_Clock::count=0;
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_ClockStopTimeDisable
+ } // end ESMCI::Clock::stopTimeDisable
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockIsStopTimeEnabled - check if Clock's stop time is enabled
+// !IROUTINE:  ESMCI::Clock::isStopTimeEnabled - check if Clock's stop time is enabled
 //
 // !INTERFACE:
-      bool ESMC_Clock::ESMC_ClockIsStopTimeEnabled(
+      bool ESMCI::Clock::isStopTimeEnabled(
 //
 // !RETURN VALUE:
 //    bool is stop time enabled or not
@@ -789,13 +789,13 @@ int ESMC_Clock::count=0;
       int  *rc) const {        // out - error return code
 //
 // !DESCRIPTION:
-//    checks if {\tt ESMC\_Clock}'s stop time is enabled.
+//    checks if {\tt ESMCI\_Clock}'s stop time is enabled.
 //
 //EOP
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockIsStopTimeEnabled()"
+ #define ESMC_METHOD "ESMCI::Clock::isStopTimeEnabled()"
 
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
@@ -807,14 +807,14 @@ int ESMC_Clock::count=0;
 
     return(stopTimeEnabled);
 
- } // end ESMC_ClockIsStopTimeEnabled
+ } // end ESMC_Clock::isStopTimeEnabled
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockIsDone - check if Clock's stop time or start time has been reached, depending on direction
+// !IROUTINE:  ESMCI::Clock::isDone - check if Clock's stop time or start time has been reached, depending on direction
 //
 // !INTERFACE:
-      bool ESMC_Clock::ESMC_ClockIsDone(
+      bool ESMCI::Clock::isDone(
 //
 // !RETURN VALUE:
 //    bool is done or not
@@ -831,7 +831,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockIsDone()"
+ #define ESMC_METHOD "ESMCI::Clock::isDone()"
 
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
@@ -875,14 +875,14 @@ int ESMC_Clock::count=0;
 
     }
 
- } // end ESMC_ClockIsDone
+ } // end ESMC_Clock::isDone
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockIsReverse - test if clock is in reverse mode
+// !IROUTINE:  ESMC_Clock::isReverse - test if clock is in reverse mode
 //
 // !INTERFACE:
-      bool ESMC_Clock::ESMC_ClockIsReverse(
+      bool ESMCI::Clock::isReverse(
 //
 // !RETURN VALUE:
 //    bool is reverse mode or not
@@ -897,7 +897,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockIsReverse()"
+ #define ESMC_METHOD "ESMC_Clock::isReverse()"
 
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
@@ -909,14 +909,14 @@ int ESMC_Clock::count=0;
 
     return(direction == ESMF_MODE_REVERSE);
 
- } // end ESMC_ClockIsReverse
+ } // end ESMC_Clock::isReverse
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockGetNextTime - calculates a Clock's next time 
+// !IROUTINE:  ESMC_Clock::getNextTime - calculates a Clock's next time 
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockGetNextTime(
+      int ESMCI::Clock::getNextTime(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -934,7 +934,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockGetNextTime()"
+ #define ESMC_METHOD "ESMC_Clock::getNextTime()"
 
     int rc = ESMF_SUCCESS;
 
@@ -954,14 +954,14 @@ int ESMC_Clock::count=0;
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_ClockGetNextTime
+ } // end ESMC_Clock::getNextTime
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockGetAlarm - get alarm from clock's alarm list
+// !IROUTINE:  ESMC_Clock::getAlarm - get alarm from clock's alarm list
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockGetAlarm(
+      int ESMCI::Clock::getAlarm(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -978,7 +978,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  TMG x.x
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockGetAlarm()"
+ #define ESMC_METHOD "ESMC_Clock::getAlarm()"
 
     int rc = ESMF_SUCCESS;
 
@@ -1014,14 +1014,14 @@ int ESMC_Clock::count=0;
     *alarm = ESMC_NULL_POINTER;
     return(ESMF_FAILURE);
 
- } // end ESMC_ClockGetAlarm
+ } // end ESMC_Clock::getAlarm
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockGetAlarmList - Get a list of alarms from a clock
+// !IROUTINE:  ESMC_Clock::getAlarmList - Get a list of alarms from a clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockGetAlarmList(
+      int ESMCI::Clock::getAlarmList(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1049,7 +1049,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  TMG 4.3, 4.8
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockGetAlarmList()"
+ #define ESMC_METHOD "ESMC_Clock::getAlarmList()"
 
     int rc = ESMF_SUCCESS;
 
@@ -1068,7 +1068,7 @@ int ESMC_Clock::count=0;
     // address order.
     // TODO:  calculate once during ESMF_FrameworkInitialize() (runtime),
     //        since this is a platform constant. compile-time constant ?
-    // see also ESMC_ClockAdvance().
+    // see also ESMCI::Clock::advance().
 
     int f90ArrayElementSize = 0; 
     if (alarmList2ndElementPtr != ESMC_NULL_POINTER) {
@@ -1144,7 +1144,7 @@ int ESMC_Clock::count=0;
     }
     return(rc);
 
- } // end ESMC_ClockGetAlarmList
+ } // end ESMC_Clock::getAlarmList
 
 #if 0
 //
@@ -1152,10 +1152,10 @@ int ESMC_Clock::count=0;
 //
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockGetAlarmList - get a clock's alarm list
+// !IROUTINE:  ESMC_Clock::getAlarmList - get a clock's alarm list
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockGetAlarmList(
+      int ESMCI::Clock::getAlarmList(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1185,14 +1185,14 @@ int ESMC_Clock::count=0;
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_ClockGetAlarmList
+ } // end ESMC_Clock::getAlarmList
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockGetRingingAlarm - get ringing alarm from clock's alarm list
+// !IROUTINE:  ESMC_Clock::getRingingAlarm - get ringing alarm from clock's alarm list
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockGetRingingAlarm(
+      int ESMCI::Clock::getRingingAlarm(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1222,14 +1222,14 @@ int ESMC_Clock::count=0;
 
     return(ESMF_FAILURE);
 
- } // end ESMC_ClockGetRingingAlarm
+ } // end ESMC_Clock::getRingingAlarm
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockGetAlarmList - get a clock's alarm list
+// !IROUTINE:  ESMC_Clock::getAlarmList - get a clock's alarm list
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockGetAlarmList(
+      int ESMCI::Clock::getAlarmList(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1259,15 +1259,15 @@ int ESMC_Clock::count=0;
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_ClockGetAlarmList
+ } // end ESMC_Clock::getAlarmList
 #endif
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockSyncToRealTime - synchronize a clock to the wall clock time
+// !IROUTINE:  ESMCI::Clock::syncToRealTime - synchronize a clock to the wall clock time
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockSyncToRealTime(void) {
+      int ESMCI::Clock::syncToRealTime(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1282,7 +1282,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  TMG 3.4.5
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockSyncToRealTime()"
+ #define ESMC_METHOD "ESMCI::Clock::syncToRealTime()"
 
     int rc = ESMF_SUCCESS;
 
@@ -1297,22 +1297,22 @@ int ESMC_Clock::count=0;
     rc = currTime.ESMCI::Time::syncToRealTime();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
-    return(ESMC_ClockValidate());
+    return(ESMCI::Clock::validate());
 
- } // end ESMC_ClockSyncToRealTime
+ } // end ESMCI::Clock::syncToRealTime
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Clock(=) - assignment operator
+// !IROUTINE:  ESMCI::Clock(=) - assignment operator
 //
 // !INTERFACE:
-      ESMC_Clock& ESMC_Clock::operator=(
+      ESMCI::Clock& ESMCI::Clock::operator=(
 //
 // !RETURN VALUE:
-//    ESMC_Clock& result
+//    ESMCI::Clock& result
 //
 // !ARGUMENTS:
-      const ESMC_Clock &clock) {   // in - ESMC_Clock to copy
+      const ESMCI::Clock &clock) {   // in - ESMC_Clock to copy
 //
 // !DESCRIPTION:
 //      Assign current object's (this) {\tt ESMC\_Clock} with given
@@ -1371,13 +1371,13 @@ int ESMC_Clock::count=0;
 // !IROUTINE:  ESMC_Clock(==) - Clock equality comparison
 // 
 // !INTERFACE:
-      bool ESMC_Clock::operator==(
+      bool ESMCI::Clock::operator==(
 //   
 // !RETURN VALUE:
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_Clock &clock) const {   // in - ESMC_Clock to compare
+      const ESMCI::Clock &clock) const {   // in - ESMC_Clock to compare
 //
 // !DESCRIPTION:
 //      Compare for equality the current object's (this) {\tt ESMC\_Clock} with
@@ -1404,13 +1404,13 @@ int ESMC_Clock::count=0;
 // !IROUTINE:  ESMC_Clock(!=) - Clock inequality comparison
 // 
 // !INTERFACE:
-      bool ESMC_Clock::operator!=(
+      bool ESMCI::Clock::operator!=(
 //   
 // !RETURN VALUE:
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_Clock &clock) const {   // in - ESMC_Clock to compare
+      const ESMCI::Clock &clock) const {   // in - ESMC_Clock to compare
 //
 // !DESCRIPTION:
 //      Compare for inequality the current object's (this)
@@ -1435,10 +1435,10 @@ int ESMC_Clock::count=0;
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockReadRestart - restore contents of a Clock
+// !IROUTINE:  ESMCI_ClockReadRestart - restore contents of a Clock
 //
 // !INTERFACE:
-      ESMC_Clock *ESMC_ClockReadRestart(
+      ESMCI::Clock *ESMCI_ClockReadRestart(
 //
 // !RETURN VALUE:
 //    pointer to newly allocated and restored ESMC_Clock
@@ -1458,21 +1458,24 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockReadRestart()"
+ #define ESMC_METHOD "ESMCI_ClockReadRestart()"
+
+    // Initialize return code
+    if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
 
     // TODO:  read clock state from iospec/name, then allocate/restore
-    //        (share code with ESMC_ClockCreate()).
+    //        (share code with ESMCI_ClockCreate()).
 
     return(ESMC_NULL_POINTER);
 
- } // end ESMC_ClockReadRestart
+ } // end ESMCI_ClockReadRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockWriteRestart - save contents of a Clock
+// !IROUTINE:  ESMCI::Clock::writeRestart - save contents of a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockWriteRestart(
+      int ESMCI::Clock::writeRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1488,7 +1491,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockWriteRestart()"
+ #define ESMC_METHOD "ESMCI::Clock::writeRestart()"
 
     int rc = ESMF_SUCCESS;
 
@@ -1502,14 +1505,14 @@ int ESMC_Clock::count=0;
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_ClockWriteRestart
+ } // end ESMCI::Clock::writeRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockValidate - internal consistency check for a Clock
+// !IROUTINE:  ESMCI::Clock::validate - internal consistency check for a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockValidate(
+      int ESMCI::Clock::validate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1526,7 +1529,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockValidate()"
+ #define ESMC_METHOD "ESMCI::Clock::validate()"
 
     int rc = ESMF_SUCCESS;
 
@@ -1671,14 +1674,14 @@ int ESMC_Clock::count=0;
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_ClockValidate
+ } // end ESMCI::Clock::validate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockPrint - print contents of a Clock
+// !IROUTINE:  ESMCI::Clock::print - print contents of a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockPrint(
+      int ESMCI::Clock::print(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1693,7 +1696,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockPrint()"
+ #define ESMC_METHOD "ESMCI::Clock::print()"
 
     int rc = ESMF_SUCCESS;
 
@@ -1815,14 +1818,14 @@ int ESMC_Clock::count=0;
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_ClockPrint
+ } // end ESMCI::Clock::print
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Clock - native C++ constructor
+// !IROUTINE:  ESMCI::Clock - native C++ constructor
 //
 // !INTERFACE:
-      ESMC_Clock::ESMC_Clock(void) {
+      ESMCI::Clock::Clock(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -1838,7 +1841,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_Clock::ESMC_Clock() native constructor"
+ #define ESMC_METHOD "ESMCI::Clock() native constructor"
 
     // allocate the clock's alarm list (array of pointers)
     try {
@@ -1862,16 +1865,16 @@ int ESMC_Clock::count=0;
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Clock - native C++ copy constructor
+// !IROUTINE:  ESMCI::Clock - native C++ copy constructor
 //
 // !INTERFACE:
-      ESMC_Clock::ESMC_Clock(
+      ESMCI::Clock::Clock(
 //
 // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
-      const ESMC_Clock &clock) {  // in - clock to copy
+      const ESMCI::Clock &clock) {  // in - clock to copy
 //
 // !DESCRIPTION:
 //      Copies members of given clock.
@@ -1880,7 +1883,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_Clock::ESMC_Clock() copy constructor"
+ #define ESMC_METHOD "ESMCI::Clock() copy constructor"
 
     // allocate the new clock's own alarm list (array of pointers)
     try {
@@ -1905,10 +1908,10 @@ int ESMC_Clock::count=0;
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ~ESMC_Clock - native C++ destructor
+// !IROUTINE:  ESMCI::~Clock - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_Clock::~ESMC_Clock(void) {
+      ESMCI::Clock::~Clock(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -1937,10 +1940,10 @@ int ESMC_Clock::count=0;
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockAddAlarm - add alarm to clock's alarm list
+// !IROUTINE:  ESMC_ClockaddAlarm - add alarm to clock's alarm list
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockAddAlarm(
+      int ESMCI::Clock::addAlarm(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1956,7 +1959,7 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  TMG 4.1, 4.2
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockAddAlarm()"
+ #define ESMC_METHOD "ESMCI::Clock::addAlarm()"
 
     int rc = ESMF_SUCCESS;
 
@@ -2013,6 +2016,6 @@ int ESMC_Clock::count=0;
 
     return(rc);
 
- } // end ESMC_ClockAddAlarm
+ } // end ESMCI::Clock::addAlarm
 
 }  // namespace ESMCI

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.C,v 1.1 2008/06/12 18:08:22 rosalind Exp $
+// $Id: ESMCI_Alarm.C,v 1.2 2008/06/24 14:23:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 
  #include <ESMC_LogErr.h>
  #include <ESMF_LogMacros.inc>
- #include "ESMC_Clock.h"
+ #include "ESMCI_Clock.h"
 
  // associated class definition file
  #include <ESMCI_Alarm.h>
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Alarm.C,v 1.1 2008/06/12 18:08:22 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_Alarm.C,v 1.2 2008/06/24 14:23:55 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -66,7 +66,7 @@ int ESMCI::Alarm::count=0;
 // !ARGUMENTS:
       int                nameLen,           // in
       const char        *name,              // in
-      ESMC_Clock        *clock,             // in
+      ESMCI::Clock        *clock,             // in
       ESMCI::Time         *ringTime,          // in
       ESMCI::TimeInterval *ringInterval,      // in
       ESMCI::Time         *stopTime,          // in
@@ -188,7 +188,7 @@ int ESMCI::Alarm::count=0;
 
     // add this new valid alarm to the given clock
     if (returnCode == ESMF_SUCCESS) {
-      returnCode = clock->ESMC_ClockAddAlarm(alarm);
+      returnCode = clock->ESMCI::Clock::addAlarm(alarm);
       ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
     }
 
@@ -291,7 +291,7 @@ int ESMCI::Alarm::count=0;
 // !ARGUMENTS:
       int                nameLen,           // in
       const char        *name,              // in
-      ESMC_Clock       **clock,             // in
+      ESMCI::Clock       **clock,             // in
       ESMCI::Time         *ringTime,          // in
       ESMCI::TimeInterval *ringInterval,      // in
       ESMCI::Time         *stopTime,          // in
@@ -407,7 +407,7 @@ int ESMCI::Alarm::count=0;
       int                nameLen,                // in
       int               *tempNameLen,            // out
       char              *tempName,               // out
-      ESMC_Clock       **clock,                  // out
+      ESMCI::Clock       **clock,                  // out
       ESMCI::Time         *ringTime,               // out
       ESMCI::Time         *prevRingTime,           // out
       ESMCI::TimeInterval *ringInterval,           // out
@@ -831,7 +831,7 @@ int ESMCI::Alarm::count=0;
 
     // get clock's next time
     ESMCI::Time clockNextTime;
-    clock->ESMC_ClockGetNextTime(&clockNextTime, timeStep);
+    clock->ESMCI::Clock::getNextTime(&clockNextTime, timeStep);
 
     // if specified, use passed-in timestep, otherwise use clock's
     ESMCI::TimeInterval tStep = (timeStep != ESMC_NULL_POINTER) ?
@@ -1504,9 +1504,9 @@ int ESMCI::Alarm::count=0;
       else if (strncmp(opts, "clock", 5) == 0) {
         printf("clock = \n");
         if (strstr(opts, "name") != ESMC_NULL_POINTER) {
-          clock->ESMC_ClockPrint("name");
+          clock->ESMCI::Clock::print("name");
         } else {
-          clock->ESMC_ClockPrint();
+          clock->ESMCI::Clock::print();
         }
       }
       else if (strncmp(opts, "ringinterval", 12) == 0) {

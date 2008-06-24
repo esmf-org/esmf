@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockEx.C,v 1.26 2008/06/11 21:14:55 rosalind Exp $
+// $Id: ESMC_ClockEx.C,v 1.27 2008/06/24 14:23:54 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -23,12 +23,12 @@
 #include <ESMCI.h>
 
 // associated class definition file
-#include <ESMC_Clock.h>
+#include "ESMC_Clock.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockEx.C,v 1.26 2008/06/11 21:14:55 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_ClockEx.C,v 1.27 2008/06/24 14:23:54 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -69,7 +69,7 @@
    // initialize start time to 3/27/2003
    int yy = 2003;
    int mm = 3, dd = 27;
-   rc = startTime.ESMCI::Time*Set(&yy, 0, &mm, &dd, 0, 0, 0, 0, 0, 0, 0, 0, 
+   rc = startTime.ESMCI::Time::set(&yy, 0, &mm, &dd, 0, 0, 0, 0, 0, 0, 0, 0, 
                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                &gregorianCalendar);
 
@@ -80,7 +80,7 @@
 
    // initialize stop time to 3/29/2003
    yy = 2003; mm = 3; dd = 29;
-   rc = stopTime.ESMCI::Time*Set(&yy, 0, &mm, &dd, 0, 0, 0, 0, 0, 0, 0, 0, 
+   rc = stopTime.ESMCI::Time::set(&yy, 0, &mm, &dd, 0, 0, 0, 0, 0, 0, 0, 0, 
                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                               &gregorianCalendar);
 

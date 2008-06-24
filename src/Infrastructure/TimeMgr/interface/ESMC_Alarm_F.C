@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.35 2008/06/12 18:08:21 rosalind Exp $
+// $Id: ESMC_Alarm_F.C,v 1.36 2008/06/24 14:23:54 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@ namespace ESMCI{
 extern "C" {
 
        void FTN(c_esmc_alarmcreatenew)(ESMCI::Alarm **ptr, int *nameLen, 
-                const char *name, ESMC_Clock **clock,
+                const char *name, ESMCI::Clock **clock,
                 ESMCI::Time *ringTime, ESMCI::TimeInterval *ringInterval,
                 ESMCI::Time *stopTime, ESMCI::TimeInterval *ringDuration, 
                 int *ringTimeStepCount, ESMCI::Time *refTime,
@@ -72,7 +72,7 @@ extern "C" {
        }
 
        void FTN(c_esmc_alarmset)(ESMCI::Alarm **ptr, int *nameLen, 
-                                 const char *name, ESMC_Clock **clock,
+                                 const char *name, ESMCI::Clock **clock,
                 ESMCI::Time *ringTime, ESMCI::TimeInterval *ringInterval,
                 ESMCI::Time *stopTime, ESMCI::TimeInterval *ringDuration, 
                 int *ringTimeStepCount, ESMCI::Time *refTime,
@@ -98,7 +98,7 @@ extern "C" {
 
        void FTN(c_esmc_alarmget)(ESMCI::Alarm **ptr, int *nameLen, 
                                  int *tempNameLen, char *tempName,
-                                 ESMC_Clock **clock,
+                                 ESMCI::Clock **clock,
                 ESMCI::Time *ringTime, ESMCI::Time *prevRingTime, 
                 ESMCI::TimeInterval *ringInterval, ESMCI::Time *stopTime,
                 ESMCI::TimeInterval *ringDuration, int *ringTimeStepCount,
