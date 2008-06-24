@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.8 2008/06/10 19:55:07 feiliu Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.9 2008/06/24 18:43:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.8 2008/06/10 19:55:07 feiliu Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.9 2008/06/24 18:43:56 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -127,7 +127,6 @@ contains
         integer                 :: localrc      ! local return code
         
         ! local variables to buffer optional arguments
-        logical                 :: l_checkflag! helper variable
         type(ESMF_Array)        :: l_srcArray ! helper variable
         type(ESMF_Array)        :: l_dstArray ! helper variable
 
@@ -137,9 +136,10 @@ contains
 
         ! Check init status of arguments, deal with optional Field args
         ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc)
 
         if (present(srcField)) then
-          ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc)
           call ESMF_FieldGet(srcField, array=l_srcArray, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -150,7 +150,6 @@ contains
         endif
 
         if (present(dstField)) then
-          ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc)
           call ESMF_FieldGet(dstField, array=l_dstArray, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -160,13 +159,9 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
         
-        ! Set default flags
-        l_checkflag = ESMF_FALSE
-        if (present(checkflag)) l_checkflag = checkflag
-            
         ! perform Field redist through internal array
         call ESMF_ArrayRedist(l_srcArray, l_dstArray, routehandle, &
-          l_checkflag, localrc)
+          checkflag, localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         

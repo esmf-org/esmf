@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.5 2008/06/10 19:55:07 feiliu Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.6 2008/06/24 18:43:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.5 2008/06/10 19:55:07 feiliu Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.6 2008/06/24 18:43:56 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -139,8 +139,6 @@ contains
         integer                 :: localrc      ! local return code
         
         ! local variables to buffer optional arguments
-        type(ESMF_RegionFlag)   :: l_zeroflag
-        logical                 :: l_checkflag! helper variable
         type(ESMF_Array)        :: l_srcArray ! helper variable
         type(ESMF_Array)        :: l_dstArray ! helper variable
 
@@ -150,9 +148,10 @@ contains
 
         ! Check init status of arguments, deal with optional Field args
         ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc)
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc)
 
         if (present(srcField)) then
-          ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc)
           call ESMF_FieldGet(srcField, array=l_srcArray, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -163,7 +162,6 @@ contains
         endif
 
         if (present(dstField)) then
-          ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc)
           call ESMF_FieldGet(dstField, array=l_dstArray, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -173,15 +171,9 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
         
-        ! Set default flags
-        l_checkflag = ESMF_FALSE
-        if (present(checkflag)) l_checkflag = checkflag
-        l_zeroflag = ESMF_REGION_TOTAL
-        if (present(zeroflag)) l_zeroflag = zeroflag
-            
         ! perform Field sparse matrix multiplication through internal array
         call ESMF_ArraySMM(l_srcArray, l_dstArray, routehandle, &
-          l_zeroflag, l_checkflag, localrc)
+          zeroflag, checkflag, localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         

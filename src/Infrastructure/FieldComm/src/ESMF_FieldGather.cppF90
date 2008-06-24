@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather.cppF90,v 1.6 2008/06/13 18:27:38 feiliu Exp $
+! $Id: ESMF_FieldGather.cppF90,v 1.7 2008/06/24 18:43:55 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGather.cppF90,v 1.6 2008/06/13 18:27:38 feiliu Exp $'
+      '$Id: ESMF_FieldGather.cppF90,v 1.7 2008/06/24 18:43:55 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldGather
@@ -72,7 +72,7 @@ contains
 ! !IROUTINE: ESMF_FieldGather - Gather a Fortran90 array from an ESMF_Field @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_FieldGather<rank><type><kind>(array, farray, patch, & @\
+! subroutine ESMF_FieldGather<rank><type><kind>(field, farray, patch, & @\
 !   rootPet, vm, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -105,13 +105,13 @@ contains
 ! @\
 !   The arguments are: @\
 !   \begin{description} @\
-!   \item[array] @\
+!   \item[field] @\
 !     The {\tt ESMF\_Field} object from which data will be gathered. @\
 !   \item[{[farray]}] @\
 !     The Fortran90 array into which to gather data. Only root @\
 !     must provide a valid {\tt farray}. @\
 !   \item[{[patch]}] @\
-!     The DistGrid patch in {\tt array} from which to gather {\tt farray}. @\
+!     The DistGrid patch in {\tt field} from which to gather {\tt farray}. @\
 !     By default {\tt farray} will be gathered from patch 1. @\
 !   \item[rootPet] @\
 !     PET that holds the valid destination array, i.e. {\tt farray}. @\

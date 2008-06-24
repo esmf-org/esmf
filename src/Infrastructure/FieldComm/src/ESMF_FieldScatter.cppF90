@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldScatter.cppF90,v 1.5 2008/06/13 18:30:36 feiliu Exp $
+! $Id: ESMF_FieldScatter.cppF90,v 1.6 2008/06/24 18:43:57 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldScatter.cppF90,v 1.5 2008/06/13 18:30:36 feiliu Exp $'
+      '$Id: ESMF_FieldScatter.cppF90,v 1.6 2008/06/24 18:43:57 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldScatter
@@ -72,7 +72,7 @@ contains
 ! !IROUTINE: ESMF_FieldScatter - Scatter a Fortran90 array across the ESMF_Field @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_FieldScatter<rank><type><kind>(array, farray, patch, & @\
+! subroutine ESMF_FieldScatter<rank><type><kind>(field, farray, patch, & @\
 !   rootPet, vm, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -104,13 +104,13 @@ contains
 ! @\
 !   The arguments are: @\
 !   \begin{description} @\
-!   \item[array] @\
+!   \item[field] @\
 !     The {\tt ESMF\_Field} object across which data will be scattered. @\
 !   \item[{[farray]}] @\
 !     The Fortran90 array that is to be scattered. Only root @\
 !     must provide a valid {\tt farray}. @\
 !   \item[{[patch]}] @\
-!     The DistGrid patch in {\tt array} into which to scatter {\tt farray}. @\
+!     The DistGrid patch in {\tt field} into which to scatter {\tt farray}. @\
 !     By default {\tt farray} will be scattered into patch 1. @\
 !   \item[rootPet] @\
 !     PET that holds the valid data in {\tt farray}. @\
