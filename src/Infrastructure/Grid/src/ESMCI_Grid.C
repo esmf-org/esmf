@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.67 2008/05/06 21:42:13 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.68 2008/06/24 18:07:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.67 2008/05/06 21:42:13 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.68 2008/06/24 18:07:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -3267,12 +3267,11 @@ int Grid::serialize(
 
     // Don't do isDEBnds because a proxy object isn't on a valid DE
 
-    // Serialize the Array exists array
-    SERIALIZE_VAR2D(cp, buffer,loffset,arrayExists,staggerLocCount,dimCount,bool);
-
     // make sure loffset is aligned correctly
     r=loffset%8;
     if (r!=0) loffset += 8-r;
+    // Serialize the Array exists array
+    SERIALIZE_VAR2D(cp, buffer,loffset,arrayExists,staggerLocCount,dimCount,bool);
 
     // Serialize the Coord Arrays 
     for (int s=0; s<staggerLocCount; s++) {
@@ -3286,6 +3285,9 @@ int Grid::serialize(
       }
     }
 
+    // make sure loffset is aligned correctly
+    r=loffset%8;
+    if (r!=0) loffset += 8-r;
     // Serialize the DistGrid
     localrc = distgrid->serialize(buffer, length, &loffset);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
@@ -3298,7 +3300,7 @@ int Grid::serialize(
     // Check if buffer has enough free memory to hold object
     if (*length < loffset){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                      "Buffer too short to add an Grid object", &rc);
+                      "Buffer too short to add a Grid object", &rc);
       return rc;
     }
 
@@ -3395,12 +3397,6 @@ int Grid::deserialize(
   // Don't deserialize, but set 
   destroyDistgrid=true;  // distgrid is Grid's after deserialize
   destroyDELayout=false; // delayot belongs to DistGrid
-  
-  DESERIALIZE_VAR( buffer,loffset,indexflag,ESMC_IndexFlag);
-
-  // Don't deserialize, but set 
-  destroyDistgrid=true;  // distgrid is Grid's after deserialize
-  destroyDELayout=false; // delayot belongs to DistGrid
 
   DESERIALIZE_VAR( buffer,loffset,distDimCount,int);    
   
@@ -3437,12 +3433,11 @@ int Grid::deserialize(
   isDELBnd=ESMC_NULL_POINTER;
   isDEUBnd=ESMC_NULL_POINTER;
     
-  // Deserialize the Array exists array
-  DESERIALIZE_VAR2D( buffer,loffset,arrayExists,staggerLocCount,dimCount,bool);
-  
   // make sure loffset is aligned correctly
   r=loffset%8;
   if (r!=0) loffset += 8-r;
+  // Deserialize the Array exists array
+  DESERIALIZE_VAR2D( buffer,loffset,arrayExists,staggerLocCount,dimCount,bool);
   
   // Deserialize the Coord Arrays 
   coordArrayList=_allocate2D<Array *>(staggerLocCount,dimCount);
@@ -3467,12 +3462,16 @@ int Grid::deserialize(
     }
   }
       
+  // make sure loffset is aligned correctly
+  r=loffset%8;
+  if (r!=0) loffset += 8-r;
+  
   // Deserialize the DistGrid
   distgrid = DistGrid::deserialize(buffer, &loffset);
 
-    // make sure loffset is aligned correctly
-    r=loffset%8;
-    if (r!=0) loffset += 8-r;
+  // make sure loffset is aligned correctly
+  r=loffset%8;
+  if (r!=0) loffset += 8-r;
 
   // free arrayExists
   _free2D<bool>(&arrayExists);
