@@ -1,4 +1,4 @@
-% $Id: State_refdoc.ctex,v 1.16 2008/06/23 20:35:42 feiliu Exp $
+% $Id: State_refdoc.ctex,v 1.17 2008/06/24 18:45:45 feiliu Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -98,10 +98,12 @@
 #ifdef STANDALONE
 \input{ESMF_State_fapi}
 \input{ESMF_StateReconcile_fapi}
+\input{ESMF_StateSet_fapi}
 \input{ESMF_StateVa_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/State/doc/ESMF_State_fapi}
 \input{../Superstructure/State/doc/ESMF_StateReconcile_fapi}
+\input{../Superstructure/State/doc/ESMF_StateSet_fapi}
 \input{../Superstructure/State/doc/ESMF_StateVa_fapi}
 #endif
 

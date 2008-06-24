@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.150 2008/06/23 20:06:14 feiliu Exp $
+! $Id: ESMF_State.F90,v 1.151 2008/06/24 18:45:45 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@
       public ESMF_StateAdd
       public ESMF_StateGet
 
-      public ESMF_StateSetNeeded, ESMF_StateGetNeeded
+      public ESMF_StateGetNeeded
       public ESMF_StateIsNeeded
 
       public ESMF_StateWriteRestart
@@ -81,12 +81,14 @@
 
       public ESMF_StateSerialize, ESMF_StateDeserialize
 
+      public ESMF_StateClassFindData
+
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.150 2008/06/23 20:06:14 feiliu Exp $'
+      '$Id: ESMF_State.F90,v 1.151 2008/06/24 18:45:45 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -3006,70 +3008,6 @@
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
         end function ESMF_StateReadRestart
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateSetNeeded"
-!BOP
-! !IROUTINE: ESMF_StateSetNeeded - Set if a data item is needed
-!
-! !INTERFACE:
-      subroutine ESMF_StateSetNeeded(state, itemName, neededflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      character (len=*), intent(in) :: itemName
-      type(ESMF_NeededFlag), intent(in) :: neededflag
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!      Sets the status of the {\tt needed} flag for the data item
-!      named by {\tt itemName} in the {\tt ESMF\_State}.
-!
-!     The arguments are:
-!      \begin{description}     
-!      \item[state]
-!        The {\tt ESMF\_State} to set.
-!       \item[itemName]
-!        Name of the data item to set.
-!       \item[neededflag]
-!        Set status of data item to this.  See Section~\ref{opt:neededflag}
-!        for possible values.
-!       \item[{[rc]}]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!EOP
-
-      type(ESMF_StateItem), pointer :: dataitem
-      logical :: exists
-      integer :: localrc
-
-      ! Assume failure until we know we will succeed
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-        ! check input variables
-        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
-                                      dataitem, rc=localrc)
-      if (.not. exists) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, itemName, &
-                                      ESMF_CONTEXT, rc)) return
-      endif
-
-      dataitem%needed = neededflag
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateSetNeeded
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
