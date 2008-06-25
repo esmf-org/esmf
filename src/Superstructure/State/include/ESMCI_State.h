@@ -1,4 +1,4 @@
-// $Id: ESMCI_State.h,v 1.10 2008/04/05 03:39:16 cdeluca Exp $
+// $Id: ESMCI_State.h,v 1.11 2008/06/25 18:42:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ extern "C" {
   void FTN(f_esmf_statecreate)(ESMCI::State* state, char* statename, int* rc,
 				ESMCI_FortranStrLenArg nlen);
 
-  void FTN(f_esmf_stateaddarray)(ESMCI::State* state, ESMCI::Array* array, 
+  void FTN(f_esmf_stateaddarray)(ESMCI::State* state, ESMCI::Array** array, 
                                  int* rc);
 
   void FTN(f_esmf_stateprint)(ESMCI::State* state, int* rc);
@@ -85,33 +85,6 @@ extern "C" {
 
   void FTN(f_esmf_statedestroy)(ESMCI::State* state, int* rc);
 
-#if 0
-      TODO: finish these prototypes
-      void FTN(f_esmf_statecreate)(char *statename, statetype, compname,
-            bundles, fields, arrays, nestedstates, names, itemcount, int *rc);
-      void FTN(f_esmf_statedestroy)(ESMC_State *state, int *rc);
-      void FTN(f_esmf_stateaddbundle)(ESMC_State *state, ESMC_FieldBundle *bundle, int *rc);
-      void FTN(f_esmf_stateaddfield)(ESMC_State *state, ESMC_Field *field, int *rc);
-      void FTN(f_esmf_stateaddarray)(ESMC_State *state, ESMC_Array *array, int *rc);
-      void FTN(f_esmf_stateaddstate)(ESMC_State *state, nestedstate, int *rc);
-      void FTN(f_esmf_stateadddataname)(ESMC_State *state, char *name, int *rc);
-      void FTN(f_esmf_stategetinfo)(ESMC_State *state, char *statename, 
-                          statetype, char *compname,
-                          int *itemcount, char *itemnames, objtypes, int *rc);
-      void FTN(f_esmf_stategetname)(ESMC_State *state, char *statename, int *rc);
-      void FTN(f_esmf_stateisneeded)(ESMC_State *state, char *dataname, int *rc);
-      void FTN(f_esmf_stategetneeded)(ESMC_State *state, char *dataname, 
-                                 needed, int *rc);
-      void FTN(f_esmf_statesetneeded)(ESMC_State *state, char *dataname, needed, int *rc);
-      void FTN(f_esmf_stategetbundle)(ESMC_State *state, char *name, ESMC_FieldBundle *bundle, int *rc);
-      void FTN(f_esmf_stategetfield)(ESMC_State *state, char *name, ESMC_Field *field, int *rc);
-      void FTN(f_esmf_stategetarray)(ESMC_State *state, char *name, ESMC_Array *array, int *rc);
-      void FTN(f_esmf_stategetstate)(ESMC_State *state, char *name, nestedstate, int *rc);
-      void FTN(f_esmf_statewriterestart)(ESMC_State *state, iospec, int *rc);
-      void FTN(f_esmf_statereadrestart)(char *name, iospec, int *rc);
-      void FTN(f_esmf_statevalidate)(ESMC_State *state, char *options, int *rc);
-      void FTN(f_esmf_stateprint)(ESMC_State *state, char *options, int *rc);
-#endif
  }; // end prototypes for fortran interface
 
  #endif  // ESMC_State_H

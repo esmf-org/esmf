@@ -46,7 +46,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.21 2008/04/05 03:39:17 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.22 2008/06/25 18:42:10 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -87,7 +87,7 @@ extern "C" {
     localrc = ESMF_RC_NOT_IMPL;
 
     // Invoque the C++ interface
-    state.ptr = (void*) ESMCI::State::create(name, &localrc);
+    state.ptr = (void*)ESMCI::State::create(name, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
       state.ptr = NULL;
       return state;
@@ -123,12 +123,10 @@ extern "C" {
       //Initialize return code
       rc = ESMF_RC_NOT_IMPL;
       localrc = ESMF_RC_NOT_IMPL;
-
       
-      localrc = ((ESMCI::State*)&state)->addArray( (ESMCI::Array*)&array.ptr );
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
-      return localrc;
-    }
+      localrc = ((ESMCI::State*)state.ptr)->addArray((ESMCI::Array*)array.ptr);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,&rc))
+        return localrc;
 
       rc = localrc;
       return rc;
@@ -162,17 +160,15 @@ extern "C" {
       rc = ESMF_RC_NOT_IMPL;
       localrc = ESMF_RC_NOT_IMPL;
 
-      localrc = ((ESMCI::State*)&state)->getArray(
-        arrayName,
-        (ESMCI::Array**)&(array->ptr) );
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
-      return localrc;
-    }
+      localrc = ((ESMCI::State*)state.ptr)->getArray(arrayName,
+        (ESMCI::Array**)&(array->ptr));
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,&rc))
+        return localrc;
 
       rc = localrc;
       return rc;
 
-   } // end ESMC_StateAddArray
+   } // end ESMC_StateGetArray
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -200,10 +196,9 @@ extern "C" {
     int rc, localrc;
 
     // Invoque the C++ interface
-    localrc = ((ESMCI::State*)&state)->print();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+    localrc = ((ESMCI::State*)state.ptr)->print();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return localrc;
-    }
 
     return rc = localrc;
 
@@ -241,10 +236,9 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
 
     // Invoque the C++ interface
-    localrc = ((ESMCI::State*)&state)->destroy();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+    localrc = ((ESMCI::State*)state.ptr)->destroy();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return localrc;
-    }
 
 //  FTN(f_esmf_statedestroy)(state, &rc);
 

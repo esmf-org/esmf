@@ -1,4 +1,4 @@
-// $Id: ESMC_StateUTest.C,v 1.10 2008/04/05 03:39:18 cdeluca Exp $
+// $Id: ESMC_StateUTest.C,v 1.11 2008/06/25 18:42:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -12,12 +12,12 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+// ESMF header
 #include "ESMC.h"
+
+// ESMF Test header
 #include "ESMC_Test.h"
-#include "ESMC_Start.h"
-#include "ESMC_DistGrid.h"
-#include "ESMC_ArraySpec.h"
-#include "ESMC_State.h"
 
 //==============================================================================
 //BOP
@@ -34,7 +34,7 @@
 
 int main(void){
 
-  ESMC_State st;              // ESMC_State object
+  ESMC_State myState;               // ESMC_State object
   const char* arrayName;
   char name[80];
   char failMsg[80];
@@ -59,7 +59,7 @@ int main(void){
   // Create a state object -- cf
   strcpy(name, "StateCreate Unit test \0");
   strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
-  st = ESMC_StateCreate("stateName\0",&rc);
+  myState = ESMC_StateCreate("stateName\0",&rc);
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
   
@@ -153,7 +153,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Add an Array to a State object\0");
   strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
-  rc = ESMC_StateAddArray(st,array);
+  rc = ESMC_StateAddArray(myState,array);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -161,7 +161,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Get an array from a state, based on its name\0");
   strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
-  rc = ESMC_StateGetArray(st, "array1\0", &retrievedArray);
+  rc = ESMC_StateGetArray(myState, "array1\0", &retrievedArray);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -195,7 +195,7 @@ int main(void){
   // Destroy a state object -- cf
   strcpy(name, "StateDestroy Unit test \0");
   strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
-  rc = ESMC_StateDestroy(st);
+  rc = ESMC_StateDestroy(myState);
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
  

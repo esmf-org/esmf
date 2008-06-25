@@ -40,7 +40,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_State.C,v 1.6 2008/04/05 03:39:17 cdeluca Exp $";
+ static const char *const version = "$Id: ESMCI_State.C,v 1.7 2008/06/25 18:42:10 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -57,7 +57,7 @@ namespace ESMCI {
 // !IROUTINE:  ESMCI::State::create - Create a new State
 //
 // !INTERFACE:
-      ESMCI::State *ESMCI::State::create(
+      State *State::create(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMCI::State object
@@ -83,9 +83,9 @@ namespace ESMCI {
     localrc = ESMF_RC_NOT_IMPL;
 
     // allocate the new State object
-    ESMCI::State* state;
+    State* state;
     try{
-      state = new ESMCI::State;
+      state = new State;
     }catch(...){
       // allocation error
       ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::State.", rc);
@@ -112,22 +112,21 @@ namespace ESMCI {
     rc = &localrc;
     return state;
 
- } // end ESMCI::State create
+ } // end State create
 
-} // namespace ESMCI
 
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMCI::State::addArray - Add an array to this state
 //
 // !INTERFACE:
-      int ESMCI::State::addArray(
+      int State::addArray(
 //
 // !RETURN VALUE:
 //     return code rc.
 //
 // !ARGUMENTS:
-     ESMCI::Array *array){       // in - array being added
+     Array *array){       // in - array being added
 //
 // !DESCRIPTION:
 //      Add an array to an existing state
@@ -143,10 +142,9 @@ namespace ESMCI {
   
       
     // Invoque the fortran interface through the F90-C++ "glue" code
-     FTN(f_esmf_stateaddarray)(this, array, &localrc);
-     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+     FTN(f_esmf_stateaddarray)(this, &array, &localrc);
+     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
        return localrc;
-     }
 
      rc = localrc;
 
@@ -159,14 +157,14 @@ namespace ESMCI {
 // !IROUTINE:  ESMCI::State::getArray - Get an array from this state
 //
 // !INTERFACE:
-      int ESMCI::State::getArray(
+      int State::getArray(
 //
 // !RETURN VALUE:
 //     return code rc.
 //
 // !ARGUMENTS:
-      char         *name,         // in - array name
-      ESMCI::Array **array){      // out - array being geted
+      char  *name,         // in - array name
+      Array **array){      // out - array being geted
 //
 // !DESCRIPTION:
 //      Get an array from an existing state
@@ -186,14 +184,14 @@ namespace ESMCI {
     nlen = strlen(name);
     fName = new char[nlen];
     localrc = ESMC_CtoF90string(name, fName, nlen);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
       delete[] fName;
       return localrc;
     }
 
     // Invoque the fortran interface through the F90-C++ "glue" code
     FTN(f_esmf_stategetarray)(this, fName, array, &localrc, nlen);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
       delete[] fName;
       return localrc;
     }
@@ -211,7 +209,7 @@ namespace ESMCI {
 // !IROUTINE:  ESMCI::State::print - print the internal data for a state
 
 // !INTERFACE:
-      int ESMCI::State::print(){
+      int State::print(){
 
 // !RETURN VALUE:
 //    int error return code
@@ -227,20 +225,20 @@ namespace ESMCI {
 
     // Invoque the fortran interface through the F90-C++ "glue" code
     FTN(f_esmf_stateprint)(this, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return localrc;
-    }
+
     rc = localrc;
     return rc;
 
-} // end ESMCI::State::print
+} // end State::print
 
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMCI::State::destroy - free a State created with Create
 //
 // !INTERFACE:
-      int ESMCI::State::destroy(){
+      int State::destroy(){
 //
 // !RETURN VALUE:
 //    int error return code
@@ -267,15 +265,13 @@ namespace ESMCI {
 
     // Invoque the fortran interface through the F90-C++ "glue" code
     FTN(f_esmf_statedestroy)(this, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return localrc;
-    }
-
 
     rc = localrc;
     return rc;
 
- } // end ESMCI::State::destroy
+ } // end State::destroy
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -478,3 +474,4 @@ namespace ESMCI {
 // } // end ESMC_StatePrint
 
 //-----------------------------------------------------------------------------
+} // namespace ESMCI
