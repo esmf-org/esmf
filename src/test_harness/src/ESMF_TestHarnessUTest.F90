@@ -213,8 +213,9 @@ contains
 !
 ! !DESCRIPTION:
 ! Routine opens the top level config file "test_harness.rc", which specifies the 
-! test class, the reporting style, and depending on how the ESMF_EXHAUSTIVE flag
-! is set, extracts the list of files containing the problem descriptor strings.
+! test class, the reporting style, and depending on how the ESMF_TESTEXHAUSTIVE
+! flag is set, extracts the list of files containing the problem descriptor
+! strings.
 !
 ! Upon completion, the routine returns the values to a public record
 !       har%testClass               Problem Descriptor Test Class

@@ -1,4 +1,4 @@
-// $Id: ESMC_ConfigUTest.C,v 1.4 2008/04/05 03:38:11 cdeluca Exp $
+// $Id: ESMC_ConfigUTest.C,v 1.5 2008/06/25 22:59:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@ int main(void){
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
  
-#ifdef ESMF_EXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
  //----------------------------------------------------------------------------
   //EX_UTest
   //Load resource file into memory
