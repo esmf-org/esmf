@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.42 2008/06/18 05:07:12 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.43 2008/06/25 06:00:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.42 2008/06/18 05:07:12 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.43 2008/06/25 06:00:28 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2050,7 +2050,7 @@ contains
     call c_ESMC_DistGridGet(distgrid, dimCount, patchCount, &
       minIndexPDimPPatchArg, maxIndexPDimPPatchArg, elementCountPPatchArg, &
       minIndexPDimPDeArg, maxIndexPDimPDeArg, elementCountPDeArg, &
-      patchListPDeArg, indexCountPDimPDeArg, regDecompFlag, delayout, &
+      patchListPDeArg, indexCountPDimPDeArg, regDecompFlagArg, delayout, &
       localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
