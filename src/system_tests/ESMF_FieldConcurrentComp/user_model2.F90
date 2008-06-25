@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3 2008/06/13 16:06:54 feiliu Exp $
+! $Id: user_model2.F90,v 1.4 2008/06/25 05:37:09 theurich Exp $
 !
 ! System test for Concurrent Components, user-written component 2.
 
@@ -119,7 +119,7 @@
 
         grid = ESMF_GridCreate(distgrid=distgrid, &
             gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
-            name="grid", rc=status)
+            name="grid", indexflag=ESMF_INDEX_GLOBAL, rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
