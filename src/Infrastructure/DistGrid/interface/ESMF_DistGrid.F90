@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.43 2008/06/25 06:00:28 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.44 2008/06/26 17:46:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.43 2008/06/25 06:00:28 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.44 2008/06/26 17:46:02 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1774,7 +1774,7 @@ contains
 !     argument determines the number of local elements in the created DistGrid.
 !     The sequence indices must be unique across all PETs and are meant to be
 !     used in combination with {\tt ESMF\_ArraySparseMatMulStore()}. A default
-!     1-D DELayout with 1 DE per PET across all PETs of the current VM is 
+!     DELayout with 1 DE per PET across all PETs of the current VM is 
 !     automatically created.
 !
 !     The arguments are:
