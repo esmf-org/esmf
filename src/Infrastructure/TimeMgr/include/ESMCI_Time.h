@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.h,v 1.5 2008/06/24 14:23:54 rosalind Exp $
+// $Id: ESMCI_Time.h,v 1.6 2008/06/26 02:08:15 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -58,7 +58,7 @@
 // !USES:
  #include <ESMC_Base.h>           // inherited Base class
  #include <ESMCI_BaseTime.h>       // inherited BaseTime class
- #include <ESMC_Calendar.h>       // associated Calendar class
+ #include <ESMCI_Calendar.h>       // associated Calendar class
 
  namespace ESMCI{
 
@@ -75,7 +75,7 @@
                                           // TODO: (& ESMC_Base class when
                                           // fully aligned with F90 equiv)
   private:   // corresponds to F90 module 'type ESMF_Time' members 
-    ESMC_Calendar *calendar;    // associated calendar
+    ESMCI::Calendar *calendar;    // associated calendar
     int timeZone;               // Offset from UTC
 
 // !PUBLIC MEMBER FUNCTIONS:
@@ -100,7 +100,7 @@
                      ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
                      ESMC_R8 *ns_r8=0,
                      ESMC_I4 *sN=0, ESMC_I4 *sD=0,
-                     ESMC_Calendar **calendar=0, 
+                     ESMCI::Calendar **calendar=0, 
                      ESMC_CalendarType *calendarType=0, 
                      int *timeZone=0);
 
@@ -116,7 +116,7 @@
                      ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
                      ESMC_R8 *ns_r8=0,
                      ESMC_I4 *sN=0, ESMC_I4 *sD=0,
-                     ESMC_Calendar **calendar=0, 
+                     ESMCI::Calendar **calendar=0, 
                      ESMC_CalendarType *calendarType=0, 
                      int *timeZone=0,
                      int timeStringLen=0, int *tempTimeStringLen=0,
@@ -137,7 +137,7 @@
     int get(const char *timeList, ...) const;
     // e.g. ESMCI::Time::get("YY:MM:DD", (int *)YY,(int *)MM, (int *)DD);
 
-    int set(ESMC_Calendar *calendar, int timeZone,
+    int set(ESMCI::Calendar *calendar, int timeZone,
                      const char *timeList, ...);
     int set(const char *timeList, ...);
     // e.g. ESMCI::Time::set("s" , (ESMC_R8) s);
@@ -179,11 +179,11 @@
 
     // native C++ constructors/destructors
     Time(void);
-    Time(ESMC_I8 s, int sN=0, int sD=1, ESMC_Calendar *calendar=0,
+    Time(ESMC_I8 s, int sN=0, int sD=1, ESMCI::Calendar *calendar=0,
               ESMC_CalendarType calendarType=(ESMC_CalendarType)0,
               int timeZone=0);
     int set(ESMC_I8 s, int sN=0, int sD=1,
-                     ESMC_Calendar *calendar=0,
+                     ESMCI::Calendar *calendar=0,
                      ESMC_CalendarType calendarType=(ESMC_CalendarType)0,
                      int timeZone=0);
                                    // used internally instead of constructor
@@ -208,7 +208,7 @@
     int getDayOfYear(ESMCI::TimeInterval *dayOfYear) const;
 
     friend class ESMCI::TimeInterval;
-    friend class ESMC_Calendar;
+    friend class ESMCI::Calendar;
                                                         // (TMG 2.5.5)
 //
  // < declare private interface methods here >

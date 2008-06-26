@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.C,v 1.4 2008/06/21 05:31:58 rosalind Exp $"
+// $Id: ESMCI_Time.C,v 1.5 2008/06/26 02:08:16 rosalind Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Time.C,v 1.4 2008/06/21 05:31:58 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_Time.C,v 1.5 2008/06/26 02:08:16 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -83,7 +83,7 @@ namespace ESMCI{
       ESMC_R8 *ns_r8,     // in - floating point nanoseconds
       ESMC_I4 *sN,        // in - fractional seconds numerator
       ESMC_I4 *sD,        // in - fractional seconds denominator
-      ESMC_Calendar **calendar, // in - associated calendar
+      ESMCI::Calendar **calendar, // in - associated calendar
       ESMC_CalendarType *calendarType, // in - associated calendar type
       int *timeZone) {         // in - timezone (hours offset from UTC,
                                //      e.g. EST = -5)
@@ -147,7 +147,7 @@ namespace ESMCI{
       // Forbid Gregorian <-> 360-Day, Gregorian <-> No Leap,
       //        Julian Day <-> 360-Day, Julian Day <-> No Leap
       // Otherwise, need conversion method/offset value: See TODO: ? in
-      // ESMC_Calendar.C
+      // ESMCI_Calendar.C
 
       // set calendar type
       if (calendar != ESMC_NULL_POINTER) {             // 1st choice
@@ -158,10 +158,10 @@ namespace ESMCI{
 
       } else if (calendarType != ESMC_NULL_POINTER) {  // 2nd choice
         // set to specified built-in type; create if necessary
-        rc = ESMC_CalendarCreate(*calendarType);
+        rc = ESMCI_CalendarCreate(*calendarType);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
-        this->calendar = ESMC_Calendar::internalCalendar[*calendarType-1];
+        this->calendar = ESMCI::Calendar::internalCalendar[*calendarType-1];
       }
 
       // set timezone
@@ -196,21 +196,21 @@ namespace ESMCI{
 
     } else if (calendarType != ESMC_NULL_POINTER) {  // 2nd choice
       // set to specified built-in type; create if necessary
-      rc = ESMC_CalendarCreate(*calendarType);
+      rc = ESMCI_CalendarCreate(*calendarType);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         { *this = saveTime; return(rc); }
-      this->calendar = ESMC_Calendar::internalCalendar[*calendarType-1];
+      this->calendar = ESMCI::Calendar::internalCalendar[*calendarType-1];
 
-    } else if (ESMC_Calendar::defaultCalendar != ESMC_NULL_POINTER) {
+    } else if (ESMCI::Calendar::defaultCalendar != ESMC_NULL_POINTER) {
       // use default calendar                        // 3rd choice
-      this->calendar = ESMC_Calendar::defaultCalendar;
+      this->calendar = ESMCI::Calendar::defaultCalendar;
 
     } else {                                         // 4th choice
       // create default calendar
-      rc = ESMC_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
+      rc = ESMCI_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         { *this = saveTime; return(rc); }
-      this->calendar = ESMC_Calendar::defaultCalendar;
+      this->calendar = ESMCI::Calendar::defaultCalendar;
     }
 
     // set timezone
@@ -236,7 +236,7 @@ namespace ESMCI{
       }
 
       // if specified, positive month-of-the-year required; further calendar-
-      //   specific validation performed within ESMC_CalendarConvertToTime()
+      //   specific validation performed within ESMCI::Calendar::convertToTime()
       if (mm != ESMC_NULL_POINTER) {
         if (*mm < 1) {
           char logMsg[ESMF_MAXSTR];
@@ -248,7 +248,7 @@ namespace ESMCI{
       }
 
       // if specified, positive day-of-the-month required; further calendar-
-      //   specific validation performed within ESMC_CalendarConvertToTime()
+      //   specific validation performed within ESMCI::Calendar::convertToTime()
       if (dd != ESMC_NULL_POINTER) {
         if (*dd < 1) {
           char logMsg[ESMF_MAXSTR];
@@ -271,7 +271,7 @@ namespace ESMCI{
       if (dd != ESMC_NULL_POINTER) argDD = *dd;
 
       // do the conversion
-      rc = this->calendar->ESMC_CalendarConvertToTime(argYY, argMM, argDD,
+      rc = this->calendar->convertToTime(argYY, argMM, argDD,
                                                       0, this);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         { *this = saveTime; return(rc); }
@@ -287,7 +287,7 @@ namespace ESMCI{
       }
 
       ESMC_I8 argD = (d != ESMC_NULL_POINTER) ? *d : *d_i8;
-      rc = this->calendar->ESMC_CalendarConvertToTime(0, 0, 0, argD, this);
+      rc = this->calendar->convertToTime(0, 0, 0, argD, this);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
 
@@ -300,7 +300,7 @@ namespace ESMCI{
       }
 
       // integer part
-      rc = this->calendar->ESMC_CalendarConvertToTime(0, 0, 0, 
+      rc = this->calendar->convertToTime(0, 0, 0, 
                                               (ESMC_I8) *d_r8, this);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
@@ -314,7 +314,7 @@ namespace ESMCI{
       if (this->calendar != ESMC_NULL_POINTER) {
         if (this->calendar->calendarType != ESMC_CAL_NOCALENDAR) {
           // defaults:  yy=0, mm=1, dd=1 d=0
-          rc = this->calendar->ESMC_CalendarConvertToTime(0, 1, 1, 0, this);
+          rc = this->calendar->convertToTime(0, 1, 1, 0, this);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
             { *this = saveTime; return(rc); }
         }
@@ -366,7 +366,7 @@ namespace ESMCI{
       ESMC_R8 *ns_r8,        // out - floating point nanoseconds
       ESMC_I4 *sN,           // out - fractional seconds numerator
       ESMC_I4 *sD,           // out - fractional seconds denominator
-      ESMC_Calendar **calendar,   // out - associated calendar
+      ESMCI::Calendar **calendar,   // out - associated calendar
       ESMC_CalendarType *calendarType, // out - associated calendar type
       int     *timeZone,          // out - timezone (hours offset from UTC)
       int      timeStringLen,     // in  - F90 time string size
@@ -409,7 +409,7 @@ namespace ESMCI{
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                                  ", calendar required.", &rc); return(rc);
       }
-      rc = this->calendar->ESMC_CalendarConvertToDate(&timeToConvert,
+      rc = this->calendar->convertToDate(&timeToConvert,
                                                       yy, yy_i8, mm, dd,
                                                       d, d_i8, d_r8);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
@@ -535,7 +535,7 @@ namespace ESMCI{
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Calendar *calendar,  // in - associated calendar
+      ESMCI::Calendar *calendar,  // in - associated calendar
       int timeZone,             // in - timezone
       const char *timeList,     // in - initializer specifier string
       ...) {                    // in - specifier values (variable args)
@@ -601,7 +601,7 @@ namespace ESMCI{
       ESMC_I8 s,          // in - integer seconds
       int sN,                  // in - fractional seconds, numerator
       int sD,                  // in - fractional seconds, denominator
-      ESMC_Calendar *calendar, // in - associated calendar
+      ESMCI::Calendar *calendar, // in - associated calendar
       ESMC_CalendarType calendarType, // in - associated calendar type
       int timeZone) {          // in - timezone
 //
@@ -633,10 +633,10 @@ namespace ESMCI{
 
     } else if (calendarType != (ESMC_CalendarType)0) {  // 2nd choice
       // set to specified built-in type; create if necessary
-      rc = ESMC_CalendarCreate(calendarType);
+      rc = ESMCI_CalendarCreate(calendarType);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
-      this->calendar = ESMC_Calendar::internalCalendar[calendarType-1];
+      this->calendar = ESMCI::Calendar::internalCalendar[calendarType-1];
     } // otherwise leave NULL, TODO: implement ESMC_Base logic, then can
       // set default calendar
 
@@ -683,7 +683,7 @@ namespace ESMCI{
     }
 
     // check if it's a leap year within this calendar
-    return(this->calendar->ESMC_CalendarIsLeapYear(yy_i8, rc));
+    return(this->calendar->isLeapYear(yy_i8, rc));
 
  }  // end ESMCI::Time::isLeapYear
 
@@ -783,7 +783,7 @@ namespace ESMCI{
 
     // set this time to wall clock time
     // TODO: use native C++ Set() version when ready
-    ESMC_Calendar *cal = this->calendar; // allows reset
+    ESMCI::Calendar *cal = this->calendar; // allows reset
     int tz = this->timeZone;             //   after Set() clears it
     rc = ESMCI::Time::set((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, &h, &m,
@@ -824,7 +824,7 @@ namespace ESMCI{
 //                          (calendar & timeZone) to the result. 
 //
     // delegate the increment operation to my calendar associate
-    return(calendar->ESMC_CalendarIncrement(this, timeinterval));
+    return(calendar->increment(this, timeinterval));
 
 }  // end ESMCI::Time::operator+
 
@@ -853,7 +853,7 @@ namespace ESMCI{
 //                          (calendar & timeZone) to the result. 
 //
     // delegate the decrement operation to my calendar associate
-    return(calendar->ESMC_CalendarDecrement(this, timeinterval));
+    return(calendar->decrement(this, timeinterval));
 
 }  // end ESMCI::Time::operator-
 
@@ -878,7 +878,7 @@ namespace ESMCI{
 // !REQUIREMENTS:  
 
     // delegate the increment operation to my calendar associate
-    *this = calendar->ESMC_CalendarIncrement(this, timeinterval);
+    *this = calendar->increment(this, timeinterval);
 
     return(*this);
 
@@ -905,7 +905,7 @@ namespace ESMCI{
 // !REQUIREMENTS:  
 
     // delegate the derement operation to my calendar associate
-    *this = calendar->ESMC_CalendarDecrement(this, timeinterval);
+    *this = calendar->decrement(this, timeinterval);
 
     return(*this);
 
@@ -1066,7 +1066,7 @@ namespace ESMCI{
             ESMC_LogDefault.ESMC_LogMsgFoundError(rc,"; calendar is NULL", &rc);
           return(rc);
         }
-        rc = this->calendar->ESMC_CalendarValidate();
+        rc = this->calendar->validate();
         ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
         return(rc);
 
@@ -1087,7 +1087,7 @@ namespace ESMCI{
         ESMC_LogDefault.ESMC_LogMsgFoundError(rc, "; calendar is NULL", &rc);
       return(rc);
     }
-    rc = this->calendar->ESMC_CalendarValidate();
+    rc = this->calendar->validate();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
 
@@ -1150,7 +1150,7 @@ namespace ESMCI{
       // default
       ESMCI::BaseTime::print(options);
       if (this->calendar != ESMC_NULL_POINTER) {
-        this->calendar->ESMC_CalendarPrint(options, this);
+        this->calendar->print(options, this);
       }
       printf("timeZone = %d\n", timeZone);
     }
@@ -1204,7 +1204,7 @@ namespace ESMCI{
       ESMC_I8 s,           // in - integer seconds
       ESMC_I4 sN,          // in - fractional seconds, numerator
       ESMC_I4 sD,          // in - fractional seconds, denominator
-      ESMC_Calendar *calendar,  // in - associated calendar
+      ESMCI::Calendar *calendar,  // in - associated calendar
       ESMC_CalendarType calendarType,  // in - associated calendar type
       int timeZone) :           // in - timezone
 //
@@ -1226,8 +1226,8 @@ namespace ESMCI{
 
   } else if (calendarType != (ESMC_CalendarType)0) {  // 2nd choice
     // set to specified built-in type; create if necessary
-    ESMC_CalendarCreate(calendarType);
-    this->calendar = ESMC_Calendar::internalCalendar[calendarType-1];
+    ESMCI_CalendarCreate(calendarType);
+    this->calendar = ESMCI::Calendar::internalCalendar[calendarType-1];
   } // otherwise leave NULL, TODO: implement ESMC_Base logic, then can
     // set default calendar
 
@@ -1435,7 +1435,7 @@ namespace ESMCI{
     //       to skip this step
     ESMCI::Time referenceMonday;
     // TODO: use native C++ Set() when ready
-    ESMC_Calendar *cal = this->calendar; // allows reset
+    ESMCI::Calendar *cal = this->calendar; // allows reset
     int tz = this->timeZone;             //   after Set() clears it
     rc = referenceMonday.ESMCI::Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                                       &yy_i8, &mm, &dd, ESMC_NULL_POINTER,
@@ -1534,7 +1534,7 @@ namespace ESMCI{
     // set start of this month
     dd = 1;
     ESMCI::Time startOfMonth;
-    ESMC_Calendar *cal = this->calendar; // allows reset
+    ESMCI::Calendar *cal = this->calendar; // allows reset
     int tz = this->timeZone;             //   after Set() clears it
     rc = startOfMonth.ESMCI::Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                                    &yy_i8, &mm, &dd, ESMC_NULL_POINTER,
@@ -1785,7 +1785,7 @@ namespace ESMCI{
     ESMCI::Time dayOne;
     mm=1, dd=1;
     // TODO: use native C++ Set(), not F90 entry point
-    ESMC_Calendar *cal = this->calendar; // allows reset
+    ESMCI::Calendar *cal = this->calendar; // allows reset
     int tz = this->timeZone;             //   after Set() clears it
     rc = dayOne.ESMCI::Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                              &yy_i8, &mm, &dd,

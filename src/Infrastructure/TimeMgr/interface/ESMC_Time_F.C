@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.45 2008/06/11 21:14:58 rosalind Exp $
+// $Id: ESMC_Time_F.C,v 1.46 2008/06/26 02:08:16 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@ extern "C" {
                                 ESMC_R8 *ms_r8, ESMC_R8 *us_r8,
                                 ESMC_R8 *ns_r8,
                                 ESMC_I4 *sN, ESMC_I4 *sD,
-                                ESMC_Calendar **calendar,
+                                ESMCI::Calendar **calendar,
                                 ESMC_CalendarType *calendarType,
                                 int *timeZone,
                                 int *status) {
@@ -96,7 +96,7 @@ extern "C" {
                               ESMC_R8 *ms_r8, ESMC_R8 *us_r8,
                               ESMC_R8 *ns_r8,
                               ESMC_I4 *sN, ESMC_I4 *sD,
-                              ESMC_Calendar **calendar, 
+                              ESMCI::Calendar **calendar, 
                               ESMC_CalendarType *calendarType, 
                               int *timeZone,
                               int *timeStringLen, int *tempTimeStringLen, 

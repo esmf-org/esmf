@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.1 2008/06/24 14:59:17 rosalind Exp $
+// $Id: ESMCI_Clock.C,v 1.2 2008/06/26 02:08:16 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.1 2008/06/24 14:59:17 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.2 2008/06/26 02:08:16 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -381,7 +381,7 @@ int ESMCI::Clock::count=0;
       ESMCI::Time         *prevTime,         // out
       ESMCI::TimeInterval *currSimTime,      // out
       ESMCI::TimeInterval *prevSimTime,      // out
-      ESMC_Calendar    **calendar,         // out
+      ESMCI::Calendar    **calendar,         // out
       ESMC_CalendarType *calendarType,     // out
       int               *timeZone,         // out
       ESMC_I8      *advanceCount,     // out
@@ -1574,7 +1574,7 @@ int ESMCI::Clock::count=0;
       //   So only produce ESMC_LOG_WARN if different.
       //   (TODO: check only if stopTime set)
       // TODO: use native C++ Get, not F90 entry point, when ready
-      ESMC_Calendar *startCal, *stopCal;
+      ESMCI::Calendar *startCal, *stopCal;
       int rc = startTime.ESMCI::Time::get((ESMC_I4 *)ESMC_NULL_POINTER, 
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.56 2008/06/11 21:14:56 rosalind Exp $
+// $Id: ESMCI_Calendar.h,v 1.1 2008/06/26 02:08:15 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -17,8 +17,8 @@
  // these lines prevent this file from being read more than once if it
  // ends up being included multiple times
 
-#ifndef ESMC_CALENDAR_H
-#define ESMC_CALENDAR_H
+#ifndef ESMCI_CALENDAR_H
+#define ESMCI_CALENDAR_H
 
 //-------------------------------------------------------------------------
 
@@ -30,7 +30,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !CLASS: ESMC_Calendar - encapsulates calendar types and behavior
+// !CLASS: ESMCI_Calendar - encapsulates calendar types and behavior
 //
 // !DESCRIPTION:
 //
@@ -73,6 +73,7 @@
 // TODO: replace with monthsPerYear property
 #define MONTHS_PER_YEAR 12
 
+
 // (TMG 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5)
 #define CALENDAR_TYPE_COUNT 7
 enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
@@ -87,7 +88,7 @@ enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
                         // Note: add new calendars between ESMC_CAL_GREGORIAN
                         // and ESMC_CAL_NOCALENDAR so Validate() doesn't need
                         // to change.  Also add to static intializers at top
-                        // of ESMC_Calendar.C
+                        // of ESMCI_Calendar.C
 
 namespace ESMCI{
 
@@ -96,14 +97,14 @@ class Time;
 class TimeInterval;
 
 // !PUBLIC TYPES:
- class ESMC_Calendar;
+ class Calendar;
 
 // !PRIVATE TYPES:
  // class configuration type:  not needed for Calendar
 
  // class definition type
-class ESMC_Calendar {
-// class ESMC_Calendar : public ESMC_Base { // TODO: inherit from ESMC_Base
+class Calendar {
+// class Calendar : public ESMC_Base { // TODO: inherit from ESMC_Base
                                             // class when fully aligned with
                                             //  F90 equiv
 
@@ -128,8 +129,8 @@ class ESMC_Calendar {
     static const char *const calendarTypeName[CALENDAR_TYPE_COUNT];
 
     // one-of-each calendar type held automatically, as needed
-    static ESMC_Calendar *internalCalendar[CALENDAR_TYPE_COUNT];
-    static ESMC_Calendar *defaultCalendar;  // set-up upon ESMF_Initialize();
+    static Calendar *internalCalendar[CALENDAR_TYPE_COUNT];
+    static Calendar *defaultCalendar;  // set-up upon ESMF_Initialize();
                                             // defaults to ESMC_CAL_NOCALENDAR
 
     int               id;         // unique identifier. used for equality
@@ -145,12 +146,12 @@ class ESMC_Calendar {
   public:
 
     // set built-in calendar type
-    int ESMC_CalendarSet(int               nameLen,
+    int set(int               nameLen,
                          const char       *name,    // TODO: default (=0)
                          ESMC_CalendarType calendarType);
 
     // set custom calendar type
-    int ESMC_CalendarSet(int           nameLen,      
+    int set(int           nameLen,      
                          const char   *name=0,
                          int          *daysPerMonth=0,
                          int           monthsPerYear=0,
@@ -160,7 +161,7 @@ class ESMC_Calendar {
                          ESMC_I4 *daysPerYearDd=0);
 
     // get properties of any calendar type
-    int ESMC_CalendarGet(int                nameLen,
+    int get(int                nameLen,
                          int               *tempNameLen,
                          char              *tempName,
                          ESMC_CalendarType *calendarType=0,
@@ -178,27 +179,27 @@ class ESMC_Calendar {
 
     // conversions based on UTC: time zone offset done by client
     //  (TMG 2.4.5, 2.5.6)
-    int ESMC_CalendarConvertToTime(ESMC_I8 yy, int mm, int dd,
+    int convertToTime(ESMC_I8 yy, int mm, int dd,
                                    ESMC_I8 d, ESMCI::BaseTime *t) const;
-    int ESMC_CalendarConvertToDate(ESMCI::BaseTime *t,
+    int convertToDate(ESMCI::BaseTime *t,
                                    ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
                                    int *mm=0, int *dd=0,
                                    ESMC_I4 *d=0, ESMC_I8 *d_i8=0,
                                    ESMC_R8 *d_r8=0) const;
 
-    ESMCI::Time ESMC_CalendarIncrement(const ESMCI::Time *time,
+    Time increment(const ESMCI::Time *time,
                                      const ESMCI::TimeInterval &timeinterval)
                                      const;
 
-    ESMCI::Time ESMC_CalendarDecrement(const ESMCI::Time *time,
+    Time decrement(const ESMCI::Time *time,
                                      const ESMCI::TimeInterval &timeinterval)
                                      const;
 
-    bool ESMC_CalendarIsLeapYear(ESMC_I8 yy, int *rc=0) const;
+    bool isLeapYear(ESMC_I8 yy, int *rc=0) const;
 
-    bool operator==(const ESMC_Calendar &) const;
+    bool operator==(const Calendar &) const;
     bool operator==(const ESMC_CalendarType &) const;
-    bool operator!=(const ESMC_Calendar &) const;
+    bool operator!=(const Calendar &) const;
     bool operator!=(const ESMC_CalendarType &) const;
 
     // TODO:  add method to convert calendar interval to core time ?
@@ -208,38 +209,38 @@ class ESMC_Calendar {
     // for persistence/checkpointing
 
     // friend to restore state
-    friend ESMC_Calendar *ESMC_CalendarReadRestart(int, const char*,
+    friend Calendar *ESMCI_CalendarReadRestart(int, const char*,
                                                    ESMC_IOSpec*, int*);
     // save state
-    int ESMC_CalendarWriteRestart(ESMC_IOSpec *iospec=0) const;
+    int writeRestart(ESMC_IOSpec *iospec=0) const;
 
     // internal validation
-    int ESMC_CalendarValidate(const char *options=0) const;
+    int validate(const char *options=0) const;
 
     // for testing/debugging
-    int ESMC_CalendarPrint(const char *options=0, 
+    int print(const char *options=0, 
                            const ESMCI::Time *time=0) const;
 
     // native C++ constructors/destructors
-    ESMC_Calendar(void);
-    ESMC_Calendar(const ESMC_Calendar &calendar);  // copy constructor
-    ESMC_Calendar(const char *name, ESMC_CalendarType calendarType);
-    ESMC_Calendar(const char *name, int *daysPerMonth, int monthsPerYear,
+    Calendar(void);
+    Calendar(const Calendar &calendar);  // copy constructor
+    Calendar(const char *name, ESMC_CalendarType calendarType);
+    Calendar(const char *name, int *daysPerMonth, int monthsPerYear,
                   ESMC_I4 *secondsPerDay, ESMC_I4 *daysPerYear,
                   ESMC_I4 *daysPerYeardN, ESMC_I4 *daysPerYearDd);
-    ~ESMC_Calendar(void);
+    ~Calendar(void);
 
  // < declare the rest of the public interface methods here >
 
     // friend function to allocate and initialize calendar from heap
-    friend ESMC_Calendar *ESMC_CalendarCreate(int, const char*,
+    friend Calendar *ESMCI_CalendarCreate(int, const char*,
                                               ESMC_CalendarType, int*);
 
     // friend function to allocate and initialize internal calendar from heap
-    friend int ESMC_CalendarCreate(ESMC_CalendarType);
+    friend int ESMCI_CalendarCreate(ESMC_CalendarType);
 
     // friend function to allocate and initialize custom calendar from heap
-    friend ESMC_Calendar *ESMC_CalendarCreate(int, const char*,
+    friend Calendar *ESMCI_CalendarCreate(int, const char*,
                                               int*, int,
                                               ESMC_I4*,
                                               ESMC_I4*,
@@ -247,18 +248,18 @@ class ESMC_Calendar {
                                               ESMC_I4*, int*);
 
     // friend function to copy a calendar
-    friend ESMC_Calendar *ESMC_CalendarCreate(ESMC_Calendar*, int*);
+    friend Calendar *ESMCI_CalendarCreate(Calendar*, int*);
 
     // friend function to de-allocate calendar
-    friend int ESMC_CalendarDestroy(ESMC_Calendar **);
+    friend int ESMCI_CalendarDestroy(Calendar **);
 
     // friend function to de-allocate all internal calendars
-    friend int ESMC_CalendarFinalize(void);
+    friend int ESMCI_CalendarFinalize(void);
     
     // friend functions to initialize and set the default calendar
-    friend int ESMC_CalendarInitialize(ESMC_CalendarType *);
-    friend int ESMC_CalendarSetDefault(ESMC_Calendar **);
-    friend int ESMC_CalendarSetDefault(ESMC_CalendarType *);
+    friend int ESMCI_CalendarInitialize(ESMC_CalendarType *);
+    friend int ESMCI_CalendarSetDefault(Calendar **);
+    friend int ESMCI_CalendarSetDefault(ESMC_CalendarType *);
 
 // !PRIVATE MEMBER FUNCTIONS:
 //
@@ -273,7 +274,7 @@ class ESMC_Calendar {
 //EOP
 //-------------------------------------------------------------------------
 
-};  // end class ESMC_Calendar
+};  // end class ESMCI::Calendar
 
     // Note: though seemingly redundant with the friend declarations within
     // the class definition above, the following declarations are necessary
@@ -281,17 +282,17 @@ class ESMC_Calendar {
     // These also establish defaults to match F90 optional args.
 
     // friend function to allocate and initialize calendar from heap
-    ESMC_Calendar *ESMC_CalendarCreate(int               nameLen,
+    Calendar *ESMCI_CalendarCreate(int               nameLen,
                                        const char       *name=0,
                                        ESMC_CalendarType calendarType=
                                                            ESMC_CAL_NOCALENDAR,
                                        int*              rc=0);
 
     // friend function to allocate and initialize internal calendar from heap
-    int ESMC_CalendarCreate(ESMC_CalendarType calendarType);
+    int ESMCI_CalendarCreate(ESMC_CalendarType calendarType);
 
     // friend function to allocate and initialize custom calendar from heap
-    ESMC_Calendar *ESMC_CalendarCreate(int           nameLen,
+    Calendar *ESMCI_CalendarCreate(int           nameLen,
                                        const char   *name=0,
                                        int          *daysPerMonth=0,
                                        int           monthsPerYear=0,
@@ -302,24 +303,24 @@ class ESMC_Calendar {
                                        int          *rc=0);
 
     // friend function to copy a calendar
-    ESMC_Calendar *ESMC_CalendarCreate(ESMC_Calendar *calendar, int *rc=0);
+    Calendar *ESMCI_CalendarCreate(Calendar *calendar, int *rc=0);
 
     // friend function to de-allocate calendar
-    int ESMC_CalendarDestroy(ESMC_Calendar **calendar);
+    int ESMCI_CalendarDestroy(Calendar **calendar);
 
     // friend function to de-allocate all internal calendars
-    int ESMC_CalendarFinalize(void);
+    int ESMCI_CalendarFinalize(void);
 
     // friend to restore state
-    ESMC_Calendar *ESMC_CalendarReadRestart(int nameLen,
+    Calendar *ESMCI_CalendarReadRestart(int nameLen,
                                             const char*  name=0,
                                             ESMC_IOSpec* iospec=0,
                                             int*         rc=0);
 
     // friend functions to initialize and set the default calendar
-    int ESMC_CalendarInitialize(ESMC_CalendarType *calendarType);
-    int ESMC_CalendarSetDefault(ESMC_Calendar **calendar);
-    int ESMC_CalendarSetDefault(ESMC_CalendarType *calendarType);
+    int ESMCI_CalendarInitialize(ESMC_CalendarType *calendarType);
+    int ESMCI_CalendarSetDefault(Calendar **calendar);
+    int ESMCI_CalendarSetDefault(ESMC_CalendarType *calendarType);
 
 } // namespace ESMCI
 #endif // ESMC_CALENDAR_H

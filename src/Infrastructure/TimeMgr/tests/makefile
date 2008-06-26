@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2005/10/12 19:06:21 nscollins Exp $
+# $Id: makefile,v 1.29 2008/06/26 02:08:18 rosalind Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -15,9 +15,9 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/TimeMgr/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_AlarmUTest \
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_CalendarUTest \
+ 		$(ESMF_TESTDIR)/ESMF_AlarmUTest \
 		$(ESMF_TESTDIR)/ESMF_ClockUTest \
-		$(ESMF_TESTDIR)/ESMF_CalendarUTest \
 		$(ESMF_TESTDIR)/ESMF_CalRangeUTest \
 		$(ESMF_TESTDIR)/ESMF_TimeIntervalUTest \
 		$(ESMF_TESTDIR)/ESMF_TimeUTest 

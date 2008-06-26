@@ -1,4 +1,4 @@
-// $Id: ESMCI_BaseTime.h,v 1.1 2008/05/06 02:18:19 rosalind Exp $
+// $Id: ESMCI_BaseTime.h,v 1.2 2008/06/26 02:08:15 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -114,6 +114,8 @@
 
 namespace ESMCI {
 
+ class Calendar;
+
 // !PUBLIC TYPES:
  class BaseTime;
 
@@ -127,7 +129,7 @@ class BaseTime : public ESMC_Fraction { // it is a fraction !
 
   protected:
 
-    // TODO:  move ESMC_Calendar* here to define seconds per day ? then could
+    // TODO:  move ESMCI_Calendar* here to define seconds per day ? then could
     //        add D (Julian Days) to Get()/Set() below, and remove secondsPerDay
     //        from Get()
 
@@ -193,7 +195,7 @@ class BaseTime : public ESMC_Fraction { // it is a fraction !
 //
   private:
 
-    friend class ESMC_Calendar;
+    friend class ESMCI::Calendar;
 
 //
  // < declare private interface methods here >
@@ -202,7 +204,7 @@ class BaseTime : public ESMC_Fraction { // it is a fraction !
 //-------------------------------------------------------------------------
 
 
-};    // end class ESMC_BaseTime
+};    // end class BaseTime
 
 }     // end namespace ESMCI
 

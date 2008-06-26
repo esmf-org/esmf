@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.C,v 1.4 2008/06/21 05:31:58 rosalind Exp $
+// $Id: ESMCI_TimeInterval.C,v 1.5 2008/06/26 02:08:17 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,6 +32,7 @@
  #include <ESMF_LogMacros.inc>
  #include <ESMCI_Time.h>
  #include <ESMC_Fraction.h>
+ #include <ESMCI_Calendar.h>
 
  // associated class definition file
  #include "ESMCI_TimeInterval.h"
@@ -39,7 +40,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.4 2008/06/21 05:31:58 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.5 2008/06/26 02:08:17 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -98,7 +99,7 @@ namespace ESMCI{
                                //      interval
       ESMCI::Time *endTime,      // in - ending time for absolute calendar
                                //      interval
-      ESMC_Calendar **calendar, // in - calendar for calendar interval
+      ESMCI::Calendar **calendar, // in - calendar for calendar interval
       ESMC_CalendarType *calendarType) { // in - calendar type for calendar interval
 //
 // !DESCRIPTION:
@@ -162,22 +163,22 @@ namespace ESMCI{
 
       } else if (calendarType != ESMC_NULL_POINTER) {
         // set to specified built-in type; create if necessary
-        rc = ESMC_CalendarCreate(*calendarType);
+        rc = ESMCI_CalendarCreate(*calendarType);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTimeInterval; return(rc); }
-        this->calendar = ESMC_Calendar::internalCalendar[*calendarType-1];
+        this->calendar = ESMCI::Calendar::internalCalendar[*calendarType-1];
                                                          // 4th choice
 
-      } else if (ESMC_Calendar::defaultCalendar != ESMC_NULL_POINTER) {
+      } else if (ESMCI::Calendar::defaultCalendar != ESMC_NULL_POINTER) {
         // use default calendar
-        this->calendar = ESMC_Calendar::defaultCalendar; // 5th choice
+        this->calendar = ESMCI::Calendar::defaultCalendar; // 5th choice
 
       } else {
         // create default calendar
-        rc = ESMC_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
+        rc = ESMCI_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTimeInterval; return(rc); }
-        this->calendar = ESMC_Calendar::defaultCalendar; // 6th choice
+        this->calendar = ESMCI::Calendar::defaultCalendar; // 6th choice
       }
     }
 
@@ -263,14 +264,14 @@ namespace ESMCI{
                                 //       interval
       ESMCI::Time *endTime,       // out - ending time of absolute calendar
                                 //       interval
-      ESMC_Calendar **calendar, // out - calendar of calendar interval
+      ESMCI::Calendar **calendar, // out - calendar of calendar interval
       ESMC_CalendarType *calendarType, // out - calendar type of
                                        //       calendar interval
       ESMCI::Time *startTimeIn,   // in  - starting time for calendar interval
                                 //       unit conversions
       ESMCI::Time *endTimeIn,     // in  - ending time for calendar interval
                                 //       unit conversions
-      ESMC_Calendar **calendarIn, // in  - calendar for calendar interval
+      ESMCI::Calendar **calendarIn, // in  - calendar for calendar interval
                                   //       unit conversions
       ESMC_CalendarType *calendarTypeIn, // in  - calendar type for calendar
                                          //       interval unit conversions
@@ -298,7 +299,7 @@ namespace ESMCI{
     // TODO: put calendar logic under test for any non-zero yy, mm, d ?
 
     // TODO: reduce size of this method by creating seperate methods on
-    //       ESMCI::TimeInterval and ESMC_Calendar ?
+    //       ESMCI::TimeInterval and ESMCI::Calendar ?
 
     int rc = ESMF_SUCCESS;
 
@@ -333,10 +334,10 @@ namespace ESMCI{
 
     } else if (calendarTypeIn != ESMC_NULL_POINTER) {  // 4th choice
       // use specified built-in type; create if necessary
-      rc = ESMC_CalendarCreate(*calendarType);
+      rc = ESMCI_CalendarCreate(*calendarType);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
-      tiToConvert.calendar = ESMC_Calendar::internalCalendar[*calendarType-1];
+      tiToConvert.calendar = ESMCI::Calendar::internalCalendar[*calendarType-1];
 
     } else if (this->calendar != ESMC_NULL_POINTER) {  // 5th choice
       // use this time interval's calendar property
@@ -469,7 +470,7 @@ namespace ESMCI{
                             "yy or yy_i8 because for %s time interval "
                             ">= 1 year, can't determine leap years without "
                             "startTime or endTime.", 
-                            ESMC_Calendar::calendarTypeName[
+                            ESMCI::Calendar::calendarTypeName[
                               tiToConvert.calendar->calendarType-1]);
                   ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_CANNOT_GET,
                             logMsg, &rc); return(rc);
@@ -577,7 +578,7 @@ namespace ESMCI{
                         "mm or mm_i8 because for %s time "
                         "interval >= 28 days, can't determine months without "
                         "startTime or endTime.", 
-                            ESMC_Calendar::calendarTypeName[
+                            ESMCI::Calendar::calendarTypeName[
                               tiToConvert.calendar->calendarType-1]);
               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_CANNOT_GET,
                             logMsg, &rc); return(rc);
@@ -652,7 +653,7 @@ namespace ESMCI{
             char logMsg[ESMF_MAXSTR];
             sprintf(logMsg, "need startTime or endTime to convert %lld months "
                             "to days on %s calendar.", tiToConvert.mm,
-                            ESMC_Calendar::calendarTypeName[
+                            ESMCI::Calendar::calendarTypeName[
                               tiToConvert.calendar->calendarType-1]);
             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_CANNOT_GET, logMsg,
                                                   &rc);
@@ -880,7 +881,7 @@ namespace ESMCI{
       ESMC_I8 d,            // in - calendar interval number of days
       ESMCI::Time *startTime,      // in - interval startTime
       ESMCI::Time *endTime,        // in - interval endTime
-      ESMC_Calendar *calendar,   // in - associated calendar
+      ESMCI::Calendar *calendar,   // in - associated calendar
       ESMC_CalendarType calendarType) { // in - associated calendar type
 //
 // !DESCRIPTION:
@@ -919,22 +920,22 @@ namespace ESMCI{
 
     } else if (calendarType != (ESMC_CalendarType)0) {
       // set to specified built-in type; create if necessary
-      rc = ESMC_CalendarCreate(calendarType);
+      rc = ESMCI_CalendarCreate(calendarType);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
-      this->calendar = ESMC_Calendar::internalCalendar[calendarType-1];
+      this->calendar = ESMCI::Calendar::internalCalendar[calendarType-1];
                                                        // 2nd choice
 
-    } else if (ESMC_Calendar::defaultCalendar != ESMC_NULL_POINTER) {
+    } else if (ESMCI::Calendar::defaultCalendar != ESMC_NULL_POINTER) {
       // use default calendar
-      this->calendar = ESMC_Calendar::defaultCalendar; // 3rd choice
+      this->calendar = ESMCI::Calendar::defaultCalendar; // 3rd choice
 
     } else {
       // create default calendar
-      rc = ESMC_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
+      rc = ESMCI_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
-      this->calendar = ESMC_Calendar::defaultCalendar; // 4th choice
+      this->calendar = ESMCI::Calendar::defaultCalendar; // 4th choice
     }
 
     return(ESMF_SUCCESS);
@@ -2791,16 +2792,16 @@ namespace ESMCI{
    mm = 0;
    d  = 0;
 
-   if (ESMC_Calendar::defaultCalendar != ESMC_NULL_POINTER) {
+   if (ESMCI::Calendar::defaultCalendar != ESMC_NULL_POINTER) {
      // use default calendar
-     calendar = ESMC_Calendar::defaultCalendar; // 1st choice
+     calendar = ESMCI::Calendar::defaultCalendar; // 1st choice
 
    } else {
      // create default calendar
-     int rc = ESMC_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
+     int rc = ESMCI_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
        return;
-     calendar = ESMC_Calendar::defaultCalendar; // 2nd choice
+     calendar = ESMCI::Calendar::defaultCalendar; // 2nd choice
    }
 
    // startTime, endTime initialized via their own constructor when
@@ -2827,7 +2828,7 @@ namespace ESMCI{
       ESMC_I8 d,             // in - calendar interval number of days
       ESMCI::Time *startTime,       // in - interval start time
       ESMCI::Time *endTime,         // in - interval end time
-      ESMC_Calendar *calendar,    // in - calendar
+      ESMCI::Calendar *calendar,    // in - calendar
       ESMC_CalendarType calendarType) :   // in - calendar type
 //
 // !DESCRIPTION:
@@ -2861,22 +2862,22 @@ namespace ESMCI{
 
    } else if (calendarType != (ESMC_CalendarType)0) {
      // set to specified built-in type; create if necessary
-     int rc = ESMC_CalendarCreate(calendarType);
+     int rc = ESMCI_CalendarCreate(calendarType);
      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
        return;
-     this->calendar = ESMC_Calendar::internalCalendar[calendarType-1];
+     this->calendar = ESMCI::Calendar::internalCalendar[calendarType-1];
                                                       // 2nd choice
 
-   } else if (ESMC_Calendar::defaultCalendar != ESMC_NULL_POINTER) {
+   } else if (ESMCI::Calendar::defaultCalendar != ESMC_NULL_POINTER) {
      // use default calendar
-     this->calendar = ESMC_Calendar::defaultCalendar; // 3rd choice
+     this->calendar = ESMCI::Calendar::defaultCalendar; // 3rd choice
 
    } else {
      // create default calendar
-     int rc = ESMC_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
+     int rc = ESMCI_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
        return;
-     this->calendar = ESMC_Calendar::defaultCalendar; // 4th choice
+     this->calendar = ESMCI::Calendar::defaultCalendar; // 4th choice
    }
 
    // TODO: catch & throw exceptions above, and/or LogErr
