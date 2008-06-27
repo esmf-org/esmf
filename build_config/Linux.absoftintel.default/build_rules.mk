@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.11 2008/06/18 05:07:08 theurich Exp $
+# $Id: build_rules.mk,v 1.12 2008/06/27 16:04:11 theurich Exp $
 #
 # Linux.absoftintel.default
 #
@@ -96,11 +96,6 @@ endif
 #
 ESMF_F90COMPILEFREENOCPP = -ffree
 ESMF_F90COMPILEFIXCPP    = -ffixed
-
-############################################################
-# Assume standard LAPACK libraries available by default
-#
-ESMF_LAPACKDEFAULT       = netlib
 
 ############################################################
 # Determine where absoft f90's libraries are located
