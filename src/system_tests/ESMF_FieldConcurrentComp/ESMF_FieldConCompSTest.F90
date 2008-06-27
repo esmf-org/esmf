@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldConCompSTest.F90,v 1.1 2008/05/09 18:09:36 feiliu Exp $
+! $Id: ESMF_FieldConCompSTest.F90,v 1.2 2008/06/27 17:24:15 theurich Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -400,12 +400,16 @@
     print *, "System Test ConcurrentComponent complete."
     rc = localrc
 
+    ! Normal ESMF Test output
+    write(failMsg, *) "System Test failure"
+    write(testname, *) "System Test ConcurrentComponent: Field Concurrent Components"
+
+    ! IMPORTANT: TestGlobal() prints the PASS: string that the scripts grep for.
+    call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), testname, failMsg, testresult, &
+      ESMF_SRCLINE)
+
     ! Only on PET 0 or any PET with an error. 
     if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
-
-      ! Normal ESMF Test output
-      write(failMsg, *) "System Test failure"
-      write(testname, *) "System Test ConcurrentComponent: Field Concurrent Components"
 
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                         testname, failMsg, testresult, ESMF_SRCLINE)
