@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.6 2008/05/08 02:27:14 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.7 2008/06/27 05:55:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -145,7 +145,8 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     DELayout *getDELayout()         const {return delayout;}
     ESMC_Logical getRegDecompFlag() const {return regDecompFlag;}
     int getSequenceIndexLocalDe(int localDe, int *index, int *rc=NULL) const;
-    int getSequenceIndexPatch(int patch, int *index, int *rc=NULL) const;
+    int getSequenceIndexPatch(int patch, int *index, int depth,
+      int *rc=NULL)const;
     const int *getArbSeqIndexCountPLocalDe()
       const {return arbSeqIndexCountPLocalDe;}
     const int *getArbSeqIndexListPLocalDe(int localDe, int *rc=NULL) const;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.68 2008/06/24 18:07:15 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.69 2008/06/27 05:55:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.68 2008/06/24 18:07:15 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.69 2008/06/27 05:55:02 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4718,7 +4718,7 @@ int GridIter::getGlobalID(
 
 
   // NOTE THAT THIS ONLY WORKS FOR SINGLE PATCH GRIDS WITH GLOBAL INDEXING
-  gid=grid->getDistGrid()->getSequenceIndexPatch(1,deBasedInd,&localrc);
+  gid=grid->getDistGrid()->getSequenceIndexPatch(1,deBasedInd,0,&localrc);
 
   if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
 #endif
@@ -5495,7 +5495,7 @@ int GridCellIter::getGlobalID(
 
 
   // NOTE THAT THIS ONLY WORKS FOR SINGLE PATCH GRIDS WITH GLOBAL INDEXING
-  gid=grid->getDistGrid()->getSequenceIndexPatch(1,curInd,&localrc);
+  gid=grid->getDistGrid()->getSequenceIndexPatch(1,curInd,0,&localrc);
 
   if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
 #endif

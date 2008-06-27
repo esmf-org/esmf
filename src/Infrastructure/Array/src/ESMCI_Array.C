@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.16 2008/05/12 21:56:36 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.17 2008/06/27 05:55:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.16 2008/05/12 21:56:36 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.17 2008/06/27 05:55:01 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1832,7 +1832,7 @@ SeqIndex Array::getSequenceIndexPatch(
   }
   // determine the sequentialized index for decomposed dimensions
   int decompSeqIndex;
-  decompSeqIndex = distgrid->getSequenceIndexPatch(patch, decompIndex,
+  decompSeqIndex = distgrid->getSequenceIndexPatch(patch, decompIndex, 0,
     &localrc);  
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return seqIndex;

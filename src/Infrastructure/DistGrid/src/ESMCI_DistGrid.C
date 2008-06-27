@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.8 2008/06/18 05:07:13 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.9 2008/06/27 05:55:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.8 2008/06/18 05:07:13 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.9 2008/06/27 05:55:02 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2035,6 +2035,58 @@ int DistGrid::print()const{
   printf("localPet = %d\n", vm->getLocalPet());
   printf("petCount = %d\n", vm->getPetCount());
   printf("--- ESMCI::DistGrid::print end ---\n");
+  
+#if 1
+  printf("--- ESMCI::DistGrid::print - Topology test start ---\n");
+  int lrc;
+  int indexTuple[2];
+  int depth=4;
+  indexTuple[0] = 0; indexTuple[1] = 0;
+  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    indexTuple[0], indexTuple[1],
+    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+  indexTuple[0] = 0; indexTuple[1] = 1;
+  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    indexTuple[0], indexTuple[1],
+    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+  indexTuple[0] = 1; indexTuple[1] = 1;
+  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    indexTuple[0], indexTuple[1],
+    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+  indexTuple[0] = 1; indexTuple[1] = 0;
+  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    indexTuple[0], indexTuple[1],
+    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+  indexTuple[0] = 11; indexTuple[1] = 1;
+  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    indexTuple[0], indexTuple[1],
+    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+  indexTuple[0] = 1; indexTuple[1] = 5;
+  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    indexTuple[0], indexTuple[1],
+    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+  indexTuple[0] = 1; indexTuple[1] = 6;
+  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    indexTuple[0], indexTuple[1],
+    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+  indexTuple[0] = 4; indexTuple[1] = 6;
+  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    indexTuple[0], indexTuple[1],
+    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+  indexTuple[0] = 10; indexTuple[1] = 5;
+  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    indexTuple[0], indexTuple[1],
+    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+  indexTuple[0] = 10; indexTuple[1] = 6;
+  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    indexTuple[0], indexTuple[1],
+    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+  indexTuple[0] = 21; indexTuple[1] = 5;
+  printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
+    indexTuple[0], indexTuple[1],
+    getSequenceIndexPatch(1, indexTuple, depth, &lrc), lrc);
+  printf("--- ESMCI::DistGrid::print - Topology test end ---\n");
+#endif
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -2358,6 +2410,11 @@ int DistGrid::getSequenceIndexLocalDe(
 //    indices and/or along dimensions with non-contiguous indices require
 //    the specified index to be within [0..indexCountPDimPDe[dim,localDe]-1].
 //
+//    A value of -1 is returned by this function if the specified index tuple
+//    cannot be mapped to a sequence index in DistGrid. If at the same time
+//    the code returned in rc does not indicate an error a return value of -1
+//    indicates that the index tuple lies outside of the DistGrid index space.
+//
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -2406,7 +2463,7 @@ int DistGrid::getSequenceIndexLocalDe(
           indexListPDimPLocalDe[localDe*dimCount+i][index[i]];
     }
     // get sequence index providing patch relative index tuple
-    seqindex = getSequenceIndexPatch(patch, patchIndexTuple, &localrc);
+    seqindex = getSequenceIndexPatch(patch, patchIndexTuple, 0, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return -1;  //  bail out with invalid seqindex
     delete [] patchIndexTuple;
@@ -2434,16 +2491,25 @@ int DistGrid::getSequenceIndexPatch(
 //
   int patch,                        // in  - patch = {1, ..., patchCount}
   int *index,                       // in  - patch relative index tuple
+  int depth,                        // in  - depth of recursive search
   int *rc                           // out - return code
   )const{
 //
 // !DESCRIPTION:
 //    Get sequential index provided the patch relative index tuple.
 //
+//    A value of -1 is returned by this function if the specified index tuple
+//    cannot be mapped to a sequence index in DistGrid. If at the same time
+//    the code returned in rc does not indicate an error a return value of -1
+//    indicates that the index tuple lies outside of the DistGrid index space.
+//
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+//printf("gjt - getSequenceIndexPatch depth: %d\n", depth);
 
   // check input
   if (patch < 1 || patch > patchCount){
@@ -2452,6 +2518,9 @@ int DistGrid::getSequenceIndexPatch(
     return -1;
   }
   
+  // adjust recursion depth
+  --depth;
+
   bool onPatch = true;  // start assuming that index tuple can be found on patch
   // add up elements from patch
   int seqindex = 0; // initialize
@@ -2474,10 +2543,57 @@ int DistGrid::getSequenceIndexPatch(
     for (int i=0; i<patch-2; i++)
       seqindex += elementCountPPatch[i];
     ++seqindex;  // shift sequentialized index to basis 1 !!!!
-  }else{
-    //TODO: more involved and expensive lookup using patch connections to find
-    // if there is a patch connected at the patch relative index[] location and
-    // if so find the sequence index.
+  }else if (depth >= 0){
+    for (int i=0; i<connectionCount; i++){
+      int patchA = connectionList[i][0];
+      int patchB = connectionList[i][1];
+      if (patchA == patch){
+        // found connection for this patch -> need to transform index
+        int *indexB = new int[dimCount];
+        int positionIndexOffset = 2;
+        int orientationIndexOffset = 2+dimCount;
+        for (int j=0; j<dimCount; j++){
+          int positionOffset = connectionList[i][positionIndexOffset+j];
+          int orientationIndex = connectionList[i][orientationIndexOffset+j];
+          if (orientationIndex < 0){
+            ++orientationIndex; // shift to basis 0
+            indexB[j] = -(index[-orientationIndex] - positionOffset);
+          }else{
+            --orientationIndex; // shift to basis 0
+            indexB[j] = index[orientationIndex] - positionOffset;
+          }
+        }
+        seqindex = getSequenceIndexPatch(patchB, indexB, depth, &localrc);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          rc)) return seqindex;  // bail out
+        delete indexB;
+        if (seqindex > -1)
+          break;  // break out of loop over connections
+      }
+      if (patchB == patch){
+        // found connection for this patch -> need to transform index
+        int *indexA = new int[dimCount];
+        int positionIndexOffset = 2;
+        int orientationIndexOffset = 2+dimCount;
+        for (int j=0; j<dimCount; j++){
+          int positionOffset = connectionList[i][positionIndexOffset+j];
+          int orientationIndex = connectionList[i][orientationIndexOffset+j];
+          if (orientationIndex < 0){
+            ++orientationIndex; // shift to basis 0
+            indexA[-orientationIndex] = -index[j] + positionOffset;
+          }else{
+            --orientationIndex; // shift to basis 0
+            indexA[orientationIndex] = index[j] + positionOffset;
+          }
+        }
+        seqindex = getSequenceIndexPatch(patchA, indexA, depth, &localrc);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          rc)) return seqindex;  // bail out
+        delete indexA;
+        if (seqindex > -1)
+          break;  // break out of loop over connections
+      }
+    }
   }
     
   // return successfully
