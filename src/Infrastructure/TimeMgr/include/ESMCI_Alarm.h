@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.h,v 1.3 2008/06/24 14:23:54 rosalind Exp $
+// $Id: ESMCI_Alarm.h,v 1.4 2008/06/27 03:51:18 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@ namespace ESMCI {
 
 // !PUBLIC TYPES:
  class Alarm;
- typedef ESMCI::Alarm* ESMCI_AlarmPtr;
+ typedef Alarm* ESMCI_AlarmPtr;
 
 // !PRIVATE TYPES:
  // class configuration type:  not needed for Alarm
@@ -106,20 +106,20 @@ class Alarm {
   private:   // corresponds to F90 module 'type ESMF_Alarm' members
     char              name[ESMF_MAXSTR];  // name of alarm
                                           // TODO: inherit from ESMC_Base class
-    ESMCI::Clock       *clock;        // associated clock
-    ESMCI::TimeInterval ringInterval; // (TMG 4.5.2) for periodic alarming
-    ESMCI::TimeInterval ringDuration; // how long alarm stays on
-    ESMCI::Time         ringTime;     // (TMG 4.5.1) next time to ring
-    ESMCI::Time         firstRingTime;    // the first ring time
+    Clock       *clock;        // associated clock
+    TimeInterval ringInterval; // (TMG 4.5.2) for periodic alarming
+    TimeInterval ringDuration; // how long alarm stays on
+    Time         ringTime;     // (TMG 4.5.1) next time to ring
+    Time         firstRingTime;    // the first ring time
                                         //   (save for reverse mode)
-    ESMCI::Time         prevRingTime; // previous alarm time 
-    ESMCI::Time         stopTime;     // when alarm intervals end.
-    ESMCI::Time         ringBegin;    // note time when alarm turns on.
-    ESMCI::Time         ringEnd;      // save time when alarm is turned off via
+    Time         prevRingTime; // previous alarm time 
+    Time         stopTime;     // when alarm intervals end.
+    Time         ringBegin;    // note time when alarm turns on.
+    Time         ringEnd;      // save time when alarm is turned off via
                                     //   ESMC_RingerOff().  For reverse mode.
                                     //   TODO: make array for variable
                                     //   turn off durations.
-    ESMCI::Time         refTime;      // reference time.
+    Time         refTime;      // reference time.
     int               ringTimeStepCount;      // how long alarm rings;
                                               //  mutually exclusive with
                                               //  ringDuration
@@ -138,7 +138,7 @@ class Alarm {
                                              // previous clock timestep.
     bool              enabled;    // able to ring (TMG 4.5.3)
     bool              sticky;     // must be turned off via
-                                  //   ESMCI::Alarm::ringerOff(),
+                                  //   Alarm::ringerOff(),
                                   //  otherwise will turn self off after
                                   //  ringDuration or ringTimeStepCount.
     int               id;         // unique identifier. used for equality
@@ -164,13 +164,13 @@ class Alarm {
 
                int    set(int                nameLen,
                       const char        *name=0,
-                      ESMCI::Clock       **clock=0,
-                      ESMCI::Time         *ringTime=0,
-                      ESMCI::TimeInterval *ringInterval=0,
-                      ESMCI::Time         *stopTime=0,
-                      ESMCI::TimeInterval *ringDuration=0,
+                      Clock       **clock=0,
+                      Time         *ringTime=0,
+                      TimeInterval *ringInterval=0,
+                      Time         *stopTime=0,
+                      TimeInterval *ringDuration=0,
                       int               *ringTimeStepCount=0,
-                      ESMCI::Time         *refTime=0,
+                      Time         *refTime=0,
                       bool              *ringing=0,
                       bool              *enabled=0,  // (TMG 4.1, 4.7)
                       bool              *sticky=0);
@@ -178,17 +178,17 @@ class Alarm {
               int     get(int                nameLen,
                       int               *tempNameLen,
                       char              *tempName=0,
-                      ESMCI::Clock       **clock=0,
-                      ESMCI::Time         *ringTime=0,
-                      ESMCI::Time         *prevRingTime=0,
-                      ESMCI::TimeInterval *ringInterval=0,
-                      ESMCI::Time         *stopTime=0,
-                      ESMCI::TimeInterval *ringDuration=0,
+                      Clock       **clock=0,
+                      Time         *ringTime=0,
+                      Time         *prevRingTime=0,
+                      TimeInterval *ringInterval=0,
+                      Time         *stopTime=0,
+                      TimeInterval *ringDuration=0,
                       int               *ringTimeStepCount=0,
                       int               *timeStepRingingCount=0,
-                      ESMCI::Time         *ringBegin=0,
-                      ESMCI::Time         *ringEnd=0,
-                      ESMCI::Time         *refTime=0,
+                      Time         *ringBegin=0,
+                      Time         *ringEnd=0,
+                      Time         *refTime=0,
                       bool              *ringing=0,
                       bool              *ringingOnPrevTimeStep=0,
                       bool              *enabled=0,  // (TMG 4.1, 4.7)
@@ -202,11 +202,11 @@ class Alarm {
               int      ringerOff(void);
               bool     isRinging(int *rc=0) const;
                                          // TMG 4.4: synchronous query for apps
-              bool     willRingNext(ESMCI::TimeInterval *timeStep, int *rc=0) const;
+              bool     willRingNext(TimeInterval *timeStep, int *rc=0) const;
               bool     wasPrevRinging(int *rc=0) const;
 
               int      setToSticky(void);
-              int      notSticky(ESMCI::TimeInterval *ringDuration=0,
+              int      notSticky(TimeInterval *ringDuration=0,
                              int *ringTimeStepCount=0);
               bool     isSticky(int *rc=0) const;
 
@@ -217,15 +217,15 @@ class Alarm {
                          //   negative direction
                          // Can be basis for asynchronous alarm reporting
 
-    bool operator==(const ESMCI::Alarm &) const; 
-    bool operator!=(const ESMCI::Alarm &) const; 
+    bool operator==(const Alarm &) const; 
+    bool operator!=(const Alarm &) const; 
 
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
 
     // friend to restore state
-    friend ESMCI::Alarm *ESMCI_alarmReadRestart(int, const char*,
+    friend Alarm *ESMCI_alarmReadRestart(int, const char*,
                                              ESMC_IOSpec*, int*);
     // save state
     int writeRestart(ESMC_IOSpec *iospec=0) const;
@@ -238,22 +238,22 @@ class Alarm {
 
     // native C++ constructors/destructors
     Alarm(void);
-    Alarm(const ESMCI::Alarm &alarm);
+    Alarm(const Alarm &alarm);
     ~Alarm(void);
 
  // < declare the rest of the public interface methods here >
 
     // friend to allocate and initialize alarm from heap
-    friend ESMCI::Alarm *ESMCI_alarmCreate(int, const char*, ESMCI::Clock*, 
-                                 ESMCI::Time*, ESMCI::TimeInterval*, ESMCI::Time*, 
-                                 ESMCI::TimeInterval*, int*, ESMCI::Time*, bool*,
+    friend Alarm *ESMCI_alarmCreate(int, const char*, Clock*, 
+                                 Time*, TimeInterval*, Time*, 
+                                 TimeInterval*, int*, Time*, bool*,
                                  bool*, int*);
 
     // friend function to copy an alarm
-    friend ESMCI::Alarm *ESMCI_alarmCreate(ESMCI::Alarm*, int*);
+    friend Alarm *ESMCI_alarmCreate(Alarm*, int*);
 
     // friend to de-allocate alarm
-    friend int ESMCI_alarmDestroy(ESMCI::Alarm **);
+    friend int ESMCI_alarmDestroy(Alarm **);
 
 
 // !PRIVATE MEMBER FUNCTIONS:
@@ -269,40 +269,40 @@ class Alarm {
     int resetRingBegin(bool timeStepPositive);
 
     // friend class alarm
-    friend class ESMCI::Clock;
+    friend class Clock;
 
 //
 //EOP
 //-------------------------------------------------------------------------
 
-};  // end class ESMCI::Alarm
+};  // end class Alarm
 
     // Note: though seemingly redundant with the friend declarations within
     // the class definition above, the following declarations are necessary
     // to appease some compilers (most notably IBM), as well as ANSI C++. 
     // These also establish defaults to match F90 optional args.
 
-    ESMCI::Alarm *ESMCI_alarmCreate(int nameLen,
+    Alarm *ESMCI_alarmCreate(int nameLen,
                                  const char*        name=0,
-                                 ESMCI::Clock*        clock=0, 
-                                 ESMCI::Time*         ringTime=0,
-                                 ESMCI::TimeInterval* ringInterval=0,
-                                 ESMCI::Time*         stopTime=0, 
-                                 ESMCI::TimeInterval* ringDuration=0,
+                                 Clock*        clock=0, 
+                                 Time*         ringTime=0,
+                                 TimeInterval* ringInterval=0,
+                                 Time*         stopTime=0, 
+                                 TimeInterval* ringDuration=0,
                                  int*               ringTimeStepCount=0,
-                                 ESMCI::Time*         refTime=0,
+                                 Time*         refTime=0,
                                  bool*              enabled=0,
                                  bool*              sticky=0,
                                  int*               rc=0);
 
     // friend function to copy a alarm
-    ESMCI::Alarm *ESMCI_alarmCreate(ESMCI::Alarm *alarm, int *rc=0);
+    Alarm *ESMCI_alarmCreate(Alarm *alarm, int *rc=0);
 
     // friend to de-allocate alarm
-    int ESMCI_alarmDestroy(ESMCI::Alarm **alarm);
+    int ESMCI_alarmDestroy(Alarm **alarm);
 
     // friend to restore state
-    ESMCI::Alarm *ESMCI_alarmReadRestart(int nameLen,
+    Alarm *ESMCI_alarmReadRestart(int nameLen,
                                       const char*  name=0,
                                       ESMC_IOSpec* iospec=0,
                                       int*         rc=0);

@@ -1,4 +1,4 @@
-// $Id: ESMCI_BaseTime.h,v 1.2 2008/06/26 02:08:15 rosalind Exp $
+// $Id: ESMCI_BaseTime.h,v 1.3 2008/06/27 03:51:18 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC_BaseTime - Base time class
+// !CLASS:  ESMCI::BaseTime - Base time class
 //
 // !DESCRIPTION:
 //
@@ -163,7 +163,7 @@ class BaseTime : public ESMC_Fraction { // it is a fraction !
                          ESMC_R8 *ns_r8=0,
                          ESMC_I4 *sN=0, ESMC_I4 *sD=0) const;
 
-    // ESMCI::BaseTime doesn't need configuration, hence GetConfig/SetConfig
+    // BaseTime doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
 
     // TODO: should be implicit, but then won't support
@@ -195,7 +195,7 @@ class BaseTime : public ESMC_Fraction { // it is a fraction !
 //
   private:
 
-    friend class ESMCI::Calendar;
+    friend class Calendar;
 
 //
  // < declare private interface methods here >

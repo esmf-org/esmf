@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.h,v 1.5 2008/06/26 02:08:15 rosalind Exp $
+// $Id: ESMCI_TimeInterval.h,v 1.6 2008/06/27 03:51:18 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -84,14 +84,14 @@ class TimeInterval;
 // !PRIVATE TYPES:
 
  // class definition type
-class TimeInterval : public ESMCI::BaseTime { 
-                                             // inherits ESMCI::BaseTime
+class TimeInterval : public BaseTime { 
+                                             // inherits BaseTime
                                              // TODO: (& ESMC_Base class when
                                              // fully aligned with F90 equiv)
   private:
-    ESMCI::Time startTime;  // for absolute calendar intervals
-    ESMCI::Time endTime;    // for absolute calendar intervals
-    ESMCI::Calendar *calendar;  // for calendar intervals on a 
+    Time startTime;  // for absolute calendar intervals
+    Time endTime;    // for absolute calendar intervals
+    Calendar *calendar;  // for calendar intervals on a 
                               //   specific calendar
     ESMC_I8 yy;      // for relative Calendar intervals:  number of years
     ESMC_I8 mm;      // for relative Calendar intervals:  number of months
@@ -105,7 +105,7 @@ class TimeInterval : public ESMCI::BaseTime {
 
     // all get/set routines perform signed conversions, where applicable;
     //   direct, one-to-one access to core time elements is provided by the
-    //   ESMCI::BaseTime base class
+    //   BaseTime base class
 
     // Get/Set methods to support the F90 optional arguments interface
     int set(ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
@@ -120,8 +120,8 @@ class TimeInterval : public ESMCI::BaseTime {
                              ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
                              ESMC_R8 *ns_r8=0,
                              ESMC_I4 *sN=0, ESMC_I4 *sD=0,
-                             ESMCI::Time *startTime=0, ESMCI::Time *endTime=0,
-                             ESMCI::Calendar **calendar=0,
+                             Time *startTime=0, Time *endTime=0,
+                             Calendar **calendar=0,
                              ESMC_CalendarType *calendarType=0);
 
     int get(ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
@@ -136,11 +136,11 @@ class TimeInterval : public ESMCI::BaseTime {
                              ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
                              ESMC_R8 *ns_r8=0,
                              ESMC_I4 *sN=0, ESMC_I4 *sD=0,
-                             ESMCI::Time *startTime=0, ESMCI::Time *endTime=0,
-                             ESMCI::Calendar **calendar=0,
+                             Time *startTime=0, Time *endTime=0,
+                             Calendar **calendar=0,
                              ESMC_CalendarType *calendarType=0,
-                             ESMCI::Time *startTimeIn=0, ESMCI::Time *endTimeIn=0,
-                             ESMCI::Calendar **calendarIn=0,
+                             Time *startTimeIn=0, Time *endTimeIn=0,
+                             Calendar **calendarIn=0,
                              ESMC_CalendarType *calendarTypeIn=0,
                              int timeStringLen=0, int *tempTimeStringLen=0,
                              char *tempTimeString=0,
@@ -202,7 +202,7 @@ class TimeInterval : public ESMCI::BaseTime {
     bool operator>=(const TimeInterval &) const;
 
     // copy or assign from ESMC_Fraction expressions, supports Time1-Time2
-    // operator in ESMCI::Time.
+    // operator in Time.
     // TODO:  should be implicit ?
     TimeInterval& operator=(const ESMC_Fraction &);
 
@@ -223,13 +223,13 @@ class TimeInterval : public ESMCI::BaseTime {
     TimeInterval(void);
     TimeInterval(ESMC_I8 s, int sN=0, int sD=1,
                       ESMC_I8 yy=0, ESMC_I8 mm=0, ESMC_I8 d=0,
-                      ESMCI::Time *startTime=0, ESMCI::Time *endTime=0,
-                      ESMCI::Calendar *calendar=0,
+                      Time *startTime=0, Time *endTime=0,
+                      Calendar *calendar=0,
                       ESMC_CalendarType calendarType=(ESMC_CalendarType)0);
     int set(ESMC_I8 s, int sN=0, int sD=1,
                       ESMC_I8 yy=0, ESMC_I8 mm=0, ESMC_I8 d=0,
-                      ESMCI::Time *startTime=0, ESMCI::Time *endTime=0,
-                      ESMCI::Calendar *calendar=0,
+                      Time *startTime=0, Time *endTime=0,
+                      Calendar *calendar=0,
                       ESMC_CalendarType calendarType=(ESMC_CalendarType)0);
                                    // used internally instead of constructor
                                    // to cover case of initial entry from F90,
@@ -266,8 +266,8 @@ class TimeInterval : public ESMCI::BaseTime {
     // reduce time interval to smallest and least number of units
     int reduce(void);
 
-    friend class ESMCI::Time;
-    friend class ESMCI::Calendar;
+    friend class Time;
+    friend class Calendar;
                                                         // (TMG 2.5.5)
 //
  // < declare private interface methods here >

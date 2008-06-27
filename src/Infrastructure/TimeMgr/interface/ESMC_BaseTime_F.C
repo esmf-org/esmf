@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime_F.C,v 1.19 2008/06/08 03:33:45 rosalind Exp $
+// $Id: ESMC_BaseTime_F.C,v 1.20 2008/06/27 03:51:19 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -36,38 +36,38 @@ extern "C" {
        // overloaded comparison operators
        //
 
-       void FTN(c_esmc_basetimeeq)(ESMCI::BaseTime *baseTime1,
-                                   ESMCI::BaseTime *baseTime2,
+       void FTN(c_esmc_basetimeeq)(BaseTime *baseTime1,
+                                   BaseTime *baseTime2,
                                    int *esmf_baseTimeEQ) {
            *esmf_baseTimeEQ = (int) (*baseTime1 == *baseTime2);
        }
 
-       void FTN(c_esmc_basetimene)(ESMCI::BaseTime *baseTime1,
-                                   ESMCI::BaseTime *baseTime2,
+       void FTN(c_esmc_basetimene)(BaseTime *baseTime1,
+                                   BaseTime *baseTime2,
                                    int *esmf_baseTimeNE) {
            *esmf_baseTimeNE = (int) (*baseTime1 != *baseTime2);
        }
 
-       void FTN(c_esmc_basetimelt)(ESMCI::BaseTime *baseTime1,
-                                   ESMCI::BaseTime *baseTime2,
+       void FTN(c_esmc_basetimelt)(BaseTime *baseTime1,
+                                   BaseTime *baseTime2,
                                    int *esmf_baseTimeLT) {
            *esmf_baseTimeLT = (int) (*baseTime1 < *baseTime2);
        }
 
-       void FTN(c_esmc_basetimegt)(ESMCI::BaseTime *baseTime1,
-                                   ESMCI::BaseTime *baseTime2,
+       void FTN(c_esmc_basetimegt)(BaseTime *baseTime1,
+                                   BaseTime *baseTime2,
                                    int *esmf_baseTimeGT) {
            *esmf_baseTimeGT = (int) (*baseTime1 > *baseTime2);
        }
 
-       void FTN(c_esmc_basetimele)(ESMCI::BaseTime *baseTime1,
-                                   ESMCI::BaseTime *baseTime2,
+       void FTN(c_esmc_basetimele)(BaseTime *baseTime1,
+                                   BaseTime *baseTime2,
                                    int *esmf_baseTimeLE) {
            *esmf_baseTimeLE = (int) (*baseTime1 <= *baseTime2);
        }
 
-       void FTN(c_esmc_basetimege)(ESMCI::BaseTime *baseTime1,
-                                   ESMCI::BaseTime *baseTime2,
+       void FTN(c_esmc_basetimege)(BaseTime *baseTime1,
+                                   BaseTime *baseTime2,
                                    int *esmf_baseTimeGE) {
            *esmf_baseTimeGE = (int) (*baseTime1 >= *baseTime2);
        }
@@ -76,15 +76,15 @@ extern "C" {
        // overloaded increment/decrement
        //
 
-       void FTN(c_esmc_basetimesum)(ESMCI::BaseTime *baseTime1,
-                                    ESMCI::BaseTime *baseTime2,
-                                    ESMCI::BaseTime *esmf_baseTimeSum) {
+       void FTN(c_esmc_basetimesum)(BaseTime *baseTime1,
+                                    BaseTime *baseTime2,
+                                    BaseTime *esmf_baseTimeSum) {
            *esmf_baseTimeSum = (*baseTime1 + *baseTime2);
        }
 
-       void FTN(c_esmc_basetimediff)(ESMCI::BaseTime *baseTime1,
-                                     ESMCI::BaseTime *baseTime2,
-                                     ESMCI::BaseTime *esmf_baseTimeDiff) {
+       void FTN(c_esmc_basetimediff)(BaseTime *baseTime1,
+                                     BaseTime *baseTime2,
+                                     BaseTime *esmf_baseTimeDiff) {
            *esmf_baseTimeDiff = (*baseTime1 - *baseTime2);
        }
 };

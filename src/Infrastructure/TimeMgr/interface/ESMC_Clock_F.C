@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.48 2008/06/26 02:08:16 rosalind Exp $
+// $Id: ESMC_Clock_F.C,v 1.49 2008/06/27 03:51:20 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -36,15 +36,15 @@ namespace ESMCI{
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_clockcreatenew)(ESMCI::Clock **ptr,
+       void FTN(c_esmc_clockcreatenew)(Clock **ptr,
                                        int *nameLen,
                                        const char *name,
-                                       ESMCI::TimeInterval *timeStep,
-                                       ESMCI::Time *startTime,
-                                       ESMCI::Time *stopTime,
-                                       ESMCI::TimeInterval *runDuration,
+                                       TimeInterval *timeStep,
+                                       Time *startTime,
+                                       Time *stopTime,
+                                       TimeInterval *runDuration,
                                        int *runTimeStepCount,
-                                       ESMCI::Time *refTime,
+                                       Time *refTime,
                                        int *status) {
           *ptr = ESMCI_ClockCreate(
                                            *nameLen,   // always present 
@@ -59,34 +59,34 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_clockcreatecopy)(ESMCI::Clock **ptr,
-                                        ESMCI::Clock **clock,
+       void FTN(c_esmc_clockcreatecopy)(Clock **ptr,
+                                        Clock **clock,
                                         int *status) {
           *ptr = ESMCI_ClockCreate(
                                            *clock,   // required
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_clockdestroy)(ESMCI::Clock **ptr, int *status) {
+       void FTN(c_esmc_clockdestroy)(Clock **ptr, int *status) {
           int rc = ESMCI_ClockDestroy(ptr);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_clockset)(ESMCI::Clock **ptr,
+       void FTN(c_esmc_clockset)(Clock **ptr,
                                  int *nameLen,
                                  const char *name,
-                                 ESMCI::TimeInterval *timeStep,
-                                 ESMCI::Time *startTime,
-                                 ESMCI::Time *stopTime,
-                                 ESMCI::TimeInterval *runDuration,
+                                 TimeInterval *timeStep,
+                                 Time *startTime,
+                                 Time *stopTime,
+                                 TimeInterval *runDuration,
                                  int *runTimeStepCount,
-                                 ESMCI::Time *refTime,
-                                 ESMCI::Time *currTime,
+                                 Time *refTime,
+                                 Time *currTime,
                                  ESMC_I8 *advanceCount,
                                  ESMC_Direction *direction,
                                  int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::set(
+          int rc = (*ptr)->Clock::set(
                                            *nameLen,   // always present 
                                                        //   internal argument.
                     ESMC_NOT_PRESENT_FILTER(name),
@@ -102,21 +102,21 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_clockget)(ESMCI::Clock **ptr,
+       void FTN(c_esmc_clockget)(Clock **ptr,
                                  int *nameLen,
                                  int *tempNameLen,
                                  char *tempName,
-                                 ESMCI::TimeInterval *timeStep,
-                                 ESMCI::Time *startTime,
-                                 ESMCI::Time *stopTime,
-                                 ESMCI::TimeInterval *runDuration,
+                                 TimeInterval *timeStep,
+                                 Time *startTime,
+                                 Time *stopTime,
+                                 TimeInterval *runDuration,
                                  ESMC_R8 *runTimeStepCount,
-                                 ESMCI::Time *refTime,
-                                 ESMCI::Time *currTime,
-                                 ESMCI::Time *prevTime,
-                                 ESMCI::TimeInterval *currSimTime,
-                                 ESMCI::TimeInterval *prevSimTime,
-                                 ESMCI::Calendar **calendar, 
+                                 Time *refTime,
+                                 Time *currTime,
+                                 Time *prevTime,
+                                 TimeInterval *currSimTime,
+                                 TimeInterval *prevSimTime,
+                                 Calendar **calendar, 
                                  ESMC_CalendarType *calendarType, 
                                  int *timeZone,
                                  ESMC_I8 *advanceCount,
@@ -124,7 +124,7 @@ extern "C" {
                                  ESMC_Direction *direction,
                                  int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::get(
+          int rc = (*ptr)->Clock::get(
 			                  // always present internal arguments.
                                            *nameLen,
                                             tempNameLen,
@@ -149,14 +149,14 @@ extern "C" {
        }
 
        // for ringingAlarmList() size > 1
-       void FTN(c_esmc_clockadvance2)(ESMCI::Clock **ptr,
-                                   ESMCI::TimeInterval *timeStep,
+       void FTN(c_esmc_clockadvance2)(Clock **ptr,
+                                   TimeInterval *timeStep,
                                    char *ringingAlarmList1stElementPtr,
                                    char *ringingAlarmList2ndElementPtr,
                                    int *sizeofRingingAlarmList,
                                    int *ringingAlarmCount, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::advance(
+          int rc = (*ptr)->Clock::advance(
                      ESMC_NOT_PRESENT_FILTER(timeStep),
                                              ringingAlarmList1stElementPtr,
                                                    // ringingAlarmList present,
@@ -169,13 +169,13 @@ extern "C" {
        }
 
        // for ringingAlarmList() size == 1
-       void FTN(c_esmc_clockadvance1)(ESMCI::Clock **ptr,
-                                   ESMCI::TimeInterval *timeStep,
+       void FTN(c_esmc_clockadvance1)(Clock **ptr,
+                                   TimeInterval *timeStep,
                                    char *ringingAlarmList1stElementPtr,
                                    int *sizeofRingingAlarmList,
                                    int *ringingAlarmCount, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::advance(
+          int rc = (*ptr)->Clock::advance(
                      ESMC_NOT_PRESENT_FILTER(timeStep),
                                              ringingAlarmList1stElementPtr,
                                                    // ringingAlarmList present,
@@ -188,12 +188,12 @@ extern "C" {
        }
 
        // for ringingAlarmList() size == 0 (missing) 
-       void FTN(c_esmc_clockadvance0)(ESMCI::Clock **ptr,
-                                   ESMCI::TimeInterval *timeStep,
+       void FTN(c_esmc_clockadvance0)(Clock **ptr,
+                                   TimeInterval *timeStep,
                                    int *sizeofRingingAlarmList,
                                    int *ringingAlarmCount, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::advance(
+          int rc = (*ptr)->Clock::advance(
                      ESMC_NOT_PRESENT_FILTER(timeStep),
                                              ESMC_NULL_POINTER,
                                              ESMC_NULL_POINTER,
@@ -204,81 +204,81 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_clockisstoptime)(ESMCI::Clock **ptr, 
+       void FTN(c_esmc_clockisstoptime)(Clock **ptr, 
                                       int *esmf_clockIsStopTime, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          *esmf_clockIsStopTime = (int) (*ptr)->ESMCI::Clock::isStopTime(
+          *esmf_clockIsStopTime = (int) (*ptr)->Clock::isStopTime(
                                              ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_clockstoptimeenable)(ESMCI::Clock **ptr,
-                                            ESMCI::Time *stopTime, int *status) {
+       void FTN(c_esmc_clockstoptimeenable)(Clock **ptr,
+                                            Time *stopTime, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::stopTimeEnable(
+          int rc = (*ptr)->Clock::stopTimeEnable(
                                          ESMC_NOT_PRESENT_FILTER(stopTime) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_clockstoptimedisable)(ESMCI::Clock **ptr, int *status) {
+       void FTN(c_esmc_clockstoptimedisable)(Clock **ptr, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::stopTimeDisable();
+          int rc = (*ptr)->Clock::stopTimeDisable();
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_clockisstoptimeenabled)(ESMCI::Clock **ptr, 
+       void FTN(c_esmc_clockisstoptimeenabled)(Clock **ptr, 
                                int *esmf_clockIsStopTimeEnabled, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           *esmf_clockIsStopTimeEnabled =
-                         (int) (*ptr)->ESMCI::Clock::isStopTimeEnabled(
+                         (int) (*ptr)->Clock::isStopTimeEnabled(
                                              ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_clockisdone)(ESMCI::Clock **ptr, 
+       void FTN(c_esmc_clockisdone)(Clock **ptr, 
                                     int *esmf_clockIsDone, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          *esmf_clockIsDone = (int) (*ptr)->ESMCI::Clock::isDone(
+          *esmf_clockIsDone = (int) (*ptr)->Clock::isDone(
                                             ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_clockisreverse)(ESMCI::Clock **ptr, 
+       void FTN(c_esmc_clockisreverse)(Clock **ptr, 
                                     int *esmf_clockIsReverse, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          *esmf_clockIsReverse = (int) (*ptr)->ESMCI::Clock::isReverse(
+          *esmf_clockIsReverse = (int) (*ptr)->Clock::isReverse(
                                             ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_clockgetnexttime)(ESMCI::Clock **ptr,
-                                 ESMCI::Time *nextTime,
-                                 ESMCI::TimeInterval *timeStep,
+       void FTN(c_esmc_clockgetnexttime)(Clock **ptr,
+                                 Time *nextTime,
+                                 TimeInterval *timeStep,
                                  int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::getNextTime(
+          int rc = (*ptr)->Clock::getNextTime(
                                                  nextTime,  // required
                          ESMC_NOT_PRESENT_FILTER(timeStep) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_clockgetalarm)(ESMCI::Clock **ptr,
+       void FTN(c_esmc_clockgetalarm)(Clock **ptr,
                                       int *nameLen,
                                       char *name,
-                                      ESMCI::Alarm **alarm,
+                                      Alarm **alarm,
                                       int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::getAlarm(*nameLen, name, alarm);
+          int rc = (*ptr)->Clock::getAlarm(*nameLen, name, alarm);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
        // for alarmList() size > 1
-       void FTN(c_esmc_clockgetalarmlist2)(ESMCI::Clock **ptr,
+       void FTN(c_esmc_clockgetalarmlist2)(Clock **ptr,
                                            ESMC_AlarmListType *type,
                                            char *AlarmList1stElementPtr,
                                            char *AlarmList2ndElementPtr,
                                            int *sizeofAlarmList,
                                            int *alarmCount,
-                                           ESMCI::TimeInterval *timeStep,
+                                           TimeInterval *timeStep,
                                            int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::getAlarmList(*type,
+          int rc = (*ptr)->Clock::getAlarmList(*type,
                                                   AlarmList1stElementPtr,
                                                   AlarmList2ndElementPtr,
                                                  *sizeofAlarmList,
@@ -288,15 +288,15 @@ extern "C" {
        }
 
        // for alarmList() size == 1
-       void FTN(c_esmc_clockgetalarmlist1)(ESMCI::Clock **ptr,
+       void FTN(c_esmc_clockgetalarmlist1)(Clock **ptr,
                                            ESMC_AlarmListType *type,
                                            char *AlarmList1stElementPtr,
                                            int *sizeofAlarmList,
                                            int *alarmCount,
-                                           ESMCI::TimeInterval *timeStep,
+                                           TimeInterval *timeStep,
                                            int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::getAlarmList(*type,
+          int rc = (*ptr)->Clock::getAlarmList(*type,
                                                   AlarmList1stElementPtr,
                                                   ESMC_NULL_POINTER,
                                                  *sizeofAlarmList,
@@ -305,25 +305,25 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_clocksynctorealtime)(ESMCI::Clock **ptr, int *status) {
+       void FTN(c_esmc_clocksynctorealtime)(Clock **ptr, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::syncToRealTime();
+          int rc = (*ptr)->Clock::syncToRealTime();
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_clockeq)(ESMCI::Clock **clock1, ESMCI::Clock **clock2,
+       void FTN(c_esmc_clockeq)(Clock **clock1, Clock **clock2,
                                    int *esmf_clockEQ) {
           ESMF_CHECK_BINARY_OPERATOR_POINTERS(*clock1, *clock2, esmf_clockEQ)
           *esmf_clockEQ = (int) (**clock1 == **clock2);
        }
 
-       void FTN(c_esmc_clockne)(ESMCI::Clock **clock1, ESMCI::Clock **clock2,
+       void FTN(c_esmc_clockne)(Clock **clock1, Clock **clock2,
                                    int *esmf_clockNE) {
           ESMF_CHECK_BINARY_OPERATOR_POINTERS(*clock1, *clock2, esmf_clockNE)
           *esmf_clockNE = (int) (**clock1 != **clock2);
        }
 
-       void FTN(c_esmc_clockreadrestart)(ESMCI::Clock **ptr, int *nameLen,
+       void FTN(c_esmc_clockreadrestart)(Clock **ptr, int *nameLen,
                                          const char *name,
                                          ESMC_IOSpec *iospec,   
                                          int *status) {    
@@ -335,27 +335,27 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_clockwriterestart)(ESMCI::Clock **ptr,
+       void FTN(c_esmc_clockwriterestart)(Clock **ptr,
                                           ESMC_IOSpec *iospec,
                                           int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::writeRestart(
+          int rc = (*ptr)->Clock::writeRestart(
                           ESMC_NOT_PRESENT_FILTER(iospec) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_clockvalidate)(ESMCI::Clock **ptr, const char *options,
+       void FTN(c_esmc_clockvalidate)(Clock **ptr, const char *options,
                                       int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::validate(
+          int rc = (*ptr)->Clock::validate(
                       ESMC_NOT_PRESENT_FILTER(options) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_clockprint)(ESMCI::Clock **ptr, const char *options,
+       void FTN(c_esmc_clockprint)(Clock **ptr, const char *options,
                                    int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->ESMCI::Clock::print(
+          int rc = (*ptr)->Clock::print(
                    ESMC_NOT_PRESENT_FILTER(options) );
           if (ESMC_PRESENT(status)) *status = rc;
        }

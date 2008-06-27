@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.C,v 1.1 2008/06/26 02:08:16 rosalind Exp $
+// $Id: ESMCI_Calendar.C,v 1.2 2008/06/27 03:51:21 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,37 +41,37 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Calendar.C,v 1.1 2008/06/26 02:08:16 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_Calendar.C,v 1.2 2008/06/27 03:51:21 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
 
 // initialize static array of calendar type names
-const char *const ESMCI::Calendar::calendarTypeName[CALENDAR_TYPE_COUNT] =
+const char *const Calendar::calendarTypeName[CALENDAR_TYPE_COUNT] =
                                                   { "Gregorian", "Julian",
                                                     "Julian Day", "No Leap",
                                                     "360 Day", "Custom",
                                                     "No Calendar" };
 
 // initialize static internal calendar pointer array
-ESMCI::Calendar *ESMCI::Calendar::internalCalendar[CALENDAR_TYPE_COUNT] =
+Calendar *Calendar::internalCalendar[CALENDAR_TYPE_COUNT] =
                                       { ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         ESMC_NULL_POINTER };
 
 // initialize default calendar
-ESMCI::Calendar *ESMCI::Calendar::defaultCalendar = ESMC_NULL_POINTER;
+Calendar *Calendar::defaultCalendar = ESMC_NULL_POINTER;
 
 // initialize static calendar instance counter
 // TODO: inherit from ESMC_Base class
-int ESMCI::Calendar::count=0;
+int Calendar::count=0;
 
 //
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 //
-// This section includes all the ESMCI::Calendar routines
+// This section includes all the Calendar routines
 //
 //
 //-----------------------------------------------------------------------------
@@ -121,10 +121,10 @@ int ESMCI::Calendar::count=0;
 //EOPI
 
   for (int i=0; i<CALENDAR_TYPE_COUNT; i++) {
-    delete ESMCI::Calendar::internalCalendar[i];
-    ESMCI::Calendar::internalCalendar[i] = ESMC_NULL_POINTER;
+    delete Calendar::internalCalendar[i];
+    Calendar::internalCalendar[i] = ESMC_NULL_POINTER;
   }
-  ESMCI::Calendar::defaultCalendar = ESMC_NULL_POINTER;
+  Calendar::defaultCalendar = ESMC_NULL_POINTER;
 
   return(ESMF_SUCCESS);
 
@@ -135,10 +135,10 @@ int ESMCI::Calendar::count=0;
 // !IROUTINE:  ESMCI_CalendarCreate - Allocates and Initializes a Calendar object
 //
 // !INTERFACE:
-      ESMCI::Calendar *ESMCI_CalendarCreate(
+      Calendar *ESMCI_CalendarCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMCI::Calendar
+//     pointer to newly allocated Calendar
 //
 // !ARGUMENTS:
       int                nameLen,      // in
@@ -156,7 +156,7 @@ int ESMCI::Calendar::count=0;
  #define ESMC_METHOD "ESMCI_CalendarCreate(built-in)"
 
     int returnCode;
-    ESMCI::Calendar *calendar;
+    Calendar *calendar;
 
     // default return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
@@ -171,7 +171,7 @@ int ESMCI::Calendar::count=0;
     }
 
     try {
-      calendar = new ESMCI::Calendar;
+      calendar = new Calendar;
     }
     catch (...) {
       ESMC_LogDefault.ESMC_LogAllocError(rc);
@@ -251,8 +251,8 @@ int ESMCI::Calendar::count=0;
     }
 
     // select internal calendar static pointer based on specified cal type
-    ESMCI::Calendar **internalCal =
-                            &(ESMCI::Calendar::internalCalendar[calendarType-1]);
+    Calendar **internalCal =
+                            &(Calendar::internalCalendar[calendarType-1]);
 
     // check if valid internal calendar already exists
     if (*internalCal != ESMC_NULL_POINTER) {
@@ -266,7 +266,7 @@ int ESMCI::Calendar::count=0;
 
     // create desired internal calendar
     try {
-      *internalCal = new ESMCI::Calendar;
+      *internalCal = new Calendar;
     }
     catch (...) {
       ESMC_LogDefault.ESMC_LogAllocError(&returnCode);
@@ -275,7 +275,7 @@ int ESMCI::Calendar::count=0;
 
     // create default internal name, e.g. "InternalGregorian001"
     sprintf((*internalCal)->name, "Internal%s%3.3d\0",
-                         ESMCI::Calendar::calendarTypeName[calendarType-1],
+                         Calendar::calendarTypeName[calendarType-1],
                                                     (*internalCal)->id);
 
     returnCode = (*internalCal)->set(strlen((*internalCal)->name), 
@@ -298,10 +298,10 @@ int ESMCI::Calendar::count=0;
 // !IROUTINE:  ESMCI_CalendarCreate - Allocates and Initializes a Custom Calendar object
 //
 // !INTERFACE:
-      ESMCI::Calendar *ESMCI_CalendarCreate(
+      Calendar *ESMCI_CalendarCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMCI::Calendar
+//     pointer to newly allocated Calendar
 //
 // !ARGUMENTS:
       int           nameLen,       // in
@@ -324,13 +324,13 @@ int ESMCI::Calendar::count=0;
  #define ESMC_METHOD "ESMCI_CalendarCreate(custom)"
 
     int returnCode;
-    ESMCI::Calendar *calendar;
+    Calendar *calendar;
 
     // default return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
 
     try {
-      calendar = new ESMCI::Calendar;
+      calendar = new Calendar;
     }
     catch (...) {
       ESMC_LogDefault.ESMC_LogAllocError(rc);
@@ -380,13 +380,13 @@ int ESMCI::Calendar::count=0;
 // !IROUTINE:  ESMCI_CalendarCreate - Creates a copy of a calendar
 //
 // !INTERFACE:
-      ESMCI::Calendar *ESMCI_CalendarCreate(
+      Calendar *ESMCI_CalendarCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMCI::Calendar
+//     pointer to newly allocated Calendar
 //
 // !ARGUMENTS:
-      ESMCI::Calendar *calendar,  // in  - calendar to copy
+      Calendar *calendar,  // in  - calendar to copy
       int           *rc) {      // out - return code 
 
 // !DESCRIPTION:
@@ -399,7 +399,7 @@ int ESMCI::Calendar::count=0;
  #define ESMC_METHOD "ESMCI_CalendarCreate(copy)"
 
     int returnCode;
-    ESMCI::Calendar *calendarCopy;
+    Calendar *calendarCopy;
 
     // default return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
@@ -413,7 +413,7 @@ int ESMCI::Calendar::count=0;
 
     try {
       // allocate new calendar and pass given calendar to copy constructor.
-      calendarCopy = new ESMCI::Calendar(*calendar);
+      calendarCopy = new Calendar(*calendar);
     }
     catch (...) {
       ESMC_LogDefault.ESMC_LogAllocError(rc);
@@ -438,7 +438,7 @@ int ESMCI::Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMCI::Calendar **calendar) {  // in - ESMCI::Calendar to destroy
+      Calendar **calendar) {  // in - Calendar to destroy
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Calendar object previously allocated
@@ -464,7 +464,7 @@ int ESMCI::Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMCI::Calendar **calendar) {  // in - ESMCI::Calendar to be the default
+      Calendar **calendar) {  // in - Calendar to be the default
 //
 // !DESCRIPTION:
 //      Friend function which sets the Time Manager default calendar.
@@ -492,7 +492,7 @@ int ESMCI::Calendar::count=0;
   }
 
   // set the default calendar
-  ESMCI::Calendar::defaultCalendar = *calendar;
+  Calendar::defaultCalendar = *calendar;
 
   return(ESMF_SUCCESS);
 
@@ -528,14 +528,14 @@ int ESMCI::Calendar::count=0;
   if (rc != ESMF_SUCCESS) {
     char logMsg[ESMF_MAXSTR];
     sprintf(logMsg, "ESMCI_CalendarCreate(%s) failed.",
-            ESMCI::Calendar::calendarTypeName[calType]);
+            Calendar::calendarTypeName[calType]);
     ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
     return (rc);
   }
 
   // set the default calendar
-  ESMCI::Calendar::defaultCalendar = 
-                             ESMCI::Calendar::internalCalendar[calType-1];
+  Calendar::defaultCalendar = 
+                             Calendar::internalCalendar[calType-1];
 
   return(ESMF_SUCCESS);
 
@@ -543,10 +543,10 @@ int ESMCI::Calendar::count=0;
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar::set - Set a calendar's type
+// !IROUTINE:  Calendar::set - Set a calendar's type
 //
 // !INTERFACE:
-      int ESMCI::Calendar::set(
+      int Calendar::set(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -574,7 +574,7 @@ int ESMCI::Calendar::count=0;
     }
 
     // save current values to restore in case of failure;
-    ESMCI::Calendar saveCalendar = *this;
+    Calendar saveCalendar = *this;
 
     // TODO: use inherited methods from ESMC_Base
     if (name != ESMC_NULL_POINTER) {
@@ -675,14 +675,14 @@ int ESMCI::Calendar::count=0;
     }
     return(rc);
 
-}  // end ESMCI::Calendar::set (built-in)
+}  // end Calendar::set (built-in)
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar::set - Set up a custom calendar
+// !IROUTINE:  Calendar::set - Set up a custom calendar
 //
 // !INTERFACE:
-      int ESMCI::Calendar::set(
+      int Calendar::set(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -715,7 +715,7 @@ int ESMCI::Calendar::count=0;
     }
 
     // save current values to restore in case of failure;
-    ESMCI::Calendar saveCalendar = *this;
+    Calendar saveCalendar = *this;
 
     // TODO: use inherited methods from ESMC_Base
     if (name != ESMC_NULL_POINTER) {
@@ -779,7 +779,7 @@ int ESMCI::Calendar::count=0;
 
     this->secondsPerYear = this->secondsPerDay * this->daysPerYear.d;
 
-    if ((rc = ESMCI::Calendar::validate()) != ESMF_SUCCESS) {
+    if ((rc = Calendar::validate()) != ESMF_SUCCESS) {
       // error, restore previous state
       *this = saveCalendar;
       ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
@@ -787,14 +787,14 @@ int ESMCI::Calendar::count=0;
 
     return(rc);
 
-}  // end ESMCI::Calendar::set (custom)
+}  // end Calendar::set (custom)
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar::get - get calendar properties
+// !IROUTINE:  Calendar::get - get calendar properties
 //
 // !INTERFACE:
-      int ESMCI::Calendar::get(
+      int Calendar::get(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -898,21 +898,21 @@ int ESMCI::Calendar::count=0;
 
     return(ESMF_SUCCESS);
 
-}  // end ESMCI::Calendar::get
+}  // end Calendar::get
     
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar:convertToTime - convert calendar date to ESMC_BaseTime
+// !IROUTINE:  Calendar:convertToTime - convert calendar date to ESMC_BaseTime
 //
 // !INTERFACE:
-      int ESMCI::Calendar::convertToTime(
+      int Calendar::convertToTime(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
       ESMC_I8 yy, int mm, int dd, ESMC_I8 d,    // in
-      ESMCI::BaseTime *t) const {                           // out
+      BaseTime *t) const {                           // out
 //
 // !DESCRIPTION:
 //     Converts a calendar-specific date to core {\tt ESMC\_BaseTime}
@@ -1006,7 +1006,7 @@ int ESMCI::Calendar::count=0;
             // if February, take leap year into account before checking
             //   day of the month
             if (mm == 2) {
-              int leapDay = ESMCI::Calendar::isLeapYear(yy) ? 1 : 0;
+              int leapDay = Calendar::isLeapYear(yy) ? 1 : 0;
               if (dd > (daysPerMonth[1] + leapDay)) {
                 char logMsg[ESMF_MAXSTR];
                 sprintf(logMsg, "; Gregorian: for February %lld, dd=%d > %d "
@@ -1071,7 +1071,7 @@ int ESMCI::Calendar::count=0;
             // if February, take leap year into account before checking
             //   day of the month
             if (mm == 2) {
-              int leapDay = ESMCI::Calendar::isLeapYear(yy) ? 1 : 0;
+              int leapDay = Calendar::isLeapYear(yy) ? 1 : 0;
               if (dd > (daysPerMonth[1] + leapDay)) {
                 char logMsg[ESMF_MAXSTR];
                 sprintf(logMsg, "; Julian: for February %lld, dd=%d > %d "
@@ -1187,20 +1187,20 @@ int ESMCI::Calendar::count=0;
 
     return(rc);
 
-}  // end ESMCI::Calendar::convertToTime
+}  // end Calendar::convertToTime
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar::convertToDate - convert ESMC_BaseTime to calendar date
+// !IROUTINE:  Calendar::convertToDate - convert ESMC_BaseTime to calendar date
 //
 // !INTERFACE:
-      int ESMCI::Calendar::convertToDate(
+      int Calendar::convertToDate(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMCI::BaseTime *t,                                                // in/out
+      BaseTime *t,                                                // in/out
       ESMC_I4 *yy, ESMC_I8 *yy_i8, int *mm, int *dd,         // out
       ESMC_I4 *d, ESMC_I8 *d_i8, ESMC_R8 *d_r8) const { // out
 //
@@ -1360,9 +1360,9 @@ int ESMCI::Calendar::count=0;
                                    + ((day-1) * secondsPerDay));
             } else if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) {
               // TODO: use native C++ Set(), not F90 entry point
-              ESMCI::Calendar *cal = (ESMCI::Calendar *) this;
-              ESMCI::Time begnningOfYear; 
-              begnningOfYear.ESMCI::Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
+              Calendar *cal = (Calendar *) this;
+              Time begnningOfYear; 
+              begnningOfYear.Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                                            &year, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1374,10 +1374,10 @@ int ESMCI::Calendar::count=0;
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, &cal);
-              ESMCI::TimeInterval secondsOfTheYear;
+              TimeInterval secondsOfTheYear;
               secondsOfTheYear = *t - begnningOfYear;
               ESMC_I8 seconds;
-              secondsOfTheYear.ESMCI::TimeInterval::get(ESMC_NULL_POINTER,
+              secondsOfTheYear.TimeInterval::get(ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
@@ -1482,9 +1482,9 @@ int ESMCI::Calendar::count=0;
                                    + ((day-1) * secondsPerDay));
             } else if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) {
               // TODO: use native C++ Set(), not F90 entry point
-              ESMCI::Calendar *cal = (ESMCI::Calendar *) this;
-              ESMCI::Time begnningOfYear; 
-              begnningOfYear.ESMCI::Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
+              Calendar *cal = (Calendar *) this;
+              Time begnningOfYear; 
+              begnningOfYear.Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                                            &year, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1496,10 +1496,10 @@ int ESMCI::Calendar::count=0;
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, &cal);
-              ESMCI::TimeInterval secondsOfTheYear;
+              TimeInterval secondsOfTheYear;
               secondsOfTheYear = *t - begnningOfYear;
               ESMC_I8 seconds;
-              secondsOfTheYear.ESMCI::TimeInterval::get(ESMC_NULL_POINTER,
+              secondsOfTheYear.TimeInterval::get(ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
                                                     ESMC_NULL_POINTER,
@@ -1731,21 +1731,21 @@ int ESMCI::Calendar::count=0;
 
     return(rc);
 
-}  // end ESMCI::Calendar::convertToDate
+}  // end Calendar::convertToDate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar::increment - increment a Time by a TimeInterval
+// !IROUTINE:  Calendar::increment - increment a Time by a TimeInterval
 //
 // !INTERFACE:
-      ESMCI::Time ESMCI::Calendar::increment(
+      Time Calendar::increment(
 //
 // !RETURN VALUE:
-//    ESMCI::Time sum
+//    Time sum
 //
 // !ARGUMENTS:
-      const ESMCI::Time *time,                            // in
-      const ESMCI::TimeInterval &timeinterval) const {    // in
+      const Time *time,                            // in
+      const TimeInterval &timeinterval) const {    // in
 
 //
 // !DESCRIPTION:
@@ -1764,7 +1764,7 @@ int ESMCI::Calendar::count=0;
 
     int rc = ESMF_SUCCESS;
 
-    ESMCI::Time zero;
+    Time zero;
 
     if (this == ESMC_NULL_POINTER || time == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1775,10 +1775,10 @@ int ESMCI::Calendar::count=0;
     // intialize result to given time to prepare for the case of
     //   only a non-calendar (h,m,s) increment
     //    (copies calendar & timezone properties)
-    ESMCI::Time sum = *time;
+    Time sum = *time;
 
     // prepare for increment with any non-calendar units (h,m,s)
-    ESMCI::TimeInterval nonCalTi = timeinterval;
+    TimeInterval nonCalTi = timeinterval;
 
     switch (calendarType)
     {
@@ -1790,7 +1790,7 @@ int ESMCI::Calendar::count=0;
             ESMC_I8 yy_i8;
             int mm, dd, timeZone;
             ESMC_I4 h, m, s;
-            ESMCI::Calendar *cal;
+            Calendar *cal;
 
             // TODO:  This algorithm operates on yy, mm, dd units the way
             //    a person would (easier to comprehend).  But could
@@ -1809,7 +1809,7 @@ int ESMCI::Calendar::count=0;
 
                 // get calendar units from given time, while saving time-of-day
                 //   units and calendar & timezone properties
-                rc = time->ESMCI::Time::get(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                rc = time->Time::get(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         &h, &m, &s,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1840,13 +1840,13 @@ int ESMCI::Calendar::count=0;
 
                 // clip day-of-the-month if necessary
                 int daysInMonth = daysPerMonth[mm-1];
-                if (mm == 2 && ESMCI::Calendar::isLeapYear(yy_i8)) daysInMonth++;
+                if (mm == 2 && Calendar::isLeapYear(yy_i8)) daysInMonth++;
                                                                // Feb. 29 days
                 if (dd > daysInMonth) dd = daysInMonth;
 
                 // convert resulting calendar sum back to base time, while also
                 // restoring time-of-day units and properties from given time
-                rc = sum.ESMCI::Time::set(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                rc = sum.Time::set(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       &h, &m, &s,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1872,31 +1872,31 @@ int ESMCI::Calendar::count=0;
     //   on this calendar and add to non-calendar units increment
     //   (applies to all calendars since secondsPerDay is defined for all)
     if (timeinterval.d != 0) {
-        ESMCI::TimeInterval daysTi(timeinterval.d * secondsPerDay);
-        nonCalTi.ESMCI::BaseTime::operator+=(daysTi);
+        TimeInterval daysTi(timeinterval.d * secondsPerDay);
+        nonCalTi.BaseTime::operator+=(daysTi);
     }
 
     // perform the remaining increment with the non-calendar and
     //   any relative days parts
-    sum.ESMCI::BaseTime::operator+=(nonCalTi);
+    sum.BaseTime::operator+=(nonCalTi);
 
     return(sum);
 
-}  // end ESMCI::Calendar::increment
+}  // end Calendar::increment
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar::decrement - decrement a Time by a TimeInterval
+// !IROUTINE:  Calendar::decrement - decrement a Time by a TimeInterval
 //
 // !INTERFACE:
-      ESMCI::Time ESMCI::Calendar::decrement(
+      Time Calendar::decrement(
 //
 // !RETURN VALUE:
-//    ESMCI::Time diff
+//    Time diff
 //
 // !ARGUMENTS:
-      const ESMCI::Time *time,                            // in
-      const ESMCI::TimeInterval &timeinterval) const {    // in
+      const Time *time,                            // in
+      const TimeInterval &timeinterval) const {    // in
 
 //
 // !DESCRIPTION:
@@ -1912,7 +1912,7 @@ int ESMCI::Calendar::count=0;
 
     int rc = ESMF_SUCCESS;
 
-    ESMCI::Time zero;
+    Time zero;
 
     if (this == ESMC_NULL_POINTER || time == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1926,10 +1926,10 @@ int ESMCI::Calendar::count=0;
     // intialize result to given time to prepare for the case of
     //   only a non-calendar (h,m,s) decrement
     //    (copies calendar & timezone properties)
-    ESMCI::Time diff = *time;
+    Time diff = *time;
 
     // prepare for decrement with any non-calendar units (h,m,s)
-    ESMCI::TimeInterval nonCalTi = timeinterval;
+    TimeInterval nonCalTi = timeinterval;
 
     switch (calendarType)
     {
@@ -1941,7 +1941,7 @@ int ESMCI::Calendar::count=0;
             ESMC_I8 yy_i8;
             int mm, dd, timeZone;
             ESMC_I4 h, m, s;
-            ESMCI::Calendar *cal;
+            Calendar *cal;
 
             // TODO:  This algorithm operates on yy, mm, dd units the way
             //    a person would (easier to comprehend).  But could
@@ -1960,7 +1960,7 @@ int ESMCI::Calendar::count=0;
 
                 // get calendar units from given time, while saving time-of-day
                 //   units and calendar & timezone properties
-                rc = time->ESMCI::Time::get(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                rc = time->Time::get(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         &h, &m, &s,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1991,13 +1991,13 @@ int ESMCI::Calendar::count=0;
 
                 // clip day-of-the-month if necessary
                 int daysInMonth = daysPerMonth[mm-1];
-                if (mm == 2 && ESMCI::Calendar::isLeapYear(yy_i8)) daysInMonth++;
+                if (mm == 2 && Calendar::isLeapYear(yy_i8)) daysInMonth++;
                                                                // Feb. 29 days
                 if (dd > daysInMonth) dd = daysInMonth;
 
                 // convert resulting calendar diff back to base time, while also
                 // restoring time-of-day units and properties from given time
-                rc = diff.ESMCI::Time::set(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                rc = diff.Time::set(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                        &h, &m, &s,
                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -2023,24 +2023,24 @@ int ESMCI::Calendar::count=0;
     //   on this calendar and add to non-calendar units increment
     //   (applies to all calendars since secondsPerDay is defined for all)
     if (timeinterval.d != 0) {
-        ESMCI::TimeInterval daysTi(timeinterval.d * secondsPerDay);
-        nonCalTi.ESMCI::BaseTime::operator+=(daysTi);
+        TimeInterval daysTi(timeinterval.d * secondsPerDay);
+        nonCalTi.BaseTime::operator+=(daysTi);
     }
 
     // perform the remaining decrement with the non-calendar and
     //   any relative days parts
-    diff.ESMCI::BaseTime::operator-=(nonCalTi);
+    diff.BaseTime::operator-=(nonCalTi);
 
     return(diff);
 
-}  // end ESMCI::Calendar::decrement
+}  // end Calendar::decrement
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar::isLeapYear - Determine if given year is a leap year
+// !IROUTINE:  Calendar::isLeapYear - Determine if given year is a leap year
 //
 // !INTERFACE:
-      bool ESMCI::Calendar::isLeapYear(
+      bool Calendar::isLeapYear(
 //
 // !RETURN VALUE:
 //    bool is leap year or not
@@ -2084,20 +2084,20 @@ int ESMCI::Calendar::count=0;
         break;
     }
 
-}  // end ESMCI::Calendar::isLeapYear
+}  // end Calendar::isLeapYear
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar(==) - Calendar equality comparison
+// !IROUTINE:  Calendar(==) - Calendar equality comparison
 //
 // !INTERFACE:
-      bool ESMCI::Calendar::operator==(
+      bool Calendar::operator==(
 //
 // !RETURN VALUE:
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMCI::Calendar &calendar) const {   // in - ESMCI::Calendar to compare
+      const Calendar &calendar) const {   // in - Calendar to compare
 //
 // !DESCRIPTION:
 //      Compare for equality the current object's (this) {\tt ESMC\_Calendar}
@@ -2117,14 +2117,14 @@ int ESMCI::Calendar::count=0;
 
     return(calendarType == calendar.calendarType);
 
-}  // end ESMCI::Calendar::operator==
+}  // end Calendar::operator==
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar(==) - Calendar equality comparison
+// !IROUTINE:  Calendar(==) - Calendar equality comparison
 //
 // !INTERFACE:
-      bool ESMCI::Calendar::operator==(
+      bool Calendar::operator==(
 //
 // !RETURN VALUE:
 //    bool result
@@ -2150,20 +2150,20 @@ int ESMCI::Calendar::count=0;
 
     return(this->calendarType == calendarType);
 
-}  // end ESMCI::Calendar::operator==
+}  // end Calendar::operator==
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar(!=) - Calendar inequality comparison
+// !IROUTINE:  Calendar(!=) - Calendar inequality comparison
 //
 // !INTERFACE:
-      bool ESMCI::Calendar::operator!=(
+      bool Calendar::operator!=(
 //
 // !RETURN VALUE:
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMCI::Calendar &calendar) const {   // in - ESMCI::Calendar to compare
+      const Calendar &calendar) const {   // in - Calendar to compare
 //
 // !DESCRIPTION:
 //      Compare for inequality the current object's (this) {\tt ESMC\_Calendar}
@@ -2183,14 +2183,14 @@ int ESMCI::Calendar::count=0;
 
     return(calendarType != calendar.calendarType);
 
-}  // end ESMCI::Calendar::operator!=
+}  // end Calendar::operator!=
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar(!=) - Calendar inequality comparison
+// !IROUTINE:  Calendar(!=) - Calendar inequality comparison
 //
 // !INTERFACE:
-      bool ESMCI::Calendar::operator!=(
+      bool Calendar::operator!=(
 //
 // !RETURN VALUE:
 //    bool result
@@ -2216,17 +2216,17 @@ int ESMCI::Calendar::count=0;
 
     return(this->calendarType != calendarType);
 
-}  // end ESMCI::Calendar::operator!=
+}  // end Calendar::operator!=
 
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMCI_CalendarReadRestart - restore contents of a Calendar 
 //
 // !INTERFACE:
-      ESMCI::Calendar *ESMCI_CalendarReadRestart(
+      Calendar *ESMCI_CalendarReadRestart(
 //
 // !RETURN VALUE:
-//    pointer to newly allocated and restored ESMCI::Calendar
+//    pointer to newly allocated and restored Calendar
 //
 // !ARGUMENTS:
       int          nameLen,  // in
@@ -2254,10 +2254,10 @@ int ESMCI::Calendar::count=0;
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar::writeRestart - save Calendar state
+// !IROUTINE:  Calendar::writeRestart - save Calendar state
 //
 // !INTERFACE:
-      int ESMCI::Calendar::writeRestart(
+      int Calendar::writeRestart(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -2286,14 +2286,14 @@ int ESMCI::Calendar::count=0;
 
     return(rc);
 
-}  // end ESMCI::Calendar::writeRestart
+}  // end Calendar::writeRestart
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar::validate - validate Calendar state
+// !IROUTINE:  Calendar::validate - validate Calendar state
 //
 // !INTERFACE:
-      int ESMCI::Calendar::validate(
+      int Calendar::validate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -2372,21 +2372,21 @@ int ESMCI::Calendar::count=0;
 
     return(rc);
 
-}  // end ESMCI::Calendar::validate
+}  // end Calendar::validate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar::print - print Calendar state
+// !IROUTINE:  Calendar::print - print Calendar state
 //
 // !INTERFACE:
-      int ESMCI::Calendar::print(
+      int Calendar::print(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
       const char *options,            // in - print options
-      const ESMCI::Time *time) const {  // in - optional time context in which
+      const Time *time) const {  // in - optional time context in which
                                       //      to print
                                       //      (e.g. Leap Year => Feb. 29 days)
 //
@@ -2408,17 +2408,17 @@ int ESMCI::Calendar::count=0;
     }
 
     // determine leap year, if requested
-    // TODO:  replace with leap year method for ESMCI::Time (which calls
-    //        ESMCI::Calendar::isLeapYear() )
+    // TODO:  replace with leap year method for Time (which calls
+    //        Calendar::isLeapYear() )
     bool isLeapYear = false;
     if (time != ESMC_NULL_POINTER) {
       ESMC_I8 yy_i8;
-      rc = time->ESMCI::Time::get(ESMC_NULL_POINTER, &yy_i8);
+      rc = time->Time::get(ESMC_NULL_POINTER, &yy_i8);
                               // TODO: use native C++ interface when ready
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
           ESMF_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(rc);
       // TODO:  ensure *this* calendar and time's calendar are the same ?
-      isLeapYear = ESMCI::Calendar::isLeapYear(yy_i8);
+      isLeapYear = Calendar::isLeapYear(yy_i8);
     }
 
     printf("Calendar -------------------------------\n");
@@ -2496,14 +2496,14 @@ int ESMCI::Calendar::count=0;
     
     return(ESMF_SUCCESS);
 
-}  // end ESMCI::Calendar::print
+}  // end Calendar::print
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar - native default C++ constructor
+// !IROUTINE:  Calendar - native default C++ constructor
 //
 // !INTERFACE:
-      ESMCI::Calendar::Calendar(void) {
+      Calendar::Calendar(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -2534,14 +2534,14 @@ int ESMCI::Calendar::count=0;
     daysPerYear.dN = 0;
     daysPerYear.dD = 1;
 
-} // end ESMCI::Calendar
+} // end Calendar
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar - native C++ constructor
+// !IROUTINE:  Calendar - native C++ constructor
 //
 // !INTERFACE:
-      ESMCI::Calendar::Calendar(
+      Calendar::Calendar(
 //
 // !RETURN VALUE:
 //    none
@@ -2562,19 +2562,19 @@ int ESMCI::Calendar::count=0;
 
     int rc = ESMF_SUCCESS;
 
-    ESMCI::Calendar();  // invoke default constructor
-    rc = ESMCI::Calendar::set(strlen(name), name, calendarType);
+    Calendar();  // invoke default constructor
+    rc = Calendar::set(strlen(name), name, calendarType);
     ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU,
                                           ESMC_NULL_POINTER);
 
-}   // end ESMCI::Calendar
+}   // end Calendar
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar - native C++ constructor
+// !IROUTINE:  Calendar - native C++ constructor
 //
 // !INTERFACE:
-      ESMCI::Calendar::Calendar(
+      Calendar::Calendar(
 //
 // !RETURN VALUE:
 //    none
@@ -2600,26 +2600,26 @@ int ESMCI::Calendar::count=0;
 
     int rc = ESMF_SUCCESS;
 
-    ESMCI::Calendar();  // invoke default constructor
-    rc = ESMCI::Calendar::set(strlen(name), name, 
+    Calendar();  // invoke default constructor
+    rc = Calendar::set(strlen(name), name, 
                           daysPerMonth, monthsPerYear, secondsPerDay, 
                           daysPerYear, daysPerYeardN, daysPerYeardD);
     ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU,
                                           ESMC_NULL_POINTER);
-}  // end ESMCI::Calendar
+}  // end Calendar
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI::Calendar - native C++ copy constructor
+// !IROUTINE:  Calendar - native C++ copy constructor
 //
 // !INTERFACE:
-      ESMCI::Calendar::Calendar(
+      Calendar::Calendar(
 //
 // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
-      const ESMCI::Calendar &calendar) {  // in - calendar to copy
+      const Calendar &calendar) {  // in - calendar to copy
 //
 // !DESCRIPTION:
 //      Copies members of given calendar.
@@ -2633,14 +2633,14 @@ int ESMCI::Calendar::count=0;
                       //       overloaded method and interface from F90.
                       //       Also, inherit from ESMC_Base class.
 
- } // end ESMCI::Calendar
+ } // end Calendar
 
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ~Calendar - native default C++ destructor
 //
 // !INTERFACE:
-      ESMCI::Calendar::~Calendar(void) {
+      Calendar::~Calendar(void) {
 //
 // !RETURN VALUE:
 //    none

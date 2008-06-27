@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.h,v 1.1 2008/06/26 02:08:15 rosalind Exp $
+// $Id: ESMCI_Calendar.h,v 1.2 2008/06/27 03:51:18 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !CLASS: ESMCI_Calendar - encapsulates calendar types and behavior
+// !CLASS: ESMCI::Calendar - encapsulates calendar types and behavior
 //
 // !DESCRIPTION:
 //
@@ -180,19 +180,19 @@ class Calendar {
     // conversions based on UTC: time zone offset done by client
     //  (TMG 2.4.5, 2.5.6)
     int convertToTime(ESMC_I8 yy, int mm, int dd,
-                                   ESMC_I8 d, ESMCI::BaseTime *t) const;
-    int convertToDate(ESMCI::BaseTime *t,
+                                   ESMC_I8 d, BaseTime *t) const;
+    int convertToDate(BaseTime *t,
                                    ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
                                    int *mm=0, int *dd=0,
                                    ESMC_I4 *d=0, ESMC_I8 *d_i8=0,
                                    ESMC_R8 *d_r8=0) const;
 
-    Time increment(const ESMCI::Time *time,
-                                     const ESMCI::TimeInterval &timeinterval)
+    Time increment(const Time *time,
+                                     const TimeInterval &timeinterval)
                                      const;
 
-    Time decrement(const ESMCI::Time *time,
-                                     const ESMCI::TimeInterval &timeinterval)
+    Time decrement(const Time *time,
+                                     const TimeInterval &timeinterval)
                                      const;
 
     bool isLeapYear(ESMC_I8 yy, int *rc=0) const;
@@ -219,7 +219,7 @@ class Calendar {
 
     // for testing/debugging
     int print(const char *options=0, 
-                           const ESMCI::Time *time=0) const;
+                           const Time *time=0) const;
 
     // native C++ constructors/destructors
     Calendar(void);
@@ -265,8 +265,8 @@ class Calendar {
 //
   private:
 
-    friend class ESMCI::Time;
-    friend class ESMCI::TimeInterval;
+    friend class Time;
+    friend class TimeInterval;
 
 //
  // < declare private interface methods here >
@@ -274,7 +274,7 @@ class Calendar {
 //EOP
 //-------------------------------------------------------------------------
 
-};  // end class ESMCI::Calendar
+};  // end class Calendar
 
     // Note: though seemingly redundant with the friend declarations within
     // the class definition above, the following declarations are necessary

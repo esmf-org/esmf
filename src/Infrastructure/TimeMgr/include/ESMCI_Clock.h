@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.h,v 1.2 2008/06/26 02:08:15 rosalind Exp $
+// $Id: ESMCI_Clock.h,v 1.3 2008/06/27 03:51:18 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
 //BOP
 //
-// !CLASS: ESMCI_Clock - keeps track of model time
+// !CLASS: ESMCI::Clock - keeps track of model time
 //
 // !DESCRIPTION:
 //
@@ -86,12 +86,12 @@ namespace ESMCI{
 
   private:   // corresponds to F90 module 'type ESMF_Clock' members
     char              name[ESMF_MAXSTR];  // name of clock
-    ESMCI::TimeInterval timeStep;
-    ESMCI::Time         startTime;
-    ESMCI::Time         stopTime;
-    ESMCI::Time         refTime;   // reference time
-    ESMCI::Time         currTime;  // current time
-    ESMCI::Time         prevTime;  // previous time
+    TimeInterval timeStep;
+    Time         startTime;
+    Time         stopTime;
+    Time         refTime;   // reference time
+    Time         currTime;  // current time
+    Time         prevTime;  // previous time
 
     ESMC_I8      advanceCount;             // number of times
                                                 //   ESMCI_ClockAdvance has
@@ -104,7 +104,7 @@ namespace ESMCI{
     int               alarmListCapacity;        // max number of defined alarms
                                                 //  before a reallocation is
                                                 //  necessary
-    ESMCI::Alarm      **alarmList;                // associated alarm array
+    Alarm      **alarmList;                // associated alarm array
 
     bool              stopTimeEnabled;  // true if optional property set
 
@@ -129,68 +129,68 @@ namespace ESMCI{
 
     int set(int                nameLen,
                       const char        *name=0,
-                      ESMCI::TimeInterval *timeStep=0,
-                      ESMCI::Time         *startTime=0,
-                      ESMCI::Time         *stopTime=0,
-                      ESMCI::TimeInterval *runDuration=0,
+                      TimeInterval *timeStep=0,
+                      Time         *startTime=0,
+                      Time         *stopTime=0,
+                      TimeInterval *runDuration=0,
                       int               *runTimeStepCount=0,
 // TODO: add overload for ESMC_R8  *runTimeStepCount=0,
-                      ESMCI::Time         *refTime=0,    // (TMG 3.1, 3.4.4)
-                      ESMCI::Time         *currTime=0,
+                      Time         *refTime=0,    // (TMG 3.1, 3.4.4)
+                      Time         *currTime=0,
                       ESMC_I8      *advanceCount=0,
                       ESMC_Direction    *direction=0);
 
     int get(int                nameLen,
                       int               *tempNameLen,
                       char              *tempName=0,
-                      ESMCI::TimeInterval *timeStep=0,
-                      ESMCI::Time         *startTime=0,
-                      ESMCI::Time         *stopTime=0,
-                      ESMCI::TimeInterval *runDuration=0,
+                      TimeInterval *timeStep=0,
+                      Time         *startTime=0,
+                      Time         *stopTime=0,
+                      TimeInterval *runDuration=0,
                       ESMC_R8      *runTimeStepCount=0,
-                      ESMCI::Time         *refTime=0,    // (TMG 3.1, 3.4.4)
-                      ESMCI::Time         *currTime=0, 
-                      ESMCI::Time         *prevTime=0, 
-                      ESMCI::TimeInterval *currSimTime=0, 
-                      ESMCI::TimeInterval *prevSimTime=0, 
-                      ESMCI::Calendar    **calendar=0,
+                      Time         *refTime=0,    // (TMG 3.1, 3.4.4)
+                      Time         *currTime=0, 
+                      Time         *prevTime=0, 
+                      TimeInterval *currSimTime=0, 
+                      TimeInterval *prevSimTime=0, 
+                      Calendar    **calendar=0,
                       ESMC_CalendarType *calendarType=0,
                       int               *timeZone=0,
                       ESMC_I8      *advanceCount=0, 
                       int               *alarmCount=0,
                       ESMC_Direction    *direction=0);
 
-    int advance(ESMCI::TimeInterval *timeStep=0,
+    int advance(TimeInterval *timeStep=0,
                           char *ringingAlarmList1stElementPtr=0, 
                           char *ringingAlarmList2ndElementPtr=0, 
                           int  sizeofRingingAlarmList=0, 
                           int *ringingAlarmCount=0);
 
     // TMG3.4.1  after increment, for each alarm,
-    //           calls ESMCI::Alarm::CheckActive()
+    //           calls Alarm::CheckActive()
 
     bool isStopTime(int *rc=0) const;           // TMG3.5.6
-    int  stopTimeEnable(ESMCI::Time *stopTime=0); // WRF
+    int  stopTimeEnable(Time *stopTime=0); // WRF
     int  stopTimeDisable(void);                 // WRF
     bool isStopTimeEnabled(int *rc=0) const;    // WRF
 
     bool isDone(int *rc=0) const;           // TMG3.5.7
     bool isReverse(int *rc=0) const;        // TMG3.4.6
 
-    int getNextTime(ESMCI::Time         *nextTime,
-                              ESMCI::TimeInterval *timeStep=0);
+    int getNextTime(Time         *nextTime,
+                              TimeInterval *timeStep=0);
 
-    int getAlarm(int nameLen, char *name, ESMCI::Alarm **alarm);
+    int getAlarm(int nameLen, char *name, Alarm **alarm);
 
     int getAlarmList(ESMC_AlarmListType type,
                                char *AlarmList1stElementPtr, 
                                char *AlarmList2ndElementPtr,
                                int  sizeofAlarmList, 
                                int *alarmCount,
-                               ESMCI::TimeInterval *timeStep=0);
+                               TimeInterval *timeStep=0);
 
     int syncToRealTime(void); // TMG3.4.5
-    // (see ESMCI::Time::SyncToRealTime()
+    // (see Time::SyncToRealTime()
 
     // to suuport copying of the alarmList
     Clock& operator=(const Clock &);
@@ -223,9 +223,9 @@ namespace ESMCI{
     //
 
     // friend function to allocate and initialize clock from heap
-    friend Clock *ESMCI_ClockCreate(int, const char*, ESMCI::TimeInterval*,
-                                 ESMCI::Time*, ESMCI::Time*, ESMCI::TimeInterval*,
-                                 int*, ESMCI::Time*, int*);
+    friend Clock *ESMCI_ClockCreate(int, const char*, TimeInterval*,
+                                 Time*, Time*, TimeInterval*,
+                                 int*, Time*, int*);
 // TODO: add overload for ESMC_R8  *runTimeStepCount
 
     // friend function to copy a clock
@@ -236,9 +236,9 @@ namespace ESMCI{
 
     // friend to allocate and initialize alarm from heap
     //   (needs access to clock current time to initialize alarm ring time)
-    friend ESMCI::Alarm *ESMCI_alarmCreate(int, const char*, Clock*, 
-                                 ESMCI::Time*, ESMCI::TimeInterval*, ESMCI::Time*, 
-                                 ESMCI::TimeInterval*, int*, ESMCI::Time*, bool*,
+    friend Alarm *ESMCI_alarmCreate(int, const char*, Clock*, 
+                                 Time*, TimeInterval*, Time*, 
+                                 TimeInterval*, int*, Time*, bool*,
                                  bool*, int*);
 
 // !PRIVATE MEMBER FUNCTIONS:
@@ -247,10 +247,10 @@ namespace ESMCI{
 //
  // < declare private interface methods here >
 
-    // called only by friend class ESMCI::Alarm
-    int addAlarm(ESMCI::Alarm *alarm);  // (TMG 4.1, 4.2)
+    // called only by friend class Alarm
+    int addAlarm(Alarm *alarm);  // (TMG 4.1, 4.2)
 
-    friend class ESMCI::Alarm;
+    friend class Alarm;
 
 //
 //EOP
@@ -266,13 +266,13 @@ namespace ESMCI{
     // friend function to allocate and initialize clock from heap
     Clock *ESMCI_ClockCreate(int                nameLen,
                                  const char*        name=0,
-                                 ESMCI::TimeInterval* timeStep=0,
-                                 ESMCI::Time*         startTime=0,
-                                 ESMCI::Time*         stopTime=0,
-                                 ESMCI::TimeInterval *runDuration=0,
+                                 TimeInterval* timeStep=0,
+                                 Time*         startTime=0,
+                                 Time*         stopTime=0,
+                                 TimeInterval *runDuration=0,
                                  int               *runTimeStepCount=0,
 // TODO: add overload for ESMC_R8             *runTimeStepCount=0,
-                                 ESMCI::Time*         refTime=0,
+                                 Time*         refTime=0,
                                  int*               rc=0);
 
     // friend function to copy a clock

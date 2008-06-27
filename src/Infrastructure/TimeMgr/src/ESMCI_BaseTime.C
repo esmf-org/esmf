@@ -1,4 +1,4 @@
-// $Id: ESMCI_BaseTime.C,v 1.1 2008/05/06 02:35:50 rosalind Exp $
+// $Id: ESMCI_BaseTime.C,v 1.2 2008/06/27 03:51:20 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.1 2008/05/06 02:35:50 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.2 2008/06/27 03:51:20 rosalind Exp $";
 //-------------------------------------------------------------------------
 
   namespace ESMCI{
@@ -430,7 +430,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  BaseTime(=) - assignment operator
+// !IROUTINE:  ESMCI::BaseTime(=) - assignment operator
 //
 // !INTERFACE:
       BaseTime& BaseTime::operator=(
@@ -620,7 +620,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ~ESMCI::BaseTime - native default C++ destructor
+// !IROUTINE:  ESMCI::~BaseTime - native default C++ destructor
 //
 // !INTERFACE:
       BaseTime::~BaseTime(void) {
