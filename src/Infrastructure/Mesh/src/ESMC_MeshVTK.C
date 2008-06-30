@@ -334,6 +334,19 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
 
 }
 
+// Manager the file resource so that early exit still closes the file...
+struct FileManager {
+  FileManager(const char *_f) : fp(NULL) {
+    fp = fopen(_f, "r");
+    if (!fp) Throw() << "Could not open infile:" << _f;
+  }
+  ~FileManager() {
+     if (fp) fclose(fp);
+   }
+  FILE *operator()() { return fp;}
+  FILE *fp;
+};
+
 
 /*--------------------------------------------------------------------------*/
 // Read a vtk mesh.  This function is EXTREMELY primitive and will not tolerate
@@ -347,18 +360,6 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
 /*--------------------------------------------------------------------------*/
 void ReadVTKMesh(Mesh &mesh, const std::string &filename) {
 
-  // Manager the file resource so that early exit still closes the file...
-  struct FileManager {
-    FileManager(const char *_f) : fp(NULL) {
-      fp = fopen(_f, "r");
-      if (!fp) Throw() << "Could not open infile:" << _f;
-    }
-    ~FileManager() {
-       if (fp) fclose(fp);
-     }
-    FILE *operator()() { return fp;}
-    FILE *fp;
-  };
 
   FileManager fp(filename.c_str());
 
@@ -652,6 +653,207 @@ void ReadVTKMesh(Mesh &mesh, const std::string &filename) {
 
       } else {
       }
+    }
+
+  } // while processing data
+
+}
+
+/**
+ * Read the header info from the VTK file, specifically how many nodes, and
+ * how many elements.
+ */
+void ReadVTKMeshHeader(const std::string &filename, int &num_elems, int &num_nodes, int &conn_size) {
+
+  FileManager fp(filename.c_str());
+
+  UInt sdim(0), pdim(0);
+
+  {
+
+    // The version line
+    char linebuf[4096];
+    float version;
+    UInt ret = fscanf(fp(), "# vtk DataFile Version %f\n", &version);
+    ThrowRequire(ret == 1);
+  
+    fgets(linebuf, 1000, fp());
+  //std::cout << "linebuf=" << linebuf << std::endl;
+  
+    ThrowRequire(0 == fscanf(fp(), "ASCII\n"));
+  
+    ThrowRequire(0 == fscanf(fp(), "DATASET UNSTRUCTURED_GRID\n"));
+  
+    UInt npoints;
+    ThrowRequire(1 == fscanf(fp(), "POINTS %u double\n", &npoints));
+  
+  //std::cout << "npoints = " << npoints << std::endl;
+  
+    /*------------------------------------------------------------*/
+    // Now skip past the coords
+    /*------------------------------------------------------------*/
+    double coord[3];
+    for (UInt i = 0; i < npoints; i++) {
+      ThrowRequire(3 == fscanf(fp(), "%lf %lf %lf\n", &coord[0], &coord[1], &coord[2]));
+    }
+  
+    UInt nelem, width;
+    ThrowRequire(2 == fscanf(fp(), "CELLS %u %u\n", &nelem, &width));
+
+    // Set the output arguments
+    num_nodes = npoints;
+    num_elems = nelem;
+    conn_size = width;
+  }
+}
+
+/**
+ * Fill out the arrays with mesh information.  Useful for creating an array in Fortran.
+ */
+void ReadVTKMeshBody(const std::string &filename, int *nodeId, double *nodeCoord, int *nodeOwner,
+                     int *elemId, int *elemType, int *elemConn)
+{
+
+  FileManager fp(filename.c_str());
+
+  // I'm sorry, but fscanf seems to be more powerful than ifstream...
+
+  UInt sdim(0), pdim(0);
+
+
+  UInt num_nodes, num_elems;
+
+  // This is a rough reader... robustness is not guaranteed at this time.
+  // What IS guaranteed is that this routine will read files written by the framework.
+  {
+
+    // The version line
+    char linebuf[4096];
+    float version;
+    UInt ret = fscanf(fp(), "# vtk DataFile Version %f\n", &version);
+    ThrowRequire(ret == 1);
+  
+    fgets(linebuf, 1000, fp());
+  //std::cout << "linebuf=" << linebuf << std::endl;
+  
+    ThrowRequire(0 == fscanf(fp(), "ASCII\n"));
+  
+    ThrowRequire(0 == fscanf(fp(), "DATASET UNSTRUCTURED_GRID\n"));
+  
+    UInt npoints;
+    ThrowRequire(1 == fscanf(fp(), "POINTS %u double\n", &npoints));
+  
+  //std::cout << "npoints = " << npoints << std::endl;
+  
+    /*------------------------------------------------------------*/
+    // Now read the coords
+    /*------------------------------------------------------------*/
+    for (UInt i = 0; i < npoints; i++) {
+      int t_i = 3*i;
+      ThrowRequire(3 == fscanf(fp(), "%lf %lf %lf\n", &nodeCoord[t_i], &nodeCoord[t_i+1], &nodeCoord[t_i+2]));
+    }
+  
+    UInt nelem, width;
+    ThrowRequire(2 == fscanf(fp(), "CELLS %u %u\n", &nelem, &width));
+
+    num_nodes = npoints;
+    num_elems = nelem;
+  
+  //std::cout << "nelem:" << nelem << ", w=" << width << std::endl;
+  
+    /*------------------------------------------------------------*/
+    // Read the connectivity for elements
+    /*------------------------------------------------------------*/
+  
+    UInt wi = 0;
+    for (UInt i = 0; i < nelem; i++) {
+  
+      ThrowRequire(1 == fscanf(fp(), "%u ", &elemConn[wi]));
+  
+      for (UInt n = 0; n < elemConn[wi]; n++) {
+        ThrowRequire(1 == fscanf(fp(), "%u ", &elemConn[wi+n+1]));
+      } 
+      fscanf(fp(), "\n");
+
+      wi += elemConn[wi] + 1; // skip forward
+    }
+  
+  
+    /*------------------------------------------------------------*/
+    // Read the element types
+    /*------------------------------------------------------------*/
+    UInt nctype;
+    ThrowRequire(1 == fscanf(fp(), "CELL_TYPES %u", &nctype));
+  
+    ThrowRequire(nctype == nelem);
+  
+    for (UInt i = 0; i < nctype; i++) {
+      ThrowRequire(1 == fscanf(fp(), "%u\n", &elemType[i]));
+    }
+
+  } // close read mesh objects
+
+  // Try reading POINT_DATA
+  bool done = false;
+
+  enum {VTK_NO_DATA = -1, VTK_CELL_DATA=0, VTK_NODE_DATA=1};
+
+  int data_type = VTK_NO_DATA;
+  while (!done) {
+    UInt ndata;
+    int nread = fscanf(fp(), "POINT_DATA %u\n", &ndata);
+    if (nread == EOF) {
+      done = true; continue;
+    }
+
+    if (1 == nread) {
+      data_type = VTK_NODE_DATA;
+    } else { // Try to read cell data
+      nread = fscanf(fp(), "CELL_DATA %u\n", &ndata);
+      if (nread == EOF) {
+        done = true; continue;
+      }
+     
+      if (1 == nread) {
+        data_type = VTK_CELL_DATA;
+      } else {
+        // If data_type is already defined, just use what we have.
+        // Otherwise we have a parsing error.
+        if (data_type == VTK_NO_DATA)
+          Throw() << "Confusion parsing VTK data type!";
+      }
+    }
+
+    // Process the data.  data_type is one of elem or node
+    char vname[512];
+    ThrowRequire(1 == fscanf(fp(), "SCALARS %s double 1\n", vname));
+//std::cout << "Reading var:" << vname << std::endl;
+
+    fscanf(fp(), "LOOKUP_TABLE default\n");
+
+    // Now read the data
+    UInt num_data = data_type == VTK_NODE_DATA ? num_nodes : num_elems;
+    std::vector<double> data(num_data, 0);
+ 
+    for (UInt i = 0; i < num_data; i++) {
+      ThrowRequire(1 == fscanf(fp(), "%lf ", &data[i]));
+//std::cout << "Read " << data[i] << std::endl;
+    }
+    
+    fscanf(fp(), "\n");
+
+    // If NUM, process specially
+    if (data_type == VTK_CELL_DATA && std::string(vname) == "_ELEM_NUM") {
+
+      std::copy(data.begin(), data.end(), elemId);
+
+    } else if (data_type == VTK_NODE_DATA && std::string(vname) == "_NODE_NUM") {
+
+
+      std::copy(data.begin(), data.end(), nodeId);
+
+    } else {
+
     }
 
   } // while processing data

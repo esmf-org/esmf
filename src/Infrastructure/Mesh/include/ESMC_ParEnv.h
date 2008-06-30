@@ -81,12 +81,12 @@ static void End();
 static MPI_Comm Comm() { return comm;}
 void SetComm(MPI_Comm _comm);
 
-static UInt Rank() { return rank; }
-static UInt Size() { return psize; }
-static bool Serial() { return serial; }
+static UInt Rank() { if (psize == 0) Init(); return rank; }
+static UInt Size() { if (psize == 0) Init(); return psize; }
+static bool Serial() { if (psize == 0) Init(); return serial; }
 
-static std::ostream &Out() { return log->stream(); }
-static ParLog *Log() { return log;}
+static std::ostream &Out() { if (psize == 0) Init(); return log->stream(); }
+static ParLog *Log() { if (psize == 0) Init(); return log;}
 
 private:
 static bool serial;

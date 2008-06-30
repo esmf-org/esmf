@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.1 2008/06/09 20:04:14 dneckels Exp $
+! $Id: ESMF_MeshEx.F90,v 1.2 2008/06/30 17:05:10 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshEx.F90,v 1.1 2008/06/09 20:04:14 dneckels Exp $'
+    '$Id: ESMF_MeshEx.F90,v 1.2 2008/06/30 17:05:10 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -53,10 +53,21 @@ program ESMF_FieldRegridEx
   logical :: correct
   type(ESMF_VM) :: vm
   type(ESMF_Mesh) :: meshSrc
+  integer :: num_elem, num_node, conn_size
+
+  integer, allocatable :: nodeId(:)
+  real(ESMF_KIND_R8), allocatable :: nodeCoord(:)
+  integer, allocatable :: nodeOwner(:)
+
+  integer, allocatable :: elemId(:)
+  integer, allocatable :: elemType(:)
+  integer, allocatable :: elemConn(:)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
   !-----------------------------------------------------------------------------
+
+  call C_ESMC_MeshInit("MeshTest", 1)
 
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)
@@ -79,6 +90,47 @@ program ESMF_FieldRegridEx
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
+  
+  call C_ESMC_MeshVTKHeader("testmesh", num_elem, num_node, conn_size, localrc)
+  write(failMsg, *) "C_ESMC_MeshVTKHeader fail"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+
+  print *, 'num_elem:', num_elem, 'num_node:', num_node, 'conn_size:', conn_size
+
+  ! Allocate the arrays to describe Mesh
+
+  allocate(nodeId(num_node))
+  allocate(nodeCoord(3*num_node))
+  allocate(nodeOwner(num_node))
+
+  allocate(elemId(num_elem))
+  allocate(elemType(num_elem))
+  allocate(elemConn(conn_size))
+
+
+  ! Get the arrays from the test mesh
+  call C_ESMC_MeshVTKBody("testmesh", nodeId(1), nodeCoord(1), nodeOwner(1), &
+          elemId(1), elemType(1), elemConn(1), localrc)
+  write(failMsg, *) "C_ESMC_MeshVTKBody fail"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+  ! Declare the nodes
+  call ESMF_MeshAddNodes(meshSrc, nodeId, nodeCoord, nodeOwner, localrc)
+  write(failMsg, *) "ESMF_MeshAddNodes fail"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+  ! free the arrays
+  deallocate(nodeId)
+  deallocate(nodeCoord)
+  deallocate(nodeOwner)
+
+  deallocate(elemId)
+  deallocate(elemType)
+  deallocate(elemConn)
 !
 !  logical :: correct
 !  type(ESMF_Grid) :: gridSrc

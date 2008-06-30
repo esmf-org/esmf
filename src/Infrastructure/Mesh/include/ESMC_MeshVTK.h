@@ -20,9 +20,28 @@ namespace ESMC {
 
 class Mesh;
 
+/**
+ * Write the mesh as a VTK file.
+ */
 void WriteVTKMesh(const Mesh &mesh, const std::string &filename);
 
+/**
+ * Read and create the mesh from a VTK file.
+ */
 void ReadVTKMesh(Mesh &mesh, const std::string &filename);
+
+/**
+ * Find the number of elements and nodes in the mesh.  This is
+ * useful if creating a Fortran mesh, since one can then allocate the
+ * correct size arrays to read the full mesh.
+ */
+void ReadVTKMeshHeader(const std::string &filename, int &num_elems, int &num_nodes, int &conn_size);
+
+/**
+ * Read the mesh into a series of arrays.  Used to read in a mesh for testing the fortran api.
+ */
+void ReadVTKMeshBody(const std::string &filename, int *nodeId, double *nodeCoord, int *nodeOwner,
+                     int *elemId, int *elemType, int *elemConn);
 
 } // namespace
 

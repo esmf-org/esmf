@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.3 2008/06/10 20:16:50 dneckels Exp $
+! $Id: ESMF_Mesh.F90,v 1.4 2008/06/30 17:05:11 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.3 2008/06/10 20:16:50 dneckels Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.4 2008/06/30 17:05:11 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -147,15 +147,14 @@ module ESMF_MeshMod
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_Mesh)         :: mesh
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    mesh%this = ESMF_NULL_POINTER
+    ESMF_MeshCreate%this = ESMF_NULL_POINTER
 
-    call c_ESMC_meshcreate(mesh%this, parametricDim, spatialDim, localrc)
+    call c_ESMC_meshcreate(ESMF_MeshCreate%this, parametricDim, spatialDim, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -205,27 +204,20 @@ module ESMF_MeshMod
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-
-    type(ESMF_InterfaceInt) :: nodeIdsArg
-    type(ESMF_InterfaceInt) :: nodeOwnersArg
+    integer                 :: num_nodes
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-   ! Check init status of arguments
-   ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
-
-   ! Create some interface int's 
-
-    !mesh%this = ESMF_NULL_POINTER
-
-    !call c_ESMC_meshcreate(mesh%this, parametricDim, spatialDim, localrc)
-    !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      !ESMF_CONTEXT, rcToReturn=rc)) return
-!
     ! Check init status of arguments
-    !ESMF_INIT_SET_CREATED(ESMF_MeshCreate)
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    num_nodes = size(nodeIds)
+    call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds(1), nodeCoords(1), &
+                             nodeOwners(1), localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
   end subroutine ESMF_MeshAddNodes
 !------------------------------------------------------------------------------
@@ -271,22 +263,20 @@ module ESMF_MeshMod
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    integer                 :: num_nodes
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-   ! Check init status of arguments
+    ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-!    mesh%this = ESMF_NULL_POINTER
-
-!    call c_ESMC_meshcreate(mesh%this, parametricDim, spatialDim, localrc)
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
-!
-    ! Check init status of arguments
-!    ESMF_INIT_SET_CREATED(ESMF_MeshCreate)
+    num_elems = size(elementIds)
+    call C_ESMC_MeshAddElements(mesh%this, num_elems, elementIds(1), elementTypes(1), &
+                             elementConn(1), localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
   end subroutine ESMF_MeshAddElements
 !------------------------------------------------------------------------------
