@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.5 2008/06/30 17:37:11 dneckels Exp $
+! $Id: ESMF_Mesh.F90,v 1.6 2008/06/30 22:15:11 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.5 2008/06/30 17:37:11 dneckels Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.6 2008/06/30 22:15:11 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -227,7 +227,7 @@ module ESMF_MeshMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshAddElements()"
 !BOPI
-! !IROUTINE: ESMF_MeshAddElement - Add elements to a mesh
+! !IROUTINE: ESMF_MeshAddElements - Add elements to a mesh
 !
 ! !INTERFACE:
     subroutine ESMF_MeshAddElements(mesh, elementIds, elementTypes, elementConn, rc)

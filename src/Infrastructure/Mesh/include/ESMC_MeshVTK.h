@@ -19,6 +19,7 @@
 namespace ESMC {
 
 class Mesh;
+class MeshObjTopo;
 
 /**
  * Write the mesh as a VTK file.
@@ -42,6 +43,11 @@ void ReadVTKMeshHeader(const std::string &filename, int &num_elems, int &num_nod
  */
 void ReadVTKMeshBody(const std::string &filename, int *nodeId, double *nodeCoord, int *nodeOwner,
                      int *elemId, int *elemType, int *elemConn);
+
+/**
+ * Convert the vtk type to a mesh obj topo.
+ */
+const MeshObjTopo *Vtk2Topo(UInt sdim, UInt vtk_type);
 
 } // namespace
 

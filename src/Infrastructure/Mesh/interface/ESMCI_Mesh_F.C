@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.5 2008/06/30 17:05:11 dneckels Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.6 2008/06/30 22:15:11 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -31,6 +31,8 @@
 
 #include <string>
 
+using namespace ESMC;
+
 
 //------------------------------------------------------------------------------
 //BOP
@@ -45,14 +47,14 @@ extern "C" void FTN(c_esmc_meshinit)(char *logfile, int *use_log, int nlen) {
 
   char *lname = ESMC_F90toCstring(logfile, nlen);
 
-  ESMC::Par::Init(lname, (*use_log == 1 ? true : false));
+  Par::Init(lname, (*use_log == 1 ? true : false));
 
   delete [] lname;
 
 }
 
 
-extern "C" void FTN(c_esmc_meshcreate)(ESMC::Mesh **meshpp,
+extern "C" void FTN(c_esmc_meshcreate)(Mesh **meshpp,
                          int *pdim, int *sdim, int *rc)
 {
 #undef  ESMC_METHOD
@@ -64,7 +66,7 @@ extern "C" void FTN(c_esmc_meshcreate)(ESMC::Mesh **meshpp,
     //Initialize return code
     localrc = ESMF_SUCCESS;
 
-    *meshpp = new ESMC::Mesh();
+    *meshpp = new Mesh();
 
     (*meshpp)->set_parametric_dimension(*pdim);
     (*meshpp)->set_spatial_dimension(*sdim);
@@ -80,7 +82,7 @@ extern "C" void FTN(c_esmc_meshcreate)(ESMC::Mesh **meshpp,
 
 } // meshcreate
 
-extern "C" void FTN(c_esmc_meshaddnodes)(ESMC::Mesh **meshpp, int *num_nodes, int *nodeId, 
+extern "C" void FTN(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nodeId, 
                double *nodeCoord, int *nodeOwner, int *rc) 
 {
 //std::cout << "num_nodes:" << *num_nodes << std::endl;
@@ -90,20 +92,21 @@ extern "C" void FTN(c_esmc_meshaddnodes)(ESMC::Mesh **meshpp, int *num_nodes, in
     //Initialize return code
     localrc = ESMF_SUCCESS;
 
-    ESMC::Mesh *meshp = *meshpp;
+    Mesh *meshp = *meshpp;
 
     for (int n = 0; n < *num_nodes; ++n) {
 
-      ESMC::MeshObj *node = new ESMC::MeshObj(ESMC::MeshObj::NODE, nodeId[n], n);
+      MeshObj *node = new MeshObj(MeshObj::NODE, nodeId[n], n);
 
       node->set_owner(nodeOwner[n]);
 
       meshp->add_node(node, 0);
 
 
-//meshp->Print(ESMC::Par::Out());
 
     }
+
+meshp->Print(Par::Out());
 
     *rc = localrc;
    } catch(...) {
@@ -112,8 +115,8 @@ extern "C" void FTN(c_esmc_meshaddnodes)(ESMC::Mesh **meshpp, int *num_nodes, in
 
 } 
 
-extern "C" void FTN(c_esmc_meshaddelements)(ESMC::Mesh **meshpp, int *num_elems, int *elementId, 
-               int *elementType, int *elementConn, int *rc) 
+extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *elemId, 
+               int *elemType, int *elemConn, int *rc) 
 {
    try {
     int localrc;
@@ -121,23 +124,63 @@ extern "C" void FTN(c_esmc_meshaddelements)(ESMC::Mesh **meshpp, int *num_elems,
     //Initialize return code
     localrc = ESMF_SUCCESS;
 
-    ESMC::Mesh *meshp = *meshpp;
+    Mesh *meshp = *meshpp;
 
-    std::vector<ESMC::MeshObj*> nconnect;
+    ThrowRequire(meshp);
 
-    int cur_conn = 0;
-    for (int n = 0; n < *num_elems; ++n) {
+    Mesh &mesh = *meshp;
 
-      // The object
-      ESMC::MeshObj *elem = new ESMC::MeshObj(ESMC::MeshObj::ELEMENT, elementId[n]);
+    // We must first store all nodes in a flat array since element
+    // connectivity will index into this array.
+    std::vector<MeshObj*> all_nodes;
 
-      // Connect to the relevant nodes.
-      int nnodes = elementConn[cur_conn++];
+    int num_nodes = mesh.num_nodes();
 
-      
+    all_nodes.resize(num_nodes, static_cast<MeshObj*>(0));
 
+    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+
+    for (; ni != ne; ++ni) {
+
+      int seq = ni->get_data_index();
+
+      ThrowRequire(seq < num_nodes);
+
+      all_nodes[seq] = &*ni;
 
     }
+
+
+    // Now loop the elements and add them to the mesh.
+    int cur_conn = 0;
+
+    std::vector<MeshObj*> nconnect(27, static_cast<MeshObj*>(0)); // 27 = quad hex, max nodes
+
+    for (int e = 0; e < *num_elems; ++e) {
+
+      // The object
+      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, elemId[e]);
+
+      // Connect to the relevant nodes.
+      int nnodes = elemConn[cur_conn++];
+
+      for (int n = 0; n < nnodes; ++n) {
+      
+        ThrowRequire(elemConn[cur_conn] <= num_nodes);
+        nconnect[n] = all_nodes[cur_conn++];
+
+      }
+
+      // Get/deduce the element topology
+      
+      const MeshObjTopo *topo = Vtk2Topo(mesh.spatial_dim(), elemType[e]);
+
+      mesh.add_element(elem, nconnect, 1, topo);
+
+
+    } // for e
+
+mesh.Print(Par::Out());
 
     *rc = localrc;
    } catch(...) {
@@ -159,8 +202,8 @@ extern "C" void FTN(c_esmc_meshvtkheader)(char *filename, int *num_elem, int *nu
     char *fname = ESMC_F90toCstring(filename, nlen);
 
     std::string fnames(fname);
-    int rank = ESMC::Par::Rank();
-    int psize = ESMC::Par::Size();
+    int rank = Par::Rank();
+    int psize = Par::Size();
 
     std::string newname;
 
@@ -169,13 +212,13 @@ extern "C" void FTN(c_esmc_meshvtkheader)(char *filename, int *num_elem, int *nu
   // If csize = 1, read fbase.g
      if (psize > 1) {
        std::ostringstream newname_str;
-       int ndec = ESMC::numDecimal(psize);
+       int ndec = numDecimal(psize);
        newname_str << fname << "." << psize << ".";
        newname_str << std::setw(ndec) << std::setfill('0') << rank;
        newname = newname_str.str() + extension;
      } else newname = fname + extension;
 
-    ESMC::ReadVTKMeshHeader(newname, *num_elem, *num_node, *conn_size);
+    ReadVTKMeshHeader(newname, *num_elem, *num_node, *conn_size);
 
     delete [] fname;
 
@@ -196,8 +239,8 @@ extern "C" void FTN(c_esmc_meshvtkbody)(char *filename, int *nodeId, double *nod
     char *fname = ESMC_F90toCstring(filename, nlen);
 
     std::string fnames(fname);
-    int rank = ESMC::Par::Rank();
-    int psize = ESMC::Par::Size();
+    int rank = Par::Rank();
+    int psize = Par::Size();
 
     std::string newname;
 
@@ -206,13 +249,13 @@ extern "C" void FTN(c_esmc_meshvtkbody)(char *filename, int *nodeId, double *nod
   // If csize = 1, read fbase.g
      if (psize > 1) {
        std::ostringstream newname_str;
-       int ndec = ESMC::numDecimal(psize);
+       int ndec = numDecimal(psize);
        newname_str << fname << "." << psize << ".";
        newname_str << std::setw(ndec) << std::setfill('0') << rank;
        newname = newname_str.str() + extension;
      } else newname = fname + extension;
 
-    ESMC::ReadVTKMeshBody(newname, nodeId, nodeCoord, nodeOwner, elemId, elemType, elemConn);
+    ReadVTKMeshBody(newname, nodeId, nodeCoord, nodeOwner, elemId, elemType, elemConn);
 
     delete [] fname;
 

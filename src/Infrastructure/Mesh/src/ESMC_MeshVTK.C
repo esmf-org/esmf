@@ -69,6 +69,12 @@ static const MeshObjTopo *vtk2topo(UInt vtk_type, UInt sdim) {
   } else Throw() << "sdim not valid:" << sdim;
 }
 
+const MeshObjTopo *Vtk2Topo(UInt sdim, UInt vtk_type) {
+
+  return vtk2topo(vtk_type, sdim);
+
+}
+
 
 // Load data into an array from the mesh, switching on the correct typeid
 template<typename iter, typename FIELD>
@@ -772,6 +778,7 @@ void ReadVTKMeshBody(const std::string &filename, int *nodeId, double *nodeCoord
   
       for (UInt n = 0; n < elemConn[wi]; n++) {
         ThrowRequire(1 == fscanf(fp(), "%u ", &elemConn[wi+n+1]));
+        elemConn[wi+n+1]++; // Make connectivities 1-based for fortran
       } 
       fscanf(fp(), "\n");
 

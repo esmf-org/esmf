@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.2 2008/06/30 17:05:10 dneckels Exp $
+! $Id: ESMF_MeshEx.F90,v 1.3 2008/06/30 22:15:10 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshEx.F90,v 1.2 2008/06/30 17:05:10 dneckels Exp $'
+    '$Id: ESMF_MeshEx.F90,v 1.3 2008/06/30 22:15:10 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -120,6 +120,12 @@ program ESMF_FieldRegridEx
   ! Declare the nodes
   call ESMF_MeshAddNodes(meshSrc, nodeId, nodeCoord, nodeOwner, localrc)
   write(failMsg, *) "ESMF_MeshAddNodes fail"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+  ! Declare the elements
+  call ESMF_MeshAddElements(meshSrc, elemId, elemType, elemConn, localrc)
+  write(failMsg, *) "ESMF_MeshAddElements fail"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
