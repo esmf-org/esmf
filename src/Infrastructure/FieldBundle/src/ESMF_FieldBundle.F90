@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.6 2008/06/02 20:05:14 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.7 2008/06/30 19:56:53 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -46,6 +46,7 @@
       use ESMF_GridMod
       use ESMF_InternArrayMod
       use ESMF_FieldMod
+      use ESMF_FieldCreateMod
       use ESMF_FieldGetMod
       use ESMF_InitMacrosMod
       implicit none
@@ -127,6 +128,7 @@
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
         logical :: isCongruent                   ! are all fields identical?
         logical :: hasPattern                    ! first data field sets this
+        logical :: is_proxy                      ! true if this is a proxy FB
         !type(ESMF_FieldBundleCongrntData) :: pattern ! what they must match
         integer :: field_count      
         ESMF_INIT_DECLARE
@@ -2221,6 +2223,7 @@ end function
       btype%isCongruent = .TRUE.
    
       btype%field_count = 0
+      btype%is_proxy = .false.
       nullify(btype%flist)
       
       btype%pack_flag = ESMF_NO_PACKED_DATA
@@ -2262,7 +2265,7 @@ end function
 !
 !EOPI
 
-      integer :: status
+      integer :: status, i
 
       ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
@@ -2274,7 +2277,18 @@ end function
       btype%bundlestatus = ESMF_STATUS_INVALID
       call ESMF_BaseDestroy(btype%base, status)
 
-      ! TODO: if packed array exists, add code to delete the array here.
+      if(btype%is_proxy) then
+          call ESMF_GridDestroy(btype%grid, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+          do i = 1, btype%field_count
+            call ESMF_FieldDestroy(btype%flist(i), rc=status)
+            if (ESMF_LogMsgFoundError(status, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+          enddo
+      endif
 
       if (associated(btype%flist)) then
           deallocate(btype%flist, stat=status)
@@ -2342,19 +2356,6 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-! TODO:FIELDINTEGRATION This method is not supported yet.
-#if 0
-        type(ESMF_Base) :: base                   ! base class object
-        type(ESMF_Field), dimension(:), pointer :: flist
-        type(ESMF_Status) :: bundlestatus
-        type(ESMF_Status) :: gridstatus
-        integer :: field_count
-        type(ESMF_Grid) :: grid                  ! associated global grid
-        type(ESMF_LocalFieldBundle) :: localbundle    ! this differs per DE
-        type(ESMF_Packflag) :: pack_flag         ! is packed data present?
-        type(ESMF_IOSpec) :: iospec              ! iospec values
-        type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
-
       ! check inputs
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)      
 
@@ -2367,8 +2368,9 @@ end function
                                  ESMF_CONTEXT, rc)) return
 
       call c_ESMC_FieldBundleSerialize(bp%bundlestatus, bp%gridstatus, &
+                                 bp%iostatus, &
                                  bp%field_count, bp%pack_flag, &
-                                 bp%mapping, bp%iostatus, &
+                                 bp%isCongruent, bp%hasPattern, &
                                  buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -2390,21 +2392,7 @@ end function
                                     ESMF_CONTEXT, rc)) return
       enddo
 
-    ! TODO: if shallow, call C directly?
-      !call ESMF_IOSpecSerialize(bp%iospec, buffer, length, offset, localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                           ESMF_ERR_PASSTHRU, &
-      !                           ESMF_CONTEXT, rc)) return
-
-     ! TODO: call C directly here?
-      !call ESMF_ArraySerialize(bp%localbundle%localdata, buffer, length, &
-      !                          offset, localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                           ESMF_ERR_PASSTHRU, &
-      !                           ESMF_CONTEXT, rc)) return
-
       if  (present(rc)) rc = ESMF_SUCCESS
-#endif
 
       end subroutine ESMF_FieldBundleSerialize
 
@@ -2463,9 +2451,6 @@ end function
       ! in case of error, make sure this is invalid.
       nullify(ESMF_FieldBundleDeserialize%btypep)
 
-! TODO:FIELDINTEGRATION This method is not supported yet.
-#if 0
-
       ! shortcut to internals
       allocate(bp, stat=status)
       if (ESMF_LogMsgFoundAllocError(status, &
@@ -2485,8 +2470,9 @@ end function
                                  ESMF_CONTEXT, rc)) return
 
       call c_ESMC_FieldBundleDeserialize(bp%bundlestatus, bp%gridstatus, &
+                                 bp%iostatus, &
                                  bp%field_count, bp%pack_flag, &
-                                 bp%mapping, bp%iostatus, &
+                                 bp%isCongruent, bp%hasPattern, &
                                  buffer(1), offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -2509,22 +2495,13 @@ end function
           bp%flist(i) = ESMF_FieldDeserialize(vm, buffer, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+                                    ESMF_CONTEXT, rc)) then
+              deallocate(bp%flist)
+              return
+          endif
       enddo
 
-
-    ! TODO: if shallow, call C directly?
-      !call ESMF_IOSpecDeserialize(bp%iospec, buffer, offset, localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                           ESMF_ERR_PASSTHRU, &
-      !                           ESMF_CONTEXT, rc)) return
-
-     ! TODO: call C directly here?
-      !call ESMF_ArrayDeserialize(bp%localbundle%localdata, buffer, &
-      !                          offset, localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                           ESMF_ERR_PASSTHRU, &
-      !                           ESMF_CONTEXT, rc)) return
+      bp%is_proxy = .true.
 
       ESMF_FieldBundleDeserialize%btypep => bp
 
@@ -2532,7 +2509,6 @@ end function
       ESMF_INIT_SET_CREATED(ESMF_FieldBundleDeserialize)
 
       if  (present(rc)) rc = ESMF_SUCCESS
-#endif
 
       end function ESMF_FieldBundleDeserialize
 

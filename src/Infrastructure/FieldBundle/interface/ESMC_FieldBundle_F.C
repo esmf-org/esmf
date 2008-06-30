@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldBundle_F.C,v 1.3 2008/04/05 03:38:19 cdeluca Exp $
+// $Id: ESMC_FieldBundle_F.C,v 1.4 2008/06/30 19:56:52 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -26,13 +26,13 @@
 #include "ESMC_LogErr.h"
 
  // associated class definition file
-#include "ESMC_FieldBundle.h"
+//#include "ESMC_FieldBundle.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_FieldBundle_F.C,v 1.3 2008/04/05 03:38:19 cdeluca Exp $";
+             "$Id: ESMC_FieldBundle_F.C,v 1.4 2008/06/30 19:56:52 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -44,59 +44,14 @@ extern "C" {
 //
 //
 
-#if 0
-      type ESMF_PackFlag
-        integer :: packflag
-      end type
-
-      type(ESMF_PackFlag), parameter :: ESMF_PACKED_DATA = ESMF_PackFlag(1), &
-                                        ESMF_NO_PACKED_DATA = ESMF_PackFlag(2)
-
-      type ESMF_FieldBundleFieldAccess
-         type(ESMF_InterleaveFlag) :: bfa_type
-         integer :: bfa_start
-         integer :: bfa_end
-         integer :: bfa_strides
-      end type
-
-      type ESMF_FieldBundleFieldInterleave
-        integer :: field_order                      ! index of this field
-        type(ESMF_FieldDataMap) :: field_dm         ! copy of this fields dm
-        type(ESMF_FieldBundleFieldAccess) :: field_bfa   ! access info if packed
-      end type
-
-      type ESMF_LocalFieldBundle
-        type(ESMF_Array) :: packed_data               ! local packed array
-        type(ESMF_Status) :: igridstatus
-        type(ESMF_Status) :: arraystatus
-        integer :: accesscount
-      end type
-
-      type ESMF_FieldBundleType
-        type(ESMF_Base) :: base                   ! base class object
-        type(ESMF_Field), dimension(:), pointer :: flist
-        type(ESMF_Status) :: bundlestatus
-        type(ESMF_Status) :: igridstatus
-        integer :: field_count
-        type(ESMF_IGrid) :: igrid                  ! associated global igrid
-        type(ESMF_LocalFieldBundle) :: localbundle    ! this differs per DE
-        type(ESMF_Packflag) :: pack_flag         ! is packed data present?
-        type(ESMF_FieldBundleFieldInterleave) :: fil  ! ordering in buffer
-        type(ESMF_FieldBundleDataMap) :: mapping      ! map info
-        type(ESMF_IOSpec) :: iospec              ! iospec values
-        type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
-      
-      end type
-#endif
-
-
 // non-method functions
-void FTN(c_esmc_bundleserialize)(ESMC_Status *bundlestatus, 
-                            ESMC_Status *igridstatus, 
-                            int *field_count, 
-                            int *pack_flag, 
-                            void *mapping, 
-                            ESMC_Status *iostatus, 
+void FTN(c_esmc_fieldbundleserialize)(ESMC_Status *bundlestatus,
+                            ESMC_Status *gridstatus,
+                            ESMC_Status *iostatus,
+                            int *field_count,
+                            int *pack_flag,
+                            int *isCongruent,
+                            int *hasPattern,
                             void *buffer, int *length, int *offset, int *localrc){
 
     // either put the code here, or call into a real C++ function
@@ -119,27 +74,29 @@ void FTN(c_esmc_bundleserialize)(ESMC_Status *bundlestatus,
 
     sp = (ESMC_Status *)((char *)(buffer) + *offset);
     *sp++ = *bundlestatus;
-    *sp++ = *igridstatus; 
+    *sp++ = *gridstatus; 
+    *sp++ = *iostatus; 
     ip = (int *)sp;
     *ip++ = *field_count; 
     *ip++ = *pack_flag; 
-    //*ip++ = *mapping; 
-    sp = (ESMC_Status *)ip;
-    *sp++ = *iostatus; 
+    *ip++ = *isCongruent; 
+    *ip++ = *hasPattern; 
 
-    *offset = (char *)sp - (char *)buffer;
+    *offset = (char *)ip - (char *)buffer;
 
+    if (localrc) *localrc = ESMF_SUCCESS;
     return;
 } 
 
 
 // non-method functions
-void FTN(c_esmc_bundledeserialize)(ESMC_Status *bundlestatus, 
-                              ESMC_Status *igridstatus, 
+void FTN(c_esmc_fieldbundledeserialize)(ESMC_Status *bundlestatus, 
+                              ESMC_Status *gridstatus, 
+                              ESMC_Status *iostatus, 
                               int *field_count, 
                               int *pack_flag, 
-                              void *mapping, 
-                              ESMC_Status *iostatus, 
+                              int *isCongruent,
+                              int *hasPattern,
                               void *buffer, int *offset, int *localrc){
 
     // either put the code here, or call into a real C++ function
@@ -148,16 +105,17 @@ void FTN(c_esmc_bundledeserialize)(ESMC_Status *bundlestatus,
 
     sp = (ESMC_Status *)((char *)(buffer) + *offset);
     *bundlestatus = *sp++;
-    *igridstatus = *sp++;
+    *gridstatus = *sp++;
+    *iostatus = *sp++;
     ip = (int *)sp;
     *field_count = *ip++;
     *pack_flag = *ip++;
-    // *mapping = *ip++;
-    sp = (ESMC_Status *)ip;
-    *iostatus = *sp++;
+    *isCongruent = *ip++;
+    *hasPattern = *ip++;
 
-    *offset = (char *)sp - (char *)buffer;
+    *offset = (char *)ip - (char *)buffer;
 
+    if (localrc) *localrc = ESMF_SUCCESS;
     return;
 } 
 
