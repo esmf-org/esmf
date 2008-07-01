@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.6 2008/06/30 22:15:11 dneckels Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.7 2008/07/01 22:23:51 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -25,6 +25,7 @@
 #include "ESMC_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMC_Mesh.h"
+#include "ESMC_MeshRead.h"
 #include "ESMC_MeshVTK.h"
 #include "ESMC_ParEnv.h"
 #include "ESMC_MeshUtils.h"
@@ -93,6 +94,8 @@ extern "C" void FTN(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nod
     localrc = ESMF_SUCCESS;
 
     Mesh *meshp = *meshpp;
+    ThrowRequire(meshp);
+    Mesh &mesh = *meshp;
 
     for (int n = 0; n < *num_nodes; ++n) {
 
@@ -100,13 +103,31 @@ extern "C" void FTN(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nod
 
       node->set_owner(nodeOwner[n]);
 
-      meshp->add_node(node, 0);
-
-
+      mesh.add_node(node, 0);
 
     }
 
-meshp->Print(Par::Out());
+    // Register the nodal coordinate field.
+    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", mesh.spatial_dim());
+
+    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+
+    UInt sdim = mesh.spatial_dim();
+
+    for (UInt nc = 0; ni != ne; ++ni) {
+
+      MeshObj &node = *ni;
+
+      double *coord = node_coord->data(node);
+
+      for (UInt c = 0; c < sdim; ++c)
+        coord[c] = nodeCoord[nc+c];
+
+      nc += 3;  // nodeCoord is stride 3 whether mesh is or not.
+
+    }
+
+//meshp->Print(Par::Out());
 
     *rc = localrc;
    } catch(...) {
@@ -114,6 +135,23 @@ meshp->Print(Par::Out());
    }
 
 } 
+
+extern "C" void FTN(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc, int nlen) {
+
+  char *filename = ESMC_F90toCstring(fname, nlen);
+
+  try {
+
+    *rc = ESMF_SUCCESS;
+    WriteMesh(**meshpp, filename);
+
+  } catch(...) {
+    *rc = ESMF_FAILURE;
+  }
+
+  delete [] filename;
+
+}
 
 extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *elemId, 
                int *elemType, int *elemConn, int *rc) 
@@ -164,10 +202,11 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
       // Connect to the relevant nodes.
       int nnodes = elemConn[cur_conn++];
 
+      nconnect.resize(nnodes, static_cast<MeshObj*>(0));
       for (int n = 0; n < nnodes; ++n) {
       
         ThrowRequire(elemConn[cur_conn] <= num_nodes);
-        nconnect[n] = all_nodes[cur_conn++];
+        nconnect[n] = all_nodes[elemConn[cur_conn++]-1];
 
       }
 
@@ -175,11 +214,14 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
       
       const MeshObjTopo *topo = Vtk2Topo(mesh.spatial_dim(), elemType[e]);
 
+      ThrowRequire(topo->num_nodes == nnodes); // basic sanity check
+
       mesh.add_element(elem, nconnect, 1, topo);
 
 
     } // for e
 
+mesh.Commit();
 mesh.Print(Par::Out());
 
     *rc = localrc;

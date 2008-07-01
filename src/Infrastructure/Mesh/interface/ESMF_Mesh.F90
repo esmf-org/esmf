@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.6 2008/06/30 22:15:11 dneckels Exp $
+! $Id: ESMF_Mesh.F90,v 1.7 2008/07/01 22:23:51 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -94,6 +94,7 @@ module ESMF_MeshMod
 
 ! - ESMF-public methods:
   public ESMF_MeshCreate           
+  public ESMF_MeshWrite
  ! public ESMF_MeshDestroy         
  ! public ESMF_MeshGetInit
   public ESMF_MeshAddNodes
@@ -105,7 +106,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.6 2008/06/30 22:15:11 dneckels Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.7 2008/07/01 22:23:51 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -169,6 +170,54 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshWrite()"
+!BOPI
+! !IROUTINE: ESMF_MeshWrite - Write mesh to a VTK file
+!
+! !INTERFACE:
+    subroutine ESMF_MeshWrite(mesh, filename, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                   :: mesh
+    character (len=*), intent(in)                 :: filename
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Write a mesh to VTK file.
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh.
+!   \item[filename] 
+!         The name of the output file.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    call C_ESMC_MeshWrite(mesh%this, filename, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rc = localrc
+    
+  end subroutine ESMF_MeshWrite
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshAddNodes()"
 !BOPI
 ! !IROUTINE: ESMF_MeshAddNodes - Add nodes to a mesh
@@ -218,6 +267,8 @@ module ESMF_MeshMod
                              nodeOwners(1), localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rc = localrc
     
   end subroutine ESMF_MeshAddNodes
 !------------------------------------------------------------------------------
@@ -277,6 +328,8 @@ module ESMF_MeshMod
                              elementConn(1), localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rc = localrc
     
   end subroutine ESMF_MeshAddElements
 !------------------------------------------------------------------------------
