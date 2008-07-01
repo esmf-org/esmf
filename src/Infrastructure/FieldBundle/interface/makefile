@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.2 2008/04/02 20:42:54 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2008/07/01 20:37:28 feiliu Exp $ 
 
 ALL: build_here 
 
 CFLAGS    =
 FFLAGS    =
-SOURCEC	  = ESMC_FieldBundle_F.C
+SOURCEC	  = ESMCI_FieldBundle_F.C
 SOURCEF	  = ESMF_FieldBundle_C.F90
-STOREH	  = ESMC_FieldBundle.h
+STOREH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

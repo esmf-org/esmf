@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldBundle_F.C,v 1.4 2008/06/30 19:56:52 feiliu Exp $
+// $Id: ESMCI_FieldBundle_F.C,v 1.1 2008/07/01 20:37:28 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -14,9 +14,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC\_FieldBundle} methods declared
-// in the companion file ESMC_FieldBundle.h
-//
+// The code in this file implements the C serialize and deserialize methods
 // 
 //
 //-----------------------------------------------------------------------------
@@ -25,14 +23,11 @@
 #include "ESMC_Start.h"
 #include "ESMC_LogErr.h"
 
- // associated class definition file
-//#include "ESMC_FieldBundle.h"
-
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_FieldBundle_F.C,v 1.4 2008/06/30 19:56:52 feiliu Exp $";
+             "$Id: ESMCI_FieldBundle_F.C,v 1.1 2008/07/01 20:37:28 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
