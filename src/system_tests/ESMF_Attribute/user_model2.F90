@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.8 2008/06/13 00:29:34 theurich Exp $
+! $Id: user_model2.F90,v 1.9 2008/07/02 05:12:13 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -103,15 +103,15 @@ module user_model2
     call ESMF_StateGet(exportState, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! initialize variables
-    conv = 'netCDF'
+    ! Initialize variables
+    conv = 'CF'
     purp = 'basic'
     name1 = 'shortname'
     name2 = 'longname'
     name3 = 'units'
     name4 = 'dimensions'
  
-    ! create a field, make an attribute package, and set attributes in the package
+    ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'aero'
     value2 = 'aerosols'
     value3 = 'unitless'
@@ -125,7 +125,7 @@ module user_model2
     call ESMF_AttributeSet(aero, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
-    ! create a field, make an attribute package, and set attributes in the package
+    ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'delp'
     value2 = 'pressure thickness'
     value3 = 'Pa'
@@ -139,7 +139,7 @@ module user_model2
     call ESMF_AttributeSet(delp, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
-    ! create a field, make an attribute package, and set attributes in the package
+    ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'dewl'
     value2 = 'dewfall'
     value3 = 'kg m-2 s-1'
@@ -153,7 +153,7 @@ module user_model2
     call ESMF_AttributeSet(dewl, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
     
-    ! create a field, make an attribute package, and set attributes in the package
+    ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'hi'
     value2 = 'sea ice skin layer depth'
     value3 = 'm'
@@ -167,7 +167,7 @@ module user_model2
     call ESMF_AttributeSet(hi, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
-    ! create a field, make an attribute package, and set attributes in the package
+    ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'ox'
     value2 = 'odd oxygen mixing ratio'
     value3 = 'pppv'
@@ -181,7 +181,7 @@ module user_model2
     call ESMF_AttributeSet(ox, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
-    ! create a field, make an attribute package, and set attributes in the package
+    ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'ple'
     value2 = 'air pressure'
     value3 = 'Pa'
@@ -195,7 +195,7 @@ module user_model2
     call ESMF_AttributeSet(ple, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
-    ! create a field, make an attribute package, and set attributes in the package
+    ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 's'
     value2 = 'dry static energy'
     value3 = 'm+2 s-2'
@@ -209,7 +209,7 @@ module user_model2
     call ESMF_AttributeSet(s, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
-    ! create a field, make an attribute package, and set attributes in the package
+    ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'speed'
     value2 = 'surface wind speed'
     value3 = 'm s-1'
@@ -223,7 +223,7 @@ module user_model2
     call ESMF_AttributeSet(speed, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
-    ! create a field, make an attribute package, and set attributes in the package
+    ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'taux'
     value2 = 'eastward surface stress'
     value3 = 'N m-2'
@@ -237,7 +237,7 @@ module user_model2
     call ESMF_AttributeSet(taux, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
-    ! create a field, make an attribute package, and set attributes in the package
+    ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'zle'
     value2 = 'geopotential height'
     value3 = 'm'
@@ -251,11 +251,11 @@ module user_model2
     call ESMF_AttributeSet(zle, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
       
-    ! create a field bundle for the first five fields from above
+    ! Create a FieldBundle for the first five Fields from above
     fbundle = ESMF_FieldBundleCreate(name="fbundle", rc=status)
     if (status .ne. ESMF_SUCCESS) return
       
-    ! connect the attrs from the first five fields above to the field bundle
+    ! Connect the Attributes from the first five Fields above to the FieldBundle
     call ESMF_AttributeSet(fbundle, aero, rc=status)
     call ESMF_AttributeSet(fbundle, delp, rc=status)
     call ESMF_AttributeSet(fbundle, dewl, rc=status)
@@ -263,7 +263,7 @@ module user_model2
     call ESMF_AttributeSet(fbundle, ox, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
-    ! connect the attrs from the remaining five fields directly to the export state
+    ! Connect the Attributes from the remaining five Fields directly to the export State
     call ESMF_AttributeSet(exportState, ple, rc=status)
     call ESMF_AttributeSet(exportState, s, rc=status)
     call ESMF_AttributeSet(exportState, speed, rc=status)
@@ -271,11 +271,11 @@ module user_model2
     call ESMF_AttributeSet(exportState, zle, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
-    ! connect the attrs from the field bundle to the export state
+    ! Connect the Attributes from the FieldBundle to the export State
     call ESMF_AttributeSet(exportState, fbundle, rc=status)
     if (status .ne. ESMF_SUCCESS) return
   
-    ! Don't delete the fields so we can copy attrs (shallow) and reuse
+    ! Don't delete the fields so we can copy attrs (shallow) and reuse (garbage collection issue)
     
     rc = ESMF_SUCCESS
     return
@@ -312,14 +312,15 @@ module user_model2
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
-    ! Get the export state
+    ! Get the export State
     call ESMF_StateGet(exportState, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! initialize variables
-    conv = 'netCDF'
+    ! Initialize variables
+    conv = 'CF'
     purp = 'basic'
 
+    ! Write the Attribute info to esmf/test/testg/<platform>/ESMF_AttributeSTest.stdout
     if (myPet .eq. 0) then
       call ESMF_AttributeWrite(importState,conv,purp,rc=rc)
       call ESMF_AttributeWrite(exportState,conv,purp,rc=rc)
