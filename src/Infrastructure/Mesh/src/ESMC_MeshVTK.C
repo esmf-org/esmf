@@ -525,7 +525,7 @@ void ReadVTKMesh(Mesh &mesh, const std::string &filename) {
 
       elem->set_owner(Par::Rank());
 
-      mesh.add_element(elem, elemnodes, etype2blk[ctypes[i]], topo);
+      mesh.add_element(elem, elemnodes, topo->number, topo);
 
       cur_off += topo->num_nodes;
     }

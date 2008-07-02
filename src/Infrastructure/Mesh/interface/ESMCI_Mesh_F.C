@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.7 2008/07/01 22:23:51 dneckels Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.8 2008/07/02 22:00:21 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -216,13 +216,14 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
 
       ThrowRequire(topo->num_nodes == nnodes); // basic sanity check
 
-      mesh.add_element(elem, nconnect, 1, topo);
+      mesh.add_element(elem, nconnect, topo->number, topo);
 
 
     } // for e
 
-mesh.Commit();
-mesh.Print(Par::Out());
+    // Perhaps commit will be a separate call, but for now commit the mesh here.
+    mesh.Commit();
+//mesh.Print(Par::Out());
 
     *rc = localrc;
    } catch(...) {

@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.4 2008/07/01 22:23:51 dneckels Exp $
+! $Id: ESMF_MeshEx.F90,v 1.5 2008/07/02 22:00:15 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshEx.F90,v 1.4 2008/07/01 22:23:51 dneckels Exp $'
+    '$Id: ESMF_MeshEx.F90,v 1.5 2008/07/02 22:00:15 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -91,7 +91,7 @@ program ESMF_FieldRegridEx
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
   
-  call C_ESMC_MeshVTKHeader("testmesh", num_elem, num_node, conn_size, localrc)
+  call C_ESMC_MeshVTKHeader("data/testmesh", num_elem, num_node, conn_size, localrc)
   write(failMsg, *) "C_ESMC_MeshVTKHeader fail"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
@@ -111,7 +111,7 @@ program ESMF_FieldRegridEx
 
 
   ! Get the arrays from the test mesh
-  call C_ESMC_MeshVTKBody("testmesh", nodeId(1), nodeCoord(1), nodeOwner(1), &
+  call C_ESMC_MeshVTKBody("data/testmesh", nodeId(1), nodeCoord(1), nodeOwner(1), &
           elemId(1), elemType(1), elemConn(1), localrc)
   write(failMsg, *) "C_ESMC_MeshVTKBody fail"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -134,7 +134,6 @@ program ESMF_FieldRegridEx
   write(failMsg, *) "ESMF_MeshWrite fail"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
-
 
 
   ! free the arrays
