@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.6 2008/05/08 02:27:27 theurich Exp $
+! $Id: FlowSolverMod.F90,v 1.7 2008/07/03 23:07:47 eschwab Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -1579,7 +1579,15 @@
 ! !DESCRIPTION:
 !     The FlowPrint routine outputs the SIE, U, and V arrays with the specified
 !     file number.  It also prints out the FLAG array at the beginning of the
-!     run.
+!     run. \\
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, it is recommended to use the
+!     standard Fortran call {\tt flush(6)} as a workaround until this issue
+!     is fixed in a future release. \\
+!
 !     \begin{description}
 !     \item [gcomp]
 !           A Gridded Component.

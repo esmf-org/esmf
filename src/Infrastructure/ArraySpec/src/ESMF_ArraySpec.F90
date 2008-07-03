@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.34 2008/04/05 03:38:05 cdeluca Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.35 2008/07/03 23:07:48 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.34 2008/04/05 03:38:05 cdeluca Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.35 2008/07/03 23:07:48 eschwab Exp $'
 
 !==============================================================================
 
@@ -504,7 +504,14 @@ module ESMF_ArraySpecMod
 !         
 !
 ! !DESCRIPTION:
-!      Print ArraySpecStatus internals.
+!     Print ArraySpecStatus internals. \\
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, it is recommended to use the
+!     standard Fortran call {\tt flush(6)} as a workaround until this issue
+!     is fixed in a future release. \\
 !
 !     The arguments are:
 !     \begin{description}
@@ -535,7 +542,14 @@ module ESMF_ArraySpecMod
 !         
 !
 ! !DESCRIPTION:
-!      Print ArraySpec internals.
+!     Print ArraySpec internals. \\
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, it is recommended to use the
+!     standard Fortran call {\tt flush(6)} as a workaround until this issue
+!     is fixed in a future release. \\
 !
 !     The arguments are:
 !     \begin{description}

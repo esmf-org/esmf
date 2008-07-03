@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.102 2008/06/13 00:07:12 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.103 2008/07/03 23:07:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -183,7 +183,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.102 2008/06/13 00:07:12 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.103 2008/07/03 23:07:55 eschwab Exp $"
 
 !==============================================================================
 
@@ -3069,6 +3069,13 @@ module ESMF_VMMod
 ! !DESCRIPTION:
 !   Print internal information about the specified {\tt ESMF\_VM} to
 !   {\tt stdout}.\newline
+!
+!   Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!   On some platforms/compilers there is a potential issue with interleaving
+!   Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!   the expected order.  If this occurs, it is recommended to use the
+!   standard Fortran call {\tt flush(6)} as a workaround until this issue
+!   is fixed in a future release. \\
 !
 !   The arguments are:
 !   \begin{description}
@@ -6319,6 +6326,13 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Print an ESMF_VMId object.\newline
+!
+!   Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!   On some platforms/compilers there is a potential issue with interleaving
+!   Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!   the expected order.  If this occurs, it is recommended to use the
+!   standard Fortran call {\tt flush(6)} as a workaround until this issue
+!   is fixed in a future release. \\
 !
 !   The arguments are:
 !   \begin{description}

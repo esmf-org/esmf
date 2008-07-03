@@ -1,4 +1,4 @@
-! $Id: ESMF_RTable.F90,v 1.16 2008/04/05 03:38:54 cdeluca Exp $
+! $Id: ESMF_RTable.F90,v 1.17 2008/07/03 23:07:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RTable.F90,v 1.16 2008/04/05 03:38:54 cdeluca Exp $'
+      '$Id: ESMF_RTable.F90,v 1.17 2008/07/03 23:07:52 eschwab Exp $'
 
 !==============================================================================
 !
@@ -352,7 +352,14 @@ end function ESMF_RTableGetInit
       integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!     Print information about an {\tt ESMF\_RTable}.  
+!     Print information about an {\tt ESMF\_RTable}. \\
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, it is recommended to use the
+!     standard Fortran call {\tt flush(6)} as a workaround until this issue
+!     is fixed in a future release. \\
 !
 !     The arguments are:
 !     \begin{description}

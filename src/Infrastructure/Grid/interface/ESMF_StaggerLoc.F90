@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.14 2008/02/15 23:36:04 theurich Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.15 2008/07/03 23:07:49 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -103,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.14 2008/02/15 23:36:04 theurich Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.15 2008/07/03 23:07:49 eschwab Exp $'
 
 
 !==============================================================================
@@ -662,7 +662,14 @@ end interface
       integer, intent(out), optional     :: rc 
 
 ! !DESCRIPTION:
-!     Print the internal data members of a ESMF\_StaggerLoc object
+!     Print the internal data members of an {\tt ESMF\_StaggerLoc} object. \\
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, it is recommended to use the
+!     standard Fortran call {\tt flush(6)} as a workaround until this issue
+!     is fixed in a future release. \\
 !
 !     The arguments are:
 !     \begin{description}
