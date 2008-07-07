@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.C,v 1.2 2008/06/27 03:51:21 rosalind Exp $
+// $Id: ESMCI_Calendar.C,v 1.3 2008/07/07 16:10:13 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Calendar.C,v 1.2 2008/06/27 03:51:21 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_Calendar.C,v 1.3 2008/07/07 16:10:13 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -212,7 +212,7 @@ int Calendar::count=0;
     returnCode = calendar->validate();
     ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
                                           ESMF_ERR_PASSTHRU, rc);
-
+    *rc=ESMF_SUCCESS;
     return(calendar);
 
  } // end ESMCI_CalendarCreate (built-in)

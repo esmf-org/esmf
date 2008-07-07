@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2008/06/26 02:08:16 rosalind Exp $ 
+# $Id: makefile,v 1.28 2008/07/07 16:11:07 rosalind Exp $ 
 
 ALL: build_here 
 
@@ -6,7 +6,7 @@ CFLAGS    =
 FFLAGS    = -free
 SOURCEC	  = ESMC_Fraction_F.C ESMC_BaseTime_F.C \
             ESMC_Calendar_F.C ESMC_TimeInterval_F.C ESMC_Time_F.C \
-            ESMC_Alarm_F.C ESMC_Clock_F.C
+            ESMC_Alarm_F.C ESMC_Clock_F.C ESMC_Calendar.C
 
 SOURCEF	  = ESMF_Fraction.F90 ESMF_BaseTime.F90 ESMF_Calendar.F90 \
             ESMF_TimeType.F90 ESMF_TimeIntervalType.F90 \
@@ -14,7 +14,7 @@ SOURCEF	  = ESMF_Fraction.F90 ESMF_BaseTime.F90 ESMF_Calendar.F90 \
             ESMF_AlarmType.F90 ESMF_ClockType.F90 \
             ESMF_Alarm.F90 ESMF_Clock.F90
 SOURCEH	  = 
-STOREH    = ESMF_TimeMgr.inc
+STOREH    = ESMC_Calendar.h ESMF_TimeMgr.inc
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
@@ -64,3 +64,5 @@ ESMF_Alarm.o:	ESMF_TimeInterval.o ESMF_Time.o \
 ESMF_Clock.o:	ESMF_TimeInterval.o ESMF_Time.o \
 		ESMF_AlarmType.o ESMF_ClockType.o \
 		makefile
+
+#ESMC_Calendar.o: ESMC_Calendar.h 

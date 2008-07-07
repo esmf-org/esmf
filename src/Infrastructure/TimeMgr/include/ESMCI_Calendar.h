@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.h,v 1.2 2008/06/27 03:51:18 rosalind Exp $
+// $Id: ESMCI_Calendar.h,v 1.3 2008/07/07 16:11:59 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -69,26 +69,11 @@
 // !USES:
  #include <ESMC_Base.h>           // inherited Base class
  #include <ESMCI_BaseTime.h>       // inherited BaseTime class
+ #include "ESMC_Calendar.h"
 
 // TODO: replace with monthsPerYear property
 #define MONTHS_PER_YEAR 12
 
-
-// (TMG 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5)
-#define CALENDAR_TYPE_COUNT 7
-enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
-                        ESMC_CAL_JULIAN,
-                        ESMC_CAL_JULIANDAY,
-                        ESMC_CAL_NOLEAP,      // like Gregorian, except
-                                              //   Feb always has 28 days
-                        ESMC_CAL_360DAY,      // 12 months, 30 days each
-                        ESMC_CAL_CUSTOM,      // user defined
-                        ESMC_CAL_NOCALENDAR}; // track base time seconds
-                                              //   only
-                        // Note: add new calendars between ESMC_CAL_GREGORIAN
-                        // and ESMC_CAL_NOCALENDAR so Validate() doesn't need
-                        // to change.  Also add to static intializers at top
-                        // of ESMCI_Calendar.C
 
 namespace ESMCI{
 
