@@ -33,7 +33,7 @@
 ! !USES:
 
   use ESMF_Mod
-  use ESMF_TestHarnessMod
+  use ESMF_TestHarnessTypesMod
 
   implicit none
 
