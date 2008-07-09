@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.22.2.4 2008/06/12 17:45:22 theurich Exp $
+# $Id: build_rules.mk,v 1.22.2.5 2008/07/09 22:38:12 theurich Exp $
 #
 # Linux.lahey.default
 #
@@ -31,12 +31,14 @@ ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKERDEFAULT   = mpiCC
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_MPIRUNDEFAULT      = mpirun
 else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKERDEFAULT   = mpicxx
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
@@ -45,6 +47,7 @@ ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with lf95) ----------------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
+ESMF_F90LINKERDEFAULT   = mpic++
 ESMF_CXXDEFAULT         = mpic++
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
@@ -53,6 +56,7 @@ ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKERDEFAULT   = mpicxx
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec
@@ -107,7 +111,7 @@ ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.lf95 $(ESMF_F90COMPILE
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.lf95 $(ESMF_F90COMPILER)) $(shell $(ESMF_DIR)/scripts/libpath.lf95 $(ESMF_F90COMPILER))/fj90rt0.o
+ESMF_F90LINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.lf95 $(ESMF_F90COMPILER)) $(shell $(ESMF_DIR)/scripts/f90rtobjects.lf95 $(ESMF_F90COMPILER))
 
 ############################################################
 # Shared library options
