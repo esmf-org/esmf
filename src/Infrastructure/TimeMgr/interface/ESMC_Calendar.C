@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.1 2008/07/07 16:11:07 rosalind Exp $
+// $Id: ESMC_Calendar.C,v 1.2 2008/07/09 14:20:17 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Calendar.C,v 1.1 2008/07/07 16:11:07 rosalind Exp $";
+static const char *const version = "$Id: ESMC_Calendar.C,v 1.2 2008/07/09 14:20:17 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -46,13 +46,13 @@ ESMC_Calendar ESMC_CalendarCreate(
       int                nameLen,      // in
       const char        *name,         // in
       ESMC_CalendarType  calendarType, // in
-      int                rc) {         // out - return code
+      int               *rc) {         // out - return code
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMC_CalendarCreate()"
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  rc = ESMC_RC_NOT_IMPL;   // final return code
+  *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   ESMC_Calendar calendar;
 
@@ -60,13 +60,13 @@ ESMC_Calendar ESMC_CalendarCreate(
 
   calendar.ptr = (void *)
      ESMCI::ESMCI_CalendarCreate(nameLen, name, calendarType, &localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     calendar.ptr = NULL;
     return calendar;  // bail out
   }
 
   // return successfully
-  rc = ESMF_SUCCESS;
+  *rc = ESMF_SUCCESS;
   return calendar;
 
 } // end ESMC_CalendarCreate

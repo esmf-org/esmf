@@ -1,4 +1,4 @@
-// $Id: ESMC_CalendarUTest.C,v 1.1 2008/07/07 16:13:19 rosalind Exp $
+// $Id: ESMC_CalendarUTest.C,v 1.2 2008/07/09 14:20:17 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_Calendar object\0");
   strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
-  calendar = ESMC_CalendarCreate(9, "Gregorian", ESMC_CAL_GREGORIAN, rc);
+  calendar = ESMC_CalendarCreate(9, "Gregorian", ESMC_CAL_GREGORIAN, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
