@@ -448,14 +448,6 @@
   logical :: nohaloflag
 
 
-  ! debug
-  integer :: i, j, de, localDeCount, dimCount 
-  integer, allocatable ::  localDeList(:)
-  type(ESMF_LocalArray), allocatable :: larrayList(:)
-  integer, allocatable :: exclusiveLBound(:,:), exclusiveUBound(:,:) 
-  real(ESMF_KIND_R8), pointer :: localFptr(:,:)
-  type(ESMF_IndexFlag) :: indexflag
-
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
   rc = ESMF_RC_NOT_IMPL
@@ -644,6 +636,67 @@
   !-----------------------------------------------------------------------------
 ! deallocate( map )
 
+  !-----------------------------------------------------------------------------
+  rc = ESMF_SUCCESS     
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  end subroutine create_array
+  !-----------------------------------------------------------------------------
+
+
+
+!-----------------------------------------------------------------------------
+  subroutine populate_redist_array(Memory, DistGrid, Grid, Array, rc)
+  !-----------------------------------------------------------------------------
+  ! routine creates a single distribution from specifier files
+  !
+  !-----------------------------------------------------------------------------
+  ! arguments
+  type(memory_config), intent(in   ) :: Memory
+  type(ESMF_DistGrid), intent(in   ) :: DistGrid
+  type(grid_specification_record), intent(in   ) :: Grid
+  type(ESMF_Array), intent(  out) :: Array
+  integer, intent(inout) :: rc
+ 
+  ! local ESMF types
+  type(ESMF_ArraySpec) :: ArraySpec
+
+  ! local parameters
+  integer :: localrc ! local error status
+
+  ! local integer variables
+  integer :: irank, k, tensorsize
+  integer, allocatable :: haloL(:), haloR(:)
+  integer, allocatable :: top(:), bottom(:)
+
+  ! local logicals
+  logical :: nohaloflag
+
+  ! local real variables
+  real(ESMF_KIND_R8), pointer :: fptr1(:), fptr2(:,:)
+  real(ESMF_KIND_R8), pointer :: fptr3(:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr4(:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr5(:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr6(:,:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr7(:,:,:,:,:,:,:)
+
+
+  ! debug
+  integer :: i, j, de, localDeCount, dimCount 
+  integer, allocatable ::  localDeList(:)
+  type(ESMF_LocalArray), allocatable :: larrayList(:)
+  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  real(ESMF_KIND_R8), pointer :: localFptr(:,:)
+  type(ESMF_IndexFlag) :: indexflag
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  ! get local array DE list
+  !-----------------------------------------------------------------------------
   call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=localrc)
   print*,' localdecount ',localDeCount
   if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
@@ -659,53 +712,37 @@
   if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
           rcToReturn=rc)) return
 
-  do de=1, localDeCount
-    print*,' localDeList ',localDeList(de)
-    call ESMF_LocalArrayGet(larrayList(de), localFptr, ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to array list",&
-            rcToReturn=rc)) return
-    localFptr = localDeList(de)
-  enddo
-
   !-----------------------------------------------------------------------------
-
   ! get dimcount to allocate bound arrays
+  !-----------------------------------------------------------------------------
   call ESMF_DistGridGet(DistGrid, dimCount=dimCount, rc=localrc)
   print*,' dimcount ',dimCount
   if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
           rcToReturn=rc)) return
   
-  allocate(exclusiveUBound(dimCount, localDeCount))
-  allocate(exclusiveLBound(dimCount, localDeCount))  
+  allocate(UBnd(dimCount, localDeCount))
+  allocate(LBnd(dimCount, localDeCount))  
 
   call ESMF_ArrayGet(array, indexflag=indexflag,                               &
-           exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound,   &
-           rc=localrc)
+           exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting exclusive bound range",     &
+          rcToReturn=rc)) return
 
-  print*,' exclusive bounds '
-  do de=1, localDeCount
-    print*,de,'lower and upper of 1 ',exclusiveLBound(1, de), exclusiveUBound(1, de)
-    print*,de,'lower and upper of 2 ',exclusiveLBound(2, de), exclusiveUBound(2, de)
-    call ESMF_LocalArrayGet(larrayList(de), localFptr, ESMF_DATA_REF, rc=localrc)
-    do i=exclusiveLBound(1, de), exclusiveUBound(1, de)
-      do j=exclusiveLBound(2, de), exclusiveUBound(2, de)
-           localFptr(i,j) = localDeList(de) + 1000.0d0*i + 0.001d0*j
-  enddo
-  print*,' localFptr ', localFptr
+  !-----------------------------------------------------------------------------
+  !
+  !-----------------------------------------------------------------------------
 
   deallocate(localDeList)
-  deallocate(exclusiveUBound)
-  deallocate(exclusiveLBound)
-
-! why no destroy?
-! call ESMF_LocalArrayDestroy(larrayList, rc=localrc)
+  deallocate(UBnd)
+  deallocate(LBnd)
+  deallocate(larrayList)
 
   !-----------------------------------------------------------------------------
   rc = ESMF_SUCCESS     
   !-----------------------------------------------------------------------------
-   print*,'leave create array '
+
   !-----------------------------------------------------------------------------
-  end subroutine create_array
+  end subroutine populate_redist_array 
   !-----------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
