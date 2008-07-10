@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2008/07/07 16:13:19 rosalind Exp $
+# $Id: makefile,v 1.31 2008/07/10 15:47:05 rosalind Exp $
 
 ALL:     build_unit_tests
 run:     run_unit_tests
@@ -6,10 +6,10 @@ run_uni: run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/TimeMgr/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_CalendarUTest \
-		$(ESMF_TESTDIR)/ESMF_CalendarUTest \
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_TimeUTest \
 		$(ESMF_TESTDIR)/ESMC_CalendarUTest \
- 		$(ESMF_TESTDIR)/ESMF_AlarmUTest \
+		$(ESMF_TESTDIR)/ESMF_CalendarUTest \
+		$(ESMF_TESTDIR)/ESMF_AlarmUTest \
 		$(ESMF_TESTDIR)/ESMF_ClockUTest \
 		$(ESMF_TESTDIR)/ESMF_CalRangeUTest \
 		$(ESMF_TESTDIR)/ESMF_TimeIntervalUTest \
@@ -17,7 +17,8 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_CalendarUTest \
 #	        $(ESMF_TESTDIR)/ESMC_ClockUTest 
 # remove temporarily
 
-TESTS_RUN     = RUN_ESMC_CalendarUTest \
+TESTS_RUN     = RUN_ESMC_TimeUTest \
+		RUN_ESMC_CalendarUTest \
 		RUN_ESMF_AlarmUTest \
 		RUN_ESMF_CalendarUTest \
 		RUN_ESMF_ClockUTest \
@@ -26,7 +27,8 @@ TESTS_RUN     = RUN_ESMC_CalendarUTest \
 		RUN_ESMF_TimeUTest
 #		RUN_ESMC_ClockUTest 
 
-TESTS_RUN_UNI = RUN_ESMC_CalendarUTestUNI \
+TESTS_RUN_UNI = RUN_ESMC_TimeUTestUNI \
+		RUN_ESMC_CalendarUTestUNI \
 		RUN_ESMF_AlarmUTestUNI \
 		RUN_ESMF_CalendarUTestUNI \
 		RUN_ESMF_ClockUTestUNI \
@@ -76,6 +78,11 @@ RUN_ESMC_CalendarUTest:
 RUN_ESMC_CalendarUTestUNI:
 	$(MAKE) TNAME=Calendar NP=1 ctest
 
+RUN_ESMC_TimeUTest:
+	$(MAKE) TNAME=Time NP=4 ctest
+
+RUN_ESMC_TimeUTestUNI:
+	$(MAKE) TNAME=Time NP=1 ctest
 
 RUN_ESMC_ClockUTest:
 	$(MAKE) TNAME=Clock NP=4 ctest
