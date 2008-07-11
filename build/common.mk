@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.235 2008/06/18 05:40:54 theurich Exp $
+#  $Id: common.mk,v 1.236 2008/07/11 03:20:15 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -742,8 +742,8 @@ endif
 ifdef ESMF_LAPACK
 CPPFLAGS                += -DESMF_LAPACK=1
 ifdef ESMF_LAPACK_LIBS
-ESMF_CXXLINKLIBS        += $(ESMF_LAPACK_LIBS)
-ESMF_F90LINKLIBS        += $(ESMF_LAPACK_LIBS)
+ESMF_CXXLINKLIBS        := $(ESMF_LAPACK_LIBS) $(ESMF_CXXLINKLIBS)
+ESMF_F90LINKLIBS        := $(ESMF_LAPACK_LIBS) $(ESMF_F90LINKLIBS)
 endif
 ifdef ESMF_LAPACK_LIBPATH
 ESMF_CXXLINKPATHS       += -L$(ESMF_LAPACK_LIBPATH)
@@ -752,7 +752,8 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
-# Set LAPACK default libs according to ESMF_LAPACK (if not set in user environment)
+# Set NETCDF default libs according to ESMF_NETCDF (if not set in user
+# environment)
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_NETCDF),standard)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
