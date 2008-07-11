@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.h,v 1.6 2008/06/27 03:51:18 rosalind Exp $
+// $Id: ESMCI_TimeInterval.h,v 1.7 2008/07/11 18:23:01 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -69,12 +69,7 @@
  #include <ESMCI_BaseTime.h>       // inherited BaseTime class
  #include <ESMCI_Time.h>
  #include <ESMCI_Calendar.h>
-
-enum ESMC_ComparisonType {ESMC_EQ, ESMC_NE,
-                          ESMC_LT, ESMC_GT,
-                          ESMC_LE, ESMC_GE};
-
-enum ESMC_AbsValueType {ESMC_POSITIVE_ABS, ESMC_NEGATIVE_ABS};
+ #include <ESMC_TimeInterval.h>    // for use of enumerated types
 
 namespace ESMCI {
 
