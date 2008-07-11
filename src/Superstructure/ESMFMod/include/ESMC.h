@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.20 2008/07/11 18:27:04 rosalind Exp $
+// $Id: ESMC.h,v 1.21 2008/07/12 00:03:07 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -31,6 +31,7 @@
 #include "ESMC_Calendar.h"
 #include "ESMC_Time.h"
 #include "ESMC_TimeInterval.h"
+#include "ESMC_Clock.h"
 
 // Superstructure headers
 #include "ESMC_State.h"

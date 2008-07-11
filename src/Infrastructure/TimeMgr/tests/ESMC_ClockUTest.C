@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockUTest.C,v 1.9 2008/04/07 06:45:59 theurich Exp $
+// $Id: ESMC_ClockUTest.C,v 1.10 2008/07/12 00:01:57 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -14,7 +14,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file drives C++ Clock unit tests.
+// The code in this file drives C Clock unit tests.
 // The companion files ESMC\_Clock.h and ESMC\_Clock.C contain
 // the declarations and definitions for the Clock methods.
 //
@@ -25,19 +25,24 @@
 //
 // insert any higher level, 3rd party or system includes here
 #include <stdio.h>
-#include "ESMCI.h"
+#include <stdlib.h>
+#include <string.h>
+
+//ESMF header
+#include "ESMC.h"
 
 // associated class definition file
 #include "ESMC_Clock.h"
 
 // ESMC_Test function
-#include "ESMCI_Test.h"
+#include "ESMC_Test.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.9 2008/04/07 06:45:59 theurich Exp $";
+ static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.10 2008/07/12 00:01:57 rosalind Exp $";
 //-----------------------------------------------------------------------------
+
 
  int main(int argc, char *argv[])
  {
@@ -53,13 +58,84 @@
    // individual test failure message
    char failMsg[ESMF_MAXSTR];
 
-   // for dynamically allocated Clock's
-   ESMC_Clock *clock_ptr;
-
-   // for statically allocated Clock's
-   //  tests default constructor; add args to test other constructors
+   //  the C clock object that points to the C++ allocated one
    ESMC_Clock clock;
 
+
+  //----------------------------------------------------------------------------
+  ESMC_TestStart(__FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  ESMC_TimeInterval timeStep,runDuration;
+  ESMC_Time startTime, stopTime,refTime;
+  ESMC_Calendar calendar;
+  ESMC_I4 yy1=2006;
+  ESMC_I4 h1=0;
+  ESMC_I4 h2=1;
+  ESMC_CalendarType calType1=ESMC_CAL_GREGORIAN;
+  int tZ1=-6;
+  const ESMC_I4 one=1;
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Create ESMC_Calendar object\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  calendar = ESMC_CalendarCreate(9, "Gregorian", ESMC_CAL_GREGORIAN, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Set Start Time\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  rc = ESMC_TimeSet(&startTime, yy1, h1, calendar, calType1, tZ1);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Set Stop Time\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  rc = ESMC_TimeSet(&stopTime, yy1, h2, calendar, calType1, tZ1);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Set a TimeInterval\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  rc = ESMC_TimeIntervalSet(&timeStep, one);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Create ESMC_Clock object\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  clock = ESMC_ClockCreate(10,"TEST_CLOCK",timeStep,startTime, stopTime,
+  //      0, 0, 0, 
+          &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Print ESMC_Clock object\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  rc = ESMC_ClockPrint(clock);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_Clock object\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  rc = ESMC_ClockDestroy(&clock);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+/*
 #ifdef ESMF_TESTEXHAUSTIVE
 #if 0
    // perform exhaustive tests here;
@@ -164,8 +240,9 @@
    //   use same templates as above
 
 #endif
+*/
 
    // return number of failures to environment; 0 = success (all pass)
+   printf("result = %d\n",result);
    return(result);
-  
  } // end unit test main()
