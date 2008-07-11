@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMSTest.F90,v 1.1 2008/07/07 19:47:49 feiliu Exp $
+! $Id: ESMF_FieldBundleSMMSTest.F90,v 1.2 2008/07/11 04:15:33 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -35,7 +35,7 @@
 !\begin{verbatim}
 
 program ESMF_FieldBundleSMM
-#define ESMF_METHOD "program ESMF_FieldBundleSMM
+#define ESMF_METHOD "program ESMF_FieldBundleSMMSTest"
 
 #include "ESMF.h"
 
