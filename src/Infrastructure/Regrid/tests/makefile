@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.44 2008/02/25 21:33:53 dneckels Exp $
+# $Id: makefile,v 1.45 2008/07/11 19:12:54 dneckels Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -19,8 +19,7 @@ TESTS_OBJ =
 
 ESMF_RegridUTest.o:$(TESTS_OBJ)
 
-TESTS_BUILD   = \
-                $(ESMF_TESTDIR)/ESMF_RegridUTest
+TESTS_BUILD   = 
 
 TESTS_RUN     = 
 
@@ -34,16 +33,5 @@ DIRS =
 CLEANDIRS   = 
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
-
-
-#
-# Regrid Unit Test
-#
-RUN_ESMF_RegridUTest:
-	$(MAKE) TNAME=Regrid NP=8 ftest
-
-RUN_ESMF_RegridUTestUNI:
-	$(MAKE) TNAME=Regrid NP=1 ftest
-
 
 
