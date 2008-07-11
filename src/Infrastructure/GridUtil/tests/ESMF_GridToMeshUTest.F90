@@ -1,4 +1,4 @@
-! $Id: ESMF_GridToMeshUTest.F90,v 1.9 2008/04/14 20:47:36 oehmke Exp $
+! $Id: ESMF_GridToMeshUTest.F90,v 1.10 2008/07/11 20:17:24 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridToMeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridToMeshUTest.F90,v 1.9 2008/04/14 20:47:36 oehmke Exp $'
+    '$Id: ESMF_GridToMeshUTest.F90,v 1.10 2008/07/11 20:17:24 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -76,20 +76,11 @@ program ESMF_GridToMeshUTest
   correct=.true.
   rc=ESMF_SUCCESS
 
-  ! if petCount >1, setup petMap
-  if (petCount .gt. 1) then
-     grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/),regDecomp=(/2,1/), &
+   grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/),regDecomp=(/4,4/), &
                               gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  else
-     grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/),regDecomp=(/4,4/), &
-                              gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
-                              rc=localrc)
-     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  endif
+   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Allocate coordinates
   call ESMF_GridAddCoord(grid2D, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
