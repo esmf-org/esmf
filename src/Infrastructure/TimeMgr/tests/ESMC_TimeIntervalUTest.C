@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeIntervalUTest.C,v 1.1 2008/07/11 18:23:01 rosalind Exp $
+// $Id: ESMC_TimeIntervalUTest.C,v 1.2 2008/07/11 18:49:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -80,6 +80,8 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+#ifdef ESMF_TESTEXHAUSTIVE
+
   //----------------------------------------------------------------------------
   //EX_UTest
   strcpy(name, "Check that hour parameter is returned correctly\0");
@@ -93,6 +95,8 @@ int main(void){
   strcpy(failMsg, "s_I8 is not 3600\0");
   ESMC_Test((int(s_I8)==3600), name, failMsg, &result, __FILE__, __LINE__, 0); 
   //----------------------------------------------------------------------------
+
+#endif
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(result, __FILE__, __LINE__, 0);

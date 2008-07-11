@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeUTest.C,v 1.1 2008/07/10 15:43:51 rosalind Exp $
+// $Id: ESMC_TimeUTest.C,v 1.2 2008/07/11 18:49:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -98,26 +98,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  strcpy(name, "Check that year parameter is set and get correctly\0");
-  strcpy(failMsg, "yy is different from yy1\0");
-  ESMC_Test((yy==yy1), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  strcpy(name, "Check that hour parameter is set and get correctly\0");
-  strcpy(failMsg, "h is different from h1\0");
-  ESMC_Test((h==h1), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  strcpy(name, "Check that CalendarType parameter is set and get correctly\0");
-  strcpy(failMsg, "calType is different from calType1\0");
-  ESMC_Test((calType==calType1), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
+#ifdef ESMF_TESTEXHAUSTIVE
 
   //----------------------------------------------------------------------------
   //EX_UTest
@@ -131,8 +112,9 @@ int main(void){
   strcpy(name, "Check that ESMC_Calendar parameter is set and get correctly\0");
   strcpy(failMsg, "calendar.ptr is different from calendarOut.ptr\0");
   ESMC_Test((calendar.ptr==calendarOut.ptr), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
+ //----------------------------------------------------------------------------
 
+#endif
   
   //----------------------------------------------------------------------------
   //NEX_UTest
