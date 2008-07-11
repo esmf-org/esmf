@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.8 2008/07/02 22:00:21 dneckels Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.9 2008/07/11 18:46:28 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -29,6 +29,7 @@
 #include "ESMC_MeshVTK.h"
 #include "ESMC_ParEnv.h"
 #include "ESMC_MeshUtils.h"
+#include "ESMC_GlobalIds.h"
 
 #include <string>
 
@@ -153,7 +154,7 @@ extern "C" void FTN(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc, int n
 
 }
 
-extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *elemId, 
+extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *has_eids, int *elemId, 
                int *elemType, int *elemConn, int *rc) 
 {
    try {
@@ -189,32 +190,37 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
     }
 
 
+    std::vector<long> new_ids;
+    if (!has_eids) {
+      // Manufacture unique global element ids.
+      std::vector<long> current_ids;
+      new_ids.resize(*num_elems+1, 0); // add 1 so that new_ids is not empty
+
+      GlobalIds(current_ids, new_ids);
+    }
+
     // Now loop the elements and add them to the mesh.
     int cur_conn = 0;
 
-    std::vector<MeshObj*> nconnect(27, static_cast<MeshObj*>(0)); // 27 = quad hex, max nodes
-
     for (int e = 0; e < *num_elems; ++e) {
 
+    // Get/deduce the element topology
+    const MeshObjTopo *topo = Vtk2Topo(mesh.spatial_dim(), elemType[e]);
+
+    int nnodes = topo->num_nodes;
+
+    std::vector<MeshObj*> nconnect(nnodes, static_cast<MeshObj*>(0));
+
       // The object
-      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, elemId[e]);
+      long eid = has_eids ? elemId[e] : new_ids[e];
+      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid);
 
-      // Connect to the relevant nodes.
-      int nnodes = elemConn[cur_conn++];
-
-      nconnect.resize(nnodes, static_cast<MeshObj*>(0));
       for (int n = 0; n < nnodes; ++n) {
       
         ThrowRequire(elemConn[cur_conn] <= num_nodes);
         nconnect[n] = all_nodes[elemConn[cur_conn++]-1];
 
       }
-
-      // Get/deduce the element topology
-      
-      const MeshObjTopo *topo = Vtk2Topo(mesh.spatial_dim(), elemType[e]);
-
-      ThrowRequire(topo->num_nodes == nnodes); // basic sanity check
 
       mesh.add_element(elem, nconnect, topo->number, topo);
 

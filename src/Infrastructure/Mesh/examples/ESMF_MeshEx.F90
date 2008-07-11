@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.5 2008/07/02 22:00:15 dneckels Exp $
+! $Id: ESMF_MeshEx.F90,v 1.6 2008/07/11 18:46:27 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshEx.F90,v 1.5 2008/07/02 22:00:15 dneckels Exp $'
+    '$Id: ESMF_MeshEx.F90,v 1.6 2008/07/11 18:46:27 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -54,6 +54,7 @@ program ESMF_FieldRegridEx
   type(ESMF_VM) :: vm
   type(ESMF_Mesh) :: meshSrc
   integer :: num_elem, num_node, conn_size
+  integer :: i
 
   integer, allocatable :: nodeId(:)
   real(ESMF_KIND_R8), allocatable :: nodeCoord(:)
@@ -117,11 +118,21 @@ program ESMF_FieldRegridEx
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
+  ! VTKBody returns zero based elemConn, so make them 1 based
+  do i=1, conn_size
+    elemConn(i) = elemConn(i)+1
+  enddo
+
   ! Declare the nodes
   call ESMF_MeshAddNodes(meshSrc, nodeId, nodeCoord, nodeOwner, localrc)
   write(failMsg, *) "ESMF_MeshAddNodes fail"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
+
+  ! Done with node arrays, zap
+  deallocate(nodeId)
+  deallocate(nodeCoord)
+  deallocate(nodeOwner)
 
   ! Declare the elements
   call ESMF_MeshAddElements(meshSrc, elemId, elemType, elemConn, localrc)
@@ -136,11 +147,7 @@ program ESMF_FieldRegridEx
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
 
-  ! free the arrays
-  deallocate(nodeId)
-  deallocate(nodeCoord)
-  deallocate(nodeOwner)
-
+  ! free the element arrays
   deallocate(elemId)
   deallocate(elemType)
   deallocate(elemConn)

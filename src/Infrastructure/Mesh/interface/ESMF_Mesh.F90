@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.7 2008/07/01 22:23:51 dneckels Exp $
+! $Id: ESMF_Mesh.F90,v 1.8 2008/07/11 18:46:28 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.7 2008/07/01 22:23:51 dneckels Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.8 2008/07/11 18:46:28 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -286,7 +286,7 @@ module ESMF_MeshMod
 !
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(in)                   :: mesh
-    integer, dimension(:), intent(in)             :: elementIds
+    integer, dimension(:), intent(in), optional   :: elementIds
     integer, dimension(:), intent(in)             :: elementTypes
     integer, dimension(:), intent(in)             :: elementConn
     integer,                intent(out), optional :: rc
@@ -296,7 +296,7 @@ module ESMF_MeshMod
 !   The elements will link together nodes to form topological entitites.
 !
 !   \begin{description}
-!   \item [elementIds]
+!   \item [{[elementIds]}]
 !         The global id's of the elements resident on this processor
 !   \item[elementTypes] 
 !         Topology of the given element (one of ESMF_MeshElement)
@@ -315,16 +315,28 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: num_elems
+    integer, dimension(1:2) :: lelementIds
+    integer, pointer        :: pelementIds(:)
+    integer                 :: has_eids
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    if (present(elementIds)) then
+      pelementIds = elementIds
+      has_eids = 1
+    else
+      pelementIds = lelementIds
+      has_eids = 0
+    endif
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
     num_elems = size(elementIds)
-    call C_ESMC_MeshAddElements(mesh%this, num_elems, elementIds(1), elementTypes(1), &
+    call C_ESMC_MeshAddElements(mesh%this, num_elems, has_eids, &
+                             pelementIds(1), elementTypes(1), &
                              elementConn(1), localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

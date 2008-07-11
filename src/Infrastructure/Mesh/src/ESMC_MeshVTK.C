@@ -709,7 +709,8 @@ void ReadVTKMeshHeader(const std::string &filename, int &num_elems, int &num_nod
     // Set the output arguments
     num_nodes = npoints;
     num_elems = nelem;
-    conn_size = width;
+    conn_size = width-nelem;  // width includes an entry for num_nodes at beginning
+                              // of each node list.  We will not forward this.
   }
 }
 
@@ -772,17 +773,17 @@ void ReadVTKMeshBody(const std::string &filename, int *nodeId, double *nodeCoord
     /*------------------------------------------------------------*/
   
     UInt wi = 0;
+    UInt nnode;
     for (UInt i = 0; i < nelem; i++) {
   
-      ThrowRequire(1 == fscanf(fp(), "%u ", &elemConn[wi]));
+      ThrowRequire(1 == fscanf(fp(), "%u ", &nnode));
   
-      for (UInt n = 0; n < elemConn[wi]; n++) {
-        ThrowRequire(1 == fscanf(fp(), "%u ", &elemConn[wi+n+1]));
-        elemConn[wi+n+1]++; // Make connectivities 1-based for fortran
+      for (UInt n = 0; n < nnode; n++) {
+        ThrowRequire(1 == fscanf(fp(), "%u ", &elemConn[wi+n]));
       } 
       fscanf(fp(), "\n");
 
-      wi += elemConn[wi] + 1; // skip forward
+      wi += nnode; // skip forward
     }
   
   
@@ -852,12 +853,13 @@ void ReadVTKMeshBody(const std::string &filename, int *nodeId, double *nodeCoord
     // If NUM, process specially
     if (data_type == VTK_CELL_DATA && std::string(vname) == "_ELEM_NUM") {
 
-      std::copy(data.begin(), data.end(), elemId);
+      for (UInt i = 0; i < data.size(); ++i) elemId[i] = (int)(data[i]+0.0001);
+      //std::copy(data.begin(), data.end(), elemId); causes double to int warnings
 
     } else if (data_type == VTK_NODE_DATA && std::string(vname) == "_NODE_NUM") {
 
-
-      std::copy(data.begin(), data.end(), nodeId);
+      for (UInt i = 0; i < data.size(); ++i) nodeId[i] = (int)(data[i]+0.0001);
+      //std::copy(data.begin(), data.end(), nodeId); causes double to int warnings
 
     } else {
 
