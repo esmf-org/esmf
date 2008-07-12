@@ -33,6 +33,9 @@ program ESMF_AttributeSTest
   type(ESMF_GridComp) :: comp1
   type(ESMF_GridComp) :: comp2
   type(ESMF_CplComp) :: cplcomp
+  character(ESMF_MAXSTR) :: name1,name2,name3,name4,name5,name6,name7, &
+                            value1,value2,value3,value4,value5,value6,value7, &
+                            conv,purp
     
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: testresult = 0
@@ -186,8 +189,61 @@ program ESMF_AttributeSTest
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
+    
+  ! add Attribute packages to the Gridded Components and link the States
   
+  ! initialize variables
+  conv = 'CF'
+  purp = 'basic'
+  name1 = 'discipline'
+  name2 = 'physical domain'
+  name3 = 'agency'
+  name4 = 'institution'
+  name5 = 'author'
+  name6 = 'coding language'
+  name7 = 'model component framework'
+  value1 = 'Atmosphere'
+  value2 = 'Earth System'
+  value3 = 'NASA'
+  value4 = 'GMAO'
+  value5 = 'Max Suarez'
+  value6 = 'F90'
+  value7 = 'ESMF'
+  
+  ! Add the Attribute package to comp1
+  call ESMF_AttributeAdd(comp1, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp1, name1, value1, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp1, name2, value2, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp1, name3, value3, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp1, name4, value4, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp1, name5, value5, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp1, name6, value6, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp1, name7, value7, convention=conv, purpose=purp, rc=rc)
+  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  
+  ! Add the Attribute package to comp2
+  call ESMF_AttributeAdd(comp2, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp2, name1, value1, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp2, name2, value2, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp2, name3, value3, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp2, name4, value4, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp2, name5, value5, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp2, name6, value6, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp2, name7, value7, convention=conv, purpose=purp, rc=rc)
+  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  
+  ! link the Component Attribute hierarchies to their States
+  call ESMF_AttributeSet(comp1, c1imp, rc=rc)
+  call ESMF_AttributeSet(comp1, c1exp, rc=rc)
+  call ESMF_AttributeSet(comp2, c2imp, rc=rc)
+  call ESMF_AttributeSet(comp2, c2exp, rc=rc)
+  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Run section
@@ -211,6 +267,15 @@ program ESMF_AttributeSTest
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+  ! write out some Attribute info
+  if (localPet .eq. 0) then
+    call ESMF_AttributeWrite(comp1,conv,purp,rc=rc)
+    call ESMF_AttributeWrite(comp2,conv,purp,rc=rc)
+    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)  
+  endif
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
