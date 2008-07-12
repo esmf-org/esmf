@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUTest.F90,v 1.6 2008/06/11 21:21:32 rokuingh Exp $
+! $Id: ESMF_AttributeUTest.F90,v 1.7 2008/07/12 16:01:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeUTest.F90,v 1.6 2008/06/11 21:21:32 rokuingh Exp $'
+      '$Id: ESMF_AttributeUTest.F90,v 1.7 2008/07/12 16:01:52 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -271,8 +271,8 @@ program ESMF_AttributeUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      attrname = "units"
-      attrvalue = "m/s"
+      attrname = "discipline"
+      attrvalue = "atmosphere"
       conv = "defaultconvention"
       purp = "defaultpurpose"
 
@@ -396,8 +396,8 @@ program ESMF_AttributeUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      attrname = "units"
-      attrvalue = "m/s"
+      attrname = "discipline"
+      attrvalue = "atmosphere"
       conv = "defaultconvention"
       purp = "defaultpurpose"
 

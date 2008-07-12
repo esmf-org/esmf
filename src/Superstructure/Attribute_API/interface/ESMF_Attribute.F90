@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.14 2008/07/12 01:25:03 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.15 2008/07/12 16:01:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -103,7 +103,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.14 2008/07/12 01:25:03 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.15 2008/07/12 16:01:52 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -3588,7 +3588,7 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: name1, name2, name3, name4
+      character(ESMF_MAXSTR) :: name1, name2, name3, name4, name5, name6, name7
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
@@ -6536,7 +6536,7 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: name1, name2, name3, name4
+      character(ESMF_MAXSTR) :: name1, name2, name3, name4, name5, name6, name7
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
