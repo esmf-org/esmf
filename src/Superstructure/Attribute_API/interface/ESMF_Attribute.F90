@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.16 2008/07/12 18:58:20 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.17 2008/07/12 19:36:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.16 2008/07/12 18:58:20 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.17 2008/07/12 19:36:22 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -6509,7 +6509,7 @@ contains
         fpurpose = 'N/A'
       endif
       
-      fobject = 'comp'
+      fobject = 'field'
 
       if (present(attwriteflag)) then
         writeflag = attwriteflag
@@ -9473,7 +9473,7 @@ contains
         fpurpose = 'N/A'
       endif
       
-      fobject = 'comp'
+      fobject = 'field'
 
       if (present(attwriteflag)) then
         writeflag = attwriteflag
@@ -15011,7 +15011,7 @@ contains
         fpurpose = 'N/A'
       endif
       
-      fobject = 'fieldbundle'
+      fobject = 'field'
 
       if (present(attwriteflag)) then
         writeflag = attwriteflag
