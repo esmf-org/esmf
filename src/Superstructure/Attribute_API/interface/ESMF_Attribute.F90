@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.13 2008/06/23 20:36:39 feiliu Exp $
+! $Id: ESMF_Attribute.F90,v 1.14 2008/07/12 01:25:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -103,7 +103,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.13 2008/06/23 20:36:39 feiliu Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.14 2008/07/12 01:25:03 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -3601,10 +3601,13 @@ contains
       fpurpose = purpose
       fobject = 'comp'
 
-      name1 = 'shortname'
-      name2 = 'longname'
-      name3 = 'units'
-      name4 = 'dimensions'
+      name1 = 'discipline'
+      name2 = 'physical domain'
+      name3 = 'agency'
+      name4 = 'institution'
+      name5 = 'author'
+      name6 = 'coding language'
+      name7 = 'model component framework'
 
       call c_ESMC_AttPackCreate(comp%compp%base, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -3613,6 +3616,12 @@ contains
       call c_ESMC_AttPackCreate(comp%compp%base, name3, fconvention, &
         fpurpose, fobject, localrc)
       call c_ESMC_AttPackCreate(comp%compp%base, name4, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(comp%compp%base, name5, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(comp%compp%base, name6, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(comp%compp%base, name7, fconvention, &
         fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -6540,10 +6549,13 @@ contains
       fpurpose = purpose
       fobject = 'comp'
 
-      name1 = 'shortname'
-      name2 = 'longname'
-      name3 = 'units'
-      name4 = 'dimensions'
+      name1 = 'discipline'
+      name2 = 'physical domain'
+      name3 = 'agency'
+      name4 = 'institution'
+      name5 = 'author'
+      name6 = 'coding language'
+      name7 = 'model component framework'
 
       call c_ESMC_AttPackCreate(comp%compp%base, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -6552,6 +6564,12 @@ contains
       call c_ESMC_AttPackCreate(comp%compp%base, name3, fconvention, &
         fpurpose, fobject, localrc)
       call c_ESMC_AttPackCreate(comp%compp%base, name4, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(comp%compp%base, name5, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(comp%compp%base, name6, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(comp%compp%base, name7, fconvention, &
         fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
