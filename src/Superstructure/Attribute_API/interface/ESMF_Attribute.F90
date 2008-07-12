@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.15 2008/07/12 16:01:52 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.16 2008/07/12 18:58:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -69,17 +69,28 @@ module ESMF_AttributeMod
   private
 
 !------------------------------------------------------------------------------
+! ! ESMF_Attribute
 !
-!    ! Dummy structure which must just be big enough to hold the values.
-!    ! actual data values will always be accessed on the C++ side.
+!------------------------------------------------------------------------------
 
   type ESMF_Attribute
   sequence
-  private
     character(len=ESMF_MAXSTR)  :: attr_name
     type(ESMF_DataValue)        :: attr_value
   end type
 
+!------------------------------------------------------------------------------
+! ! ESMF_AttWriteFlag
+!
+!------------------------------------------------------------------------------
+  type ESMF_AttWriteFlag
+  sequence
+     integer :: attwriteflag
+  end type
+
+  type(ESMF_AttWriteFlag), parameter :: &
+                      ESMF_ATTWRITEFLAG_TAB=ESMF_AttWriteFlag(0), &
+                      ESMF_ATTWRITEFLAG_XML=ESMF_AttWriteFlag(1)
 
 !------------------------------------------------------------------------------
 !
@@ -91,6 +102,7 @@ module ESMF_AttributeMod
 !
 !   Classes
       public ESMF_Attribute
+      public ESMF_AttWriteFlag, ESMF_ATTWRITEFLAG_TAB, ESMF_ATTWRITEFLAG_XML
       
 !  Attribute methods
       public ESMF_AttributeAdd
@@ -103,7 +115,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.15 2008/07/12 16:01:52 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.16 2008/07/12 18:58:20 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -840,8 +852,7 @@ contains
 ! !DESCRIPTION:
 !     Sets up the Attribute package for the {\tt array}.
 !     The Attribute package defines the convention, purpose, and object type 
-!     of the three associated Attributes {\tt longname}, {\tt shortname}, 
-!     {\tt units}, and {\tt coordinates}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3473,20 +3484,21 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_ArrayAttWrite(array, convention, purpose, rc)
+      subroutine ESMF_ArrayAttWrite(array, convention, purpose, &
+        attwriteflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in), optional :: convention
       character (len = *), intent(in), optional :: purpose
+      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Print the Attribute package for the {\tt array}.
 !     The Attribute package defines the convention, purpose, and object type
-!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
-!     {\tt units}, and {\tt coordinates}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3496,8 +3508,10 @@ contains
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!     \item [attwriteflag]
+!      Flag to determine the format for writing the Attributes.
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -3505,6 +3519,7 @@ contains
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_AttWriteFlag) :: writeflag
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3531,11 +3546,25 @@ contains
       
       fobject = 'array'
 
-      call c_ESMC_AttPackWrite(array, fconvention, &
-        fpurpose, fobject, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (present(attwriteflag)) then
+        writeflag = attwriteflag
+      else
+        writeflag = ESMF_ATTWRITEFLAG_TAB
+      endif
+      
+      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+        call c_ESMC_AttPackWrite(array, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+        call c_ESMC_AttPackWrite(array, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3565,8 +3594,7 @@ contains
 ! !DESCRIPTION:
 !     Sets up the Attribute package for the {\tt comp}.
 !     The Attribute package defines the convention, purpose, and object type
-!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
-!     {\tt units}, and {\tt coordinates}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -6421,20 +6449,21 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_CplCompAttWrite(comp, convention, purpose, rc)
+      subroutine ESMF_CplCompAttWrite(comp, convention, purpose, &
+        attwriteflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp  
       character (len = *), intent(in), optional :: convention
       character (len = *), intent(in), optional :: purpose
+      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Write the Attribute package for the {\tt comp}.
 !     The Attribute package defines the convention, purpose, and object type
-!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
-!     {\tt units}, and {\tt coordinates}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -6444,8 +6473,10 @@ contains
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!     \item [attwriteflag]
+!      Flag to determine the format for writing the Attributes.
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -6453,6 +6484,7 @@ contains
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_AttWriteFlag) :: writeflag
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -6479,11 +6511,25 @@ contains
       
       fobject = 'comp'
 
-      call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
-        fpurpose, fobject, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (present(attwriteflag)) then
+        writeflag = attwriteflag
+      else
+        writeflag = ESMF_ATTWRITEFLAG_TAB
+      endif
+      
+      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+        call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+        call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -6513,8 +6559,7 @@ contains
 ! !DESCRIPTION:
 !     Sets up the Attribute package for the {\tt comp}.
 !     The Attribute package defines the convention, purpose, and object type
-!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
-!     {\tt units}, and {\tt coordinates}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -9368,20 +9413,21 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_GridCompAttWrite(comp, convention, purpose, rc)
+      subroutine ESMF_GridCompAttWrite(comp, convention, purpose, &
+        attwriteflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp  
       character (len = *), intent(in), optional :: convention
       character (len = *), intent(in), optional :: purpose
+      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Write the Attribute package for the {\tt comp}.
 !     The Attribute package defines the convention, purpose, and object type
-!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
-!     {\tt units}, and {\tt coordinates}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -9391,8 +9437,10 @@ contains
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!     \item [attwriteflag]
+!      Flag to determine the format for writing the Attributes.
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -9400,6 +9448,7 @@ contains
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_AttWriteFlag) :: writeflag
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -9426,11 +9475,25 @@ contains
       
       fobject = 'comp'
 
-      call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
-        fpurpose, fobject, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (present(attwriteflag)) then
+        writeflag = attwriteflag
+      else
+        writeflag = ESMF_ATTWRITEFLAG_TAB
+      endif
+      
+      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+        call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+        call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -9460,8 +9523,7 @@ contains
 ! !DESCRIPTION:
 !     Sets up the Attribute package for the {\tt field}.
 !     The Attribute package defines the convention, purpose, and object type
-!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
-!     {\tt units}, and {\tt coordinates}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -12093,20 +12155,21 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_FieldAttWrite(field, convention, purpose, rc)
+      subroutine ESMF_FieldAttWrite(field, convention, purpose, &
+        attwriteflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in), optional :: convention
       character (len = *), intent(in), optional :: purpose
+      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Write the Attribute package for the {\tt field}.
 !     The Attribute package defines the convention, purpose, and object type
-!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
-!     {\tt units}, and {\tt coordinates}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -12116,8 +12179,10 @@ contains
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!     \item [attwriteflag]
+!      Flag to determine the format for writing the Attributes.
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -12125,6 +12190,7 @@ contains
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_AttWriteFlag) :: writeflag
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -12151,11 +12217,25 @@ contains
       
       fobject = 'field'
 
-      call c_ESMC_AttPackWrite(field%ftypep%base, fconvention, &
-        fpurpose, fobject, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (present(attwriteflag)) then
+        writeflag = attwriteflag
+      else
+        writeflag = ESMF_ATTWRITEFLAG_TAB
+      endif
+      
+      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+        call c_ESMC_AttPackWrite(field%ftypep%base, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+        call c_ESMC_AttPackWrite(field%ftypep%base, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -12185,8 +12265,7 @@ contains
 ! !DESCRIPTION:
 !     Sets up the Attribute package for the {\tt fieldbundle}.
 !     The Attribute package defines the convention, purpose, and object type
-!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
-!     {\tt units}, and {\tt coordinates}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -14872,20 +14951,21 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_FBundleAttWrite(fieldbundle, convention, purpose, rc)
+      subroutine ESMF_FBundleAttWrite(fieldbundle, convention, purpose, &
+        attwriteflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       character (len = *), intent(in), optional :: convention
       character (len = *), intent(in), optional :: purpose
+      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Write the Attribute package for the {\tt fieldbundle}.
 !     The Attribute package defines the convention, purpose, and object type
-!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
-!     {\tt units}, and {\tt coordinates}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -14895,8 +14975,10 @@ contains
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!     \item [attwriteflag]
+!      Flag to determine the format for writing the Attributes.
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -14904,6 +14986,7 @@ contains
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_AttWriteFlag) :: writeflag
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -14930,11 +15013,25 @@ contains
       
       fobject = 'fieldbundle'
 
-      call c_ESMC_AttPackWrite(fieldbundle%btypep%base, fconvention, &
-        fpurpose, fobject, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (present(attwriteflag)) then
+        writeflag = attwriteflag
+      else
+        writeflag = ESMF_ATTWRITEFLAG_TAB
+      endif
+      
+      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+        call c_ESMC_AttPackWrite(fieldbundle%btypep%base, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+        call c_ESMC_AttPackWrite(fieldbundle%btypep%base, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -14964,8 +15061,7 @@ contains
 ! !DESCRIPTION:
 !     Sets up the Attribute package for the {\tt grid}.
 !     The Attribute package defines the convention, purpose, and object type
-!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
-!     {\tt units}, and {\tt coordinates}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -17597,20 +17693,21 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_GridAttWrite(grid, convention, purpose, rc)
+      subroutine ESMF_GridAttWrite(grid, convention, purpose, &
+        attwriteflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in), optional :: convention
       character (len = *), intent(in), optional :: purpose
+      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Write the Attribute package for the {\tt grid}.
 !     The Attribute package defines the convention, purpose, and object type
-!     of the four associated Attributes {\tt longname}, {\tt shortname}, 
-!     {\tt units}, and {\tt coordinates}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -17620,8 +17717,10 @@ contains
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!     \item [attwriteflag]
+!      Flag to determine the format for writing the Attributes.
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -17629,6 +17728,7 @@ contains
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_AttWriteFlag) :: writeflag
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -17650,11 +17750,25 @@ contains
       
       fobject = 'grid'
 
-      call c_ESMC_AttPackWrite(grid, fconvention, &
-        fpurpose, fobject, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (present(attwriteflag)) then
+        writeflag = attwriteflag
+      else
+        writeflag = ESMF_ATTWRITEFLAG_TAB
+      endif
+      
+      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+        call c_ESMC_AttPackWrite(grid, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+        call c_ESMC_AttPackWrite(grid, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -17684,8 +17798,7 @@ contains
 ! !DESCRIPTION:
 !     Sets up the Attribute package for the {\tt state}.
 !     The Attribute package defines the convention, purpose, and object type 
-!     of the three associated Attributes {\tt name}, {\tt organization}, and 
-!     {\tt discipline}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -20581,20 +20694,21 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_StateAttWrite(state, convention, purpose, rc)
+      subroutine ESMF_StateAttWrite(state, convention, purpose, &
+        attwriteflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in), optional :: convention
       character (len = *), intent(in), optional :: purpose
+      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Write the Attribute package for the {\tt state}.
 !     The Attribute package defines the convention, purpose, and object type 
-!     of the three associated Attributes {\tt name}, {\tt organization}, and 
-!     {\tt discipline}.
+!     of the associated Attributes.
 !
 !     The arguments are:
 !     \begin{description}
@@ -20604,8 +20718,10 @@ contains
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!     \item [attwriteflag]
+!      Flag to determine the format for writing the Attributes.
 !     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
@@ -20613,6 +20729,7 @@ contains
 
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_AttWriteFlag) :: writeflag
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -20638,12 +20755,26 @@ contains
       endif
       
       fobject = 'field'
-
-      call c_ESMC_AttPackWrite(state%statep%base, fconvention, &
-        fpurpose, fobject, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      
+      if (present(attwriteflag)) then
+        writeflag = attwriteflag
+      else
+        writeflag = ESMF_ATTWRITEFLAG_TAB
+      endif
+      
+      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+        call c_ESMC_AttPackWrite(state%statep%base, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+        call c_ESMC_AttPackWrite(state%statep%base, fconvention, &
+          fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
