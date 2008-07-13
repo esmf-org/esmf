@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.17 2008/07/12 19:36:22 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.18 2008/07/13 22:57:39 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -80,19 +80,6 @@ module ESMF_AttributeMod
   end type
 
 !------------------------------------------------------------------------------
-! ! ESMF_AttWriteFlag
-!
-!------------------------------------------------------------------------------
-  type ESMF_AttWriteFlag
-  sequence
-     integer :: attwriteflag
-  end type
-
-  type(ESMF_AttWriteFlag), parameter :: &
-                      ESMF_ATTWRITEFLAG_TAB=ESMF_AttWriteFlag(0), &
-                      ESMF_ATTWRITEFLAG_XML=ESMF_AttWriteFlag(1)
-
-!------------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
 !     The following routines apply to {\tt ESMF\_Array}, {\tt ESMF\_Field},
@@ -102,7 +89,6 @@ module ESMF_AttributeMod
 !
 !   Classes
       public ESMF_Attribute
-      public ESMF_AttWriteFlag, ESMF_ATTWRITEFLAG_TAB, ESMF_ATTWRITEFLAG_XML
       
 !  Attribute methods
       public ESMF_AttributeAdd
@@ -115,7 +101,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.17 2008/07/12 19:36:22 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.18 2008/07/13 22:57:39 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -3549,16 +3535,16 @@ contains
       if (present(attwriteflag)) then
         writeflag = attwriteflag
       else
-        writeflag = ESMF_ATTWRITEFLAG_TAB
+        writeflag = ESMF_ATTWRITE_TAB
       endif
       
-      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
         call c_ESMC_AttPackWrite(array, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
         call c_ESMC_AttPackWrite(array, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -6514,16 +6500,16 @@ contains
       if (present(attwriteflag)) then
         writeflag = attwriteflag
       else
-        writeflag = ESMF_ATTWRITEFLAG_TAB
+        writeflag = ESMF_ATTWRITE_TAB
       endif
       
-      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
         call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
         call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -9478,16 +9464,16 @@ contains
       if (present(attwriteflag)) then
         writeflag = attwriteflag
       else
-        writeflag = ESMF_ATTWRITEFLAG_TAB
+        writeflag = ESMF_ATTWRITE_TAB
       endif
       
-      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
         call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
         call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -12220,16 +12206,16 @@ contains
       if (present(attwriteflag)) then
         writeflag = attwriteflag
       else
-        writeflag = ESMF_ATTWRITEFLAG_TAB
+        writeflag = ESMF_ATTWRITE_TAB
       endif
       
-      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
         call c_ESMC_AttPackWrite(field%ftypep%base, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
         call c_ESMC_AttPackWrite(field%ftypep%base, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -15016,16 +15002,16 @@ contains
       if (present(attwriteflag)) then
         writeflag = attwriteflag
       else
-        writeflag = ESMF_ATTWRITEFLAG_TAB
+        writeflag = ESMF_ATTWRITE_TAB
       endif
       
-      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
         call c_ESMC_AttPackWrite(fieldbundle%btypep%base, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
         call c_ESMC_AttPackWrite(fieldbundle%btypep%base, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -17753,16 +17739,16 @@ contains
       if (present(attwriteflag)) then
         writeflag = attwriteflag
       else
-        writeflag = ESMF_ATTWRITEFLAG_TAB
+        writeflag = ESMF_ATTWRITE_TAB
       endif
       
-      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
         call c_ESMC_AttPackWrite(grid, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
         call c_ESMC_AttPackWrite(grid, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -20759,16 +20745,16 @@ contains
       if (present(attwriteflag)) then
         writeflag = attwriteflag
       else
-        writeflag = ESMF_ATTWRITEFLAG_TAB
+        writeflag = ESMF_ATTWRITE_TAB
       endif
       
-      if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_TAB%attwriteflag) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
         call c_ESMC_AttPackWrite(state%statep%base, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-      else if (writeflag%attwriteflag .eq. ESMF_ATTWRITEFLAG_XML%attwriteflag) then
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
         call c_ESMC_AttPackWrite(state%statep%base, fconvention, &
           fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
