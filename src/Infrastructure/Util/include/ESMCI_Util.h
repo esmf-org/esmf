@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.6 2008/05/12 21:56:37 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.7 2008/07/13 22:58:18 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -87,6 +87,10 @@ enum ESMC_IndexFlag { ESMF_INDEX_DELOCAL=0,
 enum ESMC_RegionFlag { ESMF_REGION_TOTAL=0,
                        ESMF_REGION_SELECT,
                        ESMF_REGION_EMPTY};
+
+// attwrite flag type
+enum ESMC_AttWriteFlag { ESMF_ATTWRITE_TAB=0,
+                         ESMF_ATTWRITE_XML};
 
 // ESMF platform-dependent data types
 #ifdef ESMF_IS_32BIT_MACHINE

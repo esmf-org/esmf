@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.63 2008/05/16 17:26:06 w6ws Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.64 2008/07/13 22:58:18 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -483,6 +483,21 @@
         ESMF_REGION_EMPTY = ESMF_RegionFlag(2)
 
 !------------------------------------------------------------------------------
+!     ! ESMF_AttWriteFlag
+!
+!     ! Interface flag for Attribute write methods
+
+      type ESMF_AttWriteFlag
+      sequence
+      !private
+        integer :: value
+      end type
+
+      type(ESMF_AttWriteFlag), parameter ::  &
+        ESMF_ATTWRITE_TAB = ESMF_AttWriteFlag(0), &
+        ESMF_ATTWRITE_XML = ESMF_AttWriteFlag(1)
+
+!------------------------------------------------------------------------------
 !BOPI
 !
 ! !PUBLIC TYPES:
@@ -530,6 +545,7 @@
       public ESMF_ContextFlag, ESMF_CHILD_IN_NEW_VM, ESMF_CHILD_IN_PARENT_VM
       public ESMF_TerminationFlag, ESMF_FINAL, ESMF_KEEPMPI, ESMF_ABORT
       public ESMF_DePinFlag, ESMF_DE_PIN_PET, ESMF_DE_PIN_VAS
+      public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
