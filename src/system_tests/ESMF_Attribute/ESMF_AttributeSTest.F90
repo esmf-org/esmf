@@ -237,9 +237,9 @@ program ESMF_AttributeSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   
   ! link the Component Attribute hierarchies to their States
-  call ESMF_AttributeSet(comp1, c1imp, rc=rc)
+  !call ESMF_AttributeSet(comp1, c1imp, rc=rc)
   call ESMF_AttributeSet(comp1, c1exp, rc=rc)
-  call ESMF_AttributeSet(comp2, c2imp, rc=rc)
+  !call ESMF_AttributeSet(comp2, c2imp, rc=rc)
   call ESMF_AttributeSet(comp2, c2exp, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -270,8 +270,8 @@ program ESMF_AttributeSTest
 
   ! write out some Attribute info
   if (localPet .eq. 0) then
-    call ESMF_AttributeWrite(comp1,conv,purp,rc=rc)
-    call ESMF_AttributeWrite(comp2,conv,purp,rc=rc)
+    call ESMF_AttributeWrite(comp1,conv,purp,attwriteflag=ESMF_ATTWRITE_TAB,rc=rc)
+    call ESMF_AttributeWrite(comp2,conv,purp,attwriteflag=ESMF_ATTWRITE_TAB,rc=rc)
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)  
