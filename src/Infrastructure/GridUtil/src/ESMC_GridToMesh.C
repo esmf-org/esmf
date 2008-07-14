@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.22 2008/05/20 22:43:08 dneckels Exp $
+// $Id: ESMC_GridToMesh.C,v 1.23 2008/07/14 19:45:24 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,6 +40,12 @@
 #include <vector>
 #include <map>
 #include <cmath>
+
+
+// Some xlf compilers don't define this
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 //#define G2M_DBG
 
