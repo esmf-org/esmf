@@ -63,20 +63,29 @@
 ! local parameters
   integer :: localrc ! local error status
 
-  ! local
-  type(ESMF_DistGrid) :: src_distgrid, dst_distgrid
+  ! local ESMF Types
   type(ESMF_Array) :: src_array, return_array, dst_array
+  type(ESMF_DistGrid) :: src_distgrid, dst_distgrid
+  type(ESMF_RouteHandle) :: redistHandle_forward, redistHandle_reverse
+
+  ! local integers
   integer :: iDfile, iGfile, iD, iG
+
+  ! local characters
   character(ESMF_MAXSTR) :: liG, liD
+
+  ! debug
+  real(ESMF_KIND_R8), pointer :: fptr2(:,:)
+  integer :: i1,i2,de, localDeCount, dimCount 
+  integer, allocatable ::  localDeList(:)
+  type(ESMF_LocalArray), allocatable :: larrayList(:)
+  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  type(ESMF_IndexFlag) :: indexflag
 
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
   rc = ESMF_RC_NOT_IMPL
-
-  !-----------------------------------------------------------------------------
-  ! assign needed local variables
-  !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
   ! for a single problem descriptor string, loop through each specifier file
@@ -110,12 +119,10 @@
           !---------------------------------------------------------------------
           ! create source and destination distributions
           !---------------------------------------------------------------------
-          print*,'> create source distribution '
+          print*,'> create source return distributions '
           call create_distribution(PDS%SrcMem, PDS%Dfiles(iDfile)%src_dist(iD),&
                     PDS%Gfiles(iGfile)%src_grid(iG), src_distgrid, VM, localrc)
-
           print*,'               '
-
           write(liG,"(i5)") iG 
           write(liD,"(i5)") iD 
           if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
@@ -130,8 +137,8 @@
           ! create source array
           !---------------------------------------------------------------------
           print*,'> create src_array '
-          call create_array(PDS%SrcMem, src_distgrid,                          &
-                      PDS%Gfiles(iGfile)%src_grid(iG), src_array, localrc)
+          call create_array(src_array, src_distgrid, PDS%SrcMem,               &
+                      PDS%Gfiles(iGfile)%src_grid(iG), localrc)
           if (ESMF_LogMsgFoundError(localrc,"error creating source array "     &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
@@ -139,6 +146,11 @@
              // " and entry " // trim(adjustL(liG)) // " of file " //          &
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
+
+          call ESMF_ArrayValidate(src_array, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"source array validation error ",  &
+                  rcToReturn=rc)) return
+
 
           !---------------------------------------------------------------------
           ! populate source array for redistribution test
@@ -152,8 +164,8 @@
           ! create return array
           !---------------------------------------------------------------------
           print*,'> create return_array '
-          call create_array(PDS%SrcMem, src_distgrid,                          &
-                      PDS%Gfiles(iGfile)%src_grid(iG), return_array, localrc)
+          call create_array(return_array, src_distgrid, PDS%SrcMem,            &
+                      PDS%Gfiles(iGfile)%src_grid(iG), localrc)
           if (ESMF_LogMsgFoundError(localrc,"error creating return array "     &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
@@ -165,10 +177,50 @@
           !---------------------------------------------------------------------
           ! populate source array for redistribution test
           !---------------------------------------------------------------------
-          call populate_redist_array(return_array, src_distgrid, PDS%SrcMem,   &
-                       PDS%Gfiles(iGfile)%src_grid(iG), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error populating return array ",  &
-                  rcToReturn=rc)) return
+!         call populate_redist_array(return_array, src_distgrid, PDS%SrcMem,   &
+!                      PDS%Gfiles(iGfile)%src_grid(iG), localrc)
+!         if (ESMF_LogMsgFoundError(localrc,"error populating return array ",  &
+!                 rcToReturn=rc)) return
+
+!-===========DEBUG==========================
+! call ESMF_ArrayGet(src_array, localDeCount=localDeCount, rc=localrc)
+! if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
+!         rcToReturn=rc)) return
+! allocate(localDeList(localDeCount))
+! call ESMF_ArrayGet(src_array, localDeList=localDeList, rc=localrc)
+! if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
+!         rcToReturn=rc)) return
+! allocate(larrayList(localDeCount))
+! call ESMF_ArrayGet(src_array, larrayList=larrayList, rc=localrc)
+! if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
+!         rcToReturn=rc)) return
+! call ESMF_DistGridGet(src_distgrid, dimCount=dimCount, rc=localrc)
+! if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
+!         rcToReturn=rc)) return
+! allocate(UBnd(dimCount, localDeCount))
+! allocate(LBnd(dimCount, localDeCount))  
+! call ESMF_ArrayGet(src_array, indexflag=indexflag,                               &
+!          exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
+! if (ESMF_LogMsgFoundError(localrc,"error getting exclusive bound range",     &
+!         rcToReturn=rc)) return
+! do de=1, localDeCount
+!    call ESMF_LocalArrayGet(larrayList(de), fptr=fptr2, &
+!                            docopy=ESMF_DATA_REF,&
+!                            rc=localrc)
+!
+!    if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+!            "array list", rcToReturn=rc)) return
+!    print*,de,' display array ',LBnd(1,de),UBnd(1,de),LBnd(2,de),UBnd(2,de)
+!    do i1=LBnd(1,de), UBnd(1,de)
+!       do i2=LBnd(2,de), UBnd(2,de)
+!          print*,de,' repopulate ',i1,i2,fptr2(i1,i2) 
+!       enddo   !   i2
+!    enddo    !   i1
+! enddo    ! de
+! deallocate(localDeList)
+! deallocate(LBnd, UBnd)
+! deallocate(larrayList)
+!-===========DEBUG==========================
 
           !---------------------------------------------------------------------
           ! Create Destination distribution and array
@@ -188,8 +240,8 @@
              rcToReturn=rc)) return
 
           print*,'> create dst_array'
-          call create_array(PDS%DstMem, Dst_distgrid,                          &
-                      PDS%Gfiles(iGfile)%dst_grid(iG), dst_array, localrc)
+          call create_array(dst_array, dst_distgrid, PDS%DstMem,               &
+                      PDS%Gfiles(iGfile)%dst_grid(iG), localrc)
           if (ESMF_LogMsgFoundError(localrc,"error creating destinationarray " &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
@@ -198,33 +250,115 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
+!-===========DEBUG==========================
+  call ESMF_ArrayGet(dst_array, localDeCount=localDeCount, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
+          rcToReturn=rc)) return
+  allocate(localDeList(localDeCount))
+  call ESMF_ArrayGet(dst_array, localDeList=localDeList, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
+          rcToReturn=rc)) return
+  allocate(larrayList(localDeCount))
+  call ESMF_ArrayGet(dst_array, larrayList=larrayList, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
+          rcToReturn=rc)) return
+  call ESMF_DistGridGet(dst_distgrid, dimCount=dimCount, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
+          rcToReturn=rc)) return
+  allocate(UBnd(dimCount, localDeCount))
+  allocate(LBnd(dimCount, localDeCount))  
+  call ESMF_ArrayGet(dst_array, indexflag=indexflag,                               &
+           exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting exclusive bound range",     &
+          rcToReturn=rc)) return
+  do de=1, localDeCount
+     call ESMF_LocalArrayGet(larrayList(de), fptr=fptr2, &
+                             docopy=ESMF_DATA_REF,&
+                             rc=localrc)
+     if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+             "array list", rcToReturn=rc)) return
+     print*,de,' display array ',LBnd(1,de),UBnd(1,de),LBnd(2,de),UBnd(2,de)
+     do i1=LBnd(1,de), UBnd(1,de)
+        do i2=LBnd(2,de), UBnd(2,de)
+           print*,de,' dst_array ',i1,i2,fptr2(i1,i2) 
+        enddo   !   i2
+     enddo    !   i1
+  enddo    ! de
+  deallocate(localDeList)
+  deallocate(LBnd, UBnd)
+  deallocate(larrayList)
+!-===========DEBUG==========================
+
   !-----------------------------------------------------------------------------
-  ! run redistribution
-  ! redistribution store
-  ! redistribution  run
+  ! Now conduct the redistribution test
+  !
+  ! the test consists of a forward redistribution from the source
+  ! distribution to the destination distribution, and a second backward
+  ! redistribution from the destination back to the source distribution.
   !-----------------------------------------------------------------------------
+          !---------------------------------------------------------------------
+          ! redistribution store for forward direction
+          !---------------------------------------------------------------------
+          call ESMF_ArrayRedistStore(srcArray=src_array, dstArray=dst_array,   &
+                   routehandle=redistHandle_forward, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
+                  " forward direction", rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! forward redistribution run
+          !---------------------------------------------------------------------
+!         call ESMF_ArrayRedist(srcArray=src_array, dstArray=dst_array,        &
+!                  routehandle=redistHandle_forward, rc=localrc)
+!         if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
+!                 " forward failed ", rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! redistribution store for reverse direction
+          !---------------------------------------------------------------------
+          call ESMF_ArrayRedistStore(srcArray=dst_array, dstArray=return_array,&
+                   routehandle=redistHandle_reverse, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
+                  " reverse direction", rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! forward redistribution run
+          !---------------------------------------------------------------------
+!         call ESMF_ArrayRedist(srcArray=dst_array, dstArray=return_array,     &
+!                  routehandle=redistHandle_reverse, rc=localrc)
+!         if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
+!                 " reverse failed ", rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! drs!!!! need iD and iG argument for test_status
   ! test agreement between source and returned source array contents
   ! PDS%test_status(iDfile,iGfile) = HarnessTest_SUCCESS _FAILURE
   !-----------------------------------------------------------------------------
-
           !---------------------------------------------------------------------
           ! compare source array values with the return array values
           !---------------------------------------------------------------------
           print*,'> compare arrays'
           call compare_redist_array(src_array, return_array, src_distgrid,     &
-                      src_distgrid,                                            &
-                      PDS%SrcMem,PDS%Gfiles(iGfile)%src_grid(iG),              &
-                      localrc)
+                    src_distgrid, PDS%SrcMem, PDS%Gfiles(iGfile)%src_grid(iG), &
+                    localrc)
           if (ESMF_LogMsgFoundError(localrc,"redistribution array " //         &
                   " comparison failed ", rcToReturn=rc)) return
 
+  !-----------------------------------------------------------------------------
+  ! Clean up!!!!!!
+  !-----------------------------------------------------------------------------
+          !---------------------------------------------------------------------
+          ! release redistribution handles
+          !---------------------------------------------------------------------
+          call ESMF_ArrayRedistRelease(routehandle=redistHandle_forward,       &
+                   rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
+                  " forward failed ", rcToReturn=rc)) return
 
-          !---------------------------------------------------------------------
-          ! Clean up!!!!!!
-          !---------------------------------------------------------------------
+          call ESMF_ArrayRedistRelease(routehandle=redistHandle_reverse,       &
+                   rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
+                  " reverse failed ", rcToReturn=rc)) return
+
           !---------------------------------------------------------------------
           ! Destroy Array objects before moving to next test
           !---------------------------------------------------------------------
@@ -446,16 +580,16 @@
 !-------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  subroutine create_array(Memory, DistGrid, Grid, Array, rc)
+  subroutine create_array(Array, DistGrid, Memory, Grid, rc)
   !-----------------------------------------------------------------------------
   ! routine creates a single distribution from specifier files
   !
   !-----------------------------------------------------------------------------
   ! arguments
-  type(memory_config), intent(in   ) :: Memory
-  type(ESMF_DistGrid), intent(in   ) :: DistGrid
-  type(grid_specification_record), intent(in   ) :: Grid
   type(ESMF_Array), intent(  out) :: Array
+  type(ESMF_DistGrid), intent(in   ) :: DistGrid
+  type(memory_config), intent(in   ) :: Memory
+  type(grid_specification_record), intent(in   ) :: Grid
   integer, intent(inout) :: rc
  
   ! local ESMF types
@@ -686,12 +820,16 @@
   integer, intent(inout) :: rc
  
   ! local ESMF types
-! type(ESMF_DistGrid) :: DistGrid
+  type(ESMF_LocalArray), allocatable :: larrayList(:)
+  type(ESMF_IndexFlag) :: indexflag
 
   ! local parameters
   integer :: localrc ! local error status
 
   ! local integer variables
+  integer :: de, localDeCount, dimCount 
+  integer, allocatable ::  localDeList(:)
+  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
   integer :: i1, i2, i3, i4, i5, i6, i7
   integer :: irank, k, tensorsize, fsize(7)
   integer, allocatable :: haloL(:), haloR(:)
@@ -699,14 +837,6 @@
 
   ! local real variables
   real(ESMF_KIND_R8), pointer :: fptr2(:,:)
-
-
-  ! debug
-  integer :: i, j, de, localDeCount, dimCount 
-  integer, allocatable ::  localDeList(:)
-  type(ESMF_LocalArray), allocatable :: larrayList(:)
-  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
-  type(ESMF_IndexFlag) :: indexflag
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -733,10 +863,6 @@
   !-----------------------------------------------------------------------------
   ! get dimcount to allocate bound arrays
   !-----------------------------------------------------------------------------
-! call ESMF_ArrayGet(array, distgrid=DistGrid, rc=localrc)
-! if (ESMF_LogMsgFoundError(localrc,"error getting distgrid from array",       &
-!         rcToReturn=rc)) return
-
   call ESMF_DistGridGet(DistGrid, dimCount=dimCount, rc=localrc)
   print*,' dimcount ',dimCount
   if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
@@ -765,28 +891,18 @@
         ! rank = 2
         !-----------------------------------------------------------------------
         do de=1, localDeCount
-           fsize(1) = UBnd(1,de)-LBnd(1,de)+1
-           fsize(2) = UBnd(2,de)-LBnd(2,de)+1
-           allocate( fptr2(fsize(1),fsize(2)) )
-
-
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr2, &
-                                   docopy=ESMF_DATA_REF,&
-                                   rc=localrc)
-
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
            if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            print*,de,' populate array ',LBnd(1,de),UBnd(1,de),LBnd(2,de),UBnd(2,de)
            do i1=LBnd(1,de), UBnd(1,de)
-             do i2=LBnd(2,de), UBnd(2,de)
-               fptr2(i1,i2) = 1000.0d0*i1 + 0.001d0*i2
-               print*,de,' populate ',i1,i2,fptr2(i1,i2) 
+              do i2=LBnd(2,de), UBnd(2,de)
+                 fptr2(i1,i2) = localDeList(de) + 1000.0d0*i1 + 0.001d0*i2
+  !              print*,de,' populate ',i1,i2,fptr2(i1,i2) 
               enddo   !   i2
-            enddo    !   i1
-
-
-           deallocate( fptr2 )
+           enddo    !   i1
         enddo    ! de
      case default
         ! error
@@ -833,14 +949,19 @@
   integer, intent(inout) :: rc
  
   ! local ESMF types
-! type(ESMF_DistGrid) :: DistGrid1
-! type(ESMF_DistGrid) :: DistGrid2
+  type(ESMF_LocalArray), allocatable :: larrayList1(:)
+  type(ESMF_LocalArray), allocatable :: larrayList2(:)
+  type(ESMF_IndexFlag) :: indexflag
 
   ! local parameters
   integer :: localrc ! local error status
 
   ! local integer variables
-  integer :: i1, i2, i3, i4, i5, i6, i7
+  integer :: de, i1, i2, i3, i4, i5, i6, i7
+  integer :: localDeCount1, dimCount1, localDeCount2, dimCount2
+  integer, allocatable ::  localDeList1(:), localDeList2(:)
+  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  integer, allocatable :: LBnd2(:,:), UBnd2(:,:) 
   integer :: irank, k, tensorsize, fsize(7)
   integer, allocatable :: haloL(:), haloR(:)
   integer, allocatable :: top(:), bottom(:)
@@ -852,19 +973,6 @@
   real(ESMF_KIND_R8), pointer :: farray2D(:,:)
 
   real(ESMF_KIND_R8), pointer :: rarray2D(:,:)
-
-  ! debug
-  integer :: de
-  integer :: localDeCount1, dimCount1, localDeCount2, dimCount2
-  integer, allocatable ::  localDeList1(:)
-  integer, allocatable ::  localDeList2(:)
-  type(ESMF_LocalArray), allocatable :: larrayList1(:)
-  type(ESMF_LocalArray), allocatable :: larrayList2(:)
-  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
-  integer, allocatable :: LBnd2(:,:), UBnd2(:,:) 
-  type(ESMF_IndexFlag) :: indexflag
-
-  integer :: alloc_test
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -890,10 +998,6 @@
   call ESMF_ArrayGet(array1, larrayList=larrayList1, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
           rcToReturn=rc)) return
-
-! call ESMF_ArrayGet(array1, distgrid=DistGrid1, rc=localrc)
-! if (ESMF_LogMsgFoundError(localrc,"error getting distgrid from array1",      &
-!         rcToReturn=rc)) return
 
   call ESMF_DistGridGet(DistGrid1, dimCount=dimCount1, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
@@ -934,10 +1038,6 @@
   call ESMF_ArrayGet(array2, larrayList=larrayList2, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
           rcToReturn=rc)) return
-
-! call ESMF_ArrayGet(array2, distgrid=DistGrid2, rc=localrc)
-! if (ESMF_LogMsgFoundError(localrc,"error getting distgrid from array2",      &
-!         rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! compare dimcounts for both arrays 
@@ -1008,15 +1108,6 @@
         ! rank = 2
         !-----------------------------------------------------------------------
         do de=1, localDeCount1
-           fsize(1) = UBnd(1,de)-LBnd(1,de)+1
-           fsize(2) = UBnd(2,de)-LBnd(2,de)+1
-           print*,de,' size ',fsize(1),fsize(2)
-           allocate( farray2D(fsize(1),fsize(2)), stat=alloc_test )
-           if (ESMF_LogMsgFoundAllocError(alloc_test, "integer array",         &
-                                   rcToReturn=rc)) then
-           endif
-           allocate( rarray2D(fsize(1),fsize(2)) )
-
            call ESMF_LocalArrayGet(larrayList1(de), fptr=farray2D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
@@ -1038,9 +1129,7 @@
                endif
              enddo   !   i2
            enddo    !   i1
-           print*,"deallocate local arrays - move on to next de"
-           print*,'    '
-           deallocate( farray2D, rarray2D )
+           print*,"move on to next de"
         enddo    ! de
      case default
         ! error
@@ -1064,7 +1153,6 @@
   deallocate(localDeList1, localDeList2)
   deallocate(LBnd, UBnd)
   deallocate( LBnd2, UBnd2 )
-  print*,' compare deallocation complete'
 
   !-----------------------------------------------------------------------------
   rc = ESMF_SUCCESS     
