@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.69 2008/06/27 05:55:02 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.70 2008/07/15 16:15:53 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.69 2008/06/27 05:55:02 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.70 2008/07/15 16:15:53 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4560,6 +4560,12 @@ GridIter *GridIter::toBeg(
 //EOPI
 //-----------------------------------------------------------------------------
 
+  // If no DEs then just set iterator to done 
+  if (numDE==0) {
+    done=true;
+    return this;
+  } 
+
   // Set to beginning (localDE=0)
   this->setDEBnds(0);
 
@@ -5350,6 +5356,12 @@ GridCellIter *GridCellIter::toBeg(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+
+  // If no DEs then just set iterator to done 
+  if (numDE==0) {
+    done=true;
+    return this;
+  } 
 
   // Set to beginning (localDE=0)
   this->setDEBnds(0);
