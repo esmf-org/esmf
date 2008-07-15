@@ -107,7 +107,9 @@
          ' Destination grid/dist/memory rank ', &
           pds%DstMem%GridRank,pds%DstMem%DistRank,pds%DstMem%memRank
 
+          !---------------------------------------------------------------------
           ! create source and destination distributions
+          !---------------------------------------------------------------------
           print*,'> create source distribution '
           call create_distribution(PDS%SrcMem, PDS%Dfiles(iDfile)%src_dist(iD),&
                     PDS%Gfiles(iGfile)%src_grid(iG), src_distgrid, VM, localrc)
@@ -124,6 +126,9 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
+          !---------------------------------------------------------------------
+          ! create source array
+          !---------------------------------------------------------------------
           print*,'> create src_array '
           call create_array(PDS%SrcMem, src_distgrid,                          &
                       PDS%Gfiles(iGfile)%src_grid(iG), src_array, localrc)
@@ -135,7 +140,18 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
-          print*,'enter create return_array '
+          !---------------------------------------------------------------------
+          ! populate source array for redistribution test
+          !---------------------------------------------------------------------
+          call populate_redist_array(src_array, src_distgrid, PDS%SrcMem,      &
+                       PDS%Gfiles(iGfile)%src_grid(iG), localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error populating source array ",  &
+                  rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! create return array
+          !---------------------------------------------------------------------
+          print*,'> create return_array '
           call create_array(PDS%SrcMem, src_distgrid,                          &
                       PDS%Gfiles(iGfile)%src_grid(iG), return_array, localrc)
           if (ESMF_LogMsgFoundError(localrc,"error creating return array "     &
@@ -147,13 +163,20 @@
              rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
-          ! Create Destination objects
+          ! populate source array for redistribution test
+          !---------------------------------------------------------------------
+          call populate_redist_array(return_array, src_distgrid, PDS%SrcMem,   &
+                       PDS%Gfiles(iGfile)%src_grid(iG), localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error populating return array ",  &
+                  rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! Create Destination distribution and array
           !---------------------------------------------------------------------
           print*,'> create destination distribution'
+          print*,'               '
           call create_distribution(PDS%DstMem, PDS%Dfiles(iDfile)%dst_dist(iD),&
                     PDS%Gfiles(iGfile)%dst_grid(iG), dst_distgrid, VM, localrc)
-          print*,'               '
-
           write(liG,"(i5)") iG 
           write(liD,"(i5)") iD 
           if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
@@ -164,7 +187,7 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
-          print*,'enter create dst_array'
+          print*,'> create dst_array'
           call create_array(PDS%DstMem, Dst_distgrid,                          &
                       PDS%Gfiles(iGfile)%dst_grid(iG), dst_array, localrc)
           if (ESMF_LogMsgFoundError(localrc,"error creating destinationarray " &
@@ -176,25 +199,27 @@
              rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
-  ! create source and destination distributions (in DistMod)
-
-  !-----------------------------------------------------------------------------
-  !-----------------------------------------------------------------------------
-  ! create source array, destination array, and second source array
-
-  ! populate source array  (in grid)
-
-  !-----------------------------------------------------------------------------
-  !-----------------------------------------------------------------------------
   ! run redistribution
   ! redistribution store
   ! redistribution  run
-
   !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
   ! drs!!!! need iD and iG argument for test_status
   ! test agreement between source and returned source array contents
   ! PDS%test_status(iDfile,iGfile) = HarnessTest_SUCCESS _FAILURE
+  !-----------------------------------------------------------------------------
+
+          !---------------------------------------------------------------------
+          ! compare source array values with the return array values
+          !---------------------------------------------------------------------
+          print*,'> compare arrays'
+          call compare_redist_array(src_array, return_array, src_distgrid,     &
+                      src_distgrid,                                            &
+                      PDS%SrcMem,PDS%Gfiles(iGfile)%src_grid(iG),              &
+                      localrc)
+          if (ESMF_LogMsgFoundError(localrc,"redistribution array " //         &
+                  " comparison failed ", rcToReturn=rc)) return
 
 
           !---------------------------------------------------------------------
@@ -208,13 +233,14 @@
           if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_array",     &
              rcToReturn=rc)) return
 
+          call ESMF_ArrayDestroy(return_array, rc=localrc) ! return to source
+          if (ESMF_LogMsgFoundError(localrc,"unable to destroy return_array",  &
+             rcToReturn=rc)) return
+
           call ESMF_ArrayDestroy(dst_array, rc=localrc) ! redistribution 
           if (ESMF_LogMsgFoundError(localrc,"unable to destroy dst_array   ",  &
              rcToReturn=rc)) return
 
-          call ESMF_ArrayDestroy(return_array, rc=localrc) ! return to source
-          if (ESMF_LogMsgFoundError(localrc,"unable to destroy return_array",  &
-             rcToReturn=rc)) return
           !---------------------------------------------------------------------
           ! Destroy DistGrid objects before running next test
           !---------------------------------------------------------------------
@@ -644,42 +670,35 @@
   end subroutine create_array
   !-----------------------------------------------------------------------------
 
-
-
 !-----------------------------------------------------------------------------
-  subroutine populate_redist_array(Memory, DistGrid, Grid, Array, rc)
+
+  !-----------------------------------------------------------------------------
+  subroutine populate_redist_array(Array, DistGrid, Memory, Grid, rc)
   !-----------------------------------------------------------------------------
   ! routine creates a single distribution from specifier files
   !
   !-----------------------------------------------------------------------------
   ! arguments
-  type(memory_config), intent(in   ) :: Memory
+  type(ESMF_Array), intent(inout) :: Array
   type(ESMF_DistGrid), intent(in   ) :: DistGrid
+  type(memory_config), intent(in   ) :: Memory
   type(grid_specification_record), intent(in   ) :: Grid
-  type(ESMF_Array), intent(  out) :: Array
   integer, intent(inout) :: rc
  
   ! local ESMF types
-  type(ESMF_ArraySpec) :: ArraySpec
+! type(ESMF_DistGrid) :: DistGrid
 
   ! local parameters
   integer :: localrc ! local error status
 
   ! local integer variables
-  integer :: irank, k, tensorsize
+  integer :: i1, i2, i3, i4, i5, i6, i7
+  integer :: irank, k, tensorsize, fsize(7)
   integer, allocatable :: haloL(:), haloR(:)
   integer, allocatable :: top(:), bottom(:)
 
-  ! local logicals
-  logical :: nohaloflag
-
   ! local real variables
-  real(ESMF_KIND_R8), pointer :: fptr1(:), fptr2(:,:)
-  real(ESMF_KIND_R8), pointer :: fptr3(:,:,:)
-  real(ESMF_KIND_R8), pointer :: fptr4(:,:,:,:)
-  real(ESMF_KIND_R8), pointer :: fptr5(:,:,:,:,:)
-  real(ESMF_KIND_R8), pointer :: fptr6(:,:,:,:,:,:)
-  real(ESMF_KIND_R8), pointer :: fptr7(:,:,:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr2(:,:)
 
 
   ! debug
@@ -687,7 +706,6 @@
   integer, allocatable ::  localDeList(:)
   type(ESMF_LocalArray), allocatable :: larrayList(:)
   integer, allocatable :: LBnd(:,:), UBnd(:,:) 
-  real(ESMF_KIND_R8), pointer :: localFptr(:,:)
   type(ESMF_IndexFlag) :: indexflag
 
   ! initialize return flag
@@ -715,6 +733,10 @@
   !-----------------------------------------------------------------------------
   ! get dimcount to allocate bound arrays
   !-----------------------------------------------------------------------------
+! call ESMF_ArrayGet(array, distgrid=DistGrid, rc=localrc)
+! if (ESMF_LogMsgFoundError(localrc,"error getting distgrid from array",       &
+!         rcToReturn=rc)) return
+
   call ESMF_DistGridGet(DistGrid, dimCount=dimCount, rc=localrc)
   print*,' dimcount ',dimCount
   if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
@@ -729,12 +751,62 @@
           rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
-  !
+  ! associate the fortran pointer with the array object and populate the array
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  ! Memory Rank = Grid Rank, then there are no tensor dimensions
+  !-----------------------------------------------------------------------------
+  if( Memory%memRank ==  Memory%GridRank ) then
+
+     select case(dimCount)
+     case(2)
+        !-----------------------------------------------------------------------
+        ! rank = 2
+        !-----------------------------------------------------------------------
+        do de=1, localDeCount
+           fsize(1) = UBnd(1,de)-LBnd(1,de)+1
+           fsize(2) = UBnd(2,de)-LBnd(2,de)+1
+           allocate( fptr2(fsize(1),fsize(2)) )
+
+
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr2, &
+                                   docopy=ESMF_DATA_REF,&
+                                   rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           print*,de,' populate array ',LBnd(1,de),UBnd(1,de),LBnd(2,de),UBnd(2,de)
+           do i1=LBnd(1,de), UBnd(1,de)
+             do i2=LBnd(2,de), UBnd(2,de)
+               fptr2(i1,i2) = 1000.0d0*i1 + 0.001d0*i2
+               print*,de,' populate ',i1,i2,fptr2(i1,i2) 
+              enddo   !   i2
+            enddo    !   i1
+
+
+           deallocate( fptr2 )
+        enddo    ! de
+     case default
+        ! error
+        localrc = ESMF_FAILURE
+        call ESMF_LogMsgSetError(ESMF_FAILURE,"DimCount inot between 1 and 7", &
+                 rcToReturn=localrc)
+     end select
+
+  !-----------------------------------------------------------------------------
+  ! Memory Rank > Grid Rank, then there are MemRank-GridRank tensor dimensions
+  !-----------------------------------------------------------------------------
+  elseif( Memory%memRank >  Memory%GridRank ) then
+! -----------
+  endif
+
+  !-----------------------------------------------------------------------------
+  ! clean up allocated arrays
+  !-----------------------------------------------------------------------------
   deallocate(localDeList)
-  deallocate(UBnd)
-  deallocate(LBnd)
+  deallocate(LBnd, UBnd)
   deallocate(larrayList)
 
   !-----------------------------------------------------------------------------
@@ -743,6 +815,263 @@
 
   !-----------------------------------------------------------------------------
   end subroutine populate_redist_array 
+  !-----------------------------------------------------------------------------
+
+!-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  subroutine compare_redist_array(Array1, Array2, DistGrid1, DistGrid2, &
+                                  Memory, Grid, rc)
+  !-----------------------------------------------------------------------------
+  ! routine compares the contents of two arrays and returns if they agree
+  !-----------------------------------------------------------------------------
+  ! arguments
+  type(ESMF_Array), intent(in   ) :: Array1, Array2
+  type(ESMF_DistGrid), intent(in   ) :: DistGrid1, DistGrid2
+  type(memory_config), intent(in   ) :: Memory
+  type(grid_specification_record), intent(in   ) :: Grid
+  integer, intent(inout) :: rc
+ 
+  ! local ESMF types
+! type(ESMF_DistGrid) :: DistGrid1
+! type(ESMF_DistGrid) :: DistGrid2
+
+  ! local parameters
+  integer :: localrc ! local error status
+
+  ! local integer variables
+  integer :: i1, i2, i3, i4, i5, i6, i7
+  integer :: irank, k, tensorsize, fsize(7)
+  integer, allocatable :: haloL(:), haloR(:)
+  integer, allocatable :: top(:), bottom(:)
+
+  ! local logicals
+  logical :: nohaloflag
+
+  ! local real variables
+  real(ESMF_KIND_R8), pointer :: farray2D(:,:)
+
+  real(ESMF_KIND_R8), pointer :: rarray2D(:,:)
+
+  ! debug
+  integer :: de
+  integer :: localDeCount1, dimCount1, localDeCount2, dimCount2
+  integer, allocatable ::  localDeList1(:)
+  integer, allocatable ::  localDeList2(:)
+  type(ESMF_LocalArray), allocatable :: larrayList1(:)
+  type(ESMF_LocalArray), allocatable :: larrayList2(:)
+  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  integer, allocatable :: LBnd2(:,:), UBnd2(:,:) 
+  type(ESMF_IndexFlag) :: indexflag
+
+  integer :: alloc_test
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  ! Sanity check - confirm that the two arrays have the same ranks and sizes
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  ! get local array DE list from array1
+  !-----------------------------------------------------------------------------
+  call ESMF_ArrayGet(array1, localDeCount=localDeCount1, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
+          rcToReturn=rc)) return
+
+  allocate(localDeList1(localDeCount1))
+  call ESMF_ArrayGet(array1, localDeList=localDeList1, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
+          rcToReturn=rc)) return
+
+  allocate(larrayList1(localDeCount1))
+  call ESMF_ArrayGet(array1, larrayList=larrayList1, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
+          rcToReturn=rc)) return
+
+! call ESMF_ArrayGet(array1, distgrid=DistGrid1, rc=localrc)
+! if (ESMF_LogMsgFoundError(localrc,"error getting distgrid from array1",      &
+!         rcToReturn=rc)) return
+
+  call ESMF_DistGridGet(DistGrid1, dimCount=dimCount1, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
+          rcToReturn=rc)) return
+
+  !-----------------------------------------------------------------------------
+  ! get local array DE list from array2
+  !-----------------------------------------------------------------------------
+  call ESMF_ArrayGet(array2, localDeCount=localDeCount2, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
+          rcToReturn=rc)) return
+
+  ! check localDeCount for agreement
+  if( localDeCount1 /= localDeCount2 ) then
+     localrc = ESMF_FAILURE
+     call ESMF_LogMsgSetError(ESMF_FAILURE,"local De Counts do not agree",     &
+              rcToReturn=localrc)
+  endif
+
+  allocate(localDeList2(localDeCount2))
+  call ESMF_ArrayGet(array2, localDeList=localDeList2, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
+          rcToReturn=rc)) return
+
+  ! check localDeList for agreement
+  do de=1, localDeCount2
+  print*,' localDeCount check ',de
+     if( localDeList2(de) /= localDeList1(de) ) then
+        localrc = ESMF_FAILURE
+        call ESMF_LogMsgSetError(ESMF_FAILURE,"local De lists do not agree",   &
+                 rcToReturn=localrc)
+     endif
+     print*,' de , DeList 1 and 2 ',de,localDeList1(de),localDeList2(de)
+  enddo
+
+  ! get local De List
+  allocate(larrayList2(localDeCount2))
+  call ESMF_ArrayGet(array2, larrayList=larrayList2, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
+          rcToReturn=rc)) return
+
+! call ESMF_ArrayGet(array2, distgrid=DistGrid2, rc=localrc)
+! if (ESMF_LogMsgFoundError(localrc,"error getting distgrid from array2",      &
+!         rcToReturn=rc)) return
+
+  !-----------------------------------------------------------------------------
+  ! compare dimcounts for both arrays 
+  !-----------------------------------------------------------------------------
+  call ESMF_DistGridGet(DistGrid2, dimCount=dimCount2, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
+          rcToReturn=rc)) return
+  
+  ! check localDeCount for agreement
+  if( dimCount1 /= dimCount2 ) then
+     localrc = ESMF_FAILURE
+     call ESMF_LogMsgSetError(ESMF_FAILURE,"array 1 and 2 dimCounts disagree", &
+              rcToReturn=localrc)
+  endif
+
+  !-----------------------------------------------------------------------------
+  ! allocate bound arrays and extract exclusive bounds
+  !-----------------------------------------------------------------------------
+  allocate(UBnd(dimCount1, localDeCount1))
+  allocate(LBnd(dimCount1, localDeCount1))  
+
+  call ESMF_ArrayGet(array=array1, indexflag=indexflag,                        &
+           exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting exclusive bound range",     &
+          rcToReturn=rc)) return
+
+
+  allocate(UBnd2(dimCount2, localDeCount2))
+  allocate(LBnd2(dimCount2, localDeCount2))  
+
+  call ESMF_ArrayGet(array=array2, indexflag=indexflag,                        &
+           exclusiveLBound=LBnd2, exclusiveUBound=UBnd2, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting exclusive bound range",     &
+          rcToReturn=rc)) return
+
+  !-----------------------------------------------------------------------------
+  ! check for exclusive bound agreement 
+  !-----------------------------------------------------------------------------
+  do de=1, localDeCount1
+     do k=1,dimCount1
+        if( LBnd(k,de) /= LBnd2(k,de) ) then
+           print*,'exclusive Lower bounds disagree',LBnd(k,de),LBnd2(k,de) 
+           localrc = ESMF_FAILURE
+           call ESMF_LogMsgSetError(ESMF_FAILURE,"exclusive L bounds disagree",&
+              rcToReturn=localrc)
+        endif
+        if( UBnd(k,de) /= UBnd2(k,de) ) then
+           print*,'exclusive Upper bounds disagree',UBnd(k,de),UBnd2(k,de) 
+           localrc = ESMF_FAILURE
+           call ESMF_LogMsgSetError(ESMF_FAILURE,"exclusive U bounds disagree",&
+              rcToReturn=localrc)
+        endif
+     enddo
+  enddo
+  !-----------------------------------------------------------------------------
+  ! associate fortran pointers with the two local array objects and compare
+  ! entries
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  ! Memory Rank = Grid Rank, then there are no tensor dimensions
+  !-----------------------------------------------------------------------------
+  if( Memory%memRank ==  Memory%GridRank ) then
+
+     select case(dimCount1)
+     case(2)
+        !-----------------------------------------------------------------------
+        ! rank = 2
+        !-----------------------------------------------------------------------
+        do de=1, localDeCount1
+           fsize(1) = UBnd(1,de)-LBnd(1,de)+1
+           fsize(2) = UBnd(2,de)-LBnd(2,de)+1
+           print*,de,' size ',fsize(1),fsize(2)
+           allocate( farray2D(fsize(1),fsize(2)), stat=alloc_test )
+           if (ESMF_LogMsgFoundAllocError(alloc_test, "integer array",         &
+                                   rcToReturn=rc)) then
+           endif
+           allocate( rarray2D(fsize(1),fsize(2)) )
+
+           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray2D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                  "array1 list", rcToReturn=rc)) return
+
+           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray2D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array2 list", rcToReturn=rc)) return
+
+          print*,' bounds L/U for ',LBnd(1,de),UBnd(1,de),' / ',LBnd(2,de),UBnd(2,de)
+           do i1=LBnd(1,de), UBnd(1,de)
+             do i2=LBnd(2,de), UBnd(2,de)
+               if( farray2D(i1,i2) /= rarray2D(i1,i2) ) then
+                 print*,' arrays disagree ',i1,i2,farray2D(i1,i2),             &
+                        rarray2D(i1,i2)
+               endif
+             enddo   !   i2
+           enddo    !   i1
+           print*,"deallocate local arrays - move on to next de"
+           print*,'    '
+           deallocate( farray2D, rarray2D )
+        enddo    ! de
+     case default
+        ! error
+        localrc = ESMF_FAILURE
+        call ESMF_LogMsgSetError(ESMF_FAILURE,"DimCount not between 1 and 7",  &
+                 rcToReturn=localrc)
+     end select
+
+  !-----------------------------------------------------------------------------
+  ! Memory Rank > Grid Rank, then there are MemRank-GridRank tensor dimensions
+  !-----------------------------------------------------------------------------
+  elseif( Memory%memRank >  Memory%GridRank ) then
+! ---------
+  endif
+
+  print*,'clean up'
+  !-----------------------------------------------------------------------------
+  ! clean up allocated arrays
+  !-----------------------------------------------------------------------------
+  deallocate(larrayList1, larrayList2)
+  deallocate(localDeList1, localDeList2)
+  deallocate(LBnd, UBnd)
+  deallocate( LBnd2, UBnd2 )
+  print*,' compare deallocation complete'
+
+  !-----------------------------------------------------------------------------
+  rc = ESMF_SUCCESS     
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  end subroutine compare_redist_array 
   !-----------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
