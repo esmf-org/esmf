@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.12 2008/06/04 22:54:05 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.13 2008/07/15 18:39:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.12 2008/06/04 22:54:05 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.13 2008/07/15 18:39:49 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -357,12 +357,12 @@
 }  // end ESMC_AttPackSet()
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttPackWrite"
+#define ESMC_METHOD "ESMC_AttPackWriteTab"
 //BOPI
-// !IROUTINE:  ESMC_AttPackWrite - Print contents of an attribute package
+// !IROUTINE:  ESMC_AttPackWriteTab - Print contents of an attribute package
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttPackWrite(
+      int ESMC_Attribute::ESMC_AttPackWriteTab(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -371,8 +371,9 @@
       char *convention,        //  in - convention
       char *purpose,           //  in - purpose
       char *object,            //  in - object
+      char *varobj,            //  in - variable object
       char *basename,          //  in - basename
-      int count) const {       //  in - count  
+      int &count) {            //  in - count  
 //
 // !DESCRIPTION:
 //    Print the contents of an attribute package.  Expected to be
@@ -403,10 +404,10 @@
     ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     ++count;
   }
-    
+
   if (strcmp(convention,attrConvention) == 0 && 
       strcmp(purpose,attrPurpose) == 0 &&
-      strcmp(object,attrObject) == 0) {
+      strcmp(varobj,attrObject) == 0) {
       if(strcmp("shortname",attrName) == 0)
         tlen = slen;
       else if(strcmp("longname",attrName) == 0)
@@ -442,7 +443,7 @@
       //}
   }
   for(int i=0;  i<attrCount; i++) {
-      attrList[i]->ESMC_AttPackWrite(convention,purpose,object,basename,++count);
+      attrList[i]->ESMC_AttPackWriteTab(convention,purpose,object,varobj,basename,count);
   }
 
 /*
@@ -466,7 +467,139 @@
   
   return ESMF_SUCCESS;
 
- } // end ESMC_AttPackWrite
+ } // end ESMC_AttPackWriteTab
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttPackWriteXML"
+//BOPI
+// !IROUTINE:  ESMC_AttPackWriteXML - Print contents of an attribute package
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_AttPackWriteXML(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *convention,        //  in - convention
+      char *purpose,           //  in - purpose
+      char *object,            //  in - object
+      char *varobj,            //  in - variable object
+      char *basename,          //  in - basename
+      int stop,                //  in - number of objects to write
+      int &fldcount,           //  in - field count
+      int &hdrcount) {         //  in - header count  
+//
+// !DESCRIPTION:
+//    Print the contents of an attribute package.  Expected to be
+//    called internally from the object-specific print routines.
+//
+//EOPI
+
+  char msgbuf[ESMF_MAXSTR];
+  int localrc;
+  int stopnum = 0;
+  
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // write the header
+  if (hdrcount == 0) {
+    sprintf(msgbuf,"\n\n<model_component xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
+    printf(msgbuf);
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    sprintf(msgbuf,"xsi:schemaLocation=\"http://www.esmf.ucar.edu file:/esmf_model_component.xsd\"\n");
+    printf(msgbuf);
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    sprintf(msgbuf,"xmlns=\"http://www.esmf.ucar.edu\" name=%s>\n\n",basename);
+    printf(msgbuf);
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    ++hdrcount;
+    
+    localrc = ESMC_AttributeCountTree(convention, purpose, varobj, stopnum);
+    stop = stopnum;
+  }  
+
+  // write the component level information
+  if (strcmp(convention,attrConvention) == 0 && 
+      strcmp(purpose,attrPurpose) == 0 &&
+      strcmp(object,attrObject) == 0) {
+    for (int i=0;  i<attrCount; i++) { 
+      printf("<%s>\n",attrList[i]->attrName);
+      if (attrList[i]->items == 1) {
+        if (attrList[i]->tk == ESMC_TYPEKIND_I4)
+          sprintf(msgbuf, "  <%s=\"%d\" />\n",attrList[i]->attrName,attrList[i]->vi);
+        else if (attrList[i]->tk == ESMC_TYPEKIND_I8) 
+          sprintf(msgbuf, "  <%s=\"%ld\" />\n",attrList[i]->attrName,attrList[i]->vtl); 
+        else if (attrList[i]->tk == ESMC_TYPEKIND_R4) 
+          sprintf(msgbuf, "  <%s=\"%f\" />\n",attrList[i]->attrName,attrList[i]->vf);  
+        else if (attrList[i]->tk == ESMC_TYPEKIND_R8) 
+          sprintf(msgbuf, "  <%s=\"%g\" />\n",attrList[i]->attrName,attrList[i]->vd);  
+        else if (attrList[i]->tk == ESMC_TYPEKIND_LOGICAL) 
+          sprintf(msgbuf, "  <%s=\"%s\" />\n",attrList[i]->attrName,ESMC_LogicalString(attrList[i]->vb));
+        else if (attrList[i]->tk == ESMC_TYPEKIND_CHARACTER)
+          sprintf(msgbuf, "  <%s=\"%s\" />\n",attrList[i]->attrName,attrList[i]->vcp);
+        else {
+          sprintf(msgbuf, "  <%s=\"%s\" />\n",attrList[i]->attrName,"N/A");
+        }
+        printf(msgbuf);
+        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      }
+    printf("<%s/>\n\n",attrList[i]->attrName);
+    }
+  }
+  
+  // write the field level information
+  if (strcmp(convention,attrConvention) == 0 && 
+      strcmp(purpose,attrPurpose) == 0 &&
+      strcmp(varobj,attrObject) == 0 &&
+      strncmp("Attribute Package",attrName,17) == 0) {
+    if (fldcount == 0) printf("<variables>\n");
+    for (int i=0;  i<attrCount; i++) { 
+      if (attrList[i]->items == 1) {
+        if (i == 0) printf("  <variable ");
+        if (attrList[i]->tk == ESMC_TYPEKIND_I4)
+          sprintf(msgbuf, "%s=\"%d\" ",attrList[i]->attrName,attrList[i]->vi);
+        else if (attrList[i]->tk == ESMC_TYPEKIND_I8) 
+          sprintf(msgbuf, "%s=\"%ld\" ",attrList[i]->attrName,attrList[i]->vtl); 
+        else if (attrList[i]->tk == ESMC_TYPEKIND_R4) 
+          sprintf(msgbuf, "%s=\"%f\" ",attrList[i]->attrName,attrList[i]->vf);  
+        else if (attrList[i]->tk == ESMC_TYPEKIND_R8) 
+          sprintf(msgbuf, "%s=\"%g\" ",attrList[i]->attrName,attrList[i]->vd);  
+        else if (attrList[i]->tk == ESMC_TYPEKIND_LOGICAL) 
+          sprintf(msgbuf, "%s=\"%s\" ",attrList[i]->attrName,ESMC_LogicalString(attrList[i]->vb));
+        else if (attrList[i]->tk == ESMC_TYPEKIND_CHARACTER)
+          sprintf(msgbuf, "%s=\"%s\" ",attrList[i]->attrName,attrList[i]->vcp);
+        else {
+          sprintf(msgbuf, "%s=\"%s\" ",attrList[i]->attrName,"N/A");
+        }
+        printf(msgbuf);
+        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      }
+    }
+    printf(" />\n");
+    fldcount++;
+    if (fldcount == stop) {
+      printf("</variables>\n");
+      fldcount++;
+    }
+  }
+  
+  // write the footer (using the fldcount+1 for now to show all fields written)
+  if (fldcount == stop+1) {
+    printf("\n</model_component>\n");
+    fldcount++;
+  }
+  
+  // recurse through the Attribute hierarchy
+  for(int i=0;  i<attrCount; i++) {
+      attrList[i]->ESMC_AttPackWriteXML(convention,purpose,object,varobj,basename,
+        stop,fldcount,hdrcount);
+  }
+
+  return ESMF_SUCCESS;
+
+ } // end ESMC_AttPackWriteXML
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeAlloc"
@@ -543,6 +676,48 @@
   return ESMF_SUCCESS;
 
 }  // end ESMC_AttributeCopyAll
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeCountTree"
+//BOP
+// !IROUTINE:  ESMC_AttributeCountTree - count objects in hierarchy 
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_AttributeCountTree(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *convention,              // in - convention
+      char *purpose,                 // in - purpose
+      char *object,                  // in - object type to look for
+      int &ans) {                    // inout - the count
+// 
+// !DESCRIPTION:
+//     Count the number of objects in the Attribute hierarchy 
+
+//EOP
+
+  int rc;
+
+  // Initialize local return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  
+  if (strcmp(convention,attrConvention) == 0 && 
+      strcmp(purpose,attrPurpose) == 0 &&
+      strcmp(object,attrObject) == 0 &&
+      strncmp("Attribute Package",attrName,17) == 0) {
+    ans++;
+  }
+  
+  for (int i = 0; i < attrCount; i++) { 
+    rc = attrList[i]->ESMC_AttributeCountTree(convention, purpose, object, ans);
+  }
+  
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeCountTree
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeGet"

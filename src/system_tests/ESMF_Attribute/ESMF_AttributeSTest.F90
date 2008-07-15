@@ -271,7 +271,7 @@ program ESMF_AttributeSTest
   ! write out some Attribute info
   if (localPet .eq. 0) then
     call ESMF_AttributeWrite(comp1,conv,purp,attwriteflag=ESMF_ATTWRITE_TAB,rc=rc)
-    call ESMF_AttributeWrite(comp2,conv,purp,attwriteflag=ESMF_ATTWRITE_TAB,rc=rc)
+    call ESMF_AttributeWrite(comp2,conv,purp,attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)  

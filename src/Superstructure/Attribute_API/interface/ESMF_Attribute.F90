@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.18 2008/07/13 22:57:39 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.19 2008/07/15 18:40:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.18 2008/07/13 22:57:39 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.19 2008/07/15 18:40:52 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -3504,7 +3504,7 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject, ftarobj
       type(ESMF_AttWriteFlag) :: writeflag
 
       ! Initialize return code; assume failure until success is certain
@@ -3531,6 +3531,7 @@ contains
       endif
       
       fobject = 'array'
+      ftarobj = 'array'
 
       if (present(attwriteflag)) then
         writeflag = attwriteflag
@@ -3539,14 +3540,14 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWrite(array, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteTab(array, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWrite(array, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteXML(array, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -6469,9 +6470,9 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject, ftarobj
       type(ESMF_AttWriteFlag) :: writeflag
-
+      
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -6495,7 +6496,8 @@ contains
         fpurpose = 'N/A'
       endif
       
-      fobject = 'field'
+      fobject = 'comp'
+      ftarobj = 'field'
 
       if (present(attwriteflag)) then
         writeflag = attwriteflag
@@ -6504,14 +6506,14 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteTab(comp%compp%base, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteXML(comp%compp%base, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -9433,7 +9435,7 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject, ftarobj
       type(ESMF_AttWriteFlag) :: writeflag
 
       ! Initialize return code; assume failure until success is certain
@@ -9459,7 +9461,8 @@ contains
         fpurpose = 'N/A'
       endif
       
-      fobject = 'field'
+      fobject = 'comp'
+      ftarobj = 'field'
 
       if (present(attwriteflag)) then
         writeflag = attwriteflag
@@ -9468,14 +9471,14 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteTab(comp%compp%base, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWrite(comp%compp%base, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteXML(comp%compp%base, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -12175,7 +12178,7 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject, ftarobj
       type(ESMF_AttWriteFlag) :: writeflag
 
       ! Initialize return code; assume failure until success is certain
@@ -12202,6 +12205,7 @@ contains
       endif
       
       fobject = 'field'
+      ftarobj = 'field'
 
       if (present(attwriteflag)) then
         writeflag = attwriteflag
@@ -12210,14 +12214,14 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWrite(field%ftypep%base, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteTab(field%ftypep%base, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWrite(field%ftypep%base, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteXML(field%ftypep%base, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -14971,7 +14975,7 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject, ftarobj
       type(ESMF_AttWriteFlag) :: writeflag
 
       ! Initialize return code; assume failure until success is certain
@@ -14997,7 +15001,8 @@ contains
         fpurpose = 'N/A'
       endif
       
-      fobject = 'field'
+      fobject = 'fieldbundle'
+      ftarobj = 'field'
 
       if (present(attwriteflag)) then
         writeflag = attwriteflag
@@ -15006,14 +15011,14 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWrite(fieldbundle%btypep%base, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteTab(fieldbundle%btypep%base, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWrite(fieldbundle%btypep%base, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteXML(fieldbundle%btypep%base, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -17713,7 +17718,7 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject, ftarobj
       type(ESMF_AttWriteFlag) :: writeflag
 
       ! Initialize return code; assume failure until success is certain
@@ -17735,6 +17740,7 @@ contains
       endif
       
       fobject = 'grid'
+      ftarobj = 'grid'
 
       if (present(attwriteflag)) then
         writeflag = attwriteflag
@@ -17743,14 +17749,14 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWrite(grid, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteTab(grid, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWrite(grid, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteXML(grid, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -20714,7 +20720,7 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject, ftarobj
       type(ESMF_AttWriteFlag) :: writeflag
 
       ! Initialize return code; assume failure until success is certain
@@ -20740,8 +20746,9 @@ contains
         fpurpose = 'N/A'
       endif
       
-      fobject = 'field'
-      
+      fobject = 'state'
+      ftarobj = 'field'
+
       if (present(attwriteflag)) then
         writeflag = attwriteflag
       else
@@ -20749,14 +20756,14 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWrite(state%statep%base, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteTab(state%statep%base, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWrite(state%statep%base, fconvention, &
-          fpurpose, fobject, localrc)
+        call c_ESMC_AttPackWriteXML(state%statep%base, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.8 2008/06/04 22:54:05 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.9 2008/07/15 18:39:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.8 2008/06/04 22:54:05 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.9 2008/07/15 18:39:49 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -54,6 +54,9 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN(c_esmc_attpackcreate)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackcreate()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -171,6 +174,9 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN(c_esmc_attpackgetchar)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackgetchar()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -314,6 +320,9 @@ extern "C" {
 // !INTERFACE:
       void FTN(c_esmc_attpackgetvalue)(
 //
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackgetvalue()"
+//
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
 // 
@@ -456,6 +465,9 @@ extern "C" {
 // !INTERFACE:
       void FTN(c_esmc_attpacksetchar)(
 //
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpacksetchar()"
+//
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
 // 
@@ -591,6 +603,9 @@ extern "C" {
 // !INTERFACE:
       void FTN(c_esmc_attpacksetvalue)(
 //
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpacksetvalue()"
+//
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
 // 
@@ -705,10 +720,13 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attpackwrite - Setup the attribute package
+// !IROUTINE:  c_ESMC_attpackwritetab - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackwrite)(
+      void FTN(c_esmc_attpackwritetab)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackwritetab()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -718,10 +736,12 @@ extern "C" {
       char *convention,          // in - convention
       char *purpose,             // in - purpose
       char *object,              // in - object type
+      char *targetobj,           // in - target object for writing
       int *rc,                   // in - return code
       int clen,                  // hidden/in - strlen count for convention
       int plen,                  // hidden/in - strlen count for purpose           
-      int olen) {                // hidden/in - strlen count for object
+      int olen,                  // hidden/in - strlen count for object
+      int tlen) {                // hidden/in - strlen count for target object
 // 
 // !DESCRIPTION:
 //     Associate a convention, purpose, and object type with an attribute package
@@ -729,7 +749,8 @@ extern "C" {
 //EOP
 
   int status;
-  char *cconv, *cpurp, *cobj;
+  char *cconv, *cpurp, *cobj, *ctarobj;
+  int temp = 0;
   
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -763,6 +784,14 @@ extern "C" {
       return;
   }
 
+  // simple sanity check before doing any more work
+  if ((!targetobj) || (tlen <= 0) || (targetobj[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
   // copy and convert F90 string to null terminated one
   cconv = ESMC_F90toCstring(convention, clen);
   if (!cconv) {
@@ -790,16 +819,148 @@ extern "C" {
       return;
   }
 
+  // copy and convert F90 string to null terminated one
+  ctarobj = ESMC_F90toCstring(targetobj, tlen);
+  if (!ctarobj) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
   // Set the attribute on the object.
-  *rc = (**base).root.ESMC_AttPackWrite(cconv, cpurp, cobj, 
-    (*base)->ESMC_Base::ESMC_BaseGetName(), 0);
+  *rc = (**base).root.ESMC_AttPackWriteTab(cconv, cpurp, cobj, ctarobj,
+    (*base)->ESMC_Base::ESMC_BaseGetName(), temp);
 
   delete [] cconv;
   delete [] cpurp;
   delete [] cobj;
+  delete [] ctarobj;
   return;
 
-}  // end c_ESMC_attpackwrite
+}  // end c_ESMC_attpackwritetab
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_attpackwritexml - Setup the attribute package
+//
+// !INTERFACE:
+      void FTN(c_esmc_attpackwritexml)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackwritexml()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,          // in/out - base object
+      char *convention,          // in - convention
+      char *purpose,             // in - purpose
+      char *object,              // in - object type
+      char *targetobj,           // in - target object for writing
+      int *rc,                   // in - return code
+      int clen,                  // hidden/in - strlen count for convention
+      int plen,                  // hidden/in - strlen count for purpose           
+      int olen,                  // hidden/in - strlen count for object
+      int tlen) {                // hidden/in - strlen count for target object
+// 
+// !DESCRIPTION:
+//     Associate a convention, purpose, and object type with an attribute package
+//
+//EOP
+
+  int status;
+  char *cconv, *cpurp, *cobj, *ctarobj;
+  int temp1 = 0, temp2 = 0, stop = 0;
+  
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!targetobj) || (tlen <= 0) || (targetobj[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute target object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cconv = ESMC_F90toCstring(convention, clen);
+  if (!cconv) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cpurp = ESMC_F90toCstring(purpose, plen);
+  if (!cpurp) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cobj = ESMC_F90toCstring(object, olen);
+  if (!cobj) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  ctarobj = ESMC_F90toCstring(targetobj, tlen);
+  if (!ctarobj) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Set the attribute on the object.
+  *rc = (**base).root.ESMC_AttPackWriteXML(cconv, cpurp, cobj, ctarobj, 
+    (*base)->ESMC_Base::ESMC_BaseGetName(), stop, temp1, temp2);
+
+  delete [] cconv;
+  delete [] cpurp;
+  delete [] cobj;
+  delete [] ctarobj;
+  return;
+
+}  // end c_ESMC_attpackwritexml
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -807,6 +968,9 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN(c_esmc_attributecopyall)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributecopyall()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -848,6 +1012,9 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN(c_esmc_attributegetchar)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributegetchar()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -940,6 +1107,9 @@ extern "C" {
 // !INTERFACE:
       void FTN(c_esmc_attributegetvalue)(
 //
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributegetvalue()"
+//
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
 // 
@@ -1030,6 +1200,9 @@ extern "C" {
 // !INTERFACE:
       void FTN(c_esmc_attributegetinfoname)(
 //
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributegetinfoname()"
+//
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
 // 
@@ -1096,6 +1269,9 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN(c_esmc_attributegetinfonum)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributegetinfonum()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1166,6 +1342,9 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
 // !INTERFACE:
       void FTN(c_esmc_attributegetcount)(
 //
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributegetcount()"
+//
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
 // 
@@ -1209,6 +1388,9 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
 //
 // !INTERFACE:
       void FTN(c_esmc_attributesetchar)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributesetchar()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1286,6 +1468,9 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
 // !INTERFACE:
       void FTN(c_esmc_attributesetvalue)(
 //
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributesetvalue()"
+//
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
 // 
@@ -1348,6 +1533,9 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
 // !INTERFACE:
       void FTN(c_esmc_attributesetlink)(
 //
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributesetlink()"
+//
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
 // 
@@ -1382,5 +1570,7 @@ if (rc) *rc = ESMF_RC_NOT_IMPL;
   return;
 
 }  // end c_ESMC_AttributeSetLink
+
+#undef  ESMC_METHOD
 
 } // extern "C"
