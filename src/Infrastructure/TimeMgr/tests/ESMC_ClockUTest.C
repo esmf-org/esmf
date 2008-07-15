@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockUTest.C,v 1.10 2008/07/12 00:01:57 rosalind Exp $
+// $Id: ESMC_ClockUTest.C,v 1.11 2008/07/15 00:35:04 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.10 2008/07/12 00:01:57 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.11 2008/07/15 00:35:04 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -241,6 +241,10 @@
 
 #endif
 */
+
+  //----------------------------------------------------------------------------
+  ESMC_TestEnd(result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
 
    // return number of failures to environment; 0 = success (all pass)
    printf("result = %d\n",result);
