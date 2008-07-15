@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2008/07/14 17:33:01 feiliu Exp $ 
+# $Id: makefile,v 1.2 2008/07/15 16:18:31 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -40,6 +40,6 @@ CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 
-RUN_ArrayRedist:
+RUN_ArrayRedist3D:
 	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=ArrayRedist3D NP=8 stest
 
