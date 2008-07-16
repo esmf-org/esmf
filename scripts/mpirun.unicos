@@ -1,11 +1,29 @@
 #!/bin/ksh
-# $Id: mpirun.unicos,v 1.5 2007/03/14 17:11:35 theurich Exp $
-# This script provides an interface such that the simple command
-# mpirun -np # runs # copies of the program in parallel.
+# $Id: mpirun.unicos,v 1.5.2.1 2008/07/16 00:19:15 theurich Exp $
+################################################################################
+# This script abides to the ESMF script rules for executing the bundled test 
+# and example applications.
+#
+# 1) <this_script> -np N prog
+#    runs N copies of executable "prog" in parallel. The script must hide all
+#    of the system specific details, such as going through a queueing system
+#    and/or calling a system specific mpirun script with modified arguments.
+#
+# 2) The output of the script must be written to a file named "prog".stdout and
+#    it must contain the combination of stdout and stderr output of the
+#    execution.
+#
+# 3) The script must block, i.e. _not_ return, until the output described in #2
+#    has become accessible.
+#
+# To access this script set environment variable ESMF_MPIRUN=<this_script> in
+# your shell before executing any of the ESMF run targets or targets that 
+# call run targets indirectly, such as the all_tests.
+################################################################################
 
 if [ "$1" != "-np" ] 
 then
-        echo "Usage: mpirun -np #"
+        echo "Usage: mpirun -np # prog"
         exit 1
 fi
 
@@ -13,6 +31,6 @@ num_procs=$2
 shift 2
 prog=$*
 
-aprun $ESMF_MPIRUNOPTIONS -n $num_procs $prog
+aprun $ESMF_MPILAUNCHOPTIONS -n $num_procs $prog
 
 

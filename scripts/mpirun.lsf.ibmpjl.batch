@@ -1,10 +1,25 @@
 #!/bin/ksh
+# $Id: mpirun.lsf.ibmpjl.batch,v 1.2.2.1 2008/07/16 00:19:15 theurich Exp $
+################################################################################
+# This script abides to the ESMF script rules for executing the bundled test 
+# and example applications.
 #
-# $Id: mpirun.lsf.ibmpjl.batch,v 1.2 2007/01/17 23:31:37 svasquez Exp $
+# 1) <this_script> -np N prog
+#    runs N copies of executable "prog" in parallel. The script must hide all
+#    of the system specific details, such as going through a queueing system
+#    and/or calling a system specific mpirun script with modified arguments.
 #
-# This script provides an interface such that the simple command
-# mpirun -np # 
-# runs # copies of the program in parallel.
+# 2) The output of the script must be written to a file named "prog".stdout and
+#    it must contain the combination of stdout and stderr output of the
+#    execution.
+#
+# 3) The script must block, i.e. _not_ return, until the output described in #2
+#    has become accessible.
+#
+# To access this script set environment variable ESMF_MPIRUN=<this_script> in
+# your shell before executing any of the ESMF run targets or targets that 
+# call run targets indirectly, such as the all_tests.
+################################################################################
 #
 # This script submits a job through LSF and then interfaces with
 # IBM's mpirun.lsf which is IBM's unified PJL (parallel job launcher)
@@ -14,7 +29,7 @@
 
 if [ "$1" != "-np" ] 
 then
-	echo "Usage: mpirun -np #"
+	echo "Usage: mpirun -np # prog"
 	exit 1
 fi
 
@@ -24,9 +39,9 @@ shift 2
 
 prog=$*
 
-echo executing: bsub $ESMF_BATCHOPTIONS -n $num_procs -oo outfile  \"mpirun.lsf ${prog}\"
+echo executing: bsub $ESMF_MPIBATCHOPTIONS -n $num_procs -oo outfile  \"mpirun.lsf ${prog}\"
 
-bsub $ESMF_BATCHOPTIONS  -n $num_procs -oo outfile "mpirun.lsf ${prog}" 
+bsub $ESMF_MPIBATCHOPTIONS  -n $num_procs -oo outfile "mpirun.lsf ${prog}" 
 
 # Wait for the outfile to be available.
 sleep 30

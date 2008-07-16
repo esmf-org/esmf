@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.31 2007/05/01 21:13:35 dneckels Exp $
+# $Id: build_rules.mk,v 1.31.2.1 2008/07/16 00:19:10 theurich Exp $
 # 
 # IRIX64.default.default
 #
@@ -35,7 +35,7 @@ ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
 ESMF_F90LINKLIBS       += -lmpi++ -lmpi
 ESMF_CXXLINKLIBS       += -lmpi++ -lmpi
-ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------

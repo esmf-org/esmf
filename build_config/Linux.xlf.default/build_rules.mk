@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.13 2006/10/23 18:12:27 theurich Exp $
+# $Id: build_rules.mk,v 1.13.2.1 2008/07/16 00:19:13 theurich Exp $
 #
 # Linux.xlf.default
 #
@@ -29,10 +29,8 @@ else
 ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
 ESMF_F90DEFAULT         = mpxlf90
-ESMF_F90LINKLIBS       += 
 ESMF_CXXDEFAULT         = mpxlC
-ESMF_CXXLINKLIBS       += 
-ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.cqsub
+ESMF_MPIRUNDEFAULT      = mpirun.cqsub
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------

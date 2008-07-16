@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.12 2007/03/14 04:02:13 theurich Exp $
+# $Id: build_rules.mk,v 1.12.2.1 2008/07/16 00:19:14 theurich Exp $
 # 
 # Unicos.default.default
 #
@@ -31,10 +31,7 @@ ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
 ESMF_F90LINKLIBS       += -lmpi
 ESMF_CXXLINKLIBS       += -lmpi
-ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.unicos
-ifeq ($(ESMF_BATCH),unicos.batch)
-ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.unicos.batch
-endif
+ESMF_MPIRUNDEFAULT      = mpirun.unicos
 ESMF_MPIMPMDRUNDEFAULT  =
 else
 ifeq ($(ESMF_COMM),user)

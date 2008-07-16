@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201.2.18 2008/04/28 21:08:43 cdeluca Exp $
+#  $Id: common.mk,v 1.201.2.19 2008/07/16 00:19:06 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -98,6 +98,14 @@ endif
 
 ifeq ($(origin ESMF_EXHAUSTIVE), environment)
 $(error Obsolete environment variable ESMF_EXHAUSTIVE detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
+endif
+
+ifeq ($(origin ESMF_BATCH), environment)
+$(error Obsolete environment variable ESMF_BATCH detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
+endif
+
+ifeq ($(origin ESMF_BATCHOPTIONS), environment)
+$(error Obsolete environment variable ESMF_BATCHOPTIONS detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 ifeq ($(origin MPI_HOME), environment)
@@ -686,6 +694,11 @@ endif
 #  with =, but should be appended to if neeeded with +=
 #-------------------------------------------------------------------------------
 
+
+#-------------------------------------------------------------------------------
+# Set the correct MPIRUN command with appropriate options
+#-------------------------------------------------------------------------------
+ESMF_MPIRUN := $(shell $(ESMF_DIR)/scripts/mpirun.command $(ESMF_DIR)/scripts $(ESMF_MPIRUN) $(ESMF_MPISCRIPTOPTIONS))
 
 #-------------------------------------------------------------------------------
 # For convenience ESMF_NETCDF_INCLUDE and ESMF_NETCDF_LIBPATH variables are 

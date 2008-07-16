@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.29.2.6 2008/06/12 17:45:24 theurich Exp $
+# $Id: build_rules.mk,v 1.29.2.7 2008/07/16 00:19:13 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -33,50 +33,38 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lpmpich++ -lmpich
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_CXXLINKLIBS       += -lmpich
-ESMF_MPIRUNDEFAULT      = mpirun
-ifeq ($(ESMF_BATCH),lsf.ibmpjl)
-ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
-endif
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
-ESMF_MPIRUNDEFAULT      = mpirun
-ifeq ($(ESMF_BATCH),sge.batch)
-ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.sge.batch
-else
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 endif
 else
 ifeq ($(ESMF_COMM),scalimpi)
 # scaliMPI -------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpic++
-ESMF_MPIRUNDEFAULT      = mpirun
-ifeq ($(ESMF_BATCH),scali.batch)
-ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.scali.batch
-endif
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with pgf90) ---------------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
-ESMF_MPIRUNDEFAULT      = mpirun
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec
-ifeq ($(ESMF_BATCH),lsf.ibmpjl)
-ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/scripts/mpirun.lsf.ibmpjl
-endif
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
-ESMF_MPIRUNDEFAULT      = mpirun
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
