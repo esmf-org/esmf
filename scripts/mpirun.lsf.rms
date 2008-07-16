@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.lsf.rms,v 1.2.2.1 2008/07/16 00:19:15 theurich Exp $
+# $Id: mpirun.lsf.rms,v 1.2.2.2 2008/07/16 22:13:56 theurich Exp $
 ################################################################################
 # This script abides to the ESMF script rules for executing the bundled test 
 # and example applications.
@@ -9,12 +9,8 @@
 #    of the system specific details, such as going through a queueing system
 #    and/or calling a system specific mpirun script with modified arguments.
 #
-# 2) The output of the script must be written to a file named "prog".stdout and
-#    it must contain the combination of stdout and stderr output of the
-#    execution.
-#
-# 3) The script must block, i.e. _not_ return, until the output described in #2
-#    has become accessible.
+# 2) The output of the application must arrive at the calling shell via 
+#    stdout and stderr.
 #
 # To access this script set environment variable ESMF_MPIRUN=<this_script> in
 # your shell before executing any of the ESMF run targets or targets that 
