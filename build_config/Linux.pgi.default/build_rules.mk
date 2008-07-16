@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.29.2.7 2008/07/16 00:19:13 theurich Exp $
+# $Id: build_rules.mk,v 1.29.2.8 2008/07/16 17:27:57 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -41,7 +41,6 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-endif
 else
 ifeq ($(ESMF_COMM),scalimpi)
 # scaliMPI -------------------------------------------------
