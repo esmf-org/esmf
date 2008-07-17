@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldBundleGetMacros.h,v 1.1.2.3 2008/05/06 17:54:36 cdeluca Exp $
+! $Id: ESMF_FieldBundleGetMacros.h,v 1.1.2.4 2008/07/17 21:04:01 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,

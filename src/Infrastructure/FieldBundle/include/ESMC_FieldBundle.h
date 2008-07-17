@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldBundle.h,v 1.1.2.2 2008/04/05 03:12:42 cdeluca Exp $
+// $Id: ESMC_FieldBundle.h,v 1.1.2.3 2008/07/17 21:03:58 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 

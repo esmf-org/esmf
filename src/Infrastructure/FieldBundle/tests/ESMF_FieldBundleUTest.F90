@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.1.2.7 2008/05/16 21:09:30 feiliu Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.1.2.8 2008/07/17 21:04:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.1.2.7 2008/05/16 21:09:30 feiliu Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.1.2.8 2008/07/17 21:04:06 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -243,17 +243,16 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_remove_UTest
+      !EX_UTest
       ! Test Requirement Creating a FieldBundle with ESMF_PACKED_DATA option
       ! The ESMF_PACKED_DATA option is not implemented and until it is, it
       ! is correct for the method to return ESMF_RC_NOT_IMPL when it is used.
-!      write(failMsg, *) "Did not return ESMF_RC_NOT_IMPL"
-!      bundle4 = ESMF_FieldBundleCreate(3, fields, ESMF_PACKED_DATA, &
-!      			name="atmosphere data", rc=rc)
-!      write(name, *) "Creating FieldBundle with ESMF_PACKED_DATA"
-!      call ESMF_Test((rc.eq.ESMF_RC_NOT_IMPL), name, failMsg, result, ESMF_SRCLINE)
-!      print *, "rc = ", rc
-!      call ESMF_FieldBundleDestroy(bundle4)
+      write(failMsg, *) "Did not return ESMF_RC_NOT_IMPL"
+      bundle4 = ESMF_FieldBundleCreate(3, fields, ESMF_PACKED_DATA, &
+      			name="atmosphere data", rc=rc)
+      write(name, *) "Creating FieldBundle with ESMF_PACKED_DATA"
+      call ESMF_Test((rc.eq.ESMF_RC_NOT_IMPL), name, failMsg, result, ESMF_SRCLINE)
+      print *, "rc = ", rc
       !------------------------------------------------------------------------
 
       !EX_UTest

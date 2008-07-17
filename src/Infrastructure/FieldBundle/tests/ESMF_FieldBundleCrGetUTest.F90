@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.1.2.5 2008/05/06 17:54:37 cdeluca Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.1.2.6 2008/07/17 21:04:03 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -141,6 +141,11 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
+        call serialize_bundle(bundle, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
         call ESMF_FieldBundleDestroy(bundle, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -168,7 +173,6 @@ contains
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray4
         type(ESMF_Field)    :: f1, f2, f3, f4, f5
         type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)  :: array8, array
         integer           :: i, j, localrc
         logical           :: ldo_slicing = .false.
         logical           :: ldo_slicing1 = .false.
@@ -273,9 +277,6 @@ contains
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray4
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray5
         type(ESMF_Field)    :: f1, f2, f3, f4, f5
-        type(ESMF_Grid)     :: grid
-        type(ESMF_DistGrid) :: distgrid
-        type(ESMF_Array)  :: array8, array
         integer           :: fc, i, j, localrc
         logical           :: ldo_slicing = .false.
         logical           :: ldo_slicing1 = .false.
@@ -410,5 +411,51 @@ contains
                 ESMF_CONTEXT, rc)) return
 
     end subroutine retrieve_bundle_dataptr
+
+    subroutine serialize_bundle(bundle, rc)
+        ! inout variables
+        type(ESMF_FieldBundle)                      :: bundle
+        integer, optional                           :: rc
+
+        ! local variables
+        type(ESMF_FieldBundle)                      :: bundle1
+        type(ESMF_VM)                               :: vm
+
+        integer(ESMF_KIND_I4), pointer              :: buffer(:)
+        integer                                     :: length, offset, localrc
+
+        localrc = ESMF_SUCCESS
+        rc = ESMF_SUCCESS
+
+        length = 102400
+        offset = 0
+        allocate(buffer(length))
+
+        call ESMF_VMGetCurrent(vm, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! call serialize and deserialize and verify again
+        call ESMF_FieldBundleSerialize(bundle, buffer, length, offset, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        offset = 0
+
+        bundle1 = ESMF_FieldBundleDeserialize(vm, buffer, offset, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldBundleValidate(bundle1, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        if(present(rc)) rc = ESMF_SUCCESS
+    end subroutine serialize_bundle
+
 end program ESMF_FieldBundleCrGetUTest
 
