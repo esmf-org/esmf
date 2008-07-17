@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockUTest.C,v 1.11 2008/07/15 00:35:04 rosalind Exp $
+// $Id: ESMC_ClockUTest.C,v 1.12 2008/07/17 16:41:56 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,11 +40,11 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.11 2008/07/15 00:35:04 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.12 2008/07/17 16:41:56 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
- int main(int argc, char *argv[])
+ int main(void)
  {
    // cumulative result: count failures; no failures equals "all pass"
    int result = 0;
@@ -75,6 +75,11 @@
   ESMC_CalendarType calType1=ESMC_CAL_GREGORIAN;
   int tZ1=-6;
   const ESMC_I4 one=1;
+  ESMC_TimeInterval currSimTime;
+  ESMC_I8 advanceCount, advanceCount1;
+  ESMC_I8 initSec, currSec1;
+  ESMC_R8 initHour, currHour1;
+
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -99,7 +104,6 @@
   rc = ESMC_TimeSet(&stopTime, yy1, h2, calendar, calType1, tZ1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -126,6 +130,54 @@
   rc = ESMC_ClockPrint(clock);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Get ESMC_Clock object current time and advance count\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  rc = ESMC_ClockGet(clock, &currSimTime, &advanceCount);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Advance the Clock object\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  rc = ESMC_ClockAdvance(clock);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+#ifdef ESMF_TESTEXHAUSTIVE
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "Get ESMC_Clock object current time and advance count\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  rc = ESMC_ClockGet(clock, &currSimTime, &advanceCount1);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "Get currSimTime in seconds and in hours\0");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  rc = ESMC_TimeIntervalGet(currSimTime, &currSec1, &currHour1);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "Verify that currSimTime in second units\0");
+  strcpy(failMsg, "Did not return 3600\0");
+  ESMC_Test((int(currSec1)==3600), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+ 
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "Verify that currSimTime in hour units\0");
+  strcpy(failMsg, "Did not return 1\0");
+  ESMC_Test((int(currHour1)==1), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+#endif
 
   //----------------------------------------------------------------------------
   //NEX_UTest

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.55 2008/07/12 00:01:19 rosalind Exp $
+// $Id: ESMC_Clock.h,v 1.56 2008/07/17 16:41:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -48,6 +48,11 @@ ESMC_Clock ESMC_ClockCreate(int, const char*,
                             ESMC_Time, ESMC_Time, int*);
 
 int ESMC_ClockPrint(ESMC_Clock);
+
+int ESMC_ClockAdvance(ESMC_Clock);
+
+int ESMC_ClockGet(ESMC_Clock, ESMC_TimeInterval* currSimTime,
+                              ESMC_I8* advanceCount);
 
 int ESMC_ClockDestroy(ESMC_Clock*);
 

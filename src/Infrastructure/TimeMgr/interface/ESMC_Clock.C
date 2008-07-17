@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.1 2008/07/11 23:59:28 rosalind Exp $
+// $Id: ESMC_Clock.C,v 1.2 2008/07/17 16:41:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Clock.C,v 1.1 2008/07/11 23:59:28 rosalind Exp $";
+static const char *const version = "$Id: ESMC_Clock.C,v 1.2 2008/07/17 16:41:55 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -107,6 +107,70 @@ int ESMC_ClockPrint(ESMC_Clock clock){
   return ESMF_SUCCESS;
  
 } // end ESMC_ClockPrint
+
+
+int ESMC_ClockAdvance(ESMC_Clock clock){
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMC_ClockAdvance()"
+
+  // initialize return code; assume routine not implemented
+  int rc= ESMC_RC_NOT_IMPL;          // local return code
+  int localrc = ESMC_RC_NOT_IMPL;    // local return code
+
+  ESMCI::Clock *IntClock = (ESMCI::Clock*)(clock.ptr);
+  localrc = IntClock->advance();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+    clock.ptr = NULL;
+    return rc;  // bail out
+  }
+  //return successfully
+  return ESMF_SUCCESS;
+
+} // end ESMC_ClockAdvance
+
+
+int ESMC_ClockGet(ESMC_Clock clock, ESMC_TimeInterval *currSimTime,
+                                    ESMC_I8* advanceCount){
+  int rc= ESMC_RC_NOT_IMPL;          // local return code
+  int localrc = ESMC_RC_NOT_IMPL;    // local return code
+
+  ESMCI::Clock* pClock = (ESMCI::Clock*)(clock.ptr);
+  localrc = pClock->print();
+  ESMCI::TimeInterval* cST = new(ESMCI::TimeInterval);
+  localrc = pClock->get(0,
+                      (int*)NULL,
+                      (char*)NULL,
+                      (ESMCI::TimeInterval*)NULL,
+                      (ESMCI::Time*)NULL,
+                      (ESMCI::Time*)NULL,
+                      (ESMCI::TimeInterval*)NULL,
+                      (ESMC_R8*)NULL,
+                      (ESMCI::Time*)NULL,
+                      (ESMCI::Time*)NULL,
+                      (ESMCI::Time*)NULL,
+                      cST,                 
+                      (ESMCI::TimeInterval*)NULL,
+                      (ESMCI::Calendar**)NULL,
+                      (ESMC_CalendarType*)NULL,
+                      (int*)NULL,
+                      advanceCount,
+                      (int*)NULL,
+                      (ESMC_Direction*)NULL );
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+    pClock = NULL;
+    return localrc;  // bail out
+  }
+  (*currSimTime).ptr = (void*)cST;
+
+//  (*currSimTime).ptr = (void*)(&cST);
+
+   delete cST;
+
+   //return successfully
+   return ESMF_SUCCESS;
+
+}  //end ESMC_ClockGet
 
 int ESMC_ClockDestroy(ESMC_Clock* pClock){
   int rc = ESMF_RC_NOT_IMPL;
