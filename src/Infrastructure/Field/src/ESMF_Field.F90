@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.28 2008/05/20 23:20:03 oehmke Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.29 2008/07/17 21:41:36 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -114,6 +114,7 @@ module ESMF_FieldMod
     type (ESMF_StaggerLoc)        :: staggerloc
     logical                       :: array_internal   ! .true. if field%array is
                                                       ! internally allocated
+    logical                       :: is_proxy         ! .true. for a proxy field
     integer                       :: gridToFieldMap(ESMF_MAXDIM)
     integer                       :: ungriddedLBound(ESMF_MAXDIM)
     integer                       :: ungriddedUBound(ESMF_MAXDIM)
@@ -203,7 +204,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.272.2.28 2008/05/20 23:20:03 oehmke Exp $'
+    '$Id: ESMF_Field.F90,v 1.272.2.29 2008/07/17 21:41:36 feiliu Exp $'
 
 !==============================================================================
 !
@@ -2568,6 +2569,9 @@ contains
 
       call c_ESMC_FieldSerialize(fp%fieldstatus, fp%gridstatus, &
                                  fp%datastatus, fp%iostatus, & 
+                                 fp%staggerloc%staggerloc, fp%gridToFieldMap, &
+                                 fp%ungriddedLBound, fp%ungriddedUBound, &
+                                 fp%maxHaloLWidth, fp%maxHaloUWidth, &
                                  buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -2663,6 +2667,9 @@ contains
 
       call c_ESMC_FieldDeserialize(fp%fieldstatus, fp%gridstatus, &
                                    fp%datastatus, fp%iostatus, &
+                                   fp%staggerloc%staggerloc, fp%gridToFieldMap, &
+                                   fp%ungriddedLBound, fp%ungriddedUBound, &
+                                   fp%maxHaloLWidth, fp%maxHaloUWidth, &
                                    buffer(1), offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2687,6 +2694,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
     
+      fp%is_proxy = .true.
       ESMF_FieldDeserialize%ftypep => fp
       ESMF_INIT_SET_CREATED(ESMF_FieldDeserialize)
 
@@ -2863,6 +2871,7 @@ contains
         ftypep%staggerloc = ESMF_STAGGERLOC_CENTER
 
         ftypep%array_internal = .false. 
+        ftypep%is_proxy       = .false. 
         ftypep%gridToFieldMap = -1
         ftypep%ungriddedLBound = -1
         ftypep%ungriddedUBound = -1
