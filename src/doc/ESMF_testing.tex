@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.23.2.3 2008/07/17 00:12:53 theurich Exp $
+% $Id: ESMF_testing.tex,v 1.23.2.4 2008/07/17 20:10:39 theurich Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
@@ -54,7 +54,7 @@ Finally, there are those systems that utilize batch software to access the
 parallel execution environment. One option is to execute the ESMF test targets
 from within a batch session, either interactively or from within a script. In 
 this case the batch software does not add any additional complexity for ESMF.
-The same issues discussed above, of how to lauch an MPI application, apply 
+The same issues discussed above, of how to launch an MPI application, apply 
 directly. 
 
 However, in some cases it is more convenient to execute the ESMF test target
@@ -72,7 +72,7 @@ parallel launching facilities though interactive LSF.
 
 Second, if interactive batch access is not available, a more complex scripting
 approach is necessary. The basic requirements in this case are that ESMF must
-be able to lauch MPI applications across {\tt N} processes by calling
+be able to launch MPI applications across {\tt N} processes by calling
 
 \begin{verbatim}
 $(ESMF_MPIRUN) -np N application  ,
@@ -86,7 +86,7 @@ has become accessible.
 The ESMF {\tt ./scripts} directory contains scripts of this flavor for a wide
 variety of batch systems. Most of these scripts, when called through ESMF,
 will generate a customized, temporary batch script for a specific executable
-"on the fly" and submit this batch script to the queueing software. The script
+"on the fly" and submit this batch script to the queuing software. The script
 then waits for completion of the submitted job, after which it copies the
 output, received through a system specific mechanism, into the prescribed file.
 
@@ -108,15 +108,40 @@ out of the ESMF {\tt ./scripts} directory, it is the user's responsibility to
 add {\tt ESMF\_MPISCRIPTOPTIONS} to {\tt ESMF\_MPIRUN} and/or to utilize
 {\tt ESMF\_MPILAUNCHOPTIONS} within the specified script.
 
-Users working on a system with a parallel execution environment not covered by
-any of the existing scripts are encouraged to use the closes match and customize
-it to their situation. Pointing {\tt ESMF\_MPIRUN} to a specific file will 
-override any default settings. The best way to see how the existing scripts are
-used on the supported platforms is to go to the 
+The possibilities covered by the generic scripts provided in the ESMF
+{\tt ./scripts} directory, combined with the {\tt ESMF\_MPISCRIPTOPTIONS},
+{\tt ESMF\_MPIBATCHOPTIONS}, and {\tt ESMF\_MPILAUNCHOPTIONS} environment
+variables, will satisfy the majority of common situations. There are, however,
+circumstances for which a customized, user-provided mpirun script is necessary.
+One such situation arises with the LoadLeveler batch software. LoadLeveler
+typically requires a list of options specified in the actual batch script. This
+is most easily handled by a script that produces such a system and user specific
+script "on the fly". Another situation is where certain modules or software
+packages need to be made available inside the batch script. Again this is most
+easily handled by a customized script the user writes and provides to ESMF via
+the {\tt ESMF\_MPIRUN} environment variable. This will override any default
+settings for the configuration and rely on the user provided script instead.
+
+Users that face the need to write a customized mpirun script for their
+parallel execution environment are encouraged to start with the closest match 
+from the ESMF {\tt ./scripts} directory and customize it to their situation.
+The best way to see how the existing scripts are used on the supported
+platforms is to go to the 
 \htmladdnormallink{http://www.esmf.ucar.edu/download/platforms/}
-{"Supported Platforms"} web page and follow the link for the platform of
-interest. Each test report contains the output of {\tt gmake info}, which
-lists the settings of the {\tt ESMF\_MPIxxx} environment variables.
+{http://www.esmf.ucar.edu/download/platforms/} web page and follow the link 
+for the platform of interest. Each test report contains the output of
+{\tt gmake info}, which lists the settings of the {\tt ESMF\_MPIxxx} 
+environment variables.
+
+Furthermore, the {\tt esmfcontrib} repository on SourceForge hosts a 
+{\tt scripts} module that contains scripts that were customized to certain
+user environments. These scripts are not generic enough to be included in the
+ESMF distribution, but users faced with the need to customize a script to their
+environment may find the script collection on {\tt esmfcontrib} a valuable
+resource. Please refer to
+\htmladdnormallink{https://sourceforge.net/projects/esmfcontrib}
+{https://sourceforge.net/projects/esmfcontrib} on how to access 
+{\tt esmfcontrib}, and the {\tt scripts} module in particular.
 
 \subsubsection{Running ESMF Unit Tests}
 
