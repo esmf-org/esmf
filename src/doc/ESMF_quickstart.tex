@@ -194,7 +194,7 @@ variables have been set appropriatly. It also tells the user the paths to
 various libraries e.g. MPI that are set on the system. The user to review 
 this information to verify their settings. In the case of a build failure, 
 this information is invaluable and will be the first thing asked for by the
-ESMF support team. Below is an {/b example output} from {/tt gmake info}: 
+ESMF support team. Below is an {\bf example output} from {\tt gmake info}: 
  
 \begin{verbatim}
 
@@ -341,11 +341,14 @@ on the requirements).
 
 \subsubsection{Testing Makefile Targets}
 
-To build and run the unit and system tests in non-exhaustive mode, type:
+To build and run the unit and system tests, type:
 \begin{verbatim}
 gmake check
 \end{verbatim}
 A summary report of success and failures will be printed out at the end.
+
+See section \ref{ESMFRunSetting} on how to set up ESMF to be able to launch
+the bundled test and example applications.
 
 \noindent Other test-related targets are:
 \begin{description}

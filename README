@@ -227,7 +227,8 @@ install target. Libraries, F90 module files, header files and documentation
 all are installed relative to ESMF_INSTALL_PREFIX by default. See the ESMF
 User's Guide on how to customize the installation location of the installed
 files using additional "ESMF_INSTALL_..." environment variables.
-The ESMF_INSTALL_PREFIX may be provided as an absolute path or relative to ESMF_DIR.
+The ESMF_INSTALL_PREFIX may be provided as an absolute path or relative to 
+ESMF_DIR.
 
 
 Supported Makefile Targets
@@ -302,69 +303,23 @@ The ESMF library sources come with 4 flavors of test codes:
 Unless the ESMF library was built in MPI-bypass mode (mpiuni), all applications
 compiled and linked against ESMF automatically become MPI applications and must
 be executed as such. Details of how to execute MPI applications vary widely from
-system to system. The ESMF gmake test targets hide a good portion of this
-complexity. The remaining differences are given here on a per platform basis:
+system to system. ESMF uses an mpirun script mechanism to abstract away most of
+these differences.
 
-IBM      -    The ESMF AIX configuration assumes the use of LoadLeveler by
- AIX &        default. In general this means that the user must set the
- Linux        MP_RMPOOL environment variable to a valid setting in order to
-              successfully start MPI applications. In our experience "1" will
-              be a good value, but see your own system documentation for more
-              help on this.
-              IBM systems running LSF (i.e. new AIX systems as well as IBM/AMD64
-              Linux clusters) require that the ESMF_BATCH environment variable
-              is set to "lsf.ibmpjl". This will ensure that each ESMF test
-              application runs as a separate LSF job and uses the IBM parallel
-              job launcher facility for LSF. Details about the LSF setup, such
-              as queues, limits and project ids, are site dependent. These
-              options must be specified via the associated environment variable
-              ESMF_BATCHOPTIONS and will be used by the ESMF makefile in
-              conjunction with the LSF bsub command. (E.g. on NCAR's bluevista
-              machine you may want to set ESMF_BATCHOPTIONS="-qdebug -W10".)
-              The test targets expect to be run from within a queue that allows
-              interactive mode. Please consult your system documentation for
-              more help on this.
-              
-OSF1     -    The default assumed for the HP/Compaq Sierra Cluster is to run
-              test targets through the LSF batch system. Each ESMF test
-              application runs as a separate LSF job and uses the RMS prun
-              facility to start parallel execution. Details about the LSF setup,
-              such as queues, limits and project ids, are site dependent. These
-              options must be specified via the associated environment variable
-              ESMF_BATCHOPTIONS and will be used by the ESMF makefile in
-              conjunction with the LSF bsub command. (E.g. on GSFC's halem
-              machine you may want to set ESMF_BATCHOPTIONS="-qgeneral
-              -P<your_project_id>".) 
-              The test targets expect to be run from within a queue that
-              allows interactive mode. Please consult your system documentation
-              for more help on this.
-              
-Darwin   -    The ESMF Darwin configurations assume that resources to run the
-              test applications have been made available prior to calling ESMF
-              gmake test targets. The ESMF makefile uses the MPI startup 
-              script according to the ESMF_COMM setting in order to launch
-              parallel execution.
-              
-IRIX64   -    The ESMF IRIX64 configuration assumes that resources to run the
-              test applications have been made available prior to calling ESMF
-              gmake test targets. The ESMF makefile uses SGI's MPI startup 
-              script in order to launch parallel execution.
-              
-Linux    -    The ESMF Linux configurations assume that resources to run the
-              test applications have been made available prior to calling ESMF
-              gmake test targets. The ESMF makefile uses the MPI startup 
-              script according to the ESMF_COMM setting in order to launch
-              parallel execution. The only exceptions to this rule are IBM/Linux
-              clusters. Please see the IBM section for details.
-              
-Unicos   -    The ESMF Unicos configuration assumes that resources to run the
-              test applications have been made available prior to calling ESMF
-              gmake test targets. The ESMF makefile uses Cray's MPI startup 
-              script in order to launch parallel execution. On some Cray X1
-              systems it will be necessary to set the MPI_REQUEST_MAX
-              environment variable to about 4000 to successfully run all 
-              bundled ESMF test applications.
-              
+ESMF provides mpirun scripts for a wide range of system configurations. These
+are used by ESMF by default or can be set by the user via the ESMF_MPIRUN
+environment variable. The best way to see how the existing scripts are used
+on the supported platforms is to go to the "Supported Platforms" web page at
+http://www.esmf.ucar.edu/download/platforms/ and follow the link for the
+platform of interest. Each test report contains the output of "gmake info",
+which lists the settings of the ESMF_MPIxxx environment variables.
+
+Users are encouraged to read the "Setting up ESMF to run Test Suite
+Applications" in the User's Guide to gain a deeper insight into how ESMF
+manages parallel application launching. This User's Guide section is especially
+valuable in case no suitable script is available and the user is confronted
+with the task of writing a customized, system specific mpirun script to work
+with ESMF.
 
 ================================================================================
 ================================================================================
@@ -566,4 +521,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.88.2.8 2008/06/16 21:53:27 theurich Exp $
+ $Id: README,v 1.88.2.9 2008/07/17 00:12:52 theurich Exp $

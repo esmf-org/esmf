@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.23.2.2 2008/04/04 16:17:54 theurich Exp $
+% $Id: ESMF_testing.tex,v 1.23.2.3 2008/07/17 00:12:53 theurich Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
@@ -13,6 +13,110 @@ verify that the framework software was built and installed properly,
 and is running correctly on a particular platform.
 
 Test targets will compile the ESMF library if it has not already been built.
+
+\subsubsection{Setting up ESMF to run Test Suite Applications}
+\label{ESMFRunSetting}
+
+Unless the ESMF library was built in MPI-bypass mode (mpiuni), all applications
+compiled and linked against ESMF automatically become MPI applications and must
+be executed as such. The ESMF test suite and example applications are no
+different in this respect.
+
+Details of how to execute MPI applications vary widely from system to system.
+ESMF uses an mpirun script mechanism to abstract away most of these differences.
+All ESMF makefile targets that require the execution of applications do this by
+launching the application via the executable specified in the 
+{\tt ESMF\_MPIRUN} variable. ESMF assumes that an MPI applications can be 
+launched across {\tt N} processes by calling
+
+\begin{verbatim}
+$(ESMF_MPIRUN) -np N application
+\end{verbatim}
+
+and that the output of the application arrives at the calling shell via 
+{\tt stdout} and {\tt stderr}.
+
+On systems that allow direct launching of MPI application via a suitable
+{\tt mpirun} facility, ESMF can use it directly. This is the ESMF default for
+all those configurations that come with a suitable {\tt mpirun}. In these
+cases the {\tt ESMF\_MPIRUN} environment variable does not need to be set by
+the user.
+
+There are systems, however, that allow direct launching of MPI application but
+provide a launch mechanism that is incompatible with ESMF's assumptions. In
+these cases a simple mpirun wrapper is required. The ESMF {\tt ./scripts}
+directory contains wrappers for several cases in this class, e.g. for
+interactive POE access on IBM machines and {\tt aprun}, as well as
+{\tt yod} on Cray machines. The ESMF configurations will access the
+appropriate wrapper scripts by default if necessary.
+
+Finally, there are those systems that utilize batch software to access the
+parallel execution environment. One option is to execute the ESMF test targets
+from within a batch session, either interactively or from within a script. In 
+this case the batch software does not add any additional complexity for ESMF.
+The same issues discussed above, of how to lauch an MPI application, apply 
+directly. 
+
+However, in some cases it is more convenient to execute the ESMF test target
+on the front-end machine, and have ESMF access the batch software each time it
+needs to launch an application. In fact, on IBM systems this is often the only
+working option, because the integrated POE system will execute each application
+on the exact same number of processes specified during batch access, regardless
+of how many ways parallel a specific application needs to be run.
+
+Two modes of operation need to be considered for the ESMF batch access. First,
+if interactive batch access is available, it is straight forward to write an
+{\tt mpirun} script that fulfills the ESMF requirements outlined above. The
+ESMF {\tt ./scripts} directory contains several scripts that access various
+parallel launching facilities though interactive LSF.
+
+Second, if interactive batch access is not available, a more complex scripting
+approach is necessary. The basic requirements in this case are that ESMF must
+be able to lauch MPI applications across {\tt N} processes by calling
+
+\begin{verbatim}
+$(ESMF_MPIRUN) -np N application  ,
+\end{verbatim}
+
+that the output of the application will be available in a file named
+{\tt application.stdout} after the script finishes, and that the
+{\tt ESMF\_MPIRUN} script blocks execution until {\tt application.stdout}
+has become accessible.
+
+The ESMF {\tt ./scripts} directory contains scripts of this flavor for a wide
+variety of batch systems. Most of these scripts, when called through ESMF,
+will generate a customized, temporary batch script for a specific executable
+"on the fly" and submit this batch script to the queueing software. The script
+then waits for completion of the submitted job, after which it copies the
+output, received through a system specific mechanism, into the prescribed file.
+
+Regardless of whether the batch system access is interactive or not, it is
+often necessary to specify various system specific options when calling the
+batch submission tool. ESMF utilizes the {\tt ESMF\_MPIBATCHOPTIONS} environment
+variable to pass user supplied values to the batch system.
+
+The environment variable {\tt ESMF\_MPISCRIPTOPTIONS} is available to pass
+user specified options to the actual script specified by {\tt ESMF\_MPIRUN}.
+However, {\tt ESMF\_MPISCRIPTOPTIONS} will only be added automatically to the 
+{\tt ESMF\_MPIRUN} call if the specified {\tt ESMF\_MPIRUN} can be found in the
+ESMF {\tt ./scripts} directory.
+
+Finally, the value of {\tt ESMF\_MPILAUNCHOPTIONS} is passed to the MPI launch
+facility by default, i.e if {\tt ESMF\_MPIRUN} was not specified by the user.
+In case the user specifies {\tt ESMF\_MPIRUN} to be anything else but scripts
+out of the ESMF {\tt ./scripts} directory, it is the user's responsibility to
+add {\tt ESMF\_MPISCRIPTOPTIONS} to {\tt ESMF\_MPIRUN} and/or to utilize
+{\tt ESMF\_MPILAUNCHOPTIONS} within the specified script.
+
+Users working on a system with a parallel execution environment not covered by
+any of the existing scripts are encouraged to use the closes match and customize
+it to their situation. Pointing {\tt ESMF\_MPIRUN} to a specific file will 
+override any default settings. The best way to see how the existing scripts are
+used on the supported platforms is to go to the 
+\htmladdnormallink{http://www.esmf.ucar.edu/download/platforms/}
+{"Supported Platforms"} web page and follow the link for the platform of
+interest. Each test report contains the output of {\tt gmake info}, which
+lists the settings of the {\tt ESMF\_MPIxxx} environment variables.
 
 \subsubsection{Running ESMF Unit Tests}
 
