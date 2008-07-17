@@ -1,4 +1,4 @@
-% $Id: FieldBundle_refdoc.ctex,v 1.1.2.2 2008/07/17 21:03:53 feiliu Exp $
+% $Id: FieldBundle_refdoc.ctex,v 1.1.2.3 2008/07/17 21:51:03 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -53,13 +53,9 @@
 #ifdef STANDALONE
 \input{FieldBundle_usage}
 \input{ESMF_FieldBundleCreateEx_fapi}
-\input{ESMF_FieldBundleRedistEx_fapi}
-\input{ESMF_FieldBundleSMMEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/FieldBundle/doc/FieldBundle_usage}
 \input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleCreateEx_fapi}
-\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleRedistEx_fapi}
-\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleSMMEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
@@ -98,15 +94,11 @@
 %\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleGet_fapi}
 %#endif
 
-\subsection{Class API: FieldBundle Communications}
+#\subsection{Class API: FieldBundle Communications}
 #ifdef STANDALONE
 %\input{../../FieldBundleComm/doc/ESMF_FieldBundleComm_fapi}
-\input{../../FieldBundleComm/doc/ESMF_FieldBundleRedist_fapi}
-\input{../../FieldBundleComm/doc/ESMF_FieldBundleSMM_fapi}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleComm_fapi}
-\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleRedist_fapi}
-\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleSMM_fapi}
+%\input{../Infrastructure/FieldBundleComm/doc/ESMF_FieldBundleComm_fapi}
 #endif
 
 #ifdef STANDALONE
