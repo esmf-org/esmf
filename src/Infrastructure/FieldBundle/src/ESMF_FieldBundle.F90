@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.1.2.10 2008/07/17 21:04:00 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.1.2.11 2008/07/17 21:49:54 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -209,6 +209,34 @@
     public ESMF_FieldBundleValidate     ! Check internal consistency
     public ESMF_FieldBundlePrint        ! Print contents of a FieldBundle
 
+    public ESMF_FieldBundleGetI4Attr
+    public ESMF_FieldBundleGetI4ListAttr
+    public ESMF_FieldBundleGetI8Attr
+    public ESMF_FieldBundleGetI8ListAttr
+    public ESMF_FieldBundleGetR4Attr
+    public ESMF_FieldBundleGetR4ListAttr
+    public ESMF_FieldBundleGetR8Attr
+    public ESMF_FieldBundleGetR8ListAttr
+    public ESMF_FieldBundleGetLogAttr
+    public ESMF_FieldBundleGetLogListAttr
+    public ESMF_FieldBundleGetCharAttr
+
+    public ESMF_FieldBundleGetAttByName
+    public ESMF_FieldBundleGetAttByNum
+    public ESMF_FieldBundleGetAttCount
+
+    public ESMF_FieldBundleSetI4Attr
+    public ESMF_FieldBundleSetI4ListAttr
+    public ESMF_FieldBundleSetI8Attr
+    public ESMF_FieldBundleSetI8ListAttr
+    public ESMF_FieldBundleSetR4Attr
+    public ESMF_FieldBundleSetR4ListAttr
+    public ESMF_FieldBundleSetR8Attr
+    public ESMF_FieldBundleSetR8ListAttr
+    public ESMF_FieldBundleSetLogAttr
+    public ESMF_FieldBundleSetLogListAttr
+    public ESMF_FieldBundleSetCharAttr
+
     public operator(.eq.), operator(.ne.)
 
 !  !subroutine ESMF_FieldBundleWriteRestart(bundle, iospec, rc)
@@ -217,7 +245,7 @@
 !  !function ESMF_FieldBundleRead(name, iospec, rc)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-!  ! additional future signatures of ESMF_FieldBundleCreate() functions:
+!  !additional future signatures of ESMF_FieldBundleCreate() functions:
 !  !function ESMF_FieldBundleCreateCopy(bundle, subarray, name, packflag, rc)
 !  !function ESMF_FieldBundleCreateRemap(bundle, grid, name, packflag, rc)
 
@@ -296,6 +324,7 @@
 
 
 !------------------------------------------------------------------------------
+
 interface operator (.eq.)
  module procedure ESMF_pfeq
 end interface
@@ -477,8 +506,8 @@ end function
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_FieldBundleAddFieldList
 
-!------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleCreateNew"
 !BOP
@@ -576,7 +605,7 @@ end function
       ESMF_FieldBundleCreateNew%btypep => btypep
 
 
-      ! do this before ESMF_FieldBundleIsConguent so it doesn't complain
+      ! do this before ESMF_FieldBundleIsCongruent so it doesn't complain
       ! about uninitialized bundles
       ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateNew)
 
@@ -837,7 +866,6 @@ end function
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_FieldBundleGetInfo
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleGetAllFields"
@@ -911,6 +939,925 @@ end function
 
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_FieldBundleGetAllFields
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetI4Attr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAtt - Retrieve a 4-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGetAtt()
+      subroutine ESMF_FieldBundleGetI4Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns a 4-byte integer attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The integer value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I4, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetI4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetI4ListAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAtt - Retrieve a 4-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGetAtt()
+      subroutine ESMF_FieldBundleGetI4ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns an integer list attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I4, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetI4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetI8Attr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAtt - Retrieve an 8-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGetAtt()
+      subroutine ESMF_FieldBundleGetI8Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I8), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns an 8-byte integer attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The integer value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I8, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetI8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetI8ListAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAtt - Retrieve an 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGetAtt()
+      subroutine ESMF_FieldBundleGetI8ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns an 8-byte integer list attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I8, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetI8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetR4Attr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAtt - Retrieve a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGetAtt()
+      subroutine ESMF_FieldBundleGetR4Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a 4-byte real attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The real value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R4, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetR4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetR4ListAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAtt - Retrieve a 4-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGetAtt()
+      subroutine ESMF_FieldBundleGetR4ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns a 4-byte real list attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The real values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R4, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetR4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetR8Attr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAtt - Retrieve an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGetAtt()
+      subroutine ESMF_FieldBundleGetR8Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an 8-byte real attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The real value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R8, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetR8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetR8ListAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAtt - Retrieve an 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGetAtt()
+      subroutine ESMF_FieldBundleGetR8ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Returns an 8-byte real list attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The real values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R8, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetR8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetLogAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAtt - Retrieve a logical attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGetAtt()
+      subroutine ESMF_FieldBundleGetLogAttr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a logical attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The logical value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_LOGICAL, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetLogAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetLogListAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAtt - Retrieve a logical list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGetAtt()
+      subroutine ESMF_FieldBundleGetLogListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(out) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a logical list attribute from the {\tt bundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [count]
+!           The number of values in the list.
+!     \item [valueList]
+!           The logical values of the named attribute.
+!           The list must be at least {\tt count} items long.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_LOGICAL, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetLogListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetCharAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAtt - Retrieve a character attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGetAtt()
+      subroutine ESMF_FieldBundleGetCharAttr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      character (len = *), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a character attribute from the {\tt bundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to retrieve.
+!     \item [value]
+!           The character value of the named attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetChar(bundle%btypep%base, name, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetCharAttr
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetAttCount"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAttCount - Query the number of attributes
+!
+! !INTERFACE:
+      subroutine ESMF_FieldBundleGetAttCount(bundle, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      integer, intent(out) :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns the number of attributes associated with the given {\tt bundle}
+!      in the argument {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [count]
+!           The number of attributes associated with this object.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      status = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetCount(bundle%btypep%base, count, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetAttCount
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetAttByName"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAttInfo - Query FieldBundle attributes by name
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGetAttInfo()
+      subroutine ESMF_FieldBundleGetAttByName(bundle, name, typekind, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(in) :: bundle  
+      character(len=*), intent(in) :: name
+      type(ESMF_TypeKind), intent(out), optional :: typekind
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns information associated with the named attribute, 
+!      including {\tt typekind} and item {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to query.
+!     \item [{[typekind]}]
+!           The typekind of the attribute.
+!     \item [{[count]}]
+!           The number of items in this attribute.  For character types,
+!           the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: status                           ! Error status
+      type(ESMF_TypeKind) :: localTk
+      integer :: localCount
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetAttrInfoName(bundle%btypep%base, name, &
+        localTk, localCount, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(typekind)) typekind = localTk
+      if (present(count)) count = localCount
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetAttByName
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetAttByNum"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleGetAttInfo - Query FieldBundle attributes by index number
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleGetAttInfo()
+      subroutine ESMF_FieldBundleGetAttByNum(bundle, attributeIndex, name, &
+        typekind, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      integer, intent(in) :: attributeIndex
+      character(len=*), intent(out) :: name
+      type(ESMF_TypeKind), intent(out), optional :: typekind
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns information associated with the indexed attribute, 
+!      including {\tt typekind} and item {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [attributeIndex]
+!           The index number of the attribute to query.
+!     \item [name]
+!           Returns the name of the attribute.
+!     \item [{[typekind]}]
+!           The typekind of the attribute.
+!     \item [{[count]}]
+!           Returns the number of items in this attribute.  For character types,
+!           the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+      character(len=ESMF_MAXSTR) :: localName
+      type(ESMF_TypeKind) :: localTk
+      integer :: localCount
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttGetAttrInfoNum(bundle%btypep%base, attributeIndex, &
+        localName, localTk, localCount, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      name = localName
+      if (present(typekind)) typekind = localTk
+      if (present(count)) count = localCount
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleGetAttByNum
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleIsCongruent"
@@ -936,7 +1883,7 @@ end function
 !      data is not congruent.   A {\tt ESMF\_FieldBundle} with no data, or on error
 !      this routine returns {\tt .FALSE.}.
 !
-!      This routine also resets the internal bundle flag to a known bundle
+!      This routine also resets the internal bundle flag to a known state
 !      before returning.
 !
 !     The arguments are:
@@ -968,8 +1915,8 @@ end function
 
 
 ! TODO:FIELDINTEGRATION Restore FieldBundleIsCongruent
-      ESMF_FieldBundleIsCongruent = .FALSE.
 #if 0
+      ESMF_FieldBundleIsCongruent = .FALSE.
       bundle%btypep%isCongruent = .FALSE.
 
       ! Validate bundle before going further
@@ -1325,14 +2272,14 @@ end function
 !
 ! !DESCRIPTION:
 !     Prints diagnostic information about the {\tt bundle}
-!     to {\tt stdout}. \\
+!     to {\tt stdout}.  
 !
 !     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
 !     On some platforms/compilers there is a potential issue with interleaving
 !     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
 !     the expected order.  If this occurs, it is recommended to use the
 !     standard Fortran call {\tt flush(6)} as a workaround until this issue
-!     is fixed in a future release. \\
+!     is fixed in a future release. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -1553,58 +2500,737 @@ end function
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldBundleRemoveField
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleSetDataValues"
+#define ESMF_METHOD "ESMF_FieldBundleSetI4Attr"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleSetDataValues - Set contents of packed array
+! !IROUTINE: ESMF_FieldBundleSetAtt - Set a 4-byte integer attribute
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleSetDataValues(bundle, index, value, rc)
+      ! Private name; call using ESMF_FieldBundleSetAtt()
+      subroutine ESMF_FieldBundleSetI4Attr(bundle, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
-      integer, dimension (:), intent(in) :: index
-      real(ESMF_KIND_R8), dimension (:), intent(in) :: value
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
 !
 ! !DESCRIPTION:
-!     Allows data values associated with an {\tt ESMF\_FieldBundle} to be 
-!     set through the {\tt ESMF\_FieldBundle} interface instead of 
-!     detaching data and setting it in a loop.
-!     Various restrictions on data types may be imposed.
+!      Attaches a 4-byte integer attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}.
 ! 
-!
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           The {\tt ESMF\_FieldBundle} to operate on.
-!     \item [index]
-!           Index values to change.
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to set.
 !     \item [value]
-!           Data value(s) to set.
-!     \item [{[rc]}]
+!           The integer value of the attribute to set.
+!     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOPI
-      integer :: localrc                        ! local return code
+
+      integer :: status                           ! Error status
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
 
-!
-!  TODO: code goes here
-!
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
 
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I4, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_FieldBundleSetDataValues
 
+      end subroutine ESMF_FieldBundleSetI4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSetI4ListAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleSetAtt - Set a 4-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleSetAtt()
+      subroutine ESMF_FieldBundleSetI4ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte integer list attribute to the {\tt bundle}.  
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is given 
+!     by {\tt count}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!           The integer values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+      integer :: status 
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I4, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleSetI4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSetI8Attr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleSetAtt - Set an 8-byte integer attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleSetAtt()
+      subroutine ESMF_FieldBundleSetI8Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte integer attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The integer value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I8, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleSetI8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSetI8ListAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleSetAtt - Set an 8-byte integer list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleSetAtt()
+      subroutine ESMF_FieldBundleSetI8ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 8-byte integer list attribute to the {\tt bundle}.  
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is given 
+!     by {\tt count}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!           The integer values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+      integer :: status
+      integer :: limit
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_I8, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleSetI8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSetR4Attr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleSetAtt - Set a 4-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleSetAtt()
+      subroutine ESMF_FieldBundleSetR4Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a 4-byte real attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The real value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R4, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleSetR4Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSetR8Attr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleSetAtt - Set an 8-byte real attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleSetAtt()
+      subroutine ESMF_FieldBundleSetR8Attr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an 8-byte real attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The real value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R8, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleSetR8Attr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSetR4ListAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleSetAtt - Set a 4-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleSetAtt()
+      subroutine ESMF_FieldBundleSetR4ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a 4-byte real list attribute to the {\tt bundle}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is given 
+!     by {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of reals in the {\tt valueList}.
+!     \item [value]
+!           The real values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+      integer :: limit
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R4, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleSetR4ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSetR8ListAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleSetAtt - Set an 8-byte real list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleSetAtt()
+      subroutine ESMF_FieldBundleSetR8ListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches an 8-byte real list attribute to the {\tt bundle}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is given 
+!     by {\tt count}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of reals in the {\tt valueList}.
+!     \item [value]
+!           The real values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+      integer :: limit
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_R8, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleSetR8ListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSetLogAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleSetAtt - Set a logical attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleSetAtt()
+      subroutine ESMF_FieldBundleSetLogAttr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a logical attribute to the {\tt bundle}.
+!      The attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The logical true/false value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_LOGICAL, 1, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleSetLogAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSetLogListAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleSetAtt - Set a logical list attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleSetAtt()
+      subroutine ESMF_FieldBundleSetLogListAttr(bundle, name, count, valueList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Attaches a logical list attribute to the {\tt bundle}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of logical items in the {\tt value} list is given 
+!     by {\tt count}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [count]
+!           The number of logicals in the {\tt valueList}.
+!     \item [valueList]
+!           The logical values of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+      integer :: limit
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      limit = size(valueList)
+      if (count > limit) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than valueList", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttSetValue(bundle%btypep%base, name, &
+        ESMF_TYPEKIND_LOGICAL, count, valueList, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleSetLogListAttr
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSetCharAttr"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleSetAtt - Set a character attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldBundleSetAtt()
+      subroutine ESMF_FieldBundleSetCharAttr(bundle, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: bundle  
+      character (len = *), intent(in) :: name
+      character (len = *), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character attribute to the {\tt bundle}.
+!      The attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the attribute to set.
+!     \item [value]
+!           The character value of the attribute to set.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: status                           ! Error status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+
+      ! Validate bundle before going further
+      call ESMF_FieldBundleValidate(bundle, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call c_ESMC_BaseAttSetChar(bundle%btypep%base, name, value, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldBundleSetCharAttr
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2089,7 +3715,7 @@ end function
       integer, intent(in) :: fieldCount           
       type(ESMF_Field), dimension (:) :: fields
       type(ESMF_PackFlag), intent(in), optional :: packflag 
-       character (len = *), intent(in), optional :: name 
+      character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
 !
@@ -2146,7 +3772,7 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! If specified, set packflag and interleave
+      ! If specified, set packflag
       if(present(packflag)) then
         if(packflag.eq.ESMF_PACKED_DATA) then
           call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
@@ -2277,6 +3903,9 @@ end function
       ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleTypeGetInit,btype,rc)
 
       btype%bundlestatus = ESMF_STATUS_INVALID
       call ESMF_BaseDestroy(btype%base, status)
