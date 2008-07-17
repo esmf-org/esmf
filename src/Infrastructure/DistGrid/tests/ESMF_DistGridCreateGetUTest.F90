@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.9 2008/06/18 05:07:13 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.10 2008/07/17 06:41:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.9 2008/06/18 05:07:13 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.10 2008/07/17 06:41:26 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -57,6 +57,7 @@ program ESMF_DistGridCreateGetUTest
   type(ESMF_DELayout):: delayout
   integer:: dimCount, patchCount, deCount
   logical:: regDecompFlag
+  integer:: elementCount
   integer, allocatable:: elementCountPPatch(:), patchListPDe(:), elementCountPDe(:)
   integer, allocatable:: minIndexPDimPPatch(:,:), maxIndexPDimPPatch(:,:)
   integer, allocatable:: minIndexPDimPDe(:,:), maxIndexPDimPDe(:,:)
@@ -311,6 +312,19 @@ program ESMF_DistGridCreateGetUTest
   deallocate(indexList)
   deallocate(indexCountPDimPDe)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridGet() - elementCount"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, localDe=0, elementCount=elementCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "verify elementCount"
+  write(failMsg, *) "Did not match"
+  call ESMF_Test((elementCount.eq.elementCountPDe(localDeList(0))), name, failMsg, result, ESMF_SRCLINE)
+    
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "DistGridGet() - seqIndexList(:)"

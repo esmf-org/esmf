@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.6 2008/06/18 05:07:12 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.7 2008/07/17 06:41:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -419,7 +419,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_distgridgetplocalde)(ESMCI::DistGrid **ptr,
-    int *localDeArg, ESMCI::InterfaceInt **seqIndexList, int *rc){
+    int *localDeArg, ESMCI::InterfaceInt **seqIndexList, int *elementCount,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetplocalde()"
     // Initialize return code; assume routine not implemented
@@ -486,6 +487,11 @@ extern "C" {
         }
         delete [] ii;
       }
+    }
+    // set elementCount
+    if (ESMC_NOT_PRESENT_FILTER(elementCount) != ESMC_NULL_POINTER){
+      *elementCount = ((*ptr)->getElementCountPDe())[(*ptr)->getDELayout()->
+        getLocalDeList()[localDe]];
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
