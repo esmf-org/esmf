@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.4 2008/07/16 00:19:08 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.5 2008/07/18 16:16:26 theurich Exp $
 #
 # Cygwin.gfortran.default
 #
@@ -143,7 +143,7 @@ ESMF_F90LINKLIBS += -lstdc++
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt -lgfortran
+ESMF_CXXLINKLIBS += -lgfortran
 
 ############################################################
 # Blank out shared library options
