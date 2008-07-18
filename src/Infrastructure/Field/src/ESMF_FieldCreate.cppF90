@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.26 2008/07/17 21:41:37 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.27 2008/07/18 18:58:43 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.26 2008/07/17 21:41:37 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.27 2008/07/18 18:58:43 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -566,7 +566,8 @@ contains
     type(ESMF_StaggerLoc)  :: localStaggerLoc
     type(ESMF_CopyFlag)    :: l_copyflag
     integer :: l_uglb(ESMF_MAXDIM), l_ugub(ESMF_MAXDIM)
-    
+    type (ESMF_IndexFlag) :: arrayIndexFlag, gridIndexFlag    
+
     ! Initialize pointers
     localrc = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
@@ -584,7 +585,8 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
     ! Get rank of proposed Field.  
-    call ESMF_ArrayGet(array, rank=fieldDimCount, rc=localrc) 
+    call ESMF_ArrayGet(array, rank=fieldDimCount, & 
+                       indexflag=arrayIndexFlag, rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, &  
          ESMF_ERR_PASSTHRU, &  
          ESMF_CONTEXT, rc)) return   
@@ -593,7 +595,8 @@ contains
     ! of distributed grid dimensions, distgrid,  
     ! number of ungridded Field dimensions,  
     ! and number of undistributed Field Dimensions  
-    call ESMF_GridGet(grid, dimCount=gridDimCount, rc=localrc)
+    call ESMF_GridGet(grid, dimCount=gridDimCount, &
+                      indexflag=gridIndexFlag, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
@@ -664,6 +667,13 @@ contains
        endif  
     endif  
  
+    if (.not.(arrayIndexFlag .eq. gridIndexFlag)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+         "- Array indexflag must be the same as the Grid indexflag", &
+           ESMF_CONTEXT, rc)
+        return
+    endif
+
     ! Set default values.  
     if (present(staggerloc)) then  
        localStaggerloc = staggerloc  
