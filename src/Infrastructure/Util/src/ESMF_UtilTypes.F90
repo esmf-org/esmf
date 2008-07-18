@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.64 2008/07/13 22:58:18 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.65 2008/07/18 01:22:30 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -637,7 +637,9 @@ interface assignment (=)
   module procedure ESMF_bfas
   module procedure ESMF_dkas
   module procedure ESMF_tfas
+  module procedure ESMF_tfas_v
   module procedure ESMF_tfas2
+  module procedure ESMF_tfas2_v
   module procedure ESMF_ptas
   module procedure ESMF_ptas2
 end interface  
@@ -1188,9 +1190,23 @@ subroutine ESMF_tfas(lval, tfval)
  lval = (tfval%value .eq. 1)    ! this must match initializer
 end subroutine
 
+subroutine ESMF_tfas_v(lval, tfval)
+ logical, intent(out) :: lval(:)
+ type(ESMF_Logical), intent(in) :: tfval(:)
+
+ lval = (tfval%value .eq. 1)    ! this must match initializer
+end subroutine
+
 subroutine ESMF_tfas2 (tfval, lval)
  type(ESMF_Logical), intent(out) :: tfval
  logical, intent(in) :: lval
+
+ tfval = merge (ESMF_TRUE, ESMF_FALSE, lval)
+end subroutine
+
+subroutine ESMF_tfas2_v (tfval, lval)
+ type(ESMF_Logical), intent(out) :: tfval(:)
+ logical, intent(in) :: lval(:)
 
  tfval = merge (ESMF_TRUE, ESMF_FALSE, lval)
 end subroutine
