@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.17 2008/05/20 22:43:08 dneckels Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.18 2008/07/21 23:25:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
-#include "ESMC_VM.h"
+#include "ESMCI_VM.h"
 #include "ESMCI_DistGrid.h"
 #include "ESMC_RHandle.h"
 #include "ESMC_LogErr.h"                  // for LogErr

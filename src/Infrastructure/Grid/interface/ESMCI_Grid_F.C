@@ -21,7 +21,7 @@
 
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
-#include "ESMC_VM.h"
+#include "ESMCI_VM.h"
 #include "ESMCI_DistGrid.h"
 #include "ESMC_RHandle.h"
 #include "ESMC_LogErr.h"                  // for LogErr

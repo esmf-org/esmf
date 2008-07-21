@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.104 2008/06/18 05:07:13 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.1 2008/07/21 23:25:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -10,7 +10,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "ESMC_VMKernel.h"
+#include "ESMCI_VMKernel.h"
 
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
@@ -370,7 +370,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   }
   delete [] temp_ssiid;
 #endif
-  // ESMC_VMK pet -> core mapping
+  // ESMCI::VMK pet -> core mapping
   lpid = new int[npets];
   pid = new int[npets];
   tid = new int[npets];

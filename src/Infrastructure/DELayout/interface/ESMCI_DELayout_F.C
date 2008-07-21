@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout_F.C,v 1.2 2008/04/05 03:38:12 cdeluca Exp $
+// $Id: ESMCI_DELayout_F.C,v 1.3 2008/07/21 23:25:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -21,7 +21,7 @@
 
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
-#include "ESMC_VM.h"
+#include "ESMCI_VM.h"
 
 #include "ESMCI_DELayout.h"
 

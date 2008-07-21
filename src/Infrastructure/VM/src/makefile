@@ -1,16 +1,16 @@
-# $Id: makefile,v 1.7 2008/04/02 23:44:53 theurich Exp $
+# $Id: makefile,v 1.8 2008/07/21 23:25:54 theurich Exp $
 
 # leave alone.
 ALL: build_here 
 
 # If you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_VM.C ESMC_VMKernel.C
+SOURCEC	  = ESMCI_VM.C ESMCI_VMKernel.C
 # If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = 
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # List all .h files which should be copied to common include dir
-STOREH	  = ESMC_VM.h ESMC_VMKernel.h
+STOREH	  = ESMCI_VM.h ESMCI_VMKernel.h
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

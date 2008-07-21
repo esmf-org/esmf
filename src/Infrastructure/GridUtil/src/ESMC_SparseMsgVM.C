@@ -1,4 +1,4 @@
-// $Id: ESMC_SparseMsgVM.C,v 1.3 2008/04/22 18:01:36 theurich Exp $
+// $Id: ESMC_SparseMsgVM.C,v 1.4 2008/07/21 23:25:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -27,13 +27,13 @@
 #include <GridUtil/include/ESMC_SparseMsgVM.h>
 #include <GridUtil/include/ESMC_Exception.h>
 #include <ESMC_LogErr.h>
-#include <ESMC_VMKernel.h>
+#include <ESMCI_VMKernel.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_SparseMsgVM.C,v 1.3 2008/04/22 18:01:36 theurich Exp $";
+            "$Id: ESMC_SparseMsgVM.C,v 1.4 2008/07/21 23:25:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //

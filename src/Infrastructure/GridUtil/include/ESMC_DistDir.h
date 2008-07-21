@@ -1,4 +1,4 @@
-// $Id: ESMC_DistDir.h,v 1.8 2008/04/05 03:38:27 cdeluca Exp $
+// $Id: ESMC_DistDir.h,v 1.9 2008/07/21 23:25:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -26,7 +26,7 @@
 #include <vector>
 #include <functional>
 
-#include <VM/include/ESMC_VM.h>
+#include <VM/include/ESMCI_VM.h>
 
 namespace ESMC {
 

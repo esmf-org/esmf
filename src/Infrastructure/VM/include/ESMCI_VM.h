@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.40 2008/04/05 03:39:06 cdeluca Exp $
+// $Id: ESMCI_VM.h,v 1.1 2008/07/21 23:25:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -15,30 +15,30 @@
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMC_VM_H
-#define ESMC_VM_H
+#ifndef ESMCI_VM_H
+#define ESMCI_VM_H
 
 //-------------------------------------------------------------------------
 //BOPI
-// !CLASS: ESMC_VM - virtual machine
+// !CLASS: ESMCI_VM - virtual machine
 //
 // !DESCRIPTION:
 //
-// The code in this file defines two C++ classes {\tt ESMC\_VM} and 
-// {\tt ESMC\_VMPlan}, their members and method signatures (prototypes).
-// The companion file {\tt ESMC\_VM.C} contains the full code (bodies) 
+// The code in this file defines two C++ classes {\tt ESMCI::VM} and 
+// {\tt ESMCI::VMPlan}, their members and method signatures (prototypes).
+// The companion file {\tt ESMCI\_VM.C} contains the full code (bodies) 
 // for the methods.
 //
-// Currently class {\tt ESMC\_VM} is derived from base class {\tt ESMC_VMK}
-// and class {\tt ESMC\_VMPlan} is derived from base class {\tt ESMC_VMKPlan}.
+// Currently class {\tt ESMCI::VM} is derived from base class {\tt ESMCI::VMK}
+// and {\tt ESMCI::VMPlan} is derived from base class {\tt ESMCI::VMKPlan}.
 // There are only very few new features that the derived classes add to their
 // base classes, thus most of the implementing code is located in 
-// {\tt ESMC_VMKernel.C}.
+// {\tt ESMCI_VMKernel.C}.
 //
 //EOPI
 //-------------------------------------------------------------------------
 
-#include "ESMC_VMKernel.h"    // inherit from ESMC_VMK class
+#include "ESMCI_VMKernel.h"    // inherit from ESMCI::VMK class
 
 //-------------------------------------------------------------------------
 
@@ -120,4 +120,4 @@ class VMPlan : public VMKPlan {   // inherits from ESMCI::VMKPlan
 
 } // namespace ESMCI
 
-#endif  // ESMC_VM_H
+#endif  // ESMCI_VM_H

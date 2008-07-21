@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.25 2008/05/08 02:27:25 theurich Exp $
+// $Id: ESMC_FTable_F.C,v 1.26 2008/07/21 23:25:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 #include "ESMC_Comp.h"
 #include "ESMC_FTable.h"
 
-#include "ESMC_VM.h"
+#include "ESMCI_VM.h"
 
 #include "trim.h"
 //------------------------------------------------------------------------------

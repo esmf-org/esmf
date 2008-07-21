@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.79 2008/04/22 18:01:37 theurich Exp $
+// $Id: ESMCI_VM_F.C,v 1.1 2008/07/21 23:25:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMC_VM_F.C"
+#define ESMC_FILENAME "ESMCI_VM_F.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
@@ -21,7 +21,7 @@
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
 
-#include "ESMC_VM.h"
+#include "ESMCI_VM.h"
 
 #include "ESMC_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
@@ -42,7 +42,7 @@
 extern "C" {
 
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  // ESMC_VM interfaces
+  // ESMCI::VM interfaces
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
   void FTN(c_esmc_vmallfullreduce)(ESMCI::VM **vm, void *input, void *output, 

@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.11 2008/04/02 23:44:53 theurich Exp $
+# $Id: makefile,v 1.12 2008/07/21 23:25:53 theurich Exp $
 
 # leave alone.
 ALL: build_here
 
-SOURCEC	  = ESMC_VM_F.C
+SOURCEC	  = ESMCI_VM_F.C
 SOURCEF	  = ESMF_VM.F90
 SOURCEH	  = 
 STOREH	  = 

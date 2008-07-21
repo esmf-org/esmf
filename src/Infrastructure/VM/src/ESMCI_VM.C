@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.58 2008/04/22 18:01:37 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.1 2008/07/21 23:25:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMC_VM.C"
+#define ESMC_FILENAME "ESMCI_VM.C"
 //==============================================================================
 //
 // ESMC VM method implementation (body) file
@@ -19,13 +19,13 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the methods of two C++ classes 
-// {\tt ESMC\_VM} and {\tt ESMC\_VMPlan} which are defined in the companion 
-// file {\tt ESMC\_VM.h}.
+// {\tt ESMCI::VM} and {\tt ESMCI::VMPlan} which are defined in the companion 
+// file {\tt ESMCI::VM.h}.
 //
-// Class {\tt ESMC\_VM} is derived from base class {\tt ESMC_VMK}
-// and class {\tt ESMC\_VMPlan} is derived from base class {\tt ESMC_VMKPlan}.
-// Both base classes are defined in {\tt ESMC_VMKernel.h} and implemented in
-// source file {\tt ESMC_VMKernel.C}.
+// Class {\tt ESMCI::VM} is derived from base class {\tt ESMCI::VMK}
+// and {\tt ESMCI::VMPlan} is derived from base class {\tt ESMCI::VMKPlan}.
+// Both base classes are defined in {\tt ESMCI\_VMKernel.h} and implemented in
+// source file {\tt ESMCI\_VMKernel.C}.
 // There a couple of new features that the derived classes add to their
 // base classes. This is the content of this source file. Furthermore, this
 // source file contains the implementation of a global association list for VMs
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
 
 // include associated header file
-#include "ESMC_VM.h"
+#include "ESMCI_VM.h"
 
 // include higher level, 3rd party or system headers
 #include "ESMF_Pthread.h"
@@ -51,7 +51,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.58 2008/04/22 18:01:37 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.1 2008/07/21 23:25:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {

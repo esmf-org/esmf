@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.57 2008/04/29 00:38:05 theurich Exp $
+// $Id: ESMCI_VMKernel.h,v 1.1 2008/07/21 23:25:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -10,8 +10,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef ESMC_VMKERNEL_H
-#define ESMC_VMKERNEL_H
+#ifndef ESMCI_VMKERNEL_H
+#define ESMCI_VMKERNEL_H
 
 #ifdef VMK_STANDALONE
 #include <pthread.h>
@@ -461,4 +461,4 @@ class VMKPlan{
 
 } // namespace ESMCI
 
-#endif  // ESMC_VMKERNEL_H
+#endif  // ESMCI_VMKERNEL_H
