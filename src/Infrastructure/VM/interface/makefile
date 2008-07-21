@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.12 2008/07/21 23:25:53 theurich Exp $
+# $Id: makefile,v 1.13 2008/07/21 23:51:21 theurich Exp $
 
 # leave alone.
 ALL: build_here
 
-SOURCEC	  = ESMCI_VM_F.C
+SOURCEC	  = ESMCI_VM_F.C ESMC_VM.C
 SOURCEF	  = ESMF_VM.F90
 SOURCEH	  = 
-STOREH	  = 
+STOREH	  = ESMC_VM.h
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
