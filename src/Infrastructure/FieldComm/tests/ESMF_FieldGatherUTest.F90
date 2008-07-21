@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.32 2008/06/13 20:53:05 feiliu Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.33 2008/07/21 17:36:02 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldGatherUTest.F90,v 1.32 2008/06/13 20:53:05 feiliu Exp $'
+    '$Id: ESMF_FieldGatherUTest.F90,v 1.33 2008/07/21 17:36:02 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -73,6 +73,14 @@ program ESMF_FieldGatherUTest
         call test_gather_2d(rc)
         write(failMsg, *) ""
         write(name, *) "FieldGather 2d test"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Gather test
+        call test_gather_3d(rc)
+        write(failMsg, *) ""
+        write(name, *) "FieldGather 3d test"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -267,6 +275,97 @@ contains
         if(lpe .eq. 0) deallocate(farrayDst)
         rc = ESMF_SUCCESS
     end subroutine test_gather_2d
+
+#undef ESMF_METHOD
+#define ESMF_METHOD "test_gather_3d"
+    subroutine test_gather_3d(rc)
+        integer, intent(out)                        :: rc
+
+        ! local arguments used to create field etc
+        type(ESMF_Field)                            :: field
+        type(ESMF_Grid)                             :: grid
+        type(ESMF_DistGrid)                         :: distgrid
+        type(ESMF_VM)                               :: vm
+        !type(ESMF_ArraySpec)                        :: arrayspec
+        type(ESMF_Array)                            :: array
+        integer                                     :: localrc, lpe, i, j, k
+
+        integer, allocatable                        :: farray(:,:,:)
+        integer, allocatable                        :: farrayDst(:,:,:)
+        integer                                     :: fa_shape(3)
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        call ESMF_VMGetCurrent(vm, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/10,20,5/), &
+            regDecomp=(/2,2,1/), &
+            gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
+            name="grid", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(grid, localDe=0, totalCount=fa_shape, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)))
+        farray = lpe
+        array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
+            staggerloc=0, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        field = ESMF_FieldCreate(grid, array, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        if(lpe .eq. 0) allocate(farrayDst(10,20,5))
+        call ESMF_FieldGather(field, farrayDst, rootPet=0, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! check that the values gathered on rootPet are correct
+        if(lpe .eq. 0) then
+            do k = 1, 5
+                do j = 1, 2
+                    do i = 1, 2
+                        if(farrayDst(i*5, j*10, k) .ne. (i-1)+(j-1)*2) localrc=ESMF_FAILURE
+                    enddo
+                enddo
+            enddo
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+        endif
+
+        call ESMF_FieldDestroy(field)
+        call ESMF_GridDestroy(grid)
+        call ESMF_ArrayDestroy(array)
+        deallocate(farray)
+        if(lpe .eq. 0) deallocate(farrayDst)
+        rc = ESMF_SUCCESS
+    end subroutine test_gather_3d
 
 #undef ESMF_METHOD
 #define ESMF_METHOD "test_scatter_2d"
