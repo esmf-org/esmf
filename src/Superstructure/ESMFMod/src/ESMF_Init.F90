@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.48 2008/05/21 22:14:53 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.49 2008/07/22 20:17:13 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -129,6 +129,14 @@
 !     the command line arguments, so that if the user obtains them they will
 !     be as specified on the command line (including those which MPICH would
 !     normally strip out). 
+!
+!     By default, {\tt ESMF\_Initialize()} will open multiple error log files, one per
+!     processor.  This is very useful for debugging purpose.  However, when running the
+!     application on a large number of processors, opening a large number of
+!     log files and writing log messages from all the processors could become a performance 
+!     bottleneck.  Therefore, it is recommended
+!     to turn the Error Log feature off by setting {\tt defaultLogType} to 
+!     ESMF_LOG_NONE.
 !
 !     Before exiting the application
 !     the user must call {\tt ESMF\_Finalize()} to release resources 
