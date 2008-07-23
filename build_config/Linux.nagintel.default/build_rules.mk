@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.6 2008/06/18 05:07:11 theurich Exp $
+# $Id: build_rules.mk,v 1.7 2008/07/23 04:51:54 theurich Exp $
 #
 # Linux.nagintel.default
 #
@@ -31,30 +31,30 @@ ifeq ($(ESMF_COMM),mpich)
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPIRUNOPTIONS)
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
-ESMF_MPIRUNDEFAULT      = mpirun
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with nag f95) ----------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
-ESMF_MPIRUNDEFAULT      = mpirun
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
-ESMF_MPIRUNDEFAULT      = mpirun
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------

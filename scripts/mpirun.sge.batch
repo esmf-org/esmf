@@ -1,12 +1,29 @@
 #!/bin/ksh 
-# $Id: mpirun.sge.batch,v 1.4 2007/10/03 20:25:42 svasquez Exp $
-# This script provides an interface such that the simple command
-# mpirun -np #
-# runs # copies of the program in parallel.
+# $Id: mpirun.sge.batch,v 1.5 2008/07/23 04:51:56 theurich Exp $
+################################################################################
+# This script abides to the ESMF script rules for executing the bundled test 
+# and example applications.
+#
+# 1) <this_script> -np N prog
+#    runs N copies of executable "prog" in parallel. The script must hide all
+#    of the system specific details, such as going through a queueing system
+#    and/or calling a system specific mpirun script with modified arguments.
+#
+# 2) The output of the script must be written to a file named "prog".stdout and
+#    it must contain the combination of stdout and stderr output of the
+#    execution.
+#
+# 3) The script must block, i.e. _not_ return, until the output described in #2
+#    has become accessible.
+#
+# To access this script set environment variable ESMF_MPIRUN=<this_script> in
+# your shell before executing any of the ESMF run targets or targets that 
+# call run targets indirectly, such as the all_tests.
+################################################################################
 
 if [ "$1" != "-np" ]
 then
-        echo "Usage: mpirun -np #"
+        echo "Usage: mpirun -np # prog"
         exit 1
 fi
 
@@ -27,7 +44,7 @@ cat > $ESMF_DIR/scripts/esmf_script << THE_END_OF_BATCH_SCRIPT
 #  Make sure that the .e and .o file arrive in the working directory
 #$ -cwd
 #
-#$ $ESMF_BATCHOPTIONS
+#$ $ESMF_MPIBATCHOPTIONS
 #
 #  My code is re-runnable
 #$ -r n

@@ -1,15 +1,40 @@
 #!/bin/ksh
-# $Id: mpirun.rs6000_sp,v 1.8 2003/05/02 22:20:49 nscollins Exp $
-# This script provides an interface such that the simple command
-# mpirun -np # runs # copies of the program in parallel.
-# The IBM poe command does not fit this paradigm.
-
-
+# $Id: mpirun.rs6000_sp,v 1.9 2008/07/23 04:51:56 theurich Exp $
+################################################################################
+# This script abides to the ESMF script rules for executing the bundled test 
+# and example applications.
+#
+# 1) <this_script> -np N prog
+#    runs N copies of executable "prog" in parallel. The script must hide all
+#    of the system specific details, such as going through a queueing system
+#    and/or calling a system specific mpirun script with modified arguments.
+#
+# 2) The output of the application must arrive at the calling shell via 
+#    stdout and stderr.
+#
+# To access this script set environment variable ESMF_MPIRUN=<this_script> in
+# your shell before executing any of the ESMF run targets or targets that 
+# call run targets indirectly, such as the all_tests.
+################################################################################
 
 if [ "$1" != "-np" ] 
 then
-	echo "Usage: mpirun -np #"
+	echo "Usage: mpirun -np # prog"
 	exit 1
+fi
+
+if [ "$MP_RESD" != "no" ]; then
+if [ x$MP_RMPOOL == x ]; then
+if [ x$MP_HOSTFILE == x ]; then
+  echo "***ERROR***"
+  echo "It appears that ./scripts/mpirun.rs6000_sp has been called without"
+  echo "resources. You must either execute from within a batch script or"
+  echo "set environment variable MP_RMPOOL to a system-dependent shared pool,"
+  echo "if available. Please see your system documentation for details on how"
+  echo "to execute parallel applications."
+  exit 1
+fi
+fi
 fi
 
 num_procs=$2

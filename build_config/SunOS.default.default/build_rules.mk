@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16 2008/04/17 18:58:32 theurich Exp $
+# $Id: build_rules.mk,v 1.17 2008/07/23 04:51:55 theurich Exp $
 # 
 # SunOS.default.default
 #
@@ -31,7 +31,7 @@ ifeq ($(ESMF_COMM),mpi)
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_CXXLINKERDEFAULT   = mpif90
-ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------

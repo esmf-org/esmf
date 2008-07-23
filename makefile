@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.91 2008/06/17 22:31:49 theurich Exp $
+# $Id: makefile,v 1.92 2008/07/23 04:51:52 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -88,12 +88,6 @@ script_info:
 	  echo "ESMF_OPTLEVEL:          $(ESMF_OPTLEVEL)" ; fi
 	-@echo "ESMF_COMM:              $(ESMF_COMM)"
 	-@echo "ESMF_SITE:              $(ESMF_SITE)"
-	-@if [ -n "$(ESMF_BATCH)" ] ; then \
-	  echo "ESMF_BATCH:             $(ESMF_BATCH)" ; fi
-	-@if [ -n "$(ESMF_BATCHOPTIONS)" ] ; then \
-	  echo "ESMF_BATCHOPTIONS:      $(ESMF_BATCHOPTIONS)" ; fi
-	-@if [ -n "$(ESMF_MPIRUNOPTIONS)" ] ; then \
-	  echo "ESMF_MPIRUNOPTIONS:     $(ESMF_MPIRUNOPTIONS)" ; fi
 	-@echo "ESMF_PTHREADS:          $(ESMF_PTHREADS)"
 	-@echo "ESMF_ARRAY_LITE:        $(ESMF_ARRAY_LITE)"
 	-@echo "ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)"
@@ -103,6 +97,13 @@ script_info:
 	-@echo "ESMF_TESTEXHAUSTIVE:    $(ESMF_TESTEXHAUSTIVE)"
 	-@echo "ESMF_TESTWITHTHREADS:   $(ESMF_TESTWITHTHREADS)"
 	-@echo "ESMF_TESTMPMD:          $(ESMF_TESTMPMD)"
+	-@echo "ESMF_MPIRUN:            $(ESMF_MPIRUN)"
+	-@if [ -n "$(ESMF_MPISCRIPTOPTIONS)" ] ; then \
+	  echo "ESMF_MPISCRIPTOPTIONS:  $(ESMF_MPISCRIPTOPTIONS)" ; fi
+	-@if [ -n "$(ESMF_MPIBATCHOPTIONS)" ] ; then \
+	  echo "ESMF_MPIBATCHOPTIONS:   $(ESMF_MPIBATCHOPTIONS)" ; fi
+	-@if [ -n "$(ESMF_MPILAUNCHOPTIONS)" ] ; then \
+	  echo "ESMF_MPILAUNCHOPTIONS:  $(ESMF_MPILAUNCHOPTIONS)" ; fi
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF environment variables pointing to 3rd party software *"
@@ -248,12 +249,6 @@ info_mk:
 	  echo "# ESMF_OPTLEVEL: $(ESMF_OPTLEVEL)" >> $(MKINFO) ; fi
 	-@echo "# ESMF_COMM: $(ESMF_COMM)" >> $(MKINFO)
 	-@echo "# ESMF_SITE: $(ESMF_SITE)" >> $(MKINFO)
-	-@if [ -n "$(ESMF_BATCH)" ] ; then \
-	  echo "# ESMF_BATCH: $(ESMF_BATCH)" >> $(MKINFO) ; fi
-	-@if [ -n "$(ESMF_BATCHOPTIONS)" ] ; then \
-	  echo "# ESMF_BATCHOPTIONS: $(ESMF_BATCHOPTIONS)" >> $(MKINFO) ; fi
-	-@if [ -n "$(ESMF_MPIRUNOPTIONS)" ] ; then \
-	  echo "# ESMF_MPIRUNOPTIONS: $(ESMF_MPIRUNOPTIONS)" >> $(MKINFO) ; fi
 	-@echo "# ESMF_PTHREADS: $(ESMF_PTHREADS)" >> $(MKINFO)
 	-@echo "# ESMF_ARRAY_LITE: $(ESMF_ARRAY_LITE)" >> $(MKINFO)
 	-@echo "# ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)" >> $(MKINFO)

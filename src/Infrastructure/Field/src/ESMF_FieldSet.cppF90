@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.12 2008/05/21 22:14:25 theurich Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.13 2008/07/23 04:51:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.12 2008/05/21 22:14:25 theurich Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.13 2008/07/23 04:51:57 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -672,6 +672,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     integer                        :: compEUWidth(ESMF_MAXDIM), compELWidth(ESMF_MAXDIM) @\
     integer                        :: fieldUndistDimCount                         @\
     logical                        :: flipflop(ESMF_MAXDIM) @\
+    type(ESMF_IndexFlag)           :: indexflag @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -710,7 +711,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     ! and number of undistributed Field Dimensions @\
     call ESMF_GridGet(grid, dimCount=gridDimCount, & @\
           distgridToGridMap=distgridToGridMap, & @\
-          distgrid=distgrid, rc=localrc) @\
+          distgrid=distgrid, indexflag=indexflag, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -918,7 +919,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
             computationalEdgeUWidth=compEUWidth(1:gridDimCount), & @\
             totalLWidth=localMaxHaloLWidth(1:gridDimCount), & @\
             totalUWidth=localMaxHaloUWidth(1:gridDimCount), & @\
-            staggerloc=localStaggerLoc%staggerloc, rc=localrc) @\
+            staggerloc=localStaggerLoc%staggerloc, indexflag=indexflag, rc=localrc) @\
             if (ESMF_LogMsgFoundError(localrc, & @\
                    ESMF_ERR_PASSTHRU, & @\
                    ESMF_CONTEXT, rc)) return @\
