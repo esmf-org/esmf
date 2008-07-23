@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2.2.4 2008/07/16 00:19:09 theurich Exp $
+# $Id: build_rules.mk,v 1.2.2.5 2008/07/23 05:02:49 theurich Exp $
 #
 # Darwin.intelgcc.default
 #
@@ -37,14 +37,14 @@ ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
-ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),intelmpi)
 # IntelMPI -------------------------------------------------
 ESMF_F90DEFAULT         = mpiifort
 ESMF_CXXDEFAULT         = mpicxx
-ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),lam)
@@ -52,7 +52,7 @@ ifeq ($(ESMF_COMM),lam)
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
-ESMF_MPIRUNDEFAULT      = mpirun
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),openmpi)
@@ -83,29 +83,48 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
-# On IA64 set long and pointer types to 64-bit
+# Construct the ABISTRING
 #
+ifeq ($(ESMF_MACHINE),ia64)
 ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := $(ESMF_MACHINE)_64
+else
+$(error Invalid ESMF_MACHINE / ESMF_ABI combination: $(ESMF_MACHINE) / $(ESMF_ABI))
+endif
+endif
+ifeq ($(ESMF_MACHINE),x86_64)
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := $(ESMF_MACHINE)_32
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := x86_64_small
+endif
+endif
+
+############################################################
+# Set memory model compiler flags according to ABISTRING
+#
+ifeq ($(ESMF_ABISTRING),x86_64_medium)
+ESMF_F90COMPILEOPTS     += -mcmodel=medium
+ESMF_F90LINKOPTS        += -mcmodel=medium
+ESMF_CXXCOMPILEOPTS     += -mcmodel=medium
+ESMF_CXXLINKOPTS        += -mcmodel=medium
+endif
+ifeq ($(ESMF_ABISTRING),ia64_64)
+ESMF_CXXCOMPILEOPTS       += -size_lp64
+ESMF_CXXLINKOPTS          += -size_lp64
 ESMF_F90COMPILEOPTS       += -size_lp64
 ESMF_F90LINKOPTS          += -size_lp64
 endif
 
 ############################################################
-# Link against GCC's stdc++ library (because g++ is used)
-#
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
-ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
-endif
-ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
-ESMF_F90LINKLIBS  += -lstdc++ -lgcc_eh
-
-############################################################
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
-ESMF_F90COMPILEOPTS += -threads
+ESMF_F90COMPILEOPTS +=  -threads
+ESMF_CXXCOMPILEOPTS +=  -pthread
 ESMF_F90LINKOPTS    += -threads
+ESMF_CXXLINKOPTS    += -pthread
 endif
 
 ############################################################
@@ -118,6 +137,16 @@ ESMF_F90COMPILEFIXCPP    = -fpp
 # Determine where ifort's libraries are located
 #
 ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
+
+############################################################
+# Link against GCC's stdc++ library (because g++ is used)
+#
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKLIBS  += -lstdc++ -lgcc_eh
 
 ############################################################
 # Blank out variables to prevent rpath encoding
@@ -133,10 +162,7 @@ ESMF_F90LINKLIBS += -lm
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lifcoremt -lunwind
-ifeq ($(ESMF_ABI),64)
-ESMF_CXXLINKLIBS += -lipr
-endif
+ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)")
 
 ############################################################
 # Blank out shared library options
