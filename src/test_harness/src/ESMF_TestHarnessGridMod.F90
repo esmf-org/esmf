@@ -34,14 +34,9 @@
 
   use ESMF_Mod
   use ESMF_TestHarnessTypesMod
+  use ESMF_TestHarnessUtilMod
 
   implicit none
-
-!-------------------------------------------------------------------------------
-! !PRIVATE TYPES:
-
-!-------------------------------------------------------------------------------
-! !PUBLIC TYPES:
 
 !-------------------------------------------------------------------------------
 ! PUBLIC METHODS:
@@ -115,12 +110,12 @@
   select case(trim(adjustL(ltmp)) )
 
      case('REDISTRIBUTION')
-!      print*,' read grid specification for redistribution test'
+       print*,' read grid specification for redistribution test'
        call read_redistribution_grid(lfilename, Gfile%nGspecs, Gfile%src_grid, &
                 Gfile%dst_grid,localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
                rcToReturn=rc)) return
-
+       print*,"read redist grid spec ", localrc
      case('REMAP')
 !      print*,' read grid specification for remapping test'
        call read_remapping_grid(lfilename, Gfile%nGspecs, Gfile%src_grid,      &
@@ -133,7 +128,7 @@
        call ESMF_LogMsgSetError( ESMF_FAILURE,                                 &
               "unknown grid type in " // trim(lfilename),                      &
               rcToReturn=rc)
-
+       return
      end select
 
   !-----------------------------------------------------------------------------
@@ -170,8 +165,10 @@
 
   ! arguments
   character(ESMF_MAXSTR), intent(in   ) :: lfilename
-  type(grid_specification_record), pointer :: grid(:)
-  type(grid_specification_record), pointer :: tmp_grid(:)
+  type(grid_specification_record), pointer :: grid(:)      ! source grid spec
+  type(grid_specification_record), pointer :: tmp_grid(:)  ! duplicate copy of
+                                                           ! the grid specifier for 
+                                                           ! the destination grid
   integer, intent(  out) :: ngrids
   integer, intent(inout) :: rc
 
@@ -205,7 +202,7 @@
   !-----------------------------------------------------------------------------
   ! open the grid file
   !-----------------------------------------------------------------------------
-  localcf = ESMF_ConfigCreate(localrc)
+  localcf = ESMF_ConfigCreate(rc=localrc)
   if( ESMF_LogMsgFoundError(localrc, "cannot create config object",            &
                             rcToReturn=rc) ) return
 
@@ -226,10 +223,13 @@
          "cannot find config label grid_type:",                                &
          rcToReturn=rc) ) return
 
-  if( trim(adjustL( ltmp )) /= 'REDISTRIBUTION' ) call ESMF_LogMsgSetError(    &
+  if( trim(adjustL( ltmp )) /= 'REDISTRIBUTION' ) then
+     call ESMF_LogMsgSetError(    &
             ESMF_FAILURE, "Wrong grid type for redist test in file " //        &
-            trim( lfilename ), rcToReturn=rc)
-
+            trim( lfilename ), rcToReturn=rc) 
+     return
+  endif
+  
   !-----------------------------------------------------------------------------
   ! search for the grid specifier table
   !-----------------------------------------------------------------------------
@@ -268,7 +268,7 @@
   allocate( ncolumns(nrows) )
 
   do krow=1,nrows
-     call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
+     call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
      if( ESMF_LogMsgFoundError(localrc,                                        &
              "cannot advance to next line of table " //                        &
               trim(descriptor_label) // " in file " // trim(lfilename),        &
@@ -305,7 +305,7 @@
   !-----------------------------------------------------------------------------
   ngrid = 0
   do krow=1,nrows
-     call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
+     call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
      call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
      if( trim(adjustL(ltmp)) == "&" ) then
      ! continuation line
@@ -349,9 +349,16 @@
 
      ! new grid specification - not continuation symbol and not end of row
      if( new_row(krow) /= 0 .and. ncolumns(krow) > 0 ) then
-     call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
+        call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc,                                     &
+          "unable to go to next line in table " // trim(descriptor_label),     &
+          rcToReturn=rc)) return
+
         ! extract rank of current grid
-        call ESMF_ConfigGetAttribute(localcf, grank)
+        call ESMF_ConfigGetAttribute(localcf, grank, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, "unable to get grank",              &
+           rcToReturn=rc)) return
+
         irank = 1        ! grid element being read (<= rank)
         kelements = 1    ! row element just read
         irow = krow   
@@ -360,6 +367,7 @@
            call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
                  "attempting to access a higher index grid than exists.",      &
                  rcToReturn=rc)
+           return
         endif
         ! allocate workspace
         grid(igrid)%grank = grank
@@ -395,6 +403,17 @@
                                 lfilename, descriptor_label, localcf, localrc)  
            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,               &
                rcToReturn=rc)) return
+           
+           ! sanity check - specification size of grid dimensions must be
+           ! positive, but not huge.
+           if( (gsize <= 0).or.(gsize > Harness_Max_Size) ) then
+              localrc = ESMF_FAILURE
+              write(ltmp,"(i9)") gsize
+              call ESMF_LogMsgSetError(ESMF_FAILURE,"grid specifier size "//   &
+                 "is not within acceptable range " // ltmp,                    &
+                 rcToReturn=rc)
+              return
+           endif
 
            grid(igrid)%gsize(irank) = gsize 
            tmp_grid(igrid)%gsize(irank) = gsize 
@@ -524,7 +543,7 @@
   !-----------------------------------------------------------------------------
   ! open the grid file
   !-----------------------------------------------------------------------------
-  localcf = ESMF_ConfigCreate(localrc)
+  localcf = ESMF_ConfigCreate(rc=localrc)
   if( ESMF_LogMsgFoundError(localrc, "cannot create config object",            &
                             rcToReturn=rc) ) return
 
@@ -545,18 +564,20 @@
          "cannot find config label grid_type:",                                &
          rcToReturn=rc) ) return
 
-  if( trim(adjustL( ltmp )) /= 'REMAP' ) call ESMF_LogMsgSetError(             &
-            ESMF_FAILURE, "Wrong grid type for remap test in file " //         &
-            trim( lfilename ),  rcToReturn=rc)
+  if( trim(adjustL( ltmp )) /= 'REMAP' ) then 
+     call ESMF_LogMsgSetError(                                                 &
+     ESMF_FAILURE, "Wrong grid type for remap test in file " //                &
+     trim( lfilename ),  rcToReturn=rc)
+     return
+  endif
 
   !-----------------------------------------------------------------------------
   ! search for the grid specifier table
   !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, trim(descriptor_label), rc=localrc )
-  if (localrc .ne. ESMF_SUCCESS) print*,' find descriptor label failed'
   if( ESMF_LogMsgFoundError(localrc,                                           &
-         "cannot find config label " // trim(descriptor_label),                &
-         rcToReturn=rc) ) return
+     "cannot find config label " // trim(descriptor_label),                    &
+      rcToReturn=rc) ) return
 
   !-----------------------------------------------------------------------------
   ! determine the total number of table rows, continue only if not empty
@@ -564,10 +585,10 @@
   ! possibility of continued lines.
   !-----------------------------------------------------------------------------
   call ESMF_ConfigGetDim(localcf, nrows, ntmp, trim(descriptor_label),         &
-                         rc=localrc)
+           rc=localrc)
   if( ESMF_LogMsgFoundError(localrc,                                           &
-         "cannot get descriptor table size in file " // trim(lfilename),       &
-         rcToReturn=rc) ) return
+     "cannot get descriptor table size in file " // trim(lfilename),           &
+     rcToReturn=rc) ) return
 
   if( nrows .le. 0 ) then
      call ESMF_LogMsgSetError( ESMF_FAILURE,                                   &
@@ -581,17 +602,17 @@
   !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, trim(descriptor_label), rc=localrc )
   if( ESMF_LogMsgFoundError(localrc,                                           &
-         "cannot find config label " // trim(descriptor_label),                &
-         rcToReturn=rc) ) return
+     "cannot find config label " // trim(descriptor_label),                    &
+     rcToReturn=rc) ) return
 
   allocate( ncolumns(nrows) )
 
   do krow=1,nrows
-     call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
+     call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
      if( ESMF_LogMsgFoundError(localrc,                                        &
-             "cannot advance to next line of table " //                        &
-              trim(descriptor_label) // " in file " // trim(lfilename),        &
-              rcToReturn=rc) ) return
+        "cannot advance to next line of table " //                             &
+        trim(descriptor_label) // " in file " // trim(lfilename),              &
+        rcToReturn=rc) ) return
 
 
       ncolumns(krow) = ESMF_ConfigGetLen(localcf, rc=localrc)
@@ -615,8 +636,8 @@
   !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, trim(descriptor_label), rc=localrc )
   if( ESMF_LogMsgFoundError(localrc,                                           &
-         "cannot find config label " // trim(descriptor_label),                &
-         rcToReturn=rc) ) return
+     "cannot find config label " // trim(descriptor_label),                    &
+     rcToReturn=rc) ) return
   allocate( new_row(nrows) )
 
   !-----------------------------------------------------------------------------
@@ -624,7 +645,7 @@
   !-----------------------------------------------------------------------------
   ngrid = 0
   do krow=1,nrows
-     call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
+     call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
      call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
      if( trim(adjustL(ltmp)) == "&" ) then
      ! continuation line
@@ -653,8 +674,8 @@
   !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, trim(descriptor_label), rc=localrc )
   if( ESMF_LogMsgFoundError(localrc,                                           &
-         "cannot find config label " // trim(descriptor_label),                &
-         rcToReturn=rc) ) return
+     "cannot find config label " // trim(descriptor_label),                    &
+     rcToReturn=rc) ) return
 
   !-----------------------------------------------------------------------------
   ! move to the next line in the table and confirm that (1) the line doesn't
@@ -667,7 +688,7 @@
 
      ! new grid specification - not continuation symbol and not end of row
      if( new_row(krow) /= 0 .and. ncolumns(krow) > 0 ) then
-     call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
+     call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
         ! extract rank of current grid
         call ESMF_ConfigGetAttribute(localcf, grank)
         irank = 1        ! grid element being read (<= rank)
@@ -678,6 +699,7 @@
            call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
                  "attempting to access a higher index grid than exists.",      &
                  rcToReturn=rc)
+           return
         endif
         ! allocate workspace
         src_grid(igrid)%grank = grank
@@ -707,6 +729,7 @@
            call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
                  "Source flag expected but not found in remapping" //          &
                  " grid specifier file" // trim(lfilename), rcToReturn=rc)
+           return
         endif
 
         !-----------------------------------------------------------------------
@@ -789,6 +812,7 @@
            call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
                  "Destination flag expected but not found in remapping" //     &
                  " grid specifier file " // trim(lfilename), rcToReturn=rc)
+           return
         endif
 
         !-----------------------------------------------------------------------
@@ -876,6 +900,7 @@
            call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
                  "Test Function flag expected but not found in remapping" //   &
                  " grid specifier file " // trim(lfilename), rcToReturn=rc)
+           return
         endif
 
         !-----------------------------------------------------------------------

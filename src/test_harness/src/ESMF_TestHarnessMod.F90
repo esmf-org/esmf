@@ -36,6 +36,8 @@
 
   use ESMF_Mod
   use ESMF_TestHarnessTypesMod
+  use ESMF_TestHarnessUtilMod
+
 
   implicit none
 
@@ -46,9 +48,513 @@
 !===============================================================================
 
 
- !------------------------------------------------------------------------------
- ! Routines to parse input files for descriptor string, and specifier files.
- !------------------------------------------------------------------------------
+
+!===============================================================================
+! !IROUTINE: read_descriptor_files
+
+! !INTERFACE:
+  subroutine read_descriptor_files(numRecords,rcrd,rc)
+!
+! !ARGUMENTS:
+  integer, intent(inout) :: numRecords
+  type(problem_descriptor_records), pointer, intent(inout) :: rcrd(:) 
+  integer, intent(inout) :: rc
+
+!
+! !DESCRIPTION:
+! This routine takes the problem descriptor file names specified in the top 
+! level config file "test_harness.rc" and extracts from a config table the
+! "problem descriptor string" and all the "problem specifier files." These
+! helper files are divided into groups by flags preceeded by a dash. The
+! "-c" flag (currently not implemented) indicates file(s) containing the CLASS 
+! specific settings. The "-d" flag indicates the file(s) containing an ensemble
+! of distribution configurations to be run with the specific "problem descriptor
+! string." Likewise the "-g" flag indicates the file(s) containing an ensemble
+! of grid configurations to be run with the specific "problem descriptor string."
+! This routine only extracts the information from the configuration file,
+! additional processing occurs in a later routine.
+!
+! Upon completion, the routine returns the values to a public record
+
+!   har%rcrd(n)%numStrings      number of problem descriptor strings in 
+!                               the n'th problem descriptor file.
+
+!   har%rcrd(n)%str(k)%pds   k'th problem descriptor from the n'th
+!                               problem descriptor file.
+!
+!   har%rcrd(n)%str(k)%nDfiles   number of distribution specifier files
+
+!   har%rcrd(n)%str(k)%Dfiles(l)%filename   filename string for
+!                                        the l'th distribution specifier file 
+!                                        associated with the k'th problem descriptor
+!                                        string, located in the n'th problem 
+!                                        descriptor file.                  
+!
+!   har%rcrd(n)%str(k)%nGfiles        number of grid specifier files
+!
+!   har%rcrd(n)%str(k)%Gfile(l)%filename   filename string for
+!                                        the l'th grid specifier file associated
+!                                        with the k'th problem descriptor string
+!                                        located in the n'th problem descriptor
+!                                        file.                  
+!===============================================================================
+
+  ! local ESMF types
+  type(ESMF_Config)      :: localcf
+
+  ! local parameters
+  character(ESMF_MAXSTR), parameter :: descriptor_label      &
+                                               = "problem_descriptor_string::"
+
+  ! local character types
+  type (sized_char_array), allocatable :: ltmpstring(:), lstring(:)
+
+  ! local character strings
+  character(ESMF_MAXSTR) :: lfilename, ltmp
+  character(ESMF_MAXSTR) :: lchar, lchar1, lchar2
+  
+  logical :: flag = .true.
+
+! local integer variables
+  integer :: n, nn, k, pos, kcol, ncount, npds, ntmp
+  integer :: kfile, kstr, pstring
+  integer :: cpos, dpos, gpos, csize, dsize, gsize
+  integer, allocatable :: kcount(:), ncolumns(:), nstrings(:)
+  integer, allocatable :: pds_loc(:), pds_flag(:)
+  integer :: localrc
+
+! local logical variable
+  logical :: endflag = .false.
+  logical :: cflag, dflag, gflag
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  ! open each problem descriptor and extract the contents of the table
+  ! containing the problem descriptor strings and the specifier filenames
+  !-----------------------------------------------------------------------------
+  allocate( nstrings(numRecords) )
+
+  do kfile=1,numRecords
+    !---------------------------------------------------------------------------
+    ! create a new config handle for reading problem descriptor strings
+    !---------------------------------------------------------------------------
+    localcf = ESMF_ConfigCreate(rc=localrc)
+    if( ESMF_LogMsgFoundError(localrc, "cannot create config object",          &
+                         rcToReturn=rc) ) return
+
+    !---------------------------------------------------------------------------
+    ! load file holding the problem descriptor strings
+    !---------------------------------------------------------------------------
+    lfilename = trim(adjustL(rcrd(kfile)%filename))
+
+    call ESMF_ConfigLoadFile(localcf, trim(adjustL(lfilename)), rc=localrc )
+    if( ESMF_LogMsgFoundError(localrc, "cannot load config file " //           &
+            trim(adjustL(lfilename)), rcToReturn=rc) ) return
+
+    !---------------------------------------------------------------------------
+    ! Search for the problem descriptor string table
+    !---------------------------------------------------------------------------
+    call ESMF_ConfigFindLabel(localcf, trim(adjustL(descriptor_label)),        &
+             rc=localrc )
+    if( ESMF_LogMsgFoundError(localrc, "cannot find config label " //          &
+             trim(adjustL(descriptor_label)), rcToReturn=rc) ) return
+
+    !---------------------------------------------------------------------------
+    ! determine the number of entries
+    !---------------------------------------------------------------------------
+    call ESMF_ConfigGetDim(localcf, nstrings(kfile), ntmp,                     &
+             trim(adjustL(descriptor_label)), rc=localrc)
+    if( ESMF_LogMsgFoundError(localrc, "cannot get descriptor table size in "  &
+            // "file " // trim(adjustL(lfilename)), rcToReturn=rc) ) return
+
+    !---------------------------------------------------------------------------
+    ! determine that the table has entries before preceeding
+    !---------------------------------------------------------------------------
+    if( nstrings(kfile) .le. 0 ) then
+      call ESMF_LogMsgSetError( ESMF_FAILURE, "problem descriptor table empty" &
+               // " in file " // trim(adjustL(lfilename)), rcToReturn=rc)
+      return
+    endif
+
+    !---------------------------------------------------------------------------
+    ! extract column lengths of the table to determine the number of specifier files
+    !---------------------------------------------------------------------------
+    call ESMF_ConfigFindLabel(localcf, trim(adjustL(descriptor_label)),        &
+           rc=localrc )
+    if( ESMF_LogMsgFoundError(localrc, "cannot find config label" //           &
+           trim(adjustL(descriptor_label)), rcToReturn=rc) ) return
+
+    allocate( ncolumns(nstrings(kfile)) )
+    allocate ( ltmpstring(nstrings(kfile)) )
+
+    do kstr=1,nstrings(kfile)
+      call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
+      if( ESMF_LogMsgFoundError(localrc, "cannot advance to the next line of"  &
+              //" the table "// trim(adjustL(descriptor_label)) // " in file " &
+              // trim(adjustL(lfilename)), rcToReturn=rc) ) return
+
+      ncolumns(kstr) = ESMF_ConfigGetLen(localcf, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS .or. ncolumns(kstr) .lt. 1 ) then
+        write(lchar,"(i5)")  kstr
+        call ESMF_LogMsgSetError( ESMF_FAILURE, "problem reading line " //     &
+                 trim(adjustL(lchar)) // " of table in file " //               &
+                 trim(adjustL(lfilename)), rcToReturn=rc)
+        return
+      endif
+
+      !-------------------------------------------------------------------------
+      ! allocate tempory storage so that the file needs to be read only once
+      !-------------------------------------------------------------------------
+      allocate ( ltmpstring(kstr)%tag( ncolumns(kstr) ) )
+      ltmpstring(kstr)%tagsize = ncolumns(kstr)
+    enddo    ! end string
+
+    !---------------------------------------------------------------------------
+    ! Starting again at the top of the table, extract the table contents into
+    ! a local character array structure for later processing
+    !---------------------------------------------------------------------------
+    call ESMF_ConfigFindLabel(localcf, trim(adjustL(descriptor_label)),        &
+             rc=localrc )
+    if( ESMF_LogMsgFoundError(localrc,                                         &
+            "cannot find config label " // trim(adjustL(descriptor_label)),    &
+            rcToReturn=rc) ) return
+
+    do kstr=1,nstrings(kfile)
+    !---------------------------------------------------------------------------
+    ! copy the table into a character array
+    !---------------------------------------------------------------------------
+      call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
+      if( ESMF_LogMsgFoundError(localrc, "cannot advance to the next line " // &
+              "of table " // trim(adjustL(descriptor_label)) // " in file " // &
+              trim(adjustL(lfilename)), rcToReturn=rc) ) return
+
+      do kcol=1, ncolumns(kstr)
+        call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
+        write(lchar,"(i5)") kstr
+        if( ESMF_LogMsgFoundError(localrc, "cannot get table entry from line " &
+                // trim(adjustl(lchar)) //  " column " // char(kcol)  //       &
+                "of file " // trim(adjustL(lfilename)),                        &
+                rcToReturn=rc) ) return
+         ltmpstring(kstr)%tag(kcol)%string = trim( ltmp )
+      enddo     ! end col
+    enddo       ! end string
+
+    !---------------------------------------------------------------------------
+    ! count the number of actual problem descriptor strings & continuation lines
+    !---------------------------------------------------------------------------
+    ncount = 0
+    npds = 0
+    allocate( pds_flag(nstrings(kfile)) )
+    do kstr=1,nstrings(kfile)
+       if( trim(adjustL(ltmpstring(kstr)%tag(1)%string)) /= "&") then
+         pds_flag(kstr) = 1         
+         npds = npds + 1
+       else
+         ncount = ncount + 1
+         pds_flag(kstr) = 0         
+       endif
+    enddo     ! end string
+    ! sanity check
+    if( (npds + ncount) /= nstrings(kfile) ) then
+      write(lchar,"(i5)")  nstrings(kfile)
+      write(lchar1,"(i5)")  npds
+      write(lchar2,"(i5)")  ncount
+      call ESMF_LogMsgSetError( ESMF_FAILURE, "number of rows " //             &
+             trim(adjustl(lchar)) // " in the table"  //                       &
+             " does not match the sum of strings " // trim(adjustl(lchar1))    &
+             // " and continuation lines " //  trim(adjustl(lchar2)) //        &
+             " of file " // trim(adjustL(lfilename)), rcToReturn=rc) 
+      return
+    endif
+
+    rcrd(kfile)%numStrings = npds
+
+    !---------------------------------------------------------------------------
+    ! save the addresses of the non-continuation lines
+    !---------------------------------------------------------------------------
+    k = 0
+    allocate( pds_loc(npds) )
+    do kstr=1,nstrings(kfile)
+       if( pds_flag(kstr) == 1 ) then
+         k = k + 1
+         pds_loc(k) =  kstr        
+       endif
+    enddo     ! end string
+    ! sanity check
+    if( npds .ne. k ) then 
+      write(lchar,"(i5)")  nstrings(kfile)
+      write(lchar1,"(i5)")  npds
+      write(lchar2,"(i5)")  ncount
+      call ESMF_LogMsgSetError( ESMF_FAILURE, "number of rows " //             &
+             trim(adjustl(lchar)) // " in the table" //                        &
+             " does not match the sum of strings "//trim(adjustl(lchar1))      &
+             // " and continuation lines " // trim(adjustl(lchar2)) //         &
+             " of file " // trim(adjustL(lfilename)), rcToReturn=rc)
+      return
+    endif
+
+    !---------------------------------------------------------------------------
+    ! to simplify the later search algorithm, reshape the input table from a 
+    ! series of lines with a PDS plus optional continuations lines, to a single
+    ! line with everything on it. Count the total number of elements on both 
+    ! type of lines to that we can allocate enough memory to store the whole 
+    ! specification.
+    !---------------------------------------------------------------------------
+    allocate( kcount(npds) )
+    do k=1,npds
+      if( trim( ltmpstring( pds_loc(k) )%tag(1)%string ) == "&") then
+        write(lchar,"(i5)")   pds_loc(k)
+        call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
+                 "no problem descriptor string on line " //                    &
+                 trim(adjustl(lchar)) // " of file " //                        &
+                 trim(adjustL(lfilename)),rcToReturn=rc)
+        return
+      else    ! at new PDS
+        kcount(k) = ncolumns(pds_loc(k))
+        pstring =  pds_loc(k)
+ 21     continue
+        !-----------------------------------------------------------------------
+        ! if not end of table, look for additional continuation lines 
+        !-----------------------------------------------------------------------
+        if(pstring < nstrings(kfile)) then
+          pstring =  pstring + 1
+          !---------------------------------------------------------------------
+          ! if find a continuation line add additional elements (minus the
+          ! continuation symbol "&")
+          !---------------------------------------------------------------------
+          if( trim( ltmpstring(pstring)%tag(1)%string ) == "&" ) then 
+            kcount(k) = kcount(k) + ncolumns(pstring) -1
+            goto 21
+          endif
+        endif
+
+      endif
+    enddo     ! k
+    !---------------------------------------------------------------------------
+    ! create reshaped workspace to hold the problem descriptor table contents
+    !---------------------------------------------------------------------------
+    allocate ( lstring(npds) )    
+    do k=1, npds
+      allocate ( lstring(k)%tag(kcount(k)) )    
+
+      do n=1,ncolumns(pds_loc(k))
+        lstring(k)%tag(n)%string = trim( ltmpstring(pds_loc(k))%tag(n)%string )
+      enddo     ! n
+        
+      pstring =  pds_loc(k)
+      nn = ncolumns(pds_loc(k))+1
+ 22   continue
+
+      !-------------------------------------------------------------------------
+      ! if not end of table, look for additional continuation lines
+      !-------------------------------------------------------------------------
+      if(pstring < nstrings(kfile)) then
+        pstring =  pstring + 1
+
+        !-----------------------------------------------------------------------
+        ! if find a continuation line, and add to the line length (minus the 
+        ! continuation symbol)
+        !-----------------------------------------------------------------------
+        if( trim( ltmpstring(pstring)%tag(1)%string ) == "&" ) then
+          do n=2,ncolumns(pstring)
+            lstring(k)%tag(nn)%string = trim(ltmpstring(pstring)%tag(n)%string )
+            nn = nn + 1
+          enddo     ! n
+          goto 22
+        endif
+      endif
+    enddo     ! k
+
+    !---------------------------------------------------------------------------
+    ! mine the table entries for the problem descriptor strings
+    !---------------------------------------------------------------------------
+    allocate( rcrd(kfile)%str(npds) )
+    do k=1,npds
+       rcrd(kfile)%str(k)%pds = trim( lstring(k)%tag(1)%string )
+    enddo     ! k
+
+    !---------------------------------------------------------------------------
+    ! mine the table entries for the names of the specifier files
+    !---------------------------------------------------------------------------
+    do k=1,npds
+      pos = 2
+      endflag = .true.
+      ! drs debug
+      cflag = .true.  ! set to true so that it doesn't look for a "-c" argument
+      ! drs debug
+      dflag = .false.
+      gflag = .false.
+      !-------------------------------------------------------------------------
+      ! loop through the specifiers for each of the problem desriptor strings
+      !-------------------------------------------------------------------------
+      do while(endflag)
+      ltmp = trim( lstring(k)%tag(pos)%string )
+
+        select case ( trim(adjustL(ltmp)) )
+
+         !----------------------------------------------------------------------
+         ! class descriptor file
+         !----------------------------------------------------------------------
+         case('-c')
+         if( cflag ) then
+           write(lchar,"(i5)") k
+           call ESMF_LogMsgSetError( ESMF_FAILURE, "the -c specifier flag"  &
+                    // " is used more than once on the " //                 &
+                   trim(adjustl(lchar))//"th string of the problem " //     &
+                   "descriptor table in file" // trim(lfilename),           &
+                   rcToReturn=rc)
+           return
+         endif
+         ! starting position
+         cpos = pos
+ 11      continue
+         ! if not at the end of the row, then check next element
+         if( pos < kcount(k) ) then
+           pos = pos + 1
+           ltmp =  trim(adjustL( lstring(k)%tag(pos)%string ))
+           ! if not a flag, repeat until a flag
+           if( ltmp(1:1) /= '-' ) goto 11
+           csize = pos-1-cpos
+           endflag = .true.
+         else  ! at end of row
+           csize = pos-cpos
+           endflag = .false.
+         endif
+
+         allocate( rcrd(kfile)%str(k)%classfile%tag(csize) )
+         rcrd(kfile)%str(k)%classfile%tagsize = csize
+         do n=1,csize
+           rcrd(kfile)%str(k)%classfile%tag(n)%string =                 &
+                                 trim(adjustL( lstring(k)%tag(cpos+n)%string ))
+         enddo      ! n
+         cflag = .true.
+
+         !----------------------------------------------------------------------
+         ! distribution descriptor file
+         !----------------------------------------------------------------------
+         case('-d')
+         if( dflag ) then
+           write(lchar,"(i5)") k
+           call ESMF_LogMsgSetError( ESMF_FAILURE, "the -d specifier flag"     &
+                    // " is used more than once on the " //                    &
+                   trim(adjustl(lchar))//"th string of the problem " //        &
+                   "descriptor table in file" // trim(adjustL(lfilename)),     &
+                   rcToReturn=rc)
+           return
+         endif
+         ! starting position
+         dpos = pos
+
+ 12      continue
+         ! if not at the end of the row, then check next element
+         if( pos < kcount(k) ) then
+           pos = pos + 1
+           ltmp =  trim(adjustL( lstring(k)%tag(pos)%string ))
+           ! if not a flag, repeat until a flag
+           if( ltmp(1:1) /= '-' ) goto 12
+           dsize = pos-1-dpos
+           endflag =.true. 
+         else  ! at end of row
+           dsize = pos-dpos
+           endflag =.false. 
+         endif
+
+         allocate( rcrd(kfile)%str(k)%Dfiles(dsize) )
+         rcrd(kfile)%str(k)%nDfiles = dsize
+         do n=1,dsize
+           rcrd(kfile)%str(k)%Dfiles(n)%filename =                      &
+                               trim(adjustL( lstring(k)%tag(dpos+n)%string ))
+         enddo      ! n
+         dflag = .true.
+
+         !----------------------------------------------------------------------
+         ! grid descriptor file
+         !----------------------------------------------------------------------
+         case('-g')
+         if( gflag ) then
+           write(lchar,"(i5)") k
+           call ESMF_LogMsgSetError( ESMF_FAILURE, "the -g specifier flag" //  &
+                    " is used more than once on the " // trim(adjustl(lchar))  &
+                    //"th string of the problem descriptor table in file " //  &
+                    trim(adjustL(lfilename)), rcToReturn=rc)
+           return
+         endif
+         ! starting position
+         gpos = pos
+
+ 13      continue
+         ! if not at the end of the row, then check next element
+         if( pos < kcount(k) ) then
+           pos = pos + 1
+           ltmp =  trim(adjustL( lstring(k)%tag(pos)%string ))
+           ! if not a flag, repeat until a flag
+           if( ltmp(1:1) /= '-' ) goto 13
+           gsize = pos-1-gpos
+           endflag = .true.
+         else  ! at end of row
+           gsize = pos-gpos
+           endflag = .false.
+         endif  
+
+         allocate( rcrd(kfile)%str(k)%Gfiles(gsize) )
+         rcrd(kfile)%str(k)%nGfiles = gsize
+         do n=1,gsize
+           rcrd(kfile)%str(k)%Gfiles(n)%filename =                      &
+                             trim(adjustL(lstring(k)%tag(gpos+n)%string))
+         enddo     ! n
+         gflag = .true.
+
+         !----------------------------------------------------------------------
+         ! syntax error - entry after pds should be a flag
+         !----------------------------------------------------------------------
+         case default
+         write(lchar,"(i5)")  pds_loc(k)
+         call ESMF_LogMsgSetError( ESMF_FAILURE,                               &
+               "no specifier flag on line " // trim(adjustl(lchar)) //         &
+               " of file " //trim(lfilename), rcToReturn=rc)
+         return
+
+        end select  ! specifier flag type
+      end do  ! while
+    enddo      ! k
+
+    !---------------------------------------------------------------------------
+    ! finish cleaning up workspace before opening new file
+    !---------------------------------------------------------------------------
+    deallocate( ncolumns, kcount )
+    deallocate( ltmpstring, lstring )
+    deallocate( pds_loc, pds_flag )
+
+    !---------------------------------------------------------------------------
+    ! clean up CF
+    !---------------------------------------------------------------------------
+    call ESMF_ConfigDestroy(localcf, rc=localrc)
+    if( ESMF_LogMsgFoundError(localrc, "cannot destroy config file "  //       &
+            trim(adjustL(lfilename)),  rcToReturn=rc) ) return
+  enddo  ! file
+
+  !-----------------------------------------------------------------------------
+  ! final deallocation
+  !-----------------------------------------------------------------------------
+  deallocate( nstrings )
+
+  !-----------------------------------------------------------------------------
+  ! if I've gotten this far without an error, then the routine has succeeded.
+  !-----------------------------------------------------------------------------
+  rc = ESMF_SUCCESS
+
+  !-----------------------------------------------------------------------------
+  end subroutine read_descriptor_files
+  !-----------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+! Routines to parse input files for descriptor string, and specifier files.
+!-------------------------------------------------------------------------------
+
 
   !-----------------------------------------------------------------------------
   subroutine array_redist_test(PDS, VM, rc)
@@ -81,7 +587,6 @@
   type(ESMF_LocalArray), allocatable :: larrayList(:)
   integer, allocatable :: LBnd(:,:), UBnd(:,:) 
   type(ESMF_IndexFlag) :: indexflag
-
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -151,14 +656,17 @@
           if (ESMF_LogMsgFoundError(localrc,"source array validation error ",  &
                   rcToReturn=rc)) return
 
+          call ESMF_ArrayPrint( src_array, rc=localrc )
+          if (ESMF_LogMsgFoundError(localrc,"source array print error ",       &
+                  rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! populate source array for redistribution test
           !---------------------------------------------------------------------
-          call populate_redist_array(src_array, src_distgrid, PDS%SrcMem,      &
-                       PDS%Gfiles(iGfile)%src_grid(iG), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error populating source array ",  &
-                  rcToReturn=rc)) return
+!         call populate_redist_array(src_array, src_distgrid, PDS%SrcMem,      &
+!                      PDS%Gfiles(iGfile)%src_grid(iG), localrc)
+!         if (ESMF_LogMsgFoundError(localrc,"error populating source array ",  &
+!                 rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! create return array
@@ -173,6 +681,10 @@
              // " and entry " // trim(adjustL(liG)) // " of file " //          &
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
+
+          call ESMF_ArrayPrint( return_array, rc=localrc )
+          if (ESMF_LogMsgFoundError(localrc,"source array print error ",       &
+                  rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! populate source array for redistribution test
@@ -280,7 +792,7 @@
      print*,de,' display array ',LBnd(1,de),UBnd(1,de),LBnd(2,de),UBnd(2,de)
      do i1=LBnd(1,de), UBnd(1,de)
         do i2=LBnd(2,de), UBnd(2,de)
-           print*,de,' dst_array ',i1,i2,fptr2(i1,i2) 
+!          print*,de,' dst_array ',i1,i2,fptr2(i1,i2) 
         enddo   !   i2
      enddo    !   i1
   enddo    ! de
@@ -299,7 +811,7 @@
           !---------------------------------------------------------------------
           ! redistribution store for forward direction
           !---------------------------------------------------------------------
-          call ESMF_ArrayRedistStore(srcArray=src_array, dstArray=dst_array,   &
+          call ESMF_ArrayRedistStore(srcArray=src_array, dstArray=return_array,&
                    routehandle=redistHandle_forward, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
                   " forward direction", rcToReturn=rc)) return
@@ -315,10 +827,10 @@
           !---------------------------------------------------------------------
           ! redistribution store for reverse direction
           !---------------------------------------------------------------------
-          call ESMF_ArrayRedistStore(srcArray=dst_array, dstArray=return_array,&
-                   routehandle=redistHandle_reverse, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
-                  " reverse direction", rcToReturn=rc)) return
+!         call ESMF_ArrayRedistStore(srcArray=dst_array, dstArray=return_array,&
+!                  routehandle=redistHandle_reverse, rc=localrc)
+!         if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
+!                 " reverse direction", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! forward redistribution run
@@ -354,10 +866,10 @@
           if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
                   " forward failed ", rcToReturn=rc)) return
 
-          call ESMF_ArrayRedistRelease(routehandle=redistHandle_reverse,       &
-                   rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
-                  " reverse failed ", rcToReturn=rc)) return
+!         call ESMF_ArrayRedistRelease(routehandle=redistHandle_reverse,       &
+!                  rc=localrc)
+!         if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
+!                 " reverse failed ", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! Destroy Array objects before moving to next test
@@ -396,7 +908,7 @@
   !-----------------------------------------------------------------------------
   ! if I've gotten this far without an error, then the routine has succeeded.
   !-----------------------------------------------------------------------------
-  localrc = ESMF_SUCCESS
+  rc = ESMF_SUCCESS
 
   !-----------------------------------------------------------------------------
   end subroutine array_redist_test
@@ -538,9 +1050,14 @@
     distgrid = ESMF_DistGridCreate(minIndex=BIndx, maxIndex=EIndx,             &
                    regDecomp=decompOrder, decompflag=decompType,               &
                    vm=VM, rc=localrc)
-
     if (ESMF_LogMsgFoundError(localrc,"error creating distgrid",               &
-             rcToReturn=rc)) return
+       rcToReturn=rc)) return
+
+  print*,'==============Dist Grid Create info=============      '
+       print*,' Min index ', BIndx
+       print*,' Max index ', EIndx
+       print*,' Decomp Order ', decompOrder
+  print*,'      '
 
   else
     ! singlely periodic connection
@@ -619,6 +1136,9 @@
   print*,' array create - rank ', Memory%memRank
   call ESMF_ArraySpecSet(ArraySpec, typekind=ESMF_TYPEKIND_R8,                 &
                          rank=Memory%memRank, rc=localrc)
+
+  print*,'==============array Create info=============      '
+   print*,' array spec set - memory rank ', Memory%memRank
   if (ESMF_LogMsgFoundError(localrc,"error creating ArraySpecSet",             &
                             rcToReturn=rc)) return
 
@@ -678,9 +1198,8 @@
         print*,'Memory Rank = Grid Rank ',Memory%memRank, ' = ', Memory%GridRank
         Array = ESMF_ArrayCreate(arrayspec=ArraySpec, distgrid=DistGrid,       &
                   indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-
         if (ESMF_LogMsgFoundError(localrc,"error creating non-haloed ESMF " // &
-                 "Array with no tensor dimensions", rcToReturn=rc)) return
+           "Array with no tensor dimensions", rcToReturn=rc)) return
 
      elseif( Memory%memRank > Memory%GridRank ) then
         !-----------------------------------------------------------------------
@@ -703,15 +1222,15 @@
         Array = ESMF_ArrayCreate(arrayspec=ArraySpec, distgrid=DistGrid,       &
                   indexflag=ESMF_INDEX_GLOBAL,                                 &
                   undistLBound=bottom, undistUBound=top, rc=localrc)
-
         if (ESMF_LogMsgFoundError(localrc,"error creating non-haloed ESMF " // &
-                 "Array with tensor dimensions", rcToReturn=rc)) return
+           "Array with tensor dimensions", rcToReturn=rc)) return
 
         deallocate( top, bottom )
      else
         print*,'error - Memory Rank < Grid Rank'
         call ESMF_LogMsgSetError( ESMF_FAILURE,"memory rank < Grid rank not"// &
                "supported ",rcToReturn=localrc)
+        return
      endif
 
   else
@@ -782,6 +1301,7 @@
         print*,'error - Memory Rank < Grid Rank'
         call ESMF_LogMsgSetError( ESMF_FAILURE,"memory rank < Grid rank not"// &
                "supported ",rcToReturn=localrc)
+        return
      endif
 
      !--------------------------------------------------------------------------
@@ -836,7 +1356,12 @@
   integer, allocatable :: top(:), bottom(:)
 
   ! local real variables
-  real(ESMF_KIND_R8), pointer :: fptr2(:,:)
+  real(ESMF_KIND_R8), pointer :: fptr1(:), fptr2(:,:)
+  real(ESMF_KIND_R8), pointer :: fptr3(:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr4(:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr5(:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr6(:,:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr7(:,:,:,:,:,:,:)
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -886,10 +1411,24 @@
   if( Memory%memRank ==  Memory%GridRank ) then
 
      select case(dimCount)
+     case(1)
+     !--------------------------------------------------------------------------
+     ! rank = 1
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr1, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              fptr1(i1) = localDeList(de) + 1000.0d0*i1
+           enddo    !   i1
+        enddo    ! de
      case(2)
-        !-----------------------------------------------------------------------
-        ! rank = 2
-        !-----------------------------------------------------------------------
+     !--------------------------------------------------------------------------
+     ! rank = 2
+     !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), fptr=fptr2, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
@@ -900,15 +1439,134 @@
            do i1=LBnd(1,de), UBnd(1,de)
               do i2=LBnd(2,de), UBnd(2,de)
                  fptr2(i1,i2) = localDeList(de) + 1000.0d0*i1 + 0.001d0*i2
-  !              print*,de,' populate ',i1,i2,fptr2(i1,i2) 
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(3)
+     !--------------------------------------------------------------------------
+     ! rank = 3
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr3, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    fptr3(i1,i2,i3) = localDeList(de) + 1.0d4*i1 + 10.0d2*i2 &
+                          + 1.0d-2*i3
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(4)
+     !--------------------------------------------------------------------------
+     ! rank = 4
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr4, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    do i4=LBnd(4,de), UBnd(4,de)
+                       fptr4(i1,i2,i3,i4) = localDeList(de) + 1.0d4*i1         &
+                             + 1.0d2*i2 + 1.0d-2*i3 + 1.0d-4*i4 
+                    enddo   !   i4
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(5)
+     !--------------------------------------------------------------------------
+     ! rank = 5
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr5, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    do i4=LBnd(4,de), UBnd(4,de)
+                       do i5=LBnd(5,de), UBnd(5,de)
+                          fptr5(i1,i2,i3,i4,i5) = localDeList(de) + 1.0d4*i1   &
+                             + 1.0d2*i2 + 1.0d0*i3 + 1.0d-2*i4  + 1.0d-4*i5
+                       enddo   !   i5
+                    enddo   !   i4
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(6)
+     !--------------------------------------------------------------------------
+     ! rank = 6
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr6, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    do i4=LBnd(4,de), UBnd(4,de)
+                       do i5=LBnd(5,de), UBnd(5,de)
+                       do i6=LBnd(6,de), UBnd(6,de)
+                       fptr6(i1,i2,i3,i4,i5,i6) = localDeList(de) +            &
+                             1.0d5*i1 + 1.0d3*i2 + 1.0d1*i3 + 1.0d-1*i4        &
+                             + 1.0d-3*i5 + 1.0d-5*i6
+                       enddo   !   i6
+                       enddo   !   i5
+                    enddo   !   i4
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(7)
+     !--------------------------------------------------------------------------
+     ! rank = 7
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr7, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    do i4=LBnd(4,de), UBnd(4,de)
+                       do i5=LBnd(5,de), UBnd(5,de)
+                       do i6=LBnd(6,de), UBnd(6,de)
+                       do i7=LBnd(7,de), UBnd(7,de)
+                          fptr7(i1,i2,i3,i4,i5,i6,i7) = localDeList(de) +      &
+                             1.0d5*i1 + 1.0d3*i2 + 1.0d1*i3 + 1.0d-1*i4        &
+                             + 1.0d-3*i5 + 1.0d-5*i6 + 1.0d0*i7
+                       enddo   !   i7
+                       enddo   !   i6
+                       enddo   !   i5
+                    enddo   !   i4
+                 enddo   !   i3
               enddo   !   i2
            enddo    !   i1
         enddo    ! de
      case default
-        ! error
+     !--------------------------------------------------------------------------
+     ! error
+     !--------------------------------------------------------------------------
         localrc = ESMF_FAILURE
         call ESMF_LogMsgSetError(ESMF_FAILURE,"DimCount inot between 1 and 7", &
                  rcToReturn=localrc)
+        return
      end select
 
   !-----------------------------------------------------------------------------
@@ -970,9 +1628,20 @@
   logical :: nohaloflag
 
   ! local real variables
-  real(ESMF_KIND_R8), pointer :: farray2D(:,:)
+  real(ESMF_KIND_R8), pointer :: farray1D(:), farray2D(:,:)
+  real(ESMF_KIND_R8), pointer :: farray3D(:,:,:)
+  real(ESMF_KIND_R8), pointer :: farray4D(:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: farray5D(:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: farray6D(:,:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: farray7D(:,:,:,:,:,:,:)
 
-  real(ESMF_KIND_R8), pointer :: rarray2D(:,:)
+  real(ESMF_KIND_R8), pointer :: rarray1D(:), rarray2D(:,:)
+  real(ESMF_KIND_R8), pointer :: rarray3D(:,:,:)
+  real(ESMF_KIND_R8), pointer :: rarray4D(:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: rarray5D(:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: rarray6D(:,:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: rarray7D(:,:,:,:,:,:,:)
+
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -1015,6 +1684,7 @@
      localrc = ESMF_FAILURE
      call ESMF_LogMsgSetError(ESMF_FAILURE,"local De Counts do not agree",     &
               rcToReturn=localrc)
+     return
   endif
 
   allocate(localDeList2(localDeCount2))
@@ -1029,6 +1699,7 @@
         localrc = ESMF_FAILURE
         call ESMF_LogMsgSetError(ESMF_FAILURE,"local De lists do not agree",   &
                  rcToReturn=localrc)
+        return
      endif
      print*,' de , DeList 1 and 2 ',de,localDeList1(de),localDeList2(de)
   enddo
@@ -1051,6 +1722,7 @@
      localrc = ESMF_FAILURE
      call ESMF_LogMsgSetError(ESMF_FAILURE,"array 1 and 2 dimCounts disagree", &
               rcToReturn=localrc)
+     return
   endif
 
   !-----------------------------------------------------------------------------
@@ -1083,12 +1755,14 @@
            localrc = ESMF_FAILURE
            call ESMF_LogMsgSetError(ESMF_FAILURE,"exclusive L bounds disagree",&
               rcToReturn=localrc)
+           return
         endif
         if( UBnd(k,de) /= UBnd2(k,de) ) then
            print*,'exclusive Upper bounds disagree',UBnd(k,de),UBnd2(k,de) 
            localrc = ESMF_FAILURE
            call ESMF_LogMsgSetError(ESMF_FAILURE,"exclusive U bounds disagree",&
               rcToReturn=localrc)
+           return
         endif
      enddo
   enddo
@@ -1103,10 +1777,34 @@
   if( Memory%memRank ==  Memory%GridRank ) then
 
      select case(dimCount1)
+     case(1)
+     !--------------------------------------------------------------------------
+     ! rank = 1
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount1
+           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray1D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                  "array1 list", rcToReturn=rc)) return
+
+           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray1D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array2 list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              if( farray1D(i1) /= rarray1D(i1) ) then
+                 print*,' arrays disagree ',i1,farray1D(i1),                   &
+                        rarray1D(i1)
+              endif
+           enddo    !   i1
+        enddo    ! de
      case(2)
-        !-----------------------------------------------------------------------
-        ! rank = 2
-        !-----------------------------------------------------------------------
+     !--------------------------------------------------------------------------
+     ! rank = 2
+     !--------------------------------------------------------------------------
         do de=1, localDeCount1
            call ESMF_LocalArrayGet(larrayList1(de), fptr=farray2D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
@@ -1131,11 +1829,179 @@
            enddo    !   i1
            print*,"move on to next de"
         enddo    ! de
+     case(3)
+     !--------------------------------------------------------------------------
+     ! rank = 3
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount1
+           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray3D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                  "array1 list", rcToReturn=rc)) return
+
+           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray3D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array2 list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+             do i2=LBnd(2,de), UBnd(2,de)
+                do i3=LBnd(3,de), UBnd(3,de)
+                   if( farray3D(i1,i2,i3) /= rarray3D(i1,i2,i3) ) then
+                       print*,' arrays disagree ',i1,i2,i3,farray3D(i1,i2,i3), &
+                              rarray3D(i1,i2,i3)
+                   endif
+                enddo   !   i3
+             enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(4)
+     !--------------------------------------------------------------------------
+     ! rank = 4
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount1
+           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray4D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                  "array1 list", rcToReturn=rc)) return
+
+           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray4D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array2 list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+             do i2=LBnd(2,de), UBnd(2,de)
+                do i3=LBnd(3,de), UBnd(3,de)
+                   do i4=LBnd(4,de), UBnd(4,de)
+                      if( farray4D(i1,i2,i3,i4) /= rarray4D(i1,i2,i3,i4) ) then
+                       print*,' arrays disagree ',i1,i2,i3,i4,                 &
+                              farray4D(i1,i2,i3,i4), rarray4D(i1,i2,i3,i4)
+                      endif
+                   enddo   !   i4
+                enddo   !   i3
+             enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(5)
+     !--------------------------------------------------------------------------
+     ! rank = 5
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount1
+           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray5D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                  "array1 list", rcToReturn=rc)) return
+
+           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray5D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array2 list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+             do i2=LBnd(2,de), UBnd(2,de)
+                do i3=LBnd(3,de), UBnd(3,de)
+                   do i4=LBnd(4,de), UBnd(4,de)
+                      do i5=LBnd(5,de), UBnd(5,de)
+                         if( farray5D(i1,i2,i3,i4,i5) /=                       &
+                             rarray5D(i1,i2,i3,i4,i5) ) then
+                               print*,' arrays disagree ',i1,i2,i3,i4,i5,      &
+                              farray5D(i1,i2,i3,i4,i5),                        &
+                              rarray5D(i1,i2,i3,i4,i5)
+                         endif
+                      enddo   !   i5
+                   enddo   !   i4
+                enddo   !   i3
+             enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(6)
+     !--------------------------------------------------------------------------
+     ! rank = 6
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount1
+           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray6D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                  "array1 list", rcToReturn=rc)) return
+
+           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray6D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array2 list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+             do i2=LBnd(2,de), UBnd(2,de)
+                do i3=LBnd(3,de), UBnd(3,de)
+                   do i4=LBnd(4,de), UBnd(4,de)
+                      do i5=LBnd(5,de), UBnd(5,de)
+                      do i6=LBnd(6,de), UBnd(6,de)
+                         if( farray6D(i1,i2,i3,i4,i5,i6) /=                    &
+                             rarray6D(i1,i2,i3,i4,i5,i6) ) then
+                               print*,' arrays disagree ',i1,i2,i3,i4,i5,i6,   &
+                              farray6D(i1,i2,i3,i4,i5,i6),                     &
+                              rarray6D(i1,i2,i3,i4,i5,i6)
+                         endif
+                      enddo   !   i6
+                      enddo   !   i5
+                   enddo   !   i4
+                enddo   !   i3
+             enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(7)
+     !--------------------------------------------------------------------------
+     ! rank = 7
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount1
+           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray7D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                  "array1 list", rcToReturn=rc)) return
+
+           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray7D,             &
+                    docopy=ESMF_DATA_REF, rc=localrc)
+
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array2 list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+             do i2=LBnd(2,de), UBnd(2,de)
+                do i3=LBnd(3,de), UBnd(3,de)
+                   do i4=LBnd(4,de), UBnd(4,de)
+                      do i5=LBnd(5,de), UBnd(5,de)
+                      do i6=LBnd(6,de), UBnd(6,de)
+                      do i7=LBnd(7,de), UBnd(7,de)
+                         if( farray7D(i1,i2,i3,i4,i5,i6,i7) /=                 &
+                             rarray7D(i1,i2,i3,i4,i5,i6,i7) ) then
+                              print*,' arrays disagree ',i1,i2,i3,i4,i5,i6,i7, &
+                              farray7D(i1,i2,i3,i4,i5,i6,i7),                  &
+                              rarray7D(i1,i2,i3,i4,i5,i6,i7)
+                         endif
+                      enddo   !   i7
+                      enddo   !   i6
+                      enddo   !   i5
+                   enddo   !   i4
+                enddo   !   i3
+             enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+
      case default
         ! error
         localrc = ESMF_FAILURE
         call ESMF_LogMsgSetError(ESMF_FAILURE,"DimCount not between 1 and 7",  &
                  rcToReturn=localrc)
+        return
      end select
 
   !-----------------------------------------------------------------------------
@@ -1229,6 +2095,7 @@
       ! error
       call ESMF_LogMsgSetError( ESMF_FAILURE,"invalid test status value ",     &
                rcToReturn=localrc)
+      return
 
     endif
     ! print specifier files
@@ -1372,7 +2239,7 @@
 !-------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  subroutine parse_descriptor_string(nstrings, pds, localrc)
+  subroutine parse_descriptor_string(nstrings, pds, rc)
   !-----------------------------------------------------------------------------
   ! Routine parses a problem descriptor string and extracts:
   !	operation - redistribution or regrid plus method
@@ -1404,7 +2271,7 @@
   ! arguments
   integer, intent(in   ) :: nstrings
   type(problem_descriptor_strings), intent(inout) :: pds
-  integer, intent(  out) :: localrc
+  integer, intent(  out) :: rc
 
   ! local character strings
   character(ESMF_MAXSTR) :: lstring, lname
@@ -1422,6 +2289,7 @@
   integer :: srcBlock,dstBlock
   integer :: src_mem_rank, dst_mem_rank
   integer :: dist_rank, grid_rank
+  integer :: localrc
 
   integer, allocatable :: grid_order(:), dist_order(:)
   integer, allocatable :: grid_HaloL(:), grid_HaloR(:)
@@ -1431,6 +2299,7 @@
   logical :: endflag = .false.
 
   ! initialize return flag
+  rc = ESMF_RC_NOT_IMPL
   localrc = ESMF_RC_NOT_IMPL
 
   !-----------------------------------------------------------------------------
@@ -1449,7 +2318,7 @@
   call process_query(lstring, lname, tag, location, localrc)  
   if( ESMF_LogMsgFoundError(localrc,"syntax error in problem descriptor" //    &
           " string " // trim(adjustL(lstring)),                                &
-          rcToReturn=localrc) ) return
+          rcToReturn=rc) ) return
 
 
   ! store name (string) of operation and numerical code
@@ -1465,7 +2334,7 @@
                        dstMulti, dstBlock, localrc)
   if( ESMF_LogMsgFoundError(localrc,"syntax error in problem descriptor" //    &
           " string " // trim(adjustL(lstring)),                                &
-          rcToReturn=localrc) ) return
+          rcToReturn=rc) ) return
 
   ! a multiple block memory structure contains (), these are counted in
   ! srcMulti and dstMulti 
@@ -1499,14 +2368,16 @@
             (src_mem_rank /= dst_mem_rank) )  then
            localrc = ESMF_FAILURE
            call ESMF_LogMsgSetError(ESMF_FAILURE,"rank of memory block "       &
-                    // "symbols not properly paired", rcToReturn=localrc)
+                    // "symbols not properly paired", rcToReturn=rc)
+           return
         endif
 
         ! test for common mistake of using commas instead of semicolons
         if( pattern_query(dst_string,',') > 0 ) then
            localrc = ESMF_FAILURE
            call ESMF_LogMsgSetError(ESMF_FAILURE,"syntax error - commas"       &
-                    // " are not valid deliminators", rcToReturn=localrc)
+                    // " are not valid deliminators", rcToReturn=rc)
+           return
         endif
 
         !-----------------------------------------------------------------------
@@ -1537,14 +2408,14 @@
         call memory_separate( src_string, src_mem_rank, lsrc, localrc) 
         if( ESMF_LogMsgFoundError(localrc,"syntax error in SRC portion " //    &
                 "of problem descriptor string - memory separate " //           &
-                 trim(adjustL(lstring)), rcToReturn=localrc) ) return
+                 trim(adjustL(lstring)), rcToReturn=rc) ) return
         call interpret_descriptor_string( lsrc, src_mem_rank,                  & 
                  grid_rank, grid_order, grid_type, grid_HaloL, grid_HaloR,     &
                  grid_StagLoc, dist_rank, dist_order, dist_type, localrc)
 
         if( ESMF_LogMsgFoundError(localrc,"syntax error in SRC portion " //    &
                 "of problem descriptor string - interpret string " //          &
-                trim(adjustL(lstring)), rcToReturn=localrc) ) return
+                trim(adjustL(lstring)), rcToReturn=rc) ) return
 
         pds%SrcMem%GridRank = grid_rank
         pds%SrcMem%DistRank = dist_rank
@@ -1596,13 +2467,13 @@
         call memory_separate( dst_string, dst_mem_rank, ldst, localrc) 
         if( ESMF_LogMsgFoundError(localrc,"syntax error in SRC portion " //    &
                 "of problem descriptor string - memory separate " //           &
-                trim(adjustL(lstring)), rcToReturn=localrc) ) return
+                trim(adjustL(lstring)), rcToReturn=rc) ) return
         call interpret_descriptor_string( ldst, dst_mem_rank,                  & 
                 grid_rank, grid_order, grid_type, grid_HaloL, grid_HaloR,      &
                 grid_StagLoc, dist_rank, dist_order, dist_type, localrc)
         if( ESMF_LogMsgFoundError(localrc,"syntax error in SRC portion " //    &
                 "of problem descriptor string - interpret string " //          &
-                trim(adjustL(lstring)), rcToReturn=localrc) ) return
+                trim(adjustL(lstring)), rcToReturn=rc) ) return
 
         pds%DstMem%GridRank = grid_rank
         pds%DstMem%DistRank = dist_rank
@@ -1628,20 +2499,22 @@
         call ESMF_LogMsgSetError(ESMF_FAILURE,"syntax error - problem "        &
                  // " descriptor string does not conform to either " //        &
                  "single block syntax or to multiblock syntax",                &
-                 rcToReturn=localrc)
+                 rcToReturn=rc)
+        return
      endif
   else   ! error does not conform to either single block or multiblock
      localrc = ESMF_FAILURE
      call ESMF_LogMsgSetError(ESMF_FAILURE,"syntax error - problem "           &
               // " descriptor string does not conform to either " //           &
               "single block syntax or to multiblock syntax",                   &
-              rcToReturn=localrc)
+              rcToReturn=rc)
+     return
   endif
 
   !-----------------------------------------------------------------------------
   ! if I've gotten this far without an error, then the routine has succeeded.
   !-----------------------------------------------------------------------------
-  localrc = ESMF_SUCCESS
+  rc = ESMF_SUCCESS
 
   !-----------------------------------------------------------------------------
   end subroutine parse_descriptor_string
@@ -1725,28 +2598,31 @@
               call pattern_locate(lstring(kstring)%string, 'H{', itmp, iloc)    
               hbeg = iloc(1)
               if( itmp /= 1) then
-              !syntax error in halo specification
-              call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
-                      "halo specification missing prefix",                     &
-                      rcToReturn=localrc)
+                 !syntax error in halo specification
+                 call ESMF_LogMsgSetError( ESMF_FAILURE,                       &
+                         "halo specification missing prefix",                  &
+                         rcToReturn=localrc)
+                 return
               endif
 
               call set_locate(lstring(kstring)%string, ':', itmp, iloc)    
               hmid = iloc(1)
               if( itmp /= 1) then
-              !syntax error in halo specification
-              call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
-                      "halo specification missing separator",                  &
-                      rcToReturn=localrc)
+                 !syntax error in halo specification
+                 call ESMF_LogMsgSetError( ESMF_FAILURE,                       &
+                         "halo specification missing separator",               &
+                         rcToReturn=localrc)
+                 return
               endif
 
               call set_locate(lstring(kstring)%string, '}', itmp, iloc)    
               hend = iloc(1)
               if( itmp /= 1) then
-              !syntax error in halo specification
-              call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
-                      "halo specification missing suffix",                     &
-                      rcToReturn=localrc)
+                 !syntax error in halo specification
+                 call ESMF_LogMsgSetError( ESMF_FAILURE,                       &
+                         "halo specification missing suffix",                  &
+                         rcToReturn=localrc)
+                 return
               endif
               !-----------------------------------------------------------------
               ! halo syntax is correct, now read in the halo values as characters 
@@ -1764,11 +2640,13 @@
                       "halo specification "//trim(lstring(kstring)%string) //  &
                       " is not symmetric and/or is negative ",                 &
                       rcToReturn=localrc)
+                 return
            else
            ! syntax error for halo specification
               call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
                       "halo specification "//trim(lstring(kstring)%string),    &
                       rcToReturn=localrc)
+              return
            endif   ! halo
 
         elseif( halo == 0 ) then 
@@ -1782,6 +2660,7 @@
            call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
                    "halo specification wrong "//trim(lstring(kstring)%string), &
                    rcToReturn=localrc)
+           return
         endif    ! halo
 
      else 
@@ -1789,6 +2668,7 @@
         call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
                 "multiple grid specifications for single memory location " //  &
                 trim(lstring(kstring)%string), rcToReturn=localrc)
+        return
      endif
 
   enddo    !  kstring
@@ -1848,10 +2728,11 @@
               intstr = adjustL( lstagger( 1:sdelim(1)-1 ) ) 
               read(intstr, *) staggerloc(1)
            else
-           ! specification empty
+              ! specification empty
               call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
                       "stagger location specification empty ",                 &
                        rcToReturn=localrc)
+              return
            endif
         
            do k=2,ndelim
@@ -1859,10 +2740,11 @@
                  intstr = adjustL( lstagger( sdelim(k-1)+1:sdelim(k)-1) ) 
                  read(intstr, *) staggerloc(k)
               else
-              ! specification empty
+                 ! specification empty
                  call ESMF_LogMsgSetError( ESMF_FAILURE,                       &
                          "stagger location specification empty ",              &
                          rcToReturn=localrc)
+                 return
               endif
            enddo     ! ndelim
 
@@ -1875,6 +2757,7 @@
               call ESMF_LogMsgSetError( ESMF_FAILURE,                          &
                       "stagger location specification empty ",                 &
                       rcToReturn=localrc)
+              return
            endif
            ! clean up workspace
            deallocate( sdelim )
@@ -1884,12 +2767,14 @@
            call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
                    "wrong number of delimiters for grid rank",                 &
                    rcToReturn=localrc)
+           return
         endif    ! number of delimiters
      else
      ! error missing ending delimiter
         call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
                 "missing stagger location ending delimitor from string",       &
                    rcToReturn=localrc)
+        return
      endif     ! proper ending syntax
   elseif( itmp_beg == 0 ) then
   ! no stagger assumption, assume cell center location
@@ -1901,6 +2786,7 @@
      call ESMF_LogMsgSetError( ESMF_FAILURE,                                   &
              "problem descriptor string syntax error, strings ends with " //   &
              trim(lstring(nstring+1)%string), rcToReturn=localrc)
+     return
   endif     ! proper starting syntax
 
   !-----------------------------------------------------------------------------
@@ -1911,7 +2797,8 @@
         ! error invalid staggerlocs
         call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
                 "invalid stagger locations from problem descriptor string",    &
-                rcToReturn=localrc)
+                 rcToReturn=localrc)
+        return
      endif
   enddo
 
@@ -1936,6 +2823,7 @@
         call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
                 "multiple distribution specifications in single memory" //     &
                 "location", rcToReturn=localrc)
+        return
      endif
 
   enddo    !  kstring
@@ -1959,3 +2847,4 @@
 !===============================================================================
   end module ESMF_TestHarnessMod
 !===============================================================================
+

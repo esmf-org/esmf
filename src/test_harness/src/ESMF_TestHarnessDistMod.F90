@@ -34,17 +34,9 @@
 
   use ESMF_Mod
   use ESMF_TestHarnessTypesMod
+  use ESMF_TestHarnessUtilMod
 
   implicit none
-
-  ! Debug flag
-  logical, parameter, private :: debug_flag = .false.
-
-!-------------------------------------------------------------------------------
-! !PRIVATE TYPES:
-
-!-------------------------------------------------------------------------------
-! !PUBLIC TYPES:
 
 !-------------------------------------------------------------------------------
 ! PUBLIC METHODS:
@@ -128,7 +120,7 @@
   !-----------------------------------------------------------------------------
   ! open the distribution file
   !-----------------------------------------------------------------------------
-  localcf = ESMF_ConfigCreate(localrc)
+  localcf = ESMF_ConfigCreate(rc=localrc)
   if( ESMF_LogMsgFoundError(localrc, "cannot create config object",           &
                             rcToReturn=localrc) ) return
 
@@ -183,7 +175,7 @@
   allocate( ncolumns(nrows) )
 
   do krow=1,nrows
-     call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
+     call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
      if( ESMF_LogMsgFoundError(localrc,                                        &
              "cannot advance to next line of table " //                        &
               trim(distribution_label) // " in file " // trim(Dfile%filename), &
@@ -220,7 +212,7 @@
   !-----------------------------------------------------------------------------
   ndist = 0
   do krow=1,nrows
-     call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
+     call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
      call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
      if( trim(adjustL(ltmp)) == "&" ) then
      ! continuation line
@@ -269,7 +261,7 @@
     ! not a continuation symbol and not end of row
     !---------------------------------------------------------------------------
     if( ncolumns(irow) > 0 ) then
-       call ESMF_ConfigNextLine(localcf, flag , rc=localrc)
+       call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
        kelements = 0 ! first element on the row
        idist = idist + 1 ! index to count distributions in the table
 
@@ -316,7 +308,6 @@
        return
     endif
 
-!   allocate( Dfile%src_dist(idist)%dsize(Src_rank) )
     allocate( Dfile%src_dist(idist)%dsize(SrcMem%memRank) )
     Dfile%src_dist(idist)%drank = src_rank
 
@@ -461,7 +452,6 @@
        return
     endif
 
-!   allocate( Dfile%dst_dist(idist)%dsize(dst_rank) )
     allocate( Dfile%dst_dist(idist)%dsize(DstMem%memRank) )
     Dfile%dst_dist(idist)%drank = dst_rank
 
