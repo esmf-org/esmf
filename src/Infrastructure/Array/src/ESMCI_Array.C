@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.17 2008/06/27 05:55:01 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.18 2008/07/23 23:37:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.17 2008/06/27 05:55:01 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.18 2008/07/23 23:37:24 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -681,21 +681,21 @@ Array *Array::create(
   // modify computational bounds on patch edges
   for (int j=0; j<localDeCount; j++){
     for (int i=0; i<dimCount; i++){
-      if (computationalEdgeLWidth[i]){
-        bool onEdgeL = distgrid->isLocalDeOnEdgeL(j, i+1, &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
-          return ESMC_NULL_POINTER;
-        if (onEdgeL)
-          if (int k=distgridToPackedArrayMap[i])
+      if (int k=distgridToPackedArrayMap[i]){
+        if (computationalEdgeLWidth[k-1]){
+          bool onEdgeL = distgrid->isLocalDeOnEdgeL(j, i+1, &localrc);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            ESMF_ERR_PASSTHRU,rc)) return ESMC_NULL_POINTER;
+          if (onEdgeL)
             computationalLBound[j*dimCount+k-1] -= computationalEdgeLWidth[k-1];
-      }
-      if (computationalEdgeUWidth[i]){
-        bool onEdgeU = distgrid->isLocalDeOnEdgeU(j, i+1, &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
-          return ESMC_NULL_POINTER;
-        if (onEdgeU)
-          if (int k=distgridToPackedArrayMap[i])
+        }
+        if (computationalEdgeUWidth[k-1]){
+          bool onEdgeU = distgrid->isLocalDeOnEdgeU(j, i+1, &localrc);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            ESMF_ERR_PASSTHRU,rc)) return ESMC_NULL_POINTER;
+          if (onEdgeU)
             computationalUBound[j*dimCount+k-1] += computationalEdgeUWidth[k-1];
+        }
       }
     }
   }
@@ -1262,21 +1262,21 @@ Array *Array::create(
   // modify computational bounds on patch edges
   for (int j=0; j<localDeCount; j++){
     for (int i=0; i<dimCount; i++){
-      if (computationalEdgeLWidth[i]){
-        bool onEdgeL = distgrid->isLocalDeOnEdgeL(j, i+1, &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
-          return ESMC_NULL_POINTER;
-        if (onEdgeL)
-          if (int k=distgridToPackedArrayMap[i])
+      if (int k=distgridToPackedArrayMap[i]){
+        if (computationalEdgeLWidth[k-1]){
+          bool onEdgeL = distgrid->isLocalDeOnEdgeL(j, i+1, &localrc);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            ESMF_ERR_PASSTHRU, rc)) return ESMC_NULL_POINTER;
+          if (onEdgeL)
             computationalLBound[j*dimCount+k-1] -= computationalEdgeLWidth[k-1];
-      }
-      if (computationalEdgeUWidth[i]){
-        bool onEdgeU = distgrid->isLocalDeOnEdgeU(j, i+1, &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
-          return ESMC_NULL_POINTER;
-        if (onEdgeU)
-          if (int k=distgridToPackedArrayMap[i])
+        }
+        if (computationalEdgeUWidth[k-1]){
+          bool onEdgeU = distgrid->isLocalDeOnEdgeU(j, i+1, &localrc);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            ESMF_ERR_PASSTHRU,rc)) return ESMC_NULL_POINTER;
+          if (onEdgeU)
             computationalUBound[j*dimCount+k-1] += computationalEdgeUWidth[k-1];
+        }
       }
     }
   }
