@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUTest.F90,v 1.7 2008/07/12 16:01:52 rokuingh Exp $
+! $Id: ESMF_AttributeUTest.F90,v 1.8 2008/07/24 21:22:46 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeUTest.F90,v 1.7 2008/07/12 16:01:52 rokuingh Exp $'
+      '$Id: ESMF_AttributeUTest.F90,v 1.8 2008/07/24 21:22:46 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -60,6 +60,7 @@ program ESMF_AttributeUTest
       type(ESMF_FieldBundle) :: fieldbundle
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
       character(ESMF_MAXSTR), dimension(3) :: attrList
+      logical                :: lattrList(3), lattrResult(3)
       integer                :: rc, count, number, defaultvalue, inval, outval
   
       ! cumulative result: count failures; no failures equals "all pass"
@@ -201,6 +202,53 @@ program ESMF_AttributeUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Set a logical attribute - scalar version
+      attrname = "flag"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(array, name=attrname, value=lattrList(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting Array attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - scalar version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(array, name=attrname, value=lattrResult(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting Array attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+        name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Set a logical attribute - array version
+      attrname = "flag array"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(array, name=attrname,  &
+        count=size (lattrList), valueList=lattrList, &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting Array attribute (type Fortran logical array)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - array version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(array, name=attrname,  &
+        count=size (lattrResult), valueList=lattrResult, &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting Array attribute (type Fortran logical array)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+        name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
 !-------------------------------------------------------------------------
 !  CPLCOMP
 !-------------------------------------------------------------------------
@@ -324,6 +372,53 @@ program ESMF_AttributeUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute Count from a CplComp Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Set a logical attribute - scalar version
+      attrname = "flag"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(cplcomp, name=attrname, value=lattrList(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting CplComp attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - scalar version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(cplcomp, name=attrname, value=lattrResult(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting CplComp attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+        name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Set a logical attribute - array version
+      attrname = "flag array"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(cplcomp, name=attrname,  &
+        count=size (lattrList), valueList=lattrList, &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting CplComp attribute (type Fortran logical array)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - array version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(cplcomp, name=attrname,  &
+        count=size (lattrResult), valueList=lattrResult, &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting CplComp attribute (type Fortran logical array)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+        name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -451,6 +546,53 @@ program ESMF_AttributeUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Set a logical attribute - scalar version
+      attrname = "flag"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(grdcomp, name=attrname, value=lattrList(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting GrdComp attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - scalar version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(grdcomp, name=attrname, value=lattrResult(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting GrdComp attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+        name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Set a logical attribute - array version
+      attrname = "flag array"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(grdcomp, name=attrname,  &
+        count=size (lattrList), valueList=lattrList, &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting GrdComp attribute (type Fortran logical array)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - array version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(grdcomp, name=attrname,  &
+        count=size (lattrResult), valueList=lattrResult, &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting GrdComp attribute (type Fortran logical array)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+        name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
 !-------------------------------------------------------------------------
 !  FIELD
 !-------------------------------------------------------------------------
@@ -574,6 +716,53 @@ program ESMF_AttributeUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Set a logical attribute - scalar version
+      attrname = "flag"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(field, name=attrname, value=lattrList(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting Field attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - scalar version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(field, name=attrname, value=lattrResult(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting Field attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+        name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Set a logical attribute - array version
+      attrname = "flag array"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(field, name=attrname,  &
+        count=size (lattrList), valueList=lattrList, &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting Field attribute (type Fortran logical array)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - array version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(field, name=attrname,  &
+        count=size (lattrResult), valueList=lattrResult, &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting Field attribute (type Fortran logical array)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+        name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
 !-------------------------------------------------------------------------
 !  FIELDBUNDLE
 !-------------------------------------------------------------------------
@@ -683,6 +872,53 @@ program ESMF_AttributeUTest
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Set a logical attribute - scalar version
+      attrname = "flag"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(fieldbundle, name=attrname, value=lattrList(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting FieldBundle attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - scalar version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(fieldbundle, name=attrname, value=lattrResult(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting FieldBundle attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+        name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Set a logical attribute - array version
+      attrname = "flag array"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(fieldbundle, name=attrname,  &
+        count=size (lattrList), valueList=lattrList, &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting FieldBundle attribute (type Fortran logical array)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - array version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(fieldbundle, name=attrname,  &
+        count=size (lattrResult), valueList=lattrResult, &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting FieldBundle attribute (type Fortran logical array)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+        name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
 !-------------------------------------------------------------------------
 !  GRID
 !-------------------------------------------------------------------------
@@ -782,6 +1018,53 @@ program ESMF_AttributeUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute Count from a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Set a logical attribute - scalar version
+      attrname = "flag"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(grid, name=attrname, value=lattrList(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting Grid attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - scalar version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(grid, name=attrname, value=lattrResult(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting Grid attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+        name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Set a logical attribute - array version
+      attrname = "flag array"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(grid, name=attrname,  &
+        count=size (lattrList), valueList=lattrList, &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting Grid attribute (type Fortran logical array)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - array version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(grid, name=attrname,  &
+        count=size (lattrResult), valueList=lattrResult, &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting Grid attribute (type Fortran logical array)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+        name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -907,6 +1190,53 @@ program ESMF_AttributeUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Copy an attribute hierarchy from state1 to state2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Set a logical attribute - scalar version
+      attrname = "flag"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(state, name=attrname, value=lattrList(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting State attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - scalar version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(state, name=attrname, value=lattrResult(1), &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting State attribute (type Fortran logical scalar)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+        name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Set a logical attribute - array version
+      attrname = "flag array"
+      lattrList = (/ .true., .false., .true. /)
+
+      call ESMF_AttributeSet(state, name=attrname,  &
+        count=size (lattrList), valueList=lattrList, &
+        rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting State attribute (type Fortran logical array)"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get a logical attribute - array version
+      lattrResult = .false.
+
+      call ESMF_AttributeGet(state, name=attrname,  &
+        count=size (lattrResult), valueList=lattrResult, &
+        rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting State attribute (type Fortran logical array)"
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+        name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.19 2008/07/15 18:40:52 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.20 2008/07/24 21:22:46 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.19 2008/07/15 18:40:52 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.20 2008/07/24 21:22:46 w6ws Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -578,8 +578,8 @@ contains
 !     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
 !     \item real (ESMF\_KIND\_R8), intent(out) :: value
 !     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
-!     \item type(ESMF\_Logical), intent(out) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(out) :: valueList
+!     \item logical, intent(out) :: value
+!     \item logical, dimension(:), intent(out) :: valueList
 !     \item character (len = *), intent(out), value
 !     \end{description}
 !     Supported values for <defaultvalue argument> are:
@@ -588,7 +588,7 @@ contains
 !     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
 !     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
 !     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
-!     \item type(ESMF\_Logical), intent(out) :: defaultvalue
+!     \item logical, intent(out) :: defaultvalue
 !     \item character (len = *), intent(out), defaultvalue
 !     \end{description}
 !
@@ -788,8 +788,8 @@ contains
 !     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
 !     \item real (ESMF\_KIND\_R8), intent(in) :: value
 !     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
-!     \item type(ESMF\_Logical), intent(in) :: value
-!     \item type(ESMF\_Logical), dimension(:), intent(in) :: valueList
+!     \item logical, intent(in) :: value
+!     \item logical, dimension(:), intent(in) :: valueList
 !     \item character (len = *), intent(in), value
 !     \end{description}
 ! 
@@ -1885,8 +1885,8 @@ contains
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(out) :: value
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, intent(out) :: value
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -1918,6 +1918,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1943,15 +1944,15 @@ contains
       fobject = 'array'
 
       call c_ESMC_AttPackGetValue(array, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
-        
+      value = localvalue  
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) then
         if(present(defaultvalue)) then
           value = defaultvalue
-        else 
+        else
           return
         end if
       end if
@@ -1959,7 +1960,8 @@ contains
       else
       
       call c_ESMC_AttributeGetValue(array, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
+      value = localvalue
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -1992,8 +1994,8 @@ contains
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: valueList
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(out) :: valueList
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -2029,6 +2031,8 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
+      integer :: err
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2060,10 +2064,13 @@ contains
       
       fobject = 'array'
 
+      allocate (localvalueList(limit))
       call c_ESMC_AttPackGetValue(array, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
-        
+      valueList = localvalueList
+      deallocate (localvalueList)
+  
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) then
@@ -2076,8 +2083,11 @@ contains
                                 
       else
       
+      allocate (localvalueList(limit))
       call c_ESMC_AttributeGetValue(array, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      valueList = localvalueList
+      deallocate (localvalueList)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -3191,7 +3201,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(in) :: value
+      logical, intent(in) :: value
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -3222,6 +3232,7 @@ contains
 
       integer :: localrc
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -3229,7 +3240,7 @@ contains
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
-
+      
       if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
@@ -3246,8 +3257,9 @@ contains
       
       fobject = 'array'
 
+      localvalue = value
       call c_ESMC_AttPackSetValue(array, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
@@ -3256,8 +3268,9 @@ contains
                                 
       else
       
+      localvalue = value
       call c_ESMC_AttributeSetValue(array, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3284,7 +3297,7 @@ contains
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      logical, dimension(:), intent(in) :: valueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -3320,6 +3333,7 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -3327,7 +3341,7 @@ contains
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
-
+      
       if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
@@ -3344,10 +3358,13 @@ contains
       
       fobject = 'array'
 
+      allocate (localvalueList(count))
+      localvalueList = valueList
       call c_ESMC_AttPackSetValue(array, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
-        
+      deallocate (localvalueList)
+      
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -3361,8 +3378,12 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
+      allocate (localvalueList(count))
+      localvalueList = valueList
       call c_ESMC_AttributeSetValue(array, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4638,8 +4659,8 @@ contains
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(out) :: value
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, intent(out) :: value
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -4671,6 +4692,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4678,7 +4700,7 @@ contains
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
-
+      
       if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
@@ -4696,8 +4718,9 @@ contains
       fobject = 'comp'
 
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
+      value = localvalue
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4712,7 +4735,9 @@ contains
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
+      value = localvalue
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -4745,8 +4770,8 @@ contains
       type(ESMF_CplComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: valueList
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(out) :: valueList
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -4782,6 +4807,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4789,7 +4815,7 @@ contains
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
-
+      
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -4813,15 +4839,18 @@ contains
       
       fobject = 'comp'
 
+      allocate (localvalueList(count))
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
+      valueList = localvalueList
+      deallocate (localvalueList)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) then
         if(present(defaultvalue)) then
-          valueList = defaultvalue
+          valueList(:count) = defaultvalue
         else 
           return
         end if
@@ -4829,13 +4858,17 @@ contains
                                 
       else
       
+      allocate (localvalueList(count))
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      valuelist(:count) = localvalueList
+      deallocate (localvalueList)
+      
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
         if(present(defaultvalue)) then
-          valueList = defaultvalue
+          valueList(:count) = defaultvalue
         else 
           return
         end if
@@ -5944,7 +5977,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(in) :: value
+      logical, intent(in) :: value
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -5975,6 +6008,7 @@ contains
 
       integer :: localrc
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -5999,8 +6033,9 @@ contains
       
       fobject = 'comp'
 
+      localvalue = value
       call c_ESMC_AttPackSetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
@@ -6008,9 +6043,10 @@ contains
                                 ESMF_CONTEXT, rc)) return
                                 
       else
-      
+
+      localvalue = value
       call c_ESMC_AttributeSetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -6037,7 +6073,7 @@ contains
       type(ESMF_CplComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      logical, dimension(:), intent(in) :: valueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -6073,6 +6109,7 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -6097,9 +6134,12 @@ contains
       
       fobject = 'comp'
 
+      allocate (localvalueList(count))
+      localvalueList = valueList(:count)
       call c_ESMC_AttPackSetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
+      deallocate (localvalueList)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -6114,8 +6154,12 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
+      allocate (localvalueList(count))
+      localvalueList = valueList(:count)
       call c_ESMC_AttributeSetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -6472,7 +6516,7 @@ contains
       integer :: localrc                           ! Error status
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject, ftarobj
       type(ESMF_AttWriteFlag) :: writeflag
-      
+
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -7603,8 +7647,8 @@ contains
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(out) :: value
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, intent(out) :: value
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -7636,6 +7680,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -7661,8 +7706,9 @@ contains
       fobject = 'comp'
 
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
+      value = localvalue
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -7677,7 +7723,8 @@ contains
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
+      value = localvalue
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -7710,8 +7757,8 @@ contains
       type(ESMF_GridComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: valueList
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(out) :: valueList
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -7747,6 +7794,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -7778,15 +7826,18 @@ contains
       
       fobject = 'comp'
 
+      allocate (localvalueList(count))
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
+      valueList(:count) = localvalueList
+      deallocate (localvalueList)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) then
         if(present(defaultvalue)) then
-          valueList = defaultvalue
+          valueList(:count) = defaultvalue
         else 
           return
         end if
@@ -7794,13 +7845,17 @@ contains
                                 
       else
       
+      allocate (localvalueList(count))
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      valueList(:count) = localvalueList
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
         if(present(defaultvalue)) then
-          valueList = defaultvalue
+          valueList(:count) = defaultvalue
         else 
           return
         end if
@@ -8909,7 +8964,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(in) :: value
+      logical, intent(in) :: value
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -8940,6 +8995,7 @@ contains
 
       integer :: localrc
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -8964,8 +9020,9 @@ contains
       
       fobject = 'comp'
 
+      localvalue = value
       call c_ESMC_AttPackSetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
@@ -8974,8 +9031,9 @@ contains
                                 
       else
       
+      localvalue = value
       call c_ESMC_AttributeSetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -9002,7 +9060,7 @@ contains
       type(ESMF_GridComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      logical, dimension(:), intent(in) :: valueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -9038,6 +9096,7 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -9062,10 +9121,13 @@ contains
       
       fobject = 'comp'
 
+      allocate (localvalueList(count))
+      localvalueList = valueList(:count)
       call c_ESMC_AttPackSetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
-        
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -9079,8 +9141,12 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
+      allocate (localvalueList(count))
+      localvalueList = valueList(:count)
       call c_ESMC_AttributeSetValue(comp%compp%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -10559,8 +10625,8 @@ contains
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(out) :: value
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, intent(out) :: value
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -10592,6 +10658,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -10617,8 +10684,9 @@ contains
       fobject = 'field'
 
       call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
+      value = localvalue
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -10633,7 +10701,9 @@ contains
       else
       
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
+      value = localvalue
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -10666,8 +10736,8 @@ contains
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: valueList
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(out) :: valueList
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -10703,6 +10773,8 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
+      integer :: err
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -10734,15 +10806,18 @@ contains
       
       fobject = 'field'
 
+      allocate (localvalueList(count))
       call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
+      valueList(:count) = localvalueList
+      deallocate (localvalueList)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) then
         if(present(defaultvalue)) then
-          valueList = defaultvalue
+          valueList(:count) = defaultvalue
         else 
           return
         end if
@@ -10750,13 +10825,17 @@ contains
                                 
       else
       
+      allocate (localvalueList(count))
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      valueList(:count) = localvalueList
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
         if(present(defaultvalue)) then
-          valueList = defaultvalue
+          valueList(:count) = defaultvalue
         else 
           return
         end if
@@ -11865,7 +11944,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(in) :: value
+      logical, intent(in) :: value
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -11896,6 +11975,7 @@ contains
 
       integer :: localrc
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -11920,8 +12000,9 @@ contains
       
       fobject = 'field'
 
+      localvalue = value
       call c_ESMC_AttPackSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
@@ -11930,8 +12011,9 @@ contains
                                 
       else
       
+      localvalue = value
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -11958,7 +12040,7 @@ contains
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      logical, dimension(:), intent(in) :: valueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -11994,6 +12076,7 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -12018,10 +12101,13 @@ contains
       
       fobject = 'field'
 
+      allocate (localvalueList(count))
+      localvalueList = valueList(:count)
       call c_ESMC_AttPackSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
-        
+      deallocate (localvalueList)
+      
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -12035,8 +12121,12 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
+      allocate (localvalueList(count))
+      localvalueList = valueList(:count)
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      deallocate (localvalueList)
+      
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -13302,8 +13392,8 @@ contains
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(out) :: value
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, intent(out) :: value
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -13335,6 +13425,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -13360,8 +13451,9 @@ contains
       fobject = 'fieldbundle'
 
       call c_ESMC_AttPackGetValue(fieldbundle%btypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
+      value = localvalue
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -13376,7 +13468,9 @@ contains
       else
       
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
+      value = localvalue
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -13409,8 +13503,8 @@ contains
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: valueList
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(out) :: valueList
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -13446,6 +13540,8 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
+      integer :: err
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -13460,6 +13556,13 @@ contains
                                     "count longer than valueList", &
                                      ESMF_CONTEXT, rc)) return
       endif
+
+      allocate (localvalueList(count), stat=err)
+      if (err /= 0) then
+          if (ESMF_LogMsgFoundError (ESMF_RC_OBJ_BAD,  &
+              "can not allocate localvalueList",  &
+              ESMF_CONTEXT, rc)) return
+      end if
 
       if (present(convention) .OR. present(purpose)) then
       
@@ -13478,14 +13581,16 @@ contains
       fobject = 'fieldbundle'
 
       call c_ESMC_AttPackGetValue(fieldbundle%btypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
+      valueList(:count) = localvalueList
+      deallocate (localvalueList)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) then
         if(present(defaultvalue)) then
-          valueList = defaultvalue
+          valueList(:count) = defaultvalue
         else 
           return
         end if
@@ -13494,12 +13599,15 @@ contains
       else
       
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      valueList(:count) = localvalueList
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
         if(present(defaultvalue)) then
-          valueList = defaultvalue
+          valueList(:count) = defaultvalue
         else 
           return
         end if
@@ -14608,7 +14716,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(in) :: value
+      logical, intent(in) :: value
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -14639,6 +14747,7 @@ contains
 
       integer :: localrc
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -14663,8 +14772,9 @@ contains
       
       fobject = 'fieldbundle'
 
+      localvalue = value
       call c_ESMC_AttPackSetValue(fieldbundle%btypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
@@ -14673,8 +14783,9 @@ contains
                                 
       else
       
+      localvalue = value
       call c_ESMC_AttributeSetValue(fieldbundle%btypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -14701,7 +14812,7 @@ contains
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      logical, dimension(:), intent(in) :: valueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -14737,6 +14848,7 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -14761,10 +14873,13 @@ contains
       
       fobject = 'fieldbundle'
 
+      allocate (localvalueList(count))
+      localvalueList = valueList(:count)
       call c_ESMC_AttPackSetValue(fieldbundle%btypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
-        
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -14778,8 +14893,12 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
+      allocate (localvalueList(count))
+      localvalueList = valueList(:count)
       call c_ESMC_AttributeSetValue(fieldbundle%btypep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -16099,8 +16218,8 @@ contains
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(out) :: value
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, intent(out) :: value
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -16132,6 +16251,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -16157,8 +16277,9 @@ contains
       fobject = 'grid'
 
       call c_ESMC_AttPackGetValue(grid, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
+      value = localvalue
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -16173,7 +16294,9 @@ contains
       else
       
       call c_ESMC_AttributeGetValue(grid, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
+      value = localvalue
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -16206,8 +16329,8 @@ contains
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: valueList
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(out) :: valueList
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -16243,6 +16366,8 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
+      integer :: err
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -16257,6 +16382,13 @@ contains
                                     "count longer than valueList", &
                                      ESMF_CONTEXT, rc)) return
       endif
+
+      allocate (localvalueList(count), stat=err)
+      if (err /= 0) then
+          if (ESMF_LogMsgFoundError (ESMF_RC_OBJ_BAD,  &
+              "can not allocate localvalueList",  &
+              ESMF_CONTEXT, rc)) return
+      end if
 
       if (present(convention) .OR. present(purpose)) then
       
@@ -16275,14 +16407,16 @@ contains
       fobject = 'grid'
 
       call c_ESMC_AttPackGetValue(grid, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
+      valueList(:count) = localvalueList
+      deallocate (localvalueList)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) then
         if(present(defaultvalue)) then
-          valueList = defaultvalue
+          valueList(:count) = defaultvalue
         else 
           return
         end if
@@ -16291,13 +16425,16 @@ contains
       else
       
       call c_ESMC_AttributeGetValue(grid, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      valueList(:count) = localvalueList
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
         if(present(defaultvalue)) then
-          valueList = defaultvalue
-        else 
+          valueList(:count) = defaultvalue
+        else
           return
         end if
       end if
@@ -17405,7 +17542,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(in) :: value
+      logical, intent(in) :: value
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -17436,6 +17573,7 @@ contains
 
       integer :: localrc
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -17460,8 +17598,9 @@ contains
       
       fobject = 'grid'
 
+      localvalue = value
       call c_ESMC_AttPackSetValue(grid, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
@@ -17470,8 +17609,9 @@ contains
                                 
       else
       
+      localvalue = value
       call c_ESMC_AttributeSetValue(grid, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -17498,7 +17638,7 @@ contains
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      logical, dimension(:), intent(in) :: valueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -17534,6 +17674,7 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -17558,9 +17699,12 @@ contains
       
       fobject = 'grid'
 
+      allocate (localvalueList(count))
+      localvalueList = valueList(:count)
       call c_ESMC_AttPackSetValue(grid, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
+      deallocate (localvalueList)
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -17575,8 +17719,12 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
+      allocate (localvalueList(count))
+      localvalueList = valueList(:count)
       call c_ESMC_AttributeSetValue(grid, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -18899,8 +19047,8 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(out) :: value
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, intent(out) :: value
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -18932,6 +19080,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -18957,8 +19106,9 @@ contains
       fobject = 'state'
 
       call c_ESMC_AttPackGetValue(state%statep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
+      value = localvalue
         
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -18973,7 +19123,9 @@ contains
       else
       
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
+      value = localvalue
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -19006,8 +19158,8 @@ contains
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: valueList
-      type(ESMF_Logical), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(out) :: valueList
+      logical, intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -19043,6 +19195,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -19074,15 +19227,18 @@ contains
       
       fobject = 'state'
 
+      allocate (localvalueList(count))
       call c_ESMC_AttPackGetValue(state%statep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
-        
+      valueList(:count) = localvalueList
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) then
         if(present(defaultvalue)) then
-          valueList = defaultvalue
+          valueList(:count) = defaultvalue
         else 
           return
         end if
@@ -19090,13 +19246,17 @@ contains
                                 
       else
       
+      allocate (localvalueList(count))
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      valueList(:count) = localvalueList
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
         if(present(defaultvalue)) then
-          valueList = defaultvalue
+          valueList(:count) = defaultvalue
         else 
           return
         end if
@@ -20205,7 +20365,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(in) :: value
+      logical, intent(in) :: value
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -20236,6 +20396,7 @@ contains
 
       integer :: localrc
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: localvalue
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -20260,8 +20421,9 @@ contains
       
       fobject = 'state'
 
+      localvalue = value
       call c_ESMC_AttPackSetValue(state%statep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, &
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
         
       if (ESMF_LogMsgFoundError(localrc, &
@@ -20270,8 +20432,9 @@ contains
                                 
       else
       
+      localvalue = value
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, 1, value, localrc)
+        ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -20298,7 +20461,7 @@ contains
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: valueList
+      logical, dimension(:), intent(in) :: valueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -20334,6 +20497,7 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -20358,10 +20522,13 @@ contains
       
       fobject = 'state'
 
+      allocate (localvalueList(count))
+      localvalueList = valueList(:count)
       call c_ESMC_AttPackSetValue(state%statep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, &
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
-        
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -20375,8 +20542,12 @@ contains
                                  ESMF_CONTEXT, rc)) return
       endif
 
+      allocate (localvalueList(count))
+      localvalueList = valueList(:count)
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
-        ESMF_TYPEKIND_LOGICAL, count, valueList, localrc)
+        ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
+      deallocate (localvalueList)
+
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
