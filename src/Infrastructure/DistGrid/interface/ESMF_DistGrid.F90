@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.46 2008/07/17 06:41:26 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.47 2008/07/24 17:08:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -95,6 +95,7 @@ module ESMF_DistGridMod
   public ESMF_DistGridGet
   public ESMF_DistGridMatch
   public ESMF_DistGridPrint
+  public ESMF_DistGridSet
   public ESMF_DistGridValidate
   
   public ESMF_DistGridConnection
@@ -111,7 +112,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.46 2008/07/17 06:41:26 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.47 2008/07/24 17:08:32 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -136,6 +137,7 @@ module ESMF_DistGridMod
     module procedure ESMF_DistGridCreateDBP
     module procedure ESMF_DistGridCreateRDPFA
     module procedure ESMF_DistGridCreateDBPFA
+    module procedure ESMF_DistGridCreateDBAI1D
     module procedure ESMF_DistGridCreateDBAI
       
 ! !DESCRIPTION: 
@@ -155,7 +157,7 @@ module ESMF_DistGridMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_DistGridGet
+    module procedure ESMF_DistGridGetDefault
 !    module procedure ESMF_DistGridGetPDe
     module procedure ESMF_DistGridGetPLocalDe
     module procedure ESMF_DistGridGetPLocalDePDim
@@ -1751,35 +1753,35 @@ contains
   end function ESMF_DistGridCreateDBPFA
 !------------------------------------------------------------------------------
 
+
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDBAI()"
+#define ESMF_METHOD "ESMF_DistGridCreateDBAI1D()"
 !BOP
 ! !IROUTINE: ESMF_DistGridCreate - Create 1D DistGrid object from user's arbitray index list
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBAI(arbSeqIndexList, rc)
+  function ESMF_DistGridCreateDBAI1D(arbSeqIndexList, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: arbSeqIndexList(:)
-    integer,                      intent(out),optional  :: rc
+    integer,    intent(in)            :: arbSeqIndexList(:)
+    integer,    intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI1D
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} of {\tt dimCount} 1 from a PET-local list
 !     of sequence indices. The PET-local size of the {\tt arbSeqIndexList}
 !     argument determines the number of local elements in the created DistGrid.
-!     The sequence indices must be unique across all PETs and are meant to be
-!     used in combination with {\tt ESMF\_ArraySparseMatMulStore()}. A default
+!     The sequence indices must be unique across all PETs. A default
 !     DELayout with 1 DE per PET across all PETs of the current VM is 
 !     automatically created.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[arbSeqIndexList]}]
+!     \item[arbSeqIndexList]
 !          List of arbitrary sequence indices that reside on the local PET.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1823,9 +1825,9 @@ contains
     allocate(deblock(1,2,petCount))
     csum = 0
     do i=1,petCount
-      deblock(1,1,i) = csum + 1
+      deblock(1,1,i) = csum + 1 ! min
       csum = csum + globalSizes(i)
-      deblock(1,2,i) = csum
+      deblock(1,2,i) = csum     ! max
     enddo
 
     ! create fitting DistGrid
@@ -1840,7 +1842,7 @@ contains
     deallocate(globalSizes)
     
     ! set return value
-    ESMF_DistGridCreateDBAI = distgrid 
+    ESMF_DistGridCreateDBAI1D = distgrid 
 
     ! prepare to set local arbitrary sequence indices
     indicesArg = ESMF_InterfaceIntCreate(farray1D=arbSeqIndexList, rc=localrc)
@@ -1848,7 +1850,195 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! set local arbitrary sequence indices in DistGrid object
-    call c_ESMC_DistGridSetArbSeqIndex(distgrid, indicesArg, localrc)
+    ! localDe=0, collocation=1
+    call c_ESMC_DistGridSetArbSeqIndex(distgrid, indicesArg, 0, 1, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(indicesArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBAI1D)
+ 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_DistGridCreateDBAI1D
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateDBAI()"
+!BOP
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from user's arbitray index list
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridCreate()
+  function ESMF_DistGridCreateDBAI(arbSeqIndexList, minIndex, maxIndex, &
+    arbDim, rc)
+!
+! !ARGUMENTS:
+    integer,    intent(in)            :: arbSeqIndexList(:)
+    integer,    intent(in)            :: minIndex(:)
+    integer,    intent(in)            :: maxIndex(:)
+    integer,    intent(in), optional  :: arbDim
+    integer,    intent(out),optional  :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI
+!
+! !DESCRIPTION:
+!     Create an {\tt ESMF\_DistGrid} of {\tt dimCount} $1+n$, where 
+!     $n=$ {\tt size(minIndex)} = {\tt size(maxIndex)}.
+!
+!     The resulting DistGrid will have a 1D distribution determined by the
+!     PET-local {\tt arbSeqIndexList}. The PET-local size of the
+!     {\tt arbSeqIndexList} argument determines the number of local elements 
+!     along the arbitrarily distributed dimension in the created DistGrid. The
+!     sequence indices must be unique across all PETs. The associated,
+!     automatically created DELayout will have 1 DE per PET across all PETs of
+!     the current VM.
+!
+!     In addition to the arbitrarily distributed dimension, regular DistGrid
+!     dimensions can be specified in {\tt minIndex} and {\tt maxIndex}. The
+!     $n$ dimensional subspace spanned by the regular dimensions is "multiplied"
+!     with the arbitrary dimension on each DE, to form a $1+n$ dimensional
+!     total index space described by the DistGrid object. The {\tt arbDim}
+!     argument allows to specify which dimension in the resulting DistGrid
+!     corresponds to the arbitrarily distributed one.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[arbSeqIndexList]
+!          List of arbitrary sequence indices that reside on the local PET.
+!     \item[minIndex]
+!          Global coordinate tuple of the lower corner of the tile. The 
+!          arbitrary dimension is {\em not} included in this tile
+!     \item[maxIndex]
+!          Global coordinate tuple of the upper corner of the tile. The
+!          arbitrary dimension is {\em not} included in this tile
+!     \item[{[arbDim]}]
+!          Dimension of the arbitrary distribution. Default equal to 1.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    type(ESMF_VM)           :: vm           ! opaque pointer to VM object
+    type(ESMF_InterfaceInt) :: indicesArg   ! index helper
+    integer                 :: arbDimArg    ! helper variable
+    integer                 :: localSize(1) ! number of local indices
+    integer, allocatable    :: globalSizes(:)  ! array of all sizes
+    integer                 :: petCount        ! num pets
+    integer, allocatable    :: deblock(:,:,:)  ! Array of sizes
+    integer                 :: i, j, jj, csum  ! loop variable
+    integer, allocatable    :: minC(:), maxC(:)! min/max corner
+    integer, allocatable    :: seqIndexCollocation(:)
+    integer                 :: dimCount     ! number of dimension
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! check input
+    dimCount = size(minIndex)
+    if (dimCount /= size(maxIndex)) then
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
+          "- size(minIndex) must match size(maxIndex)", &
+          ESMF_CONTEXT, rc)
+      return
+    endif
+    if (present(arbDim)) then
+      if (arbDim < 1 .or. arbDim > dimCount+1) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            "- arbDim out of range", &
+            ESMF_CONTEXT, rc)
+        return
+      endif
+      arbDimArg = arbDim
+    else
+      arbDimArg = 1 ! default
+    endif
+    
+    ! get VM and related information
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! number of local indices
+    localSize(1) = size(arbSeqIndexList)
+
+    ! gather all sizes locally
+    allocate(globalSizes(petCount))
+    call ESMF_VMAllGather(vm, localSize, globalSizes, 1, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up the deblocks
+    allocate(deblock(dimCount+1,2,petCount))
+    csum = 0
+    do i=1,petCount
+      deblock(arbDimArg,1,i) = csum + 1 ! min
+      csum = csum + globalSizes(i)
+      deblock(arbDimArg,2,i) = csum     ! max
+      do j=1,dimCount+1
+        if (j==arbDimArg) cycle
+        jj=j
+        if (j>arbDimArg) jj=jj-1
+        deblock(j,1,i) = minIndex(jj) ! min
+        deblock(j,2,i) = maxIndex(jj) ! max
+      enddo
+    enddo
+
+    ! create fitting DistGrid
+    allocate(minC(dimCount+1))
+    allocate(maxC(dimCount+1))
+    do i=1, dimCount+1
+      minC(i) = deblock(i,1,1)
+      maxC(i) = deblock(i,2,petCount)
+    enddo
+    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! garbage collection
+    deallocate(deblock)
+    deallocate(globalSizes)
+    deallocate(minC)
+    deallocate(maxC)
+    
+    ! set return value
+    ESMF_DistGridCreateDBAI = distgrid 
+
+    ! set collocations to separate arbDimArg from the reset
+    allocate(seqIndexCollocation(dimCount+1))
+    seqIndexCollocation = 2 ! initialize
+    seqIndexCollocation(arbDimArg) = 1 ! arbDimArg singled out as collocation "1"
+    call ESMF_DistGridSet(distgrid, seqIndexCollocation=seqIndexCollocation, &
+      rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deallocate(seqIndexCollocation)
+
+    ! prepare to set local arbitrary sequence indices
+    indicesArg = ESMF_InterfaceIntCreate(farray1D=arbSeqIndexList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set local arbitrary sequence indices in DistGrid object
+    ! localDe=0, collocation=1, i.e. arbDimArg's collocation
+    call c_ESMC_DistGridSetArbSeqIndex(distgrid, indicesArg, 0, 1, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1923,12 +2113,13 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridGet()"
+#define ESMF_METHOD "ESMF_DistGridGetDefault()"
 !BOP
 ! !IROUTINE: ESMF_DistGridGet - Get information about DistGrid object
 
 ! !INTERFACE:
-  subroutine ESMF_DistGridGet(distgrid, delayout, dimCount, patchCount, &
+  ! Private name; call using ESMF_DistGridGet()
+  subroutine ESMF_DistGridGetDefault(distgrid, delayout, dimCount, patchCount, &
     minIndexPDimPPatch, maxIndexPDimPPatch, elementCountPPatch, &
     minIndexPDimPDe, maxIndexPDimPDe, elementCountPDe, patchListPDe, &
     indexCountPDimPDe, regDecompFlag, rc)
@@ -2094,7 +2285,7 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_DistGridGet
+  end subroutine ESMF_DistGridGetDefault
 !------------------------------------------------------------------------------
 
 #ifdef PROTOCODE
@@ -2489,6 +2680,74 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
     
   end function ESMF_DistGridMatch
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridSet()"
+!BOP
+! !IROUTINE: ESMF_DistGridSet - Set DistGrid sequence index collocation labels
+
+! !INTERFACE:
+  subroutine ESMF_DistGridSet(distgrid, seqIndexCollocation, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),  intent(in)              :: distgrid
+    integer,              intent(in)              :: seqIndexCollocation(:)
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!      Set the sequence index collocation labels in {\tt distgrid}.
+!      The method returns an error code if problems are found.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Specified {\tt ESMF\_DistGrid} object.
+!     \item[seqIndexCollocation] 
+!          List of size {\tt dimCount} specifying which dimensions are
+!          covered by which sequence index. Each entry is associated with the
+!          corresponding dimension. Dimensions with identical entries in the
+!          {\tt seqIndexCollocation} argument are collocated within the same
+!          sequence index space. Dimensions with different entries are located
+!          in orthogonal sequence index spaces.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_InterfaceInt) :: seqIndexCollocationArg  ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
+    
+    seqIndexCollocationArg = &
+      ESMF_InterfaceIntCreate(seqIndexCollocation, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_DistGridSet(distgrid, seqIndexCollocationArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(seqIndexCollocationArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_DistGridSet
 !------------------------------------------------------------------------------
 
 

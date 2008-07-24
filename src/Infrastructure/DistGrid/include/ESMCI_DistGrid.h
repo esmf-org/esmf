@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.8 2008/07/21 23:25:50 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.9 2008/07/24 17:08:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -67,11 +67,14 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
                                   // [indexCountPDimPDe(localDe,dim)]
     int connectionCount;          // number of elements in connection list
     int **connectionList;         // list of connection elements
-    int *arbSeqIndexCountPLocalDe;// number of arb seq. indices [localDeCount]
-                                  // ==0: no arb seq indices for localDe
-                                  // ==elementCountPDe(localDe): arb seq indices
-    int **arbSeqIndexListPLocalDe;// local arb sequence indices [localDeCount]
-                                  // [arbSeqIndexCountPLocalDe(localDe)]
+    int ***arbSeqIndexListPCollPLocalDe;// local arb sequence indices
+                                  // [collocationCount][localDeCount]
+                                  // [arbSeqIndexCountPCollLocalDe(localDe)]
+    int seqIndexCollocationCount; // number different seqIndex collocations
+    int *seqIndexCollocation;     // collocation [dimCount]
+    int *collocationTable;        // collocation in packed format [dimCount]
+    int **elementCountPCollPLocalDe; // number of elements 
+                                  // [collocationCount][localDeCount]
     ESMC_Logical regDecompFlag;   // flag indicating regular decomposition
     // lower level object references
     DELayout *delayout;
@@ -147,10 +150,12 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int getSequenceIndexLocalDe(int localDe, int *index, int *rc=NULL) const;
     int getSequenceIndexPatch(int patch, int *index, int depth,
       int *rc=NULL)const;
-    const int *getArbSeqIndexCountPLocalDe()
-      const {return arbSeqIndexCountPLocalDe;}
-    const int *getArbSeqIndexListPLocalDe(int localDe, int *rc=NULL) const;
-    int setArbSeqIndex(InterfaceInt *arbSeqIndex);
+    int *const*getElementCountPCollPLocalDe()
+      const {return elementCountPCollPLocalDe;}
+    const int *getArbSeqIndexListPLocalDe(int localDe, int collocation,
+      int *rc=NULL) const;
+    int setArbSeqIndex(InterfaceInt *arbSeqIndex, int localDe, int collocation);
+    int setSeqIndexCollocation(InterfaceInt *seqIndexCollocation);
     // fill()
     int fillIndexListPDimPDe(int *indexList, int de, int dim,
       VMK::commhandle **commh, int rootPet, VM *vm=NULL) const;

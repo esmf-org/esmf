@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.8 2008/07/21 23:25:50 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.9 2008/07/24 17:08:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -451,16 +451,17 @@ extern "C" {
         return;
       }
       // check for arbitrary sequence indices
-      const int *arbSeqIndexCountPLocalDe =
-        (*ptr)->getArbSeqIndexCountPLocalDe();
-      if (arbSeqIndexCountPLocalDe[localDe]){
-        // arbitrary seq indices -> get arbSeqIndexListPLocalDe and fill in
-        const int *arbSeqIndexListPLocalDe =
-          (*ptr)->getArbSeqIndexListPLocalDe(localDe, &localrc);
+      int *const*arbSeqIndexCountPCollPLocalDe =
+        (*ptr)->getElementCountPCollPLocalDe();
+      //TODO: this is hardcoded for first collocation
+      const int *arbSeqIndexListPLocalDe =
+        (*ptr)->getArbSeqIndexListPLocalDe(localDe, 1, &localrc);
+      if (arbSeqIndexListPLocalDe){
+        // arbitrary seq indices -> fill in arbSeqIndexListPLocalDe
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           ESMC_NOT_PRESENT_FILTER(rc))) return;
         memcpy((*seqIndexList)->array, arbSeqIndexListPLocalDe,
-          sizeof(int) * arbSeqIndexCountPLocalDe[localDe]);
+          sizeof(int) * arbSeqIndexCountPCollPLocalDe[0][localDe]);
       }else{
         // default seq indices
         int dimCount = (*ptr)->getDimCount();
@@ -589,15 +590,29 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
+  void FTN(c_esmc_distgridset)(
+    ESMCI::DistGrid **ptr, ESMCI::InterfaceInt **seqIndexCollocation, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_distgridset()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(
+      (*ptr)->setSeqIndexCollocation(*seqIndexCollocation),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+  
   void FTN(c_esmc_distgridsetarbseqindex)(
-    ESMCI::DistGrid **ptr, ESMCI::InterfaceInt **arbSeqIndex, int *rc){
+    ESMCI::DistGrid **ptr, ESMCI::InterfaceInt **arbSeqIndex, 
+      int *localDe, int *collocation, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridsetarbseqindex()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError(
-      (*ptr)->setArbSeqIndex(*arbSeqIndex),
+      (*ptr)->setArbSeqIndex(*arbSeqIndex, *localDe, *collocation),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

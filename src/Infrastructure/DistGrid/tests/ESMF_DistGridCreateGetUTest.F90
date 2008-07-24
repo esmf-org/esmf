@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.10 2008/07/17 06:41:26 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.11 2008/07/24 17:08:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.10 2008/07/17 06:41:26 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.11 2008/07/24 17:08:32 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -57,13 +57,14 @@ program ESMF_DistGridCreateGetUTest
   type(ESMF_DELayout):: delayout
   integer:: dimCount, patchCount, deCount
   logical:: regDecompFlag
-  integer:: elementCount
+  integer:: elementCount, localStart
   integer, allocatable:: elementCountPPatch(:), patchListPDe(:), elementCountPDe(:)
   integer, allocatable:: minIndexPDimPPatch(:,:), maxIndexPDimPPatch(:,:)
   integer, allocatable:: minIndexPDimPDe(:,:), maxIndexPDimPDe(:,:)
   integer, allocatable:: indexCountPDimPDe(:,:), localDeList(:)
   integer, allocatable:: indexList(:), seqIndexList(:)
   integer, allocatable:: deBlockList(:,:,:)
+  integer, allocatable:: arbSeqIndexList(:)
   logical:: loopResult
   logical:: matchResult
 
@@ -526,6 +527,57 @@ program ESMF_DistGridCreateGetUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   deallocate(deBlockList)
 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridPrint()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridPrint(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridDestroy()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - 1D arbitrary seq indices"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  localStart = localPet*10
+  distgrid = ESMF_DistGridCreate(arbSeqIndexList=(/localStart, localStart+1/), &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridPrint()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridPrint(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridDestroy()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - insert 1D arbitrary seq indices into regular 2D tile at arbDim=2 -> 3D total"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  localStart = localPet*10
+  allocate(arbSeqIndexList((localPet+1)*2))
+  do i=1,(localPet+1)*2
+    arbSeqIndexList(i)=localStart+i
+  enddo
+  distgrid = ESMF_DistGridCreate(arbSeqIndexList=arbSeqIndexList, &
+    minIndex=(/1,1/), maxIndex=(/5,7/), arbDim=2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(arbSeqIndexList)
+  
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "DistGridPrint()"

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.18 2008/07/23 23:37:24 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.19 2008/07/24 17:08:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.18 2008/07/23 23:37:24 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.19 2008/07/24 17:08:31 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3500,8 +3500,8 @@ int Array::redistStore(
   
     // implemented via sparseMatMul using identity matrix
     const int *srcElementCountPDe = srcArray->distgrid->getElementCountPDe();
-    const int *srcArbSeqIndexCountPLocalDe =
-      srcArray->distgrid->getArbSeqIndexCountPLocalDe();
+    int *const*srcArbSeqIndexCountPCollPLocalDe =
+      srcArray->distgrid->getElementCountPCollPLocalDe();
     const int *srcLocalDeList = srcArray->delayout->getLocalDeList();
     int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
     factorListCount = 0;  // init
@@ -3517,10 +3517,11 @@ int Array::redistStore(
     int jj = 0; // reset
     for (int i=0; i<srcLocalDeCount; i++){
       int de = srcLocalDeList[i];
-      int arbSeqIndexCount = srcArbSeqIndexCountPLocalDe[i];
-      if (arbSeqIndexCount==srcElementCountPDe[de]){
-        const int *srcArbSeqIndexListPLocalDe =
-          srcArray->distgrid->getArbSeqIndexListPLocalDe(i);
+      //TODO: this is hardcoded for first collocation only
+      int arbSeqIndexCount = srcArbSeqIndexCountPCollPLocalDe[0][i];
+      const int *srcArbSeqIndexListPLocalDe =
+        srcArray->distgrid->getArbSeqIndexListPLocalDe(i,1);
+      if (srcArbSeqIndexListPLocalDe){
         for (int j=0; j<arbSeqIndexCount; j++){
           factorIndexListAlloc[2*jj] = factorIndexListAlloc[2*jj+1] =
             srcArbSeqIndexListPLocalDe[j];
