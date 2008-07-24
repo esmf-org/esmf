@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.19 2008/07/24 17:08:31 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.20 2008/07/24 21:16:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.19 2008/07/24 17:08:31 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.20 2008/07/24 21:16:48 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3508,7 +3508,7 @@ int Array::redistStore(
     for (int i=0; i<srcLocalDeCount; i++)
       factorListCount += srcElementCountPDe[srcLocalDeList[i]];
     // set up factorIndexList
-    factorIndexListAlloc = new int[2*factorListCount*sizeof(int)];
+    factorIndexListAlloc = new int[2*factorListCount];
     int *extent = new int[2];
     extent[0] = 2;
     extent[1] = factorListCount;
@@ -3533,7 +3533,7 @@ int Array::redistStore(
           seqIndexOffset += srcElementCountPDe[j];
         for (int j=0; j<srcElementCountPDe[de]; j++){
           factorIndexListAlloc[2*jj] = factorIndexListAlloc[2*jj+1] =
-            seqIndexOffset + jj;
+            seqIndexOffset + j;
           ++jj;
         }
       }
@@ -3681,7 +3681,7 @@ fprintf(stderr, "%d, %d\n", srcSize, dstSize);
 fprintf(stderr, "factorListCount = %d\n", factorListCount);
 #endif
     // set up factorIndexList
-    factorIndexListAlloc = new int[4*factorListCount*sizeof(int)];
+    factorIndexListAlloc = new int[4*factorListCount];
     int *extent = new int[2];
     extent[0] = 4;
     extent[1] = factorListCount;
