@@ -11,7 +11,7 @@ grid_type: REDISTRIBUTION
 grid_redist::
 #rank spacing  size  range (min/max)  units
 #
-2  'UNIFORM'  12  -3.14159  3.14159  'RAD'   'UNIFORM'  9  -1.57  1.57  'RAD'   
+2  'UNIFORM'  12  -3.14159  3.14159  'RAD'   'UNIFORM'  9  -1.57  1.57  'RAD'
 3  'UNIFORM'  16  -180   180  'DEG_E'  'GAUSSIAN'  8  -88   88   'DEG_N'  
  &      'UNIFORM'  40  0  4000  'METERS'
 3  'UNIFORM'  18  -180   180  'DEG_E'  'GAUSSIAN'  12  -88   88   'DEG_N'  
