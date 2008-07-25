@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.11 2008/07/24 17:08:32 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.12 2008/07/25 17:08:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.11 2008/07/24 17:08:32 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.12 2008/07/25 17:08:27 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -574,7 +574,7 @@ program ESMF_DistGridCreateGetUTest
     arbSeqIndexList(i)=localStart+i
   enddo
   distgrid = ESMF_DistGridCreate(arbSeqIndexList=arbSeqIndexList, &
-    minIndex=(/1,1/), maxIndex=(/5,7/), arbDim=2, rc=rc)
+    arbDim=2, minIndex=(/1,1/), maxIndex=(/5,7/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   deallocate(arbSeqIndexList)
   

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.49 2008/07/25 00:52:06 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.50 2008/07/25 17:08:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.49 2008/07/25 00:52:06 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.50 2008/07/25 17:08:27 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1883,7 +1883,7 @@ contains
 !
 ! !ARGUMENTS:
     integer,    intent(in)            :: arbSeqIndexList(:)
-    integer,    intent(in), optional  :: arbDim
+    integer,    intent(in)            :: arbDim
     integer,    intent(in)            :: minIndex(:)
     integer,    intent(in)            :: maxIndex(:)
     integer,    intent(out),optional  :: rc
@@ -1915,8 +1915,8 @@ contains
 !     \begin{description}
 !     \item[arbSeqIndexList]
 !          List of arbitrary sequence indices that reside on the local PET.
-!     \item[{[arbDim]}]
-!          Dimension of the arbitrary distribution. Default equal to 1.
+!     \item[arbDim]
+!          Dimension of the arbitrary distribution.
 !     \item[minIndex]
 !          Global coordinate tuple of the lower corner of the tile. The 
 !          arbitrary dimension is {\em not} included in this tile
@@ -1933,7 +1933,6 @@ contains
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
     type(ESMF_VM)           :: vm           ! opaque pointer to VM object
     type(ESMF_InterfaceInt) :: indicesArg   ! index helper
-    integer                 :: arbDimArg    ! helper variable
     integer                 :: localSize(1) ! number of local indices
     integer, allocatable    :: globalSizes(:)  ! array of all sizes
     integer                 :: petCount        ! num pets
@@ -1955,16 +1954,11 @@ contains
           ESMF_CONTEXT, rc)
       return
     endif
-    if (present(arbDim)) then
-      if (arbDim < 1 .or. arbDim > dimCount+1) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-            "- arbDim out of range", &
-            ESMF_CONTEXT, rc)
-        return
-      endif
-      arbDimArg = arbDim
-    else
-      arbDimArg = 1 ! default
+    if (arbDim < 1 .or. arbDim > dimCount+1) then
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+        "- arbDim out of range", &
+        ESMF_CONTEXT, rc)
+      return
     endif
     
     ! get VM and related information
@@ -1989,13 +1983,13 @@ contains
     allocate(deblock(dimCount+1,2,petCount))
     csum = 0
     do i=1,petCount
-      deblock(arbDimArg,1,i) = csum + 1 ! min
+      deblock(arbDim,1,i) = csum + 1 ! min
       csum = csum + globalSizes(i)
-      deblock(arbDimArg,2,i) = csum     ! max
+      deblock(arbDim,2,i) = csum     ! max
       do j=1,dimCount+1
-        if (j==arbDimArg) cycle
+        if (j==arbDim) cycle
         jj=j
-        if (j>arbDimArg) jj=jj-1
+        if (j>arbDim) jj=jj-1
         deblock(j,1,i) = minIndex(jj) ! min
         deblock(j,2,i) = maxIndex(jj) ! max
       enddo
@@ -2021,10 +2015,10 @@ contains
     ! set return value
     ESMF_DistGridCreateDBAI = distgrid 
 
-    ! set collocations to separate arbDimArg from the reset
+    ! set collocations to separate arbDim from the reset
     allocate(seqIndexCollocation(dimCount+1))
     seqIndexCollocation = 2 ! initialize
-    seqIndexCollocation(arbDimArg) = 1 ! arbDimArg singled out as collocation "1"
+    seqIndexCollocation(arbDim) = 1 ! arbDim singled out as collocation "1"
     call ESMF_DistGridSet(distgrid, seqIndexCollocation=seqIndexCollocation, &
       rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2037,7 +2031,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! set local arbitrary sequence indices in DistGrid object
-    ! localDe=0, collocation=1, i.e. arbDimArg's collocation
+    ! localDe=0, collocation=1, i.e. arbDim's collocation
     call c_ESMC_DistGridSetArbSeqIndex(distgrid, indicesArg, 0, 1, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
