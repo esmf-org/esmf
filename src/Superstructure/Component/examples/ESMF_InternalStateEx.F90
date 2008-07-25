@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.12 2008/05/21 22:14:51 theurich Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.13 2008/07/25 20:28:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -26,8 +26,8 @@
 !   ESMF_CplCompSetInternalState
 !
 !-------------------------------------------------------------------------
-!BOC
-!\subsubsection{Example of Getting and Setting an Internal State}  
+!BOP
+!\subsubsection{Setting and Getting the Internal State}  
 !
 !   These routines save the address of an internal, private data block
 !   during the execution of a Component's initialize, run, or finalize
@@ -42,7 +42,7 @@
 !   
 !   See the code below for a simple example of using this capability.
 !
-!EOC
+!EOP
 !
 ! !USES:
 !BOC

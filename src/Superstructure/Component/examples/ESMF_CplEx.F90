@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.29 2008/04/02 19:44:08 theurich Exp $
+! $Id: ESMF_CplEx.F90,v 1.30 2008/07/25 20:28:30 theurich Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -53,19 +53,19 @@
     contains
 
     subroutine CPL_SetServices(comp, rc)
-        type(ESMF_CplComp) :: comp
-        integer, intent(out) :: rc
+      type(ESMF_CplComp)    :: comp   ! must not be optional
+      integer, intent(out)  :: rc     ! must not be optional
 
-        ! SetServices the callback routines.
-        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, CPL_Init, 0, rc)
-        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, CPL_Run, 0, rc)
-        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, CPL_Final, 0, rc)
+      ! SetServices the callback routines.
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, CPL_Init, 0, rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, CPL_Run, 0, rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, CPL_Final, 0, rc)
 
-        ! If desired, this routine can register a private data block
-        ! to be passed in to the routines above:
-        ! call ESMF_CplCompSetInternalState(comp, mydatablock, rc)
+      ! If desired, this routine can register a private data block
+      ! to be passed in to the routines above:
+      ! call ESMF_CplCompSetInternalState(comp, mydatablock, rc)
 
-        rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
     end subroutine
 !EOC
 
@@ -74,10 +74,11 @@
 !\subsubsection{Specifying a User-Code Initialize Routine}
 !
 ! When a higher level component is ready to begin using an 
-! {\tt ESMF\_CplComp},
-! it will call its initialize routine.  The component writer must
-! supply a subroutine with the exact calling sequence below; no arguments
-! can be optional, and the types and order must match.
+! {\tt ESMF\_CplComp}, it will call its initialize routine.
+!
+! The component writer must supply a subroutine with the exact interface 
+! shown below. Arguments must not be declared as optional, and the types and
+! order must match.
 !
 ! At initialization time the component can allocate data space, open
 ! data files, set up initial conditions; anything it needs to do to
@@ -89,21 +90,20 @@
     
 !BOC
     subroutine CPL_Init(comp, importState, exportState, clock, rc)
-        type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: importState
-        type(ESMF_State) :: exportState
-        type(ESMF_Clock) :: clock
-        integer, intent(out) :: rc
+      type(ESMF_CplComp)    :: comp                       ! must not be optional
+      type(ESMF_State)      :: importState, exportState   ! must not be optional
+      type(ESMF_Clock)      :: clock                      ! must not be optional
+      integer, intent(out)  :: rc                         ! must not be optional
 
-        print *, "Coupler Init starting"
+      print *, "Coupler Init starting"
     
-        ! Add whatever code here needed
-        ! Precompute any needed values, fill in any inital values
-        !  needed in Import States
+      ! Add whatever code here needed
+      ! Precompute any needed values, fill in any inital values
+      !  needed in Import States
 
-        rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
-        print *, "Coupler Init returning"
+      print *, "Coupler Init returning"
    
     end subroutine CPL_Init
 !EOC
@@ -118,9 +118,11 @@
 ! and produce any output and place it in the {\tt exportState}.
 !
 ! When a higher level component is ready to use the {\tt ESMF\_CplComp}
-! it will call its run routine.  The component writer must
-! supply a subroutine with the exact calling sequence below; 
-! no arguments can be optional, and the types and order must match.
+! it will call its run routine.
+!
+! The component writer must supply a subroutine with the exact interface 
+! shown below. Arguments must not be declared as optional, and the types and
+! order must match.
 !
 ! It is expected that this is where the bulk of the model computation
 ! or data analysis will occur.
@@ -131,21 +133,19 @@
     
 !BOC
     subroutine CPL_Run(comp, importState, exportState, clock, rc)
-        type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: importState
-        type(ESMF_State) :: exportState
-        type(ESMF_Clock) :: clock
-        integer, intent(out) :: rc
+      type(ESMF_CplComp)    :: comp                       ! must not be optional
+      type(ESMF_State)      :: importState, exportState   ! must not be optional
+      type(ESMF_Clock)      :: clock                      ! must not be optional
+      integer, intent(out)  :: rc                         ! must not be optional
 
+      print *, "Coupler Run starting"
 
-        print *, "Coupler Run starting"
+      ! Add whatever code needed here to transform Export state data
+      !  into Import states for the next timestep.  
 
-        ! Add whatever code needed here to transform Export state data
-        !  into Import states for the next timestep.  
+      rc = ESMF_SUCCESS
 
-        rc = ESMF_SUCCESS
-
-        print *, "Coupler Run returning"
+      print *, "Coupler Run returning"
 
     end subroutine CPL_Run
 !EOC
@@ -157,6 +157,10 @@
 ! deallocate data space, close open files, and flush final results.
 ! These functions should be placed in a finalize routine.
 !
+! The component writer must supply a subroutine with the exact interface 
+! shown below. Arguments must not be declared as optional, and the types and
+! order must match.
+!
 ! The {\tt rc} return code should be set if an error occurs, otherwise
 ! the value {\tt ESMF\_SUCCESS} should be returned.
 !
@@ -164,21 +168,19 @@
     
 !BOC
     subroutine CPL_Final(comp, importState, exportState, clock, rc)
-        type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: importState
-        type(ESMF_State) :: exportState
-        type(ESMF_Clock) :: clock
-        integer, intent(out) :: rc
+      type(ESMF_CplComp)    :: comp                       ! must not be optional
+      type(ESMF_State)      :: importState, exportState   ! must not be optional
+      type(ESMF_Clock)      :: clock                      ! must not be optional
+      integer, intent(out)  :: rc                         ! must not be optional
 
-
-        print *, "Coupler Final starting"
+      print *, "Coupler Final starting"
     
-        ! Add whatever code needed here to compute final values and
-        !  finish the computation.
+      ! Add whatever code needed here to compute final values and
+      !  finish the computation.
 
-        rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
-        print *, "Coupler Final returning"
+      print *, "Coupler Final returning"
    
     end subroutine CPL_Final
 

@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.37 2008/04/05 03:39:11 cdeluca Exp $
+% $Id: Component_refdoc.ctex,v 1.38 2008/07/25 20:28:29 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -110,11 +110,9 @@
 #ifdef STANDALONE
 \input{CplComp_usage}
 \input{ESMF_CplEx_fapi}
-\input{ESMF_InternalStateEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/CplComp_usage}
 \input{../Superstructure/Component/doc/ESMF_CplEx_fapi}
-\input{../Superstructure/Component/doc/ESMF_InternalStateEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}

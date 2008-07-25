@@ -1,4 +1,4 @@
-% $Id: GridComp_rest.tex,v 1.9 2008/05/21 22:14:50 theurich Exp $
+% $Id: GridComp_rest.tex,v 1.10 2008/07/25 20:28:30 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -11,6 +11,10 @@
 %\subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
+
+\item {\bf No optional arguments.} User-written routines called by SetServices,
+and registered for Initialize, Run and Finalize, {\em must not} declare any
+of the arguments as optional.
 
 \item {\bf Namespace isolation.}
 If possible, Gridded Components should attempt to make 

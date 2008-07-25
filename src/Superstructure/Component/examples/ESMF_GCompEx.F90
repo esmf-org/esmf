@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.35 2008/05/21 22:14:50 theurich Exp $
+! $Id: ESMF_GCompEx.F90,v 1.36 2008/07/25 20:28:30 theurich Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -53,19 +53,19 @@
     contains
 
     subroutine GComp_SetServices(comp, rc)
-        type(ESMF_GridComp) :: comp
-        integer, intent(out) :: rc
+      type(ESMF_GridComp)   :: comp   ! must not be optional
+      integer, intent(out)  :: rc     ! must not be optional
 
-        ! SetServices the callback routines.
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, GComp_Init, 0, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, GComp_Run, 0, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, GComp_Final, 0, rc)
+      ! SetServices the callback routines.
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, GComp_Init, 0, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, GComp_Run, 0, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, GComp_Final, 0, rc)
 
-        ! If desired, this routine can register a private data block
-        ! to be passed in to the routines above:
-        ! call ESMF_GridCompSetData(comp, mydatablock, rc)
+      ! If desired, this routine can register a private data block
+      ! to be passed in to the routines above:
+      ! call ESMF_GridCompSetData(comp, mydatablock, rc)
 
-        rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
     end subroutine
 !EOC
@@ -74,10 +74,11 @@
 !\subsubsection{Specifying a User-Code Initialize Routine}
 !
 ! When a higher level component is ready to begin using an 
-! {\tt ESMF\_GridComp},
-! it will call its initialize routine.  The component writer must
-! supply a subroutine with the exact calling sequence below; no arguments
-! can be optional, and the types and order must match.
+! {\tt ESMF\_GridComp}, it will call its initialize routine.
+!
+! The component writer must supply a subroutine with the exact interface 
+! shown below. Arguments must not be declared as optional, and the types and
+! order must match.
 !
 ! At initialization time the component can allocate data space, open
 ! data files, set up initial conditions; anything it needs to do to
@@ -89,21 +90,21 @@
     
 !BOC
     subroutine GComp_Init(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp) :: comp
-        type(ESMF_State) :: importState, exportState
-        type(ESMF_Clock) :: clock
-        integer, intent(out) :: rc
+      type(ESMF_GridComp)   :: comp                       ! must not be optional
+      type(ESMF_State)      :: importState, exportState   ! must not be optional
+      type(ESMF_Clock)      :: clock                      ! must not be optional
+      integer, intent(out)  :: rc                         ! must not be optional
 
-        print *, "Gridded Comp Init starting"
+      print *, "Gridded Comp Init starting"
 
-        ! This is where the model specific setup code goes.  
+      ! This is where the model specific setup code goes.  
  
-        ! If the initial Export state needs to be filled, do it here.
-        !call ESMF_StateAdd(exportState, field, rc)
-        !call ESMF_StateAdd(exportState, bundle, rc)
-        print *, "Gridded Comp Init returning"
+      ! If the initial Export state needs to be filled, do it here.
+      !call ESMF_StateAdd(exportState, field, rc)
+      !call ESMF_StateAdd(exportState, bundle, rc)
+      print *, "Gridded Comp Init returning"
    
-        rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
     end subroutine GComp_Init
 !EOC
@@ -118,9 +119,11 @@
 ! and produce any output and place it in the {\tt exportState}. 
 ! 
 ! When a higher level component is ready to use the {\tt ESMF\_GridComp}
-! it will call its run routine.  The component writer must
-! supply a subroutine with the exact calling sequence below; 
-! no arguments can be optional, and the types and order must match.
+! it will call its run routine.
+!
+! The component writer must supply a subroutine with the exact interface 
+! shown below. Arguments must not be declared as optional, and the types and
+! order must match.
 !
 ! It is expected that this is where the bulk of the model computation
 ! or data analysis will occur.
@@ -131,22 +134,22 @@
         
 !BOC    
     subroutine GComp_Run(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp) :: comp
-        type(ESMF_State) :: importState, exportState
-        type(ESMF_Clock) :: clock
-        integer, intent(out) :: rc
+      type(ESMF_GridComp)   :: comp                       ! must not be optional
+      type(ESMF_State)      :: importState, exportState   ! must not be optional
+      type(ESMF_Clock)      :: clock                      ! must not be optional
+      integer, intent(out)  :: rc                         ! must not be optional
 
-        print *, "Gridded Comp Run starting"
-        ! call ESMF_StateGet(), etc to get fields, bundles, arrays
-        !  from import state.
+      print *, "Gridded Comp Run starting"
+      ! call ESMF_StateGet(), etc to get fields, bundles, arrays
+      !  from import state.
 
-        ! This is where the model specific computation goes.
+      ! This is where the model specific computation goes.
 
-        ! Fill export state here using ESMF_StateAdd(), etc
+      ! Fill export state here using ESMF_StateAdd(), etc
 
-        print *, "Gridded Comp Run returning"
+      print *, "Gridded Comp Run returning"
 
-        rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
     end subroutine GComp_Run
 !EOC
@@ -158,6 +161,10 @@
 ! deallocate data space, close open files, and flush final results.
 ! These functions should be placed in a finalize routine.
 !
+! The component writer must supply a subroutine with the exact interface 
+! shown below. Arguments must not be declared as optional, and the types and
+! order must match.
+!
 ! The {\tt rc} return code should be set if an error occurs, otherwise
 ! the value {\tt ESMF\_SUCCESS} should be returned.
 !
@@ -165,18 +172,18 @@
 
 !BOC
     subroutine GComp_Final(comp, importState, exportState, clock, rc)
-        type(ESMF_GridComp) :: comp
-        type(ESMF_State) :: importState, exportState
-        type(ESMF_Clock) :: clock
-        integer, intent(out) :: rc
+      type(ESMF_GridComp)   :: comp                       ! must not be optional
+      type(ESMF_State)      :: importState, exportState   ! must not be optional
+      type(ESMF_Clock)      :: clock                      ! must not be optional
+      integer, intent(out)  :: rc                         ! must not be optional
 
-        print *, "Gridded Comp Final starting"
+      print *, "Gridded Comp Final starting"
     
-        ! Add whatever code here needed
+      ! Add whatever code here needed
 
-        print *, "Gridded Comp Final returning"
+      print *, "Gridded Comp Final returning"
    
-        rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
     end subroutine GComp_Final
 
@@ -366,6 +373,4 @@
 
 
     end program ESMF_AppMainEx
-    
-!EOC
     

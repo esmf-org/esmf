@@ -1,4 +1,4 @@
-% $Id: AppDriver_reqmethods.tex,v 1.10 2008/04/05 03:39:11 cdeluca Exp $
+% $Id: AppDriver_reqmethods.tex,v 1.11 2008/07/25 20:28:29 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -19,6 +19,8 @@ by another part of the program; in effect, an ESMF component takes the
 place of a library.  The interface is prescribed by the framework,
 and the component writer must provide specific subroutines which 
 have standard argument lists and perform specific operations.
+For technical reasons {\em none} of the arguments in user-provided subroutines
+must be declared as {\em optional}.
 
 One of the required interfaces a component must provide is 
 the set services method.  This subroutine must have an
@@ -27,7 +29,8 @@ as the first argument, and an integer return code as the second.
 Both arguments are required and must {\em not} be declared as 
 {\tt optional}. If an intent is specified in the interface it must be 
 {\tt intent(inout)} for the first and {\tt intent(out)} for the 
-second argument. The subroutine name is not predefined, it is set by the component writer, but must be provided as part of the component 
+second argument. The subroutine name is not predefined, it is set by the
+component writer, but must be provided as part of the component 
 documentation.
 
 The required function of the set services subroutine is to
@@ -60,6 +63,8 @@ routines as required.
 User-code initialize, run, and finalize routines must be provided for
 each component.  See Sections \ref{sec:GridSetServ} and \ref{sec:CplSetServ}
 for the prescribed interfaces and examples of how to set these up.
+The provided user-code must abide {\em exactly} to the prescribed interfaces.
+{\em None} of the arguments must be declared as {\em optional}.
 
 
 

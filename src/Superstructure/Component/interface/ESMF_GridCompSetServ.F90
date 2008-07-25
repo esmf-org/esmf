@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompSetServ.F90,v 1.12 2008/04/05 03:39:13 cdeluca Exp $
+! $Id: ESMF_GridCompSetServ.F90,v 1.13 2008/07/25 20:28:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -85,17 +85,15 @@
 !      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
-!  Intended to be called by an {\tt ESMF\_GridComp} during the 
-!  registration process.
-!  An {\tt ESMF\_GridComp} calls {\tt ESMF\_GridCompSetEntryPoint} for each of 
-!  the predefined init, run, and finalize routines, 
-!  to assocate the internal subroutine to be
-!  called for each function.  If multiple phases for init, run, or finalize
-!  are needed, this can be called with phase numbers.
+!  Intended to be called by an {\tt ESMF\_GridComp} during its SetServices
+!  routine. An {\tt ESMF\_GridComp} calls {\tt ESMF\_GridCompSetEntryPoint}
+!  for each of the predefined initialize, run, and finalize routines, 
+!  to assocate the internal subroutine to be called for each function. 
+!  If multiple phases for init, run, or finalize are needed, this can be 
+!  called with phase numbers.
 !
-!  After this subroutine returns, the framework now knows how to call
-!  the initialize, run, and finalize routines for this child
-!  {\tt ESMF\_GridComp}.
+!  After this subroutine returns, the framework knows how to call the
+!  initialize, run, and finalize routines for this component.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -123,15 +121,17 @@
 !    because of implementation considerations.
 !   \end{description}
 !
-!  The user-supplied routine must conform to the following interface:
+! The component writer must supply a subroutine with the exact interface 
+! shown below. Arguments must not be declared as optional, and the types and
+! order must match.
 !
 ! !INTERFACE:
 !      interface
 !        subroutine subroutineName (comp, importState, exportState, clock, rc)
-!          type(ESMF\_GridComp) :: comp
-!          type(ESMF\_State) :: importState, exportState
-!          type(ESMF\_Clock) :: clock
-!          integer, intent(out) :: rc
+!          type(ESMF\_GridComp) :: comp                     ! must not be optional
+!          type(ESMF\_State)    :: importState, exportState ! must not be optional
+!          type(ESMF\_Clock)    :: clock                    ! must not be optional
+!          integer, intent(out) :: rc                       ! must not be optional
 !        end subroutine
 !      end interface
 !
@@ -198,7 +198,7 @@
 !  that is the registration routine for this {\tt ESMF\_GridComp}. 
 !  This name must be documented by the {\tt ESMF\_GridComp} provider.
 !
-!  After this subroutine returns, the framework now knows how to call
+!  After this subroutine returns, the framework knows how to call
 !  the initialize, run, and finalize routines for the {\tt ESMF\_GridComp}.
 !    
 !  The arguments are:
@@ -216,14 +216,15 @@
 !    because of implementation considerations.
 !   \end{description}
 !
-!  The user-supplied registration routine must conform to the following
-!  interface:
+! The component writer must supply a subroutine with the exact interface 
+! shown below. Arguments must not be declared as optional, and the types and
+! order must match.
 !
 ! !INTERFACE:
 !      interface
 !        subroutine subroutineName (comp, rc)
-!          type(ESMF\_GridComp) :: comp
-!          integer, intent(out) :: rc
+!          type(ESMF\_GridComp) :: comp   ! must not be optional
+!          integer, intent(out) :: rc     ! must not be optional
 !        end subroutine
 !      end interface
 !

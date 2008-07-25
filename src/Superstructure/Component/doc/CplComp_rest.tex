@@ -1,4 +1,4 @@
-% $Id: CplComp_rest.tex,v 1.8 2008/04/05 03:39:11 cdeluca Exp $
+% $Id: CplComp_rest.tex,v 1.9 2008/07/25 20:28:29 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -11,6 +11,10 @@
 %\subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
+
+\item {\bf No optional arguments.} User-written routines called by SetServices,
+and registered for Initialize, Run and Finalize, {\em must not} declare any
+of the arguments as optional.
 
 \item {\bf No Transforms.}  Components must exchange data through 
 {\tt ESMF\_State} objects.  The input data are available at the time 
