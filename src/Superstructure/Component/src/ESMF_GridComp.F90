@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.101 2008/07/22 21:51:30 peggyli Exp $
+! $Id: ESMF_GridComp.F90,v 1.102 2008/07/25 18:31:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.101 2008/07/22 21:51:30 peggyli Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.102 2008/07/25 18:31:23 theurich Exp $'
 
 !==============================================================================
 !
@@ -231,12 +231,15 @@
       integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
-!  This interface creates an {\tt ESMF\_GridComp} object. By default, a separate VM context will be created for
-!  each component.  This implies creating a new MPI communicator and allocating additional memory to manage the VM resources.
-!  When running on a large number of processors, creating a separate VM for each component could be both
-!  time and memory inefficient.  If the application is sequential, i.e., each component is running on all
-!  the PETs of the global VM, it will be more efficient to use the global VM instead of creating a new one.  This can be
-!  done by setting parentVm to ESMF_CHILD_IN_PARENT_VM.
+!  This interface creates an {\tt ESMF\_GridComp} object. By default, a
+!  separate VM context will be created for each component.  This implies
+!  creating a new MPI communicator and allocating additional memory to
+!  manage the VM resources. When running on a large number of processors,
+!  creating a separate VM for each component could be both time and memory
+!  inefficient.  If the application is sequential, i.e., each component is
+!  running on all the PETs of the global VM, it will be more efficient to use
+!  the global VM instead of creating a new one.  This can be done by setting
+!  {\tt contextflag} to ESMF\_CHILD\_IN\_PARENT\_VM.
 !
 !  The return value is the new {\tt ESMF\_GridComp}.
 !    

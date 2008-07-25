@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.49 2008/07/22 20:17:13 peggyli Exp $
+! $Id: ESMF_Init.F90,v 1.50 2008/07/25 18:31:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -118,9 +118,10 @@
 !     initializing the framework. If the MPI initialization is left to
 !     {\tt ESMF\_Initialize()} it inherits all of the MPI implementation 
 !     dependent limitations of what may or may not be done before 
-!     {\tt MPI\_Init()}. For instance, it is unsafe for some MPI implementations,
-!     such as MPICH, to do IO before the MPI environment is initialized. Please
-!     consult the documentation of your MPI implementation for details.
+!     {\tt MPI\_Init()}. For instance, it is unsafe for some MPI
+!     implementations, such as MPICH, to do IO before the MPI environment
+!     is initialized. Please consult the documentation of your MPI
+!     implementation for details.
 !
 !     Note that when using MPICH as the MPI library, ESMF needs to use
 !     the application command line arguments for {\tt MPI\_Init()}. However,
@@ -130,17 +131,16 @@
 !     be as specified on the command line (including those which MPICH would
 !     normally strip out). 
 !
-!     By default, {\tt ESMF\_Initialize()} will open multiple error log files, one per
-!     processor.  This is very useful for debugging purpose.  However, when running the
-!     application on a large number of processors, opening a large number of
-!     log files and writing log messages from all the processors could become a performance 
-!     bottleneck.  Therefore, it is recommended
-!     to turn the Error Log feature off by setting {\tt defaultLogType} to 
-!     ESMF_LOG_NONE.
+!     By default, {\tt ESMF\_Initialize()} will open multiple error log files,
+!     one per processor.  This is very useful for debugging purpose.  However,
+!     when running the application on a large number of processors, opening a
+!     large number of log files and writing log messages from all the processors
+!     could become a performance bottleneck.  Therefore, it is recommended
+!     to turn the Error Log feature off in these situations by setting
+!     {\tt defaultLogType} to ESMF\_LOG\_NONE.
 !
-!     Before exiting the application
-!     the user must call {\tt ESMF\_Finalize()} to release resources 
-!     and clean up the ESMF gracefully.
+!     Before exiting the application the user must call {\tt ESMF\_Finalize()}
+!     to release resources and clean up the ESMF gracefully.
 !
 !     The arguments are:
 !     \begin{description}
