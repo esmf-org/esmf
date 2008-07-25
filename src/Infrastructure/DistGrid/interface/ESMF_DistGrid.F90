@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.48 2008/07/24 17:11:38 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.49 2008/07/25 00:52:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.48 2008/07/24 17:11:38 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.49 2008/07/25 00:52:06 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1878,14 +1878,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBAI(arbSeqIndexList, minIndex, maxIndex, &
-    arbDim, rc)
+  function ESMF_DistGridCreateDBAI(arbSeqIndexList, arbDim, &
+    minIndex, maxIndex, rc)
 !
 ! !ARGUMENTS:
     integer,    intent(in)            :: arbSeqIndexList(:)
+    integer,    intent(in), optional  :: arbDim
     integer,    intent(in)            :: minIndex(:)
     integer,    intent(in)            :: maxIndex(:)
-    integer,    intent(in), optional  :: arbDim
     integer,    intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
@@ -1915,14 +1915,14 @@ contains
 !     \begin{description}
 !     \item[arbSeqIndexList]
 !          List of arbitrary sequence indices that reside on the local PET.
+!     \item[{[arbDim]}]
+!          Dimension of the arbitrary distribution. Default equal to 1.
 !     \item[minIndex]
 !          Global coordinate tuple of the lower corner of the tile. The 
 !          arbitrary dimension is {\em not} included in this tile
 !     \item[maxIndex]
 !          Global coordinate tuple of the upper corner of the tile. The
 !          arbitrary dimension is {\em not} included in this tile
-!     \item[{[arbDim]}]
-!          Dimension of the arbitrary distribution. Default equal to 1.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
