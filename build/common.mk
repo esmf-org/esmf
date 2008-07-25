@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.237 2008/07/23 04:51:52 theurich Exp $
+#  $Id: common.mk,v 1.238 2008/07/25 22:10:54 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -106,6 +106,14 @@ endif
 
 ifeq ($(origin ESMF_BATCHOPTIONS), environment)
 $(error Obsolete environment variable ESMF_BATCHOPTIONS detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
+endif
+
+ifeq ($(origin ESMF_MPI), environment)
+$(error Obsolete environment variable ESMF_MPI detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
+endif
+
+ifeq ($(origin ESMF_MPIRUNOPTIONS), environment)
+$(error Obsolete environment variable ESMF_MPIRUNOPTIONS detected. Please see ESMF README and/or User's Guide for a current list of ESMF environment variables.)
 endif
 
 #-------------------------------------------------------------------------------
