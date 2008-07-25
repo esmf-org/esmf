@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUTest.F90,v 1.8 2008/07/24 21:22:46 w6ws Exp $
+! $Id: ESMF_AttributeUTest.F90,v 1.9 2008/07/25 02:35:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeUTest.F90,v 1.8 2008/07/24 21:22:46 w6ws Exp $'
+      '$Id: ESMF_AttributeUTest.F90,v 1.9 2008/07/25 02:35:16 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -49,15 +49,12 @@ program ESMF_AttributeUTest
       type(ESMF_Array)       :: array
       type(ESMF_ArraySpec)   :: arrayspec
       type(ESMF_DistGrid)    :: distgrid
-      type(ESMF_CplComp)     :: cplcomp, cplcomp2
-      type(ESMF_GridComp)    :: grdcomp, grdcomp2
-      type(ESMF_Field)       :: field
       type(ESMF_Grid)        :: grid
-      type(ESMF_State)       :: state, state2
-      type(ESMF_FieldBundle) :: fieldbundleforstate
-			type(ESMF_Field)       :: fieldforstate
-      type(ESMF_Field)       :: fieldforbundle
-      type(ESMF_FieldBundle) :: fieldbundle
+      type(ESMF_CplComp)     :: cplcomp, cfc, cfg
+      type(ESMF_GridComp)    :: grdcomp, gfc, gfg
+      type(ESMF_Field)       :: field, ffb, ffs 
+      type(ESMF_State)       :: state, state2, sfc, sfg
+      type(ESMF_FieldBundle) :: fieldbundle, fbfs
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrvalue
       character(ESMF_MAXSTR), dimension(3) :: attrList
       logical                :: lattrList(3), lattrResult(3)
@@ -83,22 +80,38 @@ program ESMF_AttributeUTest
 
       !------------------------------------------------------------------------
       ! preparations
+      ! array and grid
       call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
       distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
         regDecomp=(/2,3/), rc=rc)
       array = ESMF_ArrayCreate(arrayspec, distgrid, rc=rc)
-      field = ESMF_FieldCreateEmpty(name="field 1", rc=rc)
       grid = ESMF_GridCreateEmpty(rc=rc)
-      state = ESMF_StateCreate("state 1", ESMF_STATE_IMPORT, rc=rc)
-      state2 = ESMF_StateCreate("state 2", ESMF_STATE_EXPORT, rc=rc)
-      fieldbundleforstate = ESMF_FieldBundleCreate(name="fieldbundleforstate1", rc=rc)
-      fieldforstate = ESMF_FieldCreateEmpty(name="fieldforstate1", rc=rc)
-      fieldbundle = ESMF_FieldBundleCreate(name="bundle 1", rc=rc)
-      fieldforbundle = ESMF_FieldCreateEmpty(name="field 1", rc=rc)
+      
+      ! fields
+      field = ESMF_FieldCreateEmpty(name="original field", rc=rc)
+      ffs = ESMF_FieldCreateEmpty(name="fieldforstate", rc=rc)
+      ffb = ESMF_FieldCreateEmpty(name="fieldforbundle", rc=rc)
+      
+      ! field bundles
+      fieldbundle = ESMF_FieldBundleCreate(name="original field bundle", rc=rc)
+      fbfs = ESMF_FieldBundleCreate(name="fieldbundleforstate", rc=rc)
+      
+      ! states
+      state = ESMF_StateCreate("original state", ESMF_STATE_IMPORT, rc=rc)
+      state2 = ESMF_StateCreate("state copy", ESMF_STATE_EXPORT, rc=rc)
+      sfc = ESMF_StateCreate("stateforcplcomp", ESMF_STATE_EXPORT, rc=rc)
+      sfg = ESMF_StateCreate("stateforgridcomp", ESMF_STATE_EXPORT, rc=rc)
+      
+      ! coupler components
       cplcomp = ESMF_CplCompCreate(name="cplcomp", petList=(/0/), rc=rc)
-      cplcomp2 = ESMF_CplCompCreate(name="cplcomp2", petList=(/0/), rc=rc)
-      grdcomp = ESMF_GridCompCreate(name="grdcomp", petList=(/0/), rc=rc)
-      grdcomp2 = ESMF_GridCompCreate(name="grdcomp2", petList=(/0/), rc=rc)
+      cfc = ESMF_CplCompCreate(name="cplcompforcplcomp", petList=(/0/), rc=rc)
+      cfg = ESMF_CplCompCreate(name="cplcompforgridcomp", petList=(/0/), rc=rc)
+      
+      ! gridded components
+      grdcomp = ESMF_GridCompCreate(name="gridcomp", petList=(/0/), rc=rc)
+      gfc = ESMF_GridCompCreate(name="gridcompforcplcomp", petList=(/0/), rc=rc)
+      gfg = ESMF_GridCompCreate(name="gridcompforgridcomp", petList=(/0/), rc=rc)
+      
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !-------------------------------------------------------------------------
@@ -122,7 +135,7 @@ program ESMF_AttributeUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      defaultvalue = 7;
+defaultvalue = 7;
 
       !EX_UTest
       ! Get an integer attribute from a Field Test
@@ -344,7 +357,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Link a cplcomp attribute hierarchy to a state attribute hierarchy CplComp Test
-      call ESMF_AttributeSet(cplcomp, state, rc=rc)
+      call ESMF_AttributeSet(cplcomp, sfc, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a CplComp hierarchy to a State hierarchy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -352,7 +365,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Link a cplcomp attribute hierarchy to a cplcomp attribute hierarchy CplComp Test
-      call ESMF_AttributeSet(cplcomp, cplcomp2, rc=rc)
+      call ESMF_AttributeSet(cplcomp, cfc, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a CplComp hierarchy to a CplComp hierarchy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -360,7 +373,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Link a cplcomp attribute hierarchy to a gridcomp attribute hierarchy CplComp Test
-      call ESMF_AttributeSet(cplcomp, grdcomp, rc=rc)
+      call ESMF_AttributeSet(cplcomp, gfc, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a CplComp hierarchy to a GridComp hierarchy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -516,7 +529,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Link a grdcomp attribute hierarchy to a state attribute hierarchy GridComp Test
-      call ESMF_AttributeSet(grdcomp, state, rc=rc)
+      call ESMF_AttributeSet(grdcomp, sfg, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a GridComp hierarchy to a State hierarchy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -524,7 +537,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Link a grdcomp attribute hierarchy to a cplcomp attribute hierarchy GridComp Test
-      call ESMF_AttributeSet(grdcomp, cplcomp, rc=rc)
+      call ESMF_AttributeSet(grdcomp, cfg, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a GridComp hierarchy to a CplComp hierarchy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -532,7 +545,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Link a grdcomp attribute hierarchy to a gridcomp attribute hierarchy GridComp Test
-      call ESMF_AttributeSet(grdcomp, grdcomp2, rc=rc)
+      call ESMF_AttributeSet(grdcomp, gfg, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a GridComp hierarchy to a GridComp hierarchy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -858,7 +871,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Link a bundle attribute hierarchy to a field attribute hierarchy FieldBundle Test
-      call ESMF_AttributeSet(fieldbundle, fieldforbundle, rc=rc)
+      call ESMF_AttributeSet(fieldbundle, ffb, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a FieldBundle hierarchy to a Field hierarchy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1162,7 +1175,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Link a state attribute hierarchy to a bundle attribute hierarchy State Test
-      call ESMF_AttributeSet(state, fieldbundleforstate, rc=rc)
+      call ESMF_AttributeSet(state, fbfs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a State hierarchy to a FieldBundle hierarchy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1170,7 +1183,7 @@ program ESMF_AttributeUTest
 
       !EX_UTest
       ! Link a state attribute hierarchy to a field attribute hierarchy State Test
-      call ESMF_AttributeSet(state, fieldforstate, rc=rc)
+      call ESMF_AttributeSet(state, ffs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a State hierarchy to a Field hierarchy Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1186,9 +1199,9 @@ program ESMF_AttributeUTest
       
       !EX_UTest
       ! Copy an attribute hierarchy from state1 to state2
-      call ESMF_AttributeCopy(state, state2, rc=rc)
+      call ESMF_AttributeCopy(sfc, state2, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Copy an attribute hierarchy from state1 to state2"
+      write(name, *) "Copy an attribute hierarchy from state to state2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1243,10 +1256,28 @@ program ESMF_AttributeUTest
       ! clean up
       call ESMF_ArrayDestroy(array, rc=rc)
       call ESMF_DistGridDestroy(distGrid, rc=rc)
-      call ESMF_FieldDestroy(field, rc=rc)
       call ESMF_GridDestroy(grid, rc=rc)
+      
       call ESMF_FieldBundleDestroy(fieldbundle, rc=rc)
-      call ESMF_FieldDestroy(fieldforbundle, rc=rc)
+      call ESMF_FieldBundleDestroy(fbfs, rc=rc)
+      
+      call ESMF_FieldDestroy(field, rc=rc)
+      call ESMF_FieldDestroy(ffb, rc=rc)
+      call ESMF_FieldDestroy(ffs, rc=rc)
+      
+      call ESMF_CplCompDestroy(cplcomp, rc=rc)
+      call ESMF_CplCompDestroy(cfc, rc=rc)
+      call ESMF_CplCompDestroy(cfg, rc=rc)
+      
+      call ESMF_GridCompDestroy(grdcomp, rc=rc)
+      call ESMF_GridCompDestroy(gfc, rc=rc)
+      call ESMF_GridCompDestroy(gfg, rc=rc)
+
+      call ESMF_StateDestroy(state2, rc=rc)
+      call ESMF_StateDestroy(state, rc=rc)
+      call ESMF_StateDestroy(sfc, rc=rc)
+      call ESMF_StateDestroy(sfg, rc=rc)
+      
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 #endif
 

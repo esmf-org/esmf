@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.20 2008/07/24 21:22:46 w6ws Exp $
+! $Id: ESMF_Attribute.F90,v 1.21 2008/07/25 02:35:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.20 2008/07/24 21:22:46 w6ws Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.21 2008/07/25 02:35:16 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1050,29 +1050,30 @@ contains
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+        
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -1168,29 +1169,30 @@ contains
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -1274,29 +1276,30 @@ contains
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -1392,29 +1395,30 @@ contains
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -1498,29 +1502,30 @@ contains
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -1616,29 +1621,30 @@ contains
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -1722,29 +1728,30 @@ contains
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -1840,29 +1847,30 @@ contains
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -1947,30 +1955,32 @@ contains
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
       value = localvalue  
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
-        else
-          return
-        end if
-      end if
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -2071,15 +2081,15 @@ contains
       valueList = localvalueList
       deallocate (localvalueList)
   
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
@@ -2088,15 +2098,16 @@ contains
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
       valueList = localvalueList
       deallocate (localvalueList)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -2179,28 +2190,29 @@ contains
       call c_ESMC_AttPackGetChar(array, name, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetChar(array, name, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -3561,13 +3573,13 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWriteTab(array, fconvention, &
+        call c_ESMC_AttributeWriteTab(array, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWriteXML(array, fconvention, &
+        call c_ESMC_AttributeWriteXML(array, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3638,12 +3650,12 @@ contains
       fobject = 'comp'
 
       name1 = 'discipline'
-      name2 = 'physical domain'
+      name2 = 'physical_domain'
       name3 = 'agency'
       name4 = 'institution'
       name5 = 'author'
-      name6 = 'coding language'
-      name7 = 'model component framework'
+      name6 = 'coding_language'
+      name7 = 'model_component_framework'
 
       call c_ESMC_AttPackCreate(comp%compp%base, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -3824,29 +3836,30 @@ contains
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -3942,29 +3955,30 @@ contains
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -4048,29 +4062,30 @@ contains
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -4166,29 +4181,30 @@ contains
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -4272,29 +4288,30 @@ contains
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -4390,29 +4407,30 @@ contains
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -4496,29 +4514,30 @@ contains
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -4614,29 +4633,30 @@ contains
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -4722,15 +4742,15 @@ contains
         fconvention, fpurpose, fobject, localrc)
       value = localvalue
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
@@ -4738,15 +4758,15 @@ contains
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
 
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -4846,15 +4866,15 @@ contains
       valueList = localvalueList
       deallocate (localvalueList)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
-          valueList(:count) = defaultvalue
+          valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
@@ -4864,15 +4884,15 @@ contains
       valuelist(:count) = localvalueList
       deallocate (localvalueList)
       
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
-          valueList(:count) = defaultvalue
+          valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -4955,28 +4975,29 @@ contains
       call c_ESMC_AttPackGetChar(comp%compp%base, name, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetChar(comp%compp%base, name, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -6550,13 +6571,13 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWriteTab(comp%compp%base, fconvention, &
+        call c_ESMC_AttributeWriteTab(comp%compp%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWriteXML(comp%compp%base, fconvention, &
+        call c_ESMC_AttributeWriteXML(comp%compp%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -6627,12 +6648,12 @@ contains
       fobject = 'comp'
 
       name1 = 'discipline'
-      name2 = 'physical domain'
+      name2 = 'physical_domain'
       name3 = 'agency'
       name4 = 'institution'
       name5 = 'author'
-      name6 = 'coding language'
-      name7 = 'model component framework'
+      name6 = 'coding_language'
+      name7 = 'model_component_framework'
 
       call c_ESMC_AttPackCreate(comp%compp%base, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -6812,29 +6833,30 @@ contains
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -6930,29 +6952,30 @@ contains
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -7036,29 +7059,30 @@ contains
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -7154,29 +7178,30 @@ contains
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -7260,29 +7285,30 @@ contains
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -7378,29 +7404,30 @@ contains
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -7484,29 +7511,30 @@ contains
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -7602,29 +7630,30 @@ contains
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -7710,30 +7739,31 @@ contains
         fconvention, fpurpose, fobject, localrc)
       value = localvalue
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -7833,15 +7863,15 @@ contains
       valueList(:count) = localvalueList
       deallocate (localvalueList)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
-          valueList(:count) = defaultvalue
+          valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
@@ -7851,15 +7881,15 @@ contains
       valueList(:count) = localvalueList
       deallocate (localvalueList)
 
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
-          valueList(:count) = defaultvalue
+          valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -7942,28 +7972,29 @@ contains
       call c_ESMC_AttPackGetChar(comp%compp%base, name, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetChar(comp%compp%base, name, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -9537,13 +9568,13 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWriteTab(comp%compp%base, fconvention, &
+        call c_ESMC_AttributeWriteTab(comp%compp%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWriteXML(comp%compp%base, fconvention, &
+        call c_ESMC_AttributeWriteXML(comp%compp%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -9600,7 +9631,7 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: name1, name2, name3, name4
+      character(ESMF_MAXSTR) :: name1, name2, name3, name4, name5
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
@@ -9616,7 +9647,8 @@ contains
       name1 = 'shortname'
       name2 = 'longname'
       name3 = 'units'
-      name4 = 'dimensions'
+      name4 = 'import'
+      name5 = 'export'
 
       call c_ESMC_AttPackCreate(field%ftypep%base, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -9625,6 +9657,8 @@ contains
       call c_ESMC_AttPackCreate(field%ftypep%base, name3, fconvention, &
         fpurpose, fobject, localrc)
       call c_ESMC_AttPackCreate(field%ftypep%base, name4, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(field%ftypep%base, name5, fconvention, &
         fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -9790,29 +9824,30 @@ contains
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -9908,29 +9943,30 @@ contains
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -10014,29 +10050,30 @@ contains
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -10132,29 +10169,30 @@ contains
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -10238,29 +10276,30 @@ contains
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -10356,29 +10395,30 @@ contains
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -10462,29 +10502,30 @@ contains
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -10580,29 +10621,30 @@ contains
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -10688,15 +10730,15 @@ contains
         fconvention, fpurpose, fobject, localrc)
       value = localvalue
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
@@ -10704,15 +10746,15 @@ contains
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
 
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -10813,15 +10855,15 @@ contains
       valueList(:count) = localvalueList
       deallocate (localvalueList)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
-          valueList(:count) = defaultvalue
+          valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
@@ -10831,15 +10873,15 @@ contains
       valueList(:count) = localvalueList
       deallocate (localvalueList)
 
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
-          valueList(:count) = defaultvalue
+          valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -10922,28 +10964,29 @@ contains
       call c_ESMC_AttPackGetChar(field%ftypep%base, name, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetChar(field%ftypep%base, name, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -12304,13 +12347,13 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWriteTab(field%ftypep%base, fconvention, &
+        call c_ESMC_AttributeWriteTab(field%ftypep%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWriteXML(field%ftypep%base, fconvention, &
+        call c_ESMC_AttributeWriteXML(field%ftypep%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -12557,29 +12600,30 @@ contains
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -12675,29 +12719,30 @@ contains
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -12781,29 +12826,30 @@ contains
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -12899,29 +12945,30 @@ contains
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -13005,29 +13052,30 @@ contains
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -13123,29 +13171,30 @@ contains
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -13229,29 +13278,30 @@ contains
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -13347,29 +13397,30 @@ contains
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -13455,15 +13506,15 @@ contains
         fconvention, fpurpose, fobject, localrc)
       value = localvalue
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
@@ -13471,15 +13522,15 @@ contains
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
 
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -13586,15 +13637,15 @@ contains
       valueList(:count) = localvalueList
       deallocate (localvalueList)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
-          valueList(:count) = defaultvalue
+          valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
@@ -13603,15 +13654,15 @@ contains
       valueList(:count) = localvalueList
       deallocate (localvalueList)
 
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
-          valueList(:count) = defaultvalue
+          valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -13694,28 +13745,29 @@ contains
       call c_ESMC_AttPackGetChar(fieldbundle%btypep%base, name, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetChar(fieldbundle%btypep%base, name, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -15130,13 +15182,13 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWriteTab(fieldbundle%btypep%base, fconvention, &
+        call c_ESMC_AttributeWriteTab(fieldbundle%btypep%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWriteXML(fieldbundle%btypep%base, fconvention, &
+        call c_ESMC_AttributeWriteXML(fieldbundle%btypep%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -15383,29 +15435,30 @@ contains
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -15501,29 +15554,30 @@ contains
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -15607,29 +15661,30 @@ contains
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -15725,29 +15780,30 @@ contains
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -15831,29 +15887,30 @@ contains
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -15949,29 +16006,30 @@ contains
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -16055,29 +16113,30 @@ contains
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -16173,29 +16232,30 @@ contains
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -16281,15 +16341,15 @@ contains
         fconvention, fpurpose, fobject, localrc)
       value = localvalue
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
@@ -16297,15 +16357,15 @@ contains
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
 
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -16412,15 +16472,15 @@ contains
       valueList(:count) = localvalueList
       deallocate (localvalueList)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
-          valueList(:count) = defaultvalue
+          valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
@@ -16429,15 +16489,15 @@ contains
       valueList(:count) = localvalueList
       deallocate (localvalueList)
 
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
-          valueList(:count) = defaultvalue
-        else
-          return
-        end if
-      end if
+          valueList = defaultvalue
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -16520,28 +16580,29 @@ contains
       call c_ESMC_AttPackGetChar(grid, name, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetChar(grid, name, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -17897,13 +17958,13 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWriteTab(grid, fconvention, &
+        call c_ESMC_AttributeWriteTab(grid, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWriteXML(grid, fconvention, &
+        call c_ESMC_AttributeWriteXML(grid, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -18212,29 +18273,30 @@ contains
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -18330,29 +18392,30 @@ contains
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -18436,29 +18499,30 @@ contains
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -18554,29 +18618,30 @@ contains
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -18660,29 +18725,30 @@ contains
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -18778,29 +18844,30 @@ contains
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -18884,29 +18951,30 @@ contains
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -19002,29 +19070,30 @@ contains
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -19110,15 +19179,15 @@ contains
         fconvention, fpurpose, fobject, localrc)
       value = localvalue
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
@@ -19126,15 +19195,15 @@ contains
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
 
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -19234,15 +19303,15 @@ contains
       valueList(:count) = localvalueList
       deallocate (localvalueList)
 
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
-          valueList(:count) = defaultvalue
+          valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
@@ -19252,15 +19321,15 @@ contains
       valueList(:count) = localvalueList
       deallocate (localvalueList)
 
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
-          valueList(:count) = defaultvalue
+          valueList = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -19343,28 +19412,29 @@ contains
       call c_ESMC_AttPackGetChar(state%statep%base, name, value, &
         fconvention, fpurpose, fobject, localrc)
         
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) then
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
                                 
       else
       
       call c_ESMC_AttributeGetChar(state%statep%base, name, value, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+      
+      if (localrc .ne. ESMF_SUCCESS) then
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
-          return
-        end if
-      end if
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
 
       endif
 
@@ -20927,13 +20997,13 @@ contains
       endif
       
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttPackWriteTab(state%statep%base, fconvention, &
+        call c_ESMC_AttributeWriteTab(state%statep%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttPackWriteXML(state%statep%base, fconvention, &
+        call c_ESMC_AttributeWriteXML(state%statep%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
