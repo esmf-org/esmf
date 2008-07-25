@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.9 2008/07/15 18:39:49 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.10 2008/07/25 02:32:54 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.9 2008/07/15 18:39:49 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.10 2008/07/25 02:32:54 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -720,13 +720,13 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attpackwritetab - Setup the attribute package
+// !IROUTINE:  c_ESMC_attributewritetab - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackwritetab)(
+      void FTN(c_esmc_attributewritetab)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpackwritetab()"
+#define ESMC_METHOD "c_esmc_attributewritetab()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -829,7 +829,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *rc = (**base).root.ESMC_AttPackWriteTab(cconv, cpurp, cobj, ctarobj,
+  *rc = (**base).root.ESMC_AttributeWriteTab(cconv, cpurp, cobj, ctarobj,
     (*base)->ESMC_Base::ESMC_BaseGetName(), temp);
 
   delete [] cconv;
@@ -838,17 +838,17 @@ extern "C" {
   delete [] ctarobj;
   return;
 
-}  // end c_ESMC_attpackwritetab
+}  // end c_ESMC_attributewritetab
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attpackwritexml - Setup the attribute package
+// !IROUTINE:  c_ESMC_attributewritexml - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackwritexml)(
+      void FTN(c_esmc_attributewritexml)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpackwritexml()"
+#define ESMC_METHOD "c_esmc_attributewritexml()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -872,7 +872,6 @@ extern "C" {
 
   int status;
   char *cconv, *cpurp, *cobj, *ctarobj;
-  int temp1 = 0, temp2 = 0, stop = 0;
   
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -951,8 +950,8 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  *rc = (**base).root.ESMC_AttPackWriteXML(cconv, cpurp, cobj, ctarobj, 
-    (*base)->ESMC_Base::ESMC_BaseGetName(), stop, temp1, temp2);
+  *rc = (**base).root.ESMC_AttributeWriteXML(cconv, cpurp, cobj, ctarobj, 
+    (*base)->ESMC_Base::ESMC_BaseGetName());
 
   delete [] cconv;
   delete [] cpurp;
@@ -1156,9 +1155,11 @@ extern "C" {
   }
 
   status = (**base).root.ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
-                         "failed getting attribute type and count", &status)) {
+//  *** FIXME  *** this throws when the default value form of GetAttribute is used
+//  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
+//                         "failed getting attribute type and count", &status)) {
     //printf("ESMF_AttributeGetValue: failed getting attribute info\n");
+    if (status != 0) {
     delete [] cname;
     if (rc) *rc = status;
     return;

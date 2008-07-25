@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.h,v 1.10 2008/07/15 18:39:48 rokuingh Exp $
+// $Id: ESMC_Attribute.h,v 1.11 2008/07/25 02:32:54 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -55,6 +55,7 @@ class ESMC_Attribute
     char attrConvention[ESMF_MAXSTR];             // for att packages
     char attrPurpose[ESMF_MAXSTR];                // for att packages
     char attrObject[ESMF_MAXSTR];                 // for att packages
+    ESMC_Logical attrPack;                         // for att packages
 
     int attrCount;              // number of attributes in use in list
     int attrAlloc;              // number of attributes currently allocated
@@ -89,10 +90,22 @@ class ESMC_Attribute
                                              char *convention, char *purpose, char *object) const;
     int ESMC_AttPackSet(char *name, ESMC_TypeKind tk, int count, void *value, 
                         char *convention, char *purpose, char *object);
-    int ESMC_AttPackWriteTab(char *convention, char *purpose, char *object, 
-                          char *varobj, char *basename, int &count);
-    int ESMC_AttPackWriteXML(char *convention, char *purpose, char *object, 
-                          char *varobj, char *basename, int stop, int &fldcount, int &hdrcount);
+
+
+
+    int ESMC_AttributeWriteTab(char *convention, char *purpose, char *object, 
+                          char *varobj, char *basename, int &count) const;
+
+    // count the number of objects in an attribute hierarchy
+    int ESMC_AttributeCountTree(char *convention, 
+      char *purpose, char *object, int &ans) const;
+
+
+    int ESMC_AttributeWriteXML(char *convention, char *purpose, char *object, 
+                               char *varobj, char *basename) const;
+    
+    int ESMC_AttributeWriteXMLrecurse(FILE *xml, char *convention, char *purpose, char *object, 
+                               char *varobj, int stop, int& fldcount) const;
     
     // extend pointer list
     int ESMC_AttributeAlloc(int adding);
@@ -141,10 +154,6 @@ class ESMC_Attribute
     // copy an attribute hierarchy
     int ESMC_AttributeCopyAll(ESMC_Base *source);
     
-    // count the number of objects in an attribute hierarchy
-    int ESMC_AttributeCountTree(char *convention, 
-      char *purpose, char *object, int &ans);
-
     // attribute set a link in hierarchy
     int ESMC_AttributeSetLink(ESMC_Base *destination);
 
@@ -184,10 +193,10 @@ extern "C" {
   void FTN(c_esmc_attpacksetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
                                   void *value, char *convention, char *purpose, char *object, 
                                   int *rc, int nlen, int clen, int plen, int olen);
-  void FTN(c_esmc_attpackwritetab)(ESMC_Base **base, char *convention, char *purpose,
+  void FTN(c_esmc_attributewritetab)(ESMC_Base **base, char *convention, char *purpose,
                                   char *object, char *targetobj, int *rc, int clen, int plen, 
                                   int olen, int tlen);
-  void FTN(c_esmc_attpackwritexml)(ESMC_Base **base, char *convention, char *purpose,
+  void FTN(c_esmc_attributewritexml)(ESMC_Base **base, char *convention, char *purpose,
                                   char *object, char *targetobj, int *rc, 
                                   int clen, int plen, int olen, int tlen);
   void FTN(c_esmc_attributecopyall)(ESMC_Base **source, ESMC_Base **destination, int *rc);
