@@ -16,7 +16,6 @@ test_report: NONE
 # descriptor file for the nonexhaustive case
 nonexhaustive::
    'nonexhaustive_descriptor.rc'
-   'exhaustive_descriptor.rc'
 ::   # end of list
 
 # descriptor files for the exhaustive case
