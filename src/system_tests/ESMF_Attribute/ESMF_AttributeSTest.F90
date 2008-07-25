@@ -111,7 +111,7 @@ program ESMF_AttributeSTest
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-    cname2 = "user model 2"
+    cname2 = "Finite_Volume_Dynamical_Core"
     ! use petList to define comp1 on PET 0,1,2,3
     comp2 = ESMF_GridCompCreate(name=cname2, petList=(/0,1,2,3,4,5/), rc=rc)
     !print  *, "Created component ", trim(cname1), "rc =", rc
@@ -196,19 +196,19 @@ program ESMF_AttributeSTest
   conv = 'CF'
   purp = 'basic'
   name1 = 'discipline'
-  name2 = 'physical domain'
+  name2 = 'physical_domain'
   name3 = 'agency'
   name4 = 'institution'
   name5 = 'author'
-  name6 = 'coding language'
-  name7 = 'model component framework'
+  name6 = 'coding_language'
+  name7 = 'model_component_framework'
   value1 = 'Atmosphere'
-  value2 = 'Earth System'
+  value2 = 'Earth system'
   value3 = 'NASA'
-  value4 = 'GMAO'
+  value4 = 'Global Modeling and Assimilation Office (GMAO)'
   value5 = 'Max Suarez'
-  value6 = 'F90'
-  value7 = 'ESMF'
+  value6 = 'Fortran 90'
+  value7 = 'ESMF (Earth System Modeling Framework)'
   
   ! Add the Attribute package to comp1
   call ESMF_AttributeAdd(comp1, convention=conv, purpose=purp, rc=rc)
@@ -270,7 +270,13 @@ program ESMF_AttributeSTest
 
   ! write out some Attribute info
   if (localPet .eq. 0) then
+    print *, "--------------------------------------- "
+    print *, "Tab delimited AttributeWrite format"
+    print *, "--------------------------------------- "
     call ESMF_AttributeWrite(comp1,conv,purp,attwriteflag=ESMF_ATTWRITE_TAB,rc=rc)
+    print *, "--------------------------------------- "
+    print *, "XML AttributeWrite format"
+    print *, "--------------------------------------- "
     call ESMF_AttributeWrite(comp2,conv,purp,attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
