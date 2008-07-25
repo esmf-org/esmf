@@ -652,21 +652,19 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
-          call ESMF_ArrayValidate(src_array, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"source array validation error ",  &
-                  rcToReturn=rc)) return
-
-          call ESMF_ArrayPrint( src_array, rc=localrc )
-          if (ESMF_LogMsgFoundError(localrc,"source array print error ",       &
-                  rcToReturn=rc)) return
+!-===========DEBUG==========================
+!         call ESMF_ArrayPrint( src_array, rc=localrc )
+!         if (ESMF_LogMsgFoundError(localrc,"source array print error ",       &
+!                 rcToReturn=rc)) return
+!-===========DEBUG==========================
 
           !---------------------------------------------------------------------
           ! populate source array for redistribution test
           !---------------------------------------------------------------------
-!         call populate_redist_array(src_array, src_distgrid, PDS%SrcMem,      &
-!                      PDS%Gfiles(iGfile)%src_grid(iG), localrc)
-!         if (ESMF_LogMsgFoundError(localrc,"error populating source array ",  &
-!                 rcToReturn=rc)) return
+          call populate_redist_array(src_array, src_distgrid, PDS%SrcMem,      &
+                       PDS%Gfiles(iGfile)%src_grid(iG), localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error populating source array ",  &
+                  rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! create return array
@@ -682,17 +680,15 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
-          call ESMF_ArrayPrint( return_array, rc=localrc )
-          if (ESMF_LogMsgFoundError(localrc,"source array print error ",       &
-                  rcToReturn=rc)) return
+!-===========DEBUG==========================
+!         call ESMF_ArrayPrint( return_array, rc=localrc )
+!         if (ESMF_LogMsgFoundError(localrc,"source array print error ",       &
+!                 rcToReturn=rc)) return
+!-===========DEBUG==========================
 
           !---------------------------------------------------------------------
           ! populate source array for redistribution test
           !---------------------------------------------------------------------
-!         call populate_redist_array(return_array, src_distgrid, PDS%SrcMem,   &
-!                      PDS%Gfiles(iGfile)%src_grid(iG), localrc)
-!         if (ESMF_LogMsgFoundError(localrc,"error populating return array ",  &
-!                 rcToReturn=rc)) return
 
 !-===========DEBUG==========================
 ! call ESMF_ArrayGet(src_array, localDeCount=localDeCount, rc=localrc)
@@ -762,45 +758,6 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
-!-===========DEBUG==========================
-  call ESMF_ArrayGet(dst_array, localDeCount=localDeCount, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
-          rcToReturn=rc)) return
-  allocate(localDeList(localDeCount))
-  call ESMF_ArrayGet(dst_array, localDeList=localDeList, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
-          rcToReturn=rc)) return
-  allocate(larrayList(localDeCount))
-  call ESMF_ArrayGet(dst_array, larrayList=larrayList, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
-          rcToReturn=rc)) return
-  call ESMF_DistGridGet(dst_distgrid, dimCount=dimCount, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
-          rcToReturn=rc)) return
-  allocate(UBnd(dimCount, localDeCount))
-  allocate(LBnd(dimCount, localDeCount))  
-  call ESMF_ArrayGet(dst_array, indexflag=indexflag,                               &
-           exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc,"error getting exclusive bound range",     &
-          rcToReturn=rc)) return
-  do de=1, localDeCount
-     call ESMF_LocalArrayGet(larrayList(de), fptr=fptr2, &
-                             docopy=ESMF_DATA_REF,&
-                             rc=localrc)
-     if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
-             "array list", rcToReturn=rc)) return
-     print*,de,' display array ',LBnd(1,de),UBnd(1,de),LBnd(2,de),UBnd(2,de)
-     do i1=LBnd(1,de), UBnd(1,de)
-        do i2=LBnd(2,de), UBnd(2,de)
-!          print*,de,' dst_array ',i1,i2,fptr2(i1,i2) 
-        enddo   !   i2
-     enddo    !   i1
-  enddo    ! de
-  deallocate(localDeList)
-  deallocate(LBnd, UBnd)
-  deallocate(larrayList)
-!-===========DEBUG==========================
-
   !-----------------------------------------------------------------------------
   ! Now conduct the redistribution test
   !
@@ -819,26 +776,26 @@
           !---------------------------------------------------------------------
           ! forward redistribution run
           !---------------------------------------------------------------------
-!         call ESMF_ArrayRedist(srcArray=src_array, dstArray=dst_array,        &
-!                  routehandle=redistHandle_forward, rc=localrc)
-!         if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
-!                 " forward failed ", rcToReturn=rc)) return
+          call ESMF_ArrayRedist(srcArray=src_array, dstArray=dst_array,        &
+                   routehandle=redistHandle_forward, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
+                  " forward failed ", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! redistribution store for reverse direction
           !---------------------------------------------------------------------
-!         call ESMF_ArrayRedistStore(srcArray=dst_array, dstArray=return_array,&
-!                  routehandle=redistHandle_reverse, rc=localrc)
-!         if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
-!                 " reverse direction", rcToReturn=rc)) return
+          call ESMF_ArrayRedistStore(srcArray=dst_array, dstArray=return_array,&
+                   routehandle=redistHandle_reverse, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
+                  " reverse direction", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! forward redistribution run
           !---------------------------------------------------------------------
-!         call ESMF_ArrayRedist(srcArray=dst_array, dstArray=return_array,     &
-!                  routehandle=redistHandle_reverse, rc=localrc)
-!         if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
-!                 " reverse failed ", rcToReturn=rc)) return
+          call ESMF_ArrayRedist(srcArray=dst_array, dstArray=return_array,     &
+                   routehandle=redistHandle_reverse, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
+                  " reverse failed ", rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! drs!!!! need iD and iG argument for test_status
@@ -866,10 +823,10 @@
           if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
                   " forward failed ", rcToReturn=rc)) return
 
-!         call ESMF_ArrayRedistRelease(routehandle=redistHandle_reverse,       &
-!                  rc=localrc)
-!         if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
-!                 " reverse failed ", rcToReturn=rc)) return
+          call ESMF_ArrayRedistRelease(routehandle=redistHandle_reverse,       &
+                   rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
+                  " reverse failed ", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
           ! Destroy Array objects before moving to next test
