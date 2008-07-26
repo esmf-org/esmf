@@ -115,7 +115,7 @@
                 Gfile%dst_grid,localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
                rcToReturn=rc)) return
-       print*,"read redist grid spec ", localrc
+
      case('REMAP')
 !      print*,' read grid specification for remapping test'
        call read_remapping_grid(lfilename, Gfile%nGspecs, Gfile%src_grid,      &

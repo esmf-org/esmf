@@ -30,11 +30,14 @@
 ! !USES:
   use ESMF_TestMod  
   use ESMF_Mod
+
   use ESMF_TestHarnessTypesMod
   use ESMF_TestHarnessMod
 
   use ESMF_TestHarnessGridMod
   use ESMF_TestHarnessDistMod
+
+  use ESMF_TestHarnessReportMod
 
 
   implicit none
@@ -283,13 +286,13 @@ contains
   ! based on whether exhaustive or nonexhaustive tests are to be run,  find 
   ! and load the problem descriptor file names
   !-----------------------------------------------------------------------------
-#ifdef ESMF_TESTEXHAUSTIVE
-  ltag = 'exhaustive::'
-  print *, "running exhaustive tests"
-#else
+!#ifdef ESMF_TESTEXHAUSTIVE
+!  ltag = 'exhaustive::'
+!  print *, "running exhaustive tests"
+!#else
   ltag = 'nonexhaustive::'
   print *, "running nonexhaustive tests"
-#endif
+!#endif
   call ESMF_ConfigFindLabel(localcf, trim(adjustL(ltag)), rc=localrc )
   if( ESMF_LogMsgFoundError(localrc, "cannot find config label " //            &
       trim(adjustL(ltag)), rcToReturn=returnrc) ) return
@@ -382,8 +385,9 @@ contains
   ! local integer variables
   integer :: nPEs
   integer :: k, kfile, kstr
-  integer :: iDfile, iGfile
+  integer :: iDfile, iGfile, iD, iG
   integer :: nDfiles, nGfiles, nstatus
+  integer :: nDspec, nGspec
   integer :: localrc
 
   ! initialize return flag
@@ -442,13 +446,24 @@ contains
         ! allocate and initialize test status
         nDfiles = har%rcrd(kfile)%str(kstr)%nDfiles
         nGfiles = har%rcrd(kfile)%str(kstr)%nGfiles
-        allocate( har%rcrd(kfile)%str(kstr)%test_status(nDfiles,nGfiles) )
+        allocate( har%rcrd(kfile)%str(kstr)%test_record(nDfiles,nGfiles) )
 
         ! initialize test result to UNDEFINED
         do iDfile=1,har%rcrd(kfile)%str(kstr)%nDfiles
         do iGfile=1,har%rcrd(kfile)%str(kstr)%nGfiles
-           har%rcrd(kfile)%str(kstr)%test_status(iDfile,iGfile) =              &
-                                                          HarnessTest_UNDEFINED 
+           nDspec = har%rcrd(kfile)%str(kstr)%Dfiles(iDfile)%nDspecs
+           nGspec = har%rcrd(kfile)%str(kstr)%Gfiles(iGfile)%nGspecs
+           print*,'==== file  sizes',iDfile,iGfile,nDspec,nGspec
+           allocate( har%rcrd(kfile)%str(kstr)%test_record(iDfile,iGfile)%   &
+              test_status(nDspec,nGspec)  )
+
+           do iD=1, nDspec
+           do iG=1, nGspec
+             har%rcrd(kfile)%str(kstr)%test_record(iDfile,iGfile)%  &
+                 test_status(iD,iG) = HarnessTest_UNDEFINED 
+           enddo   ! iG
+           enddo   ! iD
+
         enddo   ! iGfile
         enddo   ! iDfile
 

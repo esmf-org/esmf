@@ -87,12 +87,9 @@
      character(ESMF_MAXSTR) :: flags
   end type name_record
 
-  type test_report   
-     integer :: status                ! status of test
-     integer :: dist_config           ! index of distribution specification 
-     integer :: grid_config           ! index of grid specification
-     integer :: func_config           ! index of test function specification
-  end type test_report
+  type test_record   
+     integer, pointer :: test_status(:,:)  ! status of test
+  end type test_record
 
   type process_record
      character(ESMF_MAXSTR) ::string 
@@ -168,7 +165,8 @@
 
   type problem_descriptor_strings
      character(ESMF_MAXSTR) :: pds         ! problem descriptor string
-     integer, pointer :: test_status(:,:)  ! test status of the (dist,grid) config
+     type(test_record), pointer :: test_record(:,:) ! test status of the config
+                                                    ! (nDfiles,nGfiles)
      type(process_record) :: process       ! method process
      type(memory_config) :: DstMem         ! destination memory configuration
      type(memory_config) :: SrcMem         ! source memory configuration
