@@ -29,7 +29,7 @@ program ESMF_AttributeSTest
   integer :: localPet, petCount, rc
   character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
   type(ESMF_VM):: vm
-  type(ESMF_State) :: c1imp, c1exp, c2imp, c2exp, MyState, physics
+  type(ESMF_State) :: c1imp, c1exp, c2imp, c2exp
   type(ESMF_GridComp) :: comp1
   type(ESMF_GridComp) :: comp2
   type(ESMF_CplComp) :: cplcomp
@@ -87,7 +87,7 @@ program ESMF_AttributeSTest
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-    cname2 = "user model 2"
+    cname2 = "Finite_Volume_Dynamical_Core"
     ! use petList to define comp1 on PET 0,1,2,3
     comp2 = ESMF_GridCompCreate(name=cname2, petList=(/0/), rc=rc)
     !print  *, "Created component ", trim(cname1), "rc =", rc
@@ -106,21 +106,21 @@ program ESMF_AttributeSTest
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
     ! use petList to define comp1 on PET 0,1,2,3
-    comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1,2,3,4,5/), rc=rc)
+    comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1,2,3/), rc=rc)
     !print  *, "Created component ", trim(cname1), "rc =", rc
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     cname2 = "Finite_Volume_Dynamical_Core"
     ! use petList to define comp1 on PET 0,1,2,3
-    comp2 = ESMF_GridCompCreate(name=cname2, petList=(/0,1,2,3,4,5/), rc=rc)
+    comp2 = ESMF_GridCompCreate(name=cname2, petList=(/4,5/), rc=rc)
     !print  *, "Created component ", trim(cname1), "rc =", rc
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     cplname = "user coupler"
     ! use petList to define comp1 on PET 0,1,2,3
-    cplcomp = ESMF_CplCompCreate(name=cplname, petList=(/0,1,2,3,4,5/), rc=rc)
+    cplcomp = ESMF_CplCompCreate(name=cplname, rc=rc)
     !print  *, "Created component ", trim(cname1), "rc =", rc
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
@@ -210,19 +210,6 @@ program ESMF_AttributeSTest
   value6 = 'Fortran 90'
   value7 = 'ESMF (Earth System Modeling Framework)'
   
-  ! Add the Attribute package to comp1
-  call ESMF_AttributeAdd(comp1, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp1, name1, value1, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp1, name2, value2, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp1, name3, value3, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp1, name4, value4, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp1, name5, value5, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp1, name6, value6, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp1, name7, value7, convention=conv, purpose=purp, rc=rc)
-  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  
   ! Add the Attribute package to comp2
   call ESMF_AttributeAdd(comp2, convention=conv, purpose=purp, rc=rc)
   call ESMF_AttributeSet(comp2, name1, value1, convention=conv, purpose=purp, rc=rc)
@@ -236,14 +223,12 @@ program ESMF_AttributeSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   
-  ! link the Component Attribute hierarchies to their States
-  !call ESMF_AttributeSet(comp1, c1imp, rc=rc)
-  call ESMF_AttributeSet(comp1, c1exp, rc=rc)
-  !call ESMF_AttributeSet(comp2, c2imp, rc=rc)
-  call ESMF_AttributeSet(comp2, c2exp, rc=rc)
+    ! link the Component Attribute hierarchy to State
+  call ESMF_AttributeSet(comp2, c2imp, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Run section
@@ -268,12 +253,11 @@ program ESMF_AttributeSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  ! write out some Attribute info
+  ! Write the Attribute info to esmf/test/testg/<platform>/ESMF_AttributeSTest.stdout
+  ! The XML format will also send the output to an .xml in this directory
   if (localPet .eq. 0) then
-    print *, "--------------------------------------- "
-    print *, "Tab delimited AttributeWrite format"
-    print *, "--------------------------------------- "
-    call ESMF_AttributeWrite(comp1,conv,purp,attwriteflag=ESMF_ATTWRITE_TAB,rc=rc)
+    print *, ""
+    print *, ""
     print *, "--------------------------------------- "
     print *, "XML AttributeWrite format"
     print *, "--------------------------------------- "
@@ -282,7 +266,6 @@ program ESMF_AttributeSTest
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)  
   endif
-
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Finalize section
@@ -315,6 +298,20 @@ program ESMF_AttributeSTest
 
 ! print *, '---------------------------------Destroy------------------------------------'
 
+  ! destroy components
+  call ESMF_GridCompDestroy(comp1, rc=rc)
+  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  call ESMF_GridCompDestroy(comp2, rc=rc)
+  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  call ESMF_CplCompDestroy(cplcomp, rc=rc)
+  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  
   ! destroy states
   call ESMF_StateDestroy(c1imp, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -333,24 +330,8 @@ program ESMF_AttributeSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  ! destroy components
-  call ESMF_GridCompDestroy(comp1, rc=rc)
-  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  call ESMF_GridCompDestroy(comp2, rc=rc)
-  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  call ESMF_CplCompDestroy(cplcomp, rc=rc)
-  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-
-10 continue
   
   ! Normal ESMF Test output
   if (localPet .eq. 0) then
