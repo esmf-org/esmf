@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.15 2008/07/28 04:03:22 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.16 2008/07/28 15:21:08 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.15 2008/07/28 04:03:22 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.16 2008/07/28 15:21:08 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -2911,13 +2911,13 @@
 
     if (items == 1) {
       if (tk == ESMC_TYPEKIND_I4) {
-        DESERIALIZE_VAR(buffer,loffset,vi,int); }
+        DESERIALIZE_VAR(buffer,loffset,vi,ESMC_I4); }
       else if (tk == ESMC_TYPEKIND_I8) {
-        DESERIALIZE_VAR(buffer,loffset,vtl,long); }
+        DESERIALIZE_VAR(buffer,loffset,vtl,ESMC_I8); }
       else if (tk == ESMC_TYPEKIND_R4) {
-        DESERIALIZE_VAR(buffer,loffset,vf,float); }
+        DESERIALIZE_VAR(buffer,loffset,vf,ESMC_R4); }
       else if (tk == ESMC_TYPEKIND_R8) {
-        DESERIALIZE_VAR(buffer,loffset,vd,double); }
+        DESERIALIZE_VAR(buffer,loffset,vd,ESMC_R8); }
       else if (tk == ESMC_TYPEKIND_LOGICAL) {
         DESERIALIZE_VAR(buffer,loffset,vb,ESMC_Logical); }
       else if (tk == ESMC_TYPEKIND_CHARACTER) {
@@ -2926,13 +2926,13 @@
     }
     if (items > 1) { 
       if (tk == ESMC_TYPEKIND_I4) {
-        DESERIALIZE_VAR1D(buffer,loffset,vip,items,int); }
+        DESERIALIZE_VAR1D(buffer,loffset,vip,items,ESMC_I4); }
       else if (tk == ESMC_TYPEKIND_I8) {
-        DESERIALIZE_VAR1D(buffer,loffset,vlp,items,long);} 
+        DESERIALIZE_VAR1D(buffer,loffset,vlp,items,ESMC_I8);} 
       else if (tk == ESMC_TYPEKIND_R4) {
-        DESERIALIZE_VAR1D(buffer,loffset,vfp,items,float); }
+        DESERIALIZE_VAR1D(buffer,loffset,vfp,items,ESMC_R4); }
       else if (tk == ESMC_TYPEKIND_R8) {
-        DESERIALIZE_VAR1D(buffer,loffset,vdp,items,double);}
+        DESERIALIZE_VAR1D(buffer,loffset,vdp,items,ESMC_R8);}
       else if (tk == ESMC_TYPEKIND_LOGICAL) {
         DESERIALIZE_VAR1D(buffer,loffset,vbp,items,ESMC_Logical); }
     }
@@ -3061,13 +3061,13 @@
 
       if (items == 1) {
         if (tk == ESMC_TYPEKIND_I4) {
-          SERIALIZE_VAR(cc,buffer,offset,vi,int); }
+          SERIALIZE_VAR(cc,buffer,offset,vi,ESMC_I4); }
         else if (tk == ESMC_TYPEKIND_I8) {
-          SERIALIZE_VAR(cc,buffer,offset,vtl,long); }
+          SERIALIZE_VAR(cc,buffer,offset,vtl,ESMC_I8); }
         else if (tk == ESMC_TYPEKIND_R4) {
-          SERIALIZE_VAR(cc,buffer,offset,vf,float); }
+          SERIALIZE_VAR(cc,buffer,offset,vf,ESMC_R4); }
         else if (tk == ESMC_TYPEKIND_R8) {
-          SERIALIZE_VAR(cc,buffer,offset,vd,double); }
+          SERIALIZE_VAR(cc,buffer,offset,vd,ESMC_R8); }
         else if (tk == ESMC_TYPEKIND_LOGICAL) {
           SERIALIZE_VAR(cc,buffer,offset,vb,ESMC_Logical); }
         else if (tk == ESMC_TYPEKIND_CHARACTER) {
@@ -3076,13 +3076,13 @@
       }
       if (items > 1) { 
         if (tk == ESMC_TYPEKIND_I4) {
-          SERIALIZE_VAR1D(cc,buffer,offset,vip,items,int); }
+          SERIALIZE_VAR1D(cc,buffer,offset,vip,items,ESMC_I4); }
         else if (tk == ESMC_TYPEKIND_I8) {
-          SERIALIZE_VAR1D(cc,buffer,offset,vlp,items,long); }
+          SERIALIZE_VAR1D(cc,buffer,offset,vlp,items,ESMC_I8); }
         else if (tk == ESMC_TYPEKIND_R4) {
-          SERIALIZE_VAR1D(cc,buffer,offset,vfp,items,float); }
+          SERIALIZE_VAR1D(cc,buffer,offset,vfp,items,ESMC_R4); }
         else if (tk == ESMC_TYPEKIND_R8) {
-          SERIALIZE_VAR1D(cc,buffer,offset,vdp,items,double); }
+          SERIALIZE_VAR1D(cc,buffer,offset,vdp,items,ESMC_R8); }
         else if (tk == ESMC_TYPEKIND_LOGICAL) {
           SERIALIZE_VAR1D(cc,buffer,offset,vbp,items,ESMC_Logical); }
       }
