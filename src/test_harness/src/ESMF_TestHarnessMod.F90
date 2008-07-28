@@ -969,6 +969,11 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
+!         call populate_redist_array(return_array, src_distgrid, PDS%SrcMem,      &
+!                      PDS%Gfiles(iGfile)%src_grid(iG), localrc)
+!         if (ESMF_LogMsgFoundError(localrc,"error populating source array ",  &
+!                 rcToReturn=rc)) return
+
 !-===========DEBUG==========================
 !         call ESMF_ArrayPrint( return_array, rc=localrc )
 !         if (ESMF_LogMsgFoundError(localrc,"source array print error ",       &
@@ -1058,8 +1063,9 @@
           ! redistribution store for forward direction
           !---------------------------------------------------------------------
           print*,'> run forward redist store'
-          call ESMF_ArrayRedistStore(srcArray=src_array, dstArray=return_array,&
+          call ESMF_ArrayRedistStore(srcArray=src_array, dstArray=dst_array,   &
                    routehandle=redistHandle_forward, rc=localrc)
+          if (rc /= ESMF_SUCCESS) print*,' forward redist store failed',localrc
           if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
                   " forward direction", rcToReturn=rc)) return
 
@@ -1069,7 +1075,18 @@
           print*,'> run forward redist '
           call ESMF_ArrayRedist(srcArray=src_array, dstArray=dst_array,        &
                    routehandle=redistHandle_forward, rc=localrc)
+          if (rc /= ESMF_SUCCESS) print*,' forward redist failed',localrc
           if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
+                  " forward failed ", rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! release redistribution handles
+          !---------------------------------------------------------------------
+          print*,' release forward routehandle'
+          call ESMF_ArrayRedistRelease(routehandle=redistHandle_forward,       &
+                   rc=localrc)
+          if (rc /= ESMF_SUCCESS) print*,' forward redist release failed',localrc
+          if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
                   " forward failed ", rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
@@ -1090,6 +1107,15 @@
           if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
                   " reverse failed ", rcToReturn=rc)) return
 
+          !---------------------------------------------------------------------
+          ! release redistribution handles
+          !---------------------------------------------------------------------
+          print*,' release reverse routehandle'
+          call ESMF_ArrayRedistRelease(routehandle=redistHandle_reverse,       &
+                   rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
+                  " reverse failed ", rcToReturn=rc)) return
+
   !-----------------------------------------------------------------------------
   ! Check redistribution
   !-----------------------------------------------------------------------------
@@ -1107,19 +1133,6 @@
   !-----------------------------------------------------------------------------
   ! Clean up!!!!!!
   !-----------------------------------------------------------------------------
-          !---------------------------------------------------------------------
-          ! release redistribution handles
-          !---------------------------------------------------------------------
-          call ESMF_ArrayRedistRelease(routehandle=redistHandle_forward,       &
-                   rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
-                  " forward failed ", rcToReturn=rc)) return
-
-          call ESMF_ArrayRedistRelease(routehandle=redistHandle_reverse,       &
-                   rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
-                  " reverse failed ", rcToReturn=rc)) return
-
           !---------------------------------------------------------------------
           ! Destroy Array objects before moving to next test
           !---------------------------------------------------------------------
