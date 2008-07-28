@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUTest.F90,v 1.9 2008/07/25 02:35:16 rokuingh Exp $
+! $Id: ESMF_AttributeUTest.F90,v 1.10 2008/07/28 04:07:10 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeUTest.F90,v 1.9 2008/07/25 02:35:16 rokuingh Exp $'
+      '$Id: ESMF_AttributeUTest.F90,v 1.10 2008/07/28 04:07:10 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -684,7 +684,7 @@ defaultvalue = 7;
       call ESMF_AttributeSet(field, name=attrname, value=inval, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting an Attribute in an Attpack from a Field Test"
+      write(name, *) "Setting an Attribute in an Attpack from a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------    
 
@@ -694,7 +694,7 @@ defaultvalue = 7;
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an Attribute in an Attpack from a Field Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(outval.eq.4), name, failMsg, &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(outval.eq.inval), name, failMsg, &
                      result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
