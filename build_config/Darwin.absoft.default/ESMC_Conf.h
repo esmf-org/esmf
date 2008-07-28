@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.5.2.5 2008/01/19 03:58:30 theurich Exp $"
+"$Id: ESMC_Conf.h,v 1.5.2.6 2008/07/28 17:42:43 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -37,7 +37,8 @@ Licensed under the University of Illinois-NCSA License.
 #if defined (__cplusplus)
 // Typedef to match the data type of the 'hidden' string length
 // argument that Fortran uses when passing CHARACTER strings.
-typedef int ESMCI_FortranStrLenArg;
+// Absoft changes between 32-bit and 64-bit ABIs, so use 'long'.
+typedef long ESMCI_FortranStrLenArg;
 #endif
 
 #undef ESMC_HAVE_OMP_THREADS 
