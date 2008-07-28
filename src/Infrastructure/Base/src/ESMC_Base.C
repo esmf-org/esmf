@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.109 2008/07/21 23:25:49 theurich Exp $
+// $Id: ESMC_Base.C,v 1.110 2008/07/28 04:04:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -28,7 +28,6 @@
  // associated class definition file and others
 #include <string.h>
 #include <stdlib.h>
-#include "ESMC_Attribute.h"
 #include "ESMC_Base.h"
 #include "ESMC_LogErr.h"
 #include "ESMCI_VM.h"
@@ -36,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.109 2008/07/21 23:25:49 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.110 2008/07/28 04:04:57 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -659,24 +658,14 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     memcpy(className, cp, ESMF_MAXSTR);
     cp += ESMF_MAXSTR;
     ip = (int *)cp;
-    //attrCount = *ip++;
-    //attrAlloc = *ip++;
     cp = (char *)ip;
 
     // update offset to point to past the current obj
     *offset = (cp - buffer);
 
-/*
-    if (attrAlloc > 0) {
-         nbytes = attrAlloc * sizeof(ESMC_Attribute *);
-         attrList = (ESMC_Attribute **)malloc(nbytes);
-         for (i=0; i<attrCount; i++) {
-            attrList[i] = new ESMC_Attribute;
-            attrList[i]->ESMC_Attribute::ESMC_Deserialize(buffer, offset);
-            //attrList[i] = NULL;
-         }
-    }
-*/
+    // Deserialize the Attribute hierarchy
+    localrc = root.ESMC_Deserialize(buffer, offset);
+    
   return ESMF_SUCCESS;
 
  } // end ESMC_Deserialize
@@ -717,13 +706,13 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     //       ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
     // printf(msgbuf);
     // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-  
-/*
-  sprintf(msgbuf, "   Number of Attributes: %d\n", attrCount);
+    
+  // root Attribute
+  sprintf(msgbuf, "   Root Attribute\n");
   printf(msgbuf);
-    // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-  */
+  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   
+  // traverse the Attribute hierarchy, printing as we go
   root.ESMC_Print();
 
   return ESMF_SUCCESS;
@@ -807,18 +796,14 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     memcpy(cp, className, ESMF_MAXSTR);
     cp += ESMF_MAXSTR;
     ip = (int *)cp;
-    //*ip++ = attrCount;
-    //*ip++ = attrAlloc;
     cp = (char *)ip;
 
     // update the offset before calling AttributeSerialize
     *offset = (cp - buffer);
-/*
-    if (attrCount > 0) {
-         for (i=0; i<attrCount; i++)
-             attrList[i]->ESMC_Attribute::ESMC_Serialize(buffer, length, offset);
-    }
-*/
+
+    // Serialize the Attribute hierarchy
+    rc = root.ESMC_Serialize(buffer,length,offset);
+    
   return ESMF_SUCCESS;
 
  } // end ESMC_Serialize
@@ -908,7 +893,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   strcpy(className, "global");
   sprintf(baseName, "%s%3d", "unnamed", ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
-
+  
   baseStatus = ESMF_STATUS_READY;
 
  } // end ESMC_Base
@@ -948,12 +933,15 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       sprintf(baseName, "%s%3d", className, ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
 
+/*  ***FIXME*** This code is invalid - when Attribute removed from Base,
+//              the nattrs argument should be removed from the call.
   if (nattrs > 0) {
       if (root.ESMC_AttributeAlloc(nattrs) != ESMF_SUCCESS) {
           baseStatus = ESMF_STATUS_INVALID;   // can't return err, but can
           return;                            // try to indicate unhappiness
       }
   }
+*/
 
   baseStatus = ESMF_STATUS_READY;
 
