@@ -1,8 +1,7 @@
 #!/bin/sh
-# see if $2 is a script in $1 dir and return the correct mpirun command with
-# options if so, just unmodified $2 otherwise
+# see if $2 is a script in $1 dir
 if [ -e $1/$2 ]; then
-echo $1/$2 $3
+echo "esmfscript"
 else
-echo $2
+echo "noesmfscript"
 fi

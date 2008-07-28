@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201.2.20 2008/07/25 22:05:55 theurich Exp $
+#  $Id: common.mk,v 1.201.2.21 2008/07/28 23:15:47 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -706,7 +706,10 @@ endif
 #-------------------------------------------------------------------------------
 # Set the correct MPIRUN command with appropriate options
 #-------------------------------------------------------------------------------
-ESMF_MPIRUN := $(shell $(ESMF_DIR)/scripts/mpirun.command $(ESMF_DIR)/scripts $(ESMF_MPIRUN) $(ESMF_MPISCRIPTOPTIONS))
+ESMF_MPIRUNCOMMAND  = $(shell $(ESMF_DIR)/scripts/mpirun.command $(ESMF_DIR)/scripts $(ESMF_MPIRUN))
+ifeq ($(ESMF_MPIRUNCOMMAND),esmfscript)
+ESMF_MPIRUN := $(ESMF_DIR)/scripts/$(ESMF_MPIRUN) $(ESMF_MPISCRIPTOPTIONS)
+endif
 
 #-------------------------------------------------------------------------------
 # For convenience ESMF_NETCDF_INCLUDE and ESMF_NETCDF_LIBPATH variables are 
