@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.47 2008/05/08 02:27:26 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.48 2008/07/28 04:06:01 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.47 2008/05/08 02:27:26 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.48 2008/07/28 04:06:01 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -767,6 +767,8 @@
                     call c_ESMC_SetVMId(bundle%btypep, si%vmidrecv(k), localrc)
                     call ESMF_StateAdd(state, bundle, proxyflag=.true., &
                       rc=localrc)
+                    call c_ESMC_AttributeSetLink(state%statep%base, &
+                      bundle%btypep%base, localrc)
 !!DEBUG "bundle added to state"
 
                    case (ESMF_ID_FIELD%objectID)
@@ -777,6 +779,8 @@
                     call c_ESMC_SetVMId(field%ftypep, si%vmidrecv(k), localrc)
                     call ESMF_StateAdd(state, field, proxyflag=.true., &
                       rc=localrc)
+                    call c_ESMC_AttributeSetLink(state%statep%base, &
+                      field%ftypep%base, localrc)
 !!DEBUG "field added to state"
 
                    case (ESMF_ID_ARRAY%objectID)
@@ -812,6 +816,8 @@
                     call c_ESMC_SetVMId(substate%statep, si%vmidrecv(k), localrc)
                     call ESMF_StateAdd(state, substate, proxyflag=.true., &
                       rc=localrc)
+                    call c_ESMC_AttributeSetLink(state%statep%base, &
+                      substate%statep%base, localrc)
 !!DEBUG "substate added to state"
 
                    case (ESMF_STATEITEM_NAME%ot)
