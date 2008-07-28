@@ -896,6 +896,7 @@
            "cannot read row " // trim(adjustL(lchar)) //                       &
            " of table " //trim(descriptor_label) // "in file " //              &
            trim(lfilename), rcToReturn=rc) ) return
+
         !-----------------------------------------------------------------------
         ! read and discard continuation symbol
         !-----------------------------------------------------------------------

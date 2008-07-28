@@ -376,9 +376,11 @@
        enddo   ! k
     enddo   ! irank
 
+    !-----------------------------------------------------------------------------
     ! search for equivalence operators to know how to partition the total PE
     ! amoung the distribution axes. The base value = (nPE)**(1/erank), where
     ! erank is the effective rank = source rank - number of equivalences
+    !-----------------------------------------------------------------------------
     erank = src_rank
     do irank=1, src_rank
        if( numOp(irank) > 0 .and. numOp(irank) < 9 ) then
@@ -518,9 +520,11 @@
        enddo   ! k
     enddo   ! irank
 
+    !---------------------------------------------------------------------------
     ! search for equivalence operators to know how to partition the total PE
     ! amoung the distribution axes. The base value = (nPE)**(1/erank), where
     ! erank is the effective rank = source rank - number of equivalences
+    !-----------------------------------------------------------------------------
     erank = dst_rank
     do irank=1, dst_rank
        if( numOp(irank) > 0 .and. numOp(irank) < 9 ) then
@@ -557,7 +561,7 @@
                    DstMem%memRank, rc)
 
     !---------------------------------------------------------------------------
-    ! both source and destination specifications have been read, more to next
+    ! both source and destination specifications have been read, move to next
     ! entry - check new row to make certain it is a new entry and not a
     ! continuation.
     !---------------------------------------------------------------------------
@@ -584,6 +588,9 @@
                 "table " // trim(distribution_label) // " but no end tag" // &
                 " found. File " // trim(Dfile%filename) , rcToReturn=rc)
                 return
+    else
+       ! we are at the end of the table so finish up.
+       irow = irow+1
     endif
 
     ! sanity check to catch infinite loops

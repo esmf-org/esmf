@@ -854,8 +854,8 @@
   type(ESMF_VM), intent(in   ) :: VM
   integer, intent(  out) :: rc
 
-! local parameters
-  integer :: localrc ! local error status
+  ! local parameters
+  real(ESMF_KIND_R8), parameter :: initvalue = 0.0
 
   ! local ESMF Types
   type(ESMF_Array) :: src_array, return_array, dst_array
@@ -863,6 +863,7 @@
   type(ESMF_RouteHandle) :: redistHandle_forward, redistHandle_reverse
 
   ! local integers
+  integer :: localrc ! local error status
   integer :: iDfile, iGfile, iD, iG
   integer :: test_status
 
@@ -941,12 +942,6 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
-!-===========DEBUG==========================
-!         call ESMF_ArrayPrint( src_array, rc=localrc )
-!         if (ESMF_LogMsgFoundError(localrc,"source array print error ",       &
-!                 rcToReturn=rc)) return
-!-===========DEBUG==========================
-
           !---------------------------------------------------------------------
           ! populate source array for redistribution test
           !---------------------------------------------------------------------
@@ -969,20 +964,13 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
-!         call populate_redist_array(return_array, src_distgrid, PDS%SrcMem,      &
-!                      PDS%Gfiles(iGfile)%src_grid(iG), localrc)
-!         if (ESMF_LogMsgFoundError(localrc,"error populating source array ",  &
-!                 rcToReturn=rc)) return
-
-!-===========DEBUG==========================
-!         call ESMF_ArrayPrint( return_array, rc=localrc )
-!         if (ESMF_LogMsgFoundError(localrc,"source array print error ",       &
-!                 rcToReturn=rc)) return
-!-===========DEBUG==========================
-
           !---------------------------------------------------------------------
-          ! populate source array for redistribution test
+          ! populate return array with zeros for redistribution test
           !---------------------------------------------------------------------
+          call populate_array_value(return_array, initvalue, src_distgrid,     &
+                  PDS%SrcMem, PDS%Gfiles(iGfile)%src_grid(iG), localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error initializing value in " //  &
+             "return array ", rcToReturn=rc)) return
 
 !-===========DEBUG==========================
 ! call ESMF_ArrayGet(src_array, localDeCount=localDeCount, rc=localrc)
@@ -1052,6 +1040,14 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
+          !---------------------------------------------------------------------
+          ! populate destination array with zeros for redistribution test
+          !---------------------------------------------------------------------
+          call populate_array_value(dst_array, initvalue, dst_distgrid,        &
+                  PDS%DstMem, PDS%Gfiles(iGfile)%dst_grid(iG), localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error initializing value in " //  &
+             "destination array ", rcToReturn=rc)) return
+
   !-----------------------------------------------------------------------------
   ! Now conduct the redistribution test
   !
@@ -1065,7 +1061,6 @@
           print*,'> run forward redist store'
           call ESMF_ArrayRedistStore(srcArray=src_array, dstArray=dst_array,   &
                    routehandle=redistHandle_forward, rc=localrc)
-          if (rc /= ESMF_SUCCESS) print*,' forward redist store failed',localrc
           if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
                   " forward direction", rcToReturn=rc)) return
 
@@ -1075,7 +1070,6 @@
           print*,'> run forward redist '
           call ESMF_ArrayRedist(srcArray=src_array, dstArray=dst_array,        &
                    routehandle=redistHandle_forward, rc=localrc)
-          if (rc /= ESMF_SUCCESS) print*,' forward redist failed',localrc
           if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
                   " forward failed ", rcToReturn=rc)) return
 
@@ -1085,7 +1079,6 @@
           print*,' release forward routehandle'
           call ESMF_ArrayRedistRelease(routehandle=redistHandle_forward,       &
                    rc=localrc)
-          if (rc /= ESMF_SUCCESS) print*,' forward redist release failed',localrc
           if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
                   " forward failed ", rcToReturn=rc)) return
 
@@ -1599,7 +1592,9 @@
   !-----------------------------------------------------------------------------
   subroutine populate_redist_array(Array, DistGrid, Memory, Grid, rc)
   !-----------------------------------------------------------------------------
-  ! routine creates a single distribution from specifier files
+  ! routine populates an esmf array to the values used for a redist test. These 
+  ! values are dependent on the global coordinates and the local DE number. For
+  ! a rank 2 array the values are set to Value = localDE + 1000*i1 + 1/1000 *i2
   !
   !-----------------------------------------------------------------------------
   ! arguments
@@ -1859,6 +1854,536 @@
 
   !-----------------------------------------------------------------------------
   end subroutine populate_redist_array 
+  !-----------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  subroutine populate_array_value(Array, value, DistGrid, Memory, Grid, rc)
+  !-----------------------------------------------------------------------------
+  ! routie populates an esmf array to a constant value. Typically used for 
+  ! initialization.
+  !
+  !-----------------------------------------------------------------------------
+  ! arguments
+  type(ESMF_Array), intent(inout) :: Array
+  real(ESMF_KIND_R8), intent(in   ) :: value
+  type(ESMF_DistGrid), intent(in   ) :: DistGrid
+  type(memory_config), intent(in   ) :: Memory
+  type(grid_specification_record), intent(in   ) :: Grid
+  integer, intent(inout) :: rc
+ 
+  ! local ESMF types
+  type(ESMF_LocalArray), allocatable :: larrayList(:)
+  type(ESMF_IndexFlag) :: indexflag
+
+  ! local parameters
+  integer :: localrc ! local error status
+
+  ! local integer variables
+  integer :: de, localDeCount, dimCount 
+  integer, allocatable ::  localDeList(:)
+  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  integer :: i1, i2, i3, i4, i5, i6, i7
+  integer :: irank, k, tensorsize, fsize(7)
+  integer, allocatable :: haloL(:), haloR(:)
+  integer, allocatable :: top(:), bottom(:)
+
+  ! local real variables
+  real(ESMF_KIND_R8), pointer :: fptr1(:), fptr2(:,:)
+  real(ESMF_KIND_R8), pointer :: fptr3(:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr4(:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr5(:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr6(:,:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr7(:,:,:,:,:,:,:)
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  ! get local array DE list
+  !-----------------------------------------------------------------------------
+  call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=localrc)
+! print*,' localdecount ',localDeCount
+  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
+          rcToReturn=rc)) return
+
+  allocate(localDeList(localDeCount))
+  call ESMF_ArrayGet(array, localDeList=localDeList, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
+          rcToReturn=rc)) return
+
+  allocate(larrayList(localDeCount))
+  call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
+          rcToReturn=rc)) return
+
+  !-----------------------------------------------------------------------------
+  ! get dimcount to allocate bound arrays
+  !-----------------------------------------------------------------------------
+  call ESMF_DistGridGet(DistGrid, dimCount=dimCount, rc=localrc)
+! print*,' dimcount ',dimCount
+  if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
+          rcToReturn=rc)) return
+  
+  allocate(UBnd(dimCount, localDeCount))
+  allocate(LBnd(dimCount, localDeCount))  
+
+  call ESMF_ArrayGet(array, indexflag=indexflag,                               &
+           exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting exclusive bound range",     &
+          rcToReturn=rc)) return
+
+  !-----------------------------------------------------------------------------
+  ! associate the fortran pointer with the array object and populate the array
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  ! Memory Rank = Grid Rank, then there are no tensor dimensions
+  !-----------------------------------------------------------------------------
+  if( Memory%memRank ==  Memory%GridRank ) then
+
+     select case(dimCount)
+     case(1)
+     !--------------------------------------------------------------------------
+     ! rank = 1
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr1, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              fptr1(i1) =  value
+           enddo    !   i1
+        enddo    ! de
+     case(2)
+     !--------------------------------------------------------------------------
+     ! rank = 2
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr2, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 fptr2(i1,i2) = value
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(3)
+     !--------------------------------------------------------------------------
+     ! rank = 3
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr3, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    fptr3(i1,i2,i3) = value
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(4)
+     !--------------------------------------------------------------------------
+     ! rank = 4
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr4, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    do i4=LBnd(4,de), UBnd(4,de)
+                       fptr4(i1,i2,i3,i4) = value
+                    enddo   !   i4
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(5)
+     !--------------------------------------------------------------------------
+     ! rank = 5
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr5, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    do i4=LBnd(4,de), UBnd(4,de)
+                       do i5=LBnd(5,de), UBnd(5,de)
+                          fptr5(i1,i2,i3,i4,i5) =  value
+                       enddo   !   i5
+                    enddo   !   i4
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(6)
+     !--------------------------------------------------------------------------
+     ! rank = 6
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr6, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    do i4=LBnd(4,de), UBnd(4,de)
+                       do i5=LBnd(5,de), UBnd(5,de)
+                       do i6=LBnd(6,de), UBnd(6,de)
+                       fptr6(i1,i2,i3,i4,i5,i6) =  value
+                       enddo   !   i6
+                       enddo   !   i5
+                    enddo   !   i4
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(7)
+     !--------------------------------------------------------------------------
+     ! rank = 7
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr7, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    do i4=LBnd(4,de), UBnd(4,de)
+                       do i5=LBnd(5,de), UBnd(5,de)
+                       do i6=LBnd(6,de), UBnd(6,de)
+                       do i7=LBnd(7,de), UBnd(7,de)
+                          fptr7(i1,i2,i3,i4,i5,i6,i7) = value
+                       enddo   !   i7
+                       enddo   !   i6
+                       enddo   !   i5
+                    enddo   !   i4
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case default
+     !--------------------------------------------------------------------------
+     ! error
+     !--------------------------------------------------------------------------
+        localrc = ESMF_FAILURE
+        call ESMF_LogMsgSetError(ESMF_FAILURE,"DimCount inot between 1 and 7", &
+                 rcToReturn=localrc)
+        return
+     end select
+
+  !-----------------------------------------------------------------------------
+  ! Memory Rank > Grid Rank, then there are MemRank-GridRank tensor dimensions
+  !-----------------------------------------------------------------------------
+  elseif( Memory%memRank >  Memory%GridRank ) then
+! -----------
+  endif
+
+  !-----------------------------------------------------------------------------
+  ! clean up allocated arrays
+  !-----------------------------------------------------------------------------
+  deallocate(localDeList)
+  deallocate(LBnd, UBnd)
+  deallocate(larrayList)
+
+  !-----------------------------------------------------------------------------
+  rc = ESMF_SUCCESS     
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  end subroutine populate_array_value 
+  !-----------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  subroutine populate_grid(Array, value, DistGrid, Memory, Grid, rc)
+  !-----------------------------------------------------------------------------
+  ! routie populates an esmf array to a constant value. Typically used for 
+  ! initialization.
+  !
+  !-----------------------------------------------------------------------------
+  ! arguments
+  type(ESMF_Array), intent(inout) :: Array
+  real(ESMF_KIND_R8), intent(in   ) :: value
+  type(ESMF_DistGrid), intent(in   ) :: DistGrid
+  type(memory_config), intent(in   ) :: Memory
+  type(grid_specification_record), intent(in   ) :: Grid
+  integer, intent(inout) :: rc
+ 
+  ! local ESMF types
+  type(ESMF_LocalArray), allocatable :: larrayList(:)
+  type(ESMF_IndexFlag) :: indexflag
+
+  ! local parameters
+  integer :: localrc ! local error status
+
+  ! local integer variables
+  integer :: de, localDeCount, dimCount 
+  integer, allocatable ::  localDeList(:)
+  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  integer :: i1, i2, i3, i4, i5, i6, i7
+  integer :: irank, k, tensorsize, fsize(7)
+  integer, allocatable :: haloL(:), haloR(:)
+  integer, allocatable :: top(:), bottom(:)
+
+  ! local real variables
+  real(ESMF_KIND_R8), pointer :: fptr1(:), fptr2(:,:)
+  real(ESMF_KIND_R8), pointer :: fptr3(:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr4(:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr5(:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr6(:,:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr7(:,:,:,:,:,:,:)
+
+  !
+  integer :: ncells
+  real(ESMF_KIND_R8) :: Urange, Lrange, increment
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
+
+  !-----------------------------------------------------------------------------
+  ! get local array DE list
+  !-----------------------------------------------------------------------------
+  call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=localrc)
+! print*,' localdecount ',localDeCount
+  if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
+          rcToReturn=rc)) return
+
+  allocate(localDeList(localDeCount))
+  call ESMF_ArrayGet(array, localDeList=localDeList, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
+          rcToReturn=rc)) return
+
+  allocate(larrayList(localDeCount))
+  call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
+          rcToReturn=rc)) return
+
+  !-----------------------------------------------------------------------------
+  ! get dimcount to allocate bound arrays
+  !-----------------------------------------------------------------------------
+  call ESMF_DistGridGet(DistGrid, dimCount=dimCount, rc=localrc)
+! print*,' dimcount ',dimCount
+  if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
+          rcToReturn=rc)) return
+  
+  allocate(UBnd(dimCount, localDeCount))
+  allocate(LBnd(dimCount, localDeCount))  
+
+  call ESMF_ArrayGet(array, indexflag=indexflag,                               &
+           exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc,"error getting exclusive bound range",     &
+          rcToReturn=rc)) return
+
+  !-----------------------------------------------------------------------------
+  ! associate the fortran pointer with the array object and populate the array
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  ! Memory Rank = Grid Rank, then there are no tensor dimensions
+  !-----------------------------------------------------------------------------
+  if( Memory%memRank ==  Memory%GridRank ) then
+
+     select case(dimCount)
+     case(1)
+     !--------------------------------------------------------------------------
+     ! rank = 1
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr1, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+! test values, not to be kept
+   Urange = 180.0
+   Lrange = -180.0	
+   ncells = 181
+
+           do i1=LBnd(1,de), UBnd(1,de)
+!             fptr1(i1) =  (i1-1)*increment1 + Lrange
+           enddo    !   i1
+        enddo    ! de
+     case(2)
+     !--------------------------------------------------------------------------
+     ! rank = 2
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr2, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 fptr2(i1,i2) = value
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(3)
+     !--------------------------------------------------------------------------
+     ! rank = 3
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr3, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    fptr3(i1,i2,i3) = value
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(4)
+     !--------------------------------------------------------------------------
+     ! rank = 4
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr4, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    do i4=LBnd(4,de), UBnd(4,de)
+                       fptr4(i1,i2,i3,i4) = value
+                    enddo   !   i4
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(5)
+     !--------------------------------------------------------------------------
+     ! rank = 5
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr5, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    do i4=LBnd(4,de), UBnd(4,de)
+                       do i5=LBnd(5,de), UBnd(5,de)
+                          fptr5(i1,i2,i3,i4,i5) =  value
+                       enddo   !   i5
+                    enddo   !   i4
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(6)
+     !--------------------------------------------------------------------------
+     ! rank = 6
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr6, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    do i4=LBnd(4,de), UBnd(4,de)
+                       do i5=LBnd(5,de), UBnd(5,de)
+                       do i6=LBnd(6,de), UBnd(6,de)
+                       fptr6(i1,i2,i3,i4,i5,i6) =  value
+                       enddo   !   i6
+                       enddo   !   i5
+                    enddo   !   i4
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case(7)
+     !--------------------------------------------------------------------------
+     ! rank = 7
+     !--------------------------------------------------------------------------
+        do de=1, localDeCount
+           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr7, &
+                                   docopy=ESMF_DATA_REF, rc=localrc) 
+           if (ESMF_LogMsgFoundError(localrc,"error connecting pointer to " // &
+                   "array list", rcToReturn=rc)) return
+
+           do i1=LBnd(1,de), UBnd(1,de)
+              do i2=LBnd(2,de), UBnd(2,de)
+                 do i3=LBnd(3,de), UBnd(3,de)
+                    do i4=LBnd(4,de), UBnd(4,de)
+                       do i5=LBnd(5,de), UBnd(5,de)
+                       do i6=LBnd(6,de), UBnd(6,de)
+                       do i7=LBnd(7,de), UBnd(7,de)
+                          fptr7(i1,i2,i3,i4,i5,i6,i7) = value
+                       enddo   !   i7
+                       enddo   !   i6
+                       enddo   !   i5
+                    enddo   !   i4
+                 enddo   !   i3
+              enddo   !   i2
+           enddo    !   i1
+        enddo    ! de
+     case default
+     !--------------------------------------------------------------------------
+     ! error
+     !--------------------------------------------------------------------------
+        localrc = ESMF_FAILURE
+        call ESMF_LogMsgSetError(ESMF_FAILURE,"DimCount inot between 1 and 7", &
+                 rcToReturn=localrc)
+        return
+     end select
+
+  !-----------------------------------------------------------------------------
+  ! Memory Rank > Grid Rank, then there are MemRank-GridRank tensor dimensions
+  !-----------------------------------------------------------------------------
+  elseif( Memory%memRank >  Memory%GridRank ) then
+! -----------
+  endif
+
+  !-----------------------------------------------------------------------------
+  ! clean up allocated arrays
+  !-----------------------------------------------------------------------------
+  deallocate(localDeList)
+  deallocate(LBnd, UBnd)
+  deallocate(larrayList)
+
+  !-----------------------------------------------------------------------------
+  rc = ESMF_SUCCESS     
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  end subroutine populate_grid 
   !-----------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
