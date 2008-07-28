@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.h,v 1.11 2008/07/25 02:32:54 rokuingh Exp $
+// $Id: ESMC_Attribute.h,v 1.12 2008/07/28 04:03:21 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -61,6 +61,7 @@ class ESMC_Attribute
     int attrAlloc;              // number of attributes currently allocated
     ESMC_Attribute **attrList;  // attributes - array of pointers
 
+    // ***FIXME*** members of a union are public by default
     union {                     // overload pointers to conserve space 
       ESMC_I4    vi;       // integer, or
       ESMC_I4  *vip;       // pointer to integer list, or
@@ -90,25 +91,16 @@ class ESMC_Attribute
                                              char *convention, char *purpose, char *object) const;
     int ESMC_AttPackSet(char *name, ESMC_TypeKind tk, int count, void *value, 
                         char *convention, char *purpose, char *object);
-
-
-
-    int ESMC_AttributeWriteTab(char *convention, char *purpose, char *object, 
-                          char *varobj, char *basename, int &count) const;
-
-    // count the number of objects in an attribute hierarchy
-    int ESMC_AttributeCountTree(char *convention, 
-      char *purpose, char *object, int &ans) const;
-
-
-    int ESMC_AttributeWriteXML(char *convention, char *purpose, char *object, 
-                               char *varobj, char *basename) const;
-    
-    int ESMC_AttributeWriteXMLrecurse(FILE *xml, char *convention, char *purpose, char *object, 
-                               char *varobj, int stop, int& fldcount) const;
     
     // extend pointer list
     int ESMC_AttributeAlloc(int adding);
+    
+    // copy an attribute hierarchy
+    int ESMC_AttributeCopyAll(ESMC_Base *source);
+    
+    // count the number of objects in an attribute hierarchy
+    int ESMC_AttributeCountTree(char *convention, 
+      char *purpose, char *object, int &ans) const;
     
     // attribute methods - get
     int ESMC_AttributeGet(char *name, ESMC_I4 *value) const;
@@ -150,12 +142,19 @@ class ESMC_Attribute
     int ESMC_AttributeSet(char *name, int count, ESMC_Logical *value);
     int ESMC_AttributeSet(char *name, char *value);
     int ESMC_AttributeSet(char *name, ESMC_TypeKind tk, int count, void *value);
-
-    // copy an attribute hierarchy
-    int ESMC_AttributeCopyAll(ESMC_Base *source);
     
     // attribute set a link in hierarchy
     int ESMC_AttributeSetLink(ESMC_Base *destination);
+
+    // attribute write methods
+    int ESMC_AttributeWriteTab(char *convention, char *purpose, char *object, 
+                          char *varobj, char *basename, int &count) const;
+
+    int ESMC_AttributeWriteXML(char *convention, char *purpose, char *object, 
+                               char *varobj, char *basename) const;
+    
+    int ESMC_AttributeWriteXMLrecurse(FILE *xml, char *convention, char *purpose, char *object, 
+                               char *varobj, int stop, int& fldcount) const;
 
     // not implemented yet
     int ESMC_AttributeCopy(char *name, ESMC_Attribute *destination);
@@ -171,6 +170,7 @@ class ESMC_Attribute
     int ESMC_AttrModifyValue(ESMC_TypeKind typekind,int numitems,void *datap);
     int ESMC_Deserialize(char *buffer, int *offset);
     int ESMC_Serialize(char *buffer, int *length, int *offset) const;
+    int ESMC_SerializeCC(char *buffer, int *length, int &offset, bool cc) const;
     int ESMC_Print(void) const;
 
     // temporary copy constructor
