@@ -1,4 +1,4 @@
-// $Id: ESMC_InternDG_F.C,v 1.9 2008/04/05 03:38:36 cdeluca Exp $
+// $Id: ESMC_InternDG_F.C,v 1.10 2008/07/29 01:34:52 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 //
  // insert any higher level, 3rd party or system includes here
 #include "ESMC_Start.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 
 
  // associated class definition file
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_InternDG_F.C,v 1.9 2008/04/05 03:38:36 cdeluca Exp $";
+             "$Id: ESMC_InternDG_F.C,v 1.10 2008/07/29 01:34:52 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -61,7 +61,7 @@ void FTN(c_esmc_interndgserialize)(int *dimCount, int *ndes,
     int fixedpart = 40 * sizeof(int *);
     if ((*length - *offset) < fixedpart) {
          
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                              "Buffer too short to add a IGrid object", localrc);
          return;
  

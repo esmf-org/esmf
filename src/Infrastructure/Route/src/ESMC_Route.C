@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.167 2008/04/22 18:01:36 theurich Exp $
+//$Id: ESMC_Route.C,v 1.168 2008/07/29 01:34:53 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -27,13 +27,13 @@
 
  // associated class definition file
  #include <ESMC_Route.h>
- #include <ESMC_LogErr.h>
+ #include <ESMCI_LogErr.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.167 2008/04/22 18:01:36 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.168 2008/07/29 01:34:53 rosalind Exp $";
 //-----------------------------------------------------------------------------
 class permuteLocal {
 public:
@@ -941,7 +941,7 @@ int compare2(const void *item1, const void *item2) {
            // using the MPI-Vector equivalent, you would need code here which
            // could take an array of VMTypes instead of a single one.
 
-           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                  "Route option PACK_VECTOR not supported yet", &rc);
 
         }         // packing branch
@@ -1234,7 +1234,7 @@ int compare2(const void *item1, const void *item2) {
       //  be confusing if it fails because of an invalid value.)
       if ((maxReqCount < 0) || (maxReqCount > (1<<24))) {
         sprintf(msgbuf, "computed #reqs too small or large: %d\n", maxReqCount);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
         return (rc);
       }
 
@@ -1286,7 +1286,7 @@ int compare2(const void *item1, const void *item2) {
         if (req > maxReqCount) {
           sprintf(msgbuf, "not enough async bufs; have %d and index now %d (must be < %d)\n",
                            maxReqCount, req, maxReqCount);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
           return (rc);
         }
 
@@ -1486,7 +1486,7 @@ int compare2(const void *item1, const void *item2) {
            // using the MPI-Vector equivalent, you would need code here which
            // could take an array of VMTypes instead of a single one.
 
-           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                  "Route option PACK_VECTOR not supported yet", &rc);
 
         }         // packing branch
@@ -1789,7 +1789,7 @@ int compare2(const void *item1, const void *item2) {
            // using the MPI-Vector equivalent, you would need code here which
            // could take an array of VMTypes instead of a single one.
 
-           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                  "Route option PACK_VECTOR not supported yet", &rc);
 
         }         // packing branch
@@ -3297,7 +3297,7 @@ int compare2(const void *item1, const void *item2) {
 // at this time?  should have, i'd think...)
 
     rc = this->ESMC_Base::ESMC_Validate(options);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, 
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, 
                                               &rc)) return (rc);
 
     // add more code here.
@@ -3384,19 +3384,19 @@ int compare2(const void *item1, const void *item2) {
     char msgbuf[ESMF_MAXSTR];
 
     sprintf(msgbuf,"Route print:\n");
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
 
     sprintf(msgbuf," Routeid = %d\n", routeid);
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
 
     sprintf(msgbuf," Route Options = %d\n", this->options);
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
 
     sprintf(msgbuf," Recv item count: %d\n", recvitems);
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
 
     // uncomment for profiling
@@ -3407,29 +3407,29 @@ int compare2(const void *item1, const void *item2) {
 
     // TODO: print something about the attached VM?
     //sprintf(msgbuf," VM =\n");
-    ////ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    ////ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     //printf(msgbuf);
     //vm->VMPrint("");
     {
       int myid = vm->getLocalPet();
       int petcount = vm->getPetCount();
       sprintf(msgbuf, "VM: my pet = %d of %d\n", myid, petcount);
-      //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
       printf(msgbuf);
     }
 
     sprintf(msgbuf," Send table:\n");
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     rc = sendRT->ESMC_RTablePrint(options);
 
     sprintf(msgbuf," Recv table:\n");
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     rc = recvRT->ESMC_RTablePrint(options);
 
     sprintf(msgbuf," Comm table:\n");
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     rc = ct->ESMC_CommTablePrint(options);
 

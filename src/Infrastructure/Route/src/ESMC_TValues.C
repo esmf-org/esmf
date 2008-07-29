@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.C,v 1.20 2008/04/05 03:38:55 cdeluca Exp $
+// $Id: ESMC_TValues.C,v 1.21 2008/07/29 01:34:54 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
  #include <stdio.h>
  #include <stdlib.h>
  #include "ESMC_LocalArray.h"
- #include "ESMC_LogErr.h"
+ #include "ESMCI_LogErr.h"
 
  // associated class definition file
  #include "ESMC_TValues.h"
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TValues.C,v 1.20 2008/04/05 03:38:55 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_TValues.C,v 1.21 2008/07/29 01:34:54 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -398,21 +398,21 @@
     char msgbuf[ESMF_MAXSTR];
   
     sprintf(msgbuf,"TransformValues: \n");
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     sprintf(msgbuf,"  number of links: %d\n", numlist);
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     sprintf(msgbuf,"  source index:\n");
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     srcindex->ESMC_LocalArrayPrint();
     sprintf(msgbuf,"  destination index:\n");
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     dstindex->ESMC_LocalArrayPrint();
     sprintf(msgbuf,"  weights:\n");
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     weights->ESMC_LocalArrayPrint();
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.5 2008/04/09 18:14:38 theurich Exp $
+// $Id: ESMC_DistGrid.C,v 1.6 2008/07/29 01:34:49 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -28,14 +28,14 @@
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_DistGrid.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.5 2008/04/09 18:14:38 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistGrid.C,v 1.6 2008/07/29 01:34:49 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -61,7 +61,7 @@ ESMC_DistGrid ESMC_DistGridCreate(ESMC_InterfaceInt minIndexInterfaceArg,
     ESMCI::DistGrid::create(minIndexInterface, maxIndexInterface, NULL,
       NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
       &localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     distgrid.ptr = NULL;
     return distgrid;  // bail out
   }
@@ -84,7 +84,7 @@ int ESMC_DistGridPrint(ESMC_DistGrid distgrid){
 
   // call into ESMCI method  
   localrc = dgp->print();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
   // return successfully
@@ -105,7 +105,7 @@ int ESMC_DistGridDestroy(ESMC_DistGrid *distgrid){
 
   // call into ESMCI method  
   localrc = ESMCI::DistGrid::destroy(&dgp);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   
   // invalidate pointer

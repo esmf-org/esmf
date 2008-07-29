@@ -1,4 +1,4 @@
-// $Id: ESMCI_Field_F.C,v 1.6 2008/05/20 20:48:14 w6ws Exp $
+// $Id: ESMCI_Field_F.C,v 1.7 2008/07/29 01:34:50 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -23,14 +23,14 @@
 using namespace std;
 
 #include "ESMC_Start.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_Field_F.C,v 1.6 2008/05/20 20:48:14 w6ws Exp $";
+             "$Id: ESMCI_Field_F.C,v 1.7 2008/07/29 01:34:50 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -66,7 +66,7 @@ void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus,
     int fixedpart = 4 * sizeof(int *) + sizeof(int) + 5 * ESMF_MAXDIM * sizeof(int);
     if ((*length - *offset) < fixedpart) {
          
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                             "Buffer too short to add a Field object", localrc);
          return;
  

@@ -1,4 +1,4 @@
-% $Id: LogErr_cex.tex,v 1.8 2008/04/05 03:38:41 cdeluca Exp $
+% $Id: LogErr_cex.tex,v 1.9 2008/07/29 01:34:52 rosalind Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -20,7 +20,7 @@ the corresponding method.
 
 {\tt
 \begin{verbatim}
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
 #define ESMC_METHOD "TestLog1Ex"
 
@@ -28,11 +28,11 @@ int main() {
 int *rc;
     
     ESMC_LogSetFilename("log1.txt");
-    ESMC_LogDefault.ESMC_LogWrite("LogWrite",ESMC_LOG_WARN);
-    ESMC_LogDefault.ESMC_LogFoundError(ESMF_TRUE,rc);
-	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_TRUE,"Log Msg Found Error",rc);
-    ESMC_LogDefault.ESMC_LogAllocError(rc);
-	ESMC_LogDefault.ESMC_LogMsgAllocError("Log Msg Alloc Error",rc);
+    ESMC_LogDefault.Write("LogWrite",ESMC_LOG_WARN);
+    ESMC_LogDefault.FoundError(ESMF_TRUE,rc);
+	ESMC_LogDefault.MsgFoundError(ESMF_TRUE,"Log Msg Found Error",rc);
+    ESMC_LogDefault.AllocError(rc);
+	ESMC_LogDefault.MsgAllocError("Log Msg Alloc Error",rc);
 }
 \end{verbatim}
 \tt}

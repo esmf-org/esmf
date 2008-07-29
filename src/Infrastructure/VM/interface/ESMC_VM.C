@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.1 2008/07/21 23:51:21 theurich Exp $
+// $Id: ESMC_VM.C,v 1.2 2008/07/29 01:34:56 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -28,14 +28,14 @@
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_VM.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.1 2008/07/21 23:51:21 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.2 2008/07/29 01:34:56 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -53,7 +53,7 @@ int ESMC_VMPrint(ESMC_VM vm){
 
   // call into ESMCI method  
   localrc = vmp->print();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
   // return successfully

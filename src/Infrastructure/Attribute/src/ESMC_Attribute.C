@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.16 2008/07/28 15:21:08 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.17 2008/07/29 01:34:48 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,12 +30,12 @@
 #include <stdlib.h>
 #include "ESMC_Attribute.h"
 #include "ESMC_Base.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.16 2008/07/28 15:21:08 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.17 2008/07/29 01:34:48 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -111,21 +111,21 @@
 
   // simple sanity checks
   if ((!purpose) || (purpose[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute purpose", &localrc);
        return ESMF_FAILURE;
   }
   
   // simple sanity checks
   if ((!convention) || (convention[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute convention", &localrc);
        return ESMF_FAILURE;
   }
   
   // simple sanity checks
   if ((!object) || (object[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute object", &localrc);
        return ESMF_FAILURE;
   }
@@ -137,13 +137,13 @@
       convention,attrCount);
     attpack = new ESMC_Attribute(attpackname, convention, purpose, object);
     if (!attpack) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed initializing an attpack", &localrc);
       return ESMF_FAILURE;
     }
     localrc = ESMC_AttributeSet(attpack);
     if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed adding an attpack to an Attribute", &localrc);
       return ESMF_FAILURE;
     }
@@ -152,7 +152,7 @@
   // make an Attribute in the attpack
   attr = new ESMC_Attribute(name, convention, purpose, object);  
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed initialized an attpack Attribute", &localrc);
     return ESMF_FAILURE;
   }
@@ -160,7 +160,7 @@
   // add an Attribute to the attpack
   localrc = attpack->ESMC_AttributeSet(attr);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed adding an attpack Attribute", &localrc);
     return ESMF_FAILURE;
   }
@@ -192,21 +192,21 @@
 
   // simple sanity checks
   if ((!purpose) || (purpose[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute purpose", NULL);
        return NULL;
   }
   
   // simple sanity checks
   if ((!convention) || (convention[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute convention", NULL);
        return NULL;
   }
   
   // simple sanity checks
   if ((!object) || (object[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute object", NULL);
        return NULL;
   }
@@ -255,28 +255,28 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute name", NULL);
        return NULL;
   }
 
   // simple sanity checks
   if ((!purpose) || (purpose[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute purpose", NULL);
        return NULL;
   }
   
   // simple sanity checks
   if ((!convention) || (convention[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute convention", NULL);
        return NULL;
   }
   
   // simple sanity checks
   if ((!object) || (object[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute object", NULL);
        return NULL;
   }
@@ -338,7 +338,7 @@
        sprintf(msgbuf, "Cannot find an Attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
                       convention, purpose, object);
        printf(msgbuf);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              msgbuf, &localrc);
        return localrc;
   }
@@ -347,7 +347,7 @@
   if (!attr) {
        sprintf(msgbuf, "This Attribute package does have an Attribute named '%s'\n", name);
        printf(msgbuf);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              msgbuf, &localrc);
        return localrc;
   }
@@ -355,7 +355,7 @@
   // Set the Attribute
   localrc = attr->ESMC_AttrModifyValue(tk, count, value);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed modifying an attpack Attribute", &localrc);
     return ESMF_FAILURE;
   }
@@ -408,11 +408,11 @@
     sprintf(msgbuf, "Name: %s\t  Convention: %s\t  Purpose: %s\t\r\n\n",
       basename,convention,purpose);
     printf(msgbuf);
-    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     sprintf(msgbuf, "%-*s\t%-*s\t%-*s\t%-*s\t%-*s\t\r\n",slen,"Short Name",llen,"Long Name",ulen,
       "Units",ilen,"Import",elen,"Export");
     printf(msgbuf);
-    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     ++count;
   }
 
@@ -446,16 +446,16 @@
           sprintf(msgbuf, "%-*s\t",tlen,"N/A");
         }
         printf(msgbuf);
-        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
       }
       else { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
       }
         if (strcmp("export",attrName) == 0) {
           sprintf(msgbuf, "\r\n");
           printf(msgbuf);
-          ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+          ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
         }
   }
   for(int i=0;  i<attrCount; i++) {
@@ -468,7 +468,7 @@
        sprintf(msgbuf, "  Cannot find an Attribute package on this object with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
                       convention, purpose, object);
        printf(msgbuf);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              msgbuf, &localrc);
        return localrc;
   }
@@ -476,7 +476,7 @@
   for (int i=0; i<attpack->attrCount; i++) {
       sprintf(msgbuf, "   Attr %d:\n", i);
       printf(msgbuf);
-      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
       attpack->attrList[i]->ESMC_Print();
   }
 */
@@ -523,7 +523,7 @@
   if((xml=fopen(msgbuf,"w"))==NULL) {
     localrc = ESMF_FAILURE;
     sprintf(msgbuf,"Could not open the xml file!");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              msgbuf, &localrc);
     return ESMF_FAILURE;
   } 
@@ -545,7 +545,7 @@
   // determine the number of fields to write
   localrc = ESMC_AttributeCountTree(convention, purpose, varobj, stop);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "ESMC_Attribute failed counting fields", &localrc);
     fclose(xml);
     return ESMF_FAILURE;
@@ -554,7 +554,7 @@
   // recurse the Attribute hierarchy
   localrc = ESMC_AttributeWriteXMLrecurse(xml,convention,purpose,object,varobj,stop,fldcount);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "ESMC_Attribute failed recursing in WriteTab", &localrc);
     fclose(xml);
     return ESMF_FAILURE;
@@ -627,7 +627,7 @@
       }
       else { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
       }
       printf(msgbuf);
       fprintf(xml,msgbuf);
@@ -679,7 +679,7 @@
       }
       else { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
       }
     }
     if (attrList != NULL) {
@@ -863,7 +863,7 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad Attribute name", &localrc);
        return ESMF_FAILURE;
   }
@@ -871,21 +871,21 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogWrite("Attribute not found, using default value if present",
+    ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_I4) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not typekind I4", &localrc);
         return ESMF_FAILURE;
     }
   
     // simple sanity checks
     if (attr->items != 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not single value", &localrc);
       return ESMF_FAILURE;
     }
@@ -926,7 +926,7 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad Attribute name", &localrc);
        return ESMF_FAILURE;
   }
@@ -934,14 +934,14 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogWrite("Attribute not found, using default value if present",
+    ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_I4) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not typekind I4", &localrc);
        return ESMF_FAILURE;
     }
@@ -989,7 +989,7 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad Attribute name", &localrc);
        return ESMF_FAILURE;
   }
@@ -997,21 +997,21 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogWrite("Attribute not found, using default value if present",
+    ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_I8) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not typekind I8", &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items != 1) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not single value", &localrc);
        return ESMF_FAILURE;
     }
@@ -1052,7 +1052,7 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad Attribute name", &localrc);
        return ESMF_FAILURE;
   }
@@ -1060,14 +1060,14 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogWrite("Attribute not found, using default value if present",
+    ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_I8) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not typekind I8", &localrc);
        return ESMF_FAILURE;
     }
@@ -1115,7 +1115,7 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad Attribute name", &localrc);
        return ESMF_FAILURE;
   }
@@ -1123,21 +1123,21 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogWrite("Attribute not found, using default value if present",
+    ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_R4) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not typekind R4", &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items != 1) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not single value", &localrc);
        return localrc;
     }
@@ -1178,7 +1178,7 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad Attribute name", &localrc);
        return ESMF_FAILURE;
   }
@@ -1186,14 +1186,14 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogWrite("Attribute not found, using default value if present",
+    ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_R4) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not typekind R4", &localrc);
        return ESMF_FAILURE;
     }
@@ -1241,7 +1241,7 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad Attribute name", &localrc);
        return ESMF_FAILURE;
   }
@@ -1249,21 +1249,21 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogWrite("Attribute not found, using default value if present",
+    ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_R8) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not typekind R8", &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items != 1) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not single value", &localrc);
        return ESMF_FAILURE;
     }
@@ -1304,7 +1304,7 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad Attribute name", &localrc);
        return ESMF_FAILURE;
   }
@@ -1312,14 +1312,14 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogWrite("Attribute not found, using default value if present",
+    ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_R8) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not typekind R8", &localrc);
        return ESMF_FAILURE;
     }
@@ -1367,7 +1367,7 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad Attribute name", &localrc);
        return ESMF_FAILURE;
   }
@@ -1375,21 +1375,21 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogWrite("Attribute not found, using default value if present",
+    ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_LOGICAL) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not typekind LOGICAL", &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items != 1) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not single value", &localrc);
        return ESMF_FAILURE;
     }
@@ -1430,7 +1430,7 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad Attribute name", &localrc);
        return ESMF_FAILURE;
   }
@@ -1438,14 +1438,14 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogWrite("Attribute not found, using default value if present",
+    ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_LOGICAL) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not typekind LOGICAL", &localrc);
        return ESMF_FAILURE;
     }
@@ -1493,14 +1493,14 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad Attribute name", &localrc);
        return ESMF_FAILURE;
   }
 
   // simple sanity checks
   if (!value) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad value return argument", &localrc);
       return ESMF_FAILURE;
   }
@@ -1508,21 +1508,21 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogWrite("Attribute not found, using default value if present",
+    ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not typekind CHARACTER", &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items != 1) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "Attribute not single value", &localrc);
        return ESMF_FAILURE;
     }
@@ -1564,7 +1564,7 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              "bad Attribute name", &localrc);
        return ESMF_FAILURE;
   }
@@ -1572,7 +1572,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogWrite("Attribute not found, using default value if present",
+    ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -1602,7 +1602,7 @@
               else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
                   *(ESMC_Logical *)value = attr->vb;
               else{
-                   ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                        "unknown typekind",
                                        &localrc);
                    return ESMF_FAILURE;
@@ -1625,7 +1625,7 @@
                   for (i=0; i<attr->items; i++)
                       ((ESMC_Logical *)value)[i] = attr->vbp[i];
               } else{
-              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                        "unknown typekind", 
                                        &localrc);
               return ESMF_FAILURE;
@@ -1670,7 +1670,7 @@
 
   // simple sanity checks
   if ((!num) || (num < 0)) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              "Attribute number must be > 0", &localrc);
        return ESMF_FAILURE;
   }
@@ -1678,7 +1678,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(num);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogWrite("Attribute not found, using default value if present",
+    ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -1709,7 +1709,7 @@
               else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
                   *(ESMC_Logical *)value = attr->vb;
               else{
-                  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                  ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                        "unknown typekind", 
                                        &localrc);
                   return ESMF_FAILURE;
@@ -1732,7 +1732,7 @@
                   for (i=0; i<attr->items; i++)
                       ((ESMC_Logical *)value)[i] = attr->vbp[i];
               } else {
-                  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                  ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                        "unknown typekind", 
                                        &localrc);
                   return ESMF_FAILURE;
@@ -1770,7 +1770,7 @@
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute name", NULL);
        return NULL;
   }
@@ -1813,7 +1813,7 @@
   // simple sanity check
   if ((number < 0) || (number >= attrCount)) {
       sprintf(msgbuf, "Attribute number must be  0 < N <= %d\n", attrCount-1);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, NULL);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, NULL);
       return NULL;
   }
 
@@ -1873,7 +1873,7 @@
 
   // simple sanity checks
   if (!attr) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad Attribute object", &localrc);
        return ESMF_FAILURE;
   }
@@ -1898,7 +1898,7 @@
   // new Attribute name, make sure there is space for it.
   localrc = ESMC_AttributeAlloc(1);
   if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeSet failed to allocate space", &localrc);
        return ESMF_FAILURE;
   }  
@@ -2374,7 +2374,7 @@
   if(this->attrAlloc < (this->attrCount + 1)) {
     localrc = this->ESMC_AttributeAlloc(1);
     if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeSetLink failed to allocate space", &localrc);
       return ESMF_FAILURE;
     }
@@ -2559,7 +2559,7 @@
       if (len > ESMF_MAXSTR) {
         sprintf(msgbuf, "attr name %d bytes longer than limit of %d bytes\n",
                        len, ESMF_MAXSTR);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       }
       memcpy(attrName, name, len);
   }
@@ -2674,7 +2674,7 @@
       if (len > ESMF_MAXSTR) {
         sprintf(msgbuf, "attr name %d bytes longer than limit of %d bytes\n",
                        len, ESMF_MAXSTR);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       }
       memcpy(attrName, name, len);
   }
@@ -2686,7 +2686,7 @@
       if (len > ESMF_MAXSTR) {
         sprintf(msgbuf, "attr convention %d bytes longer than limit of %d bytes\n",
                        len, ESMF_MAXSTR);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       }
       memcpy(attrConvention, conv, len);
   }
@@ -2698,7 +2698,7 @@
       if (len > ESMF_MAXSTR) {
         sprintf(msgbuf, "attr purpose %d bytes longer than limit of %d bytes\n",
                        len, ESMF_MAXSTR);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       }
       memcpy(attrPurpose, purp, len);
   }
@@ -2710,7 +2710,7 @@
       if (len > ESMF_MAXSTR) {
         sprintf(msgbuf, "attr object %d bytes longer than limit of %d bytes\n",
                        len, ESMF_MAXSTR);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       }
       memcpy(attrObject, obj, len);
   }
@@ -3102,7 +3102,7 @@
       
       // check if buffer has enough free memory, expand?
       if (*length < offset){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                       "Buffer too short to add an Attribute hierarchy", &localrc);
         return localrc;
       }
@@ -3144,19 +3144,19 @@
   // print name
   sprintf(msgbuf, "        name: %s\n",  attrName);
   printf(msgbuf);
-  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   
   // print items if there are any
   if (items <= 0) {
       sprintf(msgbuf, "        value: \n");
       printf(msgbuf);
-      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   }
 
   if (items == 1) {
       sprintf(msgbuf, "        value: ");
       printf(msgbuf);
-      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
              if (tk == ESMC_TYPEKIND_I4)
                  sprintf(msgbuf, "%d\n", vi); 
              else if (tk == ESMC_TYPEKIND_I8)
@@ -3170,18 +3170,18 @@
              else if (tk == ESMC_TYPEKIND_CHARACTER)
                  sprintf(msgbuf, "%s\n", vcp);
              else{ 
-                 ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              "unknown value", &localrc);
                  return localrc;
              }
       printf(msgbuf);
-      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   }
 
   if (items > 1) { 
       sprintf(msgbuf, "        %d items, values:\n", items);
       printf(msgbuf);
-      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
       for (int i=0; i<items; i++) {
                 if (tk == ESMC_TYPEKIND_I4) {
                     sprintf(msgbuf, "          \t item %d: %d\n", i, vip[i]); 
@@ -3195,37 +3195,37 @@
                     sprintf(msgbuf, "          \t item %d: %s\n", i,
                       ESMC_LogicalString(vbp[i]));
                 } else{
-                    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              "          \t unknown value", &localrc);
                     return localrc;
                 }
       printf(msgbuf);
       }
-      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   }
 
   // print convention
   sprintf(msgbuf, "        convention: %s\n",  attrConvention);
   printf(msgbuf);
-  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   
   // print purpose
   sprintf(msgbuf, "        purpose: %s\n",  attrPurpose);
   printf(msgbuf);
-  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   
   // print object
   sprintf(msgbuf, "        object: %s\n",  attrObject);
   printf(msgbuf);
-  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
 
   sprintf(msgbuf, "        attrCount: %d\n", attrCount);
   printf(msgbuf);
-  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   for (int i=0; i<attrCount; i++) {
       sprintf(msgbuf, "   Attr %d:\n", i);
       printf(msgbuf);
-      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
       attrList[i]->ESMC_Print();
   }
 

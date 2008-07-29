@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.110 2008/07/28 04:04:57 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.111 2008/07/29 01:34:49 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -29,13 +29,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ESMC_Base.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.110 2008/07/28 04:04:57 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.111 2008/07/29 01:34:49 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -379,7 +379,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
      if (len >= ESMF_MAXSTR) {
        sprintf(msgbuf, "Error: object type %d bytes longer than limit of %d\n",
                           len, ESMF_MAXSTR-1);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
        return rc;
      }
   }
@@ -419,7 +419,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (nlen > ESMF_MAXSTR) {
        sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
                        nlen, ESMF_MAXSTR);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
        return rc;
   }
 
@@ -491,7 +491,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
      if (len >= ESMF_MAXSTR) {
        sprintf(msgbuf, "object name %d bytes longer than limit of %d bytes\n",
                        len, ESMF_MAXSTR-1);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
        return rc;
      }
      defname = 0;
@@ -502,7 +502,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
      if (len >= ESMF_MAXSTR) {
        sprintf(msgbuf, "object type %d bytes longer than limit of %d bytes\n",
                        len, ESMF_MAXSTR-1);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
        return rc;
      }
      defclass = 0;
@@ -549,7 +549,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   if (nlen > ESMF_MAXSTR) {
        sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
                        nlen, ESMF_MAXSTR);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
        return rc;
   }
 
@@ -705,12 +705,12 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     //   "Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
     //       ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
     // printf(msgbuf);
-    // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    // ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     
   // root Attribute
   sprintf(msgbuf, "   Root Attribute\n");
   printf(msgbuf);
-  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   
   // traverse the Attribute hierarchy, printing as we go
   root.ESMC_Print();
@@ -775,7 +775,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
     fixedpart = sizeof(ESMC_Base);
     if ((*length - *offset) < fixedpart) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
                                "Buffer too short to add a Base object", &rc);
         return ESMF_FAILURE; 
         //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);

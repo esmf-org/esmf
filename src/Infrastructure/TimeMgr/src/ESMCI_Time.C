@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.C,v 1.6 2008/06/27 03:51:21 rosalind Exp $"
+// $Id: ESMCI_Time.C,v 1.7 2008/07/29 01:34:55 rosalind Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@
  #include <time.h>
  #include <string.h>
 
- #include <ESMC_LogErr.h>
+ #include <ESMCI_LogErr.h>
  #include <ESMF_LogMacros.inc>
 
  // associated class definition file
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Time.C,v 1.6 2008/06/27 03:51:21 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_Time.C,v 1.7 2008/07/29 01:34:55 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -153,13 +153,13 @@ namespace ESMCI{
       if (calendar != ESMC_NULL_POINTER) {             // 1st choice
         this->calendar = *calendar;
         rc = Time::validate("calendar");
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
 
       } else if (calendarType != ESMC_NULL_POINTER) {  // 2nd choice
         // set to specified built-in type; create if necessary
         rc = ESMCI_CalendarCreate(*calendarType);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
         this->calendar = Calendar::internalCalendar[*calendarType-1];
       }
@@ -168,7 +168,7 @@ namespace ESMCI{
       if (timeZone != ESMC_NULL_POINTER) {
         this->timeZone = *timeZone;
         rc = Time::validate("timezone");
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
       }
       return(ESMF_SUCCESS);
@@ -197,7 +197,7 @@ namespace ESMCI{
     } else if (calendarType != ESMC_NULL_POINTER) {  // 2nd choice
       // set to specified built-in type; create if necessary
       rc = ESMCI_CalendarCreate(*calendarType);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         { *this = saveTime; return(rc); }
       this->calendar = Calendar::internalCalendar[*calendarType-1];
 
@@ -208,7 +208,7 @@ namespace ESMCI{
     } else {                                         // 4th choice
       // create default calendar
       rc = ESMCI_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         { *this = saveTime; return(rc); }
       this->calendar = Calendar::defaultCalendar;
     }
@@ -230,7 +230,7 @@ namespace ESMCI{
 
       // calendar required
       if (this->calendar == ESMC_NULL_POINTER) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                                               ", calendar required.", &rc);
         *this = saveTime; return(rc);
       }
@@ -241,7 +241,7 @@ namespace ESMCI{
         if (*mm < 1) {
           char logMsg[ESMF_MAXSTR];
           sprintf(logMsg, "; month-of-the-year mm=%d (must be >=1).", *mm);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
                                                 logMsg, &rc);
           *this = saveTime; return(rc);
         }
@@ -253,7 +253,7 @@ namespace ESMCI{
         if (*dd < 1) {
           char logMsg[ESMF_MAXSTR];
           sprintf(logMsg, "; day-of-the-month dd=%d (must be >=1).", *dd);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
                                                 logMsg, &rc);
           *this = saveTime; return(rc);
         }
@@ -273,7 +273,7 @@ namespace ESMCI{
       // do the conversion
       rc = this->calendar->convertToTime(argYY, argMM, argDD,
                                                       0, this);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         { *this = saveTime; return(rc); }
 
     // is a Julian-days style date specified?
@@ -281,20 +281,20 @@ namespace ESMCI{
 
       // calendar required
       if (this->calendar == ESMC_NULL_POINTER) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                                               ", calendar required.", &rc);
         *this = saveTime; return(rc);
       }
 
       ESMC_I8 argD = (d != ESMC_NULL_POINTER) ? *d : *d_i8;
       rc = this->calendar->convertToTime(0, 0, 0, argD, this);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
 
     } else if (d_r8 != ESMC_NULL_POINTER) {
       // calendar required
       if (this->calendar == ESMC_NULL_POINTER) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                                               ", calendar required.", &rc);
         *this = saveTime; return(rc);
       }
@@ -302,7 +302,7 @@ namespace ESMCI{
       // integer part
       rc = this->calendar->convertToTime(0, 0, 0, 
                                               (ESMC_I8) *d_r8, this);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
 
       // fractional part
@@ -315,7 +315,7 @@ namespace ESMCI{
         if (this->calendar->calendarType != ESMC_CAL_NOCALENDAR) {
           // defaults:  yy=0, mm=1, dd=1 d=0
           rc = this->calendar->convertToTime(0, 1, 1, 0, this);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+          if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
             { *this = saveTime; return(rc); }
         }
       }
@@ -326,7 +326,7 @@ namespace ESMCI{
                      ms_r8, us_r8, ns_r8, sN, sD);
 
     rc = Time::validate();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         { *this = saveTime; return(rc); }
 
     return(ESMF_SUCCESS);
@@ -406,35 +406,35 @@ namespace ESMCI{
         d  != ESMC_NULL_POINTER || d_i8  != ESMC_NULL_POINTER ||
         d_r8 != ESMC_NULL_POINTER) {
       if (this->calendar == ESMC_NULL_POINTER) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                                  ", calendar required.", &rc); return(rc);
       }
       rc = this->calendar->convertToDate(&timeToConvert,
                                                       yy, yy_i8, mm, dd,
                                                       d, d_i8, d_r8);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
     }
 
     // get any other "day" units
     if (dayOfYear != ESMC_NULL_POINTER) {
       rc = Time::getDayOfYear(dayOfYear);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
     }
     if (dayOfYear_r8 != ESMC_NULL_POINTER) {
       rc = Time::getDayOfYear(dayOfYear_r8);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
     }
     if (dayOfYear_intvl != ESMC_NULL_POINTER) {
       rc = Time::getDayOfYear(dayOfYear_intvl);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
     }
     if (dayOfWeek != ESMC_NULL_POINTER) {
       rc = Time::getDayOfWeek(dayOfWeek);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
     }
 
@@ -444,7 +444,7 @@ namespace ESMCI{
         dayOfYear_intvl != ESMC_NULL_POINTER ||
         dayOfWeek       != ESMC_NULL_POINTER) {
       if (timeToConvert.calendar == ESMC_NULL_POINTER) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                                  ", calendar required.", &rc); return(rc);
       }
       timeToConvert.ESMC_FractionSetw(timeToConvert.ESMC_FractionGetw() %
@@ -455,14 +455,14 @@ namespace ESMCI{
     rc = BaseTime::get(&timeToConvert, h, m, s, s_i8,
                           ms, us, ns, h_r8, m_r8, s_r8, ms_r8,
                           us_r8, ns_r8, sN, sD);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // handle remaining miscellaneous get arguments
 
     if (midMonth != ESMC_NULL_POINTER) {
       rc = Time::getMidMonth(midMonth);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
     }
     if (calendar != ESMC_NULL_POINTER) {
@@ -470,7 +470,7 @@ namespace ESMCI{
     }
     if (calendarType != ESMC_NULL_POINTER) {
       if (this->calendar == ESMC_NULL_POINTER) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
              ", calendarType requires a calendar to be set.", &rc); return(rc);
       }
       *calendarType = this->calendar->calendarType;
@@ -480,7 +480,7 @@ namespace ESMCI{
     }
     if (tempTimeString != ESMC_NULL_POINTER && timeStringLen > 0) {
       rc = Time::getString(tempTimeString);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLen = strlen(tempTimeString);
       // see also method Time::print()
@@ -488,7 +488,7 @@ namespace ESMCI{
     if (tempTimeStringISOFrac != ESMC_NULL_POINTER &&
         timeStringLenISOFrac > 0) {
       rc = Time::getString(tempTimeStringISOFrac, "isofrac");
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLenISOFrac = strlen(tempTimeStringISOFrac);
       // see also method Time::print()
@@ -620,7 +620,7 @@ namespace ESMCI{
 
     // use base class Set()
     rc = BaseTime::set(s, sN, sD);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // set calendar type
@@ -634,7 +634,7 @@ namespace ESMCI{
     } else if (calendarType != (ESMC_CalendarType)0) {  // 2nd choice
       // set to specified built-in type; create if necessary
       rc = ESMCI_CalendarCreate(calendarType);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       this->calendar = Calendar::internalCalendar[calendarType-1];
     } // otherwise leave NULL, TODO: implement ESMC_Base logic, then can
@@ -670,7 +670,7 @@ namespace ESMCI{
 
     // must have a calendar
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; calendar is NULL.", rc);
       return(false);
     }
@@ -678,7 +678,7 @@ namespace ESMCI{
     // get the year of this time
     ESMC_I8 yy_i8;
     int rc2 = Time::get((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc2, ESMF_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(rc2, ESMF_ERR_PASSTHRU, rc)) {
       return(false);
     }
 
@@ -718,7 +718,7 @@ namespace ESMCI{
       return(this->calendar->calendarType == time->calendar->calendarType);
     }
     else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                            "; calendar1 and/or calendar2 is NULL.", rc);
       return(false);
     }
@@ -754,14 +754,14 @@ namespace ESMCI{
 
     // validate for calendar type
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; calendar is NULL.", &rc);
       return(rc);
     }
 
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
                            "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
@@ -793,7 +793,7 @@ namespace ESMCI{
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, &cal, ESMC_NULL_POINTER, &tz);
 
-    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
 
     return(rc);
 
@@ -940,7 +940,7 @@ namespace ESMCI{
     // the calendars of the two times must be the same
     int rc;
     if (!Time::isSameCalendar(&time, &rc)) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SAMETYPE,
         "; The calendars of the two times to difference are not the same", &rc);
       return(rc);
     }
@@ -1063,11 +1063,11 @@ namespace ESMCI{
         if (this->calendar == ESMC_NULL_POINTER) {
           rc = ESMC_RC_PTR_NULL;
           if (!check_initialized)
-            ESMC_LogDefault.ESMC_LogMsgFoundError(rc,"; calendar is NULL", &rc);
+            ESMC_LogDefault.MsgFoundError(rc,"; calendar is NULL", &rc);
           return(rc);
         }
         rc = this->calendar->validate();
-        ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+        ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
         return(rc);
 
       // validate timezone only, not time values
@@ -1078,24 +1078,24 @@ namespace ESMCI{
     }
 
     rc = BaseTime::validate();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     if (this->calendar == ESMC_NULL_POINTER) {
       rc = ESMC_RC_PTR_NULL;
       if (!check_initialized)
-        ESMC_LogDefault.ESMC_LogMsgFoundError(rc, "; calendar is NULL", &rc);
+        ESMC_LogDefault.MsgFoundError(rc, "; calendar is NULL", &rc);
       return(rc);
     }
     rc = this->calendar->validate();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
 
     // earliest Gregorian date representable by the Fliegel algorithm
     //  is -4800/3/1 == -32044 Julian days == -2,768,601,600 core seconds
     if (calendar->calendarType == ESMC_CAL_GREGORIAN &&
         ESMC_FractionGetw() < -2768601600LL) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
                                  "; Gregorian time is before -4800/3/1", &rc);
       return(rc);
     }
@@ -1104,7 +1104,7 @@ namespace ESMCI{
     //  is -4712/3/1 == 60 Julian days == 5,184,000 core seconds
     if (calendar->calendarType == ESMC_CAL_JULIAN &&
         ESMC_FractionGetw() < 5184000LL) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
                                  "; Julian time is before -4712/3/1", &rc);
       return(rc);
     }
@@ -1293,18 +1293,18 @@ namespace ESMCI{
 
     // validate inputs
     if (timeString == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; timeString is NULL", &rc);
       return(rc);
     }
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; calendar is NULL", &rc);
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
                            "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
@@ -1322,7 +1322,7 @@ namespace ESMCI{
                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                               ESMC_NULL_POINTER, &sN, &sD);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // format everything except seconds
@@ -1388,12 +1388,12 @@ namespace ESMCI{
 
     // validate inputs
     if (dayOfWeek == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; dayOfWeek is NULL", &rc);
       return(rc);
     }
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; calendar is NULL", &rc);
       return(rc);
     }
@@ -1425,7 +1425,7 @@ namespace ESMCI{
         case ESMC_CAL_NOCALENDAR:
         case ESMC_CAL_CUSTOM:
         default:
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
                 "; calendarType is NOCALENDAR, CUSTOM, or unrecognized.", &rc);
           return(rc);
           break;
@@ -1450,7 +1450,7 @@ namespace ESMCI{
                                       ESMC_NULL_POINTER, &cal,
                                       ESMC_NULL_POINTER, &tz);
 
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // calculate the difference in days between the given date and
@@ -1465,7 +1465,7 @@ namespace ESMCI{
                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                      &diffDays);
 
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // calculate day of the week as simply modulo 7 from the reference date,
@@ -1504,18 +1504,18 @@ namespace ESMCI{
 
     // validate inputs
     if (midMonth == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; midMonth is NULL", &rc);
       return(rc);
     }
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; calendar is NULL", &rc);
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
                            "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
@@ -1528,7 +1528,7 @@ namespace ESMCI{
     ESMC_I8 yy_i8;
     int mm, dd;
     rc = Time::get((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // set start of this month
@@ -1549,7 +1549,7 @@ namespace ESMCI{
                                    ESMC_NULL_POINTER, &cal,
                                    ESMC_NULL_POINTER, &tz);
 
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // set end of this month (start of next month)
@@ -1574,7 +1574,7 @@ namespace ESMCI{
                                  ESMC_NULL_POINTER, &cal,
                                  ESMC_NULL_POINTER, &tz);
 
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // size of this month
@@ -1618,18 +1618,18 @@ namespace ESMCI{
 
     // validate inputs
     if (dayOfYear == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; dayOfYear is NULL", &rc);
       return(rc);
     }
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; calendar is NULL", &rc);
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
                            "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
@@ -1637,7 +1637,7 @@ namespace ESMCI{
     // get day of year as time interval between now and 1/1/yy
     TimeInterval yearDay;
     rc = Time::getDayOfYear(&yearDay);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // get difference in integer days
@@ -1648,7 +1648,7 @@ namespace ESMCI{
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       &diffDays);
 
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // day-of-year is one-based count; i.e. day-of-year for 1/1/yy is 1
@@ -1687,18 +1687,18 @@ namespace ESMCI{
 
     // validate inputs
     if (dayOfYear == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; dayOfYear is NULL", &rc);
       return(rc);
     }
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; calendar is NULL", &rc);
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
                            "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
@@ -1706,7 +1706,7 @@ namespace ESMCI{
     // get day of year as time interval between now and 1/1/yy
     TimeInterval yearDay;
     rc = Time::getDayOfYear(&yearDay);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // get difference in floating point days
@@ -1721,7 +1721,7 @@ namespace ESMCI{
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       &diffDays);
 
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // day-of-year is one-based count; i.e. day-of-year for 1/1/yy is 1
@@ -1757,18 +1757,18 @@ namespace ESMCI{
 
     // validate inputs
     if (dayOfYear == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; dayOfYear is NULL", &rc);
       return(rc);
     }
     if (this->calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; calendar is NULL", &rc);
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
                            "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
@@ -1778,7 +1778,7 @@ namespace ESMCI{
     int mm, dd;
     // TODO: use native C++ Get, not F90 entry point
     rc = Time::get((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // create time for 1/1/yy
@@ -1800,7 +1800,7 @@ namespace ESMCI{
                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                              &cal, ESMC_NULL_POINTER, &tz);
 
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
     // calculate difference between 1/1/yy and our (this) time

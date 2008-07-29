@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.4 2008/05/12 21:56:36 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.5 2008/07/29 01:34:48 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -34,14 +34,14 @@
 #include "ESMC_Start.h"
 
 // LogErr headers
-#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.4 2008/05/12 21:56:36 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.5 2008/07/29 01:34:48 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -97,7 +97,7 @@ ArrayBundle::ArrayBundle(
   ESMC_BaseSetName(NULL, "ArrayBundle");
    
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", rc);
     return;
   }
@@ -174,16 +174,16 @@ ArrayBundle *ArrayBundle::create(
   // call class constructor
   try{
     arraybundle = new ArrayBundle(arrayListArg, arrayCount, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
     // allocation error
-    ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::ArrayBundle.", rc);  
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::ArrayBundle.", rc);  
     return ESMC_NULL_POINTER;
   }
   
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", rc);
     return ESMC_NULL_POINTER;
   }
@@ -222,7 +222,7 @@ int ArrayBundle::destroy(
 
   // return with errors for NULL pointer
   if (arraybundle == ESMC_NULL_POINTER || *arraybundle == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to ArrayBundle", &rc);
     return rc;
   }
@@ -232,7 +232,7 @@ int ArrayBundle::destroy(
   *arraybundle = ESMC_NULL_POINTER;
   
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
     return rc;
   }
@@ -273,7 +273,7 @@ int ArrayBundle::print()const{
 
   // return with errors for NULL pointer
   if (this == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to ArrayBundle", &rc);
     return rc;
   }
@@ -342,7 +342,7 @@ int ArrayBundle::redistStore(
     if (dstArraybundle != NULL)
       dstArrayCount = dstArraybundle->getArrayCount();
     if (srcArrayCount != dstArrayCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- srcArraybundle and dstArraybundle contain different number"
         " of Arrays", &rc);
       return rc;
@@ -362,12 +362,12 @@ int ArrayBundle::redistStore(
     for (int i=1; i<srcArrayCount; i++){
       allPairsCongruent = Array::match(srcArray,
         srcArraybundle->getArrayList()[i], &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
       if (!allPairsCongruent) break;  // found mismatch
       allPairsCongruent = Array::match(dstArray,
         dstArraybundle->getArrayList()[i], &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
       if (!allPairsCongruent) break;  // found mismatch
     }
@@ -377,19 +377,19 @@ int ArrayBundle::redistStore(
       // src/dst Array pair
       localrc = Array::redistStore(srcArray, dstArray, routehandle,
         srcToDstTransposeMap, typekindFactor, factor);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
       // return successfully
       rc = ESMF_SUCCESS;
       return rc;
     }else{
       // unimplemented branch
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- non-congruent src/dst Array pairs are not yet supported", &rc);
       return rc;
     }
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
     return rc;
   }
@@ -443,7 +443,7 @@ int ArrayBundle::redist(
 
       if (srcArraybundle != NULL && dstArraybundle != NULL){
         if (srcArraybundle->getArrayCount() != dstArraybundle->getArrayCount()){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
             "- srcArraybundle and dstArraybundle contain different number"
             " of Arrays", &rc);
           return rc;
@@ -452,21 +452,21 @@ int ArrayBundle::redist(
           srcArray = srcArraybundle->getArrayList()[i];
           dstArray = dstArraybundle->getArrayList()[i];
           localrc = Array::redist(srcArray, dstArray, routehandle, checkflag);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
       }else if (srcArraybundle != NULL){
         for (int i=0; i<srcArraybundle->getArrayCount(); i++){
           srcArray = srcArraybundle->getArrayList()[i];
           localrc = Array::redist(srcArray, dstArray, routehandle, checkflag);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
       }else if (dstArraybundle != NULL){
         for (int i=0; i<dstArraybundle->getArrayCount(); i++){
           dstArray = dstArraybundle->getArrayList()[i];
           localrc = Array::redist(srcArray, dstArray, routehandle, checkflag);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
       }
@@ -475,12 +475,12 @@ int ArrayBundle::redist(
       return rc;
     }else{
       // unimplemented branch
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- only simple ESMC_ARRAYSPARSEMATMULHANDLE are supported", &rc);
       return rc;
     }
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
     return rc;
   }
@@ -519,7 +519,7 @@ int ArrayBundle::redistRelease(
   
   // implemented via sparseMatMul
   localrc = sparseMatMulRelease(routehandle);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
   // return successfully
@@ -572,7 +572,7 @@ int ArrayBundle::sparseMatMulStore(
     if (dstArraybundle != NULL)
       dstArrayCount = dstArraybundle->getArrayCount();
     if (srcArrayCount != dstArrayCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- srcArraybundle and dstArraybundle contain different number"
         " of Arrays", &rc);
       return rc;
@@ -592,12 +592,12 @@ int ArrayBundle::sparseMatMulStore(
     for (int i=1; i<srcArrayCount; i++){
       allPairsCongruent = Array::match(srcArray,
         srcArraybundle->getArrayList()[i], &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
       if (!allPairsCongruent) break;  // found mismatch
       allPairsCongruent = Array::match(dstArray,
         dstArraybundle->getArrayList()[i], &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
       if (!allPairsCongruent) break;  // found mismatch
     }
@@ -607,19 +607,19 @@ int ArrayBundle::sparseMatMulStore(
       // src/dst Array pair
       localrc = Array::sparseMatMulStore(srcArray, dstArray, routehandle,
         typekindFactors, factorList, factorListCount, factorIndexList);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
       // return successfully
       rc = ESMF_SUCCESS;
       return rc;
     }else{
       // unimplemented branch
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- non-congruent src/dst Array pairs are not yet supported", &rc);
       return rc;
     }
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
     return rc;
   }
@@ -679,7 +679,7 @@ int ArrayBundle::sparseMatMul(
 
       if (srcArraybundle != NULL && dstArraybundle != NULL){
         if (srcArraybundle->getArrayCount() != dstArraybundle->getArrayCount()){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
             "- srcArraybundle and dstArraybundle contain different number"
             " of Arrays", &rc);
           return rc;
@@ -689,7 +689,7 @@ int ArrayBundle::sparseMatMul(
           dstArray = dstArraybundle->getArrayList()[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
             zeroflag, checkflag);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
       }else if (srcArraybundle != NULL){
@@ -697,7 +697,7 @@ int ArrayBundle::sparseMatMul(
           srcArray = srcArraybundle->getArrayList()[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
             zeroflag, checkflag);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
       }else if (dstArraybundle != NULL){
@@ -705,7 +705,7 @@ int ArrayBundle::sparseMatMul(
           dstArray = dstArraybundle->getArrayList()[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
             zeroflag, checkflag);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
       }
@@ -714,12 +714,12 @@ int ArrayBundle::sparseMatMul(
       return rc;
     }else{
       // unimplemented branch
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- only simple ESMC_ARRAYSPARSEMATMULHANDLE are supported", &rc);
       return rc;
     }
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
     return rc;
   }
@@ -766,14 +766,14 @@ int ArrayBundle::sparseMatMulRelease(
 #ifdef XXEPROFILEPRINT
   // print XXE stream profile
   VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
   for (int pet=0; pet<petCount; pet++){
     if (pet==localPet){
       localrc = xxe->printProfile();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc))
       return rc;
     }
@@ -788,7 +788,7 @@ int ArrayBundle::sparseMatMulRelease(
   routehandle->ESMC_RouteHandleSetStorage(NULL);
   
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
     return rc;
   }
@@ -840,7 +840,7 @@ int ArrayBundle::serialize(
 
   // Check if buffer has enough free memory to hold object
   if ((*length - *offset) < sizeof(ArrayBundle)){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "Buffer too short to add an ArrayBundle object", &rc);
     return rc;
   }
@@ -849,7 +849,7 @@ int ArrayBundle::serialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize the ArrayBundle with all its Arrays
   r=*offset%8;
@@ -860,7 +860,7 @@ int ArrayBundle::serialize(
   *offset = (cp - buffer);
   for (int i=0; i<arrayCount; i++){
     localrc = arrayList[i]->serialize(buffer, length, offset);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
   }
   
@@ -905,7 +905,7 @@ int ArrayBundle::deserialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   localrc = ESMC_Base::ESMC_Deserialize(buffer, offset);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Deserialize the ArrayBundle with all its Arrays
   r=*offset%8;

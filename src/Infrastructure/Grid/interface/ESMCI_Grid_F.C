@@ -24,7 +24,7 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_DistGrid.h"
 #include "ESMC_RHandle.h"
-#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_Grid.h"
 
@@ -59,7 +59,7 @@ extern "C" {
 
     // call into C++
     localrc=(*grid)->commit();
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -76,7 +76,7 @@ extern "C" {
 
     // call into C++
     *ptr = ESMCI::Grid::create(&localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -129,7 +129,7 @@ extern "C" {
       *undistLBoundArg, *undistUBoundArg, *coordDimCountArg, *coordDimMapArg,
       ESMC_NOT_PRESENT_FILTER(indexflag),
       destroyDistgridPtr, destroyDELayoutPtr, &localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -166,7 +166,7 @@ extern "C" {
 
     // make sure status is correct
     if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
               "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
       return;
     }
@@ -209,12 +209,12 @@ extern "C" {
     if (*_distgridToGridMap != NULL){
       // Error check
       if ((*_distgridToGridMap)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- distgridToGridMap array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_distgridToGridMap)->extent[0] < distDimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- distgridToGridMap array must be of size = the distributed rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -229,12 +229,12 @@ extern "C" {
     if (*_coordDimCount != NULL){
       // Error check
       if ((*_coordDimCount)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- coordDimCount array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_coordDimCount)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- coordDimCount array must be of size = the rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -246,12 +246,12 @@ extern "C" {
     if (*_coordDimMap != NULL){
       // Error check
       if ((*_coordDimMap)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- coordDimMap array must be of rank 2", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if (((*_coordDimMap)->extent[0] < dimCount) || ((*_coordDimMap)->extent[1] < dimCount)){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- coordDimMap array must be of size = the rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -271,12 +271,12 @@ extern "C" {
     if (*_gridEdgeLWidth != NULL){
       // Error check
       if ((*_gridEdgeLWidth)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- gridEdgeLWidth array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_gridEdgeLWidth)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- gridEdgeLWidth array must be of size = the rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -288,12 +288,12 @@ extern "C" {
     if (*_gridEdgeUWidth != NULL){
       // Error check
       if ((*_gridEdgeUWidth)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- gridEdgeUWidth array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_gridEdgeUWidth)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- gridEdgeUWidth array must be of size = the rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -305,12 +305,12 @@ extern "C" {
     if (*_gridAlign != NULL){
       // Error check
       if ((*_gridAlign)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- gridAlign array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_gridAlign)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- gridAlign array must be of size = the rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -383,7 +383,7 @@ extern "C" {
     // call into C++
     localrc= (*grid)->addCoordArray(ESMC_NOT_PRESENT_FILTER(staggerloc),
       *staggerEdgeLWidthArg, *staggerEdgeUWidthArg, *staggerAlignArg);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -413,7 +413,7 @@ extern "C" {
     localrc= (*grid)->addCoordFromArrayList(ESMC_NOT_PRESENT_FILTER(staggerloc),
                     *arrayCount, arrayList, ESMC_NOT_PRESENT_FILTER(docopy),
             *staggerEdgeLWidthArg, *staggerEdgeUWidthArg, *staggerAlignArg);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -438,7 +438,7 @@ extern "C" {
     // call into C++
     localrc= (*grid)->setCoordArray(ESMC_NOT_PRESENT_FILTER(staggerloc),
       ESMC_NOT_PRESENT_FILTER(coord), *array, ESMC_NOT_PRESENT_FILTER(docopy));
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -501,7 +501,7 @@ extern "C" {
       *undistLBoundArg, *undistUBoundArg, *coordDimCountArg, *coordDimMapArg,
        ESMC_NOT_PRESENT_FILTER(indexflag), 
        destroyDistgridPtr, destroyDELayoutPtr);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -544,7 +544,7 @@ extern "C" {
     
     // Check grid status
     if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
          "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
       return;
     }
@@ -559,7 +559,7 @@ extern "C" {
    
     // coord
     if (ESMC_NOT_PRESENT_FILTER(_coord) == ESMC_NULL_POINTER) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- must pass in valid coord", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     } else {
@@ -584,19 +584,19 @@ extern "C" {
 
     // Input Error Checking
     if ((localDE < 0) || (localDE >=grid->getDistGrid()->getDELayout()->getLocalDeCount())) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- localDE outside range on this processor", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
 
    if ((coord < 0) || (coord >= dimCount)) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- coord outside of range for grid", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
 
    if ((staggerloc < 0) || (staggerloc >=  grid->getStaggerLocCount())) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- staggerloc outside of range for grid", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
@@ -609,11 +609,11 @@ extern "C" {
        (*_totalUBound != NULL)) { 
      docopy=ESMC_DATA_REF;
      array=grid->getCoordArray(&staggerloc, coord+1, &docopy, &localrc);
-     if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+     if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                               ESMC_NOT_PRESENT_FILTER(_rc))) return;
      
      if (array == ESMC_NULL_POINTER) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
              "- unset coord array", ESMC_NOT_PRESENT_FILTER(_rc));
        return;
      }
@@ -627,19 +627,19 @@ extern "C" {
     if (*_exclusiveLBound != NULL){
       // exclusiveLBound was provided -> do some error checking
       if ((*_exclusiveLBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- exclusiveLBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_exclusiveLBound)->extent[0] < coordDimCount[coord]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- exclusiveLBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
       // Fill in the bound array
       localrc=grid->getExclusiveLBound(localDE,lBnd);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
       // Map to coordinate ordering
@@ -654,19 +654,19 @@ extern "C" {
     if (*_exclusiveUBound != NULL){
       // exclusiveUBound was provided -> do some error checking
       if ((*_exclusiveUBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- exclusiveUBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_exclusiveUBound)->extent[0] < coordDimCount[coord]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- exclusiveUBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
       // Fill in the bound array
       localrc=grid->getExclusiveUBound(localDE,uBnd);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
       // Map to coordinate ordering
@@ -680,24 +680,24 @@ extern "C" {
     if (*_exclusiveCount != NULL){
       // exclusiveCount was provided -> do some error checking
       if ((*_exclusiveCount)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- exclusiveCount array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_exclusiveCount)->extent[0] < coordDimCount[coord]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- exclusiveCount must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
       // Get lower bound
       localrc=grid->getExclusiveLBound(localDE,lBnd);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
       // Get upper bound
       localrc=grid->getExclusiveUBound(localDE,uBnd);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
       // Fill in the output array
@@ -712,19 +712,19 @@ extern "C" {
     if (*_computationalLBound != NULL){
       // computationalLBound was provided -> do some error checking
       if ((*_computationalLBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- computationalLBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_computationalLBound)->extent[0] < coordDimCount[coord]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- computationalLBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
       // Fill in the output arra
       localrc=grid->getComputationalLBound(staggerloc,localDE,lBnd);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
       // Map to coordinate ordering
       for (int i=0; i<coordDimCount[coord]; i++) {
@@ -737,19 +737,19 @@ extern "C" {
     if (*_computationalUBound != NULL){
       // computationalUBound was provided -> do some error checking
       if ((*_computationalUBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- computationalUBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_computationalUBound)->extent[0] < coordDimCount[coord]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- computationalUBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
       // Fill in the output arra
       localrc=grid->getComputationalUBound(staggerloc,localDE,uBnd);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
       // Map to coordinate ordering
       for (int i=0; i<coordDimCount[coord]; i++) {
@@ -762,24 +762,24 @@ extern "C" {
     if (*_computationalCount != NULL){
       // computationalCount was provided -> do some error checking
       if ((*_computationalCount)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- computationalCount array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_computationalCount)->extent[0] < coordDimCount[coord]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- computationalCount must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
       // Get lower bound
       localrc=grid->getComputationalLBound(staggerloc,localDE,lBnd);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
       // Get upper bound
       localrc=grid->getComputationalUBound(staggerloc,localDE,uBnd);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
       // Fill in the output array
@@ -792,12 +792,12 @@ extern "C" {
     if (*_totalLBound != NULL){
       // totalLBound was provided -> do some error checking
       if ((*_totalLBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- totalLBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_totalLBound)->extent[0] < coordDimCount[coord]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- totalLBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -820,12 +820,12 @@ extern "C" {
     if (*_totalUBound != NULL){
       // totalUBound was provided -> do some error checking
       if ((*_totalUBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- totalUBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_totalUBound)->extent[0] < coordDimCount[coord]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- totalUBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -848,12 +848,12 @@ extern "C" {
     if (*_totalCount != NULL){
       // totalCount was provided -> do some error checking
       if ((*_totalCount)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- totalCount array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_totalCount)->extent[0] < coordDimCount[coord]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- totalCount must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -915,7 +915,7 @@ extern "C" {
 
     // Check grid status
    if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
           "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
@@ -938,19 +938,19 @@ extern "C" {
 
     // Input Error Checking
     if ((localDE < 0) || (localDE >=grid->getDistGrid()->getDELayout()->getLocalDeCount())) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- localDE outside range on this processor", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
 
    if ((staggerloc < 0) || (staggerloc >=  grid->getStaggerLocCount())) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- staggerloc outside of range for grid", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
 
    if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
           "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
@@ -962,19 +962,19 @@ extern "C" {
     if (*_exclusiveLBound != NULL){
       // exclusiveLBound was provided -> do some error checking
       if ((*_exclusiveLBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- exclusiveLBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_exclusiveLBound)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- exclusiveLBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
       // Fill in the output arra
       localrc=grid->getExclusiveLBound(localDE,(*_exclusiveLBound)->array);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
     }
 
@@ -984,19 +984,19 @@ extern "C" {
     if (*_exclusiveUBound != NULL){
       // exclusiveUBound was provided -> do some error checking
       if ((*_exclusiveUBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- exclusiveUBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_exclusiveUBound)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- exclusiveUBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
       // Fill in the output array
       localrc=grid->getExclusiveUBound(localDE,(*_exclusiveUBound)->array);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
     }
 
@@ -1006,24 +1006,24 @@ extern "C" {
     if (*_exclusiveCount != NULL){
       // exclusiveCount was provided -> do some error checking
       if ((*_exclusiveCount)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- exclusiveCount array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_exclusiveCount)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- exclusiveCount must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
       // Get lower bound
       localrc=grid->getExclusiveLBound(localDE,lBnd);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
       // Get upper bound
       localrc=grid->getExclusiveUBound(localDE,uBnd);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
       // Fill in the output array
@@ -1037,19 +1037,19 @@ extern "C" {
     if (*_computationalLBound != NULL){
       // computationalLBound was provided -> do some error checking
       if ((*_computationalLBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- computationalLBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_computationalLBound)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- computationalLBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
       // Fill in the output arra
       localrc=grid->getComputationalLBound(staggerloc,localDE,(*_computationalLBound)->array);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
     }
 
@@ -1058,19 +1058,19 @@ extern "C" {
     if (*_computationalUBound != NULL){
       // computationalUBound was provided -> do some error checking
       if ((*_computationalUBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- computationalUBound array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_computationalUBound)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- computationalUBound must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
       // Fill in the output arra
       localrc=grid->getComputationalUBound(staggerloc,localDE,(*_computationalUBound)->array);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
     }
@@ -1080,24 +1080,24 @@ extern "C" {
     if (*_computationalCount != NULL){
       // computationalCount was provided -> do some error checking
       if ((*_computationalCount)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- computationalCount array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_computationalCount)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- computationalCount must at least be the same rank as the the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
 
       // Get lower bound
       localrc=grid->getComputationalLBound(staggerloc,localDE,lBnd);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
       // Get upper bound
       localrc=grid->getComputationalUBound(staggerloc,localDE,uBnd);
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if(ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
       // Fill in the output array
@@ -1154,7 +1154,7 @@ extern "C" {
 
     // Check grid status
    if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
           "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
@@ -1178,13 +1178,13 @@ extern "C" {
 
 
    if ((staggerloc < 0) || (staggerloc >=  grid->getStaggerLocCount())) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- staggerloc outside of range for grid", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
 
    if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
           "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
@@ -1197,12 +1197,12 @@ extern "C" {
     if (*_computationalEdgeLWidth != NULL){
       // computationalEdgeLWidth was provided -> do some error checking
       if ((*_computationalEdgeLWidth)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- computationalEdgeLWidth array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_computationalEdgeLWidth)->extent[0] < distDimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- computationalEdgeLWidth must at least be the same dimCount as the grid's distgrid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -1226,12 +1226,12 @@ extern "C" {
     if (*_computationalEdgeUWidth != NULL){
       // computationalEdgeUWidth was provided -> do some error checking
       if ((*_computationalEdgeUWidth)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- computationalEdgeUWidth array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_computationalEdgeUWidth)->extent[0] < distDimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- computationalEdgeUWidth must at least be the same dimCount as the grid's distgrid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -1255,12 +1255,12 @@ extern "C" {
     if (*_lbound != NULL){
       // lbound was provided -> do some error checking
       if ((*_lbound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- lbound array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_lbound)->extent[0] < undistDimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- lbound must at least be the same dimCount as the undistributed part of the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -1280,12 +1280,12 @@ extern "C" {
     if (*_ubound != NULL){
       // ubound was provided -> do some error checking
       if ((*_ubound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- ubound array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_ubound)->extent[0] < undistDimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- ubound must at least be the same dimCount as the undistributed part of the grid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -1305,12 +1305,12 @@ extern "C" {
     if (*_minIndex != NULL){
       // computationalEdgeLWidth was provided -> do some error checking
       if ((*_minIndex)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- minIndex array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_minIndex)->extent[0] < distDimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- minIndex must at least be the same dimCount as the grid's distgrid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -1338,12 +1338,12 @@ extern "C" {
     if (*_maxIndex != NULL){
       // computationalEdgeLWidth was provided -> do some error checking
       if ((*_maxIndex)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- minIndex array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
       if ((*_maxIndex)->extent[0] < distDimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- minIndex must at least be the same dimCount as the grid's distgrid'", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
@@ -1381,7 +1381,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
     // call into C++
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Grid::destroy(ptr),
+        ESMC_LogDefault.MsgFoundError(ESMCI::Grid::destroy(ptr),
          ESMF_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc));
   } 
 
@@ -1408,19 +1408,19 @@ extern "C" {
 
     // make sure input variables are present
     if (*gridEdgeLWidthOut == NULL){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- gridEdgeLWidthOut must be present", ESMC_NOT_PRESENT_FILTER(rc));
         return;
       }
 
     if (*gridEdgeUWidthOut == NULL){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- gridEdgeUWidthOut must be present", ESMC_NOT_PRESENT_FILTER(rc));
         return;
       }
 
     if (*gridAlignOut == NULL){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- gridAlignOut must be present", ESMC_NOT_PRESENT_FILTER(rc));
         return;
       }
@@ -1430,7 +1430,7 @@ extern "C" {
    localrc=setGridDefaultsLUA(*dimCount,
      *gridEdgeLWidthIn, *gridEdgeUWidthIn, *gridAlignIn,
      (*gridEdgeLWidthOut)->array, (*gridEdgeUWidthOut)->array, (*gridAlignOut)->array);
-   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+   ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                    ESMC_NOT_PRESENT_FILTER(rc));
 
 
@@ -1446,7 +1446,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*grid)->serialize(
+    ESMC_LogDefault.MsgFoundError((*grid)->serialize(
       buf, length, offset),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -1460,7 +1460,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     *grid = new ESMCI::Grid;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*grid)->deserialize(
+    ESMC_LogDefault.MsgFoundError((*grid)->deserialize(
       buf, offset),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -1479,7 +1479,7 @@ extern "C" {
 
     // if null return error
     if ((ptr1==NULL) || (ptr2==NULL)) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- both grids must be present for comparison", ESMC_NOT_PRESENT_FILTER(rc));
         return;
 
@@ -1511,7 +1511,7 @@ extern "C" {
 
     // Check status
    if ((*_grid)->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
           "- grid status below ESMC_GRIDSTATUS_SHAPE_READY ", ESMC_NOT_PRESENT_FILTER(rc));
         return;
     }
@@ -1636,7 +1636,7 @@ extern "C" {
 
     // Check grid status
    if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_WRONG,
           "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
@@ -1647,13 +1647,13 @@ extern "C" {
 
     // Input Error Checking
     if ((*_localDE < 0) || (*_localDE >=grid->getDistGrid()->getDELayout()->getLocalDeCount())) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- localDE outside range on this processor", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }
 
    if ((*_staggerloc < 0) || (*_staggerloc >=  grid->getStaggerLocCount())) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
           "- staggerloc outside of range for grid", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
     }

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.9 2008/07/24 17:08:32 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.10 2008/07/29 01:34:49 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -26,7 +26,7 @@
 
 #include "ESMCI_DistGrid.h"
 
-#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 //------------------------------------------------------------------------------
 //BOP
@@ -73,7 +73,7 @@ extern "C" {
       *deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, *connectionTransList, opt_delayout, opt_vm,
       &localrc);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -103,7 +103,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, *connectionTransList, opt_delayout, opt_vm,
       &localrc);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -132,7 +132,7 @@ extern "C" {
       *deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, *connectionTransList, *fastAxis, opt_vm,
       &localrc);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -166,7 +166,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, *connectionTransList, opt_delayout, opt_vm,
       &localrc);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -176,7 +176,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::DistGrid::destroy(ptr),
+    ESMC_LogDefault.MsgFoundError(ESMCI::DistGrid::destroy(ptr),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -210,18 +210,18 @@ extern "C" {
     if (*minIndexPDimPPatch != NULL){
       // minIndexPDimPPatch was provided -> do some error checking
       if ((*minIndexPDimPPatch)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- minIndexPDimPPatch array must be of rank 2", rc);
         return;
       }
       if ((*minIndexPDimPPatch)->extent[0] < (*ptr)->getDimCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of minIndexPDimPPatch array must be of size 'dimCount'",
           rc);
         return;
       }
       if ((*minIndexPDimPPatch)->extent[1] < (*ptr)->getPatchCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dim of minIndexPDimPPatch array must be of size 'patchCount'",
           rc);
         return;
@@ -241,18 +241,18 @@ extern "C" {
     if (*maxIndexPDimPPatch != NULL){
       // maxIndexPDimPPatch was provided -> do some error checking
       if ((*maxIndexPDimPPatch)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- maxIndexPDimPPatch array must be of rank 2", rc);
         return;
       }
       if ((*maxIndexPDimPPatch)->extent[0] < (*ptr)->getDimCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of maxIndexPDimPPatch array must be of size 'dimCount'",
           rc);
         return;
       }
       if ((*maxIndexPDimPPatch)->extent[1] < (*ptr)->getPatchCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dim of maxIndexPDimPPatch array must be of size 'patchCount'",
           rc);
         return;
@@ -272,12 +272,12 @@ extern "C" {
     if (*elementCountPPatch != NULL){
       // elementCountPPatch was provided -> do some error checking
       if ((*elementCountPPatch)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- elementCountPPatch array must be of rank 1", rc);
         return;
       }
       if ((*elementCountPPatch)->extent[0] < (*ptr)->getPatchCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of elementCountPPatch array must be of size 'patchCount'",
           rc);
         return;
@@ -290,18 +290,18 @@ extern "C" {
     if (*minIndexPDimPDe != NULL){
       // minIndexPDimPDe was provided -> do some error checking
       if ((*minIndexPDimPDe)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- minIndexPDimPDe array must be of rank 2", rc);
         return;
       }
       if ((*minIndexPDimPDe)->extent[0] < (*ptr)->getDimCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of minIndexPDimPDe array must be of size 'dimCount'",
           rc);
         return;
       }
       if ((*minIndexPDimPDe)->extent[1] < (*ptr)->getDELayout()->getDeCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dim of minIndexPDimPDe array must be of size 'deCount'",
           rc);
         return;
@@ -321,18 +321,18 @@ extern "C" {
     if (*maxIndexPDimPDe != NULL){
       // maxIndexPDimPDe was provided -> do some error checking
       if ((*maxIndexPDimPDe)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- maxIndexPDimPDe array must be of rank 2", rc);
         return;
       }
       if ((*maxIndexPDimPDe)->extent[0] < (*ptr)->getDimCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of maxIndexPDimPDe array must be of size 'dimCount'",
           rc);
         return;
       }
       if ((*maxIndexPDimPDe)->extent[1] < (*ptr)->getDELayout()->getDeCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dim of maxIndexPDimPDe array must be of size 'deCount'",
           rc);
         return;
@@ -352,12 +352,12 @@ extern "C" {
     if (*elementCountPDe != NULL){
       // elementCountPDe was provided -> do some error checking
       if ((*elementCountPDe)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- elementCountPDe array must be of rank 1", rc);
         return;
       }
       if ((*elementCountPDe)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of elementCountPDe array must be of size 'deCount'",
           rc);
         return;
@@ -370,12 +370,12 @@ extern "C" {
     if (*patchListPDe != NULL){
       // patchListPDe was provided -> do some error checking
       if ((*patchListPDe)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- patchListPDe array must be of rank 1", rc);
         return;
       }
       if ((*patchListPDe)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of patchListPDe array must be of size 'deCount'", rc);
         return;
       }
@@ -387,19 +387,19 @@ extern "C" {
     if (*indexCountPDimPDe != NULL){
       // indexCountPDimPDe was provided -> do some error checking
       if ((*indexCountPDimPDe)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- indexCountPDimPDe array must be of rank 2", rc);
         return;
       }
       if ((*indexCountPDimPDe)->extent[0] < (*ptr)->getDimCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of indexCountPDimPDe array must be of size 'dimCount'",
           rc);
         return;
       }
       if ((*indexCountPDimPDe)->extent[1] <
         (*ptr)->getDELayout()->getDeCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dim of indexCountPDimPDe array must be of size 'deCount'", rc);
         return;
       }
@@ -431,7 +431,7 @@ extern "C" {
     // check input values
     int localDeCount = (*ptr)->getDELayout()->getLocalDeCount();
     if (localDe < 0 || localDe > localDeCount-1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- Specified local DE out of bounds", rc);
       return;
     }
@@ -439,14 +439,14 @@ extern "C" {
     if (*seqIndexList != NULL){
       // seqIndexList provided -> error checking
       if ((*seqIndexList)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- seqIndexList array must be of rank 1", rc);
         return;
       }
       if ((*seqIndexList)->extent[0] <
         ((*ptr)->getElementCountPDe())[(*ptr)->getDELayout()->
         getLocalDeList()[localDe]]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of seqIndexList array size insufficiently", rc);
         return;
       }
@@ -458,7 +458,7 @@ extern "C" {
         (*ptr)->getArbSeqIndexListPLocalDe(localDe, 1, &localrc);
       if (arbSeqIndexListPLocalDe){
         // arbitrary seq indices -> fill in arbSeqIndexListPLocalDe
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           ESMC_NOT_PRESENT_FILTER(rc))) return;
         memcpy((*seqIndexList)->array, arbSeqIndexListPLocalDe,
           sizeof(int) * arbSeqIndexCountPCollPLocalDe[0][localDe]);
@@ -514,17 +514,17 @@ extern "C" {
       // getIndexListPDimPLocalDe() checks localDe and dim for range!
       const int *indexListPtr =
         (*ptr)->getIndexListPDimPLocalDe(localDe, dim+1, &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc))) return;
       if ((*indexList)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- indexList array must be of rank 1", rc);
         return;
       }
       if ((*indexList)->extent[0] <
         ((*ptr)->getIndexCountPDimPDe())[(*ptr)->getDELayout()->
         getLocalDeList()[localDe] * (*ptr)->getDimCount()+dim]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of indexList array size insufficiently", rc);
         return;
       }
@@ -545,7 +545,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     bool matchBool = ESMCI::DistGrid::match(*ptr1, *ptr2, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (matchBool) *matchResult = ESMF_TRUE;
     else *matchResult = ESMF_FALSE;
@@ -557,7 +557,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->print(),
+    ESMC_LogDefault.MsgFoundError((*ptr)->print(),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -568,7 +568,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->validate(),
+    ESMC_LogDefault.MsgFoundError((*ptr)->validate(),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -583,7 +583,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(
+    ESMC_LogDefault.MsgFoundError(
       ESMCI::DistGrid::connection(*connection, *patchIndexA,
       *patchIndexB, *positionVector, *orientationVector, *repetitionVector), 
       ESMF_ERR_PASSTHRU,
@@ -597,7 +597,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(
+    ESMC_LogDefault.MsgFoundError(
       (*ptr)->setSeqIndexCollocation(*seqIndexCollocation),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -611,7 +611,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(
+    ESMC_LogDefault.MsgFoundError(
       (*ptr)->setArbSeqIndex(*arbSeqIndex, *localDe, *collocation),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));

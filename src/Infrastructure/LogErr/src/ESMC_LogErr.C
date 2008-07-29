@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.79 2008/04/05 03:38:43 cdeluca Exp $
+// $Id: ESMC_LogErr.C,v 1.80 2008/07/29 01:34:52 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 // associated class definition file
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMF_ErrReturnCodes.inc"
 
 // include array of error messages
@@ -50,7 +50,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.79 2008/04/05 03:38:43 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.80 2008/07/29 01:34:52 rosalind Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -61,7 +61,7 @@ char listOfFortFileNames[20][32];
 //
 // !INTERFACE:
 
-bool ESMC_Log::ESMC_LogAllocError(
+bool ESMC_Log::AllocError(
 
 // !RETURN VALUE:
 //  none
@@ -76,7 +76,7 @@ bool ESMC_Log::ESMC_LogAllocError(
 {
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-    ESMC_LogWrite(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR);
+    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR);
     result=true;
     return result;
 }
@@ -88,7 +88,7 @@ bool ESMC_Log::ESMC_LogAllocError(
 // !INTERFACE:
 
 
-bool ESMC_Log::ESMC_LogAllocError(
+bool ESMC_Log::AllocError(
 
 // !RETURN VALUE:
 //  none
@@ -105,7 +105,7 @@ bool ESMC_Log::ESMC_LogAllocError(
 {
 	bool result=false;
 	if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-	ESMC_LogWrite(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR,LINE,FILE,
+	Write(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR,LINE,FILE,
 	method);
 	result=true;
 	return result;
@@ -117,7 +117,7 @@ bool ESMC_Log::ESMC_LogAllocError(
 //
 // !INTERFACE:
 
-bool ESMC_Log::ESMC_LogMsgAllocError(
+bool ESMC_Log::MsgAllocError(
 
 // !RETURN VALUE:
 //  none
@@ -135,7 +135,7 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
     char logMsg[ESMF_MAXSTR];
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
     strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM));
-    ESMC_LogWrite(strcat(logMsg,msg),ESMC_LOG_ERROR);
+    Write(strcat(logMsg,msg),ESMC_LOG_ERROR);
     result=true;
     return result;
 }
@@ -147,7 +147,7 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 // !INTERFACE:
 
 
-bool ESMC_Log::ESMC_LogMsgAllocError(
+bool ESMC_Log::MsgAllocError(
 
 // !RETURN VALUE:
 //  none
@@ -167,7 +167,7 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
     char logMsg[ESMF_MAXSTR];
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
     strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM));
-    ESMC_LogWrite(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
+    Write(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
     result=true;
     return result;
 }
@@ -175,11 +175,11 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 //
 //
 //BOP
-// !IROUTINE:  ESMC_LogOpen -  opens a Log object
+// !IROUTINE:  Open -  opens a Log object
 //
 // !INTERFACE:
 
-void ESMC_Log::ESMC_LogOpen(
+void ESMC_Log::Open(
 //
 // !RETURN VALUE:
 //   none
@@ -259,11 +259,11 @@ int ESMC_LogFinalize(
 
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogClose - closes log file. 
+// !IROUTINE: Close - closes log file. 
 //
 // !INTERFACE:
 
-void ESMC_Log::ESMC_LogClose(
+void ESMC_Log::Close(
 //
 // ! RETURN VALUE:
 //    none
@@ -284,11 +284,11 @@ void ESMC_Log::ESMC_LogClose(
 
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogWrite - write to log file
+// !IROUTINE: Write - write to log file
 //
 // !INTERFACE:
 
-bool ESMC_Log::ESMC_LogWrite(
+bool ESMC_Log::Write(
 
 // !RETURN VALUE:
 //  bool
@@ -316,11 +316,11 @@ bool ESMC_Log::ESMC_LogWrite(
 
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogWrite - write to log file
+// !IROUTINE: Write - write to log file
 //
 // !INTERFACE:
 
-bool ESMC_Log::ESMC_LogWrite(
+bool ESMC_Log::Write(
 
 // !RETURN VALUE:
 //  bool
@@ -351,11 +351,11 @@ bool ESMC_Log::ESMC_LogWrite(
 
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogFoundError - LogFoundError
+// !IROUTINE: FoundError - LogFoundError
 //
 // !INTERFACE:
 
-bool ESMC_Log::ESMC_LogFoundError(
+bool ESMC_Log::FoundError(
 
 // !RETURN VALUE:
 //  bool
@@ -381,7 +381,7 @@ bool ESMC_Log::ESMC_LogFoundError(
         // this means that rcToCheck was _not_ in the errorMask -> flag error
         result=true;
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
-        ESMC_LogWrite(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR);
+        Write(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR);
       }
     }
     return result;
@@ -389,12 +389,12 @@ bool ESMC_Log::ESMC_LogFoundError(
 
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogFoundError - LogFoundError
+// !IROUTINE: FoundError - LogFoundError
 //
 // !INTERFACE:
 
 
-bool ESMC_Log::ESMC_LogFoundError(
+bool ESMC_Log::FoundError(
 
 // !RETURN VALUE:
 //  bool
@@ -423,7 +423,7 @@ bool ESMC_Log::ESMC_LogFoundError(
         // this means that rcToCheck was _not_ in the errorMask -> flag error
         result=true;
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
-        ESMC_LogWrite(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR,LINE,FILE,method);
+        Write(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR,LINE,FILE,method);
       }
     }
     return result;
@@ -431,11 +431,11 @@ bool ESMC_Log::ESMC_LogFoundError(
 
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogMsgFoundError - LogMsgFoundError
+// !IROUTINE: MsgFoundError - LogMsgFoundError
 //
 // !INTERFACE:
 
-bool ESMC_Log::ESMC_LogMsgFoundError(
+bool ESMC_Log::MsgFoundError(
 
 // !RETURN VALUE:
 //  bool
@@ -465,7 +465,7 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
         char logMsg[ESMF_MAXSTR];
         strcpy(logMsg, ESMC_LogGetErrMsg(rcToCheck));
-        ESMC_LogWrite(strcat(logMsg,msg),ESMC_LOG_ERROR);
+        Write(strcat(logMsg,msg),ESMC_LOG_ERROR);
       }
     }
     return result;
@@ -473,11 +473,11 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogMsgFoundError - LogMsgFoundError
+// !IROUTINE: MsgFoundError - LogMsgFoundError
 //
 // !INTERFACE:
 
-bool ESMC_Log::ESMC_LogMsgFoundError(
+bool ESMC_Log::MsgFoundError(
 
 // !RETURN VALUE:
 //  bool
@@ -505,13 +505,13 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
         if (errorMask[i] == rcToCheck) break;
       if (i==errorMaskCount){
         // this means that rcToCheck was _not_ in the errorMask -> flag error
-        result=true;   // TODO: if this line moved to after ESMC_LogWrite()
+        result=true;   // TODO: if this line moved to after Write()
                        // below, will crash ESMF_TimeIntervalUTest.F90 on 
                        // Linux longs 2.4.20-31.9, Lahey lf95 6.0 optimized
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
         char logMsg[ESMF_MAXSTR];
         strcpy(logMsg, ESMC_LogGetErrMsg(rcToCheck));
-        ESMC_LogWrite(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
+        Write(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
       }
     }
     return result;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Util_F.C,v 1.5 2008/04/05 03:39:02 cdeluca Exp $
+// $Id: ESMC_Util_F.C,v 1.6 2008/07/29 01:34:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -24,12 +24,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ESMC_Base.h"
-#include "ESMC_LogErr.h"  // will this work?
+#include "ESMCI_LogErr.h"  // will this work?
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util_F.C,v 1.5 2008/04/05 03:39:02 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Util_F.C,v 1.6 2008/07/29 01:34:55 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -67,7 +67,7 @@ extern "C" {
 
   if (!string) {
     //printf("uninitialized String object\n");
-    ESMC_LogDefault.ESMC_LogWrite("String object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("String object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
   }
@@ -75,7 +75,7 @@ extern "C" {
   int fixedpart = clen + 1;
   if ((*length - *offset) < fixedpart) {
          
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                              "Buffer too short to add a String object", rc);
        return;
  

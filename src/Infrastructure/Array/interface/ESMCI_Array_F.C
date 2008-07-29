@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.12 2008/07/21 23:25:49 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.13 2008/07/29 01:34:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 
 #include "ESMCI_Array.h"
 
-#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 //------------------------------------------------------------------------------
 //BOP
@@ -71,7 +71,7 @@ extern "C" {
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
       ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),
       *undistLBoundArg, *undistUBoundArg, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set the name in the Array object
     char *cname = ESMC_F90toCstring(name, *len_name);
@@ -79,7 +79,7 @@ extern "C" {
       (*ptr)->setName(cname);
       delete [] cname;
     }else if(*len_name){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
         "- Not a valid string", ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
@@ -109,7 +109,7 @@ extern "C" {
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
       ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),
       *undistLBoundArg, *undistUBoundArg, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set the name in the Array object
     char *cname = ESMC_F90toCstring(name, *len_name);
@@ -117,7 +117,7 @@ extern "C" {
       (*ptr)->setName(cname);
       delete [] cname;
     }else if(*len_name){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
         "- Not a valid string", ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
@@ -132,7 +132,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     *arrayOut = ESMCI::Array::create(*ptr, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
   
@@ -142,7 +142,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::destroy(ptr),
+    ESMC_LogDefault.MsgFoundError(ESMCI::Array::destroy(ptr),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -189,7 +189,7 @@ extern "C" {
     if (*len_localArrayList != 0){
       // opt_localArrayList was provided
       if (*len_localArrayList < localDeCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- opt_localArrayList must provide localDeCount elements", rc);
         return;
       }
@@ -201,12 +201,12 @@ extern "C" {
     if (*distgridToArrayMap != NULL){
       // distgridToArrayMap was provided -> do some error checking
       if ((*distgridToArrayMap)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- distgridToArrayMap array must be of rank 1", rc);
         return;
       }
       if ((*distgridToArrayMap)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of distgridToArrayMap array must be of size "
           "'dimCount'", rc);
         return;
@@ -219,12 +219,12 @@ extern "C" {
     if (*distgridToPackedArrayMap != NULL){
       // distgridToPackedArrayMap was provided -> do some error checking
       if ((*distgridToPackedArrayMap)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- distgridToPackedArrayMap array must be of rank 1", rc);
         return;
       }
       if ((*distgridToPackedArrayMap)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of distgridToPackedArrayMap array must be of size "
           "'dimCount'", rc);
         return;
@@ -237,12 +237,12 @@ extern "C" {
     if (*arrayToDistGridMap != NULL){
       // arrayToDistGridMap was provided -> do some error checking
       if ((*arrayToDistGridMap)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- arrayToDistGridMap array must be of rank 1", rc);
         return;
       }
       if ((*arrayToDistGridMap)->extent[0] < (*ptr)->getRank()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of arrayToDistGridMap array must be of size 'rank'",
           rc);
         return;
@@ -256,12 +256,12 @@ extern "C" {
     if (*undistLBound != NULL){
       //  undistLBound was provided -> do some error checking
       if ((*undistLBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- undistLBound array must be of rank 1", rc);
         return;
       }
       if ((*undistLBound)->extent[0] < (*ptr)->getTensorCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- undistLBound array must at least be of size tensorCount", rc);
         return;
       }
@@ -275,12 +275,12 @@ extern "C" {
     if (*undistUBound != NULL){
       //  undistUBound was provided -> do some error checking
       if ((*undistUBound)->dimCount != 1){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- undistUBound array must be of rank 1", rc);
         return;
       }
       if ((*undistUBound)->extent[0] < (*ptr)->getTensorCount()){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- undistUBound array must at least be of size tensorCount", rc);
         return;
       }
@@ -295,17 +295,17 @@ extern "C" {
     if (*exclusiveLBound != NULL){
       // exclusiveLBound was provided -> do some error checking
       if ((*exclusiveLBound)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- exclusiveLBound array must be of rank 2", rc);
         return;
       }
       if ((*exclusiveLBound)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of exclusiveLBound must be of size 'dimCount'", rc);
         return;
       }
       if ((*exclusiveLBound)->extent[1] < localDeCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of exclusiveLBound must be of size 'localDeCount'",
           rc);
         return;
@@ -322,17 +322,17 @@ extern "C" {
     if (*exclusiveUBound != NULL){
       // exclusiveUBound was provided -> do some error checking
       if ((*exclusiveUBound)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- exclusiveUBound array must be of rank 2", rc);
         return;
       }
       if ((*exclusiveUBound)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of exclusiveUBound must be of size 'dimCount'", rc);
         return;
       }
       if ((*exclusiveUBound)->extent[1] < localDeCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of exclusiveUBound must be of size 'localDeCount'",
           rc);
         return;
@@ -349,17 +349,17 @@ extern "C" {
     if (*computationalLBound != NULL){
       // computationalLBound was provided -> do some error checking
       if ((*computationalLBound)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- computationalLBound array must be of rank 2", rc);
         return;
       }
       if ((*computationalLBound)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of computationalLBound must be of size 'dimCount'", rc);
         return;
       }
       if ((*computationalLBound)->extent[1] < localDeCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dim of computationalLBound must be of size 'localDeCount'", 
           rc);
         return;
@@ -379,17 +379,17 @@ extern "C" {
     if (*computationalUBound != NULL){
       // computationalUBound was provided -> do some error checking
       if ((*computationalUBound)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- computationalUBound array must be of rank 2", rc);
         return;
       }
       if ((*computationalUBound)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of computationalUBound must be of size 'dimCount'", rc);
         return;
       }
       if ((*computationalUBound)->extent[1] < localDeCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dim of computationalUBound must be of size 'localDeCount'",
           rc);
         return;
@@ -409,17 +409,17 @@ extern "C" {
     if (*totalLBound != NULL){
       // totalLBound was provided -> do some error checking
       if ((*totalLBound)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- totalLBound array must be of rank 2", rc);
         return;
       }
       if ((*totalLBound)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of totalLBound must be of size 'dimCount'", rc);
         return;
       }
       if ((*totalLBound)->extent[1] < localDeCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of totalLBound must be of size 'localDeCount'",
           rc);
         return;
@@ -436,17 +436,17 @@ extern "C" {
     if (*totalUBound != NULL){
       // totalUBound was provided -> do some error checking
       if ((*totalUBound)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- totalUBound array must be of rank 2", rc);
         return;
       }
       if ((*totalUBound)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of totalUBound must be of size 'dimCount'", rc);
         return;
       }
       if ((*totalUBound)->extent[1] < localDeCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of totalUBound must be of size 'localDeCount'",
           rc);
         return;
@@ -463,18 +463,18 @@ extern "C" {
     if (*computationalLWidth != NULL){
       // computationalLWidth was provided -> do some error checking
       if ((*computationalLWidth)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- computationalLWidth array must be of rank 2", rc);
         return;
       }
       if ((*computationalLWidth)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of computationalLWidth must be of size 'dimCount'",
           rc);
         return;
       }
       if ((*computationalLWidth)->extent[1] < localDeCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of computationalLWidth must be of size"
           " 'localDeCount'", rc);
         return;
@@ -490,18 +490,18 @@ extern "C" {
     if (*computationalUWidth != NULL){
       // computationalUWidth was provided -> do some error checking
       if ((*computationalUWidth)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- computationalUWidth array must be of rank 2", rc);
         return;
       }
       if ((*computationalUWidth)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of computationalUWidth must be of size 'dimCount'",
           rc);
         return;
       }
       if ((*computationalUWidth)->extent[1] < localDeCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of computationalUWidth must be of size"
           " 'localDeCount'", rc);
         return;
@@ -517,18 +517,18 @@ extern "C" {
     if (*totalLWidth != NULL){
       // totalLWidth was provided -> do some error checking
       if ((*totalLWidth)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- totalLWidth array must be of rank 2", rc);
         return;
       }
       if ((*totalLWidth)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of totalLWidth must be of size 'dimCount'",
           rc);
         return;
       }
       if ((*totalLWidth)->extent[1] < localDeCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of totalLWidth must be of size"
           " 'localDeCount'", rc);
         return;
@@ -544,18 +544,18 @@ extern "C" {
     if (*totalUWidth != NULL){
       // totalUWidth was provided -> do some error checking
       if ((*totalUWidth)->dimCount != 2){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- totalUWidth array must be of rank 2", rc);
         return;
       }
       if ((*totalUWidth)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of totalUWidth must be of size 'dimCount'",
           rc);
         return;
       }
       if ((*totalUWidth)->extent[1] < localDeCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of totalUWidth must be of size"
           " 'localDeCount'", rc);
         return;
@@ -577,7 +577,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->print(),
+    ESMC_LogDefault.MsgFoundError((*ptr)->print(),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -588,7 +588,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->validate(),
+    ESMC_LogDefault.MsgFoundError((*ptr)->validate(),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -602,7 +602,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::redistStore(
+    ESMC_LogDefault.MsgFoundError(ESMCI::Array::redistStore(
       *srcArray, *dstArray, routehandle, *srcToDstTransposeMap, *typekind,
       factor),
       ESMF_ERR_PASSTHRU,
@@ -617,7 +617,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::redistStore(
+    ESMC_LogDefault.MsgFoundError(ESMCI::Array::redistStore(
       *srcArray, *dstArray, routehandle, *srcToDstTransposeMap),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -630,7 +630,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::redist(
+    ESMC_LogDefault.MsgFoundError(ESMCI::Array::redist(
       *srcArray, *dstArray, routehandle, *checkflag),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -645,7 +645,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMulStore(
+    ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, routehandle, *typekind, factorList,
       *factorListCount, *factorIndexList),
       ESMF_ERR_PASSTHRU,
@@ -659,7 +659,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMulStore(
+    ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, routehandle),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -673,7 +673,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Array::sparseMatMul(
+    ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMul(
       *srcArray, *dstArray, routehandle, *zeroflag, *checkflag),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -691,7 +691,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->gather(
+    ESMC_LogDefault.MsgFoundError((*array)->gather(
       farray, *typekind, *rank, counts, ESMC_NOT_PRESENT_FILTER(patch),
       *rootPet, opt_vm),
       ESMF_ERR_PASSTHRU,
@@ -709,7 +709,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->gather(
+    ESMC_LogDefault.MsgFoundError((*array)->gather(
       NULL, ESMF_NOKIND, 0, NULL, ESMC_NOT_PRESENT_FILTER(patch),
       *rootPet, opt_vm),
       ESMF_ERR_PASSTHRU,
@@ -728,7 +728,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->scatter(
+    ESMC_LogDefault.MsgFoundError((*array)->scatter(
       farray, *typekind, *rank, counts, ESMC_NOT_PRESENT_FILTER(patch),
       *rootPet, opt_vm),
       ESMF_ERR_PASSTHRU,
@@ -746,7 +746,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->scatter(
+    ESMC_LogDefault.MsgFoundError((*array)->scatter(
       NULL, ESMF_NOKIND, 0, NULL, ESMC_NOT_PRESENT_FILTER(patch),
       *rootPet, opt_vm),
       ESMF_ERR_PASSTHRU,
@@ -767,12 +767,12 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vectorDim)!=ESMC_NULL_POINTER)
       (*array)->setVectorDim(*vectorDim);
     // Call into the C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->setComputationalLWidth(
+    ESMC_LogDefault.MsgFoundError((*array)->setComputationalLWidth(
       *computationalLWidthArg),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // Call into the C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->setComputationalUWidth(
+    ESMC_LogDefault.MsgFoundError((*array)->setComputationalUWidth(
       *computationalUWidthArg),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -788,20 +788,20 @@ extern "C" {
 
     // check that tensorIndexArgs was provided    
     if (*tensorIndexArg == NULL){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
         "- Must provide tensorIndexArg-", rc);
       return;
     }
     
     // check that tensorIndexArg is within limits -> construct tensorIndex
     if ((*tensorIndexArg)->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- tensorIndexArg array must be of rank 1", rc);
       return;
     }
     int tensorCount = (*array)->getTensorCount();
     if ((*tensorIndexArg)->extent[0] != tensorCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- first dim of tensorIndexArg array must be of size tensorCount", rc);
       return;
     }
@@ -812,7 +812,7 @@ extern "C" {
       tensorIndex *= undistUBound[i] - undistLBound[i] + 1;
       if ((*tensorIndexArg)->array[i] < undistLBound[i] ||
         (*tensorIndexArg)->array[i] > undistUBound[i]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
           "- tensorIndexArg entry is out of range", rc);
         return;
       }
@@ -834,7 +834,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->serialize(
+    ESMC_LogDefault.MsgFoundError((*array)->serialize(
       buf, length, offset),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -848,7 +848,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     *array = new ESMCI::Array;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*array)->deserialize(
+    ESMC_LogDefault.MsgFoundError((*array)->deserialize(
       buf, offset),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -884,7 +884,7 @@ extern "C" {
     *ptr = ESMC_newArrayCreate(opt_larray, opt_haloWidth, opt_deCount, *rootPET,
       &localrc);
     // Use LogErr to handle return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -892,7 +892,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_newarraydestroy()"
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_newArrayDestroy(ptr),
+    ESMC_LogDefault.MsgFoundError(ESMC_newArrayDestroy(ptr),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -901,7 +901,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_newarrayprint()"
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayPrint(),
+    ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayPrint(),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -918,7 +918,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_newarrayget()"
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayGet(
+    ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayGet(
       ESMC_NOT_PRESENT_FILTER(rank), ESMC_NOT_PRESENT_FILTER(delayout),
       localArrays, *len_localArrays, globalFullLBound, len_globalFullLBound,
       globalFullUBound, len_globalFullUBound, 
@@ -944,7 +944,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayScatter(
+    ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayScatter(
       opt_larray, *rootPET, opt_vm),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -974,7 +974,7 @@ extern "C" {
     }
 #ifndef ESMF_NO_INITIALIZERS
     if (*commh != ESMC_NULL_POINTER){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       " - a previously used commhandle has not been deleted",
       ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
@@ -985,7 +985,7 @@ extern "C" {
     (*commh)->commhandleCount = 0;  // reset
     (*commh)->pthidCount = 0;       // reset
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayScatter(
+    ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayScatter(
       opt_larray, *rootPET, *commh, opt_vm),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -1005,7 +1005,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayScatter(
+    ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayScatter(
       opt_larray, *rootPET, *de, opt_vm),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -1023,7 +1023,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayScalarReduce(
+    ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayScalarReduce(
       result, *dtk, *op, *rootPET, opt_vm),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -1050,7 +1050,7 @@ extern "C" {
     }
 #ifndef ESMF_NO_INITIALIZERS
     if (*commh != ESMC_NULL_POINTER){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       " - a previously used commhandle has not been deleted",
       ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
@@ -1061,7 +1061,7 @@ extern "C" {
     (*commh)->commhandleCount = 0;  // reset
     (*commh)->pthidCount = 0;       // reset
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayScalarReduce(
+    ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayScalarReduce(
       result, *dtk, *op, *rootPET, *commh, opt_vm),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -1079,7 +1079,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayScalarReduce(
+    ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayScalarReduce(
       result, *dtk, *op, *rootPET, *de, opt_vm),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -1107,13 +1107,13 @@ extern "C" {
     }
     // Check if a valid commhandle was provided
     if (*commh == ESMC_NULL_POINTER){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       " - a valid commhandle must be provided",
       ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayWait(
+    ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayWait(
       *rootPET, *commh, opt_vm),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -1132,7 +1132,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_newArrayWait(
+    ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayWait(
       *de, opt_vm),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));

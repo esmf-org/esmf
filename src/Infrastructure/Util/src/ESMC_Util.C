@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.31 2008/07/21 23:25:51 theurich Exp $
+// $Id: ESMC_Util.C,v 1.32 2008/07/29 01:34:56 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -29,13 +29,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ESMCI_Util.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.31 2008/07/21 23:25:51 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.32 2008/07/29 01:34:56 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -219,11 +219,11 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
     int rc = ESMC_RC_NOT_IMPL;
 
      if (ai == NULL) 
-        ESMC_LogDefault.ESMC_LogWrite("Empty (NULL) AxisIndex pointer", 
+        ESMC_LogDefault.Write("Empty (NULL) AxisIndex pointer", 
                                        ESMC_LOG_INFO);
 
      sprintf(msgbuf, "min=%d, max=%d, stride=%d\n", ai->min, ai->max, ai->stride);
-     ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+     ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
 
      rc = ESMF_SUCCESS;
     return rc;
@@ -520,7 +520,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
       case ESMF_C8:  return  8;
       case ESMF_C16: return 16;
       default:
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                 "Unknown TypeKind", NULL);
        return -1;
     }
@@ -552,7 +552,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
       case ESMF_STATUS_BUSY:         return  "Busy";
       case ESMF_STATUS_INVALID:      return  "Invalid";
       default:
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                       "Unknown Status", NULL);
        return NULL;
     }
@@ -588,7 +588,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
       case ESMC_TYPEKIND_LOGICAL: return  "Logical";
       case ESMC_TYPEKIND_CHARACTER: return "Character";
       default:
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                      "Unknown TypeKind", NULL);
          return "";
     }
@@ -616,7 +616,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
       case ESMF_TRUE:      return  "True";
       case ESMF_FALSE:     return  "False";
       default:
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                      "Unknown TypeKind", NULL);
          return NULL;
     }
@@ -650,7 +650,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
     
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (slen < 0)) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                             "bad count or NULL pointer", NULL);
        return NULL;
     }
@@ -697,7 +697,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (slen <= 0) ||
         (dst == NULL) || (dlen <= 0)) {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad count or NULL pointer", &rc);
             return rc;
     }
@@ -710,7 +710,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
        sprintf(msgbuf, 
              "dest buffer size of %d bytes too small, must be >= %d bytes\n", 
              dlen, clen+1);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
        return rc;
     }
     
@@ -751,7 +751,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
 
     // minor idiotproofing
     if ((src == NULL) || (dst == NULL) || (dlen <= 0)) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad count or NULL pointer", &rc);
        return rc;
     }
@@ -762,7 +762,7 @@ ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int ainum) {
        sprintf(msgbuf, 
              "dest buffer size of %d bytes too small, must be >= %d bytes\n", 
              dlen, clen);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
        return rc;
     }
 
@@ -811,7 +811,7 @@ extern "C" {
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (*slen <= 0) ||
         (dst == NULL) || (*dlen <= 0)) {
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad count or NULL pointer", rc);
        return;
     }
@@ -825,7 +825,7 @@ extern "C" {
        sprintf(msgbuf, 
              "dest buffer size of %d bytes too small, must be >= %d bytes\n", 
              *dlen, clen+1);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, rc);
        return;
     }
     
@@ -873,7 +873,7 @@ extern "C" {
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (*slen <= 0) ||
         (dst == NULL) || (*dlen <= 0)) {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "bad count or NULL pointer", rc);
             return;
     }
@@ -884,7 +884,7 @@ extern "C" {
        sprintf(msgbuf, 
              "dest buffer size of %d bytes too small, must be >= %d bytes\n", 
              *dlen, clen);
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, rc);
        return;
     }
 

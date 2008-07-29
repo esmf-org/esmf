@@ -1,4 +1,4 @@
-// $Id: ESMCI_Arg.h,v 1.2 2007/05/11 02:40:13 rosalind Exp $
+// $Id: ESMCI_Arg.h,v 1.3 2008/07/29 01:34:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@ int ESMC_XclassFunc( int ifix, ... ) {
         ESMCI_ArgGet(argPtr,ESMC_Fred);
         break;
       default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
         return rc;
     } // end switch (argID)
   } // end while (argID)
@@ -155,7 +155,7 @@ int ESMC_XclassFunc( int ifix, ... ) {
         eOpt = ESMCI_ArgGet(argPtr,ESMC_Fred);
         break;
       default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
         return rc;
     } // end switch (argID)
   } // end while (argID)

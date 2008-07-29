@@ -40,7 +40,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_State.C,v 1.7 2008/06/25 18:42:10 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_State.C,v 1.8 2008/07/29 01:34:57 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -88,7 +88,7 @@ namespace ESMCI {
       state = new State;
     }catch(...){
       // allocation error
-      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::State.", rc);
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::State.", rc);
       return ESMC_NULL_POINTER;
     }
 
@@ -96,14 +96,14 @@ namespace ESMCI {
     nlen = strlen(name);
     fName = new char[nlen];
     localrc = ESMC_CtoF90string(name, fName, nlen);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
       delete[] fName;
       return ESMC_NULL_POINTER;
     }
 
     // Invoque the fortran interface through the F90-C++ "glue" code
     FTN(f_esmf_statecreate)(state, fName, &localrc, nlen);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
       delete[] fName;
       return ESMC_NULL_POINTER;
     }
@@ -143,7 +143,7 @@ namespace ESMCI {
       
     // Invoque the fortran interface through the F90-C++ "glue" code
      FTN(f_esmf_stateaddarray)(this, &array, &localrc);
-     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
        return localrc;
 
      rc = localrc;
@@ -184,14 +184,14 @@ namespace ESMCI {
     nlen = strlen(name);
     fName = new char[nlen];
     localrc = ESMC_CtoF90string(name, fName, nlen);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
       delete[] fName;
       return localrc;
     }
 
     // Invoque the fortran interface through the F90-C++ "glue" code
     FTN(f_esmf_stategetarray)(this, fName, array, &localrc, nlen);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
       delete[] fName;
       return localrc;
     }
@@ -225,7 +225,7 @@ namespace ESMCI {
 
     // Invoque the fortran interface through the F90-C++ "glue" code
     FTN(f_esmf_stateprint)(this, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return localrc;
 
     rc = localrc;
@@ -265,7 +265,7 @@ namespace ESMCI {
 
     // Invoque the fortran interface through the F90-C++ "glue" code
     FTN(f_esmf_statedestroy)(this, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return localrc;
 
     rc = localrc;

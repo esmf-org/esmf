@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.53 2008/07/21 23:25:54 theurich Exp $
+// $Id: ESMC_Comp_F.C,v 1.54 2008/07/29 01:34:56 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
 #include <string.h>
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMC_Comp.h"
 #include "ESMC_FTable.h"
 
@@ -59,7 +59,7 @@ static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase,
      //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
      //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
      if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
                                               "null pointer found", status);
         return;
      }
@@ -98,7 +98,7 @@ static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
      //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
      //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
     if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
                                               "null pointer found", status);
        return;
     }
@@ -121,7 +121,7 @@ static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
      //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
      //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
     if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
                                               "null pointer found", status);
         return;
     }
@@ -149,7 +149,7 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
      //if ((ptr == ESMC_NULL_POINTER)) {
      if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
                                               "null pointer found", status);
         return;
      }
@@ -197,20 +197,20 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      // time to startup the VM for this component...     
      ESMCI::VM *vm_parent;
      FTN(f_esmf_compgetvmparent)(f90comp, &vm_parent, &localrc); //get vm_parent
-     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
        status)) return;
      ESMCI::VMPlan *vmplan_p;
      FTN(f_esmf_compgetvmplan)(f90comp, &vmplan_p, &localrc);    //get vmplan_p
-     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
        status)) return;
      // parent VM and plan for child can now be used to startup the child VM
      void *vm_info = vm_parent->startup(vmplan_p,
        ESMC_FTableCallEntryPointVMHop, NULL, &localrc);
-     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
        status)) return;
      // keep vm_info in a safe place (in parent component) 'till it's used again
      FTN(f_esmf_compsetvminfo)(f90comp, &vm_info, &localrc);
-     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
        status)) return;
      // ...now the component's VM is started up and placed on hold.
      
@@ -292,7 +292,7 @@ extern "C" {
      localrc = ESMC_RC_NOT_IMPL;
 
          if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
                                               "null pointer found", status);
             return;
          }
@@ -329,7 +329,7 @@ extern "C" {
      localrc = ESMC_RC_NOT_IMPL;
 
          if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
                                               "null pointer found", status);
             return;
          }
@@ -416,7 +416,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
 
   // enter the child VM -> resurface in ESMC_FTableCallEntryPointVMHop()
   localrc = vm_parent->enter(vmplan, *vm_info, (void*)cargo);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, status);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, status);
         
   // ... if the child VM uses threads (multi-threading or single-threading) 
   // then this parent PET continues running concurrently to the child PET in the
@@ -452,7 +452,7 @@ void FTN(c_esmc_compwait)(
   
   // return with errors if there is no cargo to obtain error codes
   if (cargo == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       " - No cargo structure to obtain error codes", esmfrc);
     return;
   }
@@ -465,7 +465,7 @@ void FTN(c_esmc_compwait)(
   delete cargo;
   
   // error check esmfrc
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(*esmfrc,
+  if (ESMC_LogDefault.MsgFoundError(*esmfrc,
     " - ESMF internal error during user function callback", NULL)) return;
   
 }

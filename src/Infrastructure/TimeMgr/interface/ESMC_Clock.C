@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.3 2008/07/18 15:00:34 rosalind Exp $
+// $Id: ESMC_Clock.C,v 1.4 2008/07/29 01:34:54 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_Clock.h"
 #include "ESMC_Interface.h"
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Clock.C,v 1.3 2008/07/18 15:00:34 rosalind Exp $";
+static const char *const version = "$Id: ESMC_Clock.C,v 1.4 2008/07/29 01:34:54 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -75,7 +75,7 @@ ESMC_Clock ESMC_ClockCreate(
      (ESMCI::TimeInterval*)NULL, (int*)NULL, (ESMCI::Time*)NULL, 
      &localrc);
 
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     clock.ptr = NULL;
     return clock;  // bail out
   }
@@ -98,7 +98,7 @@ int ESMC_ClockPrint(ESMC_Clock clock){
 
   ESMCI::Clock *IntClock = (ESMCI::Clock*)(clock.ptr);
   localrc = IntClock->print();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
     clock.ptr = NULL;
     return rc;  // bail out
   }
@@ -120,7 +120,7 @@ int ESMC_ClockAdvance(ESMC_Clock clock){
 
   ESMCI::Clock *IntClock = (ESMCI::Clock*)(clock.ptr);
   localrc = IntClock->advance();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
     clock.ptr = NULL;
     return rc;  // bail out
   }
@@ -157,7 +157,7 @@ int ESMC_ClockGet(ESMC_Clock clock, ESMC_TimeInterval *currSimTime,
                       advanceCount,
                       (int*)NULL,
                       (ESMC_Direction*)NULL );
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
     pClock = NULL;
     return localrc;  // bail out
   }
@@ -177,7 +177,7 @@ int ESMC_ClockDestroy(ESMC_Clock* pClock){
    
   ESMCI::Clock **intClock = (ESMCI::Clock**)(pClock);
   localrc = ESMCI::ESMCI_ClockDestroy(intClock);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
     pClock = NULL;
     return rc;  // bail out
   }

@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.1 2008/07/21 23:25:52 theurich Exp $
+// $Id: ESMCI_VM_F.C,v 1.2 2008/07/29 01:34:56 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 
 #include "ESMCI_VM.h"
 
-#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 //------------------------------------------------------------------------------
 //BOP
@@ -68,13 +68,13 @@ extern "C" {
     default:
       localrc = ESMC_RC_ARG_BAD;
     }
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unsupported data type.",
+    if (ESMC_LogDefault.MsgFoundError(localrc,"Unsupported data type.",
       rc)) return;
     localrc = (*vm)->allfullreduce(input, output, *count, vmt, (vmOp)(*op));
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -93,7 +93,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -114,7 +114,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -146,14 +146,14 @@ extern "C" {
     default:
       localrc = ESMC_RC_ARG_BAD;
     }
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
+    if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported data type.",
       rc)) return;
     localrc = (*vm)->allgatherv(sendData, *sendCount, recvData, recvCounts,
       recvOffsets, vmt);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -184,13 +184,13 @@ extern "C" {
     default:
       localrc = ESMC_RC_ARG_BAD;
     }
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
+    if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported data type.",
       rc)) return;
     localrc = (*vm)->allreduce(input, output, *count, vmt, (vmOp)(*op));
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -222,14 +222,14 @@ extern "C" {
     default:
       localrc = ESMC_RC_ARG_BAD;
     }
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
+    if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported data type.",
       rc)) return;
     localrc = (*vm)->alltoallv(sendData, sendCounts, sendOffsets, recvData,
       recvCounts, recvOffsets, vmt);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -247,7 +247,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -266,7 +266,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -287,7 +287,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -306,7 +306,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -327,7 +327,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -359,14 +359,14 @@ extern "C" {
     default:
       localrc = ESMC_RC_ARG_BAD;
     }
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
+    if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported data type.",
       rc)) return;
     localrc = (*vm)->gatherv(sendData, *sendCount, recvData, recvCounts,
       recvOffsets, vmt, *root);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -426,7 +426,7 @@ extern "C" {
     // check that pet is within bounds
     int petCount = (*ptr)->getPetCount();
     if (*pet < 0 || *pet >= petCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- provided pet id is out of range", rc);
       return;
     }
@@ -452,7 +452,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *vmid = (*ptr)->getVMId(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -464,7 +464,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->print(),
+    if (ESMC_LogDefault.MsgFoundError((*ptr)->print(),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -477,7 +477,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->validate(),
+    if (ESMC_LogDefault.MsgFoundError((*ptr)->validate(),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -495,7 +495,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -516,7 +516,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -547,13 +547,13 @@ extern "C" {
     default:
       localrc = ESMC_RC_ARG_BAD;
     }
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unsupported data type.",
+    if (ESMC_LogDefault.MsgFoundError(localrc,"Unsupported data type.",
       rc)) return;
     localrc = (*vm)->reduce(input, output, *count, vmt, (vmOp)(*op), *root);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -572,7 +572,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -593,7 +593,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -625,14 +625,14 @@ extern "C" {
     default:
       localrc = ESMC_RC_ARG_BAD;
     }
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "Unsupported data type.",
+    if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported data type.",
       rc)) return;
     localrc = (*vm)->scatterv(sendData, sendCounts, sendOffsets, recvData,
       *recvCount, vmt, *root);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -651,7 +651,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -672,7 +672,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -692,7 +692,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -714,7 +714,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -732,7 +732,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -777,7 +777,7 @@ extern "C" {
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
       delete [] message;
       return;
     }
@@ -792,7 +792,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *ptr = ESMCI::VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -850,7 +850,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     (*ptr_vmparent)->shutdown(*ptr_vmplan, *vm_info, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -946,7 +946,7 @@ extern "C" {
       *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"- this ESMF library"
+    if (ESMC_LogDefault.MsgFoundError(localrc,"- this ESMF library"
       " was compiled with ESMF_PTHREADS=OFF and thus does not support"
       " ESMF-threading!", rc)) return;
     //debug: (*ptr)->vmkplan_print();
@@ -1001,7 +1001,7 @@ extern "C" {
       *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"- this ESMF library"
+    if (ESMC_LogDefault.MsgFoundError(localrc,"- this ESMF library"
       " was compiled with ESMF_PTHREADS=OFF and thus does not support"
       " ESMF-threading!", rc)) return;
     //debug: (*ptr)->vmkplan_print();
@@ -1056,7 +1056,7 @@ extern "C" {
       *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"- this ESMF library"
+    if (ESMC_LogDefault.MsgFoundError(localrc,"- this ESMF library"
       " was compiled with ESMF_PTHREADS=OFF and thus does not support"
       " ESMF-threading!", rc)) return;
     //debug: (*ptr)->vmkplan_print();
@@ -1085,7 +1085,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *vmid = ESMCI::VM::getCurrentID(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1118,7 +1118,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     *vmid = new ESMCI::VMId;              // allocate memory off the heap
     **vmid = ESMCI::VMIdCreate(&localrc); // allocate VMId internal members
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1133,7 +1133,7 @@ extern "C" {
     ESMCI::VMIdDestroy(*vmid, &localrc);  // free memory for internal members
     delete *vmid;                       // free memory for this VMId
     *vmid=NULL;
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1147,7 +1147,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     localrc = (*ptr)->sendVMId(*vmid, *dest);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1161,7 +1161,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     localrc = (*ptr)->recvVMId(*vmid, *source);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;

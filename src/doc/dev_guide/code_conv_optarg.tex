@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_optarg.tex,v 1.1 2007/05/04 20:59:11 tjcnrl Exp $
+% CVS $Id: code_conv_optarg.tex,v 1.2 2008/07/29 01:34:57 rosalind Exp $
 
 \subsection{Code: Optional Argument Conventions for the C/C++ API}
 
@@ -273,7 +273,7 @@ parsing an optional argument list.
         eOpt = ESMCI_ArgGet(argPtr,ESMC_Fred);
         break;
       default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
         return rc;
     } // end switch (argID)
   } // end while (argID)
@@ -296,7 +296,7 @@ parsing block shown above. The difference is that in this case the
       case ESMCI_XclassArgDoptID: ESMCI_ArgGetR8(argPtr); break;
       case ESMCI_XclassArgEoptID: ESMCI_ArgGet(argPtr,ESMC_Fred); break;
       default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
         return rc;
     } // end switch (argID)
   } // end while (argID)
@@ -326,7 +326,7 @@ case the type of the \texttt{dValue} optional argument depends on the value of t
         } // end switch (tk)
         break;
       default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
         return rc;
     } // end switch (argID)
   } // end while (argID)

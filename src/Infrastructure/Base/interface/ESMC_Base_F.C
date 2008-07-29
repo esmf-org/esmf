@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.63 2008/06/18 20:18:18 theurich Exp $
+// $Id: ESMC_Base_F.C,v 1.64 2008/07/29 01:34:49 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -24,12 +24,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ESMC_Base.h"
-#include "ESMC_LogErr.h"  // will this work?
+#include "ESMCI_LogErr.h"  // will this work?
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.63 2008/06/18 20:18:18 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.64 2008/07/29 01:34:49 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -82,7 +82,7 @@ extern "C" {
   if (superclass && (sclen > 0) && (superclass[0] != '\0')) {
       scname = ESMC_F90toCstring(superclass, sclen);
       if (!scname) {
-           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
           if (rc) *rc = status;
           return;
@@ -167,7 +167,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.ESMC_LogWrite("Base object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
     // for Print, it's not a failure for an uninit object to be printed
@@ -218,7 +218,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.ESMC_LogWrite("Base object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
   }
@@ -256,7 +256,7 @@ extern "C" {
   *base = new ESMC_Base;
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.ESMC_LogWrite("Base object error", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("Base object error", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_FAILURE;
     return;
   }
@@ -295,7 +295,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.ESMC_LogWrite("Base object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_FAILURE;
     return;
   }

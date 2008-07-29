@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.49 2008/04/05 03:38:53 cdeluca Exp $
+// $Id: ESMC_Route_F.C,v 1.50 2008/07/29 01:34:53 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 #include <string.h>
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
 #include "ESMCI_DELayout.h"
 #include "ESMC_LocalArray.h"
@@ -114,7 +114,7 @@ extern "C" {
            }
 
            if (sdk != ddk) {
-               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
+               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SAMETYPE,
                      "; source & destination datatypes not the same", status);
                return;
            }
@@ -161,7 +161,7 @@ extern "C" {
                        sdk = (src[n])->ESMC_LocalArrayGetTypeKind();
                    else {
                        if (sdk != (src[n])->ESMC_LocalArrayGetTypeKind()) {
-                           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
+                           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SAMETYPE,
                            "; all source datatypes must be the same", status);
                            return;
                        }
@@ -189,7 +189,7 @@ extern "C" {
                        ddk = (dst[n])->ESMC_LocalArrayGetTypeKind();
                    else {
                        if (ddk != (dst[n])->ESMC_LocalArrayGetTypeKind()) {
-                           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
+                           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SAMETYPE,
                         "; all destination datatypes must be the same", status);
                            return;
                        }
@@ -197,7 +197,7 @@ extern "C" {
                }
 
                if (sdk != ddk) {
-                   ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SAMETYPE,
+                   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SAMETYPE,
                      "; source & destination datatypes not the same", status);
                    return;
                }

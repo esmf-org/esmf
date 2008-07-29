@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.26 2008/04/05 03:38:38 cdeluca Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.27 2008/07/29 01:34:52 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMC_LocalArray.h"
 #include <stdio.h>
 #include <string.h>
@@ -384,7 +384,7 @@ char *name = NULL;
 
   if (!localarray) {
     //printf("uninitialized LocalArray object\n");
-    ESMC_LogDefault.ESMC_LogWrite("LocalArray object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("LocalArray object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
   }
@@ -464,7 +464,7 @@ char *name = NULL;
 
   if (!localarray) {
     //printf("uninitialized LocalArray object\n");
-    ESMC_LogDefault.ESMC_LogWrite("LocalArray object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("LocalArray object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
   }

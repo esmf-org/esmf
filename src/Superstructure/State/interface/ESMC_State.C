@@ -30,7 +30,7 @@
 #include "ESMCI_Array.h"
 #include "ESMCI_State.h"
 #include "ESMC_Start.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMC_ArraySpec.h"
 
 
@@ -46,7 +46,7 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.22 2008/06/25 18:42:10 theurich Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.23 2008/07/29 01:34:57 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -88,7 +88,7 @@ extern "C" {
 
     // Invoque the C++ interface
     state.ptr = (void*)ESMCI::State::create(name, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
       state.ptr = NULL;
       return state;
     }
@@ -125,7 +125,7 @@ extern "C" {
       localrc = ESMF_RC_NOT_IMPL;
       
       localrc = ((ESMCI::State*)state.ptr)->addArray((ESMCI::Array*)array.ptr);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,&rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,&rc))
         return localrc;
 
       rc = localrc;
@@ -162,7 +162,7 @@ extern "C" {
 
       localrc = ((ESMCI::State*)state.ptr)->getArray(arrayName,
         (ESMCI::Array**)&(array->ptr));
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,&rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,&rc))
         return localrc;
 
       rc = localrc;
@@ -197,7 +197,7 @@ extern "C" {
 
     // Invoque the C++ interface
     localrc = ((ESMCI::State*)state.ptr)->print();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return localrc;
 
     return rc = localrc;
@@ -237,7 +237,7 @@ extern "C" {
 
     // Invoque the C++ interface
     localrc = ((ESMCI::State*)state.ptr)->destroy();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return localrc;
 
 //  FTN(f_esmf_statedestroy)(state, &rc);

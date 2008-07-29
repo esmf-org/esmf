@@ -1,4 +1,4 @@
-// $Id: ESMC_State_F.C,v 1.9 2008/04/05 03:39:17 cdeluca Exp $
+// $Id: ESMC_State_F.C,v 1.10 2008/07/29 01:34:57 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -26,7 +26,7 @@
 
  // insert any higher level, 3rd party or system includes here
 #include "ESMC_Start.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 
  // associated class definition file
 #include "ESMC_State.h"
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_State_F.C,v 1.9 2008/04/05 03:39:17 cdeluca Exp $";
+             "$Id: ESMC_State_F.C,v 1.10 2008/07/29 01:34:57 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -81,7 +81,7 @@ void FTN(c_esmc_stateserialize)(int *statestatus,
     int fixedpart = 10 * sizeof (int *);
     if ((*length - *offset) < fixedpart) {
          
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                              "Buffer too short to add a State object", localrc);
          return;
  

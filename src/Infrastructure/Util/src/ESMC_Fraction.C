@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.C,v 1.7 2008/04/05 03:39:03 cdeluca Exp $
+// $Id: ESMC_Fraction.C,v 1.8 2008/07/29 01:34:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
  #include <stdio.h>
  #include <limits.h>
 
- #include <ESMC_LogErr.h>
+ #include <ESMCI_LogErr.h>
  #include <ESMF_LogMacros.inc>
 
  // associated class definition file
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Fraction.C,v 1.7 2008/04/05 03:39:03 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.8 2008/07/29 01:34:55 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -349,7 +349,7 @@
 
     // check for divide-by-zero
     if (d == 0) {
-      ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
       return(ESMF_FAILURE);
     }
 
@@ -383,7 +383,7 @@
     ESMC_I4 gcd = ESMC_FractionGCD(n,d);
     // this should never happen since GCD never returns zero!
     if (gcd == 0) {
-      ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
       rc = ESMC_RC_DIV_ZERO;
       return(rc);
     }
@@ -419,7 +419,7 @@
  #define ESMC_METHOD "ESMC_FractionConvert()"
 
     if (d == 0) {
-      ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
       return(ESMF_FAILURE);
     }
 
@@ -440,7 +440,7 @@
         sprintf(logMsg, "For conversion=%lld out-of-range with respect to "
                         "machine limits (INT_MIN=%d to INT_MAX=%d).",
                         conversion, INT_MIN, INT_MAX);
-        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR);
         return (ESMF_FAILURE);
     }
 
@@ -531,7 +531,7 @@
 
     // this should never happen since GCD never returns zero!
     if (gcd == 0) {
-      ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
       return(0);
     }
 
@@ -983,7 +983,7 @@
 
     // check for divide-by-zero
     if (divisor == 0) {
-      ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
       return(ESMF_FAILURE);
     }
 
@@ -1010,7 +1010,7 @@
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "; denominator value abs(%lld) > %d, won't fit in "
                         "fraction denominator", denominator, INT_MAX);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID, logMsg,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_VALID, logMsg,
                                               ESMC_NULL_POINTER);
         return(ESMC_Fraction(0,0,1));
       }
@@ -1087,7 +1087,7 @@
     // check for divide-by-zero
     if (d == 0 || fraction.d == 0 || 
         fraction.w * fraction.d + fraction.n == 0) {
-      ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
       return(ESMF_FAILURE);
     }
 
@@ -1128,7 +1128,7 @@
       if (fraction.w != 0) {
         remainder.n = w % fraction.w;
       } else {
-        ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+        ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
         return(ESMF_FAILURE);
       }
 
@@ -1136,7 +1136,7 @@
     } else {
       // check for divide-by-zero
       if (d == 0 || fraction.d == 0) {
-        ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+        ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
         return(ESMF_FAILURE);
       }
 
@@ -1148,7 +1148,7 @@
       if (remainder.d != 0) {
         remainder.n = ((w*d + n) * (lcm/d)) % remainder.d;
       } else {
-        ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+        ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
         return(ESMF_FAILURE);
       }
     }
@@ -1246,7 +1246,7 @@
     if (d == 0) {
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "must have non-zero denominator."); 
-      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR);
       return(ESMF_FAILURE);
     }
 

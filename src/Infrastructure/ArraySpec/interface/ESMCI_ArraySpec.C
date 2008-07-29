@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArraySpec.C,v 1.4 2008/04/05 03:38:05 cdeluca Exp $
+// $Id: ESMCI_ArraySpec.C,v 1.5 2008/07/29 01:34:48 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 
 // include ESMF headers
 #include "ESMC_Conf.h"
-#include "ESMC_LogErr.h" 
+#include "ESMCI_LogErr.h" 
 #include "ESMF_LogMacros.inc"             // for LogErr
 
 extern "C" {
@@ -44,7 +44,7 @@ void FTN(f_esmf_arrayspecgettypekind)(ESMCI::ArraySpec *arrayspec,
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArraySpec.C,v 1.4 2008/04/05 03:38:05 cdeluca Exp $";
+static const char *const version = "$Id: ESMCI_ArraySpec.C,v 1.5 2008/07/29 01:34:48 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -56,7 +56,7 @@ int ArraySpec::set(int rank, ESMC_TypeKind typekind){
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   FTN(f_esmf_arrayspecset)(this, &rank, &typekind, &localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   // return successfully
   rc = ESMF_SUCCESS;
@@ -71,7 +71,7 @@ int ArraySpec::getRank(int *rc){
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   int rank;
   FTN(f_esmf_arrayspecgetrank)(this, &rank, &localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return -1;  // bail out with invalid rank
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -86,7 +86,7 @@ ESMC_TypeKind ArraySpec::getTypeKind(int *rc){
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   ESMC_TypeKind typekind;
   FTN(f_esmf_arrayspecgettypekind)(this, &typekind, &localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return ESMF_NOKIND;  // bail out with invalid typekind
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;

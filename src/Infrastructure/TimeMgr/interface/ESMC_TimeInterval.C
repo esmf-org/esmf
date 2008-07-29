@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.1 2008/07/11 18:23:01 rosalind Exp $
+// $Id: ESMC_TimeInterval.C,v 1.2 2008/07/29 01:34:54 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_TimeInterval.h"
 #include "ESMCI_Calendar.h"
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.1 2008/07/11 18:23:01 rosalind Exp $";
+static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.2 2008/07/29 01:34:54 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -73,7 +73,7 @@ int  ESMC_TimeIntervalSet(ESMC_TimeInterval* timeInterval,
                                 (ESMCI::Calendar**)NULL,
                                 (ESMC_CalendarType*)NULL);
 
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
     (*timeInterval).ptr = NULL;
     return localrc;  // bail out
   }
@@ -124,7 +124,7 @@ int  ESMC_TimeIntervalGet(ESMC_TimeInterval timeInterval,
                              (int*)NULL,
                              (char*)NULL);
 
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
     timeInterval.ptr = NULL;
     return localrc;  // bail out
   }
@@ -148,7 +148,7 @@ int ESMC_TimeIntervalPrint(ESMC_TimeInterval timeInterval){
 
   ESMCI::TimeInterval *pTimeInterval = (ESMCI::TimeInterval*)(timeInterval.ptr);
   localrc = pTimeInterval->print();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
     timeInterval.ptr = NULL;
     return rc;  // bail out
   }

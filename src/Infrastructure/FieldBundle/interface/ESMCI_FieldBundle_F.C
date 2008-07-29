@@ -1,4 +1,4 @@
-// $Id: ESMCI_FieldBundle_F.C,v 1.1 2008/07/01 20:37:28 feiliu Exp $
+// $Id: ESMCI_FieldBundle_F.C,v 1.2 2008/07/29 01:34:50 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -21,13 +21,13 @@
 //
  // insert any higher level, 3rd party or system includes here
 #include "ESMC_Start.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_FieldBundle_F.C,v 1.1 2008/07/01 20:37:28 feiliu Exp $";
+             "$Id: ESMCI_FieldBundle_F.C,v 1.2 2008/07/29 01:34:50 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -57,7 +57,7 @@ void FTN(c_esmc_fieldbundleserialize)(ESMC_Status *bundlestatus,
     int fixedpart = 8 * sizeof(int *);
     if ((*length - *offset) < fixedpart) {
          
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                             "Buffer too short to add a FieldBundle object", localrc);
          return;
  

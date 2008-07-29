@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockUTest.C,v 1.12 2008/07/17 16:41:56 rosalind Exp $
+// $Id: ESMC_ClockUTest.C,v 1.13 2008/07/29 01:34:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.12 2008/07/17 16:41:56 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.13 2008/07/29 01:34:55 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -67,7 +67,7 @@
   //----------------------------------------------------------------------------
 
   ESMC_TimeInterval timeStep,runDuration;
-  ESMC_Time startTime, stopTime,refTime;
+  ESMC_Time startTime, stopTime, refTime; 
   ESMC_Calendar calendar;
   ESMC_I4 yy1=2006;
   ESMC_I4 h1=0;

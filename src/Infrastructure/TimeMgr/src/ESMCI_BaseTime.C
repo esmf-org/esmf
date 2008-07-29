@@ -1,4 +1,4 @@
-// $Id: ESMCI_BaseTime.C,v 1.2 2008/06/27 03:51:20 rosalind Exp $
+// $Id: ESMCI_BaseTime.C,v 1.3 2008/07/29 01:34:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
  using std::cout;
  using std::endl;
  */
- #include <ESMC_LogErr.h>
+ #include <ESMCI_LogErr.h>
  #include <ESMF_LogMacros.inc>
 
  // associated class definition file
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.2 2008/06/27 03:51:20 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.3 2008/07/29 01:34:55 rosalind Exp $";
 //-------------------------------------------------------------------------
 
   namespace ESMCI{
@@ -199,7 +199,7 @@
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "s=%lld and sN=%d not both positive or both negative, "
                       "or sD=%d negative or less than one.", s, sN, sD); 
-      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR);
       return(ESMF_FAILURE);
     }
 
@@ -253,7 +253,7 @@
 
     // validate input
     if (timeToConvert == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
                                             "; timeToConvert is NULL", &rc);
       return(rc);
     }
@@ -279,7 +279,7 @@
         sprintf(logMsg, "For s=%lld, hours=%lld out-of-range with respect to "
                         "machine limits (INT_MIN=%d to INT_MAX=%d).",
                         remainingSeconds, hours, INT_MIN, INT_MAX);
-        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR);
         return (ESMF_FAILURE);
       }
       *h = hours;
@@ -292,7 +292,7 @@
         sprintf(logMsg, "For s=%lld, minutes=%lld out-of-range with respect to "
                         "machine limits (INT_MIN=%d to INT_MAX=%d).",
                         remainingSeconds, minutes, INT_MIN, INT_MAX);
-        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR);
         return (ESMF_FAILURE);
       }
       *m = minutes;
@@ -304,7 +304,7 @@
         sprintf(logMsg, "s=%lld out-of-range with respect to "
                         "machine limits (INT_MIN=%d to INT_MAX=%d).",
                         remainingSeconds, INT_MIN, INT_MAX);
-        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR);
         return (ESMF_FAILURE);
       }
       *s = remainingSeconds;    // >= 32 bit
@@ -325,7 +325,7 @@
       // convert remaining time to milliseconds
       ESMC_Fraction msRemainingTime = remainingTime;
       int rc = msRemainingTime.ESMC_FractionConvert(1000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *ms = msRemainingTime.ESMC_FractionGetn();
 
@@ -337,7 +337,7 @@
       // convert remaining time to microseconds
       ESMC_Fraction usRemainingTime = remainingTime;
       int rc = usRemainingTime.ESMC_FractionConvert(1000000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *us = usRemainingTime.ESMC_FractionGetn();
 
@@ -349,7 +349,7 @@
       // convert remaining time to nanoseconds
       ESMC_Fraction nsRemainingTime = remainingTime;
       int rc = nsRemainingTime.ESMC_FractionConvert(1000000000);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *ns = nsRemainingTime.ESMC_FractionGetn();
     }

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.6 2008/07/21 23:25:50 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.7 2008/07/29 01:34:49 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,14 +37,14 @@
 #include "ESMCI_VM.h"
 
 // LogErr headers
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
 
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.6 2008/07/21 23:25:50 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.7 2008/07/29 01:34:49 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -88,14 +88,14 @@ DELayout *DELayout::create(
   try{
     delayout = new DELayout;
     localrc = delayout->construct(vm, dePinFlag, petMap, petMapCount);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
       delete delayout;
       delayout = ESMC_NULL_POINTER;
       return ESMC_NULL_POINTER;
     }
   }catch(...){
      // allocation error
-     ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayout.", rc);  
+     ESMC_LogDefault.MsgAllocError("for new DELayout.", rc);  
      return ESMC_NULL_POINTER;
   }
   
@@ -144,7 +144,7 @@ DELayout *DELayout::create(
   // by default use the currentVM for vm
   if (vm == ESMC_NULL_POINTER){
     vm = VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
   }
 
@@ -167,7 +167,7 @@ DELayout *DELayout::create(
     deGroupingCount = deGrouping->extent[0];
     deGroupingFlag = 1;   // set
     if (deGroupingCount != deCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
                 "- Size of deGrouping does not match deCount", rc);
       return ESMC_NULL_POINTER;
     }
@@ -245,7 +245,7 @@ DELayout *DELayout::create(
   try{
     delayout = new DELayout;
     localrc = delayout->construct(vm, dePinFlag, petMap, petMapCount);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
       if (petMapDeleteFlag) delete [] petMap;
       delete delayout;
       delayout = ESMC_NULL_POINTER;
@@ -253,7 +253,7 @@ DELayout *DELayout::create(
     }
   }catch(...){
      // allocation error
-     ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayout.", rc);
+     ESMC_LogDefault.MsgAllocError("for new DELayout.", rc);
      if (petMapDeleteFlag) delete [] petMap;
      return ESMC_NULL_POINTER;
   }
@@ -307,7 +307,7 @@ DELayout *DELayout::create(
   // that rely on DELayout to be _always 2D! Here I promote a 1D layout request
   // to 2D: N x 1. I write a message to LogErr to make people aware of this!!!
   if (ndim==0){
-    // ESMC_LogDefault.ESMC_LogWrite("Promoting 1D DELayout to 2D",
+    // ESMC_LogDefault.Write("Promoting 1D DELayout to 2D",
     //   ESMC_LOG_WARN);
     ndim = 2;
     deCountArg = new int[2];  // TODO: this will leave a memory leak
@@ -315,7 +315,7 @@ DELayout *DELayout::create(
     deCountArg[1] = 1;
   }
   if (ndim==1){
-    // ESMC_LogDefault.ESMC_LogWrite("Promoting 1D DELayout to 2D",
+    // ESMC_LogDefault.Write("Promoting 1D DELayout to 2D",
     //  ESMC_LOG_WARN);
     ndim = 2;
     int firstDEdim = deCountArg[0];
@@ -331,7 +331,7 @@ DELayout *DELayout::create(
     try {
       layout = new DELayout;
       localrc = layout->construct1D(vm, 0, DEtoPET, len, cyclic);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return ESMC_NULL_POINTER;
       // return successfully
       if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -339,14 +339,14 @@ DELayout *DELayout::create(
     }
     catch (...) {
       // LogErr catches the allocation error
-      ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayout.", rc);  
+      ESMC_LogDefault.MsgAllocError("for new DELayout.", rc);  
       return ESMC_NULL_POINTER;
     }
   }else if(ndim==1){
     try {
       layout = new DELayout;
       localrc = layout->construct1D(vm, *deCountArg, DEtoPET, len, cyclic);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return ESMC_NULL_POINTER;
       // return successfully
       if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -354,14 +354,14 @@ DELayout *DELayout::create(
     }
     catch (...) {
       // LogErr catches the allocation error
-      ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayout.", rc);  
+      ESMC_LogDefault.MsgAllocError("for new DELayout.", rc);  
       return ESMC_NULL_POINTER;
     }
   }else{
     try {
       layout = new DELayout;
       localrc = layout->constructND(vm, deCountArg, ndim, DEtoPET, len, cyclic);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return ESMC_NULL_POINTER;
       // return successfully
       if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -369,7 +369,7 @@ DELayout *DELayout::create(
     }
     catch (...) {
       // LogErr catches the allocation error
-      ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayout.", rc);  
+      ESMC_LogDefault.MsgAllocError("for new DELayout.", rc);  
       return ESMC_NULL_POINTER;
     }
   }
@@ -404,14 +404,14 @@ int DELayout::destroy(
 
   // return with errors for NULL pointer
   if (delayout == ESMC_NULL_POINTER || *delayout == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to DELayout", &rc);
     return rc;
   }
 
   // destruct and delete DELayout object
   localrc = (*delayout)->destruct();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   delete *delayout;
   *delayout = ESMC_NULL_POINTER;
@@ -460,7 +460,7 @@ int DELayout::construct(
   // by default use the currentVM for vm
   if (vmArg == ESMC_NULL_POINTER){
     vmArg = VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   }
 
@@ -508,7 +508,7 @@ int DELayout::construct(
     int pet = deInfoList[i].pet;
     // the following works because PETs in VM must be contiguous & start at zero
     if (pet < 0 || pet >= petCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_VALID,
         "- DE to PET mapping is invalid", &rc);
       delete [] deInfoList;
       delete [] petFlag;
@@ -697,14 +697,14 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
   // TODO: remove this warning once all of ESMF accepts the more general case
   // of multiple DEs per PET.
   if (oneToOneFlag == ESMF_FALSE){
-    ESMC_LogDefault.ESMC_LogWrite("A layout without 1:1 DE:PET mapping was"
+    ESMC_LogDefault.Write("A layout without 1:1 DE:PET mapping was"
       " created! This may cause problems in higher layers of ESMF!", 
       ESMC_LOG_WARN);
   }
   // Issue warning if this is not logically rectangular
   // TODO: remove this warning when non logRect layouts o.k.
   if (logRectFlag == ESMF_FALSE){
-    ESMC_LogDefault.ESMC_LogWrite("A non logRect layout was"
+    ESMC_LogDefault.Write("A non logRect layout was"
       " created! This may cause problems in higher layers of ESMF!", 
       ESMC_LOG_WARN);
   }
@@ -814,14 +814,14 @@ int DELayout::constructND(VM &vmArg, int *deCountArg, int nndim,
   // TODO: remove this warning once all of ESMF accepts the more general case
   // of multiple DEs per PET.
   if (oneToOneFlag == ESMF_FALSE){
-    ESMC_LogDefault.ESMC_LogWrite("A layout without 1:1 DE:PET mapping was"
+    ESMC_LogDefault.Write("A layout without 1:1 DE:PET mapping was"
       " created! This may cause problems in higher layers of ESMF!", 
       ESMC_LOG_WARN);
   }
   // Issue warning if this is not logically rectangular
   // TODO: remove this warning when non logRect layouts o.k.
   if (logRectFlag == ESMF_FALSE){
-    ESMC_LogDefault.ESMC_LogWrite("A non logRect layout was"
+    ESMC_LogDefault.Write("A non logRect layout was"
       " created! This may cause problems in higher layers of ESMF!", 
       ESMC_LOG_WARN);
   }
@@ -998,7 +998,7 @@ int DELayout::getDEMatchDE(
       deMatchList[i] = tempMatchList[i];
   else if (len_deMatchList != -1){
     // deMatchList argument was specified but its size is insufficient
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
       "- deMatchList must be of size 'deMatchCount'", &rc);
     return rc;
   }
@@ -1064,7 +1064,7 @@ int DELayout::getDEMatchPET(
       petMatchList[i] = tempMatchList[i];
   else if (len_petMatchList != -1){
     // petMatchList argument was specified but its size is insufficient
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
       "- petMatchList must be of size 'petMatchCount'", &rc);
     return rc;
   }
@@ -1118,7 +1118,7 @@ int DELayout::getDeprecated(
   
   if (ndim != ESMC_NULL_POINTER){
     if (!oldstyle){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- only OLDSTYLE DELayouts support this query", &rc);
       return rc;
     }else
@@ -1134,7 +1134,7 @@ int DELayout::getDeprecated(
   
   if (localDe != ESMC_NULL_POINTER){
     if (!oldstyle){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- only OLDSTYLE DELayouts support this query", &rc);
       return rc;
     }else{
@@ -1152,7 +1152,7 @@ int DELayout::getDeprecated(
   
   if (logRectFlag != ESMC_NULL_POINTER){
     if (!oldstyle){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- only OLDSTYLE DELayouts support this query", &rc);
       return rc;
     }else
@@ -1161,7 +1161,7 @@ int DELayout::getDeprecated(
   
   if (len_deCountPerDim >= this->ndim){
     if (!oldstyle){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- only OLDSTYLE DELayouts support this query", &rc);
       return rc;
     }else{
@@ -1282,7 +1282,7 @@ int DELayout::print()const{
 
   // return with errors for NULL pointer
   if (this == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       " - 'this' pointer is NULL.", &rc);
     return rc;
   }
@@ -1380,7 +1380,7 @@ int DELayout::validate()const{
 
   // check against NULL pointer
   if (this == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       " - 'this' pointer is NULL.", &rc);
     return rc;
   }
@@ -1435,7 +1435,7 @@ int DELayout::serialize(
 
   // Check if buffer has enough free memory to hold object
   if ((*length - *offset) < sizeof(DELayout)) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
     "- Buffer too short to add a DELayout object", &rc);
     return rc;
   }
@@ -1444,7 +1444,7 @@ int DELayout::serialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   localrc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
   // Serialize the DELayout internal data members
@@ -1544,7 +1544,7 @@ DELayout *DELayout::deserialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   localrc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return NULL;
 
   // Deserialize the DELayout internal data members
@@ -1666,7 +1666,7 @@ DELayoutServiceReply DELayout::serviceOffer(
     if (i==localDeCount){
 //TODO: enable LogErr once it is thread-safe
 *rc=ESMC_RC_ARG_WRONG;
-//      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+//      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
 //        "- Specified DE is not in localDeList", rc);
       return reply;
     }
@@ -1678,7 +1678,7 @@ DELayoutServiceReply DELayout::serviceOffer(
   if (ii==vasLocalDeCount){
 //TODO: enable LogErr once it is thread-safe
 *rc=ESMC_RC_ARG_WRONG;
-//    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+//    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
 //      "- Specified DE is not in vasLocalDeList", rc);
     return reply;
   }
@@ -1750,7 +1750,7 @@ int DELayout::serviceComplete(
     if (i==localDeCount){
 //TODO: enable LogErr once it is thread-safe
 rc=ESMC_RC_ARG_WRONG;
-//      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+//      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
 //        "- Specified DE is not in localDeList", &rc);
       return rc;
     }
@@ -1762,7 +1762,7 @@ rc=ESMC_RC_ARG_WRONG;
   if (ii==vasLocalDeCount){
 //TODO: enable LogErr once it is thread-safe
 rc=ESMC_RC_ARG_WRONG;
-//    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+//    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
 //      "- Specified DE is not in vasLocalDeList", &rc);
     return rc;
   }
@@ -1771,7 +1771,7 @@ rc=ESMC_RC_ARG_WRONG;
   if (!serviceMutexFlag[ii]){
 //TODO: enable LogErr once it is thread-safe
 rc=ESMC_RC_NOT_VALID;
-//    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
+//    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_VALID,
 //      "- PET does not hold service mutex for specified", &rc);
     return rc;
   }
@@ -1825,7 +1825,7 @@ int DELayout::ESMC_DELayoutCopy(
 
   // ensure this is a 1-to-1 delayout, if not bail out
   if (oneToOneFlag != ESMF_TRUE){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
       "- Can only handle 1-to-1 DELayouts", &rc);
     return rc; // bail out
   }
@@ -1881,7 +1881,7 @@ int DELayout::ESMC_DELayoutCopy(
 
   int blen = len * ESMC_TypeKindSize(dtk);
   localrc = ESMC_DELayoutCopy(srcdata, destdata, blen, srcDE, destDE);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
   // return successfully
@@ -2439,12 +2439,12 @@ int XXE::exec(
   
   // check index range
   if (count > 0 && indexRangeStart > count-1){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- indexStart out of range", &rc);
     return rc;
   }
   if (indexRangeStop > count-1){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- indexStop out of range", &rc);
     return rc;
   }
@@ -3369,12 +3369,12 @@ int XXE::print(
   
   // check index range
   if (count > 0 && indexRangeStart > count-1){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- indexStart out of range", &rc);
     return rc;
   }
   if (indexRangeStop > count-1){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- indexStop out of range", &rc);
     return rc;
   }
@@ -3688,7 +3688,7 @@ int XXE::optimizeElement(
 #endif
   
   if (index < 0 || index >= count){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- index out of range", &rc);
     return rc;
   }
@@ -3832,14 +3832,14 @@ int XXE::execReady(
       case xxeSub:
         xxeSubInfo = (XxeSubInfo *)xxeElement;
         localrc = xxeSubInfo->xxe->execReady(); // recursive call
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         break;
       case xxeSubMulti:
         xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
         for (int k=0; k<xxeSubMultiInfo->count; k++){
           localrc = xxeSubMultiInfo->xxe[k]->execReady(); // recursive call
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
         break;
@@ -3847,7 +3847,7 @@ int XXE::execReady(
         xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
         for (int k=0; k<xxeWaitOnAnyIndexSubInfo->count; k++){
           localrc = xxeWaitOnAnyIndexSubInfo->xxe[k]->execReady(); // recu. call
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
         break;
@@ -3860,7 +3860,7 @@ int XXE::execReady(
           sendnbIndexList[sendnbCount] = i;
           ++sendnbCount;
           if (sendnbCount >= sendnbMax){
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
               "- sendnbCount out of range", &rc);
             return rc;
           }
@@ -3871,7 +3871,7 @@ int XXE::execReady(
           recvnbIndexList[recvnbCount] = i;
           ++recvnbCount;
           if (recvnbCount >= recvnbMax){
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
               "- recvnbCount out of range", &rc);
             return rc;
           }
@@ -3882,7 +3882,7 @@ int XXE::execReady(
           sendnbIndexList[sendnbCount] = i;
           ++sendnbCount;
           if (sendnbCount >= sendnbMax){
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
               "- sendnbCount out of range", &rc);
             return rc;
           }
@@ -3893,7 +3893,7 @@ int XXE::execReady(
           recvnbIndexList[recvnbCount] = i;
           ++recvnbCount;
           if (recvnbCount >= recvnbMax){
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
               "- recvnbCount out of range", &rc);
             return rc;
           }
@@ -3925,7 +3925,7 @@ int XXE::execReady(
             ++count;
             if (count >= max){
               localrc = growStream(1000);
-              if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+              if (ESMC_LogDefault.MsgFoundError(localrc, 
                 ESMF_ERR_PASSTHRU, &rc)) return rc;
             }
           }
@@ -3933,7 +3933,7 @@ int XXE::execReady(
           // (excluding this StreamElement)
           if (sendnbCount+oldCount-1 >= max){
             localrc = growStream(sendnbCount+oldCount-max);
-            if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+            if (ESMC_LogDefault.MsgFoundError(localrc, 
               ESMF_ERR_PASSTHRU, &rc)) return rc;
           }
           memcpy(stream+count, oldStream+i+1, (oldCount-i-1)
@@ -3968,7 +3968,7 @@ int XXE::execReady(
             ++count;
             if (count >= max){
               localrc = growStream(1000);
-              if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+              if (ESMC_LogDefault.MsgFoundError(localrc, 
                 ESMF_ERR_PASSTHRU, &rc)) return rc;
             }
           }
@@ -3976,7 +3976,7 @@ int XXE::execReady(
           // (excluding this StreamElement)
           if (recvnbCount+count-1 >= max){
             localrc = growStream(recvnbCount+oldCount-max);
-            if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+            if (ESMC_LogDefault.MsgFoundError(localrc, 
               ESMF_ERR_PASSTHRU, &rc)) return rc;
           }
           memcpy(stream+count, oldStream+i+1, (oldCount-i-1)
@@ -4050,7 +4050,7 @@ int XXE::execReady(
         if (resolveCounter==2) break; // resolved both Ids
       }
       if (j==iCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
           "- unable to resolve XXE WTimer Id", &rc);
         return rc;
       }
@@ -4352,7 +4352,7 @@ int XXE::optimize(
               xxeSendnbInfo->size = bufferSize;
               // slip in the associated memcpy()s _before_ the first Sendnb
               if (xxeCount+count > max){
-                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                   "- count out of range", &rc);
                 return rc;
               }
@@ -4457,7 +4457,7 @@ int XXE::optimize(
               xxeRecvnbInfo->size = bufferSize;
               // slip in the associated memcpy()s _after_ the waitOnAllRecvnb
               if (xxeCount+count > max){
-                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                   "- count out of range", &rc);
                 return rc;
               }
@@ -4550,7 +4550,7 @@ int XXE::growStream(
   }
 
   if (increase < 0){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- increase must be positive", &rc);
     return rc;
   }
@@ -4560,7 +4560,7 @@ int XXE::growStream(
   try{
     streamNew = new StreamElement[maxNew];
   }catch (...){
-    ESMC_LogDefault.ESMC_LogAllocError(&rc);
+    ESMC_LogDefault.AllocError(&rc);
     return rc;
   }
   memcpy(streamNew, stream, count*sizeof(StreamElement)); // copy prev. elements
@@ -4606,7 +4606,7 @@ int XXE::growStorage(
   }
 
   if (increase < 0){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- increase must be positive", &rc);
     return rc;
   }
@@ -4616,7 +4616,7 @@ int XXE::growStorage(
   try{
     storageNew = new char*[storageMaxCountNew];
   }catch (...){
-    ESMC_LogDefault.ESMC_LogAllocError(&rc);
+    ESMC_LogDefault.AllocError(&rc);
     return rc;
   }
   memcpy(storageNew, storage, storageCount*sizeof(char *)); //copy prev elements
@@ -4662,7 +4662,7 @@ int XXE::growCommhandle(
   }
 
   if (increase < 0){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- increase must be positive", &rc);
     return rc;
   }
@@ -4672,7 +4672,7 @@ int XXE::growCommhandle(
   try{
     commhandleNew = new VMK::commhandle**[commhandleMaxCountNew];
   }catch (...){
-    ESMC_LogDefault.ESMC_LogAllocError(&rc);
+    ESMC_LogDefault.AllocError(&rc);
     return rc;
   }
   memcpy(commhandleNew, commhandle, commhandleCount*sizeof(VMK::commhandle **));
@@ -4718,7 +4718,7 @@ int XXE::growXxeSub(
   }
 
   if (increase < 0){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- increase must be positive", &rc);
     return rc;
   }
@@ -4728,7 +4728,7 @@ int XXE::growXxeSub(
   try{
     xxeSubListNew = new XXE*[xxeSubMaxCountNew];
   }catch (...){
-    ESMC_LogDefault.ESMC_LogAllocError(&rc);
+    ESMC_LogDefault.AllocError(&rc);
     return rc;
   }
   memcpy(xxeSubListNew, xxeSubList, xxeSubCount*sizeof(XXE *));
@@ -4768,7 +4768,7 @@ int XXE::incCount(
   
   ++count;
   if (count >= max)
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(growStream(1000), 
+    if (ESMC_LogDefault.MsgFoundError(growStream(1000), 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
   
   // return successfully
@@ -4803,7 +4803,7 @@ int XXE::incStorageCount(
   
   ++storageCount;
   if (storageCount >= storageMaxCount)
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(growStorage(10000), 
+    if (ESMC_LogDefault.MsgFoundError(growStorage(10000), 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
   
   // return successfully
@@ -4838,7 +4838,7 @@ int XXE::incCommhandleCount(
   
   ++commhandleCount;
   if (commhandleCount >= commhandleMaxCount)
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(growCommhandle(1000), 
+    if (ESMC_LogDefault.MsgFoundError(growCommhandle(1000), 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
   
   // return successfully
@@ -4873,7 +4873,7 @@ int XXE::incXxeSubCount(
   
   ++xxeSubCount;
   if (xxeSubCount >= xxeSubMaxCount)
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(growXxeSub(1000), 
+    if (ESMC_LogDefault.MsgFoundError(growXxeSub(1000), 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
   
   // return successfully

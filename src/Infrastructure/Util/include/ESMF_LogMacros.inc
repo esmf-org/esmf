@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.4 2008/04/05 03:39:01 cdeluca Exp $
+ $Id: ESMF_LogMacros.inc,v 1.5 2008/07/29 01:34:55 rosalind Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,19 +32,19 @@
 #define ESMC_FILENAME __FILE__
 #endif
 
-#define ESMC_LogAllocError(rc) \
-ESMC_LogAllocError(ESMC_CONTEXT,rc)
+#define AllocError(rc) \
+AllocError(ESMC_CONTEXT,rc)
 
-#define ESMC_LogFoundError(status,rc) \
-ESMC_LogFoundError(status,ESMC_CONTEXT,rc)
+#define FoundError(status,rc) \
+FoundError(status,ESMC_CONTEXT,rc)
 
-#define ESMC_LogMsgAllocError(msg,rc) \
-ESMC_LogMsgAllocError(msg,ESMC_CONTEXT,rc)
+#define MsgAllocError(msg,rc) \
+MsgAllocError(msg,ESMC_CONTEXT,rc)
 
-#define ESMC_LogMsgFoundError(status,msg,rc) \
-ESMC_LogMsgFoundError(status,msg,ESMC_CONTEXT,rc)
+#define MsgFoundError(status,msg,rc) \
+MsgFoundError(status,msg,ESMC_CONTEXT,rc)
 
-#define ESMC_LogWrite(msg,logtype) \
-ESMC_LogWrite(msg,logtype,ESMC_CONTEXT)
+#define Write(msg,logtype) \
+Write(msg,logtype,ESMC_CONTEXT)
 
 #endif

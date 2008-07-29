@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.1 2008/07/21 23:25:53 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.2 2008/07/29 01:34:56 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,14 +44,14 @@
 #include "ESMC_Base.h" 
 
 // LogErr
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
 
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.1 2008/07/21 23:25:53 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.2 2008/07/29 01:34:56 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -167,12 +167,12 @@ void VMIdDestroy(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   if (vmID==NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Invalid vmID", rc);
     return; // bail out
   }
   if (vmID->vmKey==NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Invalid vmID->vmKey", rc);
     return; // bail out
   }
@@ -212,7 +212,7 @@ ESMC_Logical VMIdCompare(
 //EOPI
 //-----------------------------------------------------------------------------
   if (vmID1==NULL || vmID2==NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Invalid vmIDs", NULL);
     return ESMF_FALSE;    // bail out
   }
@@ -249,7 +249,7 @@ int VMIdCopy(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   if (vmIDdst==NULL || vmIDsrc==NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Invalid vmIDs", &rc);
     return rc;    // bail out
   }
@@ -288,13 +288,13 @@ void VMIdPrint(
 //-----------------------------------------------------------------------------
   printf("ESMCI::VMIdPrint:\n");
   if (vmID==NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Invalid vmID", NULL);
     return; // bail out
   }
   printf("vmID located at: %p\n", vmID);
   if (vmID->vmKey==NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Invalid vmID->vmKey", NULL);
     return; // bail out
   }
@@ -361,7 +361,7 @@ void *VM::startup(
   // [if pthread_create() is used -- which depends on the VMKPlan].
   // Translate startup() error code into ESMF error code.
   if (localrc){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_SYS, " - VMKernel could not "
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_SYS, " - VMKernel could not "
     "create additional pthreads! Please check stack limit.", rc);
     return NULL;  // bail out if pthreads could not be created
   }
@@ -381,7 +381,7 @@ void *VM::startup(
 
     // The VMId is that same for all PETs spawned by local PET
     VMId vmID = VMIdCreate(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return NULL;  // bail out on error
     // vmKey part of the vmID gets set to the appropriate bit pattern:
     // ->  set the bit in vmKey for each VAS in which this VM exists <-
@@ -433,7 +433,7 @@ void *VM::startup(
           ++matchTableBound;
         }else{
           // No more space left -> fatal error!
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_MEM,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM,
             " - VM ran out of matchTable space.", rc);
           return NULL;  // bail out on error
         }
@@ -441,13 +441,13 @@ void *VM::startup(
       matchTable_tid[index]  = vmp->myvms[j]->getMypthid();   // pthid
       matchTable_vm[index]   = vmp->myvms[j];                 // ptr to this VM
       matchTable_vmID[index] = VMIdCreate(&localrc);          // vmID
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return NULL;  // bail out on error
       VMIdCopy(&(matchTable_vmID[index]), &vmID);             // deep copy
     }
     delete [] emptyList;
     VMIdDestroy(&vmID, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return NULL;  // bail out on error
   }
   
@@ -507,11 +507,11 @@ void VM::shutdown(
         // found matching entry in the matchTable
         matchTable_vm[i] = NULL;  // mark this entry invalid
         VMIdDestroy(&(matchTable_vmID[i]), &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           rc)) return;
       }else{
         // matchTable must be corrupted
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_MEMC,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_MEMC,
           " - VM matchTable corrupted.", rc);
         return;
       }
@@ -634,7 +634,7 @@ int VM::getPETMatchPET(
       for (int i=0; i<j; i++)
         petMatchList[i] = tempMatchList[i];
     else{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- Provided petMatchList too small", &rc);
       return rc;
     }
@@ -678,7 +678,7 @@ VMId *VM::getVMId(
     for (i=0; i<matchTableBound; i++)
       if (matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine VMId", rc);
       return NULL;
     }
@@ -719,7 +719,7 @@ int VM::sendVMId(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   if (vmID==ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Invalid VMId", &rc);
     return rc;
   }
@@ -760,7 +760,7 @@ int VM::recvVMId(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   if (vmID==ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Invalid VMId", &rc);
     return rc;
   }
@@ -798,14 +798,14 @@ int VM::print() const{
 
   // return with errors for NULL pointer
   if (this == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       " - 'this' pointer is NULL.", &rc);
     return rc;
   }
   // print info about the ESMCI::VM object
   printf("--- ESMCI::VM::print() start ---\n");
   VMId *vmid = getVMId(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
     &rc)) return rc;
   VMIdPrint(vmid);
   VMK::print();
@@ -841,7 +841,7 @@ int VM::validate()const{
 
   // check against NULL pointer
   if (this == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       " - 'this' pointer is NULL.", &rc);
     return rc;
   }
@@ -887,7 +887,7 @@ void VM::getArgs(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   if (GlobalVM==NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Invalid GlobalVM", rc);
     return;
   }
@@ -927,7 +927,7 @@ VM *VM::getGlobal(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   if (GlobalVM==NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Invalid GlobalVM", rc);
     return NULL;
   }
@@ -969,7 +969,7 @@ VM *VM::getCurrent(
     for (i=0; i<matchTableBound; i++)
       if (matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", rc);
       return NULL;
     }
@@ -1013,7 +1013,7 @@ VMId *VM::getCurrentID(
     for (i=0; i<matchTableBound; i++)
       if (matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", rc);
       return NULL;
     }
@@ -1055,7 +1055,7 @@ VM *VM::initialize(
 
   GlobalVM = new VM;
   if (GlobalVM==NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- GlobalVM allocation failure", rc);
     return NULL;
   }
@@ -1126,7 +1126,7 @@ void VM::finalize(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   if (GlobalVM==NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Invalid GlobalVM", rc);
     return;
   }
@@ -1142,7 +1142,7 @@ void VM::finalize(
   matchTableBound = 0;
   // delete the VM association table
   VMIdDestroy(&(matchTable_vmID[0]), &localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return;
 //gjtNotYet  delete [] matchTable_tid;
 //gjtNotYet  delete [] matchTable_vm;
@@ -1179,7 +1179,7 @@ void VM::abort(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   if (GlobalVM==NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Invalid GlobalVM", rc);
     return;
   }

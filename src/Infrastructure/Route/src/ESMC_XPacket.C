@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.69 2008/04/05 03:38:55 cdeluca Exp $
+// $Id: ESMC_XPacket.C,v 1.70 2008/07/29 01:34:54 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 //
  // insert any higher level, 3rd party or system includes here
  #include <ESMC_Start.h>
- #include <ESMC_LogErr.h>
+ #include <ESMCI_LogErr.h>
 
 // for printf
 #include <stdio.h>
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.69 2008/04/05 03:38:55 cdeluca Exp $";
+              "$Id: ESMC_XPacket.C,v 1.70 2008/07/29 01:34:54 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -873,7 +873,7 @@
        // break;
 
        default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                      "Unknown TypeKind", NULL);
         return NULL;
         }
@@ -946,7 +946,7 @@
        // break;
 
        default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                      "Unknown TypeKind", NULL);
         return NULL;
         }
@@ -1082,7 +1082,7 @@
       case 5:
       default:
         sprintf(msgbuf, "no code to handle xpacket rank %d yet\n", this->rank);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
         return (rc);
     } 
 
@@ -1330,7 +1330,7 @@
 
       default:
         sprintf(msgbuf, "no code to handle %d AxisIndices yet\n", size_axisindex);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
         return (rc);
         break;
     } 
@@ -1480,7 +1480,7 @@
     switch (rank) {
       case 1:
         sprintf(msgbuf, "no code to handle %d rank yet\n", rank);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
         return (rc);
       case 2:
         {
@@ -1502,7 +1502,7 @@
       case 5:
       default:
         sprintf(msgbuf, "no code to handle %d rank yet\n", rank);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
         return (rc);
     } 
 
@@ -1642,7 +1642,7 @@
     sprintf(tempbuf,"%d)\n", rep_count[i]); 
     strcat(msgbuf, tempbuf);
     
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
 
     return ESMF_SUCCESS;
@@ -1693,7 +1693,7 @@
     sprintf(tempbuf,"%d)\n", rep_count[i]); 
     strcat(msgbuf, tempbuf);
     
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
 
     return ESMF_SUCCESS;

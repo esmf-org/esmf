@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.2 2008/07/09 14:20:17 rosalind Exp $
+// $Id: ESMC_Calendar.C,v 1.3 2008/07/29 01:34:54 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_Calendar.h"
 #include "ESMC_Interface.h"
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Calendar.C,v 1.2 2008/07/09 14:20:17 rosalind Exp $";
+static const char *const version = "$Id: ESMC_Calendar.C,v 1.3 2008/07/29 01:34:54 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -60,7 +60,7 @@ ESMC_Calendar ESMC_CalendarCreate(
 
   calendar.ptr = (void *)
      ESMCI::ESMCI_CalendarCreate(nameLen, name, calendarType, &localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
     calendar.ptr = NULL;
     return calendar;  // bail out
   }
@@ -83,7 +83,7 @@ int ESMC_CalendarPrint(ESMC_Calendar calendar){
 
   ESMCI::Calendar *IntCalendar = (ESMCI::Calendar*)(calendar.ptr);
   localrc = IntCalendar->print();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
     calendar.ptr = NULL;
     return rc;  // bail out
   }
@@ -99,7 +99,7 @@ int ESMC_CalendarDestroy(ESMC_Calendar* pCalendar){
    
   ESMCI::Calendar **intCalendar = (ESMCI::Calendar**)(pCalendar);
   localrc = ESMCI::ESMCI_CalendarDestroy(intCalendar);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){
     pCalendar = NULL;
     return rc;  // bail out
   }

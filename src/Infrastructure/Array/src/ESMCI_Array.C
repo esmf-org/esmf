@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.20 2008/07/24 21:16:48 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.21 2008/07/29 01:34:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,14 +35,14 @@
 #include "ESMC_Start.h"
 
 // LogErr headers
-#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.20 2008/07/24 21:16:48 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.21 2008/07/29 01:34:47 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -211,7 +211,7 @@ Array::Array(
         // obtain indexList for this DE and dim
         const int *indexList =
           distgrid->getIndexListPDimPLocalDe(i, j+1, &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           rc)) return;
         // check if this dim has a contiguous index list
         for (int k=1; k<indexCountPDimPDe[de*dimCount+j]; k++){
@@ -228,7 +228,7 @@ Array::Array(
   ESMC_BaseSetName(NULL, "Array");
    
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", rc);
     return;
   }
@@ -352,12 +352,12 @@ Array *Array::create(
   // check the input and get the information together to call construct()
   // larrayListArg -> typekind/rank
   if (larrayListArg == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to larrayList argument", rc);
     return ESMC_NULL_POINTER;
   }
   if (larrayCount < 1){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
       "- The larrayList argument must provide at least one LocalArray object",
       rc);
     return ESMC_NULL_POINTER;
@@ -366,19 +366,19 @@ Array *Array::create(
   int rank = larrayListArg[0]->ESMC_LocalArrayGetRank();
   for (int i=1; i<larrayCount; i++){
     if (larrayListArg[0]->ESMC_LocalArrayGetTypeKind() != typekind){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- TypeKind mismatch in the elements of larrayList argument", rc);
       return ESMC_NULL_POINTER;
     }
     if (larrayListArg[0]->ESMC_LocalArrayGetRank() != rank){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- Rank mismatch in the elements of larrayList argument", rc);
       return ESMC_NULL_POINTER;
     }
   }
   // distgrid -> delayout, dimCount
   if (distgrid == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to distgrid", rc);
     return ESMC_NULL_POINTER;
   }
@@ -394,12 +394,12 @@ Array *Array::create(
   }
   if (distgridToArrayMap != NULL){
     if (distgridToArrayMap->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- distgridToArrayMap array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (distgridToArrayMap->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- distgridToArrayMap and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -413,13 +413,13 @@ Array *Array::create(
       check[i] = false; // initialize
     for (int i=0; i<dimCount; i++){
       if (distgridToArrayMapArray[i] < 0 || distgridToArrayMapArray[i] > rank){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- invalid distgridToArrayMap element", rc);
         return ESMC_NULL_POINTER;
       }
       if (distgridToArrayMapArray[i] > 0){
         if(check[distgridToArrayMapArray[i]-1]){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
             "- invalid distgridToArrayMap element", rc);
           return ESMC_NULL_POINTER;
         }
@@ -462,12 +462,12 @@ Array *Array::create(
   int *undistLBoundArray = NULL; // reset
   if (undistLBoundArg != NULL){
     if (undistLBoundArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistLBound array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (undistLBoundArg->extent[0] != tensorCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- undistLBound, arrayspec, distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -475,7 +475,7 @@ Array *Array::create(
   }else if (tensorCount > 0){
     int *undistLBound = new int[rank];
     localrc = larrayListArg[0]->ESMC_LocalArrayGetLbounds(rank, undistLBound);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
       return ESMC_NULL_POINTER;
     undistLBoundArrayAllocFlag = 1;  // set
     undistLBoundArray = new int[tensorCount];
@@ -491,12 +491,12 @@ Array *Array::create(
   int *undistUBoundArray = NULL; // reset
   if (undistUBoundArg != NULL){
     if (undistUBoundArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistUBound array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (undistUBoundArg->extent[0] != tensorCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- undistUBound, arrayspec, distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -504,7 +504,7 @@ Array *Array::create(
   }else if (tensorCount > 0){
     int *undistUBound = new int[rank];
     localrc = larrayListArg[0]->ESMC_LocalArrayGetUbounds(rank, undistUBound);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
       return ESMC_NULL_POINTER;
     undistUBoundArrayAllocFlag = 1;  // set
     undistUBoundArray = new int[tensorCount];
@@ -540,7 +540,7 @@ Array *Array::create(
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
   if (localDeCount != larrayCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Mismatch in localDeCount between larrayList argument and DELayout", 
       rc);
     return ESMC_NULL_POINTER;
@@ -573,7 +573,7 @@ Array *Array::create(
         // check that this DE/dim has a contiguous index list
         const int *contigFlagPDimPDe = distgrid->getContigFlagPDimPDe();
         if (!contigFlagPDimPDe[de*dimCount+j]){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_VALID,
             "- Cannot use non-contiguous decomposition for pseudo global"
             " index space", rc);
           return ESMC_NULL_POINTER;
@@ -581,7 +581,7 @@ Array *Array::create(
         // obtain indexList for this DE and dim
         const int *indexList =
           distgrid->getIndexListPDimPLocalDe(i, j+1, &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
           return ESMC_NULL_POINTER;
         // shift bounds of exclusive region to match indexList[0]
         if (indexCountPDimPDe[de*dimCount+j]){
@@ -601,12 +601,12 @@ Array *Array::create(
   int *computationalEdgeUWidth = new int[dimCount];
   if (computationalEdgeLWidthArg != NULL){
     if (computationalEdgeLWidthArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalEdgeLWidth array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (computationalEdgeLWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- computationalEdgeLWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -619,12 +619,12 @@ Array *Array::create(
   }
   if (computationalEdgeUWidthArg != NULL){
     if (computationalEdgeUWidthArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalEdgeUWidth array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (computationalEdgeUWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- computationalEdgeUWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -640,12 +640,12 @@ Array *Array::create(
   int *computationalUBound = new int[dimCount*localDeCount];
   if (computationalLWidthArg != NULL){
     if (computationalLWidthArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalLWidth array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (computationalLWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- computationalLWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -660,12 +660,12 @@ Array *Array::create(
   }
   if (computationalUWidthArg != NULL){
     if (computationalUWidthArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalUWidth array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (computationalUWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- computationalUWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -684,14 +684,14 @@ Array *Array::create(
       if (int k=distgridToPackedArrayMap[i]){
         if (computationalEdgeLWidth[k-1]){
           bool onEdgeL = distgrid->isLocalDeOnEdgeL(j, i+1, &localrc);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+          if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMF_ERR_PASSTHRU,rc)) return ESMC_NULL_POINTER;
           if (onEdgeL)
             computationalLBound[j*dimCount+k-1] -= computationalEdgeLWidth[k-1];
         }
         if (computationalEdgeUWidth[k-1]){
           bool onEdgeU = distgrid->isLocalDeOnEdgeU(j, i+1, &localrc);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+          if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMF_ERR_PASSTHRU,rc)) return ESMC_NULL_POINTER;
           if (onEdgeU)
             computationalUBound[j*dimCount+k-1] += computationalEdgeUWidth[k-1];
@@ -710,18 +710,18 @@ Array *Array::create(
   if (totalLWidthArg != NULL){
     totalLBoundFlag = 1;  // set
     if (totalLWidthArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- totalLWidth array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (totalLWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- totalLWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
     for (int i=0; i<dimCount; i++){
       if (totalLWidthArg->array[i] < 0){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- totalLWidth may only contain positive values", rc);
         return ESMC_NULL_POINTER;
       }
@@ -738,18 +738,18 @@ Array *Array::create(
   if (totalUWidthArg != NULL){
     totalUBoundFlag = 1;  // set
     if (totalUWidthArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- totalUWidth array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (totalUWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- totalUWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
     for (int i=0; i<dimCount; i++){
       if (totalUWidthArg->array[i] < 0){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- totalUWidth may only contain positive values", rc);
         return ESMC_NULL_POINTER;
       }
@@ -776,22 +776,22 @@ Array *Array::create(
     if (totalLBound[i] <= totalUBound[i]){
       // DE/dim is associated with DistGrid elements
       if (computationalLBound[i] < totalLBound[i]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaLBound / totalLBound mismatch", rc);
         return ESMC_NULL_POINTER;
       }
       if (computationalLBound[i] > totalUBound[i]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaLBound / totalUBound mismatch", rc);
         return ESMC_NULL_POINTER;
       }
       if (computationalUBound[i] < totalLBound[i]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaUBound / totalLBound mismatch", rc);
         return ESMC_NULL_POINTER;
       }
       if (computationalUBound[i] > totalUBound[i]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaUBound / totalUBound mismatch", rc);
         return ESMC_NULL_POINTER;
       }
@@ -812,7 +812,7 @@ Array *Array::create(
         // distributed dimension
         if (temp_counts[jj] < 
           totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
             "- LocalArray does not accommodate requested element count", rc);
           return ESMC_NULL_POINTER;
         }
@@ -859,7 +859,7 @@ Array *Array::create(
         // non-distributed dimension
         if (temp_counts[jj] < 
           undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
             "- LocalArray does not accommodate requested element count", rc);
           return ESMC_NULL_POINTER;
         }
@@ -875,7 +875,7 @@ Array *Array::create(
     larrayList[i] = larrayListArg[i]->
       ESMC_LocalArrayAdjust(copyflag, temp_larrayLBound, temp_larrayUBound,
         &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }
   delete [] temp_counts;
@@ -890,11 +890,11 @@ Array *Array::create(
       tensorElementCount, undistLBoundArray, undistUBoundArray, staggerLoc,
       vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray,
       distgridToPackedArrayMap, indexflag, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
     // allocation error
-    ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", rc);  
     return ESMC_NULL_POINTER;
   }
   
@@ -915,7 +915,7 @@ Array *Array::create(
   if (undistUBoundArrayAllocFlag) delete [] undistUBoundArray;
   
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", rc);
     return ESMC_NULL_POINTER;
   }
@@ -972,19 +972,19 @@ Array *Array::create(
   // check the input and get the information together to call construct()
   // arrayspec -> typekind/rank
   if (arrayspec == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to arrayspec", rc);
     return ESMC_NULL_POINTER;
   }
   ESMC_TypeKind typekind = arrayspec->getTypeKind(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
     return ESMC_NULL_POINTER;
   int rank = arrayspec->getRank(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
     return ESMC_NULL_POINTER;
   // distgrid -> delayout, dimCount
   if (distgrid == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to distgrid", rc);
     return ESMC_NULL_POINTER;
   }
@@ -1000,12 +1000,12 @@ Array *Array::create(
   }
   if (distgridToArrayMap != NULL){
     if (distgridToArrayMap->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- distgridToArrayMap array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (distgridToArrayMap->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- distgridToArrayMap and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -1019,13 +1019,13 @@ Array *Array::create(
       check[i] = false; // initialize
     for (int i=0; i<dimCount; i++){
       if (distgridToArrayMapArray[i] < 0 || distgridToArrayMapArray[i] > rank){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- invalid distgridToArrayMap element", rc);
         return ESMC_NULL_POINTER;
       }
       if (distgridToArrayMapArray[i] > 0){
         if(check[distgridToArrayMapArray[i]-1]){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
             "- invalid distgridToArrayMap element", rc);
           return ESMC_NULL_POINTER;
         }
@@ -1064,13 +1064,13 @@ Array *Array::create(
   // check for undistLBound and undistUBound arguments and that they match
   // dimCount, rank
   if (tensorCount > 0 && undistLBoundArg == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Valid undistLBound argument required to create Array with tensor dims",
       rc);
     return ESMC_NULL_POINTER;
   }
   if (tensorCount > 0 && undistUBoundArg == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Valid undistUBound argument required to create Array with tensor dims",
       rc);
     return ESMC_NULL_POINTER;
@@ -1078,12 +1078,12 @@ Array *Array::create(
   int *undistLBoundArray = NULL; // reset
   if (undistLBoundArg != NULL){
     if (undistLBoundArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistLBound array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (undistLBoundArg->extent[0] != tensorCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- undistLBound, arrayspec, distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -1092,12 +1092,12 @@ Array *Array::create(
   int *undistUBoundArray = NULL; // reset
   if (undistUBoundArg != NULL){
     if (undistUBoundArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- undistUBound array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (undistUBoundArg->extent[0] != tensorCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- undistUBound, arrayspec, distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -1154,7 +1154,7 @@ Array *Array::create(
         // check that this DE/dim has a contiguous index list
         const int *contigFlagPDimPDe = distgrid->getContigFlagPDimPDe();
         if (!contigFlagPDimPDe[de*dimCount+j]){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_VALID,
             "- Cannot use non-contiguous decomposition for pseudo global"
             " index space", rc);
           return ESMC_NULL_POINTER;
@@ -1162,7 +1162,7 @@ Array *Array::create(
         // obtain indexList for this DE and dim
         const int *indexList =
           distgrid->getIndexListPDimPLocalDe(i, j+1, &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
           return ESMC_NULL_POINTER;
         // shift bounds of exclusive region to match indexList[0]
         if (indexCountPDimPDe[de*dimCount+j]){
@@ -1182,12 +1182,12 @@ Array *Array::create(
   int *computationalEdgeUWidth = new int[dimCount];
   if (computationalEdgeLWidthArg != NULL){
     if (computationalEdgeLWidthArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalEdgeLWidth array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (computationalEdgeLWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- computationalEdgeLWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -1200,12 +1200,12 @@ Array *Array::create(
   }
   if (computationalEdgeUWidthArg != NULL){
     if (computationalEdgeUWidthArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalEdgeUWidth array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (computationalEdgeUWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- computationalEdgeUWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -1221,12 +1221,12 @@ Array *Array::create(
   int *computationalUBound = new int[dimCount*localDeCount];
   if (computationalLWidthArg != NULL){
     if (computationalLWidthArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalLWidth array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (computationalLWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- computationalLWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -1241,12 +1241,12 @@ Array *Array::create(
   }
   if (computationalUWidthArg != NULL){
     if (computationalUWidthArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalUWidth array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (computationalUWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- computationalUWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
@@ -1265,14 +1265,14 @@ Array *Array::create(
       if (int k=distgridToPackedArrayMap[i]){
         if (computationalEdgeLWidth[k-1]){
           bool onEdgeL = distgrid->isLocalDeOnEdgeL(j, i+1, &localrc);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+          if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, rc)) return ESMC_NULL_POINTER;
           if (onEdgeL)
             computationalLBound[j*dimCount+k-1] -= computationalEdgeLWidth[k-1];
         }
         if (computationalEdgeUWidth[k-1]){
           bool onEdgeU = distgrid->isLocalDeOnEdgeU(j, i+1, &localrc);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+          if (ESMC_LogDefault.MsgFoundError(localrc,
             ESMF_ERR_PASSTHRU,rc)) return ESMC_NULL_POINTER;
           if (onEdgeU)
             computationalUBound[j*dimCount+k-1] += computationalEdgeUWidth[k-1];
@@ -1288,18 +1288,18 @@ Array *Array::create(
   int *totalUBound = new int[dimCount*localDeCount];
   if (totalLWidthArg != NULL){
     if (totalLWidthArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- totalLWidth array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (totalLWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- totalLWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
     for (int i=0; i<dimCount; i++){
       if (totalLWidthArg->array[i] < 0){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- totalLWidth may only contain positive values", rc);
         return ESMC_NULL_POINTER;
       }
@@ -1315,18 +1315,18 @@ Array *Array::create(
   }
   if (totalUWidthArg != NULL){
     if (totalUWidthArg->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- totalUWidth array must be of rank 1", rc);
       return ESMC_NULL_POINTER;
     }
     if (totalUWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- totalUWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
     for (int i=0; i<dimCount; i++){
       if (totalUWidthArg->array[i] < 0){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- totalUWidth may only contain positive values", rc);
         return ESMC_NULL_POINTER;
       }
@@ -1353,22 +1353,22 @@ Array *Array::create(
     if (totalLBound[i] <= totalUBound[i]){
       // DE/dim is associated with DistGrid elements
       if (computationalLBound[i] < totalLBound[i]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaLBound / totalLBound mismatch", rc);
         return ESMC_NULL_POINTER;
       }
       if (computationalLBound[i] > totalUBound[i]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaLBound / totalUBound mismatch", rc);
         return ESMC_NULL_POINTER;
       }
       if (computationalUBound[i] < totalLBound[i]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaUBound / totalLBound mismatch", rc);
         return ESMC_NULL_POINTER;
       }
       if (computationalUBound[i] > totalUBound[i]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaUBound / totalUBound mismatch", rc);
         return ESMC_NULL_POINTER;
       }
@@ -1403,7 +1403,7 @@ Array *Array::create(
     larrayList[i] = ESMC_LocalArray::ESMC_LocalArrayCreate(rank, typekind,
       temp_counts, temp_larrayLBound, temp_larrayUBound, NULL, ESMC_DATA_REF,
       NULL, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }
   delete [] temp_counts;
@@ -1418,11 +1418,11 @@ Array *Array::create(
       tensorElementCount, undistLBoundArray, undistUBoundArray, staggerLoc,
       vectorDim, distgridToArrayMapArray, arrayToDistGridMapArray,
       distgridToPackedArrayMap, indexflag, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
     // allocation error
-    ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", rc);  
     return ESMC_NULL_POINTER;
   }
   
@@ -1441,7 +1441,7 @@ Array *Array::create(
   delete [] vectorDim;
   
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", rc);
     return ESMC_NULL_POINTER;
   }
@@ -1488,7 +1488,7 @@ Array *Array::create(
       arrayOut = new Array();
     }catch(...){
       // allocation error
-      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::Array.", rc);  
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", rc);  
       return ESMC_NULL_POINTER;
     }
     // copy all scalar members and reference members
@@ -1511,7 +1511,7 @@ Array *Array::create(
       arrayOut->larrayList[i] =
         ESMC_LocalArray::ESMC_LocalArrayCreate(arrayIn->larrayList[i],
         &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return ESMC_NULL_POINTER;
     }
     // determine the base addresses of the local arrays:
@@ -1580,7 +1580,7 @@ Array *Array::create(
     // invalidate the name for this Array object in the Base class
     arrayOut->ESMC_BaseSetName(NULL, "Array");
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", rc);
     return ESMC_NULL_POINTER;
   }
@@ -1619,7 +1619,7 @@ int Array::destroy(
 
   // return with errors for NULL pointer
   if (array == ESMC_NULL_POINTER || *array == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Array", &rc);
     return rc;
   }
@@ -1629,7 +1629,7 @@ int Array::destroy(
   *array = ESMC_NULL_POINTER;
   
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
     return rc;
   }
@@ -1754,7 +1754,7 @@ SeqIndex Array::getSequenceIndexExclusive(
   int decompSeqIndex;
   decompSeqIndex = distgrid->getSequenceIndexLocalDe(localDe, decompIndex,
     &localrc);  
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return seqIndex;
   seqIndex.decompSeqIndex = decompSeqIndex;
   
@@ -1834,7 +1834,7 @@ SeqIndex Array::getSequenceIndexPatch(
   int decompSeqIndex;
   decompSeqIndex = distgrid->getSequenceIndexPatch(patch, decompIndex, 0,
     &localrc);  
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return seqIndex;
   seqIndex.decompSeqIndex = decompSeqIndex;
   
@@ -1892,20 +1892,20 @@ int Array::setComputationalLWidth(
   // check computationalLWidthArg input and process
   if (computationalLWidthArg != NULL){
     if (computationalLWidthArg->dimCount != 2){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalLWidth array must be of rank 2", &rc);
       return rc;
     }
     int dimCount = distgrid->getDimCount();
     if (computationalLWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- first dim of computationalLWidth argument must be of size dimCount",
         &rc);
       return rc;
     }
     int localDeCount = delayout->getLocalDeCount();
     if (computationalLWidthArg->extent[1] != localDeCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- second dim of computationalLWidth argument must be of size "
         "localDeCount", &rc);
       return rc;
@@ -1915,12 +1915,12 @@ int Array::setComputationalLWidth(
       computationalLBoundNew[i] = exclusiveLBound[i]
         - computationalLWidthArg->array[i];
       if (computationalLBoundNew[i] < totalLBound[i]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaLWidth below totalLBound -> not updated", &rc);
         return rc;
       }
       if (computationalLBoundNew[i] > totalUBound[i]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaLWidth above totalUBound -> not updated", &rc);
         return rc;
       }
@@ -1966,20 +1966,20 @@ int Array::setComputationalUWidth(
   // check computationalUWidthArg input and process
   if (computationalUWidthArg != NULL){
     if (computationalUWidthArg->dimCount != 2){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- computationalUWidth array must be of rank 2", &rc);
       return rc;
     }
     int dimCount = distgrid->getDimCount();
     if (computationalUWidthArg->extent[0] != dimCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- first dim of computationalUWidth argument must be of size dimCount",
         &rc);
       return rc;
     }
     int localDeCount = delayout->getLocalDeCount();
     if (computationalUWidthArg->extent[1] != localDeCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- second dim of computationalUWidth argument must be of size "
         "localDeCount", &rc);
       return rc;
@@ -1989,12 +1989,12 @@ int Array::setComputationalUWidth(
       computationalLBoundNew[i] = exclusiveLBound[i]
         - computationalUWidthArg->array[i];
       if (computationalLBoundNew[i] < totalLBound[i]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaUWidth below totalLBound -> not updated", &rc);
         return rc;
       }
       if (computationalLBoundNew[i] > totalUBound[i]){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaUWidth above totalUBound -> not updated", &rc);
         return rc;
       }
@@ -2052,12 +2052,12 @@ bool Array::match(
   
   // return with errors for NULL pointer
   if (array1 == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Array", rc);
     return matchResult;
   }
   if (array2 == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Array", rc);
     return matchResult;
   }
@@ -2085,7 +2085,7 @@ bool Array::match(
   // compare the distgrid members
   matchResult = DistGrid::match(array1->getDistGrid(), array2->getDistGrid(),
     &localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return rc;
   if (matchResult==false){
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -2145,7 +2145,7 @@ int Array::print()const{
 
   // return with errors for NULL pointer
   if (this == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Array", &rc);
     return rc;
   }
@@ -2224,7 +2224,7 @@ int Array::validate()const{
 
   // check against NULL pointer
   if (this == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
        " - 'this' pointer is NULL.", &rc);
     return rc;
   }
@@ -2278,7 +2278,7 @@ int Array::serialize(
 
   // Check if buffer has enough free memory to hold object
   if ((*length - *offset) < sizeof(Array)){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "Buffer too short to add an Array object", &rc);
     return rc;
   }
@@ -2287,11 +2287,11 @@ int Array::serialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize the DistGrid
   localrc = distgrid->serialize(buffer, length, offset);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize Array meta data
   r=*offset%8;
@@ -2367,7 +2367,7 @@ int Array::deserialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   localrc = ESMC_Base::ESMC_Deserialize(buffer, offset);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Deserialize the DistGrid
   distgrid = DistGrid::deserialize(buffer, offset);
@@ -2465,7 +2465,7 @@ int Array::gather(
 
   // return with errors for NULL pointer
   if (this == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Array", &rc);
     return rc;
   }
@@ -2473,7 +2473,7 @@ int Array::gather(
   // by default use the currentVM for vm
   if (vm == ESMC_NULL_POINTER){
     vm = VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
   }
 
@@ -2487,7 +2487,7 @@ int Array::gather(
     patch = *patchArg;
   int patchCount = distgrid->getPatchCount();
   if (patch < 1 || patch > patchCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
       "- Specified patch out of bounds", &rc);
     return rc;
   }
@@ -2495,23 +2495,23 @@ int Array::gather(
 
   // get minIndexPDim and maxIndexPDim for patch
   const int *minIndexPDim = distgrid->getMinIndexPDimPPatch(patch, &localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   const int *maxIndexPDim = distgrid->getMaxIndexPDimPPatch(patch, &localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
   // only rootPet checks for consistency of input, others listen
   if (localPet == rootPet){
     // check consistency of input information: shape = (typekind, rank, extents)
     if (typekindArg != typekind){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- TypeKind mismatch between array argument and Array object", &rc);
       vm->broadcast(&rc, sizeof(int), rootPet);
       return rc;
     }
     if (rankArg != rank){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Type mismatch between array argument and Array object", &rc);
       vm->broadcast(&rc, sizeof(int), rootPet);
       return rc;
@@ -2523,7 +2523,7 @@ int Array::gather(
         // decomposed dimension
         --j;  // shift to basis 0
         if (counts[i] != maxIndexPDim[j] - minIndexPDim[j] + 1){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
           vm->broadcast(&rc, sizeof(int), rootPet);
           return rc;
@@ -2532,7 +2532,7 @@ int Array::gather(
         // tensor dimension
         if (counts[i] != undistUBound[tensorIndex] - undistLBound[tensorIndex]
           + 1){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
           vm->broadcast(&rc, sizeof(int), rootPet);
           return rc;
@@ -2545,7 +2545,7 @@ int Array::gather(
   }else{
     // not rootPet receive status from rootPet
     vm->broadcast(&localrc, sizeof(int), rootPet);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       "- rootPet exited with error", &rc)) return rc;
   }
 
@@ -2588,7 +2588,7 @@ int Array::gather(
         if (localrc){
           char *message = new char[160];
           sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
             message, &rc);
           delete [] message;
           return rc;
@@ -2699,7 +2699,7 @@ int Array::gather(
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         message, &rc);
       delete [] message;
       return rc;
@@ -2733,7 +2733,7 @@ int Array::gather(
               &(commhList[commhListCount]), localPet, vm);
             if (commhList[commhListCount] != NULL)
               ++commhListCount;
-            if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            if (ESMC_LogDefault.MsgFoundError(localrc,
               ESMF_ERR_PASSTHRU, &rc)) return rc;
           }
         } // j
@@ -2832,7 +2832,7 @@ int Array::gather(
               &(commhList[commhListCount]), rootPet, vm);
             if (commhList[commhListCount] != NULL)
               ++commhListCount;
-            if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            if (ESMC_LogDefault.MsgFoundError(localrc,
               ESMF_ERR_PASSTHRU, &rc)) return rc;
           }
         } // j
@@ -2906,7 +2906,7 @@ int Array::scatter(
 
   // return with errors for NULL pointer
   if (this == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Array", &rc);
     return rc;
   }
@@ -2914,7 +2914,7 @@ int Array::scatter(
   // by default use the currentVM for vm
   if (vm == ESMC_NULL_POINTER){
     vm = VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
   }
 
@@ -2927,7 +2927,7 @@ int Array::scatter(
     patch = *patchArg;
   int patchCount = distgrid->getPatchCount();
   if (patch < 1 || patch > patchCount){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
       "- Specified patch out of bounds", &rc);
     return rc;
   }
@@ -2935,23 +2935,23 @@ int Array::scatter(
 
   // get minIndexPDim and maxIndexPDim for patch
   const int *minIndexPDim = distgrid->getMinIndexPDimPPatch(patch, &localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   const int *maxIndexPDim = distgrid->getMaxIndexPDimPPatch(patch, &localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
   // only rootPet checks for consistency of input, others listen
   if (localPet == rootPet){
     // check consistency of input information: shape = (typekind, rank, extents)
     if (typekindArg != typekind){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- TypeKind mismatch between array argument and Array object", &rc);
       vm->broadcast(&rc, sizeof(int), rootPet);
       return rc;
     }
     if (rankArg != rank){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Type mismatch between array argument and Array object", &rc);
       vm->broadcast(&rc, sizeof(int), rootPet);
       return rc;
@@ -2963,7 +2963,7 @@ int Array::scatter(
         // decomposed dimension
         --j;  // shift to basis 0
         if (counts[i] != maxIndexPDim[j] - minIndexPDim[j] + 1){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
           vm->broadcast(&rc, sizeof(int), rootPet);
           return rc;
@@ -2972,7 +2972,7 @@ int Array::scatter(
         // tensor dimension
         if (counts[i] != undistUBound[tensorIndex] - undistLBound[tensorIndex]
           + 1){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Extent mismatch between array argument and Array object", &rc);
           vm->broadcast(&rc, sizeof(int), rootPet);
           return rc;
@@ -2985,7 +2985,7 @@ int Array::scatter(
   }else{
     // not rootPet receive status from rootPet
     vm->broadcast(&localrc, sizeof(int), rootPet);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       "- rootPet exited with error", &rc)) return rc;
   }
 
@@ -3032,7 +3032,7 @@ int Array::scatter(
               &(commhList[commhListCount]), localPet, vm);
             if (commhList[commhListCount] != NULL)
               ++commhListCount;
-            if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            if (ESMC_LogDefault.MsgFoundError(localrc,
               ESMF_ERR_PASSTHRU, &rc)) return rc;
           }
         } // j
@@ -3118,7 +3118,7 @@ int Array::scatter(
         if (localrc){
           char *message = new char[160];
           sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
             message, &rc);
           delete [] message;
           return rc;
@@ -3150,7 +3150,7 @@ int Array::scatter(
               &(commhList[commhListCount]), rootPet, vm);
             if (commhList[commhListCount] != NULL)
               ++commhListCount;
-            if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            if (ESMC_LogDefault.MsgFoundError(localrc,
               ESMF_ERR_PASSTHRU, &rc)) return rc;
           }
         } // j
@@ -3181,7 +3181,7 @@ int Array::scatter(
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         message, &rc);
       delete [] message;
       return rc;
@@ -3344,25 +3344,25 @@ int Array::redistStore(
 
   // every Pet must provide srcArray and dstArray
   if (srcArray == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to srcArray", &rc);
     return rc;
   }
   if (dstArray == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to dstArray", &rc);
     return rc;
   }
   // srcArray and dstArray may not point to the identical Array object
   if (srcArray == dstArray){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- srcArray and dstArray must not be identical", &rc);
     return rc;
   }
   
   // get the current VM and VM releated information
   VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
@@ -3371,7 +3371,7 @@ int Array::redistStore(
   if (factor != NULL){
     // must define a valid typekind
     if (typekindFactor == ESMF_NOKIND){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- must specify valid typekindFactor on PETs that provide factor", &rc);
       return rc;
     }
@@ -3379,7 +3379,7 @@ int Array::redistStore(
       && typekindFactor != ESMC_TYPEKIND_I8
       && typekindFactor != ESMC_TYPEKIND_R4
       && typekindFactor != ESMC_TYPEKIND_R8){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- method not implemented for specified typekindFactor", &rc);
       return rc;
     }
@@ -3407,7 +3407,7 @@ int Array::redistStore(
       // check following elements against the typekindFactors and tensorMixFlag
       if (typekindList[i] != ESMF_NOKIND){
         if (typekindFactor != typekindList[i]){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
             "- TypeKind mismatch between PETs", &rc);
           return rc;
         }
@@ -3463,7 +3463,7 @@ int Array::redistStore(
     for (int i=1; i<factorPetCount; i++){
       char *factorPtr = factorLocalList + factorSize * factorPetList[i];
       if (memcmp(factorLocal, factorPtr, factorSize) != 0){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
           "- Factor mismatch between PETs", &rc);
         return rc;
       }
@@ -3492,7 +3492,7 @@ int Array::redistStore(
     for (int i=0; i<dstArray->distgrid->getPatchCount(); i++)
       dstElementCount += dstElementCountPPatch[i];
     if (srcElementCount != dstElementCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- srcArray and dstArray must provide identical number of exclusive"
         " elements", &rc);
       return rc;
@@ -3545,7 +3545,7 @@ int Array::redistStore(
     // src and dst Arrays must be of same rank
     int rank = srcArray->getRank();
     if (rank != dstArray->getRank()){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- in transpose mode srcArray and dstArray must be of same rank", &rc);
       return rc;
     }
@@ -3553,7 +3553,7 @@ int Array::redistStore(
     // src and dst Arrays must be have same number of patches
     int patchCount = srcArray->distgrid->getPatchCount();
     if (patchCount != dstArray->distgrid->getPatchCount()){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- in transpose mode srcArray and dstArray must have same number of"
         " patches", &rc);
       return rc;
@@ -3561,12 +3561,12 @@ int Array::redistStore(
 
     // check srcToDstTransposeMap input
     if (srcToDstTransposeMap->dimCount != 1){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- srcToDstTransposeMap must be of rank 1", &rc);
       return rc;
     }
     if (srcToDstTransposeMap->extent[0] != rank){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- srcToDstTransposeMap must provide rank values", &rc);
       return rc;
     }
@@ -3578,7 +3578,7 @@ int Array::redistStore(
         if (srcToDstTransposeMap->array[j] == i+1) break;
       if (j==rank){
         // did not find (i+1) value in transpose map
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "- srcToDstTransposeMap values must be unique and within range:"
           " [1,..,rank].", &rc);
         return rc;
@@ -3669,7 +3669,7 @@ fprintf(stderr, "%d start:%d, size:%d\n", localPet, localStart[i], localSize[i])
 fprintf(stderr, "%d, %d\n", srcSize, dstSize);
 #endif
         if (srcSize != dstSize){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
             "- in transpose mode the size of srcArray and dstArray dimensions"
             " must pairwise match", &rc);
           return rc;
@@ -3795,7 +3795,7 @@ printf("factorIndexListIndex=%d (%d, %d) (%d, %d, %d, %d)\n",
   // precompute sparse matrix multiplication
   localrc = sparseMatMulStore(srcArray, dstArray, routehandle, typekindFactor,
     factorList, factorListCount, factorIndexList);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
   // garbage collection
@@ -3854,7 +3854,7 @@ int Array::redist(
   // implemented via sparseMatMul
   localrc = sparseMatMul(srcArray, dstArray, routehandle, ESMF_REGION_TOTAL,
     checkflag);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
   // return successfully
@@ -3892,7 +3892,7 @@ int Array::redistRelease(
   
   // implemented via sparseMatMul
   localrc = sparseMatMulRelease(routehandle);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
   // return successfully
@@ -4438,7 +4438,7 @@ int Array::sparseMatMulStore(
   
   // get the current VM and VM releated information
   VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
@@ -4459,19 +4459,19 @@ int Array::sparseMatMulStore(
   
   // every Pet must provide srcArray and dstArray
   if (srcArray == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to srcArray", &rc);
     return rc;
   }
   if (dstArray == NULL){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to dstArray", &rc);
     return rc;
   }
   
   // srcArray and dstArray may not point to the identical Array object
   if (srcArray == dstArray){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- srcArray and dstArray must not be identical", &rc);
     return rc;
   }
@@ -4481,30 +4481,30 @@ int Array::sparseMatMulStore(
   if (factorListCount > 0){
     // must provide valid factorList and factorIndexList args
     if (factorIndexList == NULL){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
         "- Not a valid pointer to factorIndexList array", &rc);
       return rc;
     }
     if (factorIndexList->dimCount != 2){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "- factorIndexList array must be of rank 2", &rc);
       return rc;
     }
     if (factorIndexList->extent[0] != 2 && factorIndexList->extent[0] != 4){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- first dimension of factorIndexList array must be of size 2 or 4",
         &rc);
       return rc;
     }
     if (factorIndexList->extent[1] != factorListCount){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "- second dimension of factorIndexList does not match factorListCount",
         &rc);
       return rc;
     }
     // must define a valid typekind
     if (typekindFactors == ESMF_NOKIND){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- must specify valid typekindFactors on PETs that provide factorList",
         &rc);
       return rc;
@@ -4513,7 +4513,7 @@ int Array::sparseMatMulStore(
       && typekindFactors != ESMC_TYPEKIND_I8
       && typekindFactors != ESMC_TYPEKIND_R4
       && typekindFactors != ESMC_TYPEKIND_R8){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- method not implemented for specified typekindFactors", &rc);
       return rc;
     }
@@ -4550,12 +4550,12 @@ int Array::sparseMatMulStore(
       // check following elements against the typekindFactors and tensorMixFlag
       if (typekindList[i] != ESMF_NOKIND){
         if (typekindFactors != typekindList[i]){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
             "- TypeKind mismatch between PETs", &rc);
           return rc;
         }
         if (tensorMixFlag != tensorMixFlagList[i]){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
             "- Mismatch between PETs in size of first dimension of"
             " factorIndexList array", &rc);
           return rc;
@@ -4568,7 +4568,7 @@ int Array::sparseMatMulStore(
   
   // check that factorPetCount at least 1
   if (factorPetCount < 1){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- at least one PET must provide a valid factorList", &rc);
     // garbage collection before bail out
     delete [] factorPetList;
@@ -4589,7 +4589,7 @@ int Array::sparseMatMulStore(
   // check that if tensorMixFlag is not set that the tensorElementCount matches
   if (!tensorMixFlag){
     if (srcArray->getTensorElementCount() != dstArray->getTensorElementCount()){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- factorIndexList without tensor mixing requires matching srcArray and"
         " dstArray tensorElementCount", &rc);
       // garbage collection before bail out
@@ -4998,7 +4998,7 @@ int Array::sparseMatMulStore(
       if (srcTensorSeqIndex < 1 || srcTensorSeqIndex >
         srcTensorElementCountEff){
         // srcTensorSeqIndex outside srcArray bounds
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "- factorIndexList contains srcTensorSeqIndex outside srcArray"
           " bounds", &rc);
         return rc;
@@ -5010,7 +5010,7 @@ int Array::sparseMatMulStore(
     }while (iMin != iMax);
     if (!foundFlag){
       // srcSeqIndex lies outside srcArray bounds
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- factorIndexList contains srcSeqIndex outside srcArray bounds", &rc);
       return rc;
     }
@@ -5753,7 +5753,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       if (dstTensorSeqIndex < 1 || dstTensorSeqIndex >
         dstTensorElementCountEff){
         // dstTensorSeqIndex outside dstArray bounds
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "- factorIndexList contains dstTensorSeqIndex outside dstArray"
           " bounds", &rc);
         return rc;
@@ -5765,7 +5765,7 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }while (iMin != iMax);
     if (!foundFlag){
       // dstSeqIndex lies outside dstArray bounds
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- factorIndexList contains dstSeqIndex outside dstArray bounds", &rc);
       return rc;
     }
@@ -6545,26 +6545,26 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 
   // create and initialize the RouteHandle
   *routehandle = ESMC_RouteHandleCreate(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // todo: I have no idea what some of these settings do, just copied it for now
   // todo: from what I saw being set in ESMF_IArrayHaloStoreIndex()
   // todo: All I need here is a valid RouteHandle so I can attach an XXE object.
   localrc =
     (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYSPARSEMATMULHANDLE);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   localrc = (*routehandle)->ESMC_RouteHandleSetRouteCount(1);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   localrc = (*routehandle)->ESMC_RouteHandleSetRMapType(ESMC_1TO1HANDLEMAP);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   localrc = (*routehandle)->ESMC_RouteHandleSetTVCount(0);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   localrc = (*routehandle)->ESMC_RouteHandleSetTVMapType(ESMC_NOHANDLEMAP);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
   // allocate XXE and attach to RouteHandle
@@ -6572,11 +6572,11 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   try{
     xxe = new XXE(vm, 1000, 10000, 1000);
   }catch (...){
-    ESMC_LogDefault.ESMC_LogAllocError(&rc);
+    ESMC_LogDefault.AllocError(&rc);
     return rc;
   }
   localrc = (*routehandle)->ESMC_RouteHandleSetStorage(xxe);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // set typekind in xxe which is used to check Arrays before ASMM execution 
   xxe->typekind[0] = typekindFactors;
@@ -6616,11 +6616,11 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   xxeWtimerInfo->relativeWtimerId = 0;
   xxeWtimerInfo->relativeWtimerXXE = NULL;
   localrc = xxe->incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
   localrc = xxe->incStorageCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // </XXE profiling element>
 #endif
@@ -6709,7 +6709,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     localDeFactorList[j] = new char[localDeFactorCount * dataSizeFactors];
     xxe->storage[xxe->storageCount] = localDeFactorList[j]; // xxe garb. coll.
     localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     for (int i=0; i<diffPartnerDeCount[j]; i++){
       dstInfoTable[j][i] = new DstInfo[partnerDeCount[j][i]];
@@ -6775,11 +6775,11 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     xxeWtimerInfo->relativeWtimerId = 0;
     xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
     localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
 #endif
@@ -6793,7 +6793,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       buffer[j][i] = new char[partnerDeCount[j][i] * dataSizeSrc];
       xxe->storage[xxe->storageCount] = buffer[j][i]; // xxe garbage collection
       localrc = xxe->incStorageCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       int srcDe = partnerDeList[i];
       int srcPet;   //TODO: DE-based comms
@@ -6812,12 +6812,12 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       xxeRecvnbInfo->commhandle = new VMK::commhandle*;
       *(xxeRecvnbInfo->commhandle) = new VMK::commhandle;
       localrc = xxe->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       // keep track of commhandles for xxe garbage collection
       xxe->commhandle[xxe->commhandleCount] = xxeRecvnbInfo->commhandle;
       localrc = xxe->incCommhandleCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
     } // for i - diffPartnerDeCount[j]
         
@@ -6834,11 +6834,11 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     xxeWtimerInfo->relativeWtimerId = 0;
     xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
     localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
 #endif
@@ -6969,11 +6969,11 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     xxeWtimerInfo->relativeWtimerId = 0;
     xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
     localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
 #endif
@@ -7033,7 +7033,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         char *buffer = new char[partnerDeCount[i] * dataSizeSrc];
         xxe->storage[xxe->storageCount] = buffer; // for xxe garbage collection
         localrc = xxe->incStorageCount();
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
 #define USEmemCpySrcRRA___disable
 #ifdef USEmemCpySrcRRA
@@ -7052,7 +7052,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
           xxeMemCpySrcRRAInfo->size = byteCount;
           xxeMemCpySrcRRAInfo->rraIndex = j; // localDe index into srcArray
           localrc = xxe->incCount();
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+          if (ESMC_LogDefault.MsgFoundError(localrc, 
             ESMF_ERR_PASSTHRU, &rc)) return rc;
           bufferPointer += byteCount;
         }
@@ -7070,18 +7070,18 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         xxeMemGatherSrcRRAInfo->rraOffsetList = rraOffsetList;
         xxe->storage[xxe->storageCount] = rraOffsetListChar; // f xxe garb coll.
         localrc = xxe->incStorageCount();
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
         char *countListChar = new char[count*sizeof(int)];
         int *countList = (int *)countListChar;
         xxeMemGatherSrcRRAInfo->countList = countList;
         xxe->storage[xxe->storageCount] = countListChar; // for xxe garb coll.
         localrc = xxe->incStorageCount();
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
         int xxeIndex = xxe->count;  // need this beyond the increment
         localrc = xxe->incCount();
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        if (ESMC_LogDefault.MsgFoundError(localrc, 
           ESMF_ERR_PASSTHRU, &rc)) return rc;
         // try typekind specific memGatherSrcRRA
         switch (typekindSrc){
@@ -7106,7 +7106,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         }
         double dt_tk;
         localrc = xxe->exec(rraCount, rraList, 0x0, &dt_tk, xxeIndex, xxeIndex);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         // try byte option for memGatherSrcRRA
         xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::BYTE;
@@ -7117,7 +7117,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         double dt_byte;
         localrc = xxe->exec(rraCount, rraList, 0x0, &dt_byte, xxeIndex, 
           xxeIndex);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
 #if 0        
 printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
@@ -7174,10 +7174,10 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       *(xxeCommhandleInfo->commhandle) = new VMK::commhandle;
       xxe->commhandle[xxe->commhandleCount] = xxeCommhandleInfo->commhandle;
       localrc = xxe->incCommhandleCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       localrc = xxe->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       delete [] linIndexContigBlockList;
     } // for i - diffPartnerDeCount
@@ -7207,11 +7207,11 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     xxeWtimerInfo->relativeWtimerId = 0;
     xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
     localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
 #endif
@@ -7239,11 +7239,11 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     xxeWtimerInfo->relativeWtimerId = 0;
     xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
     localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
 #endif
@@ -7256,7 +7256,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       xxe->stream[xxe->count].predicateBitField = 0x1;
       xxeElement = &(xxe->stream[xxe->count]);
       localrc = xxe->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       xxeZeroSuperScalarRRAInfo =
         (XXE::ZeroSuperScalarRRAInfo *)xxeElement;
@@ -7285,7 +7285,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       xxeZeroSuperScalarRRAInfo->rraOffsetList = rraOffsetList;
       xxe->storage[xxe->storageCount] = rraOffsetListChar; // garb coll.
       localrc = xxe->incStorageCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       
       for (int kk=0; kk<termCount; kk++){
@@ -7307,11 +7307,11 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     xxeWtimerInfo->relativeWtimerId = 0;
     xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
     localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
 #endif
@@ -7334,11 +7334,11 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     xxeWtimerInfo->relativeWtimerId = 0;
     xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
     localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
 #endif
@@ -7356,19 +7356,19 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     char *completeFlagChar = new char[diffPartnerDeCount[j]*sizeof(int)];
     xxeWaitOnAnyIndexSubInfo->completeFlag = (int *)completeFlagChar;
     localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeChar; // xxe garbCo
     localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = indexChar; // xxe garbCo
     localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = completeFlagChar; // xxe garbCo
     localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     
     for (int k=0; k<diffPartnerDeCount[j]; k++){
@@ -7381,7 +7381,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       XXE *xxeSub = xxeWaitOnAnyIndexSubInfo->xxe[k];
       xxe->xxeSubList[xxe->xxeSubCount] = xxeSub; // xxe garbage collection
       localrc = xxe->incXxeSubCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
 
 #ifdef ASMMPROFILE
@@ -7397,12 +7397,12 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       xxeWtimerInfo->relativeWtimerId = 0;
       xxeWtimerInfo->relativeWtimerXXE = xxe; // reference back into main XXE
       localrc = xxeSub->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       xxeSub->storage[xxeSub->storageCount] =
         xxeWtimerInfo->timerString; // xxe garbCo
       localrc = xxeSub->incStorageCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       // </XXE profiling element>
 #endif
@@ -7420,12 +7420,12 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       xxeWtimerInfo->relativeWtimerId = 0;
       xxeWtimerInfo->relativeWtimerXXE = xxe; // reference back into main XXE
       localrc = xxeSub->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       // xxe garb coll
       xxeSub->storage[xxeSub->storageCount] = xxeWtimerInfo->timerString;
       localrc = xxeSub->incStorageCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       // </XXE profiling element>
 #endif
@@ -7497,13 +7497,13 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         xxeProductSumScalarRRAInfo->rraIndex = srcLocalDeCount
           + j; // localDe index into dstArray shifted by srcArray localDeCount
         localrc = xxeSub->incCount();
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        if (ESMC_LogDefault.MsgFoundError(localrc, 
           ESMF_ERR_PASSTHRU, &rc)) return rc;
       } // kk - partnerDeCount[j][k]
 #else
       int xxeIndex = xxeSub->count;  // need this beyond the increment
       localrc = xxeSub->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
 
       // try super-scalar "+=*" operation in XXE stream
@@ -7569,14 +7569,14 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       xxeProductSumSuperScalarRRAInfo->rraOffsetList = rraOffsetList;
       xxeSub->storage[xxeSub->storageCount] = rraOffsetListChar; // garb coll.
       localrc = xxeSub->incStorageCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       char *factorListChar = new char[termCount*sizeof(void *)];
       void **factorList = (void **)factorListChar;
       xxeProductSumSuperScalarRRAInfo->factorList = factorList;
       xxeSub->storage[xxeSub->storageCount] = factorListChar; // garb coll.
       localrc = xxeSub->incStorageCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       char *valueListChar = new char[termCount*sizeof(void *)];
       void **valueList = (void **)valueListChar;
@@ -7639,7 +7639,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       double dt_sScalar;
       localrc = xxeSub->exec(rraCount, rraList, 0x0, &dt_sScalar, xxeIndex,
         xxeIndex);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
       
       // try super-scalar contig "+=*" operation in XXE stream
@@ -7653,7 +7653,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       double dt_sScalarC;
       localrc = xxeSub->exec(rraCount, rraList, 0x0, &dt_sScalarC, xxeIndex,
         xxeIndex);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc)) return rc;
 #if 0
 printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
@@ -7667,7 +7667,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
         xxeProductSumSuperScalarRRAInfo->valueList = valueList;
         xxeSub->storage[xxeSub->storageCount] = valueListChar; // garb coll.
         localrc = xxeSub->incStorageCount();
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+        if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
       }else{
         // use productSumSuperScalarContigRRA
@@ -7691,12 +7691,12 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
       xxeWtimerInfo->relativeWtimerId = 0;
       xxeWtimerInfo->relativeWtimerXXE = xxe; // reference back into main XXE
       localrc = xxeSub->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       // xxe garb coll
       xxeSub->storage[xxeSub->storageCount] = xxeWtimerInfo->timerString;
       localrc = xxeSub->incStorageCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       // </XXE profiling element>
 #endif
@@ -7720,11 +7720,11 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
     xxeWtimerInfo->relativeWtimerId = 0;
     xxeWtimerInfo->relativeWtimerXXE = NULL;
     localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
     localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     // </XXE profiling element>
 #endif
@@ -7772,11 +7772,11 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   xxeWtimerInfo->relativeWtimerId = 0;
   xxeWtimerInfo->relativeWtimerXXE = NULL;
   localrc = xxe->incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
   localrc = xxe->incStorageCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // </XXE profiling element>
 #endif
@@ -7785,7 +7785,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   xxe->stream[xxe->count].opId = XXE::waitOnAllSendnb;
   xxe->stream[xxe->count].predicateBitField = 0x0;
   localrc = xxe->incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
 
 #ifdef ASMMPROFILE
@@ -7801,11 +7801,11 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   xxeWtimerInfo->relativeWtimerId = 0;
   xxeWtimerInfo->relativeWtimerXXE = NULL;
   localrc = xxe->incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
   localrc = xxe->incStorageCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // </XXE profiling element>
 #endif
@@ -7823,11 +7823,11 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   xxeWtimerInfo->relativeWtimerId = 0;
   xxeWtimerInfo->relativeWtimerXXE = NULL;
   localrc = xxe->incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
   localrc = xxe->incStorageCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // </XXE profiling element>
 #endif
@@ -7835,13 +7835,13 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
 #if 0  
   // optimize the XXE entire stream
   localrc = xxe->optimize();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 #endif 
   
   // get XXE ready for execution
   localrc = xxe->execReady();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
   // garbage collection
@@ -7896,7 +7896,7 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
 #endif
   
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
     return rc;
   }
@@ -7961,7 +7961,7 @@ int Array::sparseMatMul(
   // srcArray and dstArray may not point to the identical Array object
   if (srcArrayFlag && dstArrayFlag){
     if (srcArray == dstArray){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- srcArray and dstArray must not be identical", &rc);
       return rc;
     }
@@ -7978,14 +7978,14 @@ int Array::sparseMatMul(
   if (checkflag==ESMF_TRUE){
     // check that srcArray's typekind matches
     if (srcArrayFlag && (xxe->typekind[1] != srcArray->getTypekind())){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- TypeKind mismatch between srcArray argument and precomputed XXE",
         &rc);
       return rc;
     }
     // check that dstArray's typekind matches
     if (dstArrayFlag && (xxe->typekind[2] != dstArray->getTypekind())){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- TypeKind mismatch between dstArray argument and precomputed XXE",
         &rc);
       return rc;
@@ -8064,7 +8064,7 @@ int Array::sparseMatMul(
   
   // execute XXE stream
   localrc = xxe->exec(rraCount, rraList, filterBitField);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
 #ifdef ASMMTIMING
@@ -8083,7 +8083,7 @@ int Array::sparseMatMul(
 #endif
   
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
     return rc;
   }
@@ -8130,14 +8130,14 @@ int Array::sparseMatMulRelease(
 #ifdef XXEPROFILEPRINT
   // print XXE stream profile
   VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
   for (int pet=0; pet<petCount; pet++){
     if (pet==localPet){
       localrc = xxe->printProfile();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc))
       return rc;
     }
@@ -8152,7 +8152,7 @@ int Array::sparseMatMulRelease(
   routehandle->ESMC_RouteHandleSetStorage(NULL);
   
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
     return rc;
   }
@@ -8438,7 +8438,7 @@ int ESMC_newArray::ESMC_newArrayConstruct(
   delete [] laLength;
 
   // error handling via LogErr
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
     ESMC_NULL_POINTER)) return localrc;
 
   return ESMF_SUCCESS;
@@ -8502,7 +8502,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
   // check that there is a valid larray on rootPET 
   if (localPet == rootPET){
     if (larray == ESMC_NULL_POINTER){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
         "- must supply a valid 'larray' argument on rootPET.", &localrc);
       return localrc;
     }
@@ -8511,13 +8511,13 @@ int ESMC_newArray::ESMC_newArrayScatter(
   if (localPet == rootPET){
     int laRank = larray->ESMC_LocalArrayGetRank();
     if (laRank != rank){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
         "- ranks don't match", &localrc);
       return localrc;
     }
     ESMC_TypeKind laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
     if (laTypeKind != kind){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
         "- kinds don't match", &localrc);
       return localrc;
     }
@@ -8780,26 +8780,26 @@ int ESMC_newArray::ESMC_newArrayScatter(
   // check that the commhandle is clean, if not then exit with error
   int *cc = &(commh->commhandleCount); // to simplyfy usage during this method
   if (*cc != 0){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
       "- commhandle still holds outstanding communication handles.", &localrc);
     return localrc;
   }
   // check that there is a valid larray on rootPET 
   if (larray == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
       "- must supply a valid 'larray' argument on rootPET.", &localrc);
     return localrc;
   }
   // check that t/k/r matches
   int laRank = larray->ESMC_LocalArrayGetRank();
   if (laRank != rank){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
       "- ranks don't match", &localrc);
     return localrc;
   }
   ESMC_TypeKind laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
   if (laTypeKind != kind){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
       "- kinds don't match", &localrc);
     return localrc;
   }
@@ -8954,7 +8954,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
   // check that there is a valid larray on rootPET 
   if (localPet == rootPET){
     if (larray == ESMC_NULL_POINTER){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
         "- must supply a valid 'larray' argument on rootPET.", &localrc);
       return localrc;
     }
@@ -8963,13 +8963,13 @@ int ESMC_newArray::ESMC_newArrayScatter(
   if (localPet == rootPET){
     int laRank = larray->ESMC_LocalArrayGetRank();
     if (laRank != rank){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
         "- ranks don't match", &localrc);
       return localrc;
     }
     ESMC_TypeKind laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
     if (laTypeKind != kind){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
         "- kinds don't match", &localrc);
       return localrc;
     }
@@ -9030,14 +9030,14 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   // check that there is a valid result argument on rootPET 
   if (localPet == rootPET){
     if (result == ESMC_NULL_POINTER){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
         "- must supply a valid 'result' argument on rootPET.", &localrc);
       return localrc;
     }
   }    
   // check that t/k matches (on all PETs!)
   if (dtk != kind){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
       "- kinds don't match", &localrc);
     return localrc;
   }
@@ -9054,7 +9054,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
     localResult = new ESMC_R8;
     break;
   default:
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
       "- data type kind is unknown to VM", &localrc);
     return localrc;
   }
@@ -9233,7 +9233,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
     vmt = vmR8;
     break;
   default:
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
       "- data type kind is unknown to VM", &localrc);
     return localrc;
   }
@@ -9286,14 +9286,14 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   // check that there is a valid result argument on rootPET 
   if (localPet == rootPET){
     if (result == ESMC_NULL_POINTER){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
         "- must supply a valid 'result' argument on rootPET.", &localrc);
       return localrc;
     }
   }    
   // check that t/k matches (on all PETs!)
   if (dtk != kind){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
       "- kinds don't match", &localrc);
     return localrc;
   }
@@ -9358,7 +9358,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   int rootVAS = vm->getVas(rootPET);
   // check that t/k matches (on all PETs!)
   if (dtk != kind){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
       "- kinds don't match", &localrc);
     return localrc;
   }
@@ -9379,7 +9379,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
     size = 8;
     break;
   default:
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
       "- data type kind is unknown", &localrc);
     return localrc;
   }
@@ -9841,7 +9841,7 @@ ESMC_newArray *ESMC_newArrayCreate(
   // check that there is a valid larray on rootPET 
   if (localPet == rootPET){
     if (larray == ESMC_NULL_POINTER){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
         "- must supply a valid 'larray' argument on rootPET.", rc);
       return(ESMC_NULL_POINTER);
     }
@@ -9851,7 +9851,7 @@ ESMC_newArray *ESMC_newArrayCreate(
     array = new ESMC_newArray;
   }
   catch (...) {
-    ESMC_LogDefault.ESMC_LogAllocError(rc);
+    ESMC_LogDefault.AllocError(rc);
     return(ESMC_NULL_POINTER);
   }
   // get info about the LocalArray on rootPET and broadcast it to all PETs
@@ -9985,7 +9985,7 @@ ESMC_newArray *ESMC_newArrayCreate(
 #endif
   
   // error handling via LogErr
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
   // return handle to the newArray object
   return(array);
@@ -10025,7 +10025,7 @@ localrc = ESMC_RC_NOT_IMPL;
     *array = ESMC_NULL_POINTER;
     return(ESMF_SUCCESS);
   }else{
-    ESMC_LogDefault.ESMC_LogWrite("Cannot delete bad newArray object.", 
+    ESMC_LogDefault.Write("Cannot delete bad newArray object.", 
       ESMC_LOG_ERROR);
     return(ESMC_RC_PTR_NULL);
   }
@@ -10384,7 +10384,7 @@ void *ESMC_newArrayScalarReduceThread(
     size = 8;
     break;
   default:
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
       "- data type kind is unknown to VM", &localrc);
     return NULL;
   }

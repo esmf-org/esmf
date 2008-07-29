@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.32 2008/04/05 03:38:54 cdeluca Exp $
+// $Id: ESMC_CommTable.C,v 1.33 2008/07/29 01:34:53 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -30,13 +30,13 @@
 
  // associated class definition file
  #include <ESMC_CommTable.h>
- #include <ESMC_LogErr.h>
+ #include <ESMCI_LogErr.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.32 2008/04/05 03:38:54 cdeluca Exp $";
+            "$Id: ESMC_CommTable.C,v 1.33 2008/07/29 01:34:53 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -370,7 +370,7 @@
       if (partner < 0 || partner >= commcount) {
           sprintf(msgbuf, "CommTable partner value out of range, %d not >= 0 and < %d\n",
                         partner, commcount);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
 
           //fprintf(stderr, "CommTable current values are:\n");
           //this->ESMC_CommTablePrint("");
@@ -450,12 +450,12 @@
 
     sprintf(msgbuf, " myid=%d, decount=%d, commcount=%d\n", myid, decount, commcount);
     printf(msgbuf);
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     for (i=0; i<commcount; i++) {
         if ((commneeded[i] > 0) && !brief) {
             sprintf(msgbuf, " %2d: partner=%2d, needed=%1d\n", 
                              i, commpartner[i], commneeded[i]);
-            //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+            //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
             printf(msgbuf);
         }
     }

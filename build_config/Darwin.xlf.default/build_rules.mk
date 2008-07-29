@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.22 2008/07/23 04:51:54 theurich Exp $
+# $Id: build_rules.mk,v 1.23 2008/07/29 01:34:47 rosalind Exp $
 #
 # Darwin.xlf.default
 #
@@ -83,7 +83,7 @@ ESMF_FPPPREFIX           = -WF,
 # Special debug flags
 #
 ESMF_F90OPTFLAG_G       += -qcheck -qfullpath
-ESMF_CXXOPTFLAG_G       += -qcheck -qfullpath
+ESMF_CXXOPTFLAG_G       += -qcheck -qfullpath -g
 
 ############################################################
 # Blank out variables to prevent rpath encoding

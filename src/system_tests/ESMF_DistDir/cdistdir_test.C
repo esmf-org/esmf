@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// $Id: cdistdir_test.C,v 1.11 2008/07/21 23:25:54 theurich Exp $
+// $Id: cdistdir_test.C,v 1.12 2008/07/29 01:34:58 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 
 #include "ESMCI_VM.h"
 
-#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"     
 #include <GridUtil/include/ESMC_SparseMsgVM.h>
 #include <GridUtil/include/ESMC_Ptypes.h>

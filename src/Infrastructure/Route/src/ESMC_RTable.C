@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.33 2008/04/05 03:38:54 cdeluca Exp $
+// $Id: ESMC_RTable.C,v 1.34 2008/07/29 01:34:53 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -32,13 +32,13 @@
 
 // ESMF headers
 #include "ESMC_Start.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_RTable.C,v 1.33 2008/04/05 03:38:54 cdeluca Exp $";
+            "$Id: ESMC_RTable.C,v 1.34 2008/07/29 01:34:53 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -272,7 +272,7 @@ int compare(const void* item1, const void* item2) {
                                           entry[nvmid].alloccount * sizeof(ESMC_XPacket));
       if (entry[nvmid].xp == NULL) {
 	!printf("Not enough memory to add more XPackets!?\n");
-        ESMC_LogDefault.ESMC_LogAllocError(&rc);
+        ESMC_LogDefault.AllocError(&rc);
         return(rc);
       }
     }
@@ -313,7 +313,7 @@ int compare(const void* item1, const void* item2) {
     if (nvmid < 0 || nvmid > entrycount) {
         sprintf(msgbuf, "nvmid out of range, %d must be between 0 and %d\n", 
 		                                	nvmid, entrycount);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
 
         return(rc);
     }
@@ -351,7 +351,7 @@ int compare(const void* item1, const void* item2) {
     if (nvmid < 0 || nvmid > entrycount) {
         sprintf(msgbuf, "nvmid out of range, %d must be between 0 and %d\n", 
 		                                	nvmid, entrycount);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
 
         return(rc);
     }
@@ -388,7 +388,7 @@ int compare(const void* item1, const void* item2) {
 
     if (xpcount == NULL) {
         sprintf(msgbuf, "bad xpcount argument\n");
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
 
         return(rc);
     }
@@ -524,7 +524,7 @@ int compare(const void* item1, const void* item2) {
     if ((entrycount == 0) && brief) return ESMF_SUCCESS;
 
     sprintf(msgbuf, " entrycount=%d, my_pet=%d\n", entrycount, my_vmid);
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
       
     for(i=0; i<entrycount; i++) {
@@ -532,7 +532,7 @@ int compare(const void* item1, const void* item2) {
         if (entry[i].xpcount == 0) continue;
         sprintf(msgbuf, "%2d: pet=%2d, xpcount=%2d, xpaddr=0x%08lx\n",
                  i, entry[i].vmid, entry[i].xpcount, (ESMC_I8)(entry[i].xp)); 
-        //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+        //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
         printf(msgbuf);
         for (j=0, xptr=&(entry[i].xp[0]); j<entry[i].xpcount; j++, xptr++)
             xptr->ESMC_XPacketPrint(3, options);

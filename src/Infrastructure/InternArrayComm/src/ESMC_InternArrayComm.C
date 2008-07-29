@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArrayComm.C,v 1.12 2008/04/05 03:38:35 cdeluca Exp $
+// $Id: ESMC_InternArrayComm.C,v 1.13 2008/07/29 01:34:51 rosalind Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -31,7 +31,7 @@
 #include <assert.h>
 // associated class definition file
 #include "ESMC_InternArray.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMC_DELayout.h"
 #include "ESMC_InternGrid.h"        // igrid info
 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArrayComm.C,v 1.12 2008/04/05 03:38:35 cdeluca Exp $";
+            "$Id: ESMC_InternArrayComm.C,v 1.13 2008/07/29 01:34:51 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -80,7 +80,7 @@
 
     int rc = ESMC_RC_NOT_IMPL;
 
-    ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
+    ESMC_LogDefault.MsgFoundError(rc,
     "ESMC_ArrayHalo no longer supported; use ESMF_FieldHalo instead\n", &rc);
 
     return rc;
@@ -506,7 +506,7 @@ static int ESMC_newDELayoutGatherArray(
         }
       break;
       default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
                                           "unsupported data type", &rc);
         //printf("no code to handle TypeKind %d yet\n", this->kind);
         return (rc);
@@ -584,7 +584,7 @@ static int ESMC_newDELayoutGatherArray(
     // switch based on array rank
     switch (this->rank) {
       case 1:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
                                           "unsupported data rank", &rc);
         //printf("no code to handle array rank %d yet\n", this->rank);
         return (rc);
@@ -691,13 +691,13 @@ static int ESMC_newDELayoutGatherArray(
         }
       break;
       case 5:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
                                           "unsupported data rank", &rc);
         //printf("no code to handle array rank %d yet\n", this->rank);
         return (rc);
       break;
       default:
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
                                           "unsupported data rank", &rc);
         //printf("no code to handle array rank %d yet\n", this->rank);
         return (rc);

@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "ESMC.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 
 #undef ESMC_METHOD
 #define ESMC_METHOD "main()"

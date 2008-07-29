@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.3 2008/06/27 03:51:21 rosalind Exp $
+// $Id: ESMCI_Clock.C,v 1.4 2008/07/29 01:34:55 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
  #include <stdio.h>
  #include <string.h>
  #include <ctype.h>
- #include <ESMC_LogErr.h>
+ #include <ESMCI_LogErr.h>
  #include <ESMF_LogMacros.inc>
  #include <ESMCI_Alarm.h>
 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.3 2008/06/27 03:51:21 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.4 2008/07/29 01:34:55 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -93,7 +93,7 @@ int Clock::count=0;
       clock = new Clock;
     }
     catch (...) {
-      ESMC_LogDefault.ESMC_LogAllocError(rc);
+      ESMC_LogDefault.AllocError(rc);
       return(ESMC_NULL_POINTER);
     }
 
@@ -110,7 +110,7 @@ int Clock::count=0;
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "clock name %s, length >= ESMF_MAXSTR; truncated.",
                 name);
-        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_WARN);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN);
         // TODO: return ESMF_WARNING when defined
         // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
       }
@@ -162,7 +162,7 @@ int Clock::count=0;
     clock->prevTime = clock->currTime - oneNanosecond;
 
     returnCode = clock->validate();
-    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
     return(clock);
 
  } // end ESMCI_ClockCreate (new)
@@ -198,7 +198,7 @@ int Clock::count=0;
 
     // can't copy a non-existent object
     if (clock == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogWrite("Can't copy a non-existent clock",
+      ESMC_LogDefault.Write("Can't copy a non-existent clock",
                                     ESMC_LOG_ERROR);
       return(ESMC_NULL_POINTER);
     }
@@ -208,12 +208,12 @@ int Clock::count=0;
       clockCopy = new Clock(*clock);
     }
     catch (...) {
-      ESMC_LogDefault.ESMC_LogAllocError(rc);
+      ESMC_LogDefault.AllocError(rc);
       return(ESMC_NULL_POINTER);
     }
 
     returnCode = clockCopy->validate();
-    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
 
     return(clockCopy);
 
@@ -281,7 +281,7 @@ int Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
@@ -302,7 +302,7 @@ int Clock::count=0;
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "clock name %s, length >= ESMF_MAXSTR; truncated.",
                 name);
-        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_WARN);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN);
         // TODO: return ESMF_WARNING when defined
         // rc = ESMF_WARNING;
       }
@@ -348,7 +348,7 @@ int Clock::count=0;
     if (direction != ESMC_NULL_POINTER) this->direction = *direction;
 
     rc = Clock::validate();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc)) {
       // restore original clock values
       *this = saveClock;
     }
@@ -400,7 +400,7 @@ int Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
@@ -418,7 +418,7 @@ int Clock::count=0;
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "clock name %s, "
                 "length >= given character array; truncated.", this->name);
-        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_WARN);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN);
         // TODO: return ESMF_WARNING when defined
         // rc = ESMF_WARNING;
       }
@@ -463,7 +463,7 @@ int Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       calendar);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
+      ESMC_LogDefault.MsgFoundError(rc,
                                          "Time::get(...calendar) failed.",
                                          &rc);
     }
@@ -480,7 +480,7 @@ int Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, calendarType);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
+      ESMC_LogDefault.MsgFoundError(rc,
                                        "Time::get(...calendarType) failed.",
                                        &rc);
     }
@@ -497,7 +497,7 @@ int Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, timeZone);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
+      ESMC_LogDefault.MsgFoundError(rc,
                                          "Time::get(...timeZone) failed.",
                                          &rc);
     }
@@ -546,7 +546,7 @@ int Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
@@ -642,7 +642,7 @@ int Clock::count=0;
                     "trying to report %dth ringing alarm, but given "
                     "ringingAlarmList array can only hold %d.",
                     this->name, j+1, sizeofRingingAlarmList);
-            ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+            ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR);
             rc = ESMF_FAILURE;
           }
         }
@@ -678,7 +678,7 @@ int Clock::count=0;
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", rc);
       return(false);
     }
@@ -723,7 +723,7 @@ int Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
@@ -764,7 +764,7 @@ int Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
@@ -800,7 +800,7 @@ int Clock::count=0;
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", rc);
       return(false);
     }
@@ -836,7 +836,7 @@ int Clock::count=0;
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", rc);
       return(false);
     }
@@ -902,7 +902,7 @@ int Clock::count=0;
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", rc);
       return(false);
     }
@@ -939,7 +939,7 @@ int Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
@@ -983,7 +983,7 @@ int Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
@@ -992,7 +992,7 @@ int Clock::count=0;
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "For alarm name %s, length >= ESMF_MAXSTR, "
                       "truncated.", name);
-      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_WARN);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN);
       // TODO: return ESMF_WARNING when defined
     }
 
@@ -1054,7 +1054,7 @@ int Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
@@ -1111,7 +1111,7 @@ int Clock::count=0;
           char logMsg[ESMF_MAXSTR];
           sprintf(logMsg, "For clock %s, unknown alarm list type %d.",
                   this->name, type);
-          ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+          ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR);
           return(ESMF_FAILURE);
       }
 
@@ -1137,7 +1137,7 @@ int Clock::count=0;
                   "trying to return %dth requested alarm, but given "
                   "alarmList array can only hold %d.",
                   this->name, j+1, sizeofAlarmList);
-          ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+          ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR);
           rc = ESMF_FAILURE;
         }
       }
@@ -1287,7 +1287,7 @@ int Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
@@ -1295,7 +1295,7 @@ int Clock::count=0;
     // set current time to wall clock time
     // TODO:  ensure current time is within startTime and stopTime
     rc = currTime.Time::syncToRealTime();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
     return(Clock::validate());
 
@@ -1330,7 +1330,7 @@ int Clock::count=0;
           alarmList = new ESMCI_AlarmPtr[clock.alarmListCapacity];
         }
         catch (...) {
-          ESMC_LogDefault.ESMC_LogAllocError(ESMC_NULL_POINTER);
+          ESMC_LogDefault.AllocError(ESMC_NULL_POINTER);
           return(*this);  // TODO:  throw exception
         }
         alarmListCapacity = clock.alarmListCapacity;
@@ -1390,7 +1390,7 @@ int Clock::count=0;
  #define ESMC_METHOD "ESMCI::Clock::operator==()"
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
       return(false);
     }
@@ -1424,7 +1424,7 @@ int Clock::count=0;
  #define ESMC_METHOD "ESMCI::Clock::operator!=()"
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
       return(false);
     }
@@ -1496,7 +1496,7 @@ int Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
@@ -1534,21 +1534,21 @@ int Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
 
     // validate required individual properties
-    if(ESMC_LogDefault.ESMC_LogMsgFoundError(timeStep.TimeInterval::validate(),
+    if(ESMC_LogDefault.MsgFoundError(timeStep.TimeInterval::validate(),
                           "timeStep.TimeInterval::validate() failed", &rc) ||
-       ESMC_LogDefault.ESMC_LogMsgFoundError(startTime.Time::validate(),
+       ESMC_LogDefault.MsgFoundError(startTime.Time::validate(),
                                  "startTime.Time::validate() failed", &rc) ||
-       ESMC_LogDefault.ESMC_LogMsgFoundError(refTime.Time::validate(),
+       ESMC_LogDefault.MsgFoundError(refTime.Time::validate(),
                                  "refTime.Time::validate() failed", &rc)   ||
-       ESMC_LogDefault.ESMC_LogMsgFoundError(currTime.Time::validate(),
+       ESMC_LogDefault.MsgFoundError(currTime.Time::validate(),
                                  "currTime.Time::validate() failed", &rc)  ||
-       ESMC_LogDefault.ESMC_LogMsgFoundError(prevTime.Time::validate(),
+       ESMC_LogDefault.MsgFoundError(prevTime.Time::validate(),
                                  "prevTime.Time::validate() failed", &rc)) {
        return(rc);
     }
@@ -1557,13 +1557,13 @@ int Clock::count=0;
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "direction property %d is not ESMF_MODE_FORWARD or "
               "ESMF_MODE_REVERSE", direction);
-      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR);
       return(ESMF_FAILURE);
     }
 
     // validate optional stopTime property if set
     if (stopTimeEnabled) {
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(stopTime.Time::validate(),
+      if(ESMC_LogDefault.MsgFoundError(stopTime.Time::validate(),
                                      "stopTime.Time::validate() failed",
                                      &rc)) return(rc);
 
@@ -1588,7 +1588,7 @@ int Clock::count=0;
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, &startCal);
 
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
+      if(ESMC_LogDefault.MsgFoundError(rc,
          "startTime.Time::get(...startCal) failed.", &rc)) {
         return(rc);   
       }
@@ -1606,19 +1606,19 @@ int Clock::count=0;
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, &stopCal);
 
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
+      if(ESMC_LogDefault.MsgFoundError(rc,
          "stopTime.Time::get(...stopCal) failed.", &rc)) {
         return(rc);   
       }
 
       if (startCal == ESMC_NULL_POINTER || stopCal == ESMC_NULL_POINTER) {
-        ESMC_LogDefault.ESMC_LogWrite("startCal or stopCal is NULL.",
+        ESMC_LogDefault.Write("startCal or stopCal is NULL.",
                                       ESMC_LOG_ERROR);
         return(ESMF_FAILURE);
       }
 
       if (*startCal != *stopCal) {
-        ESMC_LogDefault.ESMC_LogWrite("startCal not equal to stopCal.",
+        ESMC_LogDefault.Write("startCal not equal to stopCal.",
                                       ESMC_LOG_WARN);
         return(ESMC_RC_OBJ_BAD); 
       }
@@ -1631,37 +1631,37 @@ int Clock::count=0;
       // check if current time is out-of-range
       if (stopTime > startTime) {
         if (currTime < startTime || currTime > stopTime) {
-          ESMC_LogDefault.ESMC_LogWrite("currTime out-of-range (startTime to "
+          ESMC_LogDefault.Write("currTime out-of-range (startTime to "
                                         "stopTime).", ESMC_LOG_WARN);
           return(ESMC_RC_VAL_OUTOFRANGE);
         }
         if (currTime == startTime && timeStep < zeroTimeStep) {
-          ESMC_LogDefault.ESMC_LogWrite("timeStep negative for positive "
+          ESMC_LogDefault.Write("timeStep negative for positive "
                                         "startTime to stopTime range).",
                                         ESMC_LOG_WARN);
           return(ESMC_RC_VAL_OUTOFRANGE);
         }
       } else if (stopTime < startTime) {
         if (currTime > startTime || currTime < stopTime) {
-          ESMC_LogDefault.ESMC_LogWrite("currTime out-of-range (startTime to "
+          ESMC_LogDefault.Write("currTime out-of-range (startTime to "
                                         "stopTime).", ESMC_LOG_WARN);
           return(ESMC_RC_VAL_OUTOFRANGE);
         }
         if (currTime == startTime && timeStep > zeroTimeStep) {
-          ESMC_LogDefault.ESMC_LogWrite("timeStep positive for negative "
+          ESMC_LogDefault.Write("timeStep positive for negative "
                                         "startTime to stopTime range).",
                                         ESMC_LOG_WARN);
           return(ESMC_RC_VAL_OUTOFRANGE);
         }
       } else { // stopTime == startTime
-        ESMC_LogDefault.ESMC_LogWrite("stopTime equals startTime.",
+        ESMC_LogDefault.Write("stopTime equals startTime.",
                                       ESMC_LOG_WARN);
         return(ESMC_RC_VAL_WRONG);
       }
 
       // check for zero time step
       if(timeStep == zeroTimeStep) {
-        ESMC_LogDefault.ESMC_LogWrite("timeStep equals zero.", ESMC_LOG_WARN);
+        ESMC_LogDefault.Write("timeStep equals zero.", ESMC_LOG_WARN);
         return(ESMC_RC_VAL_WRONG);
       }
 
@@ -1701,7 +1701,7 @@ int Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
@@ -1848,7 +1848,7 @@ int Clock::count=0;
       alarmList = new ESMCI_AlarmPtr[ESMF_ALARM_BLOCK_SIZE];
     }
     catch (...) {
-      ESMC_LogDefault.ESMC_LogAllocError(ESMC_NULL_POINTER);
+      ESMC_LogDefault.AllocError(ESMC_NULL_POINTER);
       return;
     }
     alarmCount = 0;
@@ -1890,7 +1890,7 @@ int Clock::count=0;
       alarmList = new ESMCI_AlarmPtr[clock.alarmListCapacity];
     }
     catch (...) {
-      ESMC_LogDefault.ESMC_LogAllocError(ESMC_NULL_POINTER);
+      ESMC_LogDefault.AllocError(ESMC_NULL_POINTER);
       return;
     }
     alarmListCapacity = clock.alarmListCapacity;
@@ -1966,7 +1966,7 @@ int Clock::count=0;
     // validate inputs
 
     if (this == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
@@ -1974,7 +1974,7 @@ int Clock::count=0;
     if (alarm == ESMC_NULL_POINTER) {
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "For clock %s, given alarm is NULL.", this->name);
-      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR);
       return(ESMF_FAILURE);
     }
 
@@ -1985,7 +1985,7 @@ int Clock::count=0;
               "re-allocating to hold %d alarms.",
                 this->name, alarmListCapacity, 
                 alarmListCapacity+ESMF_ALARM_BLOCK_SIZE);
-      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_INFO);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOG_INFO);
 
       // re-allocate clock's alarm list to next block size
       Alarm **tempList;
@@ -1993,7 +1993,7 @@ int Clock::count=0;
         tempList = new ESMCI_AlarmPtr[alarmListCapacity + ESMF_ALARM_BLOCK_SIZE];
       }
       catch (...) {
-        ESMC_LogDefault.ESMC_LogAllocError(&rc);
+        ESMC_LogDefault.AllocError(&rc);
         return(rc);
       }
 

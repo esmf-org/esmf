@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.24 2008/07/21 23:25:51 theurich Exp $
+// $Id: ESMC_GridToMesh.C,v 1.25 2008/07/29 01:34:51 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -26,7 +26,7 @@
 #include <Grid/include/ESMCI_Grid.h>
 #include "ESMCI_VM.h"
 
-#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 
 #include "ESMC_Ptypes.h"
@@ -128,7 +128,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh, const std::
    int localrc;
    int rc;
    int me = VM::getCurrent(&localrc)->getLocalPet();
-//   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) // How should I handle ESMF LogError?
+//   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) // How should I handle ESMF LogError?
 //      return;
 
    // Keep track of locally owned, shared and shared, not-locally-owned

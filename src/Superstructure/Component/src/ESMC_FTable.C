@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.33 2008/05/08 02:27:25 theurich Exp $
+// $Id: ESMC_FTable.C,v 1.34 2008/07/29 01:34:57 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ESMC_Start.h"
-#include "ESMC_LogErr.h"
+#include "ESMCI_LogErr.h"
 #include "ESMC_Comp.h"
 #include "ESMC_GridComp.h"
 #include "ESMC_CplComp.h"
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.33 2008/05/08 02:27:25 theurich Exp $";
+           "$Id: ESMC_FTable.C,v 1.34 2008/07/29 01:34:57 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -436,7 +436,7 @@
 
    
     sprintf(msgbuf, "Error: function '%s' not found\n", name);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, msgbuf, &status);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, msgbuf, &status);
 
     return status;
 
@@ -692,7 +692,7 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
             break;
           }
           default:
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
                                          "unknown function type", &status);
             return status;
         }
@@ -889,7 +889,7 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
             break;
           }
           default:
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
                                          "unknown function type", &status);
             return status;
         }
