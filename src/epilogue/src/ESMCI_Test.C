@@ -1,4 +1,4 @@
-// $Id: ESMCI_Test.C,v 1.7 2008/07/29 01:34:57 rosalind Exp $
+// $Id: ESMCI_Test.C,v 1.8 2008/07/30 11:29:52 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,    
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Test.C,v 1.7 2008/07/29 01:34:57 rosalind Exp $";
+static const char *const version = "$Id: ESMCI_Test.C,v 1.8 2008/07/30 11:29:52 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -80,7 +80,7 @@ int Test(
 //EOP
 //-----------------------------------------------------------------------------
   char msgbuf[ESMF_MAXSTR];
-  ESMC_Log *whichLog;
+  ESMCI::LogErr *whichLog;
 
   // TODO: this should be settable by the user
   whichLog = &ESMC_LogDefault;
@@ -138,7 +138,7 @@ int TestEnd(
 //-----------------------------------------------------------------------------
   int rc;
   char msgbuf[ESMF_MAXSTR];
-  ESMC_Log *whichLog;
+  ESMCI::LogErr *whichLog;
 
   // TODO: this should be settable by the user
   whichLog = &ESMC_LogDefault;
@@ -204,7 +204,7 @@ bool TestMaxPETs(
   ESMCI::VM *globalVM;
   char msgbuf[ESMF_MAXSTR], failMsg[ESMF_MAXSTR];
   int numPETs;
-  ESMC_Log *whichLog;
+  ESMCI::LogErr *whichLog;
 
   // TODO: this should be settable by the user
   whichLog = &ESMC_LogDefault;
@@ -276,7 +276,7 @@ bool TestMinPETs(
   ESMCI::VM *globalVM;
   char msgbuf[ESMF_MAXSTR], failMsg[ESMF_MAXSTR];
   int numPETs;
-  ESMC_Log *whichLog;
+  ESMCI::LogErr *whichLog;
 
   // TODO: this should be settable by the user
   whichLog = &ESMC_LogDefault;
@@ -348,7 +348,7 @@ bool TestNumPETs(
   ESMCI::VM *globalVM;
   char msgbuf[ESMF_MAXSTR], failMsg[ESMF_MAXSTR];
   int numPETs;
-  ESMC_Log *whichLog;
+  ESMCI::LogErr *whichLog;
 
   // TODO: this should be settable by the user
   whichLog = &ESMC_LogDefault;
@@ -420,7 +420,7 @@ int TestStart(
   ESMCI::VM *globalVM;
   char msgbuf[ESMF_MAXSTR], failMsg[ESMF_MAXSTR];
   int numPETs;
-  ESMC_Log *whichLog;
+  ESMCI::LogErr *whichLog;
 
   // TODO: this should be settable by the user
   whichLog = &ESMC_LogDefault;

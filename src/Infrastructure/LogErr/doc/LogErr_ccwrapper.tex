@@ -75,7 +75,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}    void FTN(c_esmf_logopenfile)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}         ESMC_Log *log, 
+\begin{verbatim}         LogErr *log, 
          int *numFiles, 
          char name[], 
          int namelen)\end{verbatim}
@@ -120,7 +120,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}      void FTN(c_esmf_logwarnmsg)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}   none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       ESMC_Log *log,
+\begin{verbatim}       LogErr *log,
        int *errCode,
        int *line,
        char file[],
@@ -147,7 +147,7 @@
 \begin{verbatim}       void FTN(c_esmf_logwarn)(
    !RETURN VALUES:
    none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}        ESMC_Log *log,
+\begin{verbatim}        LogErr *log,
         int *errCode,
         int *line,
         char file[],
@@ -243,7 +243,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}      int  FTN(c_esmf_loggetunit)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      A Fortran Unit Number\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}      ESMC_Log *log)\end{verbatim}
+\begin{verbatim}      LogErr *log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -263,7 +263,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}     void FTN(c_esmf_logerrmsg)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}     ESMC_Log *log,
+\begin{verbatim}     LogErr *log,
      int *errCode,
      int *line, 
      char file[],
@@ -290,7 +290,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}      void FTN(c_esmf_logerr)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}      ESMC_Log *log,
+\begin{verbatim}      LogErr *log,
       int *errCode,
       int *line, 
       char file[],

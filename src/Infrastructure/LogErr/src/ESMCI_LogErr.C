@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.80 2008/07/29 01:34:52 rosalind Exp $
+// $Id: ESMCI_LogErr.C,v 1.1 2008/07/30 11:29:44 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 #define ESMC_SUCCESSDEFAULT_ON
 
 //Global Variables
-ESMC_Log ESMC_LogDefault;
+ESMCI::LogErr ESMC_LogDefault;
 FILE* logErrCFilePtr[10];
 int numCFiles=0;
 int logErrFortFile[10];
@@ -50,18 +50,21 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.80 2008/07/29 01:34:52 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr.C,v 1.1 2008/07/30 11:29:44 rosalind Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
 //
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogAllocErr - LogAllocErr
+
+namespace ESMCI{
+
+// !IROUTINE: AllocErr - LogAllocErr
 //
 // !INTERFACE:
 
-bool ESMC_Log::AllocError(
+bool LogErr::AllocError(
 
 // !RETURN VALUE:
 //  none
@@ -83,12 +86,12 @@ bool ESMC_Log::AllocError(
 
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogAllocErr - LogAllocErr
+// !IROUTINE: AllocErr - LogAllocErr
 //
 // !INTERFACE:
 
 
-bool ESMC_Log::AllocError(
+bool LogErr::AllocError(
 
 // !RETURN VALUE:
 //  none
@@ -113,11 +116,11 @@ bool ESMC_Log::AllocError(
 
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogMsgAllocErr - LogAllocErr
+// !IROUTINE: MsgAllocErr - LogAllocErr
 //
 // !INTERFACE:
 
-bool ESMC_Log::MsgAllocError(
+bool LogErr::MsgAllocError(
 
 // !RETURN VALUE:
 //  none
@@ -142,12 +145,12 @@ bool ESMC_Log::MsgAllocError(
 
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogMsgAllocErr - LogAllocErr
+// !IROUTINE: MsgAllocErr - LogAllocErr
 //
 // !INTERFACE:
 
 
-bool ESMC_Log::MsgAllocError(
+bool LogErr::MsgAllocError(
 
 // !RETURN VALUE:
 //  none
@@ -179,7 +182,7 @@ bool ESMC_Log::MsgAllocError(
 //
 // !INTERFACE:
 
-void ESMC_Log::Open(
+void LogErr::Open(
 //
 // !RETURN VALUE:
 //   none
@@ -198,6 +201,8 @@ void ESMC_Log::Open(
 {
     strcpy(nameLogErrFile,filename);
 }   
+
+} // namespace ESMCI
 
 //----------------------------------------------------------------------------
 //
@@ -257,13 +262,15 @@ int ESMC_LogFinalize(
     return ESMF_SUCCESS;
 } 
 
+namespace ESMCI{
+
 //----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: Close - closes log file. 
 //
 // !INTERFACE:
 
-void ESMC_Log::Close(
+void LogErr::Close(
 //
 // ! RETURN VALUE:
 //    none
@@ -288,7 +295,7 @@ void ESMC_Log::Close(
 //
 // !INTERFACE:
 
-bool ESMC_Log::Write(
+bool LogErr::Write(
 
 // !RETURN VALUE:
 //  bool
@@ -320,7 +327,7 @@ bool ESMC_Log::Write(
 //
 // !INTERFACE:
 
-bool ESMC_Log::Write(
+bool LogErr::Write(
 
 // !RETURN VALUE:
 //  bool
@@ -355,7 +362,7 @@ bool ESMC_Log::Write(
 //
 // !INTERFACE:
 
-bool ESMC_Log::FoundError(
+bool LogErr::FoundError(
 
 // !RETURN VALUE:
 //  bool
@@ -394,7 +401,7 @@ bool ESMC_Log::FoundError(
 // !INTERFACE:
 
 
-bool ESMC_Log::FoundError(
+bool LogErr::FoundError(
 
 // !RETURN VALUE:
 //  bool
@@ -435,7 +442,7 @@ bool ESMC_Log::FoundError(
 //
 // !INTERFACE:
 
-bool ESMC_Log::MsgFoundError(
+bool LogErr::MsgFoundError(
 
 // !RETURN VALUE:
 //  bool
@@ -477,7 +484,7 @@ bool ESMC_Log::MsgFoundError(
 //
 // !INTERFACE:
 
-bool ESMC_Log::MsgFoundError(
+bool LogErr::MsgFoundError(
 
 // !RETURN VALUE:
 //  bool
@@ -517,6 +524,8 @@ bool ESMC_Log::MsgFoundError(
     return result;
 }
 
+} // namespace ESMCI
+
 //----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_TimeStamp - ESMC_TimeStamp
@@ -555,6 +564,7 @@ void ESMC_TimeStamp(
     *s=ti.tm_sec;
     *ms=tv.tv_usec;
 }
+
 
 //----------------------------------------------------------------------------
 //BOP

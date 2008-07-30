@@ -1,11 +1,11 @@
-# $Id: makefile,v 1.12 2008/07/29 01:34:52 rosalind Exp $ 
+# $Id: makefile,v 1.13 2008/07/30 11:29:51 rosalind Exp $ 
 
 ALL: build_here 
 
 CFLAGS    += ${MPI_INCLUDE}
 FFLAGS    =
 
-SOURCEC	  = ESMC_LogErr.C
+SOURCEC	  = ESMCI_LogErr.C
 SOURCEF	  = 
 SOURCEH	  = 
 STOREH    = ESMC_LogErr.h ESMCI_LogErr.h ESMC_LogErr.inc

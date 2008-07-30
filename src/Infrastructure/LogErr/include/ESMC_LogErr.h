@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.64 2008/07/29 01:34:52 rosalind Exp $
+// $Id: ESMC_LogErr.h,v 1.65 2008/07/30 11:29:43 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS: ESMC_Log - C++ interface to Log
+// !CLASS: LogErr - C++ interface to Log
 //
 // !DESCRIPTION:
 //

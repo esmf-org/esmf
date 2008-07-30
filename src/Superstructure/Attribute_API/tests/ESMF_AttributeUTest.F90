@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUTest.F90,v 1.10 2008/07/28 04:07:10 rokuingh Exp $
+! $Id: ESMF_AttributeUTest.F90,v 1.11 2008/07/30 11:29:52 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeUTest.F90,v 1.10 2008/07/28 04:07:10 rokuingh Exp $'
+      '$Id: ESMF_AttributeUTest.F90,v 1.11 2008/07/30 11:29:52 rosalind Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -234,7 +234,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting Array attribute (type Fortran logical scalar)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) .eqv. lattrList(1)),   &
         name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
@@ -258,7 +258,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting Array attribute (type Fortran logical array)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult .eqv. lattrList)),   &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -406,7 +406,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting CplComp attribute (type Fortran logical scalar)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) .eqv. lattrList(1)),   &
         name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
@@ -430,7 +430,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting CplComp attribute (type Fortran logical array)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult .eqv. lattrList)),   &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -578,7 +578,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting GrdComp attribute (type Fortran logical scalar)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) .eqv. lattrList(1)),   &
         name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
@@ -602,7 +602,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting GrdComp attribute (type Fortran logical array)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult .eqv. lattrList)),   &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -748,7 +748,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting Field attribute (type Fortran logical scalar)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) .eqv. lattrList(1)),   &
         name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
@@ -772,7 +772,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting Field attribute (type Fortran logical array)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult .eqv. lattrList)),   &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -904,7 +904,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting FieldBundle attribute (type Fortran logical scalar)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) .eqv. lattrList(1)),   &
         name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
@@ -928,7 +928,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting FieldBundle attribute (type Fortran logical array)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult .eqv. lattrList)),   &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1052,7 +1052,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting Grid attribute (type Fortran logical scalar)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) .eqv. lattrList(1)),   &
         name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
@@ -1076,7 +1076,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting Grid attribute (type Fortran logical array)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult .eqv. lattrList)),   &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1224,7 +1224,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting State attribute (type Fortran logical scalar)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) == lattrList(1)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. lattrResult(1) .eqv. lattrList(1)),   &
         name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
@@ -1248,7 +1248,7 @@ defaultvalue = 7;
         rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting State attribute (type Fortran logical array)"
-      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult == lattrList)),   &
+      call ESMF_Test((rc == ESMF_SUCCESS .and. all (lattrResult .eqv. lattrList)),   &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
