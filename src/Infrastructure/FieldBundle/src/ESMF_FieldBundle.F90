@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.1.2.11 2008/07/17 21:49:54 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.1.2.12 2008/07/30 14:40:26 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -3905,7 +3905,7 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleTypeGetInit,btype,rc)
+      !ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleTypeGetInit,btype,rc)
 
       btype%bundlestatus = ESMF_STATUS_INVALID
       call ESMF_BaseDestroy(btype%base, status)
