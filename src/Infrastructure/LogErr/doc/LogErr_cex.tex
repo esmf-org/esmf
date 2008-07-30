@@ -1,4 +1,4 @@
-% $Id: LogErr_cex.tex,v 1.9 2008/07/29 01:34:52 rosalind Exp $
+% $Id: LogErr_cex.tex,v 1.10 2008/07/30 22:17:21 rosalind Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ int main() {
 int *rc;
     
     ESMC_LogSetFilename("log1.txt");
-    ESMC_LogDefault.Write("LogWrite",ESMC_LOG_WARN);
+    ESMC_LogDefault.WriteLog("LogWrite",ESMC_LOG_WARN);
     ESMC_LogDefault.FoundError(ESMF_TRUE,rc);
 	ESMC_LogDefault.MsgFoundError(ESMF_TRUE,"Log Msg Found Error",rc);
     ESMC_LogDefault.AllocError(rc);

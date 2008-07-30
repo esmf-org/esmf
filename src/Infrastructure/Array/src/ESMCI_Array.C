@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.21 2008/07/29 01:34:47 rosalind Exp $
+// $Id: ESMCI_Array.C,v 1.22 2008/07/30 22:17:12 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.21 2008/07/29 01:34:47 rosalind Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.22 2008/07/30 22:17:12 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -10025,7 +10025,7 @@ localrc = ESMC_RC_NOT_IMPL;
     *array = ESMC_NULL_POINTER;
     return(ESMF_SUCCESS);
   }else{
-    ESMC_LogDefault.Write("Cannot delete bad newArray object.", 
+    ESMC_LogDefault.WriteLog("Cannot delete bad newArray object.", 
       ESMC_LOG_ERROR);
     return(ESMC_RC_PTR_NULL);
   }

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.64 2008/07/29 01:34:49 rosalind Exp $
+// $Id: ESMC_Base_F.C,v 1.65 2008/07/30 22:17:14 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.64 2008/07/29 01:34:49 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.65 2008/07/30 22:17:14 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -167,7 +167,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.WriteLog("Base object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
     // for Print, it's not a failure for an uninit object to be printed
@@ -218,7 +218,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.WriteLog("Base object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
   }
@@ -256,7 +256,7 @@ extern "C" {
   *base = new ESMC_Base;
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object error", ESMC_LOG_INFO);
+    ESMC_LogDefault.WriteLog("Base object error", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_FAILURE;
     return;
   }
@@ -295,7 +295,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.WriteLog("Base object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_FAILURE;
     return;
   }

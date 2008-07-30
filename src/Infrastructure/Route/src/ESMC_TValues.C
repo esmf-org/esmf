@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.C,v 1.21 2008/07/29 01:34:54 rosalind Exp $
+// $Id: ESMC_TValues.C,v 1.22 2008/07/30 22:17:27 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TValues.C,v 1.21 2008/07/29 01:34:54 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_TValues.C,v 1.22 2008/07/30 22:17:27 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -398,21 +398,21 @@
     char msgbuf[ESMF_MAXSTR];
   
     sprintf(msgbuf,"TransformValues: \n");
-    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     sprintf(msgbuf,"  number of links: %d\n", numlist);
-    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     sprintf(msgbuf,"  source index:\n");
-    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     srcindex->ESMC_LocalArrayPrint();
     sprintf(msgbuf,"  destination index:\n");
-    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     dstindex->ESMC_LocalArrayPrint();
     sprintf(msgbuf,"  weights:\n");
-    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     weights->ESMC_LocalArrayPrint();
 

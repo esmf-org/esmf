@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.C,v 1.8 2008/07/29 01:34:55 rosalind Exp $
+// $Id: ESMC_Fraction.C,v 1.9 2008/07/30 22:17:31 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Fraction.C,v 1.8 2008/07/29 01:34:55 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.9 2008/07/30 22:17:31 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -440,7 +440,7 @@
         sprintf(logMsg, "For conversion=%lld out-of-range with respect to "
                         "machine limits (INT_MIN=%d to INT_MAX=%d).",
                         conversion, INT_MIN, INT_MAX);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR);
+        ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_ERROR);
         return (ESMF_FAILURE);
     }
 
@@ -1246,7 +1246,7 @@
     if (d == 0) {
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "must have non-zero denominator."); 
-      ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR);
+      ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_ERROR);
       return(ESMF_FAILURE);
     }
 

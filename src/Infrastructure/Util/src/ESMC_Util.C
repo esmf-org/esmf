@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.C,v 1.32 2008/07/29 01:34:56 rosalind Exp $
+// $Id: ESMC_Util.C,v 1.33 2008/07/30 22:17:31 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util.C,v 1.32 2008/07/29 01:34:56 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Util.C,v 1.33 2008/07/30 22:17:31 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
@@ -219,11 +219,11 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
     int rc = ESMC_RC_NOT_IMPL;
 
      if (ai == NULL) 
-        ESMC_LogDefault.Write("Empty (NULL) AxisIndex pointer", 
+        ESMC_LogDefault.WriteLog("Empty (NULL) AxisIndex pointer", 
                                        ESMC_LOG_INFO);
 
      sprintf(msgbuf, "min=%d, max=%d, stride=%d\n", ai->min, ai->max, ai->stride);
-     ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+     ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
 
      rc = ESMF_SUCCESS;
     return rc;

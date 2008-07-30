@@ -1,4 +1,4 @@
-// $Id: ESMC_Util_F.C,v 1.6 2008/07/29 01:34:55 rosalind Exp $
+// $Id: ESMC_Util_F.C,v 1.7 2008/07/30 22:17:30 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Util_F.C,v 1.6 2008/07/29 01:34:55 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Util_F.C,v 1.7 2008/07/30 22:17:30 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -67,7 +67,7 @@ extern "C" {
 
   if (!string) {
     //printf("uninitialized String object\n");
-    ESMC_LogDefault.Write("String object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.WriteLog("String object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
   }

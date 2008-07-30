@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.7 2008/07/29 01:34:49 rosalind Exp $
+// $Id: ESMCI_DELayout.C,v 1.8 2008/07/30 22:17:16 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.7 2008/07/29 01:34:49 rosalind Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.8 2008/07/30 22:17:16 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -307,7 +307,7 @@ DELayout *DELayout::create(
   // that rely on DELayout to be _always 2D! Here I promote a 1D layout request
   // to 2D: N x 1. I write a message to LogErr to make people aware of this!!!
   if (ndim==0){
-    // ESMC_LogDefault.Write("Promoting 1D DELayout to 2D",
+    // ESMC_LogDefault.WriteLog("Promoting 1D DELayout to 2D",
     //   ESMC_LOG_WARN);
     ndim = 2;
     deCountArg = new int[2];  // TODO: this will leave a memory leak
@@ -315,7 +315,7 @@ DELayout *DELayout::create(
     deCountArg[1] = 1;
   }
   if (ndim==1){
-    // ESMC_LogDefault.Write("Promoting 1D DELayout to 2D",
+    // ESMC_LogDefault.WriteLog("Promoting 1D DELayout to 2D",
     //  ESMC_LOG_WARN);
     ndim = 2;
     int firstDEdim = deCountArg[0];
@@ -697,14 +697,14 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
   // TODO: remove this warning once all of ESMF accepts the more general case
   // of multiple DEs per PET.
   if (oneToOneFlag == ESMF_FALSE){
-    ESMC_LogDefault.Write("A layout without 1:1 DE:PET mapping was"
+    ESMC_LogDefault.WriteLog("A layout without 1:1 DE:PET mapping was"
       " created! This may cause problems in higher layers of ESMF!", 
       ESMC_LOG_WARN);
   }
   // Issue warning if this is not logically rectangular
   // TODO: remove this warning when non logRect layouts o.k.
   if (logRectFlag == ESMF_FALSE){
-    ESMC_LogDefault.Write("A non logRect layout was"
+    ESMC_LogDefault.WriteLog("A non logRect layout was"
       " created! This may cause problems in higher layers of ESMF!", 
       ESMC_LOG_WARN);
   }
@@ -814,14 +814,14 @@ int DELayout::constructND(VM &vmArg, int *deCountArg, int nndim,
   // TODO: remove this warning once all of ESMF accepts the more general case
   // of multiple DEs per PET.
   if (oneToOneFlag == ESMF_FALSE){
-    ESMC_LogDefault.Write("A layout without 1:1 DE:PET mapping was"
+    ESMC_LogDefault.WriteLog("A layout without 1:1 DE:PET mapping was"
       " created! This may cause problems in higher layers of ESMF!", 
       ESMC_LOG_WARN);
   }
   // Issue warning if this is not logically rectangular
   // TODO: remove this warning when non logRect layouts o.k.
   if (logRectFlag == ESMF_FALSE){
-    ESMC_LogDefault.Write("A non logRect layout was"
+    ESMC_LogDefault.WriteLog("A non logRect layout was"
       " created! This may cause problems in higher layers of ESMF!", 
       ESMC_LOG_WARN);
   }

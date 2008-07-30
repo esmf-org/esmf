@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.C,v 1.20 2008/07/29 01:34:53 rosalind Exp $
+// $Id: ESMC_RHandle.C,v 1.21 2008/07/30 22:17:26 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-       "$Id: ESMC_RHandle.C,v 1.20 2008/07/29 01:34:53 rosalind Exp $";
+       "$Id: ESMC_RHandle.C,v 1.21 2008/07/30 22:17:26 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -437,7 +437,7 @@
     char msgbuf[ESMF_MAXSTR];
   
     sprintf(msgbuf, "RouteHandle: '%s'\n", label ? label : "(no name)");
-    //ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+    //ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
     printf(" number of routes = %d\n", nroutes);
     for (i=0; i<nroutes; i++)

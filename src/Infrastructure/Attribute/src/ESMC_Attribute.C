@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.17 2008/07/29 01:34:48 rosalind Exp $
+// $Id: ESMC_Attribute.C,v 1.18 2008/07/30 22:17:14 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.17 2008/07/29 01:34:48 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.18 2008/07/30 22:17:14 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -408,11 +408,11 @@
     sprintf(msgbuf, "Name: %s\t  Convention: %s\t  Purpose: %s\t\r\n\n",
       basename,convention,purpose);
     printf(msgbuf);
-    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+    ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
     sprintf(msgbuf, "%-*s\t%-*s\t%-*s\t%-*s\t%-*s\t\r\n",slen,"Short Name",llen,"Long Name",ulen,
       "Units",ilen,"Import",elen,"Export");
     printf(msgbuf);
-    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+    ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
     ++count;
   }
 
@@ -446,16 +446,16 @@
           sprintf(msgbuf, "%-*s\t",tlen,"N/A");
         }
         printf(msgbuf);
-        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+        ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
       }
       else { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+        ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
       }
         if (strcmp("export",attrName) == 0) {
           sprintf(msgbuf, "\r\n");
           printf(msgbuf);
-          ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+          ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
         }
   }
   for(int i=0;  i<attrCount; i++) {
@@ -476,7 +476,7 @@
   for (int i=0; i<attpack->attrCount; i++) {
       sprintf(msgbuf, "   Attr %d:\n", i);
       printf(msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
       attpack->attrList[i]->ESMC_Print();
   }
 */
@@ -627,7 +627,7 @@
       }
       else { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+        ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
       }
       printf(msgbuf);
       fprintf(xml,msgbuf);
@@ -679,7 +679,7 @@
       }
       else { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+        ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
       }
     }
     if (attrList != NULL) {
@@ -871,7 +871,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
+    ESMC_LogDefault.WriteLog("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -934,7 +934,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
+    ESMC_LogDefault.WriteLog("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -997,7 +997,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
+    ESMC_LogDefault.WriteLog("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -1060,7 +1060,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
+    ESMC_LogDefault.WriteLog("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -1123,7 +1123,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
+    ESMC_LogDefault.WriteLog("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -1186,7 +1186,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
+    ESMC_LogDefault.WriteLog("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -1249,7 +1249,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
+    ESMC_LogDefault.WriteLog("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -1312,7 +1312,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
+    ESMC_LogDefault.WriteLog("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -1375,7 +1375,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
+    ESMC_LogDefault.WriteLog("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -1438,7 +1438,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
+    ESMC_LogDefault.WriteLog("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -1508,7 +1508,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
+    ESMC_LogDefault.WriteLog("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -1572,7 +1572,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
+    ESMC_LogDefault.WriteLog("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -1678,7 +1678,7 @@
   // Get the attribute
   attr = ESMC_AttributeGet(num);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
+    ESMC_LogDefault.WriteLog("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
@@ -3144,19 +3144,19 @@
   // print name
   sprintf(msgbuf, "        name: %s\n",  attrName);
   printf(msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
   
   // print items if there are any
   if (items <= 0) {
       sprintf(msgbuf, "        value: \n");
       printf(msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
   }
 
   if (items == 1) {
       sprintf(msgbuf, "        value: ");
       printf(msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
              if (tk == ESMC_TYPEKIND_I4)
                  sprintf(msgbuf, "%d\n", vi); 
              else if (tk == ESMC_TYPEKIND_I8)
@@ -3175,13 +3175,13 @@
                  return localrc;
              }
       printf(msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
   }
 
   if (items > 1) { 
       sprintf(msgbuf, "        %d items, values:\n", items);
       printf(msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
       for (int i=0; i<items; i++) {
                 if (tk == ESMC_TYPEKIND_I4) {
                     sprintf(msgbuf, "          \t item %d: %d\n", i, vip[i]); 
@@ -3201,31 +3201,31 @@
                 }
       printf(msgbuf);
       }
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
   }
 
   // print convention
   sprintf(msgbuf, "        convention: %s\n",  attrConvention);
   printf(msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
   
   // print purpose
   sprintf(msgbuf, "        purpose: %s\n",  attrPurpose);
   printf(msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
   
   // print object
   sprintf(msgbuf, "        object: %s\n",  attrObject);
   printf(msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
 
   sprintf(msgbuf, "        attrCount: %d\n", attrCount);
   printf(msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
   for (int i=0; i<attrCount; i++) {
       sprintf(msgbuf, "   Attr %d:\n", i);
       printf(msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
       attrList[i]->ESMC_Print();
   }
 
