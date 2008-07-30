@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.20 2008/07/25 22:02:14 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.21 2008/07/30 04:53:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.20 2008/07/25 22:02:14 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.21 2008/07/30 04:53:50 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -800,79 +800,89 @@ Array *Array::create(
   int *temp_larrayLBound = new int[rank];
   int *temp_larrayUBound = new int[rank];
   for (int i=0; i<localDeCount; i++){
-    larrayListArg[i]->ESMC_LocalArrayGetCounts(rank, temp_counts);
-    int j=0;    // reset distributed index
-    int jjj=0;  // reset undistributed index
-    for (int jj=0; jj<rank; jj++){
-      if (arrayToDistGridMapArray[jj]){
-        // distributed dimension
-        if (temp_counts[jj] < 
-          totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-            "- LocalArray does not accommodate requested element count", rc);
-          return ESMC_NULL_POINTER;
-        }
-        // move the total bounds according to input info
-        if (totalLBoundFlag){
-          // totalLBound fixed
-          temp_larrayLBound[jj] = totalLBound[i*dimCount+j];
-          if (totalUBoundFlag){
-            // totalUBound fixed
-            // this case allows total allocation to be larger than total region,
-            // but LocalArrayAdjust() method will ultimately prevent this by
-            // returning an error if counts are not equal to ubounds-lbounds+1.
-            temp_larrayUBound[jj] = totalUBound[i*dimCount+j];
-          }else{
-            // totalUBound not fixed
-            temp_larrayUBound[jj] = temp_counts[jj] + totalLBound[i*dimCount+j]
-            - 1;
+    if (indexflag == ESMF_INDEX_USER){
+      // don't adjust dope vector, use F90 pointers directly
+      larrayList[i] = larrayListArg[i];
+    }else{
+      // adjust dope vector
+      larrayListArg[i]->ESMC_LocalArrayGetCounts(rank, temp_counts);
+      int j=0;    // reset distributed index
+      int jjj=0;  // reset undistributed index
+      for (int jj=0; jj<rank; jj++){
+        if (arrayToDistGridMapArray[jj]){
+          // distributed dimension
+          if (temp_counts[jj] < 
+            totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+              "- LocalArray does not accommodate requested element count", rc);
+            return ESMC_NULL_POINTER;
           }
+          // move the total bounds according to input info
+          if (totalLBoundFlag){
+            // totalLBound fixed
+            temp_larrayLBound[jj] = totalLBound[i*dimCount+j];
+            if (totalUBoundFlag){
+              // totalUBound fixed
+              // this case allows total alloc. to be larger than total region,
+              // but LocalArrayAdjust() method will ultimately prevent this by
+              // returning an error if counts are not equal to
+              // ubounds-lbounds+1.
+              temp_larrayUBound[jj] = totalUBound[i*dimCount+j];
+            }else{
+              // totalUBound not fixed
+              temp_larrayUBound[jj] = temp_counts[jj]
+                + totalLBound[i*dimCount+j] - 1;
+            }
+          }else{
+            // totalLBound not fixed
+            if (totalUBoundFlag){
+              // totalUBound fixed
+              temp_larrayUBound[jj] = totalUBound[i*dimCount+j];
+              temp_larrayLBound[jj] = totalUBound[i*dimCount+j]
+                - temp_counts[jj] + 1;
+            }else{
+              // totalLBound and totalUBound not fixed
+              // -> shift computational/excl. region into center of total region
+              int lBound = computationalLBound[i*dimCount+j];
+              if (exclusiveLBound[i*dimCount+j] 
+                < computationalLBound[i*dimCount+j])
+                lBound = exclusiveLBound[i*dimCount+j];
+              int uBound = computationalUBound[i*dimCount+j];
+              if (exclusiveUBound[i*dimCount+j]
+                > computationalUBound[i*dimCount+j])
+                uBound = exclusiveUBound[i*dimCount+j];
+              temp_larrayLBound[jj] = lBound
+                - (int)(0.5 * (temp_counts[jj] - 1 + lBound - uBound));
+              temp_larrayUBound[jj] = temp_counts[jj] + temp_larrayLBound[jj]
+                - 1;
+            }
+          }
+          totalLBound[i*dimCount+j] = temp_larrayLBound[jj]; // write back
+          totalUBound[i*dimCount+j] = temp_larrayUBound[jj]; // write back
+          ++j;
         }else{
-          // totalLBound not fixed
-          if (totalUBoundFlag){
-            // totalUBound fixed
-            temp_larrayUBound[jj] = totalUBound[i*dimCount+j];
-            temp_larrayLBound[jj] = totalUBound[i*dimCount+j] - temp_counts[jj]
-              + 1;
-          }else{
-            // totalLBound and totalUBound not fixed
-            // -> shift computational/excl. region into center of total region
-            int lBound = computationalLBound[i*dimCount+j];
-            if (exclusiveLBound[i*dimCount+j]<computationalLBound[i*dimCount+j])
-              lBound = exclusiveLBound[i*dimCount+j];
-            int uBound = computationalUBound[i*dimCount+j];
-            if (exclusiveUBound[i*dimCount+j]>computationalUBound[i*dimCount+j])
-              uBound = exclusiveUBound[i*dimCount+j];
-            temp_larrayLBound[jj] = lBound
-               - (int)(0.5 * (temp_counts[jj] - 1 + lBound - uBound));
-            temp_larrayUBound[jj] = temp_counts[jj] + temp_larrayLBound[jj] - 1;
+          // non-distributed dimension
+          if (temp_counts[jj] < 
+            undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+              "- LocalArray does not accommodate requested element count", rc);
+            return ESMC_NULL_POINTER;
           }
+          temp_larrayLBound[jj] = undistLBoundArray[jjj];
+          temp_larrayUBound[jj] = undistUBoundArray[jjj];
+          ++jjj;
         }
-        totalLBound[i*dimCount+j] = temp_larrayLBound[jj]; // write back
-        totalUBound[i*dimCount+j] = temp_larrayUBound[jj]; // write back
-        ++j;
-      }else{
-        // non-distributed dimension
-        if (temp_counts[jj] < 
-          undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-            "- LocalArray does not accommodate requested element count", rc);
-          return ESMC_NULL_POINTER;
-        }
-        temp_larrayLBound[jj] = undistLBoundArray[jjj];
-        temp_larrayUBound[jj] = undistUBoundArray[jjj];
-        ++jjj;
       }
-    }
-    // Adjust LocalArray object for specific undistLBound and undistUBound.
-    // This will allocate memory for a _new_ LocalArray object for each element.
-    // Depending on copyflag the original memory used for data storage will be
-    // referenced or a copy of the data will be made.
-    larrayList[i] = larrayListArg[i]->
-      ESMC_LocalArrayAdjust(copyflag, temp_larrayLBound, temp_larrayUBound,
-        &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
-      return ESMC_NULL_POINTER;
+      // Adjust LocalArray object for specific undistLBound and undistUBound.
+      // This will alloc. memory for a _new_ LocalArray object for each element.
+      // Depending on copyflag the original memory used for data storage will be
+      // referenced or a copy of the data will be made.
+      larrayList[i] = larrayListArg[i]->
+        ESMC_LocalArrayAdjust(copyflag, temp_larrayLBound, temp_larrayUBound,
+          &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        return ESMC_NULL_POINTER;
+    }        
   }
   delete [] temp_counts;
   delete [] temp_larrayLBound;

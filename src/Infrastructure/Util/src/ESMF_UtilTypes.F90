@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.56.2.13 2008/06/24 21:54:00 eschwab Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.56.2.14 2008/07/30 04:53:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -464,7 +464,8 @@
 
       type(ESMF_IndexFlag), parameter ::  &
                                ESMF_INDEX_DELOCAL  = ESMF_IndexFlag(0), &
-                               ESMF_INDEX_GLOBAL = ESMF_IndexFlag(1)
+                               ESMF_INDEX_GLOBAL = ESMF_IndexFlag(1), &
+                               ESMF_INDEX_USER = ESMF_IndexFlag(2)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_RegionFlag
@@ -520,7 +521,8 @@
 
       public ESMF_Direction, ESMF_MODE_FORWARD, ESMF_MODE_REVERSE
 
-      public ESMF_IndexFlag, ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL
+      public ESMF_IndexFlag
+      public ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL, ESMF_INDEX_USER
       public ESMF_RegionFlag, &
              ESMF_REGION_TOTAL, ESMF_REGION_SELECT, ESMF_REGION_EMPTY
 

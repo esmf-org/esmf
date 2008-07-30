@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.22.2.9 2008/05/09 04:51:48 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.22.2.10 2008/07/30 04:53:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayCreateMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
-  public ESMF_ArrayCreate
+  public ESMF_ArrayCreate, ESMF_ArrayCreateFromPtr
   public ESMF_ArrayDestroy
 
 ! - ESMF-internal methods:
@@ -94,13 +94,31 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.22.2.9 2008/05/09 04:51:48 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.22.2.10 2008/07/30 04:53:50 theurich Exp $'
 
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_ArrayCreateFromPtr -- Generic interface
+
+! !INTERFACE:
+  interface ESMF_ArrayCreateFromPtr
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    TypeKindRankInterfaceMacro(ArrayCreateFromPtr)
+    
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+! types of {\tt ESMF\_ArrayCreateFromPtr} functions.   
+!EOPI 
+  end interface
+
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
@@ -137,6 +155,247 @@ contains
 !===============================================================================
 ! ArrayCreate() interfaces
 !===============================================================================
+
+
+#define ArrayCreateFromPtrDoc() \
+! -------------------------- ESMF-public method ----------------------------- @\
+!BOP @\
+! !IROUTINE: ESMF_ArrayCreateFromPtr - Create Array object from Fortran90 array pointer @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_ArrayCreateFromPtr() @\
+! function ESMF_ArrayCreateFromPtr<rank><type><kind>(farray, & @\
+!   distgrid, copyflag, distgridToArrayMap, computationalEdgeLWidth, & @\
+!   computationalEdgeUWidth, computationalLWidth, & @\
+!   computationalUWidth, totalLWidth, & @\
+!   totalUWidth, indexflag, staggerLoc, vectorDim, & @\
+!   undistLBound, undistUBound, name, rc) @\
+! @\
+! !ARGUMENTS: @\
+!   <type> (ESMF_KIND_<kind>),dimension(<rank>),intent(in),target :: farray @\
+!   type(ESMF_DistGrid),   intent(in)              :: distgrid @\
+!   type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
+!   integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
+!   integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
+!   integer,               intent(in),   optional  :: computationalEdgeUWidth(:) @\
+!   integer,               intent(in),   optional  :: computationalLWidth(:) @\
+!   integer,               intent(in),   optional  :: computationalUWidth(:) @\
+!   integer,               intent(in),   optional  :: totalLWidth(:) @\
+!   integer,               intent(in),   optional  :: totalUWidth(:) @\
+!   integer,               intent(in),   optional  :: staggerLoc @\
+!   integer,               intent(in),   optional  :: vectorDim @\
+!   integer,               intent(in),   optional  :: undistLBound(:) @\
+!   integer,               intent(in),   optional  :: undistUBound(:) @\
+!   character (len=*),     intent(in),   optional  :: name @\
+!   integer,               intent(out),  optional  :: rc @\
+! @\
+! !RETURN VALUE: @\
+!   type(ESMF_Array) :: ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind @\
+! @\
+! !DESCRIPTION: @\
+! Create an {\tt ESMF\_Array} object from an existing local native Fortran90 @\
+! array according to distgrid. Besides {\tt farray} each PET must issue this @\
+! call with identical arguments in order to create a consistent Array object. @\
+! The local arrays provided must be dimensioned according to the DE-local @\
+! total region. Bounds of the exclusive regions are set as specified in the @\
+! distgrid argument. Bounds for array dimensions that are not distributed can @\
+! be chosen freely using the {\tt undistLBound} and {\tt undistUBound} @\
+! arguments. @\
+! @\
+! This interface requires a 1 DE per PET decomposition. The Array object will @\
+! not be created and an error will be returned if this condition is not met. @\
+! @\
+! The not distributed Array dimensions form a tensor of rank = array.rank - @\
+! distgrid.dimCount. By default all tensor elements are associated with @\
+! stagger location 0. The widths of the computational region are set to @\
+! the provided value, or zero by default, for all tensor elements. Use @\
+! {\tt ESMF\_ArraySet()} to change these default settings after the @\
+! Array object has been created. @\
+! @\
+! The return value is the newly created {\tt ESMF\_Array} object. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item[farray] @\
+!      Valid native Fortran90 array, i.e. memory must be associated with the @\
+!      actual argument. The type/kind/rank information of {\tt farray} will be @\
+!      used to set {\tt Array}|s properties accordingly. The shape of @\
+!      {\tt farray} will be checked against the information contained in the @\
+!      {\tt distgrid}. @\
+! \item[distgrid] @\
+!      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and @\
+!      distributed over DEs. The dimCount of distgrid must be smaller or equal @\
+!      to the rank of farray. @\
+! \item[{[copyflag]}] @\
+!      Specifies whether the Array object will reference the memory allocation @\
+!      provided by {\tt farray} directly or will copy the data from @\
+!      {\tt farray} into a new memory allocation. Valid options are @\
+!      {\tt ESMF\_DATA\_REF} (default) or {\tt ESMF\_DATA\_COPY}. @\
+!      Depending on the specific situation the {\tt ESMF\_DATA\_REF} option @\
+!      may be unsafe when specifying an array slice for {\tt farray}. @\
+! \item[{[distgridToArrayMap]}] @\
+!      List that contains as many elements as is indicated by @\
+!      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
+!      the DistGrid object to a dimension in {\tt farray} by specifying the @\
+!      appropriate Array dimension index. The default is to map all of @\
+!      {\tt distgrid}|s dimensions against the lower dimensions of the @\
+!      {\tt farray} argument in sequence, i.e. {\tt distgridToArrayMap = @\
+!      (/1, 2, .../)}. @\
+!      Unmapped {\tt farray} dimensions are not decomposed dimensions and @\
+!      form a tensor of rank = Array.rank - DistGrid.dimCount. @\
+!      All {\tt distgridToArrayMap} entries must be greater than or equal @\
+!      to zero and smaller than or equal to the Array rank. It is erroneous @\
+!      to specify the same entry multiple times unless it is zero. @\
+!      If the Array rank is less than the DistGrid dimCount then the default @\
+!      distgridToArrayMap will contain zeros for the dimCount - rank @\
+!      rightmost entries. A zero entry in the {\tt distgridToArrayMap} @\
+!      indicates that the particular DistGrid dimension will be replicating @\
+!      the Array across the DEs along this direction. @\
+! \item[{[computationalEdgeLWidth]}] @\
+!      This vector argument must have dimCount elements, where dimCount is @\
+!      specified in distgrid. It specifies the lower corner of the computational @\
+!      region with respect to the lower corner of the exclusive region for DEs @\
+!      that are located on the edge of a patch. @\
+!      The default is a zero vector. @\
+! \item[{[computationalEdgeUWidth]}] @\
+!      This vector argument must have dimCount elements, where dimCount is @\
+!      specified in distgrid. It specifies the upper corner of the computational @\
+!      region with respect to the upper corner of the exclusive region for DEs @\
+!      that are located on the edge of a patch. @\
+!      The default is a zero vector. @\
+! \item[{[computationalLWidth]}] @\
+!      This vector argument must have dimCount elements, where dimCount is @\
+!      specified in distgrid. It specifies the lower corner of the computational @\
+!      region with respect to the lower corner of the exclusive region. @\
+!      The default is a zero vector. @\
+! \item[{[computationalUWidth]}] @\
+!      This vector argument must have dimCount elements, where dimCount is @\
+!      specified in distgrid. It specifies the upper corner of the computational @\
+!      region with respect to the upper corner of the exclusive region. @\
+!      The default is a zero vector. @\
+! \item[{[totalLWidth]}] @\
+!      This vector argument must have dimCount elements, where dimCount is @\
+!      specified in distgrid. It specifies the lower corner of the total memory @\
+!      region with respect to the lower corner of the computational region. @\
+!      The default is to accommodate the union of exclusive and computational @\
+!      region exactly. @\
+! \item[{[totalUWidth]}] @\
+!      This vector argument must have dimCount elements, where dimCount is @\
+!      specified in distgrid. It specifies the upper corner of the total memory @\
+!      region with respect to the upper corner of the computational region. @\
+!      The default is a vector that contains the remaining number of elements @\
+!      in each direction as to fit the union of exclusive and computational @\
+!      region into the memory region provided by the {\tt farray} argument. @\
+! \item[{[staggerLoc]}] @\
+!      Stagger location is an arbitrary integer index. This information is @\
+!      used to correctly apply connection transformations of the @\
+!      corresponding DistGrid during halo operations. @\
+! \item[{[vectorDim]}] @\
+!      If the data stored in this Array object is a component of a vector field @\
+!      then the {\tt vectorDim} argument may be used to identify the dimension @\
+!      along which the vector component is aligned. This information is used to @\
+!      correctly apply the {\tt signChangeVector} defined in the connection @\
+!      transformations of the corresponding DistGrid during halo operations. @\
+! \item[{[undistLBound]}] @\
+!      Lower bounds for the array dimensions that are not distributed. @\
+!      By default lbound is 1. @\
+! \item[{[undistUBound]}] @\
+!      Upper bounds for the array dimensions that are not distributed. @\
+!      By default ubound is equal to the extent of the corresponding @\
+!      dimension in {\tt farray}. @\
+! \item[{[name]}] @\
+!      Name of the Array object. @\
+! \item[{[rc]}] @\
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define ArrayCreateFromPtrMacro(mtype, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+! -------------------------- ESMF-public method ----------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_ArrayCreateFromPtr" @\
+  function ESMF_ArrayCreateFromPtr##mrank##D##mtypekind(farrayPtr, & @\
+    distgrid, copyflag, distgridToArrayMap, & @\
+    computationalEdgeLWidth, computationalEdgeUWidth, & @\
+    computationalLWidth, computationalUWidth, totalLWidth, & @\
+    totalUWidth, staggerLoc, vectorDim, & @\
+    undistLBound, undistUBound, name, rc) @\
+@\
+    type(ESMF_Array) :: ESMF_ArrayCreateFromPtr##mrank##D##mtypekind @\
+@\
+    mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: farrayPtr @\
+    type(ESMF_DistGrid),   intent(in)              :: distgrid @\
+    type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
+    integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
+    integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
+    integer,               intent(in),   optional  :: computationalEdgeUWidth(:) @\
+    integer,               intent(in),   optional  :: computationalLWidth(:) @\
+    integer,               intent(in),   optional  :: computationalUWidth(:) @\
+    integer,               intent(in),   optional  :: totalLWidth(:) @\
+    integer,               intent(in),   optional  :: totalUWidth(:) @\
+    integer,               intent(in),   optional  :: staggerLoc @\
+    integer,               intent(in),   optional  :: vectorDim @\
+    integer,               intent(in),   optional  :: undistLBound(:) @\
+    integer,               intent(in),   optional  :: undistUBound(:) @\
+    character (len=*),     intent(in),   optional  :: name @\
+    integer,               intent(out),  optional  :: rc @\
+@\
+    ! Local variables @\
+    integer                             :: localrc  ! local return code @\
+    type(ESMF_Array)                    :: array    ! new Array @\
+    type(ESMF_LocalArray), allocatable  :: larrayList(:)  ! helper variable @\
+    type(ESMF_CopyFlag)                 :: copyflag_opt   ! helper variable @\
+@\
+    ! Initialize return code; assume failure until success is certain @\
+    localrc = ESMF_RC_NOT_IMPL @\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
+@\
+    ! Mark this Array object as invalid @\
+    array%this = ESMF_NULL_POINTER @\
+@\
+    ! Set copy/ref behavior @\
+    copyflag_opt = ESMF_DATA_REF  ! default @\
+    if (present(copyflag)) copyflag_opt = copyflag @\
+@\
+    ! Prepare the LocalArray list to be used in the ArrayCreate() call @\
+    allocate(larrayList(1)) @\
+    larrayList(1) = ESMF_LocalArrayCreate(farrayPtr, copyflag_opt, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    ! Create the Array object by calling into overloaded ArrayCreate() interf. @\
+    array = ESMF_ArrayCreate(larrayList, distgrid, copyflag_opt, & @\
+      distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
+      computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, & @\
+      ESMF_INDEX_USER, staggerLoc, vectorDim, undistLBound, undistUBound, & @\
+      name, localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+@\
+    ! Garbage collection @\
+!    call ESMF_LocalArrayDestroy(larrayList(1), rc=localrc) @\
+!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+!      ESMF_CONTEXT, rcToReturn=rc)) return @\
+    deallocate(larrayList) @\
+@\
+    ! Set return value @\
+    ESMF_ArrayCreateFromPtr##mrank##D##mtypekind = array @\
+@\
+    ! Set init code @\
+    ESMF_INIT_SET_CREATED(ESMF_ArrayCreateFromPtr##mrank##D##mtypekind) @\
+@\
+    ! Return successfully @\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+@\
+  end function ESMF_ArrayCreateFromPtr##mrank##D##mtypekind @\
+!---------------------------------------------------------------------------- @\
+
+TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 
 
 #define ArrayCreateAssmdShapeDoc() \
