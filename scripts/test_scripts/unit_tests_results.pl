@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.16 2008/06/03 15:50:21 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.17 2008/07/31 19:41:55 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -455,9 +455,9 @@ use File::Find
 		}
 	}
 	# Add results counts to total counts
-	$total_test_count = $total_test_count + harness_total;
-	$total_pass_count = $total_pass_count + harness_pass;
-	$total_fail_count = $total_fail_count + harness_fail;
+	$total_test_count = $total_test_count + $harness_total;
+	$total_pass_count = $total_pass_count + $harness_pass;
+	$total_fail_count = $total_fail_count + $harness_fail;
 
 	if (!$SUMMARY) { # Print only if full output requested
 		print "\n\nThe log and stdout files for the unit tests can be found at:\n";
