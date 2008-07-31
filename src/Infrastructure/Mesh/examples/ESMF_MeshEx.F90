@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.6 2008/07/11 18:46:27 dneckels Exp $
+! $Id: ESMF_MeshEx.F90,v 1.7 2008/07/31 17:09:17 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshEx.F90,v 1.6 2008/07/11 18:46:27 dneckels Exp $'
+    '$Id: ESMF_MeshEx.F90,v 1.7 2008/07/31 17:09:17 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -129,11 +129,6 @@ program ESMF_FieldRegridEx
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
-  ! Done with node arrays, zap
-  deallocate(nodeId)
-  deallocate(nodeCoord)
-  deallocate(nodeOwner)
-
   ! Declare the elements
   call ESMF_MeshAddElements(meshSrc, elemId, elemType, elemConn, localrc)
   write(failMsg, *) "ESMF_MeshAddElements fail"
@@ -146,11 +141,34 @@ program ESMF_FieldRegridEx
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
+  call ESMF_MeshDestroy(meshSrc, localrc)
+  write(failMsg, *) "ESMF_MeshDelete fail"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+  ! Now do the same, but with the all in one function
+  meshSrc = ESMF_MeshCreate(3,2,nodeId, nodeCoord, nodeOwner, &
+                           elemId, elemType, elemConn, localrc)
+  write(failMsg, *) "ESMF_MeshCreate1 fail"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+  ! Write the mesh for debug
+  call ESMF_MeshWrite(meshSrc, "outmesh1", localrc)
+  write(failMsg, *) "ESMF_MeshWrite fail"
+  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (localrc .ne. ESMF_SUCCESS) goto 10
+
+
+  ! Done with node arrays, zap
+  deallocate(nodeId)
+  deallocate(nodeCoord)
+  deallocate(nodeOwner)
 
   ! free the element arrays
   deallocate(elemId)
   deallocate(elemType)
   deallocate(elemConn)
+
 !
 !  logical :: correct
 !  type(ESMF_Grid) :: gridSrc

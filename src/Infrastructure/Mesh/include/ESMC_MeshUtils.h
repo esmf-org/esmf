@@ -94,6 +94,7 @@ UInt dof2mtype(UInt dof);
 
 // Gather the ids for given attribute
 void getMeshGIDS(const Mesh &mesh, const Attr &a, std::vector<UInt> &gids);
+void getMeshGIDS(const Mesh &mesh, const Attr &a, std::vector<int> &gids);
 
 /*
  * Calculate a 1 dimensional decomposition of num_items among num_proc's.

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.11 2008/07/29 01:34:53 rosalind Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.12 2008/07/31 17:09:18 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -31,7 +31,11 @@
 #include "ESMC_MeshUtils.h"
 #include "ESMC_GlobalIds.h"
 
+#include "ESMC_MeshCAPI.h"
+
 #include <string>
+#include <ostream>
+#include <iterator>
 
 using namespace ESMC;
 
@@ -45,6 +49,48 @@ using namespace ESMC;
 //
 //EOP
 //-------------------------------------------------------------------------
+
+/*----------------------------------------------------------------------------
+ *  Implementation of C api
+ *----------------------------------------------------------------------------*/
+#ifdef NOTYET
+extern "C" {
+
+ESMC_Mesh *ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc) {
+  int localrc;
+  ESMC_Mesh *mesh;
+
+  mesh = new ESMC_Mesh();
+
+  c_esmc_meshcreate(&mesh, &parametricDim, &spatialDim, &localrc);
+
+  if (rc) *rc = localrc;
+
+  return mesh;
+}
+
+int ESMC_MeshAddNodes(ESMC_Mesh *mesh, int *nodeIds, double *nodeCoords, int *nodeOwners) {
+}
+
+int ESMC_MeshAddElements(ESMC_Mesh *mesh, int *elementIds, int *elementTypes, int *elementConn) {
+}
+
+int ESMC_MeshCreateAll(ESMC_Mesh *mesh, parametricDim, int *nodeIds, double *nodeCoords,
+             int *nodeOwners, int *elementIds, int *elementTypes, int *elementConn)
+{
+}
+
+int ESMC_MeshDestroy(ESMC_Mesh *mesh) {
+}
+
+} // extern "C" 
+#endif // NOTEYET
+
+/*----------------------------------------------------------------------------
+ *  Low level helper functions: translate from F90 to C++.
+ *----------------------------------------------------------------------------*/
+
+
 extern "C" void FTN(c_esmc_meshinit)(char *logfile, int *use_log, int nlen) {
 
   char *lname = ESMC_F90toCstring(logfile, nlen);
@@ -124,7 +170,7 @@ extern "C" void FTN(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nod
       for (UInt c = 0; c < sdim; ++c)
         coord[c] = nodeCoord[nc+c];
 
-      nc += 3;  // nodeCoord is stride 3 whether mesh is or not.
+      nc += sdim;
 
     }
 
@@ -154,7 +200,7 @@ extern "C" void FTN(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc, int n
 
 }
 
-extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *has_eids, int *elemId, 
+extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *elemId, 
                int *elemType, int *elemConn, int *rc) 
 {
    try {
@@ -190,15 +236,6 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
     }
 
 
-    std::vector<long> new_ids;
-    if (!has_eids) {
-      // Manufacture unique global element ids.
-      std::vector<long> current_ids;
-      new_ids.resize(*num_elems+1, 0); // add 1 so that new_ids is not empty
-
-      GlobalIds(current_ids, new_ids);
-    }
-
     // Now loop the elements and add them to the mesh.
     int cur_conn = 0;
 
@@ -212,7 +249,7 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
     std::vector<MeshObj*> nconnect(nnodes, static_cast<MeshObj*>(0));
 
       // The object
-      long eid = has_eids ? elemId[e] : new_ids[e];
+      long eid = elemId[e];
       MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid);
 
       for (int n = 0; n < nnodes; ++n) {
@@ -223,7 +260,6 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
       }
 
       mesh.add_element(elem, nconnect, topo->number, topo);
-
 
     } // for e
 
@@ -316,6 +352,59 @@ extern "C" void FTN(c_esmc_meshvtkbody)(char *filename, int *nodeId, double *nod
 
 }
 
+extern "C" void FTN(c_esmc_meshdestroy)(Mesh **meshpp, int *rc) {
 
+    Mesh *meshp = *meshpp;
+
+    delete meshp;
+
+    *rc = ESMF_SUCCESS;
+
+}
+
+extern "C" void FTN(c_esmc_meshfreememory)(Mesh **meshpp, int *rc) {
+
+    Mesh *meshp = *meshpp;
+
+    delete meshp;
+
+    *rc = ESMF_SUCCESS;
+
+}
+
+extern "C" void FTN(f_esmf_getmeshdistgrid)(ESMCI::DistGrid *ngrid, int*, int*, int*);
+
+extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, ESMCI::DistGrid **ngrid, ESMCI::DistGrid **egrid, int *rc) {
+
+
+  Mesh *meshp = *meshpp;
+  
+  // The nodal map.  First get the set of owned nodal ids
+  std::vector<int> ngids; 
+  std::vector<int> egids; 
+  {
+    Context c; c.set(Attr::OWNED_ID);
+    Attr a(MeshObj::NODE, c);
+    Attr ae(MeshObj::ELEMENT, c);
+
+    getMeshGIDS(*meshp, a, ngids);
+    getMeshGIDS(*meshp, ae, egids);
+  }
+
+meshp->Print(Par::Out());
+
+  Par::Out() << "Node ids:" << std::endl;
+  std::copy(ngids.begin(), ngids.end(), std::ostream_iterator<UInt>(Par::Out(), "\n"));
+
+  Par::Out() << "Elem ids:" << std::endl;
+  std::copy(egids.begin(), egids.end(), std::ostream_iterator<UInt>(Par::Out(), "\n"));
+  Par::Out().flush();
+
+  // Create the distgrids
+  int nsize = ngids.size();
+  int rc1;
+  FTN(f_esmf_getmeshdistgrid)(*ngrid, &nsize, &ngids[0], &rc1);
+
+}
 
 

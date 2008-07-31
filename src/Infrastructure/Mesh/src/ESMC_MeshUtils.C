@@ -655,6 +655,18 @@ void getMeshGIDS(const Mesh &mesh, const Attr &a, std::vector<UInt> &gids) {
 
 }
 
+void getMeshGIDS(const Mesh &mesh, const Attr &a, std::vector<int> &gids) {
+  
+  gids.clear();
+  
+  Mesh::const_iterator oi = mesh.obj_begin(a), oe = mesh.obj_end(a);
+  
+  for (; oi != oe; ++oi) {
+    gids.push_back(oi->get_id());
+  }
+
+}
+
 void decomp1d(long num_items, long num_proc, long rank, long &my_num, long &my_start)
 {
   std::ldiv_t ans;
