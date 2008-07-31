@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.6 2008/07/30 04:53:51 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.7 2008/07/31 20:21:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.6 2008/07/30 04:53:51 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.7 2008/07/31 20:21:56 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -182,17 +182,22 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_ArrayDestroy(arrayCpy, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  
-  
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreateFromPtr with 3D farray on 2D DistGrid Test as Ptr"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(farrayPtr3D(8,12,10))
+  allocate(farrayPtr3D(-2:6,12,3:10))
   array = ESMF_ArrayCreateFromPtr(farrayPtr=farrayPtr3D, distgrid=distgrid, &
     name="MyArray", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayPrint for ArrayCreateFromPtr Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Test"
@@ -200,7 +205,12 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr3Dx, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  deallocate(farrayPtr3Dx)
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Deallocate returned pointer Test"
+  write(failMsg, *) "Did not return success"
+  deallocate(farrayPtr3Dx, stat=rc)
+  call ESMF_Test((rc.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -208,12 +218,6 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-  
-  
-  
-
-
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only

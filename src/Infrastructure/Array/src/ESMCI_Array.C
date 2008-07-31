@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.21 2008/07/30 04:53:50 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.22 2008/07/31 20:21:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.21 2008/07/30 04:53:50 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.22 2008/07/31 20:21:54 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -456,8 +456,7 @@ Array *Array::create(
     }
   }
   // check for undistLBound and undistUBound arguments and that they match
-  // dimCount, rank. By default use undistLBound and undistUBound of LocalArray
-  // for localDe 0 for tensor dims.
+  // dimCount, rank.
   int undistLBoundArrayAllocFlag = 0;  // reset
   int *undistLBoundArray = NULL; // reset
   if (undistLBoundArg != NULL){
@@ -473,6 +472,8 @@ Array *Array::create(
     }
     undistLBoundArray = undistLBoundArg->array;
   }else if (tensorCount > 0){
+    // tensor dimensions are present, but no explicit bounds provided'
+    // -> set to bounds of incoming array at DE 0 (should be same across DEs!)
     int *undistLBound = new int[rank];
     localrc = larrayListArg[0]->ESMC_LocalArrayGetLbounds(rank, undistLBound);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
@@ -502,6 +503,9 @@ Array *Array::create(
     }
     undistUBoundArray = undistUBoundArg->array;
   }else if (tensorCount > 0){
+    // tensor dimensions are present, but no explicit bounds provided
+    // -> set to bounds of incoming array at DE 0
+    // -> set to bounds of incoming array at DE 0 (should be same across DEs!)
     int *undistUBound = new int[rank];
     localrc = larrayListArg[0]->ESMC_LocalArrayGetUbounds(rank, undistUBound);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
@@ -801,10 +805,100 @@ Array *Array::create(
   int *temp_larrayUBound = new int[rank];
   for (int i=0; i<localDeCount; i++){
     if (indexflag == ESMF_INDEX_USER){
-      // don't adjust dope vector, use F90 pointers directly
+      // don't adjust dope vector, use F90 pointers directly and their bounds
+      larrayListArg[i]->ESMC_LocalArrayGetCounts(rank, temp_counts);
+      int j=0;    // reset distributed index
+      int jjj=0;  // reset undistributed index
+      for (int jj=0; jj<rank; jj++){
+        if (arrayToDistGridMapArray[jj]){
+          // distributed dimension
+          if (temp_counts[jj] < 
+            totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+              "- LocalArray does not accommodate requested element count", rc);
+            return ESMC_NULL_POINTER;
+          }
+          // move the total bounds according to input info
+          if (totalLBoundFlag){
+            // totalLBound fixed
+            temp_larrayLBound[jj] = totalLBound[i*dimCount+j];
+            if (totalUBoundFlag){
+              // totalUBound fixed
+              temp_larrayUBound[jj] = totalUBound[i*dimCount+j];
+            }else{
+              // totalUBound not fixed
+              temp_larrayUBound[jj] = temp_counts[jj]
+                + totalLBound[i*dimCount+j] - 1;
+            }
+          }else{
+            // totalLBound not fixed
+            if (totalUBoundFlag){
+              // totalUBound fixed
+              temp_larrayUBound[jj] = totalUBound[i*dimCount+j];
+              temp_larrayLBound[jj] = totalUBound[i*dimCount+j]
+                - temp_counts[jj] + 1;
+            }else{
+              // totalLBound and totalUBound not fixed
+              // -> shift computational/excl. region into center of total region
+              int lBound = computationalLBound[i*dimCount+j];
+              if (exclusiveLBound[i*dimCount+j] 
+                < computationalLBound[i*dimCount+j])
+                lBound = exclusiveLBound[i*dimCount+j];
+              int uBound = computationalUBound[i*dimCount+j];
+              if (exclusiveUBound[i*dimCount+j]
+                > computationalUBound[i*dimCount+j])
+                uBound = exclusiveUBound[i*dimCount+j];
+              temp_larrayLBound[jj] = lBound
+                - (int)(0.5 * (temp_counts[jj] - 1 + lBound - uBound));
+              temp_larrayUBound[jj] = temp_counts[jj] + temp_larrayLBound[jj]
+                - 1;
+            }
+          }
+          totalLBound[i*dimCount+j] = temp_larrayLBound[jj]; // write back
+          totalUBound[i*dimCount+j] = temp_larrayUBound[jj]; // write back
+          // now bounds must match exactly or it's an error
+          if (temp_counts[jj] !=
+            totalUBound[i*dimCount+j] - totalLBound[i*dimCount+j] + 1){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+              "- LocalArray does not match requested element count", rc);
+            return ESMC_NULL_POINTER;
+          }
+          ++j;
+        }else{
+          // non-distributed dimension
+          if (temp_counts[jj] !=
+            undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+              "- LocalArray does not match requested element count", rc);
+            return ESMC_NULL_POINTER;
+          }
+          ++jjj;
+        }
+      }
+      // adjust all of the bounds to match absolute bounds of F90 pointers
+      int *larrayLBound = new int[rank];
+      localrc = larrayListArg[i]->ESMC_LocalArrayGetLbounds(rank, larrayLBound);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc))
+        return ESMC_NULL_POINTER;
+      j=0;    // reset distributed index
+      for (int jj=0; jj<rank; jj++){
+        if (arrayToDistGridMapArray[jj]){
+          // distributed dimension
+          int shift = larrayLBound[jj] - totalLBound[i*dimCount+j];
+          totalLBound[i*dimCount+j] += shift;
+          totalUBound[i*dimCount+j] += shift;
+          computationalLBound[i*dimCount+j] += shift;
+          computationalUBound[i*dimCount+j] += shift;
+          exclusiveLBound[i*dimCount+j] += shift;
+          exclusiveUBound[i*dimCount+j] += shift;
+          ++j;
+        }
+      }      
+      delete [] larrayLBound;
+      // use F90 pointers directly
       larrayList[i] = larrayListArg[i];
     }else{
-      // adjust dope vector
+      // prepare to adjust dope vector
       larrayListArg[i]->ESMC_LocalArrayGetCounts(rank, temp_counts);
       int j=0;    // reset distributed index
       int jjj=0;  // reset undistributed index
@@ -862,10 +956,10 @@ Array *Array::create(
           ++j;
         }else{
           // non-distributed dimension
-          if (temp_counts[jj] < 
+          if (temp_counts[jj] !=
             undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1){
             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-              "- LocalArray does not accommodate requested element count", rc);
+              "- LocalArray does not match requested element count", rc);
             return ESMC_NULL_POINTER;
           }
           temp_larrayLBound[jj] = undistLBoundArray[jjj];

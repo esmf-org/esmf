@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.22.2.11 2008/07/30 05:54:19 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.22.2.12 2008/07/31 20:21:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.22.2.11 2008/07/30 05:54:19 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.22.2.12 2008/07/31 20:21:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -165,15 +165,15 @@ contains
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayCreateFromPtr() @\
-! function ESMF_ArrayCreateFromPtr<rank><type><kind>(farray, & @\
+! function ESMF_ArrayCreateFromPtr<rank><type><kind>(farrayPtr, & @\
 !   distgrid, copyflag, distgridToArrayMap, computationalEdgeLWidth, & @\
 !   computationalEdgeUWidth, computationalLWidth, & @\
 !   computationalUWidth, totalLWidth, & @\
-!   totalUWidth, indexflag, staggerLoc, vectorDim, & @\
-!   undistLBound, undistUBound, name, rc) @\
+!   totalUWidth, staggerLoc, vectorDim, & @\
+!   name, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   <type> (ESMF_KIND_<kind>),dimension(<rank>),intent(in),target :: farray @\
+!   <type> (ESMF_KIND_<kind>),dimension(<rank>),pointer :: farrayPtr @\
 !   type(ESMF_DistGrid),   intent(in)              :: distgrid @\
 !   type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
 !   integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
@@ -185,23 +185,22 @@ contains
 !   integer,               intent(in),   optional  :: totalUWidth(:) @\
 !   integer,               intent(in),   optional  :: staggerLoc @\
 !   integer,               intent(in),   optional  :: vectorDim @\
-!   integer,               intent(in),   optional  :: undistLBound(:) @\
-!   integer,               intent(in),   optional  :: undistUBound(:) @\
 !   character (len=*),     intent(in),   optional  :: name @\
 !   integer,               intent(out),  optional  :: rc @\
 ! @\
 ! !RETURN VALUE: @\
-!   type(ESMF_Array) :: ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind @\
+!   type(ESMF_Array) :: ESMF_ArrayCreateFromPtr##mrank##D##mtypekind @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Array} object from an existing local native Fortran90 @\
-! array according to distgrid. Besides {\tt farray} each PET must issue this @\
-! call with identical arguments in order to create a consistent Array object. @\
-! The local arrays provided must be dimensioned according to the DE-local @\
-! total region. Bounds of the exclusive regions are set as specified in the @\
-! distgrid argument. Bounds for array dimensions that are not distributed can @\
-! be chosen freely using the {\tt undistLBound} and {\tt undistUBound} @\
-! arguments. @\
+! Create an {\tt ESMF\_Array} object from existing local native Fortran90 @\
+! arrays with pointer attribute, according to distgrid. Besides @\
+! {\tt farrayPtr} each PET must issue this call with identical arguments in @\
+! order to create a consistent Array object. The bounds of the local arrays @\
+! are preserved by this call and determine the bounds of the total region of @\
+! the resulting Array object. Bounds of the DE-local exclusive regions are @\
+! set to be consistent with the total regions and the specified distgrid @\
+! argument. Bounds for Array dimensions that are not distributed are @\
+! automatically set to the bounds provided by {\tt farrayPtr}. @\
 ! @\
 ! This interface requires a 1 DE per PET decomposition. The Array object will @\
 ! not be created and an error will be returned if this condition is not met. @\
@@ -217,12 +216,14 @@ contains
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
-! \item[farray] @\
-!      Valid native Fortran90 array, i.e. memory must be associated with the @\
-!      actual argument. The type/kind/rank information of {\tt farray} will be @\
-!      used to set {\tt Array}|s properties accordingly. The shape of @\
-!      {\tt farray} will be checked against the information contained in the @\
-!      {\tt distgrid}. @\
+! \item[farrayPtr] @\
+!      Valid native Fortran90 array with pointer attribute. Memory must be @\
+!      associated with the actual argument. The type/kind/rank information of @\
+!      {\tt farrayPtr} will be used to set {\tt Array}|s properties @\
+!      accordingly. The shape of {\tt farrayPtr} will be checked against the @\
+!      information contained in the {\tt distgrid}. The bounds of @\
+!      {\tt farrayPtr} will be preserved by this call and the bounds of the @\
+!      resulting Array object are set accordingly. @\
 ! \item[distgrid] @\
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and @\
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal @\
@@ -297,13 +298,6 @@ contains
 !      along which the vector component is aligned. This information is used to @\
 !      correctly apply the {\tt signChangeVector} defined in the connection @\
 !      transformations of the corresponding DistGrid during halo operations. @\
-! \item[{[undistLBound]}] @\
-!      Lower bounds for the array dimensions that are not distributed. @\
-!      By default lbound is 1. @\
-! \item[{[undistUBound]}] @\
-!      Upper bounds for the array dimensions that are not distributed. @\
-!      By default ubound is equal to the extent of the corresponding @\
-!      dimension in {\tt farray}. @\
 ! \item[{[name]}] @\
 !      Name of the Array object. @\
 ! \item[{[rc]}] @\
@@ -322,7 +316,7 @@ contains
     computationalEdgeLWidth, computationalEdgeUWidth, & @\
     computationalLWidth, computationalUWidth, totalLWidth, & @\
     totalUWidth, staggerLoc, vectorDim, & @\
-    undistLBound, undistUBound, name, rc) @\
+    name, rc) @\
 @\
     type(ESMF_Array) :: ESMF_ArrayCreateFromPtr##mrank##D##mtypekind @\
 @\
@@ -338,8 +332,6 @@ contains
     integer,               intent(in),   optional  :: totalUWidth(:) @\
     integer,               intent(in),   optional  :: staggerLoc @\
     integer,               intent(in),   optional  :: vectorDim @\
-    integer,               intent(in),   optional  :: undistLBound(:) @\
-    integer,               intent(in),   optional  :: undistUBound(:) @\
     character (len=*),     intent(in),   optional  :: name @\
     integer,               intent(out),  optional  :: rc @\
 @\
@@ -373,15 +365,11 @@ contains
     array = ESMF_ArrayCreate(larrayList, distgrid, copyflag_opt, & @\
       distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
       computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, & @\
-      ESMF_INDEX_USER, staggerLoc, vectorDim, undistLBound, undistUBound, & @\
-      name, localrc) @\
+      ESMF_INDEX_USER, staggerLoc, vectorDim, name=name, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Garbage collection @\
-!    call ESMF_LocalArrayDestroy(larrayList(1), rc=localrc) @\
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-!      ESMF_CONTEXT, rcToReturn=rc)) return @\
     deallocate(larrayList) @\
 @\
     ! Set return value @\
@@ -436,12 +424,12 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 !   type(ESMF_Array) :: ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Array} object from an existing local native Fortran90 @\
-! array according to distgrid. Besides {\tt farray} each PET must issue this @\
+! Create an {\tt ESMF\_Array} object from existing local native Fortran90 @\
+! arrays according to distgrid. Besides {\tt farray} each PET must issue this @\
 ! call with identical arguments in order to create a consistent Array object. @\
 ! The local arrays provided must be dimensioned according to the DE-local @\
 ! total region. Bounds of the exclusive regions are set as specified in the @\
-! distgrid argument. Bounds for array dimensions that are not distributed can @\
+! distgrid argument. Bounds for Array dimensions that are not distributed can @\
 ! be chosen freely using the {\tt undistLBound} and {\tt undistUBound} @\
 ! arguments. @\
 ! @\
@@ -613,6 +601,16 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
     ! Set copy/ref behavior @\
     copyflag_opt = ESMF_DATA_REF  ! default @\
     if (present(copyflag)) copyflag_opt = copyflag @\
+@\
+    ! Check that indexflag does not specify mode that is not supported here @\
+    if (present(indexflag)) then @\
+      if (indexflag==ESMF_INDEX_USER) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
+          "- ESMF_INDEX_USER not supported as input value", & @\
+          ESMF_CONTEXT, rc) @\
+        return @\
+      endif @\
+    endif @\
 @\
     ! Prepare the LocalArray list to be used in the ArrayCreate() call @\
     allocate(larrayList(1)) @\
@@ -855,6 +853,17 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     copyflag_opt = ESMF_DATA_REF  ! default
     if (present(copyflag)) copyflag_opt = copyflag
 
+    ! Check that indexflag does not specify mode that is not supported here
+!TODO: cannot check for this here because ArrayCreateFromPtr() calls into here!
+!    if (present(indexflag)) then
+!      if (indexflag==ESMF_INDEX_USER) then
+!        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+!          "- ESMF_INDEX_USER not supported as input value", &
+!          ESMF_CONTEXT, rc)
+!        return
+!      endif
+!    endif
+    
     ! Deal with (optional) array arguments
     distgridToArrayMapArg = ESMF_InterfaceIntCreate(distgridToArrayMap, &
       rc=localrc)
@@ -1110,6 +1119,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
 
+    ! Check that indexflag does not specify mode that is not supported here
+    if (present(indexflag)) then
+      if (indexflag==ESMF_INDEX_USER) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+          "- ESMF_INDEX_USER not supported as input value", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+    endif
+    
     ! Deal with (optional) array arguments
     distgridToArrayMapArg = ESMF_InterfaceIntCreate(distgridToArrayMap, &
       rc=localrc)
