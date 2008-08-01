@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.12 2008/07/31 17:09:18 dneckels Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.13 2008/08/01 18:56:58 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -372,9 +372,14 @@ extern "C" void FTN(c_esmc_meshfreememory)(Mesh **meshpp, int *rc) {
 
 }
 
-extern "C" void FTN(f_esmf_getmeshdistgrid)(ESMCI::DistGrid *ngrid, int*, int*, int*);
+typedef struct {
+   void *ptr;
+} generic_f90;
+
+extern "C" generic_f90 FTN(f_esmf_getmeshdistgrid)(int*, int*, int*);
 
 extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, ESMCI::DistGrid **ngrid, ESMCI::DistGrid **egrid, int *rc) {
+
 
 
   Mesh *meshp = *meshpp;
@@ -403,7 +408,9 @@ meshp->Print(Par::Out());
   // Create the distgrids
   int nsize = ngids.size();
   int rc1;
-  FTN(f_esmf_getmeshdistgrid)(*ngrid, &nsize, &ngids[0], &rc1);
+  generic_f90 gf90 = FTN(f_esmf_getmeshdistgrid)(&nsize, &ngids[0], &rc1);
+
+  *ngrid = static_cast<ESMCI::DistGrid*>(gf90.ptr);
 
 }
 
