@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray_F.C,v 1.11 2008/07/30 22:17:17 rosalind Exp $
+// $Id: ESMC_InternArray_F.C,v 1.12 2008/08/01 23:36:53 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -415,7 +415,7 @@ extern "C" {
 
   if (!iarray) {
     //printf("uninitialized InternArray object\n");
-    ESMC_LogDefault.WriteLog("InternArray object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("InternArray object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
   }
@@ -495,7 +495,7 @@ extern "C" {
 
   if (!iarray) {
     //printf("uninitialized InternArray object\n");
-    ESMC_LogDefault.WriteLog("InternArray object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("InternArray object uninitialized", ESMC_LOG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
   }

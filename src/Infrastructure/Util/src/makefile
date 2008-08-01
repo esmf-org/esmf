@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2008/06/05 17:53:03 tjcnrl Exp $ 
+# $Id: makefile,v 1.21 2008/08/01 23:36:59 rosalind Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
@@ -21,7 +21,8 @@ STOREH    = ESMC_Arg.h ESMCI_Arg.h ESMF_Macros.inc ESMF.h ESMC_Macros.h \
             ESMC_Start.h \
             ESMC_F90Interface.h ESMCI_F90Interface.h ESMF_ErrReturnCodes.inc \
             ESMF_LogMacros.inc ESMF_LogConstants.inc ESMC_Fraction.h \
-            ESMF_TypeKindMacros.hcppF90 ESMF_InitMacros.inc
+            ESMF_TypeKindMacros.hcppF90 ESMF_InitMacros.inc \
+            ESMC_LogMacros.inc
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

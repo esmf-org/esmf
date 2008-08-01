@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.C,v 1.7 2008/07/29 01:34:55 rosalind Exp $
+// $Id: ESMCI_TimeInterval.C,v 1.8 2008/08/01 23:36:57 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.7 2008/07/29 01:34:55 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.8 2008/08/01 23:36:57 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1268,7 +1268,7 @@ namespace ESMCI{
           if (ti2.mm != 0) {
             return((ESMC_R8) ti1.mm / (ESMC_R8) ti2.mm);
           } else {
-            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, 
+            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
                                                ESMC_NULL_POINTER);
             return(0.0);
           }
@@ -1281,7 +1281,7 @@ namespace ESMCI{
 
         // divisor zero
         } else if (ti2.mm == 0 && zeroBaseTime == ti2) {
-          ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,
+          ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,ESMC_CONTEXT,
                                              ESMC_NULL_POINTER);
           return(0.0);
 
@@ -1326,7 +1326,7 @@ namespace ESMCI{
           if (ti2.yy != 0) {
             return((ESMC_R8) ti1.yy / (ESMC_R8) ti2.yy);
           } else {
-            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,
+            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,ESMC_CONTEXT,
                                                ESMC_NULL_POINTER);
             return(0.0);
           }
@@ -1338,7 +1338,7 @@ namespace ESMCI{
           if (ti2.mm != 0) {
             return((ESMC_R8) ti1.mm / (ESMC_R8) ti2.mm);
           } else {
-            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,
+            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,ESMC_CONTEXT,
                                                ESMC_NULL_POINTER);
             return(0.0);
           }
@@ -1350,7 +1350,7 @@ namespace ESMCI{
           if (ti2.d != 0) {
             return((ESMC_R8) ti1.d / (ESMC_R8) ti2.d);
           } else {
-            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,
+            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,ESMC_CONTEXT,
                                                ESMC_NULL_POINTER);
             return(0.0);
           }
@@ -1424,7 +1424,8 @@ namespace ESMCI{
 
     } else {
       // TODO: write LogErr message (divide-by-zero)
-      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT, 
+                                 ESMC_NULL_POINTER);
       TimeInterval zeroInterval;
       return(zeroInterval);
     }
@@ -1502,7 +1503,8 @@ namespace ESMCI{
 
     } else {
       // TODO: write LogErr message (divide-by-zero)
-      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT, 
+                                 ESMC_NULL_POINTER);
       TimeInterval zeroInterval;
       return(zeroInterval);
     }
@@ -1661,7 +1663,7 @@ namespace ESMCI{
             remainder.mm = ti1.mm % ti2.mm;
             return(remainder);
           } else {
-            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,
+            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
                                                ESMC_NULL_POINTER);
             return(remainder);
           }
@@ -1674,7 +1676,7 @@ namespace ESMCI{
 
         // divisor zero
         } else if (ti2.mm == 0 && zeroBaseTime == ti2) {
-          ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,
+          ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
                                              ESMC_NULL_POINTER);
           return(remainder);
 
@@ -1720,7 +1722,7 @@ namespace ESMCI{
             remainder.yy = ti1.yy % ti2.yy;
             return(remainder);
           } else {
-            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,
+            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
                                                ESMC_NULL_POINTER);
             return(remainder);
           }
@@ -1733,7 +1735,7 @@ namespace ESMCI{
             remainder.mm = ti1.mm % ti2.mm;
             return(remainder);
           } else {
-            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,
+            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
                                                ESMC_NULL_POINTER);
             return(remainder);
           }
@@ -1746,7 +1748,7 @@ namespace ESMCI{
             remainder.d = ti1.d % ti2.d;
             return(remainder);
           } else {
-            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,
+            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
                                                ESMC_NULL_POINTER);
             return(remainder);
           }

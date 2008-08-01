@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.C,v 1.9 2008/07/29 01:34:49 rosalind Exp $
+// $Id: ESMC_Config.C,v 1.10 2008/08/01 23:36:51 rosalind Exp $
 //
 // Earth System Modeling Framework
 // copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
  static const char* const version = 
-             "$Id: ESMC_Config.C,v 1.9 2008/07/29 01:34:49 rosalind Exp $";
+             "$Id: ESMC_Config.C,v 1.10 2008/08/01 23:36:51 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -92,7 +92,7 @@ ESMC_Config* ESMC_ConfigCreate(
     config = new ESMC_Config;
   }catch(...){
      // allocation error
-     ESMC_LogDefault.MsgAllocError("for new ESMC_Config.", rc);  
+     ESMC_LogDefault.MsgAllocError("for new ESMC_Config.", ESMC_CONTEXT, rc);  
      return ESMC_NULL_POINTER;
   }
 

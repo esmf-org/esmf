@@ -1,4 +1,4 @@
-// $Id: ESMCI_BaseTime.C,v 1.4 2008/07/30 22:17:29 rosalind Exp $
+// $Id: ESMCI_BaseTime.C,v 1.5 2008/08/01 23:36:57 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.4 2008/07/30 22:17:29 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.5 2008/08/01 23:36:57 rosalind Exp $";
 //-------------------------------------------------------------------------
 
   namespace ESMCI{
@@ -199,7 +199,7 @@
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "s=%lld and sN=%d not both positive or both negative, "
                       "or sD=%d negative or less than one.", s, sN, sD); 
-      ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_ERROR);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
       return(ESMF_FAILURE);
     }
 
@@ -279,7 +279,7 @@
         sprintf(logMsg, "For s=%lld, hours=%lld out-of-range with respect to "
                         "machine limits (INT_MIN=%d to INT_MAX=%d).",
                         remainingSeconds, hours, INT_MIN, INT_MAX);
-        ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_ERROR);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
         return (ESMF_FAILURE);
       }
       *h = hours;
@@ -292,7 +292,7 @@
         sprintf(logMsg, "For s=%lld, minutes=%lld out-of-range with respect to "
                         "machine limits (INT_MIN=%d to INT_MAX=%d).",
                         remainingSeconds, minutes, INT_MIN, INT_MAX);
-        ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_ERROR);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
         return (ESMF_FAILURE);
       }
       *m = minutes;
@@ -304,7 +304,7 @@
         sprintf(logMsg, "s=%lld out-of-range with respect to "
                         "machine limits (INT_MIN=%d to INT_MAX=%d).",
                         remainingSeconds, INT_MIN, INT_MAX);
-        ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_ERROR);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
         return (ESMF_FAILURE);
       }
       *s = remainingSeconds;    // >= 32 bit

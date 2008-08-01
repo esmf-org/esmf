@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.12 2008/07/29 01:34:47 rosalind Exp $
+// $Id: ESMC_Array.C,v 1.13 2008/08/01 23:36:45 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMC_LogMacros.inc"             // for LogErr
 #include "ESMCI_Array.h"
 #include "ESMC_Interface.h"
 #include "ESMCI_F90Interface.h"
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.12 2008/07/29 01:34:47 rosalind Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.13 2008/08/01 23:36:45 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -62,7 +62,7 @@ ESMC_Array ESMC_ArrayCreate(ESMC_ArraySpec arrayspec, ESMC_DistGrid distgrid,
 
   // Set name in newly created Array
   localrc = ((ESMCI::Array*)(array.ptr))->ESMCI::Array::setName(name);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
     array.ptr = NULL;
     return array;  // bail out
   }
@@ -103,7 +103,7 @@ int ESMC_ArrayPrint(ESMC_Array array){
 
   // call into ESMCI method  
   localrc = ap->print();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
     return rc;  // bail out
     
   // return successfully
@@ -124,7 +124,7 @@ int ESMC_ArrayDestroy(ESMC_Array *array){
 
   // call into ESMCI method  
   localrc = ESMCI::Array::destroy(&ap);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
     return rc;  // bail out
   
   // invalidate pointer
@@ -151,7 +151,7 @@ int ESMC_ArraySetLWidth(ESMC_Array array, ESMC_InterfaceInt computationalLWidthA
   //call into ESMCI method
   localrc = ap->setComputationalLWidth( 
                           (ESMCI::InterfaceInt *)(computationalLWidthArg.ptr) );
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
     return rc;  // bail out
 
   //return code

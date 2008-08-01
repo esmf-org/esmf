@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.112 2008/07/30 22:17:15 rosalind Exp $
+// $Id: ESMC_Base.C,v 1.113 2008/08/01 23:36:49 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.112 2008/07/30 22:17:15 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.113 2008/08/01 23:36:49 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -705,12 +705,12 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     //   "Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
     //       ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
     // printf(msgbuf);
-    // ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
+    // ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     
   // root Attribute
   sprintf(msgbuf, "   Root Attribute\n");
   printf(msgbuf);
-  ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   
   // traverse the Attribute hierarchy, printing as we go
   root.ESMC_Print();

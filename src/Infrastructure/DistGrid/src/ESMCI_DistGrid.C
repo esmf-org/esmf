@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.12 2008/07/29 01:34:49 rosalind Exp $
+// $Id: ESMCI_DistGrid.C,v 1.13 2008/08/01 23:36:52 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.12 2008/07/29 01:34:49 rosalind Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.13 2008/08/01 23:36:52 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -99,7 +99,7 @@ DistGrid *DistGrid::create(
     distgrid = new DistGrid;
   }catch(...){
      // allocation error
-     ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", rc);  
+     ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", ESMC_CONTEXT, rc);  
      return ESMC_NULL_POINTER;
   }
 
@@ -575,7 +575,7 @@ DistGrid *DistGrid::create(
     distgrid = new DistGrid;
   }catch(...){
      // allocation error
-     ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", rc);  
+     ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", ESMC_CONTEXT, rc);  
      return ESMC_NULL_POINTER;
   }
 
@@ -908,7 +908,7 @@ DistGrid *DistGrid::create(
     distgrid = new DistGrid;
   }catch(...){
      // allocation error
-     ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", rc);  
+     ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", ESMC_CONTEXT, rc);  
      return ESMC_NULL_POINTER;
   }
 

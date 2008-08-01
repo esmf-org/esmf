@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.71 2008/07/29 01:34:50 rosalind Exp $
+// $Id: ESMCI_Grid.C,v 1.72 2008/08/01 23:36:52 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.71 2008/07/29 01:34:50 rosalind Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.72 2008/08/01 23:36:52 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -941,7 +941,7 @@ Grid *Grid::create(
     grid = new Grid();
   }catch(...){
      // allocation error
-     ESMC_LogDefault.MsgAllocError("for new ESMC_Grid.", rcArg);  
+     ESMC_LogDefault.MsgAllocError("for new ESMC_Grid.", ESMC_CONTEXT, rcArg);  
      return ESMC_NULL_POINTER;
   }
 
@@ -1000,7 +1000,7 @@ Grid *Grid::create(
     grid = new Grid();
   }catch(...){
      // allocation error
-     ESMC_LogDefault.MsgAllocError("for new ESMC_Grid.", rcArg);  
+     ESMC_LogDefault.MsgAllocError("for new ESMC_Grid.", ESMC_CONTEXT, rcArg);  
      return ESMC_NULL_POINTER;
   }
 

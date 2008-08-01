@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.C,v 1.5 2008/07/30 22:17:29 rosalind Exp $
+// $Id: ESMCI_Calendar.C,v 1.6 2008/08/01 23:36:57 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Calendar.C,v 1.5 2008/07/30 22:17:29 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_Calendar.C,v 1.6 2008/08/01 23:36:57 rosalind Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -166,7 +166,7 @@ int Calendar::count=0;
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "calendarType %d not in valid range of 1 to %d.",
               calendarType, CALENDAR_TYPE_COUNT);
-      ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_ERROR);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
       return(ESMC_NULL_POINTER);
     }
 
@@ -174,7 +174,7 @@ int Calendar::count=0;
       calendar = new Calendar;
     }
     catch (...) {
-      ESMC_LogDefault.AllocError(rc);
+      ESMC_LogDefault.AllocError(ESMC_CONTEXT,rc);
       return(ESMC_NULL_POINTER);
     }
 
@@ -191,7 +191,7 @@ int Calendar::count=0;
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "calendar name %s, length >= ESMF_MAXSTR; truncated.",
                 name);
-        ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_WARN);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
         // TODO: return ESMF_WARNING when defined
         // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
       }
@@ -246,7 +246,7 @@ int Calendar::count=0;
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "calendarType %d not in valid range of 1 to %d.",
               calendarType, CALENDAR_TYPE_COUNT);
-      ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_ERROR);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
       return(ESMF_FAILURE);
     }
 
@@ -269,7 +269,7 @@ int Calendar::count=0;
       *internalCal = new Calendar;
     }
     catch (...) {
-      ESMC_LogDefault.AllocError(&returnCode);
+      ESMC_LogDefault.AllocError(ESMC_CONTEXT,&returnCode);
       return(ESMF_FAILURE);
     }
 
@@ -333,7 +333,7 @@ int Calendar::count=0;
       calendar = new Calendar;
     }
     catch (...) {
-      ESMC_LogDefault.AllocError(rc);
+      ESMC_LogDefault.AllocError(ESMC_CONTEXT,rc);
       return(ESMC_NULL_POINTER);
     }
 
@@ -350,7 +350,7 @@ int Calendar::count=0;
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "calendar name %s, length >= ESMF_MAXSTR; truncated.",
                 name);
-        ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_WARN);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
         // TODO: return ESMF_WARNING when defined
         // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
       }
@@ -406,8 +406,8 @@ int Calendar::count=0;
 
     // can't copy a non-existent object
     if (calendar == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.WriteLog("Can't copy a non-existent calendar",
-                                    ESMC_LOG_ERROR);
+      ESMC_LogDefault.Write("Can't copy a non-existent calendar",
+                                    ESMC_LOG_WARN,ESMC_CONTEXT);
       return(ESMC_NULL_POINTER);
     }
 
@@ -416,7 +416,7 @@ int Calendar::count=0;
       calendarCopy = new Calendar(*calendar);
     }
     catch (...) {
-      ESMC_LogDefault.AllocError(rc);
+      ESMC_LogDefault.AllocError(ESMC_CONTEXT,rc);
       return(ESMC_NULL_POINTER);
     }
 
@@ -476,13 +476,13 @@ int Calendar::count=0;
 
   // ensure we have a valid calendar
   if (calendar == ESMC_NULL_POINTER) {
-    ESMC_LogDefault.WriteLog("calendar pointer-pointer is NULL.",
-                                  ESMC_LOG_ERROR);
+    ESMC_LogDefault.Write("calendar pointer-pointer is NULL.",
+                                  ESMC_LOG_WARN,ESMC_CONTEXT);
     return(ESMF_FAILURE);
   }
   if (*calendar == ESMC_NULL_POINTER) {
-    ESMC_LogDefault.WriteLog("calendar pointer is NULL.",
-                                  ESMC_LOG_ERROR);
+    ESMC_LogDefault.Write("calendar pointer is NULL.",
+                                  ESMC_LOG_WARN,ESMC_CONTEXT);
     return(ESMF_FAILURE);
   }
 
@@ -529,7 +529,7 @@ int Calendar::count=0;
     char logMsg[ESMF_MAXSTR];
     sprintf(logMsg, "ESMCI_CalendarCreate(%s) failed.",
             Calendar::calendarTypeName[calType]);
-    ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_ERROR);
+    ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
     return (rc);
   }
 
@@ -590,7 +590,7 @@ int Calendar::count=0;
           char logMsg[ESMF_MAXSTR];
           sprintf(logMsg, "calendar name %s, length >= ESMF_MAXSTR; truncated.",
                   name);
-          ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_WARN);
+          ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
           // TODO: return ESMF_WARNING when defined
           // rc = ESMF_WARNING;
         }
@@ -733,7 +733,7 @@ int Calendar::count=0;
           char logMsg[ESMF_MAXSTR];
           sprintf(logMsg, "calendar name %s, length >= ESMF_MAXSTR; truncated.",
                   name);
-          ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_WARN);
+          ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
           // TODO: return ESMF_WARNING when defined
           // rc = ESMF_WARNING;
         }
@@ -860,7 +860,7 @@ int Calendar::count=0;
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "For calendar name %s, "
                 "length >= given character array; truncated.", this->name);
-        ESMC_LogDefault.WriteLog(logMsg, ESMC_LOG_WARN);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
         // TODO: return ESMF_WARNING when defined
         // rc = ESMF_WARNING;
       }

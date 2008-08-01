@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.5 2008/07/29 01:34:48 rosalind Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.6 2008/08/01 23:36:46 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.5 2008/07/29 01:34:48 rosalind Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.6 2008/08/01 23:36:46 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -178,7 +178,7 @@ ArrayBundle *ArrayBundle::create(
       return ESMC_NULL_POINTER;
   }catch(...){
     // allocation error
-    ESMC_LogDefault.MsgAllocError("for new ESMCI::ArrayBundle.", rc);  
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::ArrayBundle.", ESMC_CONTEXT, rc);  
     return ESMC_NULL_POINTER;
   }
   

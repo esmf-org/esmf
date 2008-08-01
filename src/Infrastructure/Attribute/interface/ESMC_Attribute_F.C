@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.14 2008/08/01 19:25:02 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.15 2008/08/01 23:36:46 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.14 2008/08/01 19:25:02 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.15 2008/08/01 23:36:46 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -520,7 +520,7 @@ extern "C" {
   // get type of the Attribute from the attpack, do not return error (default value possible)
   status = attr->ESMC_AttributeGet(cname, &attrTypeKind, NULL, NULL);
   if (status != ESMF_SUCCESS || attrTypeKind != *tk) {
-    ESMC_LogDefault.WriteLog(
+    ESMC_LogDefault.Write(
                           "failed getting typekind - looking for default value",
                           ESMC_LOG_INFO);
     delete [] cname;
@@ -1787,7 +1787,7 @@ extern "C" {
   // check the typekind, do not return error (default value possible)
   status = (**base).root.ESMC_AttributeGet(cname, &attrTypeKind, NULL, NULL);
   if (status != ESMF_SUCCESS || attrTypeKind != *tk) {
-    ESMC_LogDefault.WriteLog(
+    ESMC_LogDefault.Write(
                           "failed getting typekind - looking for default value",
                           ESMC_LOG_INFO);
     delete [] cname;
@@ -1949,7 +1949,7 @@ extern "C" {
 
   status = (**base).root.ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
   if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.WriteLog("failed getting attribute type and count", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("failed getting attribute type and count", ESMC_LOG_INFO);
     delete [] cname;
     if (rc) *rc = status;
     return;

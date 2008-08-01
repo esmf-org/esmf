@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.7 2008/08/01 23:36:58 rosalind Exp $
+ $Id: ESMC_LogMacros.inc,v 1.1 2008/08/01 23:36:58 rosalind Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,8 +32,5 @@
 #define ESMC_FILENAME __FILE__
 #endif
 
-
-#define MsgFoundError(status,msg,rc) \
-MsgFoundError(status,msg,ESMC_CONTEXT,rc)
 
 #endif
