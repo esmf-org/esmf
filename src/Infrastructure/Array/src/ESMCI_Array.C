@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.22 2008/07/31 20:21:54 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.23 2008/08/01 21:02:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.22 2008/07/31 20:21:54 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.23 2008/08/01 21:02:37 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1051,6 +1051,7 @@ Array *Array::create(
   InterfaceInt *totalLWidthArg,               // (in)
   InterfaceInt *totalUWidthArg,               // (in)
   ESMC_IndexFlag *indexflagArg,               // (in)
+  InterfaceInt *distLBoundArg,                // (in)
   int *staggerLocArg,                         // (in)
   int *vectorDimArg,                          // (in)
   InterfaceInt *undistLBoundArg,              // (in)
@@ -1233,6 +1234,20 @@ Array *Array::create(
   ESMC_IndexFlag indexflag = ESMF_INDEX_DELOCAL;  // default
   if (indexflagArg != NULL)
     indexflag = *indexflagArg;
+  // check that presence of distLBoundArg is consistent with indexflag
+  if(indexflag == ESMF_INDEX_USER){
+    if (distLBoundArg == NULL){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+        "- distLBoundArg required in ESMF_INDEX_USER mode", rc);
+      return ESMC_NULL_POINTER;
+    }
+  }else{
+    if (distLBoundArg != NULL){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+        "- distLBoundArg must only be specified in ESMF_INDEX_USER mode", rc);
+      return ESMC_NULL_POINTER;
+    }
+  }
   // figure exclusive region
   int *exclusiveLBound = new int[dimCount*localDeCount];
   int *exclusiveUBound = new int[dimCount*localDeCount];
@@ -1467,6 +1482,37 @@ Array *Array::create(
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
           "- computationaUBound / totalUBound mismatch", rc);
         return ESMC_NULL_POINTER;
+      }
+    }
+  }
+  
+  // optionally shift to supplied lower bounds
+  if (distLBoundArg != NULL){
+    if (distLBoundArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- distLBoundArg array must be of rank 1", rc);
+      return ESMC_NULL_POINTER;
+    }
+    if (distLBoundArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- distLBoundArg and distgrid mismatch", rc);
+      return ESMC_NULL_POINTER;
+    }
+    for (int i=0; i<localDeCount; i++){
+      int j=0;    // reset distributed index
+      for (int jj=0; jj<rank; jj++){
+        if (arrayToDistGridMapArray[jj]){
+          // distributed dimension
+          // shift all bounds to be consistent with supplied lower bounds
+          int shift = distLBoundArg->array[jj] - totalLBound[i*dimCount+j];
+          totalLBound[i*dimCount+j] += shift;
+          totalUBound[i*dimCount+j] += shift;
+          computationalLBound[i*dimCount+j] += shift;
+          computationalUBound[i*dimCount+j] += shift;
+          exclusiveLBound[i*dimCount+j] += shift;
+          exclusiveUBound[i*dimCount+j] += shift;
+          ++j;
+        }
       }
     }
   }

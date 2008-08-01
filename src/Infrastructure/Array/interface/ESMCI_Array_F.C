@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.1.2.11 2008/05/09 04:51:47 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.1.2.12 2008/08/01 21:02:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ extern "C" {
     *ptr = ESMCI::Array::create(arrayspec, *distgrid, *distgridToArrayMap,
       *computationalEdgeLWidthArg, *computationalEdgeUWidthArg,
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
-      *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
+      *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag), NULL,
       ESMC_NOT_PRESENT_FILTER(staggerLoc), ESMC_NOT_PRESENT_FILTER(vectorDim),
       *undistLBoundArg, *undistUBoundArg, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
