@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.9 2008/07/31 17:09:18 dneckels Exp $
+! $Id: ESMF_Mesh.F90,v 1.10 2008/08/01 16:41:11 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.9 2008/07/31 17:09:18 dneckels Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.10 2008/08/01 16:41:11 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -565,7 +565,7 @@ module ESMF_MeshMod
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
       ! If already free, fine just return
-      if (mesh%mesh_freed) then
+      if (mesh%mesh_freed .eq. 1) then
         rc = ESMF_SUCCESS
         return
       endif
