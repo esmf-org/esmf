@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.21 2008/07/25 02:35:16 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.22 2008/08/01 19:25:43 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.21 2008/07/25 02:35:16 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.22 2008/08/01 19:25:43 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -178,6 +178,7 @@ module ESMF_AttributeMod
         module procedure ESMF_ArrayAttGetLogical
         module procedure ESMF_ArrayAttGetLogicalList
         module procedure ESMF_ArrayAttGetChar
+        module procedure ESMF_ArrayAttGetCharList
         module procedure ESMF_ArrayAttGetInfoByName
         module procedure ESMF_ArrayAttGetInfoByNum
         module procedure ESMF_ArrayAttGetCount
@@ -192,6 +193,7 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttGetLogical
         module procedure ESMF_CplCompAttGetLogicalList
         module procedure ESMF_CplCompAttGetChar
+        module procedure ESMF_CplCompAttGetCharList
         module procedure ESMF_CplCompAttGetInfoByName
         module procedure ESMF_CplCompAttGetInfoByNum
         module procedure ESMF_CplCompAttGetCount
@@ -206,6 +208,7 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttGetLogical
         module procedure ESMF_GridCompAttGetLogicalList
         module procedure ESMF_GridCompAttGetChar
+        module procedure ESMF_GridCompAttGetCharList
         module procedure ESMF_GridCompAttGetInfoByName
         module procedure ESMF_GridCompAttGetInfoByNum
         module procedure ESMF_GridCompAttGetCount
@@ -220,6 +223,7 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldAttGetLogical
         module procedure ESMF_FieldAttGetLogicalList
         module procedure ESMF_FieldAttGetChar
+        module procedure ESMF_FieldAttGetCharList
         module procedure ESMF_FieldAttGetInfoByName
         module procedure ESMF_FieldAttGetInfoByNum
         module procedure ESMF_FieldAttGetCount
@@ -234,6 +238,7 @@ module ESMF_AttributeMod
         module procedure ESMF_FBundleAttGetLogical
         module procedure ESMF_FBundleAttGetLogicalList
         module procedure ESMF_FBundleAttGetChar
+        module procedure ESMF_FBundleAttGetCharList
         module procedure ESMF_FBundleAttGetInfoByName
         module procedure ESMF_FBundleAttGetInfoByNum
         module procedure ESMF_FBundleAttGetCount
@@ -248,6 +253,7 @@ module ESMF_AttributeMod
         module procedure ESMF_GridAttGetLogical
         module procedure ESMF_GridAttGetLogicalList
         module procedure ESMF_GridAttGetChar
+        module procedure ESMF_GridAttGetCharList
         module procedure ESMF_GridAttGetInfoByName
         module procedure ESMF_GridAttGetInfoByNum
         module procedure ESMF_GridAttGetCount
@@ -262,6 +268,7 @@ module ESMF_AttributeMod
         module procedure ESMF_StateAttGetLogical
         module procedure ESMF_StateAttGetLogicalList
         module procedure ESMF_StateAttGetChar
+        module procedure ESMF_StateAttGetCharList
         module procedure ESMF_StateAttGetInfoByName
         module procedure ESMF_StateAttGetInfoByNum
         module procedure ESMF_StateAttGetCount
@@ -293,6 +300,7 @@ module ESMF_AttributeMod
         module procedure ESMF_ArrayAttSetLogical
         module procedure ESMF_ArrayAttSetLogicalList
         module procedure ESMF_ArrayAttSetChar
+        module procedure ESMF_ArrayAttSetCharList
         module procedure ESMF_CplCompAttSetInt4
         module procedure ESMF_CplCompAttSetInt4List
         module procedure ESMF_CplCompAttSetInt8
@@ -304,6 +312,7 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttSetLogical
         module procedure ESMF_CplCompAttSetLogicalList
         module procedure ESMF_CplCompAttSetChar
+        module procedure ESMF_CplCompAttSetCharList
         module procedure ESMF_CplCompAttSetLinkCplComp
         module procedure ESMF_CplCompAttSetLinkGridComp
         module procedure ESMF_CplCompAttSetLinkState
@@ -318,6 +327,7 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttSetLogical
         module procedure ESMF_GridCompAttSetLogicalList
         module procedure ESMF_GridCompAttSetChar
+        module procedure ESMF_GridCompAttSetCharList
         module procedure ESMF_GridCompAttSetLinkCplComp
         module procedure ESMF_GridCompAttSetLinkGridComp
         module procedure ESMF_GridCompAttSetLinkState
@@ -332,6 +342,7 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldAttSetLogical
         module procedure ESMF_FieldAttSetLogicalList
         module procedure ESMF_FieldAttSetChar
+        module procedure ESMF_FieldAttSetCharList
         module procedure ESMF_FBundleAttSetInt4
         module procedure ESMF_FBundleAttSetInt4List
         module procedure ESMF_FBundleAttSetInt8
@@ -343,6 +354,7 @@ module ESMF_AttributeMod
         module procedure ESMF_FBundleAttSetLogical
         module procedure ESMF_FBundleAttSetLogicalList
         module procedure ESMF_FBundleAttSetChar
+        module procedure ESMF_FBundleAttSetCharList
         module procedure ESMF_FBundleAttSetLinkField
         module procedure ESMF_GridAttSetInt4
         module procedure ESMF_GridAttSetInt4List
@@ -355,6 +367,7 @@ module ESMF_AttributeMod
         module procedure ESMF_GridAttSetLogical
         module procedure ESMF_GridAttSetLogicalList
         module procedure ESMF_GridAttSetChar
+        module procedure ESMF_GridAttSetCharList
         module procedure ESMF_StateAttSetInt4
         module procedure ESMF_StateAttSetInt4List
         module procedure ESMF_StateAttSetInt8
@@ -366,6 +379,7 @@ module ESMF_AttributeMod
         module procedure ESMF_StateAttSetLogical
         module procedure ESMF_StateAttSetLogicalList
         module procedure ESMF_StateAttSetChar
+        module procedure ESMF_StateAttSetCharList
         module procedure ESMF_StateAttSetLinkFB
         module procedure ESMF_StateAttSetLinkField
         module procedure ESMF_StateAttSetLinkState
@@ -2042,7 +2056,6 @@ contains
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
       type(ESMF_Logical), allocatable :: localvalueList(:)
-      integer :: err
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2118,7 +2131,6 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttGetChar"
-
 !BOPI
 ! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
@@ -2220,6 +2232,133 @@ contains
 
       end subroutine ESMF_ArrayAttGetChar
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayAttGetCharList"
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGet()
+      subroutine ESMF_ArrayAttGetCharList(array, name, count, valueList, &
+        defaultvalueList, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      character (ESMF_MAXSTR), dimension(count), intent(out) :: valueList
+      character (ESMF_MAXSTR), dimension(count), intent(in), optional :: defaultvalueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a character Attribute from the {\tt array}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The count of the character items to retrieve
+!     \item [valueList]
+!           The character list values of the named Attribute.
+!     \item [defaultvalueList]
+!           The character list default value of the named Attribute.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+      enddo
+      
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'array'
+
+      call c_ESMC_AttPackGetCharList(array, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, fconvention, fpurpose, fobject, localrc)
+        
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+                                
+    else
+      
+      call c_ESMC_AttributeGetCharList(array, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, localrc)
+      
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+
+    endif
+
+      j = 1
+      do  i=1,count
+        valueList(i) = valueString(j:(j+lens(i)))
+        j = j + lens(i)
+      enddo
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayAttGetCharList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3144,7 +3283,6 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -3494,6 +3632,106 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayAttSetChar
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayAttSetCharList"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeSet()
+      subroutine ESMF_ArrayAttSetCharList(array, name, count, valueList, &
+        convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character(len=*), intent(in) :: name
+      integer, intent(in) :: count
+      character(ESMF_MAXSTR), dimension(count), intent(in) :: valueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character Attribute to the {\tt array}.
+!     The Attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the Attribute to add.
+!     \item [value]
+!           The character value of the Attribute to add.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      j = 1
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+        valueString(j:(j+lens(i))) = valueList(i)
+        j = j + lens(i)
+      enddo
+
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'array'
+
+      call c_ESMC_AttPackSetCharList(array, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                                
+      else
+      
+      call c_ESMC_AttributeSetCharList(array, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayAttSetCharList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -5005,6 +5243,133 @@ contains
 
       end subroutine ESMF_CplCompAttGetChar
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompAttGetCharList"
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGet()
+      subroutine ESMF_CplCompAttGetCharList(comp, name, count, valueList, &
+        defaultvalueList, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp), intent(inout) :: comp  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      character (ESMF_MAXSTR), dimension(count), intent(out) :: valueList
+      character (ESMF_MAXSTR), dimension(count), intent(in), optional :: defaultvalueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a character Attribute from the {\tt comp}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [comp]
+!           An {\tt ESMF\_CplComp} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The count of the character items to retrieve
+!     \item [valueList]
+!           The character list values of the named Attribute.
+!     \item [defaultvalueList]
+!           The character list default value of the named Attribute.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
+
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+      enddo
+      
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'comp'
+
+      call c_ESMC_AttPackGetCharList(comp%compp%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, fconvention, fpurpose, fobject, localrc)
+       
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+                                
+    else
+      
+      call c_ESMC_AttributeGetCharList(comp%compp%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, localrc)
+      
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+    endif
+
+      j = 1
+      do  i=1,count
+        valueList(i) = valueString(j:(j+lens(i)))
+        j = j + lens(i)
+      enddo
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_CplCompAttGetCharList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -5929,7 +6294,6 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -6279,6 +6643,106 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_CplCompAttSetChar
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompAttSetCharList"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeSet()
+      subroutine ESMF_CplCompAttSetCharList(comp, name, count, valueList, &
+        convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp), intent(inout) :: comp  
+      character(len=*), intent(in) :: name
+      integer, intent(in) :: count
+      character(ESMF_MAXSTR), dimension(count), intent(in) :: valueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [comp]
+!           An {\tt ESMF\_CplComp} object.
+!     \item [name]
+!           The name of the Attribute to add.
+!     \item [value]
+!           The character value of the Attribute to add.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
+
+      j = 1
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+        valueString(j:(j+lens(i))) = valueList(i)
+        j = j + lens(i)
+      enddo
+
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'comp'
+
+      call c_ESMC_AttPackSetCharList(comp%compp%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                                
+      else
+      
+      call c_ESMC_AttributeSetCharList(comp%compp%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_CplCompAttSetCharList
 
 !------------------------------------------------------------------------------
 !BOP
@@ -8002,6 +8466,133 @@ contains
 
       end subroutine ESMF_GridCompAttGetChar
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompAttGetCharList"
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGet()
+      subroutine ESMF_GridCompAttGetCharList(comp, name, count, valueList, &
+        defaultvalueList, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(inout) :: comp  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      character (len = *), dimension(count), intent(out) :: valueList
+      character (ESMF_MAXSTR), dimension(count), intent(in), optional :: defaultvalueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a character Attribute from the {\tt comp}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [comp]
+!           An {\tt ESMF\_GridComp} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The count of the character items to retrieve
+!     \item [valueList]
+!           The character list values of the named Attribute.
+!     \item [defaultvalueList]
+!           The character list default value of the named Attribute.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
+
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+      enddo
+
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'comp'
+
+      call c_ESMC_AttPackGetCharList(comp%compp%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, fconvention, fpurpose, fobject, localrc)
+        
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+                                
+    else
+      
+      call c_ESMC_AttributeGetCharList(comp%compp%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, localrc)
+      
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+
+    endif
+
+      j = 1
+      do  i=1,count
+        valueList(i) = valueString(j:(j+lens(i)))
+        j = j + lens(i)
+      enddo
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridCompAttGetCharList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -8926,7 +9517,6 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -9276,6 +9866,106 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridCompAttSetChar
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompAttSetCharList"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeSet()
+      subroutine ESMF_GridCompAttSetCharList(comp, name, count, valueList, &
+        convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(inout) :: comp  
+      character(len=*), intent(in) :: name
+      integer, intent(in) :: count
+      character(ESMF_MAXSTR), dimension(count), intent(in) :: valueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character Attribute to the {\tt comp}.
+!     The Attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [comp]
+!           An {\tt ESMF\_GridComp} object.
+!     \item [name]
+!           The name of the Attribute to add.
+!     \item [value]
+!           The character value of the Attribute to add.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
+
+      j = 1
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+        valueString(j:(j+lens(i))) = valueList(i)
+        j = j + lens(i)
+      enddo
+
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'comp'
+
+      call c_ESMC_AttPackSetCharList(comp%compp%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                                
+      else
+      
+      call c_ESMC_AttributeSetCharList(comp%compp%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridCompAttSetCharList
 
 !------------------------------------------------------------------------------
 !BOP
@@ -10816,7 +11506,6 @@ contains
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
       type(ESMF_Logical), allocatable :: localvalueList(:)
-      integer :: err
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -10994,6 +11683,133 @@ contains
 
       end subroutine ESMF_FieldAttGetChar
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldAttGetCharList"
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGet()
+      subroutine ESMF_FieldAttGetCharList(field, name, count, valueList, &
+        defaultvalueList, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      character (ESMF_MAXSTR), dimension(count), intent(out) :: valueList
+      character (ESMF_MAXSTR), dimension(count), intent(in), optional :: defaultvalueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a character Attribute from the {\tt field}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The count of the character items to retrieve
+!     \item [valueList]
+!           The character list values of the named Attribute.
+!     \item [defaultvalueList]
+!           The character list default value of the named Attribute.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+      enddo
+      
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+      call c_ESMC_AttPackGetCharList(field%ftypep%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, fconvention, fpurpose, fobject, localrc)
+        
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+                                
+    else
+      
+      call c_ESMC_AttributeGetCharList(field%ftypep%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, localrc)
+      
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+
+    endif
+
+      j = 1
+      do  i=1,count
+        valueList(i) = valueString(j:(j+lens(i)))
+        j = j + lens(i)
+      enddo
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldAttGetCharList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -11918,7 +12734,6 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -12268,6 +13083,106 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldAttSetChar
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldAttSetCharList"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeSet()
+      subroutine ESMF_FieldAttSetCharList(field, name, count, valueList, &
+        convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field  
+      character(len=*), intent(in) :: name
+      integer, intent(in) :: count
+      character(ESMF_MAXSTR), dimension(count), intent(in) :: valueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character Attribute to the {\tt field}.
+!     The Attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to add.
+!     \item [value]
+!           The character value of the Attribute to add.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+      j = 1
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+        valueString(j:(j+lens(i))) = valueList(i)
+        j = j + lens(i)
+      enddo
+
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+      call c_ESMC_AttPackSetCharList(field%ftypep%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                                
+      else
+      
+      call c_ESMC_AttributeSetCharList(field%ftypep%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldAttSetCharList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -13775,6 +14690,133 @@ contains
 
       end subroutine ESMF_FBundleAttGetChar
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FBundleAttGetCharList"
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGet()
+      subroutine ESMF_FBundleAttGetCharList(fieldbundle, name, count, valueList, &
+        defaultvalueList, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      character (ESMF_MAXSTR), dimension(count), intent(out) :: valueList
+      character (ESMF_MAXSTR), dimension(count), intent(in), optional :: defaultvalueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a character Attribute from the {\tt fieldbundle}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [fieldbundle]
+!           An {\tt ESMF\_FBundle} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The count of the character items to retrieve
+!     \item [valueList]
+!           The character list values of the named Attribute.
+!     \item [defaultvalueList]
+!           The character list default value of the named Attribute.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
+
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+      enddo
+      
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'fieldbundle'
+
+      call c_ESMC_AttPackGetCharList(fieldbundle%btypep%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, fconvention, fpurpose, fobject, localrc)
+        
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+                                
+    else
+      
+      call c_ESMC_AttributeGetCharList(fieldbundle%btypep%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, localrc)
+      
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+
+    endif
+
+      j = 1
+      do  i=1,count
+        valueList(i) = valueString(j:(j+lens(i)))
+        j = j + lens(i)
+      enddo
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FBundleAttGetCharList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -14699,7 +15741,6 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -15049,6 +16090,106 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FBundleAttSetChar
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FBundleAttSetCharList"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeSet()
+      subroutine ESMF_FBundleAttSetCharList(fieldbundle, name, count, valueList, &
+        convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
+      character(len=*), intent(in) :: name
+      integer, intent(in) :: count
+      character(ESMF_MAXSTR), dimension(count), intent(in) :: valueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character Attribute to the {\tt fieldbundle}.
+!     The Attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [fieldbundle]
+!           An {\tt ESMF\_FBundle} object.
+!     \item [name]
+!           The name of the Attribute to add.
+!     \item [value]
+!           The character value of the Attribute to add.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
+
+      j = 1
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+        valueString(j:(j+lens(i))) = valueList(i)
+        j = j + lens(i)
+      enddo
+
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'fieldbundle'
+
+      call c_ESMC_AttPackSetCharList(fieldbundle%btypep%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                                
+      else
+      
+      call c_ESMC_AttributeSetCharList(fieldbundle%btypep%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FBundleAttSetCharList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -16610,6 +17751,133 @@ contains
 
       end subroutine ESMF_GridAttGetChar
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAttGetCharList"
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGet()
+      subroutine ESMF_GridAttGetCharList(grid, name, count, valueList, &
+        defaultvalueList, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout) :: grid  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      character (ESMF_MAXSTR), dimension(count), intent(out) :: valueList
+      character (ESMF_MAXSTR), dimension(count), intent(in), optional :: defaultvalueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a character Attribute from the {\tt grid}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The count of the character items to retrieve
+!     \item [valueList]
+!           The character list values of the named Attribute.
+!     \item [defaultvalueList]
+!           The character list default value of the named Attribute.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+      enddo
+      
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'grid'
+
+      call c_ESMC_AttPackGetCharList(grid, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, fconvention, fpurpose, fobject, localrc)
+        
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+                                
+    else
+      
+      call c_ESMC_AttributeGetCharList(grid, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, localrc)
+      
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+
+    endif
+
+      j = 1
+      do  i=1,count
+        valueList(i) = valueString(j:(j+lens(i)))
+        j = j + lens(i)
+      enddo
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridAttGetCharList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -17534,7 +18802,6 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -17884,6 +19151,106 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridAttSetChar
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAttSetCharList"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeSet()
+      subroutine ESMF_GridAttSetCharList(grid, name, count, valueList, &
+        convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout) :: grid  
+      character(len=*), intent(in) :: name
+      integer, intent(in) :: count
+      character(ESMF_MAXSTR), dimension(count), intent(in) :: valueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character Attribute to the {\tt grid}.
+!     The Attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the Attribute to add.
+!     \item [value]
+!           The character value of the Attribute to add.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+      j = 1
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+        valueString(j:(j+lens(i))) = valueList(i)
+        j = j + lens(i)
+      enddo
+
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'grid'
+
+      call c_ESMC_AttPackSetCharList(grid, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                                
+      else
+      
+      call c_ESMC_AttributeSetCharList(grid, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridAttSetCharList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -19442,6 +20809,133 @@ contains
 
       end subroutine ESMF_StateAttGetChar
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAttGetCharList"
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGet()
+      subroutine ESMF_StateAttGetCharList(state, name, count, valueList, &
+        defaultvalueList, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count
+      character (ESMF_MAXSTR), dimension(count), intent(out) :: valueList
+      character (ESMF_MAXSTR), dimension(count), intent(in), optional :: defaultvalueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a character Attribute from the {\tt state}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!           An {\tt ESMF\_State} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The count of the character items to retrieve
+!     \item [valueList]
+!           The character list values of the named Attribute.
+!     \item [defaultvalueList]
+!           The character list default value of the named Attribute.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+      enddo
+      
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'state'
+
+      call c_ESMC_AttPackGetCharList(state%statep%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, fconvention, fpurpose, fobject, localrc)
+        
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+                                
+    else
+      
+      call c_ESMC_AttributeGetCharList(state%statep%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, lens, valueString, localrc)
+      
+      if (localrc .ne. ESMF_SUCCESS) then
+        if(present(defaultvalueList)) then
+          do i=1,count
+            valueList(i) = defaultvalueList(i)
+          enddo
+          if (present(rc)) rc = ESMF_SUCCESS
+          return
+        else 
+          if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        endif
+      endif
+
+    endif
+
+      j = 1
+      do  i=1,count
+        valueList(i) = valueString(j:(j+lens(i)))
+        j = j + lens(i)
+      enddo
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAttGetCharList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -20366,7 +21860,6 @@ contains
       integer :: localrc
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_TypeKind) :: tk
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -20716,6 +22209,106 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAttSetChar
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAttSetCharList"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute list
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeSet()
+      subroutine ESMF_StateAttSetCharList(state, name, count, valueList, &
+        convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state  
+      character(len=*), intent(in) :: name
+      integer, intent(in) :: count
+      character(ESMF_MAXSTR), dimension(count), intent(in) :: valueList
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character Attribute to the {\tt state}.
+!     The Attribute has a {\tt name} and a {\tt value}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!           An {\tt ESMF\_State} object.
+!     \item [name]
+!           The name of the Attribute to add.
+!     \item [value]
+!           The character value of the Attribute to add.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, i, j
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      integer, dimension(count) :: lens
+      character(ESMF_MAXSTR*count) :: valueString
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+      j = 1
+      do  i=1,count
+        lens(i) = len_trim(valueList(i))
+        valueString(j:(j+lens(i))) = valueList(i)
+        j = j + lens(i)
+      enddo
+
+      if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'state'
+
+      call c_ESMC_AttPackSetCharList(state%statep%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, fconvention, fpurpose, fobject, localrc)
+        
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                                
+      else
+      
+      call c_ESMC_AttributeSetCharList(state%statep%base, name, ESMF_TYPEKIND_CHARACTER, &
+        count, valueString, lens, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAttSetCharList
 
 !------------------------------------------------------------------------------
 !BOP

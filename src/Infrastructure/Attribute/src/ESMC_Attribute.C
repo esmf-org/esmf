@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.18 2008/07/30 22:17:14 rosalind Exp $
+// $Id: ESMC_Attribute.C,v 1.19 2008/08/01 19:25:03 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.18 2008/07/30 22:17:14 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.19 2008/08/01 19:25:03 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -530,16 +530,16 @@
 
   // Write the XML file header
   sprintf(msgbuf,"<model_component name=\"%s\"\n",basename);
-  printf(msgbuf);
+  //printf(msgbuf);
   fprintf(xml,msgbuf);
   sprintf(msgbuf,"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
-  printf(msgbuf);
+  //printf(msgbuf);
   fprintf(xml,msgbuf);
   sprintf(msgbuf,"xsi:schemaLocation=\"http://www.esmf.ucar.edu file:/esmf_model_component.xsd\"\n");
-  printf(msgbuf);
+  //printf(msgbuf);
   fprintf(xml,msgbuf);
   sprintf(msgbuf,"xmlns=\"http://www.esmf.ucar.edu\">\n\n");
-  printf(msgbuf);
+  //printf(msgbuf);
   fprintf(xml,msgbuf);
   
   // determine the number of fields to write
@@ -606,7 +606,7 @@
       attrPack == ESMF_TRUE) {
     for (unsigned int i=0;  i<attrCount; i++) { 
       sprintf(msgbuf,"<%s_set>\n",attrList[i]->attrName);
-      printf(msgbuf);
+      //printf(msgbuf);
       fprintf(xml,msgbuf);
       if (attrList[i]->items == 1) {
         if (attrList[i]->tk == ESMC_TYPEKIND_I4)
@@ -629,10 +629,10 @@
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
         ESMC_LogDefault.WriteLog(msgbuf, ESMC_LOG_INFO);
       }
-      printf(msgbuf);
+      //printf(msgbuf);
       fprintf(xml,msgbuf);
       sprintf(msgbuf,"</%s_set>\n\n",attrList[i]->attrName);
-      printf(msgbuf);
+      //printf(msgbuf);
       fprintf(xml,msgbuf);
     }
   }
@@ -644,14 +644,14 @@
       attrPack == ESMF_TRUE) {
     if (fldcount == 0) {
       sprintf(msgbuf,"<variable_set>\n");
-      printf(msgbuf);
+      //printf(msgbuf);
       fprintf(xml,msgbuf);
     }
     for (unsigned int i=0;  i<attrCount; i++) { 
       if (attrList[i]->items == 1) {
         if (i == 0) {
           sprintf(msgbuf,"  <variable ");
-          printf(msgbuf);
+          //printf(msgbuf);
           fprintf(xml,msgbuf);
         }
         if (attrList[i]->tk == ESMC_TYPEKIND_I4)
@@ -669,11 +669,11 @@
         else {
           sprintf(msgbuf, "%s=\"%s\" ",attrList[i]->attrName,"N/A");
         }
-        printf(msgbuf);
+        //printf(msgbuf);
         fprintf(xml,msgbuf);
         if ((i+1)%2 == 0 && i != attrCount-1) {
           sprintf(msgbuf,"\n            ");
-          printf(msgbuf);
+          //printf(msgbuf);
           fprintf(xml,msgbuf);
         }
       }
@@ -684,13 +684,13 @@
     }
     if (attrList != NULL) {
       sprintf(msgbuf," />\n");
-      printf(msgbuf);
+      //printf(msgbuf);
       fprintf(xml,msgbuf);
     }  
     fldcount++;
     if (fldcount == stop) {
       sprintf(msgbuf,"</variable_set>\n");
-      printf(msgbuf);
+      //printf(msgbuf);
       fprintf(xml,msgbuf);
       fldcount++;
     }
@@ -699,7 +699,7 @@
   // write the footer (using the fldcount+1 for now to show all fields written)
   if (fldcount == stop+1) {
     sprintf(msgbuf,"\n</model_component>\n");
-    printf(msgbuf);
+    //printf(msgbuf);
     fprintf(xml,msgbuf);
     fldcount++;
   }
@@ -1608,7 +1608,7 @@
                    return ESMF_FAILURE;
                }
         }
-        else {
+        else if (attr->items > 1) {
               if (attr->tk == ESMC_TYPEKIND_I4) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_I4 *)value)[i] = attr->vip[i];
@@ -1624,6 +1624,11 @@
               } else if (attr->tk == ESMC_TYPEKIND_LOGICAL) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_Logical *)value)[i] = attr->vbp[i];
+              } else if (attr->tk == ESMC_TYPEKIND_CHARACTER) {
+                  for (i=0; i<attr->items; i++) {
+                      attr->slen = strlen(attr->vcpp[i])+1;
+                      strncpy(((char **)value)[i], attr->vcpp[i], attr->slen);
+                  }
               } else{
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                        "unknown typekind", 
@@ -1633,7 +1638,7 @@
         }
       }  // value
   }
-  // ***FIXME*** there is no support for char* here
+  //***FIXME*** still no support for char* here
 
   return ESMF_SUCCESS;
 
@@ -1822,6 +1827,69 @@
 }  // end ESMC_AttributeGet
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGet"
+//BOPI
+// !IROUTINE:  ESMC_AttributeGet - get {\tt ESMC_Attribute} from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    {\tt ESMC_Attribute} pointer or NULL on error exit.
+// 
+// !ARGUMENTS:
+      char *name,               // in - Attribute name to retrieve
+      int *lens,                // in - Atttribute char* lengths to retrieve
+      int count) const {        // in - number of Attribute lengths to retrieve
+// 
+// !DESCRIPTION:
+//    Get the lengths of the char* in an {\tt ESMC_Attribute}.
+//
+//EOPI
+
+  int size;
+  unsigned int i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad Attribute name", NULL);
+       return NULL;
+  }
+
+  // look for the Attribute
+  for (i=0; i<attrCount; i++) {
+      if (strcmp(name, attrList[i]->attrName) == 0)
+          break;  // found a match
+  }   
+
+  // grab the Attribute
+  attr = attrList[i];
+  
+  // check that it is valid
+  if (!attr) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                                          "Attribute not found", NULL);
+    return ESMF_FAILURE;
+  }
+  
+  // check that this is a char Attribute
+  if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                                          "Attribute is not a char", NULL);
+    return ESMF_FAILURE;
+  }
+  
+  // find the lengths of the char*s on this Attribute
+  for (i = 0; i < count; i++)
+    lens[i] = strlen(attr->vcpp[i]);
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeGetCount"
 //BOPI
 // !IROUTINE:  ESMC_AttributeGetCount - get an the number of {\tt ESMC_Attributes}
@@ -1843,6 +1911,38 @@
   return attrCount;
 
 } // end ESMC_AttributeGetCount
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeGetItemCount"
+//BOPI
+// !IROUTINE:  ESMC_AttributeGetItemCount - get the item count of this {\tt ESMC_Attribute}
+// 
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_AttributeGetItemCount(
+// 
+// !RETURN VALUE:
+//    item count of this {\tt ESMC_Attribute}
+// 
+// !ARGUMENTS:
+      char *name) const {       // in - name
+// 
+// !DESCRIPTION:
+//      Returns number of items on this {\tt ESMC_Attribute}
+//
+//EOPI
+
+  ESMC_Attribute *attr;
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                                            "Attribute not found", NULL);
+      return ESMF_FAILURE;
+  }
+
+  return attr->items;
+
+} // end ESMC_AttributeGetItemCount
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeSet"
@@ -2592,8 +2692,8 @@
                 vd = *(ESMC_R8 *)datap;  
             else if (tk == ESMC_TYPEKIND_LOGICAL)
                 vb = *(ESMC_Logical *)datap;  
-            else if (tk == ESMC_TYPEKIND_CHARACTER){
-                slen = strlen((char *)datap) + 1;
+            else if (tk == ESMC_TYPEKIND_CHARACTER) {
+                slen = strlen((char *)datap)+1;
                 vcp = new char[slen];
                 strncpy(vcp, (char *)datap, slen);
            }else
@@ -2627,10 +2727,17 @@
             if (datap) 
               for (i=0; i<items; i++)
                 vbp[i] = ((ESMC_Logical *)datap)[i];  
-
+        } else if (tk == ESMC_TYPEKIND_CHARACTER) {
+            vcpp = new char*[items];
+            if (datap) {
+              for (i=0; i<items; i++) {
+                 slen = strlen(((char **)datap)[i])+1;
+                 vcpp[i] = new char[slen];
+                 strncpy(vcpp[i], ((char **)datap)[i], slen);
+              }
+            }
         } else
-           // error - arrays of char strings not allowed
-                voidp = NULL;
+            voidp = NULL;
   }
 
  } // end ESMC_Attribute
@@ -2735,7 +2842,7 @@
 //
 //EOPI
 
-  if (tk == ESMC_TYPEKIND_CHARACTER) delete [] vcp;
+  if (items == 1 && tk == ESMC_TYPEKIND_CHARACTER) delete [] vcp;
 
   if (items > 1) {
         if (tk == ESMC_TYPEKIND_I4) delete [] vip;
@@ -2743,6 +2850,9 @@
         else if (tk == ESMC_TYPEKIND_R4) delete [] vfp;
         else if (tk == ESMC_TYPEKIND_R8) delete [] vdp;  
         else if (tk == ESMC_TYPEKIND_LOGICAL) delete [] vbp;
+        else if (tk == ESMC_TYPEKIND_CHARACTER) {
+          delete [] vcpp;
+        }
   }
 
   // if there are Attributes or attpacks delete, if links disconnect
@@ -2802,7 +2912,7 @@
                 vd = *(ESMC_R8 *)datap;  
             else if (tk == ESMC_TYPEKIND_LOGICAL)
                 vb = *(ESMC_Logical *)datap;  
-            else if (tk == ESMC_TYPEKIND_CHARACTER){
+            else if (tk == ESMC_TYPEKIND_CHARACTER) {
                 slen = strlen((char *)datap) + 1;
                 vcp = new char[slen];
                 strncpy(vcp, (char *)datap, slen);
@@ -2810,7 +2920,7 @@
                 voidp = NULL;
     }
 
-  } else {
+  } else  if (items > 1) {
     // items > 1, alloc space for a list and do the copy
         if (tk == ESMC_TYPEKIND_I4) {
             vip = new ESMC_I4[items];      
@@ -2837,10 +2947,17 @@
             if (datap) 
               for (i=0; i<items; i++)
                 vbp[i] = ((ESMC_Logical *)datap)[i];  
-
+        } else if (tk == ESMC_TYPEKIND_CHARACTER) {
+            vcpp = new char*[items];
+            if (datap) {
+              for (i=0; i<items; i++) {
+                 slen = strlen(((char **)datap)[i]) + 1;
+                 vcpp[i] = new char[slen];
+                 strncpy(vcpp[i], ((char **)datap)[i], slen);
+              }
+            }
         } else
-           // error - arrays of char strings not allowed
-                voidp = NULL;
+            voidp = NULL;
   }
 
   return ESMF_SUCCESS;
@@ -3194,6 +3311,8 @@
                 } else if (tk == ESMC_TYPEKIND_LOGICAL) {
                     sprintf(msgbuf, "          \t item %d: %s\n", i,
                       ESMC_LogicalString(vbp[i]));
+                } else if (tk == ESMC_TYPEKIND_CHARACTER) {
+                    sprintf(msgbuf, "          \t item %d: %s\n", i, vcpp[i]);
                 } else{
                     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              "          \t unknown value", &localrc);
@@ -3277,7 +3396,7 @@
             vd = source.vd;  
         else if (tk == ESMC_TYPEKIND_LOGICAL)
             vb = source.vb;
-        else if (tk == ESMC_TYPEKIND_CHARACTER){
+        else if (tk == ESMC_TYPEKIND_CHARACTER) {
             vcp = new char[slen];   // includes trailing null
             memcpy(vcp, (char *)source.vcp, slen);
         }else
@@ -3304,14 +3423,21 @@
               vbp = new ESMC_Logical[items];      
               for (i=0; i<items; i++)
                 vbp[i] = source.vbp[i];  
-          }else
-          // error - arrays of char strings not allowed
+          } else if (tk == ESMC_TYPEKIND_CHARACTER) {
+              vcpp = new char*[items];
+              for (i=0; i<items; i++) {
+                slen = strlen((source.vcpp)[i]);
+                vcpp[i] = new char[slen];
+                memcpy(vcpp[i], ((char **)(source.vcpp))[i], slen);
+              }
+          } else
              voidp = NULL;
   }
 
   // if Attribute list, copy it.
   for (i=0; i<source.attrCount; i++) {
-    if(source.attrList[i]->attrList == ESMC_NULL_POINTER) {
+    if(source.attrList[i]->attrList == ESMC_NULL_POINTER ||
+       source.attrList[i]->attrPack == ESMF_TRUE) {
       attr = new ESMC_Attribute();
       *attr = *(source.attrList[i]);
       localrc = ESMC_AttributeSet(attr);
