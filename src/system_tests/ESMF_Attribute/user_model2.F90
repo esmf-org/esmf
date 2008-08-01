@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.12 2008/07/28 03:59:23 rokuingh Exp $
+! $Id: user_model2.F90,v 1.13 2008/08/01 19:27:41 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -115,11 +115,8 @@ module user_model2
     conv = 'CF'
     purp = 'basic'
 
-!!!  This is set to 7 so it won't run, this code is used only to test the
-!    Attribute serialize capability, the same info is printed at component level
-
     ! Write the Attribute info to esmf/test/testg/<platform>/ESMF_AttributeSTest.stdout
-    if (myPet .eq. 7) then
+    if (myPet .eq. 0) then
       print *, ""
       print *, ""
       print *, "--------------------------------------- "

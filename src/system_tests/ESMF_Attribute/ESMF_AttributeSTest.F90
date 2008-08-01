@@ -256,11 +256,6 @@ program ESMF_AttributeSTest
   ! Write the Attribute info to esmf/test/testg/<platform>/ESMF_AttributeSTest.stdout
   ! The XML format will also send the output to an .xml in this directory
   if (localPet .eq. 0) then
-    print *, ""
-    print *, ""
-    print *, "--------------------------------------- "
-    print *, "XML AttributeWrite format"
-    print *, "--------------------------------------- "
     call ESMF_AttributeWrite(comp2,conv,purp,attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
