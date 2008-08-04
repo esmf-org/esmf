@@ -5,3 +5,5 @@ Requires the following environment settings:
 
 ESMF_COMPILER absoft
 
+Values in the 64-bit macros in ESMC_Conf.h are untested and simply copied from
+the Linux configuration.
