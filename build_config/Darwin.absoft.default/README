@@ -1,7 +1,9 @@
 Settings for Darwin (Mac OS X), using the commercial Absoft Fortran compiler
-and the GCC C++ compiler.
+and the GNU C++ compiler (g++).
 
 Requires the following environment settings:
 
 ESMF_COMPILER absoft
 
+Values in the 64-bit macros in ESMC_Conf.h are untested and simply copied from
+the Linux configuration.

@@ -1,0 +1,12 @@
+Settings for Linux, using the commercial Absoft Fortran compiler and the 
+GNU C++ compiler (g++).
+
+Requires the following environment settings:
+
+ESMF_COMPILER absoft
+
+The correct value of ESMF_F90_PTR_BASE_SIZE in 64-bit mode appears to be
+compiler version dependent:
+Absoft  8.x -> ESMF_F90_PTR_BASE_SIZE=48
+Absoft  9.x -> ESMF_F90_PTR_BASE_SIZE=64
+Absoft 10.x -> ESMF_F90_PTR_BASE_SIZE=72
