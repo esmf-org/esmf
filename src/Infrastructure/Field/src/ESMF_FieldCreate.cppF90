@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.29 2008/07/31 23:02:30 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.30 2008/08/05 19:19:47 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.29 2008/07/31 23:02:30 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.30 2008/08/05 19:19:47 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -170,15 +170,26 @@ contains
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Field} from a fortran data array with pointer attribute @\
-! and {\tt ESMF\_Grid}. @\
-! For examples and @\
-! associated documentations using this method see Section  @\
-! \ref{sec:field:usage:create_2dptr}, @\
-! \ref{sec:field:usage:create_2dgrid_3dptr}, @\
-! \ref{sec:field:usage:create_2dgrid_3dptr_map}, @\
-! \ref{sec:field:usage:create_2dgrid_3dptr_map_halo}, and @\
-! \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}. @\
+! Create an {\tt ESMF\_Field} from existing local native @\
+! Fortran 90 data array with pointer attribute @\
+! and {\tt ESMF\_Grid}. Besides @\
+! {\tt farrayPtr} each PET must issue this call with identical arguments in @\
+! order to create a consistent Field object. The bounds of the local arrays @\
+! are preserved by this call and determine the bounds of the total region of @\
+! the resulting Field object. Bounds of the DE-local exclusive regions are @\
+! set to be consistent with the total regions and the specified Grid @\
+! argument. Bounds for Field dimensions that are not distributed are @\
+! automatically set to the bounds provided by {\tt farrayPtr}. @\
+! @\
+! This interface requires a 1 DE per PET decomposition. The Field object will @\
+! not be created and an error will be returned if this condition is not met. @\
+! @\
+! The not distributed Field dimensions form a tensor of rank = Field.rank - @\
+! Grid.dimCount. By default all tensor elements are associated with @\
+! center stagger. The widths of the computational region are set to @\
+! the provided value, or zero by default, for all tensor elements. @\
+! @\
+! The return value is the newly created {\tt ESMF\_Field} object. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
