@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.23 2008/08/01 21:02:37 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.24 2008/08/05 18:22:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.23 2008/08/01 21:02:37 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.24 2008/08/05 18:22:12 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -787,12 +787,12 @@ Array *Array::create(
       }
       if (computationalUBound[i] < totalLBound[i]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "- computationaUBound / totalLBound mismatch", rc);
+          "- computationalUBound / totalLBound mismatch", rc);
         return ESMC_NULL_POINTER;
       }
       if (computationalUBound[i] > totalUBound[i]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "- computationaUBound / totalUBound mismatch", rc);
+          "- computationalUBound / totalUBound mismatch", rc);
         return ESMC_NULL_POINTER;
       }
     }
@@ -1475,12 +1475,12 @@ Array *Array::create(
       }
       if (computationalUBound[i] < totalLBound[i]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "- computationaUBound / totalLBound mismatch", rc);
+          "- computationalUBound / totalLBound mismatch", rc);
         return ESMC_NULL_POINTER;
       }
       if (computationalUBound[i] > totalUBound[i]){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "- computationaUBound / totalUBound mismatch", rc);
+          "- computationalUBound / totalUBound mismatch", rc);
         return ESMC_NULL_POINTER;
       }
     }
