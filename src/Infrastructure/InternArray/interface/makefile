@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2007/09/18 22:21:10 cdeluca Exp $
+# $Id: makefile,v 1.5 2008/08/06 17:35:36 tjcnrl Exp $
 
 # leave alone.
 ALL: build_here 
@@ -47,8 +47,4 @@ DIRS	  =
 CLEANDIRS   =
 CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS =
-
-ESMF_InternArrayCreate.o: ESMF_InternArrayCreate.cppF90 ESMF_InternArrayCreateMacros.h ESMF_InternArray.o
-
-ESMF_InternArrayGet.o: ESMF_InternArrayGet.cppF90 ESMF_InternArrayGetMacros.h ESMF_InternArrayCreate.o
 

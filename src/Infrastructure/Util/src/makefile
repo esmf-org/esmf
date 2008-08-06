@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2008/08/01 23:36:59 rosalind Exp $ 
+# $Id: makefile,v 1.22 2008/08/06 17:35:40 tjcnrl Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
@@ -41,7 +41,3 @@ CLEANDIRS   =
 CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS = 
 
-ESMF_InitMacros.o: ESMF_LogErr.o ESMF_UtilTypes.o 
-ESMF_LogErr.o: ESMF_UtilTypes.o 
-ESMF_FortranWordsize.o: ESMF_FortranWordsize.cppF90 ESMF_FortranWordsizeHelper.o ESMF_TypeKindMacros.hcppF90
-ESMF_TypeKindGet.o: ESMF_TypeKindGet.cppF90 ESMF_TypeKindMacros.hcppF90

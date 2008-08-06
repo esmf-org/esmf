@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2008/06/12 20:49:24 theurich Exp $
+# $Id: makefile,v 1.5 2008/08/06 17:35:38 tjcnrl Exp $
 
 # leave alone.
 ALL: build_here 
@@ -39,7 +39,28 @@ SOURCEC	  = all_allo.c assign_param_vals.c bind_param.c box_assign.c \
 # If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = 
 # If you have .h include files in this dir, list them all on the line below.
-SOURCEH	  = 
+SOURCEH	  = all_allo_const.h BaseLB.h ch_init_dist_const.h ch_input_const.h coloring_const.h \
+	    coloring.h comm.h CONV_NS.h costs_const.h costs.h create_proc_list_const.h \
+	    DataLocationPort.h DataMigrationPort.h DD.h dfs_const.h dfs.h \
+	    DistDataDirectoryPort.h dr_const.h dr_dd.h dr_elem_const.h dr_elem_util_const.h \
+	    dr_err_const.h dr_eval_const.h dr_hg_readfile.h dr_input_const.h Driver.h \
+	    dr_loadbal_const.h dr_maps_const.h dr_mmio.h dr_output_const.h dr_par_util_const.h \
+	    dr_util_const.h EdgeInfoPort.h EntityInfoPort.h EntityList.h EntityListImpl.h \
+	    Epetra_ZoltanMpiDistributor.h exzoltan.h g2l_hash.h GeomInfoPort.h ha_const.h \
+	    hsfc_const.h hsfc.h hsfc_hilbert_const.h HSFC_upper.h IOPort.h key_params.h \
+	    lb_const.h lbi_const.h lb_init_const.h LoadBalancerFactoryPort.h LoadBalancer.h \
+	    matrix.h Mesh.h migoct_const.h migreg_const.h migreg.h migtags_const.h msg_const.h \
+	    octant_const.h octree_const.h OctTree.h octupdate_const.h octupdate.h \
+	    oct_util_const.h order_const.h params_const.h par_average_const.h \
+	    par_bisect_const.h par_const.h par_median_const.h ParMetis.h \
+	    parmetis_jostle_const.h parmetis_jostle.h par_tflops_special_const.h \
+	    PartitionerFactory.h phg_comm.h phg_const.h phg_distrib.h phg.h phg_hypergraph.h \
+	    phg_util.h rcb_const.h rcb.h RCB_upper.h reftree_const.h reftree.h rib_const.h \
+	    rib.h RIB_upper.h rootlist_const.h SFC.h shared.h timer_const.h timer.h \
+	    TreeInfoPort.h zoltan_align.h zoltan_comm_cpp.h zoltan_comm.h zoltan_cpp.h \
+	    zoltan_dd_cpp.h zoltan_dd.h zoltan.h zoltan_id.h zoltan_mem.h zoltan_timer_cpp.h \
+	    zoltan_timer.h zoltan_types.h zoltan_util.h zz_const.h zz_heap.h zz_id_const.h \
+	    zz_rand.h zz_sort.h zz_util_const.h
 # List all .h files which should be copied to common include dir
 STOREH	  = 
 

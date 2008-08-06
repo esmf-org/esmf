@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.238 2008/07/25 22:10:54 theurich Exp $
+#  $Id: common.mk,v 1.239 2008/08/06 17:35:34 tjcnrl Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -674,6 +674,21 @@ ifneq ($(origin ESMF_MPIMPMDRUN), environment)
 ESMF_MPIMPMDRUN = $(ESMF_MPIMPMDRUNDEFAULT)
 endif
 
+# Variable that controls the output option for object files.  Note that
+# some compilers do not support specifying "-o" and "-c" together.  These
+# platforms are specified by NO_OCFLAG_LIST defined below.  In those cases
+# the object files are moved after the compile.
+NO_OCFLAG_LIST := \
+	$(ESMF_OS).absoft \
+	$(ESMF_OS).absoftintel \
+	IRIX64.default
+ifeq (,$(findstring $(ESMF_OS).$(ESMF_COMPILER),$(NO_OCFLAG_LIST)))
+  ESMF_OBJOUT_OPTION = -o $@
+else
+  ESMF_OBJOUT_OPTION = ; $(ESMF_MV) $*.o $@
+endif
+
+
 #-------------------------------------------------------------------------------
 # Up to here there have only been definitions, no targets.  This is the 
 # first (and therefore default) target.  The definition of what "all" is
@@ -876,6 +891,7 @@ OBJS		= $(OBJSC) $(OBJSF)
 #-------------------------------------------------------------------------------
 
 
+
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -1046,13 +1062,14 @@ foo:
 # Builds ESMF recursively.
 #-------------------------------------------------------------------------------
 
-# this is a magic gnumake variable which helps it find files.
-VPATH = $(ESMF_DIR)/$(LOCDIR):$(ESMF_DIR)/$(LOCDIR)/../include:\
-	$(ESMF_INCDIR):$(ESMF_CONFDIR):$(ESMF_SITEDIR)
+# The GNUMake variable VPATH specifies a list of directories that make should
+# search to find prerequisites and targets that are not in the current directory.
+VPATH = $(ESMF_DIR)/$(LOCDIR) $(ESMF_DIR)/$(LOCDIR)/../include \
+	$(ESMF_INCDIR) $(ESMF_CONFDIR) $(ESMF_SITEDIR)
 
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
-libc: $(OBJSC)
-libf: $(OBJSF)
+libc: $(addprefix $(ESMF_OBJDIR)/,$(OBJSC))
+libf: $(addprefix $(ESMF_OBJDIR)/,$(OBJSF))
 else
 libc:$(LIBNAME)($(OBJSC))
 libf:$(LIBNAME)($(OBJSF))
@@ -1074,38 +1091,38 @@ endif
 
 # Build all of ESMF from the top.  This target can be called from any
 # subdir and it will go up to the top dir and build from there.
-lib:  info build_libs info_mk
+lib: info
+	@$(MAKE) build_libs
+	@$(MAKE) info_mk
+	@echo "ESMF library built successfully."
+	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
+	@echo " or the more extensive: $(MAKE) all_tests"
 
 build_libs: chkdir_lib include
-ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
-	cd $(ESMF_DIR) ; $(MAKE) preparedefer
-endif
 	cd $(ESMF_DIR) ; $(MAKE) ACTION=tree_lib tree
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	cd $(ESMF_DIR) ; $(MAKE) defer
 endif
 	cd $(ESMF_DIR) ; $(MAKE) ranlib
+ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
 	cd $(ESMF_DIR) ; $(MAKE) shared
-	@echo "ESMF library built successfully."
-	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
-	@echo " or the more extensive: $(MAKE) all_tests"
+endif
 
 # Build only stuff in and below the current dir.
-build_here: chkdir_lib
-ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
-	cd $(ESMF_DIR) ; $(MAKE) preparedefer
-endif
+build_here: chkdir_lib chkdir_include
 	$(MAKE) ACTION=tree_include tree
 	$(MAKE) ACTION=tree_lib tree
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	$(MAKE) defer
 endif
 	$(MAKE) ranlib
+ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
 	$(MAKE) shared
+endif
 
 # Builds library - action for the 'tree' target.
 tree_lib:
-	dir=`pwd`; cd $(ESMF_OBJDIR); $(MAKE) -f $${dir}/makefile MAKEFILE=$${dir}/makefile esmflib
+	dir=`pwd`; cd $(ESMF_MODDIR); $(MAKE) -f $${dir}/makefile MAKEFILE=$${dir}/makefile esmflib
 
 # Builds library
 esmflib:: chkdir_lib $(SOURCE)
@@ -1118,7 +1135,7 @@ esmflib:: chkdir_lib $(SOURCE)
 
 
 # copy private include files into src/include directory.
-include: chkdir_include
+include: chkdir_include $(if $(findstring ON,$(ESMF_DEFER_LIB_BUILD)),chkdir_lib)
 	cd $(ESMF_DIR) ;\
 	$(MAKE) ACTION=tree_include tree
 
@@ -2477,57 +2494,85 @@ endif
 # it should be removed.  it was not here originally and had been this way
 # a long time.
 # TODO more: add CXXFLAGS
+ESMF_F90COMPILEFREECPP_CMD = $(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) \
+			     $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) \
+			     $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS)
+ESMF_F90COMPILEFREENOCPP_CMD = $(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) \
+			       $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) \
+			       $(ESMF_F90COMPILEFREENOCPP)
+ESMF_F90COMPILEFIXCPP_CMD = $(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) \
+			    $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) \
+			    $(ESMF_F90COMPILEFIXCPP) $(ESMF_F90COMPILECPPFLAGS)
+ESMF_F90COMPILEFIXNOCPP_CMD = $(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) \
+			      $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) \
+			      $(ESMF_F90COMPILEFIXNOCPP)
+ESMF_CXXCOMPILE_CMD = $(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) \
+		      $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) \
+		      $(ESMF_CXXCOMPILECPPFLAGS)
+
+$(ESMF_OBJDIR)/%.o : %.F90
+	$(ESMF_F90COMPILEFREECPP_CMD) $< $(ESMF_OBJOUT_OPTION)
+
+$(ESMF_OBJDIR)/%.o : %.f90
+	$(ESMF_F90COMPILEFREENOCPP_CMD) $< $(ESMF_OBJOUT_OPTION)
+
+$(ESMF_OBJDIR)/%.o : %.F
+	$(ESMF_F90COMPILEFIXCPP_CMD) $< $(ESMF_OBJOUT_OPTION)
+
+$(ESMF_OBJDIR)/%.o : %.f
+	$(ESMF_F90COMPILEFIXNOCPP_CMD) $< $(ESMF_OBJOUT_OPTION)
+
+$(ESMF_OBJDIR)/%.o : %.c
+	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
+
+$(ESMF_OBJDIR)/%.o : %.C
+	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
 
 .F90.o:
-	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS) $<
+	$(ESMF_F90COMPILEFREECPP_CMD) $<
 
 .f90.o:
-	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREENOCPP) $<
+	$(ESMF_F90COMPILEFREENOCPP_CMD) $<
 
 .F.o:
-	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXCPP) $(ESMF_F90COMPILECPPFLAGS) $<
+	$(ESMF_F90COMPILEFIXCPP_CMD) $<
 
 .f.o:
-	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXNOCPP) $<
+	$(ESMF_F90COMPILEFIXNOCPP_CMD) $<
 
 .c.o:
-	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
+	$(ESMF_CXXCOMPILE_CMD) $<
 
 .C.o:
-	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
+	$(ESMF_CXXCOMPILE_CMD) $<
 
 .F90.a:
-	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS) $<
+	$(ESMF_F90COMPILEFREECPP_CMD) $<
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
 .f90.a:
-	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREENOCPP) $<
+	$(ESMF_F90COMPILEFREENOCPP_CMD) $<
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
 .F.a:
-	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXCPP) $(ESMF_F90COMPILECPPFLAGS) $<
+	$(ESMF_F90COMPILEFIXCPP_CMD) $<
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
 .f.a:
-	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFIXNOCPP) $<
+	$(ESMF_F90COMPILEFIXNOCPP_CMD) $<
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
 .c.a:
-	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
+	$(ESMF_CXXCOMPILE_CMD) $<
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
 .C.a:
-	$(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $<
-	@if [ "$(ESMF_DEP)" = "on" ] ; then \
-           export ESMF_TMP=$(ESMF_LIBDIR) ; \
-           makedepend -f- --  $(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) $(ESMF_CXXCOMPILECPPFLAGS) $< -- 2> /dev/null | \
-	   perl -pe 's/(.*)\/([^\/]+):/$$ENV{'ESMF_TMP'}\/libesmf.a($$2):/' >> $(ESMF_DIR)/$(LOCDIR)/makefile.dep ; \
-	 fi
+	$(ESMF_CXXCOMPILE_CMD) $<
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
@@ -2551,14 +2596,10 @@ endif
 
 ifeq ($(origin ESMF_CPPRULES),undefined)
 .cpp.F90:
-	$(ESMF_CPP) -E -P -I$(ESMF_INCDIR) $< | tr "@^" "\n#" | \
-              $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
-
+	$(ESMF_CPP) -E -P -I$(ESMF_INCDIR) $< | tr "@^" "\n#" | $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
 
 .cppF90.F90:
 	cp $< $<.cpp; $(ESMF_CPP) -E -P -I$(ESMF_INCDIR) $<.cpp | tr "@^|" "\n#'" | $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@); rm -f $<.cpp
-
-
 endif
 
 
@@ -2589,45 +2630,12 @@ shared:
 
 #-------------------------------------------------------------------------------
 #  Build (deferred) static library from all objects
-#  Note: Test for existence and update of existing library is commented out.
-#        This code was left in for reference.  The alternate approach of
-#        completely rebuilding libesmf.a seems to be, in general, faster and
-#        more robust.  The primary issue with the "test and update" approach
-#        is that if one initially builds the library with ESMF_DEFER_LIB_BUILD
-#        not enabled and then subsequently enables it an rebuilds, then the
-#        final deferred library build will update the existing libesmf.a with
-#        all objects, one at a time.  This painfully slow and unacceptable.
 #-------------------------------------------------------------------------------
-
-MODULE_LIST = $(notdir $(wildcard $(ESMF_OBJDIR)/*.[^o]*))
-##ifeq ($(shell if test -s $(ESMFLIB); then echo 1; fi;), 1)
-### library already created, so update with recently compiled objects
-##OBJECT_LIST = $(wildcard $(ESMF_OBJDIR)/*.o)
-##defer: $(ESMFLIB)($(OBJECT_LIST))
-##	cd $(ESMF_OBJDIR) ; \
-##	$(ESMF_MV) $(MODULE_LIST) $(ESMF_MODDIR)/.
-##.o.a:
-##	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $@ $%
-##else
-### library does not exist, so create with all compiled objects
-OBJECT_LIST = $(notdir $(wildcard $(ESMF_OBJDIR)/*.o))
 defer:
 	cd $(ESMF_OBJDIR) ; \
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMFLIB) $(OBJECT_LIST)
-	@if [ "$(MODULE_LIST)" != "" ] ; then \
-          cd $(ESMF_OBJDIR) ; \
-	  $(ESMF_MV) $(MODULE_LIST) $(ESMF_MODDIR)/. ; \
-        fi
-##endif
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMFLIB) \
+		$(notdir $(wildcard $(ESMF_OBJDIR)/*.o))
 
-
-PREPARE_MODULE_LIST = $(notdir $(wildcard $(ESMF_MODDIR)/*.[^o]*))
-preparedefer:
-	@if [ "$(PREPARE_MODULE_LIST)" != "" ] ; then \
-          cd $(ESMF_MODDIR) ; \
-	  $(ESMF_MV) $(PREPARE_MODULE_LIST) $(ESMF_OBJDIR)/. ; \
-        fi
-	
 
 #-------------------------------------------------------------------------------
 # Pattern rules for making Tex files using protex script.  Input to 
@@ -2775,3 +2783,116 @@ $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 # Keep .o files
 #-------------------------------------------------------------------------------
 .PRECIOUS: %.o
+
+
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+# This section is for automatic generation of dependencies.
+#
+# During the tree_include phase the files defined by the SOURCE[CF] variables
+# in the class local makefile are parsed for module and include dependencies.
+# Only the include dependencies that are local (i.e., defined by SOURCEH or
+# located in ../include) are kept in the dependency list.  The dependencies
+# are written to a class local makefile fragment that is included (if it exists)
+# in the top-level makefile.
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+# Class local dependency makefile fragment
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
+  # Uniquely named file generated in ESMF_OBJDIR directory
+  LOCAL_DEPEND_FILE = $(ESMF_OBJDIR)/$(subst /,_,$(LOCDIR))_depend.mk
+else
+  # Commonly named file generated in LOCDIR directory
+  LOCAL_DEPEND_FILE = $(ESMF_DIR)/$(LOCDIR)/depend.mk
+  CLEAN_DEFAULTS += $(LOCAL_DEPEND_FILE)
+endif
+
+# Function for extracting an ESMF module dependency list from a Fortran source
+# file.  It is assumed that the module name occurs on the same line as the use
+# keyword.  Multiple use statements on the same line are not recognized.
+define MOD_FUNC
+$(filter-out $(addsuffix .o,$(basename $(1))), \
+  $(sort \
+    $(shell awk  '/^ *use  *ESMF_/' $(1) \
+          | sed 's/^ *use  *ESMF_/ESMF_/' \
+          | sed 's/Mod.*$$/\.o/' \
+     ) \
+   ) \
+ )
+endef
+
+# Function for extracting an include dependency list.
+# - paths are stripped from include file names
+define INC_FUNC
+$(notdir $(sort \
+  $(shell awk  '/^ *[#\^] *include *["<]/' $(1) \
+        | sed 's/^ *[#\^] *include *["<]//' \
+        | sed 's/[">].*$$//' \
+   ) \
+ ))
+endef
+
+# Function for generating the dependency list for a regular Fortran source file.
+# - filter include dependencies for local files
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
+  define SOURCEF_DEPEND_FUNC
+  $(addprefix $(ESMF_OBJDIR)/,$(addsuffix .o,$(basename $(1)))) : \
+	$(addprefix $(ESMF_OBJDIR)/,$(call MOD_FUNC,$(1))) \
+	$(filter $(LOCAL_INCLUDE_FILES),$(call INC_FUNC,$(1)))
+  endef
+else
+  define SOURCEF_DEPEND_FUNC
+  $(addsuffix .o,$(basename $(1))) : \
+	$(call MOD_FUNC,$(1)) \
+	$(filter $(LOCAL_INCLUDE_FILES),$(call INC_FUNC,$(1)))
+  endef
+endif
+
+# Function for generating the dependency list for an autogen Fortran source file.
+# - the autogenerated file is included in the prerequisite list
+# - filter include dependencies for local files
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
+  define AUTOGEN_DEPEND_FUNC
+  $(addprefix $(ESMF_OBJDIR)/,$(addsuffix .o,$(basename $(1)))) : $(1) \
+	$(addprefix $(ESMF_OBJDIR)/,$(call MOD_FUNC,$(1))) \
+	$(filter $(LOCAL_INCLUDE_FILES),$(call INC_FUNC,$(1)))
+  endef
+else
+  define AUTOGEN_DEPEND_FUNC
+  $(addsuffix .o,$(basename $(1))) : $(1) \
+	$(call MOD_FUNC,$(1)) \
+	$(filter $(LOCAL_INCLUDE_FILES),$(call INC_FUNC,$(1)))
+  endef
+endif
+
+# Function for generating the dependency list for a C/C++ source file.
+# - filter include dependencies for local files
+ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
+  define SOURCEC_DEPEND_FUNC
+  $(addprefix $(ESMF_OBJDIR)/,$(addsuffix .o,$(basename $(1)))) : \
+	$(filter $(LOCAL_INCLUDE_FILES),$(call INC_FUNC,$(1)))
+  endef
+else
+  define SOURCEC_DEPEND_FUNC
+  $(addsuffix .o,$(basename $(1))) : \
+	$(filter $(LOCAL_INCLUDE_FILES),$(call INC_FUNC,$(1)))
+  endef
+endif
+
+# Generate local dependency file during tree_include action
+# - if SOURCEF or SOURCEC are non-empty
+# - define LOCAL_INCLUDE_FILES based on SOURCEH and ../include
+# - Fortran autogen source files are assumed to be named with the .cppF90 suffix
+ifeq ($(ACTION), tree_include)
+  ifneq (,$(strip $(SOURCEF) $(SOURCEC)))
+    LOCAL_INCLUDE_FILES = $(strip $(SOURCEH) $(notdir $(wildcard ../include/*)))
+    $(foreach f,$(filter-out $(AUTOGEN),$(SOURCEF)),\
+      $(shell echo '$(call SOURCEF_DEPEND_FUNC,$(f))' >> $(LOCAL_DEPEND_FILE)))
+    $(foreach f,$(addsuffix .cppF90,$(basename $(AUTOGEN))),\
+      $(shell echo '$(call AUTOGEN_DEPEND_FUNC,$(f))' >> $(LOCAL_DEPEND_FILE)))
+    $(foreach f,$(SOURCEC),\
+      $(shell echo '$(call SOURCEC_DEPEND_FUNC,$(f))' >> $(LOCAL_DEPEND_FILE)))
+  endif
+endif
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------

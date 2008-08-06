@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2008/05/22 18:22:44 feiliu Exp $ 
+# $Id: makefile,v 1.5 2008/08/06 17:35:35 tjcnrl Exp $ 
 
 
 ALL: build_here 
@@ -28,6 +28,4 @@ DIRS	  =
 CLEANDIRS   =
 CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS =
-
-ESMF_FieldBundleGet.o:   ESMF_FieldBundle.o ESMF_FieldBundleGet.cppF90 ESMF_FieldBundleGetMacros.h
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.31 2008/07/12 00:02:27 rosalind Exp $ 
+# $Id: makefile,v 1.32 2008/08/06 17:35:40 tjcnrl Exp $ 
 
 ALL: build_here 
 
@@ -33,43 +33,3 @@ DIRS =
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
-
-
-ESMC_Fraction_F.o:	ESMC_Base.h ESMC_Fraction.h makefile
-
-ESMC_BaseTime_F.o:	ESMC_Base.h ESMCI_BaseTime.h makefile
-
-ESMC_Calendar_F.o:	ESMC_Base.h ESMCI_Calendar.h makefile
-
-ESMC_TimeInterval_F.o:	ESMC_Base.h ESMCI_TimeInterval.h makefile
-
-ESMC_Time_F.o:	ESMC_Base.h ESMCI_Time.h makefile
-
-ESMC_Alarm_F.o:	ESMC_Base.h ESMCI_Alarm.h makefile
-
-ESMC_Clock_F.o:	ESMC_Base.h ESMCI_Clock.h makefile
-
-ESMF_Fraction.o:	makefile
-
-ESMF_BaseTime.o:	makefile
-
-ESMF_Calendar.o:	ESMF_BaseTime.o makefile
-
-ESMF_TimeInterval.o:	ESMF_TimeIntervalType.o ESMF_Fraction.o \
-			ESMF_BaseTime.o ESMF_Time.o ESMF_Calendar.o makefile
-
-ESMF_Time.o:	ESMF_TimeType.o ESMF_BaseTime.o ESMF_TimeInterval.o makefile
-
-ESMF_Alarm.o:	ESMF_TimeInterval.o ESMF_Time.o \
-		ESMF_AlarmType.o ESMF_ClockType.o \
-		makefile
-
-ESMF_Clock.o:	ESMF_TimeInterval.o ESMF_Time.o \
-		ESMF_AlarmType.o ESMF_ClockType.o \
-		makefile
-
-#ESMC_Calendar.o: ESMC_Calendar.h 
-
-#ESMC_Time.o:   ESMC_Calendar.o ESMC_Calendar.h ESMCI_Calendar.h  \
-#               ESMC_Time.h \
-#               makefile 

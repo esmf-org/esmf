@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2006/03/23 00:11:02 theurich Exp $
+# $Id: makefile,v 1.2 2008/08/06 17:35:37 tjcnrl Exp $
 
 # leave alone.
 ALL: build_here 
@@ -37,18 +37,4 @@ DIRS	  =
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
-
-
-# if you have class files which need to be compiled in a particular
-# order, list the dependencies below, with no rules following.
-#
-# e.g.:
-#
-# ESMF_Field.o:   ESMF_DataArray.o
-#
-# ESMF_Bundle.o:  ESMF_Field.o
-#
-
-
-
 

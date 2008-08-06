@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.92 2008/07/23 04:51:52 theurich Exp $
+# $Id: makefile,v 1.93 2008/08/06 17:35:34 tjcnrl Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -23,7 +23,7 @@ include $(ESMF_DIR)/build/common.mk
 
 #-------------------------------------------------------------------------------
 # Include dependencies, if they exist.
--include $(ESMF_DIR)/$(LOCDIR)/makefile.dep
+-include $(LOCAL_DEPEND_FILE)
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
@@ -193,7 +193,7 @@ info:   script_info
 #
 #
 MKINFO = $(ESMF_LIBDIR)/esmf.mk
-info_mk:
+info_mk: chkdir_lib
 	-@$(ESMF_RM) $(MKINFO)
 	-@echo "# ESMF application makefile fragment" > $(MKINFO)
 	-@echo "#" >> $(MKINFO)
@@ -299,11 +299,11 @@ install_info_mk:
 
 # Ranlib on the libraries
 ranlib:
-	$(ESMF_RANLIB) $(ESMF_LIBDIR)/*.a
+	$(ESMF_RANLIB) $(wildcard $(ESMF_LIBDIR)/lib*.a)
 
 # Deletes ESMF libraries
 deletelibs: chkopts_basic
-	-$(ESMF_RM) $(ESMF_LIBDIR)/*
+	-$(ESMF_RM) $(wildcard $(ESMF_LIBDIR)/lib*.*)
 
 # ESMF_COUPLED_FLOW/demo target.
 ESMF_COUPLED_FLOW: chkopts build_libs chkdir_tests
@@ -338,7 +338,7 @@ install:
 	mkdir -p $(ESMF_INSTALL_MODDIR_ABSPATH)
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
-	cp -f $(ESMF_LIBDIR)/* $(ESMF_INSTALL_LIBDIR_ABSPATH)
+	cp -f $(ESMF_LIBDIR)/lib*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_DOCDIR_ABSPATH)
 	@if [ -d $(ESMF_DOCDIR) ]; then \
         cp -rf $(ESMF_DOCDIR)/* $(ESMF_INSTALL_DOCDIR_ABSPATH); \
