@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.45 2008/08/05 19:19:48 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.46 2008/08/06 20:30:22 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1306,7 +1306,7 @@
         write(failMsg, *) ""
         write(name, *) "Creating a 7D field using generic interface, arbitrary gridToFieldMap" // &
             " arbitrary distgridToGridMap, arbitrary haloWidth"
-        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !  Begin testing field create/get from grid and arrayspec
@@ -4679,6 +4679,7 @@ contains
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
             distgridToGridMap=distgridToGridMap, &
             gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+            indexflag = ESMF_INDEX_USER, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
