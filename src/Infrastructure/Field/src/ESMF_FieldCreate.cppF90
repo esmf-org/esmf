@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.30 2008/08/05 19:19:47 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.31 2008/08/07 15:56:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.30 2008/08/05 19:19:47 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.31 2008/08/07 15:56:51 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -146,7 +146,7 @@ contains
 #define FieldCreateFromPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldCreate - Create a Field from Fortran array pointer @\
+! !IROUTINE: ESMF_FieldCreateFromPtr - Create a Field from Fortran array pointer @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreateFromPtr() @\
