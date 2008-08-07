@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.31 2008/08/07 15:56:51 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.32 2008/08/07 20:17:03 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.31 2008/08/07 15:56:51 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.32 2008/08/07 20:17:03 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -171,7 +171,7 @@ contains
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from existing local native @\
-! Fortran 90 data array with pointer attribute @\
+! Fortran data array with pointer attribute @\
 ! and {\tt ESMF\_Grid}. Besides @\
 ! {\tt farrayPtr} each PET must issue this call with identical arguments in @\
 ! order to create a consistent Field object. The bounds of the local arrays @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.46 2008/08/06 20:30:22 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.47 2008/08/07 20:17:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -2734,7 +2734,8 @@ contains
         real, dimension(:,:), pointer  :: farray
         real, dimension(:,:), pointer  :: farray1
 
-        integer, dimension(2)               :: tlb, tub
+        integer, dimension(2)               :: tlb, tub, felb, feub, fclb, fcub
+        integer, dimension(2)               :: gelb, geub, gclb, gcub
         logical                             :: t
         integer                             :: i
 
@@ -2761,11 +2762,15 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldGet(field, localDe=0, farray=farray1, rc=localrc)
+        call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            exclusiveLBound=felb, exclusiveUBound=feub, &
+            computationalLBound=fclb, computationalUBound=fcub, &
+            rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
+        ! test pointer equivalence
         t = associated(farray, farray1)
         do i = 1, 2
             t = t .and. (lbound(farray, i) .eq. tlb(i))
@@ -2775,6 +2780,29 @@ contains
         if(.not. t) then
           call ESMF_LogMsgSetError(ESMF_RC_PTR_BAD, &
             "- pointer queried from object is not equivalent to the one passed in)", &
+            ESMF_CONTEXT, rc)
+          return
+        endif
+
+        ! test field and grid bounds
+        call ESMF_GridGet(grid, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
+            exclusiveLBound=gelb, exclusiveUBound=geub, &
+            computationalLBound=gclb, computationalUBound=gcub, &
+            rc=localrc) 
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        t = .true.
+        do i = 1, 2
+            t = t .and. (gelb(i) .eq. felb(i))
+            t = t .and. (geub(i) .eq. feub(i))
+            t = t .and. (gclb(i) .eq. fclb(i))
+            t = t .and. (gcub(i) .eq. fcub(i))
+        enddo
+        if(.not. t) then
+          call ESMF_LogMsgSetError(ESMF_RC_PTR_BAD, &
+            "- bounds queried from grid different from those queried from field)", &
             ESMF_CONTEXT, rc)
           return
         endif
@@ -3778,6 +3806,29 @@ contains
               return
             endif
 
+            ! test field and grid bounds
+            call ESMF_GridGet(grid, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                exclusiveLBound=gelb, exclusiveUBound=geub, &
+                computationalLBound=gclb, computationalUBound=gcub, &
+                rc=localrc) 
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
+            t = .true.
+            do i = 1, 2
+                t = t .and. (gelb(i) .eq. felb(i))
+                t = t .and. (geub(i) .eq. feub(i))
+                t = t .and. (gclb(i) .eq. fclb(i))
+                t = t .and. (gcub(i) .eq. fcub(i))
+            enddo
+            if(.not. t) then
+              call ESMF_LogMsgSetError(ESMF_RC_PTR_BAD, &
+                "- bounds queried from grid different from those queried from field)", &
+                ESMF_CONTEXT, rc)
+              return
+            endif
+
             ! reverse looping order to make this a little faster by improving data locality
             do ip = ftlb(7), ftub(7)
              do io = ftlb(6), ftub(6)
@@ -4638,6 +4689,7 @@ contains
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
+        integer, dimension(7)                       :: gelb, geub, gclb, gcub
         integer, dimension(7)                       :: fec, fcc, ftc
         real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray
         real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray1
@@ -4796,6 +4848,29 @@ contains
             if(.not. t) then
               call ESMF_LogMsgSetError(ESMF_RC_PTR_BAD, &
                 "- pointer queried from object is not equivalent to the one passed in)", &
+                ESMF_CONTEXT, rc)
+              return
+            endif
+
+            ! test field and grid bounds
+            call ESMF_GridGet(grid, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                exclusiveLBound=gelb, exclusiveUBound=geub, &
+                computationalLBound=gclb, computationalUBound=gcub, &
+                rc=localrc) 
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
+            t = .true.
+            do i = 1, 2
+                t = t .and. (gelb(i) .eq. felb(i))
+                t = t .and. (geub(i) .eq. feub(i))
+                t = t .and. (gclb(i) .eq. fclb(i))
+                t = t .and. (gcub(i) .eq. fcub(i))
+            enddo
+            if(.not. t) then
+              call ESMF_LogMsgSetError(ESMF_RC_PTR_BAD, &
+                "- bounds queried from grid different from those queried from field)", &
                 ESMF_CONTEXT, rc)
               return
             endif
