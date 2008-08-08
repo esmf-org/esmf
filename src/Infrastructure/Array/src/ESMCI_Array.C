@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.23 2008/08/01 23:36:45 rosalind Exp $
+// $Id: ESMCI_Array.C,v 1.24 2008/08/08 08:39:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.23 2008/08/01 23:36:45 rosalind Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.24 2008/08/08 08:39:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -6802,6 +6802,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       printf("gjt: XXE::recvnb on localPet %d from Pet %d\n", localPet, srcPet);
 #endif
       recvnbIndex[j][i] = xxe->count;  // need index for the associated wait
+      int dstDe = dstLocalDeList[j];
       xxe->stream[xxe->count].opId = XXE::recvnb;
       xxe->stream[xxe->count].predicateBitField = 0x0;
       xxeElement = &(xxe->stream[xxe->count]);
@@ -6809,6 +6810,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       xxeRecvnbInfo->buffer = buffer[j][i];
       xxeRecvnbInfo->size = partnerDeCount[j][i] * dataSizeSrc;
       xxeRecvnbInfo->srcPet = srcPet;
+      xxeRecvnbInfo->tag = dstDe;
       xxeRecvnbInfo->commhandle = new VMK::commhandle*;
       *(xxeRecvnbInfo->commhandle) = new VMK::commhandle;
       localrc = xxe->incCount();
@@ -7025,6 +7027,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         xxeSendnbRRAInfo->size = partnerDeCount[i] * dataSizeSrc;
         xxeSendnbRRAInfo->dstPet = dstPet;
         xxeSendnbRRAInfo->rraIndex = j; // localDe index into srcArray
+        xxeSendnbRRAInfo->tag = dstDe;
       }else{
 #ifdef ASMMSTOREPRINT
         printf("gjt: non-contiguous linIndex in srcArray -> need buffer \n");
@@ -7166,6 +7169,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         xxeSendnbInfo->buffer = buffer;
         xxeSendnbInfo->size = partnerDeCount[i] * dataSizeSrc;
         xxeSendnbInfo->dstPet = dstPet;
+        xxeSendnbInfo->tag = dstDe;        
       }
       // add commhandle to last xxe element (sendnbRRA or sendnb) and keep track
       // of commhandle for xxe garbage collection

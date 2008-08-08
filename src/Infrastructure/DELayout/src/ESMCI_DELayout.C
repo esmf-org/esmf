@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.9 2008/08/01 23:36:52 rosalind Exp $
+// $Id: ESMCI_DELayout.C,v 1.10 2008/08/08 08:39:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.9 2008/08/01 23:36:52 rosalind Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.10 2008/08/08 08:39:05 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2493,14 +2493,14 @@ int XXE::exec(
       {
         xxeSendnbInfo = (SendnbInfo *)xxeElement;
         vm->send(xxeSendnbInfo->buffer, xxeSendnbInfo->size,
-          xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle);
+          xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle, xxeSendnbInfo->tag);
       }
       break;
     case recvnb:
       {
         xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
         vm->recv(xxeRecvnbInfo->buffer, xxeRecvnbInfo->size,
-          xxeRecvnbInfo->srcPet, xxeRecvnbInfo->commhandle);
+          xxeRecvnbInfo->srcPet, xxeRecvnbInfo->commhandle, xxeRecvnbInfo->tag);
       }
       break;
     case sendnbRRA:
@@ -2509,7 +2509,7 @@ int XXE::exec(
         vm->send(rraList[xxeSendnbRRAInfo->rraIndex]    
           + xxeSendnbRRAInfo->rraOffset,
           xxeSendnbRRAInfo->size, xxeSendnbRRAInfo->dstPet,
-          xxeSendnbRRAInfo->commhandle);
+          xxeSendnbRRAInfo->commhandle, xxeSendnbRRAInfo->tag);
       }
       break;
     case recvnbRRA:
@@ -2518,7 +2518,7 @@ int XXE::exec(
         vm->recv(rraList[xxeRecvnbRRAInfo->rraIndex]
           + xxeRecvnbRRAInfo->rraOffset,
           xxeRecvnbRRAInfo->size, xxeRecvnbRRAInfo->srcPet,
-          xxeRecvnbRRAInfo->commhandle);
+          xxeRecvnbRRAInfo->commhandle, xxeRecvnbRRAInfo->tag);
       }
       break;
     case waitOnIndex:

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.6 2008/07/21 23:25:50 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.7 2008/08/08 08:39:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -330,6 +330,7 @@ class XXE{
       void *buffer;
       int size;
       int dstPet;
+      int tag;
     }SendnbInfo;
 
     typedef struct{
@@ -339,6 +340,7 @@ class XXE{
       void *buffer;
       int size;
       int srcPet;
+      int tag;
     }RecvnbInfo;
 
     typedef struct{
@@ -349,6 +351,7 @@ class XXE{
       int size;
       int dstPet;
       int rraIndex;
+      int tag;
     }SendnbRRAInfo;
 
     typedef struct{
@@ -359,6 +362,7 @@ class XXE{
       int size;
       int srcPet;
       int rraIndex;
+      int tag;
     }RecvnbRRAInfo;
 
     typedef struct{
