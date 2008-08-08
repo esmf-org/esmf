@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.22 2008/08/01 19:25:43 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.23 2008/08/08 15:25:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -93,6 +93,7 @@ module ESMF_AttributeMod
 !  Attribute methods
       public ESMF_AttributeAdd
       public ESMF_AttributeCopy
+      public ESMF_AttributeDestroy
       public ESMF_AttributeGet
       public ESMF_AttributeSet
       public ESMF_AttributeWrite
@@ -101,7 +102,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.22 2008/08/01 19:25:43 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.23 2008/08/08 15:25:26 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -153,6 +154,30 @@ module ESMF_AttributeMod
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that copy
 !     an Attribute or Attribute hierarchy.
+ 
+!EOPI
+      end interface
+
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+!
+! !INTERFACE:
+      interface ESMF_AttributeDestroy
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_ArrayAttDestroy
+        module procedure ESMF_CplCompAttDestroy
+        module procedure ESMF_GridCompAttDestroy
+        module procedure ESMF_FieldAttDestroy
+        module procedure ESMF_FBundleAttDestroy
+        module procedure ESMF_GridAttDestroy
+        module procedure ESMF_StateAttDestroy
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that destroy
+!     an Attribute or Attribute package.
  
 !EOPI
       end interface
@@ -991,6 +1016,87 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayAttDestroy"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeDestroy()
+      subroutine ESMF_ArrayAttDestroy(array, name, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array  
+      character (len = *), intent(in) :: name
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Destroys an Attribute on the {\tt array}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array} object.
+!     \item [name]
+!           The name of the Attribute to destroy.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                       
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'array'
+
+      call c_ESMC_AttPackDestroy(array, name, fconvention, &
+        fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    else
+      
+      call c_ESMC_AttributeDestroy(array, name, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayAttDestroy
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayAttGetInt4"
 
 !BOPI
@@ -1036,6 +1142,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1044,7 +1151,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -1059,12 +1166,23 @@ contains
       endif
       
       fobject = 'array'
+      
+      call c_ESMC_AttPackIsPresent(array, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(array, name, &
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -1074,12 +1192,23 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(array, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
+
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -1089,7 +1218,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1112,7 +1241,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -1148,6 +1277,7 @@ contains
       integer :: localrc      
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1163,7 +1293,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -1179,11 +1309,21 @@ contains
       
       fobject = 'array'
 
+      call c_ESMC_AttPackIsPresent(array, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(array, name, &
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -1193,12 +1333,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(array, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -1208,7 +1358,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1262,6 +1412,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1270,7 +1421,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -1286,11 +1437,22 @@ contains
       
       fobject = 'array'
 
+      call c_ESMC_AttPackIsPresent(array, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(array, name, &
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -1302,10 +1464,20 @@ contains
                                 
       else
       
+      call c_ESMC_AttributeIsPresent(array, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -1315,7 +1487,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1338,7 +1510,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -1374,6 +1546,7 @@ contains
       integer :: localrc                 
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1389,7 +1562,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -1405,11 +1578,21 @@ contains
       
       fobject = 'array'
 
+      call c_ESMC_AttPackIsPresent(array, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(array, name, &
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -1419,12 +1602,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(array, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -1434,7 +1626,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1488,6 +1680,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1496,7 +1689,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -1512,11 +1705,22 @@ contains
       
       fobject = 'array'
 
+      call c_ESMC_AttPackIsPresent(array, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(array, name, &
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -1526,12 +1730,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(array, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -1541,7 +1754,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1564,7 +1777,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -1600,6 +1813,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1615,7 +1829,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -1631,11 +1845,22 @@ contains
       
       fobject = 'array'
 
+      call c_ESMC_AttPackIsPresent(array, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(array, name, &
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -1645,12 +1870,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(array, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -1660,7 +1894,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1714,6 +1948,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1722,7 +1957,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -1738,11 +1973,21 @@ contains
       
       fobject = 'array'
 
+      call c_ESMC_AttPackIsPresent(array, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(array, name, &
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -1752,12 +1997,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(array, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -1767,7 +2021,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1790,7 +2044,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -1826,6 +2080,7 @@ contains
       integer :: localrc     
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1841,7 +2096,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -1857,11 +2112,21 @@ contains
       
       fobject = 'array'
 
+      call c_ESMC_AttPackIsPresent(array, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(array, name, &
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -1871,12 +2136,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(array, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -1886,7 +2160,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1940,7 +2214,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_Logical) :: localvalue
+      type(ESMF_Logical) :: localvalue, present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1949,7 +2223,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -1965,12 +2239,22 @@ contains
       
       fobject = 'array'
 
+      call c_ESMC_AttPackIsPresent(array, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(array, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
       value = localvalue  
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -1980,13 +2264,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(array, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else      
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -1996,7 +2289,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2019,7 +2312,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -2055,6 +2348,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
@@ -2071,7 +2365,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -2087,14 +2381,24 @@ contains
       
       fobject = 'array'
 
+      call c_ESMC_AttPackIsPresent(array, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       allocate (localvalueList(limit))
       call c_ESMC_AttPackGetValue(array, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
       valueList = localvalueList
       deallocate (localvalueList)
-  
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -2104,15 +2408,24 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(array, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       allocate (localvalueList(limit))
       call c_ESMC_AttributeGetValue(array, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
       valueList = localvalueList
       deallocate (localvalueList)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -2122,7 +2435,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2175,6 +2488,7 @@ contains
 
       integer :: localrc 
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2183,7 +2497,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -2199,10 +2513,20 @@ contains
       
       fobject = 'array'
 
+      call c_ESMC_AttPackIsPresent(array, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetChar(array, name, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -2212,11 +2536,20 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(array, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetChar(array, name, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -2226,7 +2559,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2282,6 +2615,7 @@ contains
 
       integer :: localrc, i, j
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       integer, dimension(count) :: lens
       character(ESMF_MAXSTR*count) :: valueString
 
@@ -2312,10 +2646,20 @@ contains
       
       fobject = 'array'
 
+      call c_ESMC_AttPackIsPresent(array, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetCharList(array, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
@@ -2331,10 +2675,19 @@ contains
                                 
     else
       
+      call c_ESMC_AttributeIsPresent(array, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetCharList(array, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
@@ -2444,8 +2797,7 @@ contains
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
 !     \item [{[count]}]
-!           The number of items in this Attribute.  For character types,
-!           the length of the character string.
+!           The number of items in this Attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2513,8 +2865,7 @@ contains
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
 !     \item [{[count]}]
-!           Returns the number of items in this Attribute.  For character types,
-!           this is the length of the character string.
+!           Returns the number of items in this Attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4001,6 +4352,87 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompAttDestroy"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeDestroy()
+      subroutine ESMF_CplCompAttDestroy(comp, name, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp), intent(inout) :: comp  
+      character (len = *), intent(in) :: name
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Destroys an Attribute on the {\tt comp}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [comp]
+!           An {\tt ESMF\_CplComp} object.
+!     \item [name]
+!           The name of the Attribute to destroy.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                       
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
+
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'comp'
+
+      call c_ESMC_AttPackDestroy(comp%compp%base, name, fconvention, &
+        fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    else
+      
+      call c_ESMC_AttributeDestroy(comp%compp%base, name, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_CplCompAttDestroy
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompAttGetInt4"
 
 !BOPI
@@ -4046,6 +4478,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4054,7 +4487,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -4069,12 +4502,23 @@ contains
       endif
       
       fobject = 'comp'
+      
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -4084,12 +4528,23 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        
+      else
+
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -4099,7 +4554,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4122,7 +4577,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -4158,6 +4613,7 @@ contains
       integer :: localrc      
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4173,7 +4629,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -4189,11 +4645,21 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -4203,12 +4669,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -4218,7 +4694,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4272,6 +4748,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4280,7 +4757,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -4296,11 +4773,22 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -4312,10 +4800,20 @@ contains
                                 
       else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -4325,7 +4823,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4348,7 +4846,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -4384,6 +4882,7 @@ contains
       integer :: localrc                 
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4399,7 +4898,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -4415,11 +4914,21 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -4429,12 +4938,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -4444,7 +4962,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4498,6 +5016,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4506,7 +5025,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -4522,11 +5041,22 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -4536,12 +5066,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -4551,7 +5090,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4574,7 +5113,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -4610,6 +5149,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4625,7 +5165,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -4641,11 +5181,22 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -4655,12 +5206,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -4670,7 +5230,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4724,6 +5284,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4732,7 +5293,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -4748,11 +5309,21 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -4762,12 +5333,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -4777,7 +5357,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4800,7 +5380,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -4836,6 +5416,7 @@ contains
       integer :: localrc     
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4851,7 +5432,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -4867,11 +5448,21 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -4881,12 +5472,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -4896,7 +5496,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4950,7 +5550,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_Logical) :: localvalue
+      type(ESMF_Logical) :: localvalue, present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -4958,8 +5558,8 @@ contains
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
-      
-      if (present(convention) .OR. present(purpose)) then
+
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -4975,12 +5575,22 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
-      value = localvalue
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      value = localvalue  
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -4990,13 +5600,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
-
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else      
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -5006,7 +5625,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5029,7 +5648,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -5065,6 +5684,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
@@ -5073,7 +5693,7 @@ contains
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
-      
+
       limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -5081,7 +5701,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -5097,14 +5717,24 @@ contains
       
       fobject = 'comp'
 
-      allocate (localvalueList(count))
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
+      allocate (localvalueList(limit))
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
       valueList = localvalueList
       deallocate (localvalueList)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -5114,15 +5744,24 @@ contains
         endif
       endif
                                 
-      else
+    else
       
-      allocate (localvalueList(count))
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
+      allocate (localvalueList(limit))
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
-      valuelist(:count) = localvalueList
+      valueList = localvalueList
       deallocate (localvalueList)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -5132,7 +5771,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5141,7 +5780,6 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompAttGetChar"
-
 !BOPI
 ! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
@@ -5186,6 +5824,7 @@ contains
 
       integer :: localrc 
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -5194,7 +5833,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -5210,10 +5849,20 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetChar(comp%compp%base, name, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -5223,11 +5872,20 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetChar(comp%compp%base, name, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -5237,7 +5895,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5293,6 +5951,7 @@ contains
 
       integer :: localrc, i, j
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       integer, dimension(count) :: lens
       character(ESMF_MAXSTR*count) :: valueString
 
@@ -5323,10 +5982,20 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetCharList(comp%compp%base, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, fconvention, fpurpose, fobject, localrc)
-       
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
@@ -5334,7 +6003,6 @@ contains
           if (present(rc)) rc = ESMF_SUCCESS
           return
         else 
-
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -5343,10 +6011,19 @@ contains
                                 
     else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetCharList(comp%compp%base, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
@@ -5359,6 +6036,7 @@ contains
                                 ESMF_CONTEXT, rc)) return
         endif
       endif
+
     endif
 
       j = 1
@@ -7224,6 +7902,87 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompAttDestroy"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeDestroy()
+      subroutine ESMF_GridCompAttDestroy(comp, name, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(inout) :: comp  
+      character (len = *), intent(in) :: name
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Destroys an Attribute on the {\tt comp}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [comp]
+!           An {\tt ESMF\_GridComp} object.
+!     \item [name]
+!           The name of the Attribute to destroy.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                       
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
+
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'comp'
+
+      call c_ESMC_AttPackDestroy(comp%compp%base, name, fconvention, &
+        fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    else
+      
+      call c_ESMC_AttributeDestroy(comp%compp%base, name, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridCompAttDestroy
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompAttGetInt4"
 
 !BOPI
@@ -7269,6 +8028,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -7277,7 +8037,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -7292,12 +8052,23 @@ contains
       endif
       
       fobject = 'comp'
+      
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -7307,12 +8078,23 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        
+      else
+
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -7322,7 +8104,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -7345,7 +8127,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -7381,6 +8163,7 @@ contains
       integer :: localrc      
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -7396,7 +8179,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -7412,11 +8195,21 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -7426,12 +8219,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -7441,7 +8244,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -7495,6 +8298,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -7503,7 +8307,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -7519,11 +8323,22 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -7535,10 +8350,20 @@ contains
                                 
       else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -7548,7 +8373,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -7571,7 +8396,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -7607,6 +8432,7 @@ contains
       integer :: localrc                 
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -7622,7 +8448,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -7638,11 +8464,21 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -7652,12 +8488,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -7667,7 +8512,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -7721,6 +8566,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -7729,7 +8575,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -7745,11 +8591,22 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -7759,12 +8616,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -7774,7 +8640,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -7797,7 +8663,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -7833,6 +8699,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -7848,7 +8715,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -7864,11 +8731,22 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -7878,12 +8756,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -7893,7 +8780,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -7947,6 +8834,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -7955,7 +8843,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -7971,11 +8859,21 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -7985,12 +8883,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -8000,7 +8907,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -8023,7 +8930,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -8059,6 +8966,7 @@ contains
       integer :: localrc     
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -8074,7 +8982,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -8090,11 +8998,21 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -8104,12 +9022,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -8119,7 +9046,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -8173,7 +9100,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_Logical) :: localvalue
+      type(ESMF_Logical) :: localvalue, present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -8182,7 +9109,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -8198,12 +9125,22 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
-      value = localvalue
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      value = localvalue  
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -8213,13 +9150,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else      
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -8229,7 +9175,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -8252,7 +9198,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -8288,6 +9234,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
@@ -8304,7 +9251,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -8320,14 +9267,24 @@ contains
       
       fobject = 'comp'
 
-      allocate (localvalueList(count))
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
+      allocate (localvalueList(limit))
       call c_ESMC_AttPackGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
-      valueList(:count) = localvalueList
+      valueList = localvalueList
       deallocate (localvalueList)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -8337,15 +9294,24 @@ contains
         endif
       endif
                                 
-      else
+    else
       
-      allocate (localvalueList(count))
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
+      allocate (localvalueList(limit))
       call c_ESMC_AttributeGetValue(comp%compp%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
-      valueList(:count) = localvalueList
+      valueList = localvalueList
       deallocate (localvalueList)
-
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -8355,7 +9321,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -8364,7 +9330,6 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompAttGetChar"
-
 !BOPI
 ! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
@@ -8409,6 +9374,7 @@ contains
 
       integer :: localrc 
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -8417,7 +9383,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -8433,10 +9399,20 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetChar(comp%compp%base, name, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -8446,11 +9422,20 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetChar(comp%compp%base, name, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -8460,7 +9445,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -8481,7 +9466,7 @@ contains
       type(ESMF_GridComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count
-      character (len = *), dimension(count), intent(out) :: valueList
+      character (ESMF_MAXSTR), dimension(count), intent(out) :: valueList
       character (ESMF_MAXSTR), dimension(count), intent(in), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
@@ -8516,6 +9501,7 @@ contains
 
       integer :: localrc, i, j
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       integer, dimension(count) :: lens
       character(ESMF_MAXSTR*count) :: valueString
 
@@ -8529,7 +9515,7 @@ contains
       do  i=1,count
         lens(i) = len_trim(valueList(i))
       enddo
-
+      
     if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
@@ -8546,10 +9532,20 @@ contains
       
       fobject = 'comp'
 
+      call c_ESMC_AttPackIsPresent(comp%compp%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetCharList(comp%compp%base, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
@@ -8565,10 +9561,19 @@ contains
                                 
     else
       
+      call c_ESMC_AttributeIsPresent(comp%compp%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetCharList(comp%compp%base, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
@@ -10441,6 +11446,87 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldAttDestroy"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeDestroy()
+      subroutine ESMF_FieldAttDestroy(field, name, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field  
+      character (len = *), intent(in) :: name
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Destroys an Attribute on the {\tt field}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to destroy.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                       
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'field'
+
+      call c_ESMC_AttPackDestroy(field%ftypep%base, name, fconvention, &
+        fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    else
+      
+      call c_ESMC_AttributeDestroy(field%ftypep%base, name, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldAttDestroy
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAttGetInt4"
 
 !BOPI
@@ -10486,6 +11572,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -10494,7 +11581,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -10509,12 +11596,23 @@ contains
       endif
       
       fobject = 'field'
+      
+      call c_ESMC_AttPackIsPresent(field%ftypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -10524,12 +11622,23 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(field%ftypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        
+      else
+
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -10539,7 +11648,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -10562,7 +11671,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -10598,6 +11707,7 @@ contains
       integer :: localrc      
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -10613,7 +11723,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -10629,11 +11739,21 @@ contains
       
       fobject = 'field'
 
+      call c_ESMC_AttPackIsPresent(field%ftypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -10643,12 +11763,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(field%ftypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -10658,7 +11788,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -10712,6 +11842,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -10720,7 +11851,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -10736,11 +11867,22 @@ contains
       
       fobject = 'field'
 
+      call c_ESMC_AttPackIsPresent(field%ftypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -10752,10 +11894,20 @@ contains
                                 
       else
       
+      call c_ESMC_AttributeIsPresent(field%ftypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -10765,7 +11917,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -10788,7 +11940,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -10824,6 +11976,7 @@ contains
       integer :: localrc                 
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -10839,7 +11992,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -10855,11 +12008,21 @@ contains
       
       fobject = 'field'
 
+      call c_ESMC_AttPackIsPresent(field%ftypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -10869,12 +12032,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(field%ftypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -10884,7 +12056,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -10938,6 +12110,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -10946,7 +12119,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -10962,11 +12135,22 @@ contains
       
       fobject = 'field'
 
+      call c_ESMC_AttPackIsPresent(field%ftypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -10976,12 +12160,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(field%ftypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -10991,7 +12184,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -11014,7 +12207,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -11050,6 +12243,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -11065,7 +12259,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -11081,11 +12275,22 @@ contains
       
       fobject = 'field'
 
+      call c_ESMC_AttPackIsPresent(field%ftypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -11095,12 +12300,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(field%ftypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -11110,7 +12324,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -11164,6 +12378,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -11172,7 +12387,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -11188,11 +12403,21 @@ contains
       
       fobject = 'field'
 
+      call c_ESMC_AttPackIsPresent(field%ftypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -11202,12 +12427,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(field%ftypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -11217,7 +12451,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -11240,7 +12474,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -11276,6 +12510,7 @@ contains
       integer :: localrc     
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -11291,7 +12526,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -11307,11 +12542,21 @@ contains
       
       fobject = 'field'
 
+      call c_ESMC_AttPackIsPresent(field%ftypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -11321,12 +12566,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(field%ftypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -11336,7 +12590,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -11390,7 +12644,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_Logical) :: localvalue
+      type(ESMF_Logical) :: localvalue, present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -11399,7 +12653,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -11415,12 +12669,22 @@ contains
       
       fobject = 'field'
 
+      call c_ESMC_AttPackIsPresent(field%ftypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
-      value = localvalue
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      value = localvalue  
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -11430,13 +12694,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(field%ftypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
-
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else      
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -11446,7 +12719,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -11469,7 +12742,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -11505,6 +12778,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
@@ -11521,7 +12795,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -11537,14 +12811,24 @@ contains
       
       fobject = 'field'
 
-      allocate (localvalueList(count))
+      call c_ESMC_AttPackIsPresent(field%ftypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
+      allocate (localvalueList(limit))
       call c_ESMC_AttPackGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
-      valueList(:count) = localvalueList
+      valueList = localvalueList
       deallocate (localvalueList)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -11554,15 +12838,24 @@ contains
         endif
       endif
                                 
-      else
+    else
       
-      allocate (localvalueList(count))
+      call c_ESMC_AttributeIsPresent(field%ftypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
+      allocate (localvalueList(limit))
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
-      valueList(:count) = localvalueList
+      valueList = localvalueList
       deallocate (localvalueList)
-
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -11572,7 +12865,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -11581,7 +12874,6 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAttGetChar"
-
 !BOPI
 ! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
@@ -11626,6 +12918,7 @@ contains
 
       integer :: localrc 
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -11634,7 +12927,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -11650,10 +12943,20 @@ contains
       
       fobject = 'field'
 
+      call c_ESMC_AttPackIsPresent(field%ftypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetChar(field%ftypep%base, name, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -11663,11 +12966,20 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(field%ftypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetChar(field%ftypep%base, name, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -11677,7 +12989,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -11733,6 +13045,7 @@ contains
 
       integer :: localrc, i, j
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       integer, dimension(count) :: lens
       character(ESMF_MAXSTR*count) :: valueString
 
@@ -11763,10 +13076,20 @@ contains
       
       fobject = 'field'
 
+      call c_ESMC_AttPackIsPresent(field%ftypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetCharList(field%ftypep%base, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
@@ -11782,10 +13105,19 @@ contains
                                 
     else
       
+      call c_ESMC_AttributeIsPresent(field%ftypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetCharList(field%ftypep%base, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
@@ -13442,6 +14774,87 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FBundleAttDestroy"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeDestroy()
+      subroutine ESMF_FBundleAttDestroy(fieldbundle, name, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
+      character (len = *), intent(in) :: name
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Destroys an Attribute on the {\tt fieldbundle}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [fieldbundle]
+!           An {\tt ESMF\_FieldBundle} object.
+!     \item [name]
+!           The name of the Attribute to destroy.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                       
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
+
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'fieldbundle'
+
+      call c_ESMC_AttPackDestroy(fieldbundle%btypep%base, name, fconvention, &
+        fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    else
+      
+      call c_ESMC_AttributeDestroy(fieldbundle%btypep%base, name, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FBundleAttDestroy
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttGetInt4"
 
 !BOPI
@@ -13487,6 +14900,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -13495,7 +14909,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -13510,12 +14924,23 @@ contains
       endif
       
       fobject = 'fieldbundle'
+      
+      call c_ESMC_AttPackIsPresent(fieldbundle%btypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -13525,12 +14950,23 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(fieldbundle%btypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        
+      else
+
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -13540,7 +14976,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -13563,7 +14999,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -13599,6 +15035,7 @@ contains
       integer :: localrc      
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -13614,7 +15051,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -13630,11 +15067,21 @@ contains
       
       fobject = 'fieldbundle'
 
+      call c_ESMC_AttPackIsPresent(fieldbundle%btypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -13644,12 +15091,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(fieldbundle%btypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -13659,7 +15116,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -13713,6 +15170,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -13721,7 +15179,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -13737,11 +15195,22 @@ contains
       
       fobject = 'fieldbundle'
 
+      call c_ESMC_AttPackIsPresent(fieldbundle%btypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -13753,10 +15222,20 @@ contains
                                 
       else
       
+      call c_ESMC_AttributeIsPresent(fieldbundle%btypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -13766,7 +15245,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -13789,7 +15268,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -13825,6 +15304,7 @@ contains
       integer :: localrc                 
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -13840,7 +15320,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -13856,11 +15336,21 @@ contains
       
       fobject = 'fieldbundle'
 
+      call c_ESMC_AttPackIsPresent(fieldbundle%btypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -13870,12 +15360,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(fieldbundle%btypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -13885,7 +15384,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -13939,6 +15438,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -13947,7 +15447,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -13963,11 +15463,22 @@ contains
       
       fobject = 'fieldbundle'
 
+      call c_ESMC_AttPackIsPresent(fieldbundle%btypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -13977,12 +15488,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(fieldbundle%btypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -13992,7 +15512,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -14015,7 +15535,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -14051,6 +15571,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -14066,7 +15587,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -14082,11 +15603,22 @@ contains
       
       fobject = 'fieldbundle'
 
+      call c_ESMC_AttPackIsPresent(fieldbundle%btypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -14096,12 +15628,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(fieldbundle%btypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -14111,7 +15652,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -14165,6 +15706,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -14173,7 +15715,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -14189,11 +15731,21 @@ contains
       
       fobject = 'fieldbundle'
 
+      call c_ESMC_AttPackIsPresent(fieldbundle%btypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -14203,12 +15755,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(fieldbundle%btypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -14218,7 +15779,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -14241,7 +15802,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -14277,6 +15838,7 @@ contains
       integer :: localrc     
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -14292,7 +15854,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -14308,11 +15870,21 @@ contains
       
       fobject = 'fieldbundle'
 
+      call c_ESMC_AttPackIsPresent(fieldbundle%btypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -14322,12 +15894,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(fieldbundle%btypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -14337,7 +15918,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -14391,7 +15972,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_Logical) :: localvalue
+      type(ESMF_Logical) :: localvalue, present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -14400,7 +15981,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -14416,12 +15997,22 @@ contains
       
       fobject = 'fieldbundle'
 
+      call c_ESMC_AttPackIsPresent(fieldbundle%btypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
-      value = localvalue
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      value = localvalue  
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -14431,13 +16022,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(fieldbundle%btypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
-
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else      
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -14447,7 +16047,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -14470,7 +16070,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -14506,8 +16106,8 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       type(ESMF_Logical), allocatable :: localvalueList(:)
-      integer :: err
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -14523,14 +16123,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      allocate (localvalueList(count), stat=err)
-      if (err /= 0) then
-          if (ESMF_LogMsgFoundError (ESMF_RC_OBJ_BAD,  &
-              "can not allocate localvalueList",  &
-              ESMF_CONTEXT, rc)) return
-      end if
-
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -14546,13 +16139,24 @@ contains
       
       fobject = 'fieldbundle'
 
+      call c_ESMC_AttPackIsPresent(fieldbundle%btypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
+      allocate (localvalueList(limit))
       call c_ESMC_AttPackGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
-      valueList(:count) = localvalueList
+      valueList = localvalueList
       deallocate (localvalueList)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -14562,14 +16166,24 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(fieldbundle%btypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
+      allocate (localvalueList(limit))
       call c_ESMC_AttributeGetValue(fieldbundle%btypep%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
-      valueList(:count) = localvalueList
+      valueList = localvalueList
       deallocate (localvalueList)
-
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -14579,7 +16193,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -14588,7 +16202,6 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttGetChar"
-
 !BOPI
 ! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
@@ -14633,6 +16246,7 @@ contains
 
       integer :: localrc 
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -14641,7 +16255,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -14657,10 +16271,20 @@ contains
       
       fobject = 'fieldbundle'
 
+      call c_ESMC_AttPackIsPresent(fieldbundle%btypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetChar(fieldbundle%btypep%base, name, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -14670,11 +16294,20 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(fieldbundle%btypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetChar(fieldbundle%btypep%base, name, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -14684,7 +16317,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -14718,7 +16351,7 @@ contains
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldbundle]
-!           An {\tt ESMF\_FBundle} object.
+!           An {\tt ESMF\_FieldBundle} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [count]
@@ -14740,6 +16373,7 @@ contains
 
       integer :: localrc, i, j
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       integer, dimension(count) :: lens
       character(ESMF_MAXSTR*count) :: valueString
 
@@ -14770,10 +16404,20 @@ contains
       
       fobject = 'fieldbundle'
 
+      call c_ESMC_AttPackIsPresent(fieldbundle%btypep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetCharList(fieldbundle%btypep%base, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
@@ -14789,10 +16433,19 @@ contains
                                 
     else
       
+      call c_ESMC_AttributeIsPresent(fieldbundle%btypep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetCharList(fieldbundle%btypep%base, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
@@ -16503,6 +18156,87 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAttDestroy"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeDestroy()
+      subroutine ESMF_GridAttDestroy(grid, name, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout) :: grid  
+      character (len = *), intent(in) :: name
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Destroys an Attribute on the {\tt grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An {\tt ESMF\_Grid} object.
+!     \item [name]
+!           The name of the Attribute to destroy.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                       
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'grid'
+
+      call c_ESMC_AttPackDestroy(grid, name, fconvention, &
+        fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    else
+      
+      call c_ESMC_AttributeDestroy(grid, name, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridAttDestroy
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttGetInt4"
 
 !BOPI
@@ -16548,6 +18282,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -16556,7 +18291,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -16571,12 +18306,23 @@ contains
       endif
       
       fobject = 'grid'
+      
+      call c_ESMC_AttPackIsPresent(grid, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(grid, name, &
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -16586,12 +18332,23 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(grid, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        
+      else
+
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -16601,7 +18358,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -16624,7 +18381,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -16660,6 +18417,7 @@ contains
       integer :: localrc      
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -16675,7 +18433,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -16691,11 +18449,21 @@ contains
       
       fobject = 'grid'
 
+      call c_ESMC_AttPackIsPresent(grid, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(grid, name, &
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -16705,12 +18473,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(grid, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -16720,7 +18498,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -16774,6 +18552,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -16782,7 +18561,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -16798,11 +18577,22 @@ contains
       
       fobject = 'grid'
 
+      call c_ESMC_AttPackIsPresent(grid, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(grid, name, &
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -16814,10 +18604,20 @@ contains
                                 
       else
       
+      call c_ESMC_AttributeIsPresent(grid, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -16827,7 +18627,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -16850,7 +18650,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -16886,6 +18686,7 @@ contains
       integer :: localrc                 
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -16901,7 +18702,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -16917,11 +18718,21 @@ contains
       
       fobject = 'grid'
 
+      call c_ESMC_AttPackIsPresent(grid, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(grid, name, &
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -16931,12 +18742,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(grid, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -16946,7 +18766,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -17000,6 +18820,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -17008,7 +18829,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -17024,11 +18845,22 @@ contains
       
       fobject = 'grid'
 
+      call c_ESMC_AttPackIsPresent(grid, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(grid, name, &
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -17038,12 +18870,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(grid, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -17053,7 +18894,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -17076,7 +18917,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -17112,6 +18953,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -17127,7 +18969,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -17143,11 +18985,22 @@ contains
       
       fobject = 'grid'
 
+      call c_ESMC_AttPackIsPresent(grid, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(grid, name, &
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -17157,12 +19010,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(grid, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -17172,7 +19034,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -17226,6 +19088,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -17234,7 +19097,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -17250,11 +19113,21 @@ contains
       
       fobject = 'grid'
 
+      call c_ESMC_AttPackIsPresent(grid, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(grid, name, &
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -17264,12 +19137,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(grid, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -17279,7 +19161,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -17302,7 +19184,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -17338,6 +19220,7 @@ contains
       integer :: localrc     
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -17353,7 +19236,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -17369,11 +19252,21 @@ contains
       
       fobject = 'grid'
 
+      call c_ESMC_AttPackIsPresent(grid, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(grid, name, &
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -17383,12 +19276,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(grid, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -17398,7 +19300,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -17452,7 +19354,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_Logical) :: localvalue
+      type(ESMF_Logical) :: localvalue, present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -17461,7 +19363,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -17477,12 +19379,22 @@ contains
       
       fobject = 'grid'
 
+      call c_ESMC_AttPackIsPresent(grid, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(grid, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
-      value = localvalue
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      value = localvalue  
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -17492,13 +19404,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(grid, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
-
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else      
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -17508,7 +19429,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -17531,7 +19452,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -17567,8 +19488,8 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       type(ESMF_Logical), allocatable :: localvalueList(:)
-      integer :: err
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -17584,14 +19505,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      allocate (localvalueList(count), stat=err)
-      if (err /= 0) then
-          if (ESMF_LogMsgFoundError (ESMF_RC_OBJ_BAD,  &
-              "can not allocate localvalueList",  &
-              ESMF_CONTEXT, rc)) return
-      end if
-
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -17607,13 +19521,24 @@ contains
       
       fobject = 'grid'
 
+      call c_ESMC_AttPackIsPresent(grid, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
+      allocate (localvalueList(limit))
       call c_ESMC_AttPackGetValue(grid, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
-      valueList(:count) = localvalueList
+      valueList = localvalueList
       deallocate (localvalueList)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -17623,14 +19548,24 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(grid, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
+      allocate (localvalueList(limit))
       call c_ESMC_AttributeGetValue(grid, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
-      valueList(:count) = localvalueList
+      valueList = localvalueList
       deallocate (localvalueList)
-
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -17640,7 +19575,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -17649,7 +19584,6 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAttGetChar"
-
 !BOPI
 ! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
@@ -17694,6 +19628,7 @@ contains
 
       integer :: localrc 
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -17702,7 +19637,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -17718,10 +19653,20 @@ contains
       
       fobject = 'grid'
 
+      call c_ESMC_AttPackIsPresent(grid, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetChar(grid, name, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -17731,11 +19676,20 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(grid, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetChar(grid, name, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -17745,7 +19699,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -17801,6 +19755,7 @@ contains
 
       integer :: localrc, i, j
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       integer, dimension(count) :: lens
       character(ESMF_MAXSTR*count) :: valueString
 
@@ -17831,10 +19786,20 @@ contains
       
       fobject = 'grid'
 
+      call c_ESMC_AttPackIsPresent(grid, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetCharList(grid, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
@@ -17850,10 +19815,19 @@ contains
                                 
     else
       
+      call c_ESMC_AttributeIsPresent(grid, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetCharList(grid, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
@@ -19567,6 +21541,87 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAttDestroy"
+
+!BOPI
+! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeDestroy()
+      subroutine ESMF_StateAttDestroy(state, name, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state  
+      character (len = *), intent(in) :: name
+      character(ESMF_MAXSTR), intent(in), optional :: convention
+      character(ESMF_MAXSTR), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Destroys an Attribute on the {\tt state}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!           An {\tt ESMF\_State} object.
+!     \item [name]
+!           The name of the Attribute to destroy.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                       
+      character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+    if (present(convention) .OR. present(purpose)) then
+      
+      if (present(convention))  then
+        fconvention = convention
+      else 
+        fconvention = 'N/A'
+      endif
+      
+      if (present(purpose)) then
+        fpurpose = purpose
+      else 
+        fpurpose = 'N/A'
+      endif
+      
+      fobject = 'state'
+
+      call c_ESMC_AttPackDestroy(state%statep%base, name, fconvention, &
+        fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    else
+      
+      call c_ESMC_AttributeDestroy(state%statep%base, name, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAttDestroy
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttGetInt4"
 
 !BOPI
@@ -19612,6 +21667,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -19620,7 +21676,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -19635,12 +21691,23 @@ contains
       endif
       
       fobject = 'state'
+      
+      call c_ESMC_AttPackIsPresent(state%statep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -19650,12 +21717,23 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(state%statep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I4, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        
+      else
+
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -19665,7 +21743,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -19688,7 +21766,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -19724,6 +21802,7 @@ contains
       integer :: localrc      
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -19739,7 +21818,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -19755,11 +21834,21 @@ contains
       
       fobject = 'state'
 
+      call c_ESMC_AttPackIsPresent(state%statep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -19769,12 +21858,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(state%statep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+        
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -19784,7 +21883,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -19838,6 +21937,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -19846,7 +21946,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -19862,11 +21962,22 @@ contains
       
       fobject = 'state'
 
+      call c_ESMC_AttPackIsPresent(state%statep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+                
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -19878,10 +21989,20 @@ contains
                                 
       else
       
+      call c_ESMC_AttributeIsPresent(state%statep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I8, 1, value, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -19891,7 +22012,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -19914,7 +22035,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -19950,6 +22071,7 @@ contains
       integer :: localrc                 
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -19965,7 +22087,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -19981,11 +22103,21 @@ contains
       
       fobject = 'state'
 
+      call c_ESMC_AttPackIsPresent(state%statep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -19995,12 +22127,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(state%statep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_I8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -20010,7 +22151,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -20064,6 +22205,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -20072,7 +22214,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -20088,11 +22230,22 @@ contains
       
       fobject = 'state'
 
+      call c_ESMC_AttPackIsPresent(state%statep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -20102,12 +22255,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(state%statep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R4, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -20117,7 +22279,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -20140,7 +22302,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -20176,6 +22338,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -20191,7 +22354,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -20207,11 +22370,22 @@ contains
       
       fobject = 'state'
 
+      call c_ESMC_AttPackIsPresent(state%statep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
         
-      if (localrc .ne. ESMF_SUCCESS) then
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -20221,12 +22395,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(state%statep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R4, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -20236,7 +22419,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -20290,6 +22473,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -20298,7 +22482,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -20314,11 +22498,21 @@ contains
       
       fobject = 'state'
 
+      call c_ESMC_AttPackIsPresent(state%statep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -20328,12 +22522,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(state%statep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R8, 1, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -20343,7 +22546,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -20366,7 +22569,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -20402,6 +22605,7 @@ contains
       integer :: localrc     
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -20417,7 +22621,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -20433,11 +22637,21 @@ contains
       
       fobject = 'state'
 
+      call c_ESMC_AttPackIsPresent(state%statep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -20447,12 +22661,21 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(state%statep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_R8, count, valueList, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -20462,7 +22685,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -20516,7 +22739,7 @@ contains
 
       integer :: localrc                       
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
-      type(ESMF_Logical) :: localvalue
+      type(ESMF_Logical) :: localvalue, present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -20525,7 +22748,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -20541,12 +22764,22 @@ contains
       
       fobject = 'state'
 
+      call c_ESMC_AttPackIsPresent(state%statep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, &
         fconvention, fpurpose, fobject, localrc)
-      value = localvalue
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      value = localvalue  
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -20556,13 +22789,22 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(state%statep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc)
       value = localvalue
-
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else      
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -20572,7 +22814,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -20595,7 +22837,7 @@ contains
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalue
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -20631,6 +22873,7 @@ contains
       integer :: localrc                
       integer :: limit
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       type(ESMF_Logical), allocatable :: localvalueList(:)
 
       ! Initialize
@@ -20647,7 +22890,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -20663,14 +22906,24 @@ contains
       
       fobject = 'state'
 
-      allocate (localvalueList(count))
+      call c_ESMC_AttPackIsPresent(state%statep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
+      allocate (localvalueList(limit))
       call c_ESMC_AttPackGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, &
         fconvention, fpurpose, fobject, localrc)
-      valueList(:count) = localvalueList
+      valueList = localvalueList
       deallocate (localvalueList)
-
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -20680,15 +22933,24 @@ contains
         endif
       endif
                                 
-      else
+    else
       
-      allocate (localvalueList(count))
+      call c_ESMC_AttributeIsPresent(state%statep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
+      allocate (localvalueList(limit))
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
         ESMF_TYPEKIND_LOGICAL, count, localvalueList, localrc)
-      valueList(:count) = localvalueList
+      valueList = localvalueList
       deallocate (localvalueList)
-
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           valueList = defaultvalue
         else 
@@ -20698,7 +22960,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -20707,7 +22969,6 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAttGetChar"
-
 !BOPI
 ! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute
 !
@@ -20752,6 +23013,7 @@ contains
 
       integer :: localrc 
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -20760,7 +23022,7 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
-      if (present(convention) .OR. present(purpose)) then
+    if (present(convention) .OR. present(purpose)) then
       
       if (present(convention))  then
         fconvention = convention
@@ -20776,10 +23038,20 @@ contains
       
       fobject = 'state'
 
+      call c_ESMC_AttPackIsPresent(state%statep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetChar(state%statep%base, name, value, &
         fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -20789,11 +23061,20 @@ contains
         endif
       endif
                                 
-      else
+    else
       
+      call c_ESMC_AttributeIsPresent(state%statep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetChar(state%statep%base, name, value, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalue)) then
           value = defaultvalue
         else 
@@ -20803,7 +23084,7 @@ contains
         endif
       endif
 
-      endif
+    endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -20859,6 +23140,7 @@ contains
 
       integer :: localrc, i, j
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: present_flag
       integer, dimension(count) :: lens
       character(ESMF_MAXSTR*count) :: valueString
 
@@ -20889,10 +23171,20 @@ contains
       
       fobject = 'state'
 
+      call c_ESMC_AttPackIsPresent(state%statep%base, name, fconvention, fpurpose, &
+        fobject, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+      
       call c_ESMC_AttPackGetCharList(state%statep%base, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, fconvention, fpurpose, fobject, localrc)
-        
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
@@ -20908,10 +23200,19 @@ contains
                                 
     else
       
+      call c_ESMC_AttributeIsPresent(state%statep%base, name, present_flag, localrc)
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present_flag == ESMF_TRUE) then
+
       call c_ESMC_AttributeGetCharList(state%statep%base, name, ESMF_TYPEKIND_CHARACTER, &
         count, lens, valueString, localrc)
-      
-      if (localrc .ne. ESMF_SUCCESS) then
+      if(ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else
         if(present(defaultvalueList)) then
           do i=1,count
             valueList(i) = defaultvalueList(i)
