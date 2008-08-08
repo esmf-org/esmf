@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindMacros.hcppF90,v 1.4 2008/04/05 03:39:01 cdeluca Exp $
+! $Id: ESMF_TypeKindMacros.hcppF90,v 1.5 2008/08/08 15:50:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -99,6 +99,36 @@ funcname##Macro(integer, I4) @\
 funcname##Macro(integer, I8) @\
 funcname##Macro(real, R4) @\
 funcname##Macro(real, R8) @\
+ @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------ @\
+
+#if 0
+!------------------------------------------------------------------------------
+! Accept an additional user-defined argument and pass it through to the macro.
+!
+! The macro then needs to be written as:
+!  #define fredMacro(typename, typekind, p1) ... 
+!------------------------------------------------------------------------------
+#endif
+
+#define TypeKind1DeclarationMacro(funcname, userp1) \
+!------------------------------------------------------------------------------ @\
+! <This section created by macro - do not edit directly> @\
+ @\
+!! < start of macros which become actual subroutine bodies after expansion > @\
+ @\
+funcname##Doc() @\
+^ifndef ESMF_NO_INTEGER_1_BYTE @\
+funcname##Macro(integer, I1, userp1) @\
+^endif @\
+^ifndef ESMF_NO_INTEGER_2_BYTE @\
+funcname##Macro(integer, I2, userp1) @\
+^endif @\
+funcname##Macro(integer, I4, userp1) @\
+funcname##Macro(integer, I8, userp1) @\
+funcname##Macro(real, R4, userp1) @\
+funcname##Macro(real, R8, userp1) @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
