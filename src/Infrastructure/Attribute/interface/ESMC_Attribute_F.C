@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.15 2008/08/01 23:36:46 rosalind Exp $
+// $Id: ESMC_Attribute_F.C,v 1.16 2008/08/08 15:26:27 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.15 2008/08/01 23:36:46 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.16 2008/08/08 15:26:27 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -184,6 +184,146 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  c_ESMC_attpackdestroy - Destroy the attribute package
+//
+// !INTERFACE:
+      void FTN(c_esmc_attpackdestroy)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackdestroy()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,          // in/out - base object
+      char *name,                // in - F90, non-null terminated string
+      char *convention,          // in - convention
+      char *purpose,             // in - purpose
+      char *object,              // in - object type
+      int *rc,                   // in - return code
+      int nlen,                  // hidden/in - strlen count for name
+      int clen,                  // hidden/in - strlen count for convention
+      int plen,                  // hidden/in - strlen count for purpose           
+      int olen) {                // hidden/in - strlen count for object
+// 
+// !DESCRIPTION:
+//    Destroy an attribute package
+//
+//EOP
+
+  int status;
+  char *cname, *cconv, *cpurp, *cobj;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cconv = ESMC_F90toCstring(convention, clen);
+  if (!cconv) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention conversion", &status);
+      delete [] cname;
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cpurp = ESMC_F90toCstring(purpose, plen);
+  if (!cpurp) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose conversion", &status);
+      delete [] cname;
+      delete [] cconv;
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cobj = ESMC_F90toCstring(object, olen);
+  if (!cobj) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object conversion", &status);
+      delete [] cname;
+      delete [] cconv;
+      delete [] cpurp;
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Set the attribute on the object.
+  status = (**base).root.ESMC_AttributeDestroy(cname, cconv, cpurp, cobj);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed destroying attribute package", &status);
+    delete [] cname;
+    delete [] cconv;
+    delete [] cpurp;
+    delete [] cobj;
+    if (rc) *rc = status;
+    return;
+  }
+  
+  delete [] cname;
+  delete [] cconv;
+  delete [] cpurp;
+  delete [] cobj;
+  
+  if (rc) *rc = status;
+  return;
+
+}  // end c_ESMC_attpackdestroy
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  c_ESMC_attpackgetchar - get attribute from an attpack
 //
 // !INTERFACE:
@@ -308,8 +448,9 @@ extern "C" {
   status = ((**base).root.ESMC_AttPackGet(cconv, cpurp, cobj))->\
     ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
   if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting attribute type and length", &status);
+    ESMC_LogDefault.Write(
+                          "failed getting typekind - looking for default value",
+                          ESMC_LOG_INFO);
     delete [] cname;
     delete [] cconv;
     delete [] cpurp;
@@ -817,6 +958,141 @@ extern "C" {
   return;
 
 }  // end c_ESMC_attpackgetvalue
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_attpackispresent - Query for an Attribute package Attribute
+//
+// !INTERFACE:
+      void FTN(c_esmc_attpackispresent)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackispresent()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,          // in/out - base object
+      char *name,                // in - F90, non-null terminated string
+      char *convention,          // in - convention
+      char *purpose,             // in - purpose
+      char *object,              // in - object type
+      ESMC_Logical *present,     // out/out - present flag 
+      int *rc,                   // in/out - return code
+      int nlen,                  // hidden/in - strlen count for name
+      int clen,                  // hidden/in - strlen count for convention
+      int plen,                  // hidden/in - strlen count for purpose           
+      int olen) {                // hidden/in - strlen count for object
+// 
+// !DESCRIPTION:
+//     Query an Attribute package for the presence of an Attribute.
+//
+//EOP
+
+  int status;
+  char *cname, *cconv, *cpurp, *cobj;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // simple sanity checks before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cconv = ESMC_F90toCstring(convention, clen);
+  if (!cconv) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention conversion", &status);
+    delete [] cname;
+    if (rc) *rc = status;
+    return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cpurp = ESMC_F90toCstring(purpose, plen);
+  if (!cpurp) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose conversion", &status);
+    delete [] cname;
+    delete [] cconv;
+    if (rc) *rc = status;
+    return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cobj = ESMC_F90toCstring(object, olen);
+  if (!cobj) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object conversion", &status);
+    delete [] cname;
+    delete [] cconv;
+    delete [] cpurp;
+    if (rc) *rc = status;
+    return;
+  }
+
+  // Set the attribute on the object.
+  status = (**base).root.ESMC_AttPackIsPresent(cname, cconv, cpurp, cobj, present);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed query for Attribute package Attribute", &status);
+  }
+  
+  delete [] cname;
+  delete [] cconv;
+  delete [] cpurp;
+  delete [] cobj;
+  
+  if (rc) *rc = status;
+  return;
+
+}  // end c_ESMC_attpackispresent
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -1610,6 +1886,77 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  c_ESMC_attributedestroy - Destroy the attribute
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributedestroy)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributedestroy()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,          // in/out - base object
+      char *name,                // in - F90, non-null terminated string
+      int *rc,                   // in - return code     
+      int nlen) {                // hidden/in - strlen count for name
+// 
+// !DESCRIPTION:
+//    Destroy an attribute package
+//
+//EOP
+
+  int status;
+  char *cname;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // Set the attribute on the object.
+  status = (**base).root.ESMC_AttributeDestroy(cname);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed destroying the attribute", &status);
+    if (rc) *rc = status;
+    delete [] cname;
+    return;
+  }
+  
+  delete [] cname;
+  
+  if (rc) *rc = status;
+  return;
+
+}  // end c_ESMC_attributedestroy
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  c_ESMC_AttributeGetChar - get attribute from an ESMF type
 //
 // !INTERFACE:
@@ -1669,8 +2016,9 @@ extern "C" {
 
   status = (**base).root.ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
   if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting attribute type and length", &status);
+    ESMC_LogDefault.Write(
+                          "failed getting typekind - looking for default value",
+                          ESMC_LOG_INFO);
     delete [] cname;
     if (rc) *rc = status;
     return;
@@ -2110,7 +2458,7 @@ extern "C" {
   }
 
   // simple sanity checks before doing any more work
-  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+  if ((!name)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
       if (rc) *rc = status;
@@ -2217,6 +2565,82 @@ extern "C" {
   return;
 
 }  // end c_ESMC_AttributeGetCount
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_attributeispresent - Query for an Attribute
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributeispresent)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributeispresent()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,          // in/out - base object
+      char *name,                // in - F90, non-null terminated string
+      ESMC_Logical *present,     // out/out - present flag 
+      int *rc,                   // in/out - return code
+      int nlen) {                // hidden/in - strlen count for name
+// 
+// !DESCRIPTION:
+//     Query for the presence of an Attribute.
+//
+//EOP
+
+  int status;
+  char *cname;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // simple sanity checks before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  if (!present) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute present flag", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // Set the attribute on the object.
+  status = (**base).root.ESMC_AttributeIsPresent(cname, present);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed query for Attribute", &status);
+  }
+  
+  delete [] cname;
+  
+  if (rc) *rc = status;
+  return;
+
+}  // end c_ESMC_attributeispresent
 
 //-----------------------------------------------------------------------------
 //BOP

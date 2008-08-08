@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.20 2008/08/01 23:36:47 rosalind Exp $
+// $Id: ESMC_Attribute.C,v 1.21 2008/08/08 15:26:28 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.20 2008/08/01 23:36:47 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.21 2008/08/08 15:26:28 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -297,6 +297,75 @@
   return NULL;
 
 }  // end ESMC_AttPackGetAttribute
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttPackIsPresent"
+//BOPI
+// !IROUTINE:  ESMC_AttPackIsPresent - query an {\tt ESMC_Attribute} for an attpack
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_AttPackIsPresent(
+// 
+// !RETURN VALUE:
+//    Value of the present flag.
+// 
+// !ARGUMENTS:
+      char *name,                             // in - Attribute name
+      char *convention,                       // in - Attribute convention
+      char *purpose,                          // in - Attribute purpose
+      char *object,                           // in - Attribute object type
+      ESMC_Logical *present ) const {         // in/out - the present flag
+// 
+// !DESCRIPTION:
+//     Query an Attribute package for an {\tt ESMC_Attribute} given its name, convention, 
+//     purpose, and object type.
+//
+//EOPI
+
+  unsigned int i;
+  ESMC_Attribute *attr, *attpack;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad Attribute name", NULL);
+       return NULL;
+  }
+
+  // simple sanity checks
+  if ((!purpose) || (purpose[0] == '\0')) {
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad Attribute purpose", NULL);
+       return NULL;
+  }
+  
+  // simple sanity checks
+  if ((!convention) || (convention[0] == '\0')) {
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad Attribute convention", NULL);
+       return NULL;
+  }
+  
+  // simple sanity checks
+  if ((!object) || (object[0] == '\0')) {
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad Attribute object", NULL);
+       return NULL;
+  }
+
+  attpack = ESMC_AttPackGet(convention, purpose, object);
+  if (!attpack) {
+    *present = ESMF_FALSE;
+    return ESMF_SUCCESS;
+  }
+  attr = attpack->ESMC_AttPackGetAttribute(name, convention, purpose, object);
+  if (!attr) *present = ESMF_FALSE;
+  else *present = ESMF_TRUE;
+  
+  // return
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttPackIsPresent
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttPackSet"
@@ -834,6 +903,128 @@
   return ESMF_SUCCESS;
 
 }  // end ESMC_AttributeCountTree
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeDestroy"
+//BOPI
+// !IROUTINE:  ESMC_AttributeDestroy - Destroy the {\tt ESMC_Attribute}
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_AttributeDestroy(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      char *name,                    // in - name
+      char *convention,              // in - convention
+      char *purpose,                 // in - purpose
+      char *object) {                // in - object type to look for
+// 
+// !DESCRIPTION:
+//     Destroy the {\tt ESMC_Attribute} 
+
+//EOPI
+
+  int localrc;
+  char msgbuf[ESMF_MAXSTR];
+  unsigned int i, j;
+  ESMC_Attribute *attpack;
+  bool done=false;
+
+  // Initialize local return code
+  localrc = ESMC_RC_NOT_IMPL;
+  
+  // get the attpack
+  attpack = ESMC_AttPackGet(convention, purpose, object);
+  if(!attpack) {
+       sprintf(msgbuf, "Cannot find an Attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
+                      convention, purpose, object);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                             msgbuf, &localrc);
+      return ESMF_FAILURE;
+  }
+  
+  for (i=0; i<attpack->attrCount; i++) {
+    if (strcmp(name,attpack->attrList[i]->attrName) == 0 &&
+      strcmp(convention,attpack->attrList[i]->attrConvention) == 0 && 
+      strcmp(purpose,attpack->attrList[i]->attrPurpose) == 0 &&
+      strcmp(object,attpack->attrList[i]->attrObject) == 0) {
+      // found a match, destroy it
+      (attpack->attrList[i])->~ESMC_Attribute();
+      // now repoint everything (up one)
+      for (j=i; j<(attpack->attrCount)-1; j++)
+        attpack->attrList[j] = attpack->attrList[j+1];
+      // null the last pointer
+      attpack->attrList[(attpack->attrCount)-1] = ESMC_NULL_POINTER;
+      // decrement the attrCount and break out
+      (attpack->attrCount)--;
+      done = true;
+      break;
+    }
+  }
+  
+  if (!done) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "could not locate, ", &localrc);
+    return ESMF_FAILURE;
+  }
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeDestroy
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeDestroy"
+//BOPI
+// !IROUTINE:  ESMC_AttributeDestroy - Destroy the {\tt ESMC_Attribute}
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_AttributeDestroy(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      char *name) {                // in - name
+// 
+// !DESCRIPTION:
+//     Destroy the {\tt ESMC_Attribute} 
+
+//EOPI
+
+  int localrc;
+  unsigned int i, j;
+  bool done=false;
+
+  // Initialize local return code
+  localrc = ESMC_RC_NOT_IMPL;
+  
+  for (i=0; i<attrCount; i++) {
+    if (strcmp(name,attrList[i]->attrName) == 0) {
+      // found a match, destroy it
+      attrList[i]->~ESMC_Attribute();
+      // now repoint everything (up one)
+      for (j=i; j<attrCount-1; j++)
+        attrList[j] = attrList[j+1];
+      // null the last pointer
+      attrList[attrCount-1] = ESMC_NULL_POINTER;
+      // decrement the attrCount and break out
+      attrCount--;
+      done = true;
+      break;
+    }
+  }
+  
+  if (!done) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "could not locate, ", &localrc);
+    return ESMF_FAILURE;
+  }
+  
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeDestroy
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeGet"
@@ -1580,14 +1771,8 @@
     if (tk) 
       *tk = attr->tk;
 
-    if (count) {
-      if (attr->tk == ESMC_TYPEKIND_CHARACTER) {
-         *count = attr->slen;
-      }
-      else {
+    if (count)
          *count = attr->items; 
-      }
-    }
 
     if (value) {
       if (attr->items == 1) {
@@ -1601,7 +1786,10 @@
                   *(ESMC_R8 *)value = attr->vd; 
               else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
                   *(ESMC_Logical *)value = attr->vb;
-              else{
+              else if (attr->tk == ESMC_TYPEKIND_CHARACTER) {
+                  attr->slen = strlen(attr->vcp)+1;
+                  strncpy(((char *)value), attr->vcp, attr->slen);
+              } else{
                    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                        "unknown typekind",
                                        &localrc);
@@ -1638,7 +1826,6 @@
         }
       }  // value
   }
-  //***FIXME*** still no support for char* here
 
   return ESMF_SUCCESS;
 
@@ -1694,12 +1881,8 @@
     if (tk) 
       *tk = attr->tk;
 
-    if (count) {
-     if (attr->tk == ESMC_TYPEKIND_CHARACTER)
-         *count = attr->slen;
-     else
-         *count = attr->items;
-    }
+    if (count)
+      *count = attr->items;
 
     if (value) {
       if (attr->items == 1) {
@@ -1713,7 +1896,10 @@
                   *(ESMC_R8 *)value = attr->vd; 
               else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
                   *(ESMC_Logical *)value = attr->vb;
-              else{
+              else if (attr->tk == ESMC_TYPEKIND_CHARACTER) {
+                  attr->slen = strlen(attr->vcp)+1;
+                  strncpy(((char *)value), attr->vcp, attr->slen);
+              } else{
                   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                        "unknown typekind", 
                                        &localrc);
@@ -1736,6 +1922,11 @@
               } else if (attr->tk == ESMC_TYPEKIND_LOGICAL) {
                   for (i=0; i<attr->items; i++)
                       ((ESMC_Logical *)value)[i] = attr->vbp[i];
+              } else if (attr->tk == ESMC_TYPEKIND_CHARACTER) {
+                  for (i=0; i<attr->items; i++) {
+                      attr->slen = strlen(attr->vcpp[i])+1;
+                      strncpy(((char **)value)[i], attr->vcpp[i], attr->slen);
+                  }
               } else {
                   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                        "unknown typekind", 
@@ -1746,7 +1937,6 @@
     }  // value
   }
   
-  // ***FIXME*** there is no support for char* here
 
   return ESMF_SUCCESS;
 
@@ -1817,7 +2007,8 @@
 
   // simple sanity check
   if ((number < 0) || (number >= attrCount)) {
-      sprintf(msgbuf, "Attribute number must be  0 < N <= %d\n", attrCount-1);
+      sprintf(msgbuf, "Number = %d, attribute number must be  1 < N < %d\n", 
+        number, attrCount);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, NULL);
       return NULL;
   }
@@ -1945,6 +2136,37 @@
 } // end ESMC_AttributeGetItemCount
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeIsPresent"
+//BOPI
+// !IROUTINE:  ESMC_AttributeIsPresent - query for an {\tt ESMC_Attribute}
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_AttributeIsPresent(
+// 
+// !RETURN VALUE:
+//    Value of the present flag.
+// 
+// !ARGUMENTS:
+      char *name,                             // in - Attribute name
+      ESMC_Logical *present) const {         // in/out - the present flag
+// 
+// !DESCRIPTION:
+//     Query for an {\tt ESMC_Attribute} given its name
+//
+//EOPI
+
+  ESMC_Attribute *attr;
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) *present = ESMF_FALSE;
+  else *present = ESMF_TRUE;
+  
+  // return
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeIsPresent
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMC_AttributeSet - set {\tt ESMC_Attribute} on an ESMF type
@@ -1988,6 +2210,7 @@
 
       // if you get here, you found a match.  replace previous copy.
 
+      // FIXME: this should use destroy
       // delete old Attribute, including possibly freeing a list
       attrList[i]->~ESMC_Attribute();
 
@@ -2986,6 +3209,7 @@
 //EOPI
     int loffset, nbytes, chars;
     int localrc;
+    unsigned int i;
     
     // Initialize local return code; assume routine not implemented
     localrc = ESMC_RC_NOT_IMPL;
@@ -3000,7 +3224,7 @@
   loff += s;
 
 #define DESERIALIZE_VAR1D(bufptr,loff,varptr,s,t)  \
-  varptr = new t[s];           \
+  varptr = new t[s]; \
   memcpy(varptr,(bufptr)+(loff),((s)*sizeof(t)));      \
   loff += ((s)*sizeof(t));
 
@@ -3052,6 +3276,14 @@
         DESERIALIZE_VAR1D(buffer,loffset,vdp,items,ESMC_R8);}
       else if (tk == ESMC_TYPEKIND_LOGICAL) {
         DESERIALIZE_VAR1D(buffer,loffset,vbp,items,ESMC_Logical); }
+      else if (tk == ESMC_TYPEKIND_CHARACTER) {
+          vcpp = new char*[items];
+          if (!vcpp) return ESMF_FAILURE;
+          for (i=0; i<items; i++) {
+            DESERIALIZE_VAR(buffer,loffset,chars,int);
+            DESERIALIZE_VAR1D(buffer,loffset,vcpp[i],chars,char); 
+          }
+        }
     }
 
     // make sure loffset is aligned correctly
@@ -3142,6 +3374,7 @@
 //EOPI
     int nbytes;
     int localrc;
+    unsigned int i;
 
     // Define serialization macros
 #define SERIALIZE_VAR(cc,bufptr,loff,var,t) \
@@ -3189,7 +3422,7 @@
           SERIALIZE_VAR(cc,buffer,offset,vb,ESMC_Logical); }
         else if (tk == ESMC_TYPEKIND_CHARACTER) {
           SERIALIZE_VAR(cc,buffer,offset,(strlen(vcp)+1),int);
-          SERIALIZE_VAR1D(cc,buffer,offset,vcp,strlen(vcp)+1,char); }
+          SERIALIZE_VAR1D(cc,buffer,offset,vcp,(strlen(vcp)+1),char); }
       }
       if (items > 1) { 
         if (tk == ESMC_TYPEKIND_I4) {
@@ -3202,6 +3435,12 @@
           SERIALIZE_VAR1D(cc,buffer,offset,vdp,items,ESMC_R8); }
         else if (tk == ESMC_TYPEKIND_LOGICAL) {
           SERIALIZE_VAR1D(cc,buffer,offset,vbp,items,ESMC_Logical); }
+        else if (tk == ESMC_TYPEKIND_CHARACTER) {
+          for (i=0; i<items; i++) {
+            SERIALIZE_VAR(cc,buffer,offset,(strlen(vcpp[i])+1),int);
+            SERIALIZE_VAR1D(cc,buffer,offset,vcpp[i],(strlen(vcpp[i])+1),char); 
+          }
+        }
       }
 
       // make sure offset is aligned correctly

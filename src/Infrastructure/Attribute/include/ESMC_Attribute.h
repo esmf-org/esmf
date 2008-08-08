@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.h,v 1.13 2008/08/01 19:25:01 rokuingh Exp $
+// $Id: ESMC_Attribute.h,v 1.14 2008/08/08 15:26:27 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -90,6 +90,8 @@ class ESMC_Attribute
     ESMC_Attribute *ESMC_AttPackGet(char *convention, char *purpose, char *object) const;
     ESMC_Attribute *ESMC_AttPackGetAttribute(char *name, 
                                              char *convention, char *purpose, char *object) const;
+    int ESMC_AttPackIsPresent(char *name, char *convention, char *purpose, char *object,
+                              ESMC_Logical *present) const;
     int ESMC_AttPackSet(char *name, ESMC_TypeKind tk, int count, void *value, 
                         char *convention, char *purpose, char *object);
     
@@ -102,6 +104,10 @@ class ESMC_Attribute
     // count the number of objects in an attribute hierarchy
     int ESMC_AttributeCountTree(char *convention, 
       char *purpose, char *object, int &ans) const;
+    
+    // destroy an attribute or attpack
+    int ESMC_AttributeDestroy(char *name);
+    int ESMC_AttributeDestroy(char *name, char *convention, char *purpose, char *object);
     
     // attribute methods - get
     int ESMC_AttributeGet(char *name, ESMC_I4 *value) const;
@@ -132,6 +138,9 @@ class ESMC_Attribute
     
     // number of items on an attribute
     int ESMC_AttributeGetItemCount(char *name) const;
+
+    // query for existence of an attribute
+    int ESMC_AttributeIsPresent(char *name, ESMC_Logical *present) const;
 
     // setting when you have an attribute already assembled
     int ESMC_AttributeSet(ESMC_Attribute *attr);
@@ -188,6 +197,8 @@ class ESMC_Attribute
 extern "C" {
   void FTN(c_esmc_attpackcreate)(ESMC_Base **base, char *name, char *convention, char *purpose, 
                                  char *object, int *rc, int nlen, int clen, int plen, int olen);
+  void FTN(c_esmc_attpackdestroy)(ESMC_Base **base, char *name, char *convention, char *purpose,
+                                    char *object, int *rc, int nlen, int clen, int plen, int olen);
   void FTN(c_esmc_attpackgetchar)(ESMC_Base **base, char *name, char *value, 
                                   char *convention, char *purpose, char *object, int *rc, int nlen, 
                                   int vlen, int clen, int plen, int olen);
@@ -198,6 +209,9 @@ extern "C" {
   void FTN(c_esmc_attpackgetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
                                   void *value, char *convention, char *purpose, char *object, 
                                   int *rc, int nlen, int clen, int plen, int olen);
+  void FTN(c_esmc_attpackispresent)(ESMC_Base **base, char *name, char *convention, char *purpose, 
+                                  char *object, ESMC_Logical *present, int *rc, int nlen, 
+                                  int clen, int plen, int olen);
   void FTN(c_esmc_attpacksetchar)(ESMC_Base **base, char *name, char *value, ESMC_TypeKind *tk, 
                                   char *convention, char *purpose, char *object, int *rc, int nlen, 
                                   int vlen, int clen, int plen, int olen);
@@ -215,6 +229,7 @@ extern "C" {
                                   char *object, char *targetobj, int *rc, 
                                   int clen, int plen, int olen, int tlen);
   void FTN(c_esmc_attributecopyall)(ESMC_Base **source, ESMC_Base **destination, int *rc);
+  void FTN(c_esmc_attributedestroy)(ESMC_Base **base, char *name, int *rc, int nlen);
   void FTN(c_esmc_attributegetcount)(ESMC_Base **base, int *count, int *rc);
   void FTN(c_esmc_attributegetinfoname)(ESMC_Base **base, char *name, 
                                         ESMC_TypeKind *tk,
@@ -228,6 +243,8 @@ extern "C" {
   void FTN(c_esmc_attributegetvalue)(ESMC_Base **base, char *name, 
                                     ESMC_TypeKind *tk,
                                     int *count, void *value, int *rc, int nlen);
+  void FTN(c_esmc_attributeispresent)(ESMC_Base **base, char *name, ESMC_Logical *present, 
+                                    int *rc, int nlen);
   void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, 
                                     int *rc, int nlen, int vlen);
   void FTN(c_esmc_attributesetcharlist)(ESMC_Base **base, char *name, ESMC_TypeKind *tk,
