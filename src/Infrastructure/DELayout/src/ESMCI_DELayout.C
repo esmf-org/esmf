@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.1.2.6 2008/05/09 16:45:45 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.1.2.7 2008/08/08 20:28:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.6 2008/05/09 16:45:45 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.7 2008/08/08 20:28:37 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2493,14 +2493,14 @@ int XXE::exec(
       {
         xxeSendnbInfo = (SendnbInfo *)xxeElement;
         vm->send(xxeSendnbInfo->buffer, xxeSendnbInfo->size,
-          xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle);
+          xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle, xxeSendnbInfo->tag);
       }
       break;
     case recvnb:
       {
         xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
         vm->recv(xxeRecvnbInfo->buffer, xxeRecvnbInfo->size,
-          xxeRecvnbInfo->srcPet, xxeRecvnbInfo->commhandle);
+          xxeRecvnbInfo->srcPet, xxeRecvnbInfo->commhandle, xxeRecvnbInfo->tag);
       }
       break;
     case sendnbRRA:
@@ -2509,7 +2509,7 @@ int XXE::exec(
         vm->send(rraList[xxeSendnbRRAInfo->rraIndex]    
           + xxeSendnbRRAInfo->rraOffset,
           xxeSendnbRRAInfo->size, xxeSendnbRRAInfo->dstPet,
-          xxeSendnbRRAInfo->commhandle);
+          xxeSendnbRRAInfo->commhandle, xxeSendnbRRAInfo->tag);
       }
       break;
     case recvnbRRA:
@@ -2518,7 +2518,7 @@ int XXE::exec(
         vm->recv(rraList[xxeRecvnbRRAInfo->rraIndex]
           + xxeRecvnbRRAInfo->rraOffset,
           xxeRecvnbRRAInfo->size, xxeRecvnbRRAInfo->srcPet,
-          xxeRecvnbRRAInfo->commhandle);
+          xxeRecvnbRRAInfo->commhandle, xxeRecvnbRRAInfo->tag);
       }
       break;
     case waitOnIndex:
@@ -3613,6 +3613,7 @@ int XXE::printProfile(
   XxeSubInfo *xxeSubInfo;
   XxeSubMultiInfo *xxeSubMultiInfo;
   WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
+  ProfileMessageInfo *xxeProfileMessageInfo;
   
   for (int i=0; i<count; i++){
     xxeElement = &(stream[i]);
@@ -3638,13 +3639,20 @@ int XXE::printProfile(
         int index = xxeWtimerInfo->actualWtimerIndex;
         if (index == i){
           // this is an actual wtimer element -> print
-          printf("localPet %d - XXE profile wtimer: %s\t"
-            "  id: %d\telement: %d\twtime = %gs\t wtimeSum = %gs\t"
+          printf("localPet %d - XXE profile wtimer - id: %04d  "
+            "element: %04d\t%s\t wtime = %gs\t wtimeSum = %gs\t"
             "sumTermCount: %d\n", 
-            localPet, xxeWtimerInfo->timerString, xxeWtimerInfo->timerId, i,
+            localPet, xxeWtimerInfo->timerId, i, xxeWtimerInfo->timerString,
             xxeWtimerInfo->wtime, xxeWtimerInfo->wtimeSum,
             xxeWtimerInfo->sumTermCount);
         }
+      }
+      break;
+    case profileMessage:
+      {
+        xxeProfileMessageInfo = (ProfileMessageInfo *)xxeElement;
+        printf("localPet %d - XXE profileMessage: %s\n",
+          localPet, xxeProfileMessageInfo->messageString);
       }
       break;
     default:
@@ -4881,5 +4889,756 @@ int XXE::incXxeSubCount(
   return rc;
 }
 //-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendStorage()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendStorage
+//
+// !INTERFACE:
+int XXE::appendStorage(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  char *storageArg
+  ){
+//
+// !DESCRIPTION:
+//  Append a storage at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  storage[storageCount] = storageArg;
+  localrc = incStorageCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendCommhandle()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendCommhandle
+//
+// !INTERFACE:
+int XXE::appendCommhandle(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  VMK::commhandle **commhandleArg
+  ){
+//
+// !DESCRIPTION:
+//  Append a commhandle at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  commhandle[commhandleCount] = commhandleArg;
+  localrc = incCommhandleCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendXxeSub()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendXxeSub
+//
+// !INTERFACE:
+int XXE::appendXxeSub(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  XXE *xxeSub
+  ){
+//
+// !DESCRIPTION:
+//  Append an xxeSub at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  xxeSubList[xxeSubCount] = xxeSub;
+  localrc = incXxeSubCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendWtimer()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendWtimer
+//
+// !INTERFACE:
+int XXE::appendWtimer(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  char *string,
+  int id,
+  int actualId,
+  int relativeId,
+  XXE *relativeXXE
+  ){
+//
+// !DESCRIPTION:
+//  Append a wtimer element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = wtimer;
+  stream[count].predicateBitField = predicateBitField;
+  WtimerInfo *xxeWtimerInfo = (WtimerInfo *)&(stream[count]);
+  xxeWtimerInfo->timerId = id;
+  int stringLen = strlen(string);
+  xxeWtimerInfo->timerString = new char[stringLen+1];
+  strcpy(xxeWtimerInfo->timerString, string);
+  xxeWtimerInfo->actualWtimerId = actualId;
+  xxeWtimerInfo->relativeWtimerId = relativeId;
+  xxeWtimerInfo->relativeWtimerXXE = relativeXXE;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of strings for xxe garbage collection
+  localrc = appendStorage(xxeWtimerInfo->timerString);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendRecvnb()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendRecvnb
+//
+// !INTERFACE:
+int XXE::appendRecvnb(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  void *buffer,
+  int size,
+  int srcPet,
+  int tag
+  ){
+//
+// !DESCRIPTION:
+//  Append a recvnb element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = recvnb;
+  stream[count].predicateBitField = predicateBitField;
+  RecvnbInfo *xxeRecvnbInfo = (RecvnbInfo *)&(stream[count]);
+  xxeRecvnbInfo->buffer = buffer;
+  xxeRecvnbInfo->size = size;
+  xxeRecvnbInfo->srcPet = srcPet;
+  xxeRecvnbInfo->tag = tag;
+  xxeRecvnbInfo->commhandle = new VMK::commhandle*;
+  *(xxeRecvnbInfo->commhandle) = new VMK::commhandle;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of commhandles for xxe garbage collection
+  localrc = appendCommhandle(xxeRecvnbInfo->commhandle);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendSendnb()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendSendnb
+//
+// !INTERFACE:
+int XXE::appendSendnb(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  void *buffer,
+  int size,
+  int dstPet,
+  int tag
+  ){
+//
+// !DESCRIPTION:
+//  Append a sendnb element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = sendnb;
+  stream[count].predicateBitField = predicateBitField;
+  SendnbInfo *xxeSendnbInfo = (SendnbInfo *)&(stream[count]);
+  xxeSendnbInfo->buffer = buffer;
+  xxeSendnbInfo->size = size;
+  xxeSendnbInfo->dstPet = dstPet;
+  xxeSendnbInfo->tag = tag;
+  xxeSendnbInfo->commhandle = new VMK::commhandle*;
+  *(xxeSendnbInfo->commhandle) = new VMK::commhandle;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of commhandles for xxe garbage collection
+  localrc = appendCommhandle(xxeSendnbInfo->commhandle);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendSendnbRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendSendnbRRA
+//
+// !INTERFACE:
+int XXE::appendSendnbRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  int rraOffset,
+  int size,
+  int dstPet,
+  int rraIndex,
+  int tag
+  ){
+//
+// !DESCRIPTION:
+//  Append a sendnbRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = sendnbRRA;
+  stream[count].predicateBitField = predicateBitField;
+  SendnbRRAInfo *xxeSendnbRRAInfo = (SendnbRRAInfo *)&(stream[count]);
+  xxeSendnbRRAInfo->rraOffset = rraOffset;
+  xxeSendnbRRAInfo->size = size;
+  xxeSendnbRRAInfo->dstPet = dstPet;
+  xxeSendnbRRAInfo->rraIndex = rraIndex;
+  xxeSendnbRRAInfo->tag = tag;
+  xxeSendnbRRAInfo->commhandle = new VMK::commhandle*;
+  *(xxeSendnbRRAInfo->commhandle) = new VMK::commhandle;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of commhandles for xxe garbage collection
+  localrc = appendCommhandle(xxeSendnbRRAInfo->commhandle);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendMemCpySrcRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendMemCpySrcRRA
+//
+// !INTERFACE:
+int XXE::appendMemCpySrcRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  int rraOffset,
+  int size,
+  void *dstMem,
+  int rraIndex
+  ){
+//
+// !DESCRIPTION:
+//  Append a memCpySrcRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = memCpySrcRRA;
+  stream[count].predicateBitField = predicateBitField;
+  MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo = (MemCpySrcRRAInfo *)&(stream[count]);
+  xxeMemCpySrcRRAInfo->rraOffset = rraOffset;
+  xxeMemCpySrcRRAInfo->size = size;
+  xxeMemCpySrcRRAInfo->dstMem = dstMem;
+  xxeMemCpySrcRRAInfo->rraIndex = rraIndex;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendMemGatherSrcRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendMemGatherSrcRRA
+//
+// !INTERFACE:
+int XXE::appendMemGatherSrcRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  void *dstBase,
+  TKId dstBaseTK,
+  int rraIndex,
+  int chunkCount
+  ){
+//
+// !DESCRIPTION:
+//  Append a memGatherSrcRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = memGatherSrcRRA;
+  stream[count].predicateBitField = predicateBitField;
+  MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo =
+    (MemGatherSrcRRAInfo *)&(stream[count]);
+  xxeMemGatherSrcRRAInfo->dstBase = dstBase;
+  xxeMemGatherSrcRRAInfo->dstBaseTK = dstBaseTK;
+  xxeMemGatherSrcRRAInfo->rraIndex = rraIndex;
+  xxeMemGatherSrcRRAInfo->chunkCount = chunkCount;
+  char *rraOffsetListChar = new char[chunkCount*sizeof(int)];
+  xxeMemGatherSrcRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
+  char *countListChar = new char[chunkCount*sizeof(int)];
+  xxeMemGatherSrcRRAInfo->countList = (int *)countListChar;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of allocations for xxe garbage collection
+  localrc = appendStorage(rraOffsetListChar);  // for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  localrc = appendStorage(countListChar);  // for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendZeroSuperScalarRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendZeroSuperScalarRRA
+//
+// !INTERFACE:
+int XXE::appendZeroSuperScalarRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  TKId elementTK,
+  int termCount,
+  int rraIndex
+  ){
+//
+// !DESCRIPTION:
+//  Append a zeroSuperScalarRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = zeroSuperScalarRRA;
+  stream[count].predicateBitField = predicateBitField;
+  ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo =
+    (ZeroSuperScalarRRAInfo *)&(stream[count]);
+  xxeZeroSuperScalarRRAInfo->elementTK = elementTK;
+  char *rraOffsetListChar = new char[termCount*sizeof(int)];
+  xxeZeroSuperScalarRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
+  xxeZeroSuperScalarRRAInfo->rraIndex = rraIndex;
+  xxeZeroSuperScalarRRAInfo->termCount = termCount;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of allocations for xxe garbage collection
+  localrc = appendStorage(rraOffsetListChar);  // for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendProductSumScalarRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendProductSumScalarRRA
+//
+// !INTERFACE:
+int XXE::appendProductSumScalarRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  TKId elementTK,
+  TKId valueTK,
+  TKId factorTK,
+  int rraOffset,
+  void *factor,
+  void *value,
+  int rraIndex
+  ){
+//
+// !DESCRIPTION:
+//  Append a productSumScalarRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = productSumScalarRRA;
+  stream[count].predicateBitField = predicateBitField;
+  ProductSumScalarRRAInfo *xxeProductSumScalarRRAInfo =
+    (ProductSumScalarRRAInfo *)&(stream[count]);
+  xxeProductSumScalarRRAInfo->elementTK = elementTK;
+  xxeProductSumScalarRRAInfo->valueTK = valueTK;
+  xxeProductSumScalarRRAInfo->factorTK = factorTK;
+  xxeProductSumScalarRRAInfo->rraOffset = rraOffset;
+  xxeProductSumScalarRRAInfo->factor = factor;
+  xxeProductSumScalarRRAInfo->value = value;
+  xxeProductSumScalarRRAInfo->rraIndex = rraIndex;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendProductSumSuperScalarRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendProductSumSuperScalarRRA
+//
+// !INTERFACE:
+int XXE::appendProductSumSuperScalarRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  TKId elementTK,
+  TKId valueTK,
+  TKId factorTK,
+  int rraIndex,
+  int termCount
+  ){
+//
+// !DESCRIPTION:
+//  Append a productSumSuperScalarRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = productSumSuperScalarRRA;
+  stream[count].predicateBitField = predicateBitField;
+  ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo =
+    (ProductSumSuperScalarRRAInfo *)&(stream[count]);
+  xxeProductSumSuperScalarRRAInfo->elementTK = elementTK;
+  xxeProductSumSuperScalarRRAInfo->valueTK = valueTK;
+  xxeProductSumSuperScalarRRAInfo->factorTK = factorTK;
+  xxeProductSumSuperScalarRRAInfo->rraIndex = rraIndex;
+  xxeProductSumSuperScalarRRAInfo->termCount = termCount;
+  char *rraOffsetListChar = new char[termCount*sizeof(int)];
+  xxeProductSumSuperScalarRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
+  char *factorListChar = new char[termCount*sizeof(void *)];
+  xxeProductSumSuperScalarRRAInfo->factorList = (void **)factorListChar;
+  char *valueListChar = new char[termCount*sizeof(void *)];
+  xxeProductSumSuperScalarRRAInfo->valueList = (void **)valueListChar;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of allocations for xxe garbage collection
+  localrc = appendStorage(rraOffsetListChar);// for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  localrc = appendStorage(factorListChar);// for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  localrc = appendStorage(valueListChar);// for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendWaitOnAnyIndexSub()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendWaitOnAnyIndexSub
+//
+// !INTERFACE:
+int XXE::appendWaitOnAnyIndexSub(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  int countArg
+  ){
+//
+// !DESCRIPTION:
+//  Append a waitOnAnyIndexSub element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = waitOnAnyIndexSub;
+  stream[count].predicateBitField = predicateBitField;
+  WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo =
+    (WaitOnAnyIndexSubInfo *)&(stream[count]);
+  xxeWaitOnAnyIndexSubInfo->count = countArg;
+  char *xxeChar = new char[countArg*sizeof(XXE *)];
+  xxeWaitOnAnyIndexSubInfo->xxe = (XXE **)xxeChar;
+  char *indexChar = new char[countArg*sizeof(int)];
+  xxeWaitOnAnyIndexSubInfo->index = (int *)indexChar;
+  char *completeFlagChar = new char[countArg*sizeof(int)];
+  xxeWaitOnAnyIndexSubInfo->completeFlag = (int *)completeFlagChar;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of allocations for xxe garbage collection
+  localrc = appendStorage(xxeChar);  // for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  localrc = appendStorage(indexChar);  // for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  localrc = appendStorage(completeFlagChar);  // for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendWaitOnAllSendnb()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendWaitOnAllSendnb
+//
+// !INTERFACE:
+int XXE::appendWaitOnAllSendnb(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField
+  ){
+//
+// !DESCRIPTION:
+//  Append a waitOnAllSendnb element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = waitOnAllSendnb;
+  stream[count].predicateBitField = predicateBitField;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendProfileMessage()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendProfileMessage
+//
+// !INTERFACE:
+int XXE::appendProfileMessage(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  char *messageString
+  ){
+//
+// !DESCRIPTION:
+//  Append a profileMessage element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = profileMessage;
+  stream[count].predicateBitField = predicateBitField;
+  ProfileMessageInfo *xxeProfileMessageInfo =
+    (ProfileMessageInfo *)&(stream[count]);
+  int stringLen = strlen(messageString);
+  xxeProfileMessageInfo->messageString = new char[stringLen+1];
+  strcpy(xxeProfileMessageInfo->messageString, messageString);
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of strings for xxe garbage collection
+  localrc = appendStorage(xxeProfileMessageInfo->messageString);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
 
 } // namespace ESMCI

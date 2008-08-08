@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.24 2008/08/05 18:22:12 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.25 2008/08/08 20:28:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.24 2008/08/05 18:22:12 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.25 2008/08/08 20:28:37 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -6738,32 +6738,69 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo;
   XXE::WtimerInfo *xxeWtimerInfo;
   XXE::WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
+  XXE::TKId elementTK;
+  switch (typekindDst){
+  case ESMC_TYPEKIND_R4:
+    elementTK = XXE::R4;
+    break;
+  case ESMC_TYPEKIND_R8:
+    elementTK = XXE::R8;
+    break;
+  case ESMC_TYPEKIND_I4:
+    elementTK = XXE::I4;
+    break;
+  case ESMC_TYPEKIND_I8:
+    elementTK = XXE::I8;
+    break;
+  default:
+    break;
+  }
+  XXE::TKId valueTK;
+  switch (typekindSrc){
+  case ESMC_TYPEKIND_R4:
+    valueTK = XXE::R4;
+    break;
+  case ESMC_TYPEKIND_R8:
+    valueTK = XXE::R8;
+    break;
+  case ESMC_TYPEKIND_I4:
+    valueTK = XXE::I4;
+    break;
+  case ESMC_TYPEKIND_I8:
+    valueTK = XXE::I8;
+    break;
+  default:
+    break;
+  }
+  XXE::TKId factorTK;
+  switch (typekindFactors){
+  case ESMC_TYPEKIND_R4:
+    factorTK = XXE::R4;
+    break;
+  case ESMC_TYPEKIND_R8:
+    factorTK = XXE::R8;
+    break;
+  case ESMC_TYPEKIND_I4:
+    factorTK = XXE::I4;
+    break;
+  case ESMC_TYPEKIND_I8:
+    factorTK = XXE::I8;
+    break;
+  default:
+    break;
+  }
+  
     
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t8);   //gjt - profile
 #endif
     
 #define ASMMPROFILE___disable
+#define ASMMPROFILE
 #ifdef ASMMPROFILE
-  // <XXE profiling element>
-  xxe->stream[xxe->count].opId = XXE::wtimer;
-  xxe->stream[xxe->count].predicateBitField = 0x0;
-  xxeElement = &(xxe->stream[xxe->count]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = 0;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer 0");
-  xxeWtimerInfo->actualWtimerId = 0;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  xxeWtimerInfo->relativeWtimerXXE = NULL;
-  localrc = xxe->incCount();
+  localrc = xxe->appendWtimer(0x0, "Wtimer 0", 0, 0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  localrc = xxe->incStorageCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-  // </XXE profiling element>
 #endif
   
   // prepare arrays used in recvnb loop _and_ +=* loop
@@ -6848,8 +6885,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     dstInfoTable[j] = new DstInfo*[diffPartnerDeCount[j]];
     int *dstInfoTableInit = new int[diffPartnerDeCount[j]];
     localDeFactorList[j] = new char[localDeFactorCount * dataSizeFactors];
-    xxe->storage[xxe->storageCount] = localDeFactorList[j]; // xxe garb. coll.
-    localrc = xxe->incStorageCount();
+    localrc = xxe->appendStorage(localDeFactorList[j]); // for xxe garb. coll.
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     for (int i=0; i<diffPartnerDeCount[j]; i++){
@@ -6904,27 +6940,17 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 #endif
         
 #ifdef ASMMPROFILE
-    // <XXE profiling element>
-    xxe->stream[xxe->count].opId = XXE::wtimer;
-    xxe->stream[xxe->count].predicateBitField = 0x0;
-    xxeElement = &(xxe->stream[xxe->count]);
-    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-    xxeWtimerInfo->timerId = xxe->count;
-    xxeWtimerInfo->timerString = new char[80];
-    strcpy(xxeWtimerInfo->timerString, "Wt: recnbL");
-    xxeWtimerInfo->actualWtimerId = xxe->count;
-    xxeWtimerInfo->relativeWtimerId = 0;
-    xxeWtimerInfo->relativeWtimerXXE = NULL;
-    localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    localrc = xxe->incStorageCount();
+    localrc = xxe->appendWtimer(0x0, "Wt: recnbL", xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
-    // </XXE profiling element>
 #endif
-        
+    
+#ifdef ASMMPROFILE
+    char *recvMessageString = new char[10000];
+    recvMessageString[0] = '\0'; // prime
+    char *message = new char[100];
+#endif
+            
     // construct recv pattern and fill in corresponding XXE StreamElements
     recvnbIndex[j] = new int[diffPartnerDeCount[j]];
     buffer[j] = new char*[diffPartnerDeCount[j]];
@@ -6932,8 +6958,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       // fill in XXE StreamElements for dstArray side
       // large contiguous 1st level receive buffer
       buffer[j][i] = new char[partnerDeCount[j][i] * dataSizeSrc];
-      xxe->storage[xxe->storageCount] = buffer[j][i]; // xxe garbage collection
-      localrc = xxe->incStorageCount();
+      localrc = xxe->appendStorage(buffer[j][i]); // for xxe garb. coll.
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       int srcDe = partnerDeList[i];
@@ -6943,45 +6968,30 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       printf("gjt: XXE::recvnb on localPet %d from Pet %d\n", localPet, srcPet);
 #endif
       recvnbIndex[j][i] = xxe->count;  // need index for the associated wait
-      xxe->stream[xxe->count].opId = XXE::recvnb;
-      xxe->stream[xxe->count].predicateBitField = 0x0;
-      xxeElement = &(xxe->stream[xxe->count]);
-      xxeRecvnbInfo = (XXE::RecvnbInfo *)xxeElement;
-      xxeRecvnbInfo->buffer = buffer[j][i];
-      xxeRecvnbInfo->size = partnerDeCount[j][i] * dataSizeSrc;
-      xxeRecvnbInfo->srcPet = srcPet;
-      xxeRecvnbInfo->commhandle = new VMK::commhandle*;
-      *(xxeRecvnbInfo->commhandle) = new VMK::commhandle;
-      localrc = xxe->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+      int dstDe = dstLocalDeList[j];
+      localrc = xxe->appendRecvnb(0x0, buffer[j][i],
+        partnerDeCount[j][i] * dataSizeSrc, srcPet, dstDe);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
-      // keep track of commhandles for xxe garbage collection
-      xxe->commhandle[xxe->commhandleCount] = xxeRecvnbInfo->commhandle;
-      localrc = xxe->incCommhandleCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-    } // for i - diffPartnerDeCount[j]
-        
 #ifdef ASMMPROFILE
-    // <XXE profiling element>
-    xxe->stream[xxe->count].opId = XXE::wtimer;
-    xxe->stream[xxe->count].predicateBitField = 0x0;
-    xxeElement = &(xxe->stream[xxe->count]);
-    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-    xxeWtimerInfo->timerId = xxe->count;
-    xxeWtimerInfo->timerString = new char[80];
-    strcpy(xxeWtimerInfo->timerString, "Wt: /recnbL");
-    xxeWtimerInfo->actualWtimerId = xxe->count;
-    xxeWtimerInfo->relativeWtimerId = 0;
-    xxeWtimerInfo->relativeWtimerXXE = NULL;
-    localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    localrc = xxe->incStorageCount();
+      sprintf(message, "<(%04d/%04d)-Rnb-(%04d/%04d)> ", srcDe, srcPet,
+        dstDe, localPet);
+      strcat(recvMessageString, message);
+#endif      
+    } // for i - diffPartnerDeCount[j]
+    
+#ifdef ASMMPROFILE
+    localrc = xxe->appendProfileMessage(0x0, recvMessageString);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
-    // </XXE profiling element>
+    delete [] recvMessageString;
+    delete [] message;
+#endif      
+        
+#ifdef ASMMPROFILE
+    localrc = xxe->appendWtimer(0x0, "Wt: /recnbL", xxe->count, xxe->count);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
 #endif
         
     // garbage collection
@@ -7098,25 +7108,9 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 #endif
     
 #ifdef ASMMPROFILE
-    // <XXE profiling element>
-    xxe->stream[xxe->count].opId = XXE::wtimer;
-    xxe->stream[xxe->count].predicateBitField = 0x0;
-    xxeElement = &(xxe->stream[xxe->count]);
-    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-    xxeWtimerInfo->timerId = xxe->count;
-    xxeWtimerInfo->timerString = new char[80];
-    strcpy(xxeWtimerInfo->timerString, "Wt: sendnbL");
-    xxeWtimerInfo->actualWtimerId = xxe->count;
-    xxeWtimerInfo->relativeWtimerId = 0;
-    xxeWtimerInfo->relativeWtimerXXE = NULL;
-    localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    localrc = xxe->incStorageCount();
+    localrc = xxe->appendWtimer(0x0, "Wt: sendnbL", xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
-    // </XXE profiling element>
 #endif
     
     // construct send pattern and fill in corresponding XXE StreamElements    
@@ -7124,6 +7118,13 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       int linIndex;
       int linIndexCount;
     };
+    
+#ifdef ASMMPROFILE
+    char *sendMessageString = new char[10000];
+    sendMessageString[0] = '\0'; // prime
+    char *message = new char[100];
+#endif
+            
     for (int i=0; i<diffPartnerDeCount; i++){
       // determine contiguous runs in linIndex to minimize memcpy overhead
       LinIndexContigBlock *linIndexContigBlockList =
@@ -7148,6 +7149,13 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       int dstDe = partnerDeList[i];
       int dstPet;   //TODO: DE-based comms
       dstArray->delayout->getDEMatchPET(dstDe, *vm, NULL, &dstPet, 1);
+      
+#ifdef ASMMPROFILE
+      sprintf(message, "<(%04d/%04d)-Snb-(%04d/%04d)> ", srcLocalDeList[j],
+        localPet, dstDe, dstPet);
+      strcat(sendMessageString, message);
+#endif      
+      
 #ifdef ASMMSTOREPRINT
       printf("gjt: XXE::sendnb from localPet %d to Pet %d\n", localPet, dstPet);
 #endif
@@ -7157,93 +7165,47 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         printf("gjt: single contiguous linIndex run in srcArray\n");
 #endif
         // sendnbRRA out of single contiguous linIndex run
-        xxe->stream[xxe->count].opId = XXE::sendnbRRA;
-        xxe->stream[xxe->count].predicateBitField = 0x0;
-        xxeElement = &(xxe->stream[xxe->count]);
-        xxeSendnbRRAInfo = (XXE::SendnbRRAInfo *)xxeElement;
-        xxeSendnbRRAInfo->rraOffset =
-          linIndexContigBlockList[0].linIndex * dataSizeSrc;
-        xxeSendnbRRAInfo->size = partnerDeCount[i] * dataSizeSrc;
-        xxeSendnbRRAInfo->dstPet = dstPet;
-        xxeSendnbRRAInfo->rraIndex = j; // localDe index into srcArray
+        localrc = xxe->appendSendnbRRA(0x0, linIndexContigBlockList[0].linIndex
+          * dataSizeSrc, partnerDeCount[i] * dataSizeSrc, dstPet, j, dstDe);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
       }else{
 #ifdef ASMMSTOREPRINT
         printf("gjt: non-contiguous linIndex in srcArray -> need buffer \n");
 #endif
-        // need intermediate buffer and memCpySrcRRAs
+        // need intermediate buffer
         char *buffer = new char[partnerDeCount[i] * dataSizeSrc];
-        xxe->storage[xxe->storageCount] = buffer; // for xxe garbage collection
-        localrc = xxe->incStorageCount();
+        localrc = xxe->appendStorage(buffer); // for xxe garbage collection
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
 #define USEmemCpySrcRRA___disable
 #ifdef USEmemCpySrcRRA
-        char *bufferPointer = buffer;
+        // memCpySrcRRA pieces into intermediate buffer
+        char *bufferPointer = buffer; // starting position
         for (int k=0; k<count; k++){
+          int rraOffset = linIndexContigBlockList[k].linIndex * dataSizeSrc;
           int byteCount = linIndexContigBlockList[k].linIndexCount
             * dataSizeSrc;
-          // memCpySrcRRA pieces into intermediate buffer
-          xxe->stream[xxe->count].opId = XXE::memCpySrcRRA;
-          xxe->stream[xxe->count].predicateBitField = 0x0;
-          xxeElement = &(xxe->stream[xxe->count]);
-          xxeMemCpySrcRRAInfo = (XXE::MemCpySrcRRAInfo *)xxeElement;
-          xxeMemCpySrcRRAInfo->dstMem = bufferPointer;
-          xxeMemCpySrcRRAInfo->rraOffset =
-            (linIndexContigBlockList[k].linIndex * dataSizeSrc);
-          xxeMemCpySrcRRAInfo->size = byteCount;
-          xxeMemCpySrcRRAInfo->rraIndex = j; // localDe index into srcArray
-          localrc = xxe->incCount();
+          localrc = xxe->appendMemCpySrcRRA(0x0, rraOffset, byteCount,
+            bufferPointer, j);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
             ESMF_ERR_PASSTHRU, &rc)) return rc;
           bufferPointer += byteCount;
         }
 #else
         // memGatherSrcRRA pieces into intermediate buffer
-        xxe->stream[xxe->count].opId = XXE::memGatherSrcRRA;
-        xxe->stream[xxe->count].predicateBitField = 0x0;
-        xxeElement = &(xxe->stream[xxe->count]);
-        xxeMemGatherSrcRRAInfo = (XXE::MemGatherSrcRRAInfo *)xxeElement;
-        xxeMemGatherSrcRRAInfo->dstBase = buffer;
-        xxeMemGatherSrcRRAInfo->rraIndex = j; // localDe index into srcArray
-        xxeMemGatherSrcRRAInfo->chunkCount = count;
-        char *rraOffsetListChar = new char[count*sizeof(int)];
-        int *rraOffsetList = (int *)rraOffsetListChar;
-        xxeMemGatherSrcRRAInfo->rraOffsetList = rraOffsetList;
-        xxe->storage[xxe->storageCount] = rraOffsetListChar; // f xxe garb coll.
-        localrc = xxe->incStorageCount();
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
-        char *countListChar = new char[count*sizeof(int)];
-        int *countList = (int *)countListChar;
-        xxeMemGatherSrcRRAInfo->countList = countList;
-        xxe->storage[xxe->storageCount] = countListChar; // for xxe garb coll.
-        localrc = xxe->incStorageCount();
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
         int xxeIndex = xxe->count;  // need this beyond the increment
-        localrc = xxe->incCount();
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        localrc = xxe->appendMemGatherSrcRRA(0x0, buffer, valueTK, j, count);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
+        xxeElement = &(xxe->stream[xxeIndex]);
+        xxeMemGatherSrcRRAInfo = (XXE::MemGatherSrcRRAInfo *)xxeElement;
         // try typekind specific memGatherSrcRRA
-        switch (typekindSrc){
-        case ESMC_TYPEKIND_R4:
-          xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::R4;
-          break;
-        case ESMC_TYPEKIND_R8:
-          xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::R8;
-          break;
-        case ESMC_TYPEKIND_I4:
-          xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::I4;
-          break;
-        case ESMC_TYPEKIND_I8:
-          xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::I8;
-          break;
-        default:
-          break;
-        }
         for (int k=0; k<count; k++){
-          rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSizeSrc;
-          countList[k] = linIndexContigBlockList[k].linIndexCount;
+          xxeMemGatherSrcRRAInfo->rraOffsetList[k] =
+            linIndexContigBlockList[k].linIndex * dataSizeSrc;
+          xxeMemGatherSrcRRAInfo->countList[k] =
+            linIndexContigBlockList[k].linIndexCount;
         }
         double dt_tk;
         localrc = xxe->exec(rraCount, rraList, 0x0, &dt_tk, xxeIndex, xxeIndex);
@@ -7252,76 +7214,46 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         // try byte option for memGatherSrcRRA
         xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::BYTE;
         for (int k=0; k<count; k++){
-          rraOffsetList[k] = linIndexContigBlockList[k].linIndex * dataSizeSrc;
-          countList[k] = linIndexContigBlockList[k].linIndexCount * dataSizeSrc;
+          xxeMemGatherSrcRRAInfo->countList[k] =
+            linIndexContigBlockList[k].linIndexCount * dataSizeSrc;
         }
         double dt_byte;
         localrc = xxe->exec(rraCount, rraList, 0x0, &dt_byte, xxeIndex, 
           xxeIndex);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
-#if 0        
+#if 0
 printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
   " dt_byte=%g s for count=%d\n", localPet, dt_tk, dt_byte, count);
 #endif
         // decide for the fastest option
         if (dt_byte < dt_tk){
           // use byte option for memGatherSrcRRA
-          xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::BYTE;
-          for (int k=0; k<count; k++){
-            rraOffsetList[k] = linIndexContigBlockList[k].linIndex
-              * dataSizeSrc;
-            countList[k] = linIndexContigBlockList[k].linIndexCount
-              * dataSizeSrc;
-          }
+          // -> nothing to do because this was the last mode tested
         }else{
           // use typekind specific memGatherSrcRRA
-          switch (typekindSrc){
-          case ESMC_TYPEKIND_R4:
-            xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::R4;
-            break;
-          case ESMC_TYPEKIND_R8:
-            xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::R8;
-            break;
-          case ESMC_TYPEKIND_I4:
-            xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::I4;
-            break;
-          case ESMC_TYPEKIND_I8:
-            xxeMemGatherSrcRRAInfo->dstBaseTK = XXE::I8;
-            break;
-          default:
-            break;
-          }
+          xxeMemGatherSrcRRAInfo->dstBaseTK = valueTK;
           for (int k=0; k<count; k++){
-            rraOffsetList[k] = linIndexContigBlockList[k].linIndex
-              * dataSizeSrc;
-            countList[k] = linIndexContigBlockList[k].linIndexCount;
+            xxeMemGatherSrcRRAInfo->countList[k] =
+              linIndexContigBlockList[k].linIndexCount;
           }
         }
 #endif
         // sendnb out of contiguous intermediate buffer
-        xxe->stream[xxe->count].opId = XXE::sendnb;
-        xxe->stream[xxe->count].predicateBitField = 0x0;
-        xxeElement = &(xxe->stream[xxe->count]);
-        xxeSendnbInfo = (XXE::SendnbInfo *)xxeElement;
-        xxeSendnbInfo->buffer = buffer;
-        xxeSendnbInfo->size = partnerDeCount[i] * dataSizeSrc;
-        xxeSendnbInfo->dstPet = dstPet;
+        localrc = xxe->appendSendnb(0x0, buffer, partnerDeCount[i]
+          * dataSizeSrc, dstPet, dstDe);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+          ESMF_ERR_PASSTHRU, &rc)) return rc;
       }
-      // add commhandle to last xxe element (sendnbRRA or sendnb) and keep track
-      // of commhandle for xxe garbage collection
-      xxeCommhandleInfo = (XXE::CommhandleInfo *)xxeElement;
-      xxeCommhandleInfo->commhandle = new VMK::commhandle*;
-      *(xxeCommhandleInfo->commhandle) = new VMK::commhandle;
-      xxe->commhandle[xxe->commhandleCount] = xxeCommhandleInfo->commhandle;
-      localrc = xxe->incCommhandleCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-      localrc = xxe->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
       delete [] linIndexContigBlockList;
     } // for i - diffPartnerDeCount
+#ifdef ASMMPROFILE
+    localrc = xxe->appendProfileMessage(0x0, sendMessageString);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+    delete [] sendMessageString;
+    delete [] message;
+#endif      
     // garbage collection
     delete [] index2Ref;
     delete [] index2Ref2;
@@ -7336,181 +7268,70 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     delete [] srcInfoTableInit;
     
 #ifdef ASMMPROFILE
-    // <XXE profiling element>
-    xxe->stream[xxe->count].opId = XXE::wtimer;
-    xxe->stream[xxe->count].predicateBitField = 0x0;
-    xxeElement = &(xxe->stream[xxe->count]);
-    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-    xxeWtimerInfo->timerId = xxe->count;
-    xxeWtimerInfo->timerString = new char[80];
-    strcpy(xxeWtimerInfo->timerString, "Wt: /sendnbL");
-    xxeWtimerInfo->actualWtimerId = xxe->count;
-    xxeWtimerInfo->relativeWtimerId = 0;
-    xxeWtimerInfo->relativeWtimerXXE = NULL;
-    localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    localrc = xxe->incStorageCount();
+    localrc = xxe->appendWtimer(0x0, "Wt: /sendnbL", xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
-    // </XXE profiling element>
 #endif
         
   } // for j - srcLocalDeCount
 
-  
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t9);   //gjt - profile
 #endif
   
-  
   // use recv pattern for all localDEs in dstArray and issue XXE::"zero"
   for (int j=0; j<dstLocalDeCount; j++){
 #ifdef ASMMPROFILE
-    // <XXE profiling element>
-    xxe->stream[xxe->count].opId = XXE::wtimer;
-    xxe->stream[xxe->count].predicateBitField = 0x1;
-    xxeElement = &(xxe->stream[xxe->count]);
-    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-    xxeWtimerInfo->timerId = xxe->count;
-    xxeWtimerInfo->timerString = new char[80];
-    strcpy(xxeWtimerInfo->timerString, "Wt: zero");
-    xxeWtimerInfo->actualWtimerId = xxe->count;
-    xxeWtimerInfo->relativeWtimerId = 0;
-    xxeWtimerInfo->relativeWtimerXXE = NULL;
-    localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    localrc = xxe->incStorageCount();
+    localrc = xxe->appendWtimer(0x1, "Wt: zero", xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
-    // </XXE profiling element>
 #endif
-  
-    //TODO:: move the k-loop to the inside of zeroSuperScalarRRA setup
-    
+    int rraIndex = srcLocalDeCount + j; // localDe index into dstArray shifted 
+                                        // by srcArray localDeCount
+    int totalTermCount = 0; // prime
+    for (int k=0; k<diffPartnerDeCount[j]; k++)
+      totalTermCount += partnerDeCount[j][k];
+    int xxeIndex = xxe->count;  // need this beyond the increment
+    localrc = xxe->appendZeroSuperScalarRRA(0x1, elementTK, totalTermCount,
+      rraIndex);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+    xxeElement = &(xxe->stream[xxeIndex]);
+    xxeZeroSuperScalarRRAInfo = (XXE::ZeroSuperScalarRRAInfo *)xxeElement;
+    int kkk=0;  // prime
     for (int k=0; k<diffPartnerDeCount[j]; k++){
-      
-      xxe->stream[xxe->count].opId = XXE::zeroSuperScalarRRA;
-      xxe->stream[xxe->count].predicateBitField = 0x1;
-      xxeElement = &(xxe->stream[xxe->count]);
-      localrc = xxe->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-      xxeZeroSuperScalarRRAInfo =
-        (XXE::ZeroSuperScalarRRAInfo *)xxeElement;
-      switch (typekindDst){
-      case ESMC_TYPEKIND_R4:
-        xxeZeroSuperScalarRRAInfo->elementTK = XXE::R4;
-        break;
-      case ESMC_TYPEKIND_R8:
-        xxeZeroSuperScalarRRAInfo->elementTK = XXE::R8;
-        break;
-      case ESMC_TYPEKIND_I4:
-        xxeZeroSuperScalarRRAInfo->elementTK = XXE::I4;
-        break;
-      case ESMC_TYPEKIND_I8:
-        xxeZeroSuperScalarRRAInfo->elementTK = XXE::I8;
-        break;
-      default:
-        break;
-      }
-      xxeZeroSuperScalarRRAInfo->rraIndex = srcLocalDeCount
-        + j; // localDe index into dstArray shifted by srcArray localDeCount
       int termCount = partnerDeCount[j][k];
-      xxeZeroSuperScalarRRAInfo->termCount = termCount;
-      char *rraOffsetListChar = new char[termCount*sizeof(int)];
-      int *rraOffsetList = (int *)rraOffsetListChar;
-      xxeZeroSuperScalarRRAInfo->rraOffsetList = rraOffsetList;
-      xxe->storage[xxe->storageCount] = rraOffsetListChar; // garb coll.
-      localrc = xxe->incStorageCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-      
+      // fill rraOffsetList[]
       for (int kk=0; kk<termCount; kk++){
         DstInfo *dstInfo = &(dstInfoTable[j][k][kk]);
-        rraOffsetList[kk] = dstInfo->linIndex;
+        xxeZeroSuperScalarRRAInfo->rraOffsetList[kkk] = dstInfo->linIndex;
+        ++kkk;
       } // for kk - termCount
     } // k - diffPartnerDeCount[j]    
       
 #ifdef ASMMPROFILE
-    // <XXE profiling element>
-    xxe->stream[xxe->count].opId = XXE::wtimer;
-    xxe->stream[xxe->count].predicateBitField = 0x1;
-    xxeElement = &(xxe->stream[xxe->count]);
-    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-    xxeWtimerInfo->timerId = xxe->count;
-    xxeWtimerInfo->timerString = new char[80];
-    strcpy(xxeWtimerInfo->timerString, "Wt: /zero");
-    xxeWtimerInfo->actualWtimerId = xxe->count;
-    xxeWtimerInfo->relativeWtimerId = 0;
-    xxeWtimerInfo->relativeWtimerXXE = NULL;
-    localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    localrc = xxe->incStorageCount();
+    localrc = xxe->appendWtimer(0x1, "Wt: /zero", xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
-    // </XXE profiling element>
 #endif
   } // for j - dstLocalDeCount
-  
         
   // use recv pattern for all localDEs in dstArray and issue XXE::"+=*"
   for (int j=0; j<dstLocalDeCount; j++){
 
 #ifdef ASMMPROFILE
-    // <XXE profiling element>
-    xxe->stream[xxe->count].opId = XXE::wtimer;
-    xxe->stream[xxe->count].predicateBitField = 0x0;
-    xxeElement = &(xxe->stream[xxe->count]);
-    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-    xxeWtimerInfo->timerId = xxe->count;
-    xxeWtimerInfo->timerString = new char[80];
-    strcpy(xxeWtimerInfo->timerString, "Wt: w+=*L");
-    xxeWtimerInfo->actualWtimerId = xxe->count;
-    xxeWtimerInfo->relativeWtimerId = 0;
-    xxeWtimerInfo->relativeWtimerXXE = NULL;
-    localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    localrc = xxe->incStorageCount();
+    localrc = xxe->appendWtimer(0x0, "Wt: w+=*L", xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
-    // </XXE profiling element>
 #endif
       
     // use waitOnAnyIndexSub to wait on and process the incoming data
-    xxe->stream[xxe->count].opId = XXE::waitOnAnyIndexSub;
-    xxe->stream[xxe->count].predicateBitField = 0x0;
-    xxeElement = &(xxe->stream[xxe->count]);
-    xxeWaitOnAnyIndexSubInfo = (XXE::WaitOnAnyIndexSubInfo *)xxeElement;
-    xxeWaitOnAnyIndexSubInfo->count = diffPartnerDeCount[j];
-    char *xxeChar = new char[diffPartnerDeCount[j]*sizeof(XXE *)];
-    xxeWaitOnAnyIndexSubInfo->xxe = (XXE **)xxeChar;
-    char *indexChar = new char[diffPartnerDeCount[j]*sizeof(int)];
-    xxeWaitOnAnyIndexSubInfo->index = (int *)indexChar;
-    char *completeFlagChar = new char[diffPartnerDeCount[j]*sizeof(int)];
-    xxeWaitOnAnyIndexSubInfo->completeFlag = (int *)completeFlagChar;
-    localrc = xxe->incCount();
+    int xxeIndex = xxe->count;  // need this beyond the increment
+    localrc = xxe->appendWaitOnAnyIndexSub(0x0, diffPartnerDeCount[j]);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
-    xxe->storage[xxe->storageCount] = xxeChar; // xxe garbCo
-    localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-    xxe->storage[xxe->storageCount] = indexChar; // xxe garbCo
-    localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-    xxe->storage[xxe->storageCount] = completeFlagChar; // xxe garbCo
-    localrc = xxe->incStorageCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
+    xxeElement = &(xxe->stream[xxeIndex]);
+    xxeWaitOnAnyIndexSubInfo = (XXE::WaitOnAnyIndexSubInfo *)xxeElement;
     
     for (int k=0; k<diffPartnerDeCount[j]; k++){
         
@@ -7520,208 +7341,61 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       // allocate sub XXE stream and attach to xxeWaitOnAnyIndexSubInfo
       xxeWaitOnAnyIndexSubInfo->xxe[k] = new XXE(vm, 1000, 1000, 1000);
       XXE *xxeSub = xxeWaitOnAnyIndexSubInfo->xxe[k];
-      xxe->xxeSubList[xxe->xxeSubCount] = xxeSub; // xxe garbage collection
-      localrc = xxe->incXxeSubCount();
+      localrc = xxe->appendXxeSub(xxeSub);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
 
 #ifdef ASMMPROFILE
-      // <XXE profiling element>
-      xxeSub->stream[xxeSub->count].opId = XXE::wtimer;
-      xxeSub->stream[xxeSub->count].predicateBitField = 0x0;
-      xxeElement = &(xxeSub->stream[xxeSub->count]);
-      xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-      xxeWtimerInfo->timerId = 0;
-      xxeWtimerInfo->timerString = new char[80];
-      sprintf(xxeWtimerInfo->timerString, "xxeSub k=%d", k);
-      xxeWtimerInfo->actualWtimerId = 0;
-      xxeWtimerInfo->relativeWtimerId = 0;
-      xxeWtimerInfo->relativeWtimerXXE = xxe; // reference back into main XXE
-      localrc = xxeSub->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-      xxeSub->storage[xxeSub->storageCount] =
-        xxeWtimerInfo->timerString; // xxe garbCo
-      localrc = xxeSub->incStorageCount();
+      char *tempString = new char[80];
+      sprintf(tempString, "xxeSub k=%d", k);
+      localrc = xxeSub->appendWtimer(0x0, tempString, 0, 0, 0, xxe);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
-      // </XXE profiling element>
+      delete [] tempString;
 #endif
         
 #ifdef ASMMPROFILE
-      // <XXE profiling element>
-      xxeSub->stream[xxeSub->count].opId = XXE::wtimer;
-      xxeSub->stream[xxeSub->count].predicateBitField = 0x0;
-      xxeElement = &(xxeSub->stream[xxeSub->count]);
-      xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-      xxeWtimerInfo->timerId = xxeSub->count;
-      xxeWtimerInfo->timerString = new char[80];
-      strcpy(xxeWtimerInfo->timerString, "Wt: pSSRRA");
-      xxeWtimerInfo->actualWtimerId = xxeSub->count;
-      xxeWtimerInfo->relativeWtimerId = 0;
-      xxeWtimerInfo->relativeWtimerXXE = xxe; // reference back into main XXE
-      localrc = xxeSub->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-      // xxe garb coll
-      xxeSub->storage[xxeSub->storageCount] = xxeWtimerInfo->timerString;
-      localrc = xxeSub->incStorageCount();
+      localrc = xxeSub->appendWtimer(0x0, "Wt: pSSRRA", xxeSub->count,
+        xxeSub->count, 0, xxe);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
-      // </XXE profiling element>
 #endif
       
 #define USEproductSumScalarRRA___disable
 #ifdef USEproductSumScalarRRA
-      for (int kk=0; kk<partnerDeCount[j][k]; kk++){
+      // use single scalar "+=*" operation for every term
+      int rraIndex = srcLocalDeCount + j; // localDe index into dstArray
+                                          // shifted by srcArray localDeCount
+      int termCount = partnerDeCount[j][k];
+      for (int kk=0; kk<termCount; kk++){
         DstInfo *dstInfo = &(dstInfoTable[j][k][kk]);
         int linIndex = dstInfo->linIndex;
-        // enter scalar "+=*" operation into XXE stream
-        xxeSub->stream[xxeSub->count].opId = XXE::productSumScalarRRA;
-        xxeSub->stream[xxeSub->count].predicateBitField = 0x0;
-        xxeElement = &(xxeSub->stream[xxeSub->count]);
-        xxeProductSumScalarRRAInfo = (XXE::ProductSumScalarRRAInfo *)xxeElement;
-        switch (typekindDst){
-        case ESMC_TYPEKIND_R4:
-          xxeProductSumScalarRRAInfo->elementTK = XXE::R4;
-          break;
-        case ESMC_TYPEKIND_R8:
-          xxeProductSumScalarRRAInfo->elementTK = XXE::R8;
-          break;
-        case ESMC_TYPEKIND_I4:
-          xxeProductSumScalarRRAInfo->elementTK = XXE::I4;
-          break;
-        case ESMC_TYPEKIND_I8:
-          xxeProductSumScalarRRAInfo->elementTK = XXE::I8;
-          break;
-        default:
-          break;
-        }
-        switch (typekindSrc){
-        case ESMC_TYPEKIND_R4:
-          xxeProductSumScalarRRAInfo->valueTK = XXE::R4;
-          break;
-        case ESMC_TYPEKIND_R8:
-          xxeProductSumScalarRRAInfo->valueTK = XXE::R8;
-          break;
-        case ESMC_TYPEKIND_I4:
-          xxeProductSumScalarRRAInfo->valueTK = XXE::I4;
-          break;
-        case ESMC_TYPEKIND_I8:
-          xxeProductSumScalarRRAInfo->valueTK = XXE::I8;
-          break;
-        default:
-          break;
-        }
-        switch (typekindFactors){
-        case ESMC_TYPEKIND_R4:
-          xxeProductSumScalarRRAInfo->factorTK = XXE::R4;
-          break;
-        case ESMC_TYPEKIND_R8:
-          xxeProductSumScalarRRAInfo->factorTK = XXE::R8;
-          break;
-        case ESMC_TYPEKIND_I4:
-          xxeProductSumScalarRRAInfo->factorTK = XXE::I4;
-          break;
-        case ESMC_TYPEKIND_I8:
-          xxeProductSumScalarRRAInfo->factorTK = XXE::I8;
-          break;
-        default:
-          break;
-        }
-        xxeProductSumScalarRRAInfo->rraOffset = linIndex * dataSizeDst;
-        xxeProductSumScalarRRAInfo->factor = (void *)
-          (localDeFactorList[j] + (dstInfo->localDeFactorListIndex)
-          * dataSizeFactors);
-        xxeProductSumScalarRRAInfo->value = (void *)
-          (buffer[j][k] + kk * dataSizeSrc);
-        xxeProductSumScalarRRAInfo->rraIndex = srcLocalDeCount
-          + j; // localDe index into dstArray shifted by srcArray localDeCount
-        localrc = xxeSub->incCount();
+        int rraOffset = linIndex * dataSizeDst;
+        void *factor = (void *)(localDeFactorList[j]
+          + (dstInfo->localDeFactorListIndex) * dataSizeFactors);
+        void *value = (void *)(buffer[j][k] + kk * dataSizeSrc);
+        localrc = xxeSub->appendProductSumScalarRRA(0x0, elementTK, valueTK,
+          factorTK, rraOffset, factor, value, rraIndex);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
           ESMF_ERR_PASSTHRU, &rc)) return rc;
       } // kk - partnerDeCount[j][k]
 #else
+      // use super-scalar "+=*" operation containing all terms
+      int rraIndex = srcLocalDeCount + j; // localDe index into dstArray
+                                          // shifted by srcArray localDeCount
+      int termCount = partnerDeCount[j][k];
       int xxeIndex = xxeSub->count;  // need this beyond the increment
-      localrc = xxeSub->incCount();
+      localrc = xxeSub->appendProductSumSuperScalarRRA(0x0, elementTK, valueTK,
+        factorTK, rraIndex, termCount);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMF_ERR_PASSTHRU, &rc)) return rc;
-
-      // try super-scalar "+=*" operation in XXE stream
-      xxeSub->stream[xxeIndex].opId = XXE::productSumSuperScalarRRA;
-      xxeSub->stream[xxeIndex].predicateBitField = 0x0;
       xxeElement = &(xxeSub->stream[xxeIndex]);
       xxeProductSumSuperScalarRRAInfo =
         (XXE::ProductSumSuperScalarRRAInfo *)xxeElement;
-      switch (typekindDst){
-      case ESMC_TYPEKIND_R4:
-        xxeProductSumSuperScalarRRAInfo->elementTK = XXE::R4;
-        break;
-      case ESMC_TYPEKIND_R8:
-        xxeProductSumSuperScalarRRAInfo->elementTK = XXE::R8;
-        break;
-      case ESMC_TYPEKIND_I4:
-        xxeProductSumSuperScalarRRAInfo->elementTK = XXE::I4;
-        break;
-      case ESMC_TYPEKIND_I8:
-        xxeProductSumSuperScalarRRAInfo->elementTK = XXE::I8;
-        break;
-      default:
-        break;
-      }
-      switch (typekindSrc){
-      case ESMC_TYPEKIND_R4:
-        xxeProductSumSuperScalarRRAInfo->valueTK = XXE::R4;
-        break;
-      case ESMC_TYPEKIND_R8:
-        xxeProductSumSuperScalarRRAInfo->valueTK = XXE::R8;
-        break;
-      case ESMC_TYPEKIND_I4:
-        xxeProductSumSuperScalarRRAInfo->valueTK = XXE::I4;
-        break;
-      case ESMC_TYPEKIND_I8:
-        xxeProductSumSuperScalarRRAInfo->valueTK = XXE::I8;
-        break;
-      default:
-        break;
-      }
-      switch (typekindFactors){
-      case ESMC_TYPEKIND_R4:
-        xxeProductSumSuperScalarRRAInfo->factorTK = XXE::R4;
-        break;
-      case ESMC_TYPEKIND_R8:
-        xxeProductSumSuperScalarRRAInfo->factorTK = XXE::R8;
-        break;
-      case ESMC_TYPEKIND_I4:
-        xxeProductSumSuperScalarRRAInfo->factorTK = XXE::I4;
-        break;
-      case ESMC_TYPEKIND_I8:
-        xxeProductSumSuperScalarRRAInfo->factorTK = XXE::I8;
-        break;
-      default:
-        break;
-      }
-      xxeProductSumSuperScalarRRAInfo->rraIndex = srcLocalDeCount
-        + j; // localDe index into dstArray shifted by srcArray localDeCount
-      int termCount = partnerDeCount[j][k];
-      xxeProductSumSuperScalarRRAInfo->termCount = termCount;
-      char *rraOffsetListChar = new char[termCount*sizeof(int)];
-      int *rraOffsetList = (int *)rraOffsetListChar;
-      xxeProductSumSuperScalarRRAInfo->rraOffsetList = rraOffsetList;
-      xxeSub->storage[xxeSub->storageCount] = rraOffsetListChar; // garb coll.
-      localrc = xxeSub->incStorageCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-      char *factorListChar = new char[termCount*sizeof(void *)];
-      void **factorList = (void **)factorListChar;
-      xxeProductSumSuperScalarRRAInfo->factorList = factorList;
-      xxeSub->storage[xxeSub->storageCount] = factorListChar; // garb coll.
-      localrc = xxeSub->incStorageCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-      char *valueListChar = new char[termCount*sizeof(void *)];
-      void **valueList = (void **)valueListChar;
-      xxeProductSumSuperScalarRRAInfo->valueList = valueList;
+      int *rraOffsetList = xxeProductSumSuperScalarRRAInfo->rraOffsetList;
+      void **factorList = xxeProductSumSuperScalarRRAInfo->factorList;
+      void **valueList = xxeProductSumSuperScalarRRAInfo->valueList;
+      // fill in rraOffsetList, factorList, valueList
       for (int kk=0; kk<termCount; kk++){
         DstInfo *dstInfo = &(dstInfoTable[j][k][kk]);
         int linIndex = dstInfo->linIndex;
@@ -7731,7 +7405,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
           * dataSizeFactors);
         valueList[kk] = (void *)(buffer[j][k] + kk * dataSizeSrc);
       } // for kk - termCount
-      // need to fill in sensible values or else timing will be bogus
+      // need to fill in sensible elements and values or timing will be bogus
       switch (typekindDst){
       case ESMC_TYPEKIND_R4:
         for (int kk=0; kk<termCount; kk++)
@@ -7785,10 +7459,9 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       
       // try super-scalar contig "+=*" operation in XXE stream
       xxeSub->stream[xxeIndex].opId = XXE::productSumSuperScalarContigRRA;
-      xxeSub->stream[xxeIndex].predicateBitField = 0x0;
       xxeProductSumSuperScalarContigRRAInfo =
         (XXE::ProductSumSuperScalarContigRRAInfo *)xxeElement;
-      // only change members that are different compared to super-scalar
+      // only change members that are different wrt super-scalar operation
       xxeProductSumSuperScalarContigRRAInfo->valueList = (void *)(buffer[j][k]);
       xxeSub->optimizeElement(xxeIndex);
       double dt_sScalarC;
@@ -7806,40 +7479,17 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
         // use productSumSuperScalarRRA
         xxeSub->stream[xxeIndex].opId = XXE::productSumSuperScalarRRA;
         xxeProductSumSuperScalarRRAInfo->valueList = valueList;
-        xxeSub->storage[xxeSub->storageCount] = valueListChar; // garb coll.
-        localrc = xxeSub->incStorageCount();
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
       }else{
         // use productSumSuperScalarContigRRA
-        // already set from last trial, just need to remove some garbage:
-        delete [] valueListChar;  // garbage from productSumSuperScalarRRA try
+        // nothing to be done -> already set from last trial
       }
-      xxeSub->stream[xxeIndex].predicateBitField = 0x0;// set predication bits
-
 #endif
             
 #ifdef ASMMPROFILE
-      // <XXE profiling element>
-      xxeSub->stream[xxeSub->count].opId = XXE::wtimer;
-      xxeSub->stream[xxeSub->count].predicateBitField = 0x0;
-      xxeElement = &(xxeSub->stream[xxeSub->count]);
-      xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-      xxeWtimerInfo->timerId = xxeSub->count;
-      xxeWtimerInfo->timerString = new char[80];
-      strcpy(xxeWtimerInfo->timerString, "Wt: /pSSRRA");
-      xxeWtimerInfo->actualWtimerId = xxeSub->count;
-      xxeWtimerInfo->relativeWtimerId = 0;
-      xxeWtimerInfo->relativeWtimerXXE = xxe; // reference back into main XXE
-      localrc = xxeSub->incCount();
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
-      // xxe garb coll
-      xxeSub->storage[xxeSub->storageCount] = xxeWtimerInfo->timerString;
-      localrc = xxeSub->incStorageCount();
+      localrc = xxeSub->appendWtimer(0x0, "Wt: /pSSRRA", xxeSub->count,
+        xxeSub->count, 0, xxe);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
-      // </XXE profiling element>
 #endif
       
     } // k - diffPartnerDeCount[j]    
@@ -7849,25 +7499,9 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
 #endif
         
 #ifdef ASMMPROFILE
-    // <XXE profiling element>
-    xxe->stream[xxe->count].opId = XXE::wtimer;
-    xxe->stream[xxe->count].predicateBitField = 0x0;
-    xxeElement = &(xxe->stream[xxe->count]);
-    xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-    xxeWtimerInfo->timerId = xxe->count;
-    xxeWtimerInfo->timerString = new char[80];
-    strcpy(xxeWtimerInfo->timerString, "Wt: /w+=*L");
-    xxeWtimerInfo->actualWtimerId = xxe->count;
-    xxeWtimerInfo->relativeWtimerId = 0;
-    xxeWtimerInfo->relativeWtimerXXE = NULL;
-    localrc = xxe->incCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-    xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garbCo
-    localrc = xxe->incStorageCount();
+    localrc = xxe->appendWtimer(0x0, "Wt: /w+=*L", xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
-    // </XXE profiling element>
 #endif
     
     // garbage collection
@@ -7901,76 +7535,26 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
 #endif
   
 #ifdef ASMMPROFILE
-  // <XXE profiling element>
-  xxe->stream[xxe->count].opId = XXE::wtimer;
-  xxe->stream[xxe->count].predicateBitField = 0x0;
-  xxeElement = &(xxe->stream[xxe->count]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = xxe->count;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wt: bef wOAS");
-  xxeWtimerInfo->actualWtimerId = xxe->count;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  xxeWtimerInfo->relativeWtimerXXE = NULL;
-  localrc = xxe->incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  localrc = xxe->incStorageCount();
+  localrc = xxe->appendWtimer(0x0, "Wt: bef wOAS", xxe->count, xxe->count);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  // </XXE profiling element>
 #endif
   
   // post XXE::waitOnAllSendnb
-  xxe->stream[xxe->count].opId = XXE::waitOnAllSendnb;
-  xxe->stream[xxe->count].predicateBitField = 0x0;
-  localrc = xxe->incCount();
+  localrc = xxe->appendWaitOnAllSendnb(0x0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
 
 #ifdef ASMMPROFILE
-  // <XXE profiling element>
-  xxe->stream[xxe->count].opId = XXE::wtimer;
-  xxe->stream[xxe->count].predicateBitField = 0x0;
-  xxeElement = &(xxe->stream[xxe->count]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = xxe->count;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer End");
-  xxeWtimerInfo->actualWtimerId = xxe->count;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  xxeWtimerInfo->relativeWtimerXXE = NULL;
-  localrc = xxe->incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  localrc = xxe->incStorageCount();
+  localrc = xxe->appendWtimer(0x0, "Wtimer End", xxe->count, xxe->count);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  // </XXE profiling element>
 #endif
   
 #ifdef ASMMPROFILE
-  // <XXE profiling element>
-  xxe->stream[xxe->count].opId = XXE::wtimer;
-  xxe->stream[xxe->count].predicateBitField = 0x0;
-  xxeElement = &(xxe->stream[xxe->count]);
-  xxeWtimerInfo = (XXE::WtimerInfo *)xxeElement;
-  xxeWtimerInfo->timerId = xxe->count;
-  xxeWtimerInfo->timerString = new char[80];
-  strcpy(xxeWtimerInfo->timerString, "Wtimer End2");
-  xxeWtimerInfo->actualWtimerId = xxe->count;
-  xxeWtimerInfo->relativeWtimerId = 0;
-  xxeWtimerInfo->relativeWtimerXXE = NULL;
-  localrc = xxe->incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-  xxe->storage[xxe->storageCount] = xxeWtimerInfo->timerString; // xxe garb coll
-  localrc = xxe->incStorageCount();
+  localrc = xxe->appendWtimer(0x0, "Wtimer End2", xxe->count, xxe->count);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  // </XXE profiling element>
 #endif
   
 #if 0  
@@ -8281,6 +7865,7 @@ int Array::sparseMatMulRelease(
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
         &rc))
       return rc;
+      fflush(stdout);
     }
     vm->barrier();
   }

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.1.2.4 2008/05/09 04:48:16 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.1.2.5 2008/08/08 20:28:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -223,7 +223,7 @@ class XXE{
       // --- profiling
       wtimer,
       // --- misc
-      message,
+      message, profileMessage,
       // --- nop
       nop,
       // --- ids below are not suitable for direct execution
@@ -304,6 +304,32 @@ class XXE{
     int incCommhandleCount();
     int incXxeSubCount();
     
+    int appendStorage(char *storage);
+    int appendCommhandle(VMK::commhandle **commhandle);
+    int appendXxeSub(XXE *xxeSub);
+    int appendWtimer(int predicateBitField, char *string, int id, int actualId,
+      int relativeId=0, XXE *relativeXXE=NULL);
+    int appendRecvnb(int predicateBitField, void *buffer, int size, int srcPet,
+      int tag=-1);
+    int appendSendnb(int predicateBitField, void *buffer, int size, int dstPet,
+      int tag=-1);
+    int appendSendnbRRA(int predicateBitField, int rraOffset, int size,
+      int dstPet, int rraIndex, int tag=-1);
+    int appendMemCpySrcRRA(int predicateBitField, int rraOffset, int size,
+      void *dstMem, int rraIndex);
+    int appendMemGatherSrcRRA(int predicateBitField, void *dstBase,
+      TKId dstBaseTK, int rraIndex, int chunkCount);
+    int appendZeroSuperScalarRRA(int predicateBitField, TKId elementTK,
+      int termCount, int rraIndex);
+    int appendProductSumScalarRRA(int predicateBitField, TKId elementTK,
+      TKId valueTK, TKId factorTK, int rraOffset, void *factor, void *value,
+      int rraIndex);
+    int appendProductSumSuperScalarRRA(int predicateBitField, TKId elementTK,
+      TKId valueTK, TKId factorTK, int rraIndex, int termCount);
+    int appendWaitOnAnyIndexSub(int predicateBitField, int count);
+    int appendWaitOnAllSendnb(int predicateBitField);
+    int appendProfileMessage(int predicateBitField, char *messageString);
+    
   private:
     template<typename T, typename U, typename V>
     static void psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
@@ -330,6 +356,7 @@ class XXE{
       void *buffer;
       int size;
       int dstPet;
+      int tag;
     }SendnbInfo;
 
     typedef struct{
@@ -339,6 +366,7 @@ class XXE{
       void *buffer;
       int size;
       int srcPet;
+      int tag;
     }RecvnbInfo;
 
     typedef struct{
@@ -349,6 +377,7 @@ class XXE{
       int size;
       int dstPet;
       int rraIndex;
+      int tag;
     }SendnbRRAInfo;
 
     typedef struct{
@@ -359,6 +388,7 @@ class XXE{
       int size;
       int srcPet;
       int rraIndex;
+      int tag;
     }RecvnbRRAInfo;
 
     typedef struct{
@@ -521,6 +551,12 @@ class XXE{
       int predicateBitField;
       char *messageString;
     }MessageInfo;
+    
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      char *messageString;
+    }ProfileMessageInfo;
     
     // --- meta Info structs (i.e. don't correspond to OpIds)
 
