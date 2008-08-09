@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.44 2008/04/07 06:46:00 theurich Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.45 2008/08/09 05:57:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.44 2008/04/07 06:46:00 theurich Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.45 2008/08/09 05:57:52 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -231,9 +231,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Leap Year method I8 test 4
-      year = 500000000  ! break up initialization,
-      year = year * 10  !  since F90 constants
-      year = year + 100 !    are 32-bit
+      year = 5000000100_ESMF_KIND_I8
       bool = ESMF_CalendarIsLeapYear(gregorianCalendar, year, rc=rc)
       write(failMsg, *) " Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "IsLeapYear of deleted Calendar Test"
@@ -243,9 +241,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Leap Year method I8 test 4
-      year = 500000000  ! break up initialization,
-      year = year * 10  !  since F90 constants
-      year = year + 100 !    are 32-bit
+      year = 5000000100_ESMF_KIND_I8
       bool = ESMF_CalendarIsLeapYear(gregorianCalendar1, year, rc=rc)
       write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "IsLeapYear of uncreated Calendar Test"
@@ -1373,8 +1369,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Leap Year method I8 test 3
-      year = 500000000  ! break up initialization,
-      year = year * 10  !  since F90 constants are 32-bit
+      year = 5000000000_ESMF_KIND_I8
       bool = ESMF_CalendarIsLeapYear(gregorianCalendar, year, rc=rc)
       write(failMsg, *) " Did not return true and ESMF_SUCCESS"
       write(name, *) "IsLeapYear test 3"
@@ -1384,9 +1379,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Leap Year method I8 test 4
-      year = 500000000  ! break up initialization,
-      year = year * 10  !  since F90 constants
-      year = year + 100 !    are 32-bit
+      year = 5000000100_ESMF_KIND_I8
       bool = ESMF_CalendarIsLeapYear(gregorianCalendar, year, rc=rc)
       write(failMsg, *) " Did not return true and ESMF_SUCCESS"
       write(name, *) "IsLeapYear test 4"
@@ -1414,9 +1407,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Leap Year method I8 test 7
-      year = 500000000  ! break up initialization,
-      year = year * 10  !  since F90 constants
-      year = year + 100 !    are 32-bit
+      year = 5000000100_ESMF_KIND_I8
       bool = ESMF_CalendarIsLeapYear(julianCalendar, year, rc=rc)
       write(failMsg, *) " Did not return true and ESMF_SUCCESS"
       write(name, *) "IsLeapYear test 7"
@@ -1426,9 +1417,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Leap Year method I8 test 8
-      year = 500000000  ! break up initialization,
-      year = year * 10  !  since F90 constants
-      year = year + 10  !   are 32-bit
+      year = 5000000010_ESMF_KIND_I8
       bool = ESMF_CalendarIsLeapYear(julianCalendar, year, rc=rc)
       write(failMsg, *) " Did not return true and ESMF_SUCCESS"
       write(name, *) "IsLeapYear test 8"

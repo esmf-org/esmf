@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.31 2008/04/07 06:46:00 theurich Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.32 2008/08/09 05:57:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.31 2008/04/07 06:46:00 theurich Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.32 2008/08/09 05:57:52 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       integer, parameter :: CONVERT_TO_TIME = 1, CONVERT_TO_DATE = 2, &
@@ -175,17 +175,13 @@
 
       ! set days to highest value representable with signed 64-bits:
       ! ((2**63)-1)/86400 = 106,751,991,167,300 days
-      Dl = 1067519911  ! break up initialization,
-      Dl = Dl * 100000  !  since F90 constants
-      Dl = Dl + 67300   !    are 32-bit
+      Dl = 106751991167300_ESMF_KIND_I8
 
       ! start back 200000 days, then come forward until it breaks
       Dl = Dl - 200000
 
       ! matching start date is March 30, 292,277,019,367
-      YYl = 292277019  ! break up initialization,
-      YYl = YYl * 1000  !   since F90 constants
-      YYl = YYl + 367   !     are 32-bit
+      YYl = 292277019367_ESMF_KIND_I8
       MM = 3
       DD = 30
 
@@ -276,17 +272,13 @@
 
       ! set days to highest value representable with signed 64-bits:
       ! ((2**63)-1)/86400 = 106,751,991,167,300 days
-      Dl = 1067519911  ! break up initialization,
-      Dl = Dl * 100000  !  since F90 constants
-      Dl = Dl + 67300   !    are 32-bit
+      Dl = 106751991167300_ESMF_KIND_I8
 
       ! start back 40000 days, then come forward until it breaks
       Dl = Dl - 40000
 
       ! matching start date is October 19, 292,271,018,223
-      YYl = 292271018  ! break up initialization,
-      YYl = YYl * 1000  !   since F90 constants
-      YYl = YYl + 223   !     are 32-bit
+      YYl = 292271018223_ESMF_KIND_I8
       MM = 10
       DD = 19
 
