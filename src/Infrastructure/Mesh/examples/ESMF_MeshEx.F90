@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.8 2008/08/11 22:16:52 dneckels Exp $
+! $Id: ESMF_MeshEx.F90,v 1.9 2008/08/11 22:21:27 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshEx.F90,v 1.8 2008/08/11 22:16:52 dneckels Exp $'
+    '$Id: ESMF_MeshEx.F90,v 1.9 2008/08/11 22:21:27 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -86,7 +86,7 @@ program ESMF_FieldRegridEx
   rc=ESMF_SUCCESS
 
 
-  meshSrc = ESMF_MeshCreate(3,2,localrc)
+  meshSrc = ESMF_MeshCreate(2,3,localrc)
   write(failMsg, *) "ESMF_MeshCreate fail"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   if (localrc .ne. ESMF_SUCCESS) goto 10
@@ -147,7 +147,7 @@ program ESMF_FieldRegridEx
   if (localrc .ne. ESMF_SUCCESS) goto 10
 
   ! Now do the same, but with the all in one function
-  meshSrc = ESMF_MeshCreate(3,2,nodeId, nodeCoord, nodeOwner, &
+  meshSrc = ESMF_MeshCreate(2,3,nodeId, nodeCoord, nodeOwner, &
                            elemId, elemType, elemConn, localrc)
   write(failMsg, *) "ESMF_MeshCreate1 fail"
   call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
