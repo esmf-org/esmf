@@ -195,7 +195,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.28 2008/06/11 17:34:32 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.29 2008/08/12 20:34:14 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -505,7 +505,7 @@ end interface
   ! Private name; call using ESMF_GridAddCoord()
      subroutine ESMF_GridAddCoordNoValues(grid, staggerloc,  &
                 staggerEdgeLWidth, staggerEdgeUWidth, staggerAlign, &
-                totalLWidth, totalUWidth,rc)
+                staggerMemLBound, totalLWidth, totalUWidth,rc)
 
 !
 ! !ARGUMENTS:
@@ -514,6 +514,7 @@ end interface
       integer,                intent(in),optional     :: staggerEdgeLWidth(:)
       integer,                intent(in),optional     :: staggerEdgeUWidth(:)
       integer,                intent(in),optional     :: staggerAlign(:)
+      integer,                intent(in),optional     :: staggerMemLBound(:)
       integer,                intent(out), optional   :: totalLWidth(:)         ! N. IMP
       integer,                intent(out), optional   :: totalUWidth(:)         ! N. IMP
       integer,                intent(out),optional    :: rc
@@ -552,6 +553,9 @@ end interface
 !      If not set, then this defaults to all negative. (e.g. 
 !      The most negative part of the stagger in a cell is aligned with the 
 !      center and the padding is all on the postive side.) 
+! \item[{[staggerMemLBound]}] 
+!      Specifies the lower index range of the memory of every DE in this staggerloc in this Grid. 
+!      Only used when Grid indexflag is {\tt ESMF\_INDEX\_USER}. 
 !\item[{[totalLWidth]}]
 !     The lower boundary of the computatational region in reference to the computational region. 
 !     Note, the computational region includes the extra padding specified by {\tt ccordLWidth}.
@@ -571,6 +575,7 @@ end interface
     type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: staggerAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: staggerMemLBoundArg  ! Language Interface Helper Var
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -617,9 +622,14 @@ end interface
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    !! staggerMemLBound
+    staggerMemLBoundArg = ESMF_InterfaceIntCreate(staggerMemLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridaddcoord(grid%this,tmp_staggerloc, &
-      staggerEdgeLWidthArg, staggerEdgeUWidthArg, staggerAlignArg, localrc)
+      staggerEdgeLWidthArg, staggerEdgeUWidthArg, staggerAlignArg, staggerMemLBoundArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -633,6 +643,10 @@ end interface
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterfaceIntDestroy(staggerMemLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1425,8 +1439,8 @@ end interface
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateFromDistGrid(name,coordTypeKind,distgrid, &
                          distgridToGridMap,  coordDimCount, coordDimMap, &
-                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, indexflag, &
-                         destroyDistGrid, destroyDELayout, rc)
+                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, gridMemLBound, &
+                         indexflag,  destroyDistGrid, destroyDELayout, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFromDistGrid
@@ -1441,6 +1455,7 @@ end interface
        integer,               intent(in),   optional  :: gridEdgeLWidth(:)
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
+       integer,               intent(in),   optional  :: gridMemLBound(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        logical,               intent(in),   optional  :: destroyDistGrid
        logical,               intent(in),   optional  :: destroyDELayout
@@ -1505,9 +1520,14 @@ end interface
 !     index space (can be overridden by the individual staggerAligns). If
 !     the {\tt gridEdgeWidths} are not specified than this parameter
 !     implies the EdgeWidths.
+! \item[{[gridMemLBound]}] 
+!      Specifies the lower index range of the memory of every DE in this Grid. 
+!      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
+!      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates whether the indices in the grid are to be interpreted to form
-!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), or are to 
+!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
+!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
 !      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1520,6 +1540,7 @@ end interface
     type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: gridMemLBoundArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
      type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
@@ -1550,6 +1571,9 @@ end interface
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    gridMemLBoundArg = ESMF_InterfaceIntCreate(gridMemLBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1597,7 +1621,7 @@ end interface
       coordTypeKind, distgrid, distgridToGridMapArg, &
       ESMF_NULL_POINTER, ESMF_NULL_POINTER, &
       coordDimCountArg, coordDimMapArg, &
-      gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
+      gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, gridMemLBoundArg,&
       indexflag, intDestroyDistGrid, intDestroyDELayout, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1610,6 +1634,9 @@ end interface
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(gridMemLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
@@ -1704,7 +1731,7 @@ end interface
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
-                        indexflag, petMap, rc)
+                        gridMemLBound, indexflag, petMap, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateShapeTileIrreg
@@ -1731,6 +1758,7 @@ end interface
        integer,               intent(in),   optional  :: gridEdgeLWidth(:)
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
+       integer,               intent(in),   optional  :: gridMemLBound(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
@@ -1886,8 +1914,15 @@ end interface
 !     index space (can be overridden by the individual staggerAligns). If
 !     the {\tt gridEdgeWidths} are not specified than this parameter
 !     implies the EdgeWidths.
+! \item[{[gridMemLBound]}] 
+!      Specifies the lower index range of the memory of every DE in this Grid. 
+!      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
+!      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Flag that indicates how the DE-local indices are to be defined.
+!      Indicates whether the indices in the grid are to be interpreted to form
+!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
+!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
+!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
@@ -2250,6 +2285,31 @@ end interface
                  ESMF_CONTEXT, rc) 
                endif
             endif
+         endif
+      endif
+   endif
+
+
+   ! check for gridMemLBound issues
+   if (present(gridMemLBound)) then
+      if (.not. present(indexflag)) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rc) 
+              return
+      else if (.not. (indexflag .eq. ESMF_INDEX_USER)) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rc) 
+              return
+      endif
+   else
+      if (present(indexflag)) then
+         if (indexflag .eq. ESMF_INDEX_USER) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
+                   ESMF_CONTEXT, rc) 
+              return
          endif
       endif
    endif
@@ -2733,6 +2793,7 @@ end interface
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
+                                    gridMemLBound=gridMemLBound, &
                                     indexflag=indexflag, &
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., &
@@ -2744,6 +2805,7 @@ end interface
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
+                                    gridMemLBound=gridMemLBound, &
                                     indexflag=indexflag, &
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., &
@@ -2799,7 +2861,7 @@ end interface
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
-                        indexflag, petMap, rc)
+                        gridMemLBound, indexflag, petMap, rc)
 
 
 !
@@ -2828,6 +2890,7 @@ end interface
        integer,               intent(in),   optional  :: gridEdgeLWidth(:)
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
+       integer,               intent(in),   optional  :: gridMemLBound(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
@@ -2976,8 +3039,15 @@ end interface
 !     index space (can be overridden by the individual staggerAligns). If
 !     the {\tt gridEdgeWidths} are not specified than this parameter
 !     implies the EdgeWidths.
+! \item[{[gridMemLBound]}] 
+!      Specifies the lower index range of the memory of every DE in this Grid. 
+!      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
+!      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Flag that indicates how the DE-local indices are to be defined.
+!      Indicates whether the indices in the grid are to be interpreted to form
+!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
+!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
+!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)
@@ -3299,9 +3369,33 @@ end interface
    endif
 
 
-
    ! Check for non-valid connection types here
 
+
+
+   ! check for gridMemLBound issues
+   if (present(gridMemLBound)) then
+      if (.not. present(indexflag)) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rc) 
+              return
+      else if (.not.(indexflag .eq. ESMF_INDEX_USER)) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rc) 
+              return
+      endif
+   else
+      if (present(indexflag)) then
+         if (indexflag .eq. ESMF_INDEX_USER) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
+                   ESMF_CONTEXT, rc) 
+              return
+         endif
+      endif
+   endif
 
 
    ! TODO: can you create an array without a distgrid??? What if everything they specify is undistributed?
@@ -3734,6 +3828,7 @@ end interface
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
+                                    gridMemLBound=gridMemLBound, &
                                     indexflag=indexflag, &
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., &
@@ -3745,6 +3840,7 @@ end interface
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
+                                    gridMemLBound=gridMemLBound, &
                                     indexflag=indexflag, &
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., &
@@ -6768,7 +6864,7 @@ endif
   ! Private name; call using ESMF_GridSet()
     subroutine ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, distgrid, & 
                  distgridToGridMap, coordDimCount, coordDimMap,           &
-                 gridEdgeLWidth, gridEdgeUWidth, gridAlign, indexflag, &
+                 gridEdgeLWidth, gridEdgeUWidth, gridAlign, gridMemLBound, indexflag, &
                  destroyDistgrid, destroyDELayout, rc)
 !
 ! !RETURN VALUE:
@@ -6785,6 +6881,7 @@ endif
        integer,               intent(in),   optional  :: gridEdgeLWidth(:)
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
+       integer,               intent(in),   optional  :: gridMemLBound(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        logical,               intent(in),   optional  :: destroyDistgrid
        logical,               intent(in),   optional  :: destroyDELayout
@@ -6833,8 +6930,15 @@ endif
 !     index space (can be overridden by the individual staggerAligns). If
 !     the {\tt gridEdgeWidths} are not specified than this parameter
 !     implies the EdgeWidths.
+! \item[{[gridMemLBound]}] 
+!      Specifies the lower index range of the memory of every DE in this Grid. 
+!      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
+!      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Flag that indicates how the DE-local indices are to be defined.
+!      Indicates whether the indices in the grid are to be interpreted to form
+!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
+!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
+!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
 ! \item[{[destroyDistgrid]}]
 !      If true, when the Grid is destroyed the DistGrid will be destroyed also. 
 !      Defaults to false. 
@@ -6851,6 +6955,7 @@ endif
     type(ESMF_InterfaceInt) :: gridEdgeLWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: gridEdgeUWidthArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: gridAlignArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: gridMemLBoundArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: distgridToGridMapArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
@@ -6882,6 +6987,9 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    gridMemLBoundArg = ESMF_InterfaceIntCreate(gridMemLBound, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6927,7 +7035,7 @@ endif
       distgridToGridMapArg, ESMF_NULL_POINTER, ESMF_NULL_POINTER, &
       coordDimCountArg, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
-      indexflag, intDestroyDistgrid, intDestroyDELayout, localrc)
+      gridMemLBoundArg, indexflag, intDestroyDistgrid, intDestroyDELayout, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6939,6 +7047,9 @@ endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(gridMemLBoundArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
@@ -7044,7 +7155,7 @@ endif
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
-                        gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
+                        gridEdgeLWidth, gridEdgeUWidth, gridAlign, gridMemLBound, &
                         indexflag, petMap, rc)
 
 !
@@ -7071,6 +7182,7 @@ endif
        integer,               intent(in),   optional  :: gridEdgeLWidth(:)
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
+       integer,               intent(in),   optional  :: gridMemLBound(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
@@ -7233,8 +7345,15 @@ endif
 !     index space (can be overridden by the individual staggerAligns). If
 !     the {\tt gridEdgeWidths} are not specified than this parameter
 !     implies the EdgeWidths.
+! \item[{[gridMemLBound]}] 
+!      Specifies the lower index range of the memory of every DE in this Grid. 
+!      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
+!      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Flag that indicates how the DE-local indices are to be defined.
+!      Indicates whether the indices in the grid are to be interpreted to form
+!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
+!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
+!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
@@ -7600,6 +7719,29 @@ endif
    endif
 
 
+   ! check for gridMemLBound issues
+   if (present(gridMemLBound)) then
+      if (.not. present(indexflag)) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rc) 
+              return
+      else if (.not. (indexflag .eq. ESMF_INDEX_USER)) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rc) 
+              return
+      endif
+   else
+      if (present(indexflag)) then
+         if (indexflag .eq. ESMF_INDEX_USER) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
+                   ESMF_CONTEXT, rc) 
+              return
+         endif
+      endif
+   endif
 
 
    ! Check for non-valid connection types here
@@ -8086,6 +8228,7 @@ endif
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
+                                    gridMemLBound=gridMemLBound, &
                                     indexflag=indexflag,   &
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., & 
@@ -8097,6 +8240,7 @@ endif
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
+                                    gridMemLBound=gridMemLBound, &
                                     indexflag=indexflag, &
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., & 
@@ -8156,7 +8300,7 @@ endif
                         bipolePos1, bipolePos2, bipolePos3, &
                         coordDep1, coordDep2, coordDep3, &
                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
-                        indexflag,  petMap, rc)
+                        gridMemLBound, indexflag,  petMap, rc)
 
 !
 ! !ARGUMENTS:
@@ -8182,6 +8326,7 @@ endif
        integer,               intent(in),   optional  :: gridEdgeLWidth(:)
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
+       integer,               intent(in),   optional  :: gridMemLBound(:)
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: petMap(:,:,:)
        integer,               intent(out),  optional  :: rc
@@ -8333,8 +8478,15 @@ endif
 !     index space (can be overridden by the individual staggerAligns). If
 !     the {\tt gridEdgeWidths} are not specified than this parameter
 !     implies the EdgeWidths.
+! \item[{[gridMemLBound]}] 
+!      Specifies the lower index range of the memory of every DE in this Grid. 
+!      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
+!      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Flag that indicates how the DE-local indices are to be defined.
+!      Indicates whether the indices in the grid are to be interpreted to form
+!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
+!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
+!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)
@@ -8659,6 +8811,29 @@ endif
 
    ! Check for non-valid connection types here
 
+   ! check for gridMemLBound issues
+   if (present(gridMemLBound)) then
+      if (.not. present(indexflag)) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rc)  
+              return
+      else if (.not.(indexflag .eq. ESMF_INDEX_USER)) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rc) 
+              return
+      endif
+   else
+      if (present(indexflag)) then
+         if (indexflag .eq. ESMF_INDEX_USER) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
+                   ESMF_CONTEXT, rc) 
+              return
+         endif
+      endif
+   endif
 
 
    ! TODO: can you create an array without a distgrid??? What if everything they specify is undistributed?
@@ -9091,6 +9266,7 @@ endif
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
+                                    gridMemLBound=gridMemLBound, &
                                     indexflag=indexflag, &
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., & 
@@ -9102,6 +9278,7 @@ endif
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
+                                    gridMemLBound=gridMemLBound, &
                                     indexflag=indexflag, &
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., & 

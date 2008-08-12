@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.36.2.18 2008/08/01 21:02:39 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.36.2.19 2008/08/12 20:34:15 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.18 2008/08/01 21:02:39 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.19 2008/08/12 20:34:15 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -113,7 +113,8 @@ int Grid::addCoordArray(
                           int *staggerlocArg,             // (in) optional
                           InterfaceInt *staggerEdgeLWidthArg, // (in) optional
                           InterfaceInt *staggerEdgeUWidthArg, // (in) optional
-                          InterfaceInt *staggerAlignArg   // (in) optional 
+                          InterfaceInt *staggerAlignArg,   // (in) optional 
+                          InterfaceInt *staggerMemLBoundArg   // (in) optional 
   ) {
 //
 // !DESCRIPTION:
@@ -129,6 +130,7 @@ int Grid::addCoordArray(
   int coord;
   ESMC_DataCopy docopy;
   int *staggerAlign;
+  int *staggerMemLBound;
   int *staggerEdgeLWidth;
   int *staggerEdgeUWidth;
   const int *distgridToArrayMap, *arrayUndistLBound, *arrayUndistUBound;
@@ -227,10 +229,29 @@ int Grid::addCoordArray(
     }
   }
 
+  // Error check Align
+  if (staggerMemLBoundArg != NULL) {
+    //// Ensure staggerMemLBoundArg has the correct dimCount
+    if (staggerMemLBoundArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- staggerMemLBound array must be of dimCount 1", &rc);
+      return rc;
+    }
+    //// Ensure staggerAlign has the correct size
+    if (staggerMemLBoundArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- staggerAlign size and Grid dimCount mismatch ", &rc);
+      return rc;
+    }
+  }
+
+
   // Allocate lWidth, uWidth, and Align based on inputs and defaults
   staggerEdgeLWidth = new int[dimCount];
   staggerEdgeUWidth = new int[dimCount];
   staggerAlign = new int[dimCount];
+  staggerMemLBound = new int[dimCount];
+
 
   // Set lWidth, uWidth, and Align based on inputs and defaults
   localrc=setDefaultsLUA(dimCount,
@@ -239,6 +260,18 @@ int Grid::addCoordArray(
           staggerEdgeLWidth, staggerEdgeUWidth, staggerAlign);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
                            ESMF_ERR_PASSTHRU, &rc)) return rc;        
+
+  // Set staggerMemLBound 
+  if (staggerMemLBoundArg != NULL) {
+    for (int i=0; i<dimCount; i++) {
+      staggerMemLBound[i]=staggerMemLBoundArg->array[i];
+    }
+  } else {
+    for (int i=0; i<dimCount; i++) {
+      staggerMemLBound[i]=staggerMemLBoundList[staggerloc][i];
+    }
+  }
+  
 
  // Rename Grid UndistLBound, UndistUBound to distinguish them from the Array versions 
   gridUndistLBound=undistLBound;
@@ -268,6 +301,15 @@ int Grid::addCoordArray(
   extent[0]=dimCount;
   InterfaceInt *compUWidthIntInt=new InterfaceInt(compUWidthIntIntArray,1,extent); 
 
+  InterfaceInt *staggerMemLBoundIntInt=(InterfaceInt *)ESMC_NULL_POINTER;
+  int *staggerMemLBoundIntIntArray=(int *)ESMC_NULL_POINTER;
+
+  // Only setup membounds if index flag is user
+  if (indexflag==ESMF_INDEX_USER) {
+    staggerMemLBoundIntIntArray=new int[dimCount];
+    extent[0]=dimCount;
+    staggerMemLBoundIntInt=new InterfaceInt(staggerMemLBoundIntIntArray,1,extent); 
+  }
 
   ////////////
   ///// Loop Constructing all the coordinate arrays
@@ -368,6 +410,19 @@ int Grid::addCoordArray(
     printf("\n");
      DEBUG */
 
+    //// Optionally fix the lower memory bounds of each DE's memory chunk
+    if (indexflag==ESMF_INDEX_USER) {
+      j=0;
+      for (int i=0; i<coordDimCount[coord]; i++) {
+	int gi=coordDimMap[coord][i];
+	if (coordIsDist[coord][i]) {
+	  staggerMemLBoundIntIntArray[j] = staggerMemLBound[gi];
+	  j++;
+	} 
+      }
+    }
+
+
     // Create an Array to hold the coords 
     if (coordUndistDimCount) { 
       // Pass in undistLBound, undistUBound if there are undistributed dims...
@@ -378,7 +433,8 @@ int Grid::addCoordArray(
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
-                          &indexflag, NULL, &staggerloc, ESMC_NULL_POINTER, 
+                          &indexflag, staggerMemLBoundIntInt, 
+                          &staggerloc, ESMC_NULL_POINTER, 
                           undistLBoundIntInt, undistUBoundIntInt, &localrc);
     } else {
       // ...otherwise pass in NUll
@@ -389,7 +445,8 @@ int Grid::addCoordArray(
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
-                          &indexflag, NULL, &staggerloc, ESMC_NULL_POINTER,
+                          &indexflag, staggerMemLBoundIntInt, 
+                          &staggerloc, ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER, 
                           &localrc);
@@ -407,7 +464,7 @@ int Grid::addCoordArray(
 
   // Set information about this stagger's coordinates into the Grid
   localrc=this->setStaggerInfo(staggerloc, staggerAlign, staggerEdgeLWidth, 
-                                  staggerEdgeUWidth);
+			       staggerEdgeUWidth,staggerMemLBound);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;        
 
@@ -427,6 +484,12 @@ int Grid::addCoordArray(
   if (staggerEdgeUWidth != ESMC_NULL_POINTER) delete [] staggerEdgeUWidth;
   if (staggerEdgeLWidth != ESMC_NULL_POINTER) delete [] staggerEdgeLWidth;
   if (staggerAlign != ESMC_NULL_POINTER) delete [] staggerAlign;
+  if (indexflag==ESMF_INDEX_USER) {
+    delete [] staggerMemLBoundIntIntArray;
+    delete staggerMemLBoundIntInt;
+  }
+
+
 
   // return ESMF_SUCCESS
   return ESMF_SUCCESS;
@@ -804,7 +867,9 @@ int Grid::addCoordFromArrayList(
 
   // Set information about this stagger's coordinates into the Grid
   localrc=this->setStaggerInfo(staggerloc, staggerAlign, staggerEdgeLWidth, 
-                                  staggerEdgeUWidth);
+			       staggerEdgeUWidth, 
+			       staggerMemLBoundList[staggerloc]); // TODO: this is just using existing
+                                                                  // MemLBound need to change this
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;        
 
@@ -874,6 +939,7 @@ int Grid::commit(
                        proto->distgridToGridMap, 
                        proto->undistLBound, proto->undistUBound, 
                        proto->coordDimCount, proto->coordDimMap,
+                       proto->gridMemLBound,
 		       proto->indexflag,
                        proto->destroyDistgrid, proto->destroyDELayout);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -915,6 +981,7 @@ Grid *Grid::create(
   InterfaceInt *undistUBoundArg,                 // (in) optional
   InterfaceInt *coordDimCountArg,               // (in) optional
   InterfaceInt *coordDimMapArg,             // (in) optional
+  InterfaceInt *gridMemLBoundArg,          // (in) optional
   ESMC_IndexFlag *indexflagArg,             // (in) optional
   bool *destroyDistgridArg,
   bool *destroyDELayoutArg,
@@ -949,7 +1016,7 @@ Grid *Grid::create(
   localrc=construct(grid, nameLenArg, nameArg, typekindArg, distgridArg, 
                     gridEdgeLWidthArg,gridEdgeUWidthArg, gridAlignArg,
                     distgridToGridMapArg, undistLBoundArg, undistUBoundArg, 
-                    coordDimCountArg, coordDimMapArg, indexflagArg,
+                    coordDimCountArg, coordDimMapArg, gridMemLBoundArg, indexflagArg,
                     destroyDistgridArg, destroyDELayoutArg);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
@@ -1157,7 +1224,7 @@ Array *Grid::getCoordArray(
   }
 //-----------------------------------------------------------------------------
 
-
+//// NEED TO THINK ABOUT THE FOLLOWING VVVVV
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Grid::getDistExclusiveLBound()"
@@ -1204,7 +1271,7 @@ int Grid::getDistExclusiveLBound(
   }
 
   // Set lower bound based on indexflag
-  if (indexflag==ESMF_INDEX_DELOCAL) {
+  if ((indexflag==ESMF_INDEX_DELOCAL) || (indexflag==ESMF_INDEX_USER)) {
     for (int i=0; i<distDimCount; i++)
       lBndArg[i] = 1; // excl. region starts at (1,1,1...) 
   } else {
@@ -1467,6 +1534,8 @@ int Grid::getLDEStaggerUOffset(
 }
 //-----------------------------------------------------------------------------
 
+//// NEED TO THINK ABOUT THE PROCEEDING ^^^^^
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -1494,6 +1563,7 @@ int Grid::set(
   InterfaceInt *undistUBoundArg,      // (in) optional
   InterfaceInt *coordDimCountArg,    // (in) optional
   InterfaceInt *coordDimMapArg,  // (in) optional
+  InterfaceInt *gridMemLBoundArg,          // (in)
   ESMC_IndexFlag *indexflagArg,   // (in) optional
   bool *destroyDistgridArg,
   bool *destroyDELayoutArg
@@ -1625,6 +1695,15 @@ int Grid::set(
 
     // record the new data
     proto->coordDimMap=_copyInterfaceInt(coordDimMapArg);
+  }
+
+  // if passed in, set gridMemLBoundArg
+  if (gridMemLBoundArg != ESMC_NULL_POINTER) { 
+    // if present get rid of the old data
+    if (proto->gridMemLBound !=ESMC_NULL_POINTER) _freeInterfaceInt(&proto->gridMemLBound);
+
+    // record the new data
+    proto->gridMemLBound=_copyInterfaceInt(gridMemLBoundArg);
   }
 
   // if passed in, set indexflag
@@ -1996,6 +2075,7 @@ int Grid::constructInternal(
   int *gridAlignArg,                       // (in)
   int *coordDimCountArg,                      // (in)
   int **coordDimMapArg,                   // (in)
+  int *gridMemLBoundArg,                      // (in)
   ESMC_IndexFlag indexflagArg,             // (in)
   bool destroyDistgridArg, 
   bool destroyDELayoutArg 
@@ -2084,6 +2164,9 @@ int Grid::constructInternal(
     //// allocate coordinate Alignment storage
     staggerAlignList=_allocate2D<int>(staggerLocCount,dimCount);
 
+    //// allocate coordinate memLBound storage
+    staggerMemLBoundList=_allocate2D<int>(staggerLocCount,dimCount);
+
     //// set defaults for stagger alignment and stagger width
     for(int i=0; i<staggerLocCount; i++) {
       for(int j=0; j<dimCount; j++) {
@@ -2096,6 +2179,7 @@ int Grid::constructInternal(
           staggerEdgeUWidthList[i][j]=0;
           staggerAlignList[i][j]=0;
         }
+	staggerMemLBoundList[i][j]=gridMemLBoundArg[j];
       }
     }
 
@@ -2107,7 +2191,6 @@ int Grid::constructInternal(
           didIAllocList[i][j]=false;
       }
     }
-
 
     //// setup map from Grid dimensions to distgrid or undistUBound/undistLBound 
     //// dimensions 
@@ -2334,6 +2417,8 @@ Grid::Grid(
   coordArrayList = ESMC_NULL_POINTER;
   staggerEdgeLWidthList = ESMC_NULL_POINTER;
   staggerEdgeUWidthList = ESMC_NULL_POINTER;
+  staggerAlignList = ESMC_NULL_POINTER;
+  staggerMemLBoundList = ESMC_NULL_POINTER;
   didIAllocList = ESMC_NULL_POINTER;
   
   gridIsDist = ESMC_NULL_POINTER;
@@ -2354,7 +2439,6 @@ Grid::Grid(
   
 }
 //-----------------------------------------------------------------------------
-
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -2429,6 +2513,7 @@ Grid::Grid(
      _free2D<int>(&staggerEdgeLWidthList);
      _free2D<int>(&staggerEdgeUWidthList);
      _free2D<int>(&staggerAlignList);
+     _free2D<int>(&staggerMemLBoundList);
      _free2D<bool>(&didIAllocList);
      if (gridIsDist !=ESMC_NULL_POINTER) delete [] gridIsDist;
      if (gridMapDim !=ESMC_NULL_POINTER) delete [] gridMapDim;
@@ -2471,6 +2556,7 @@ ProtoGrid::ProtoGrid(
   gridEdgeLWidth=ESMC_NULL_POINTER;   
   gridEdgeUWidth=ESMC_NULL_POINTER;   
   gridAlign=ESMC_NULL_POINTER;   
+  gridMemLBound=ESMC_NULL_POINTER;   
   distgridToGridMap=ESMC_NULL_POINTER;   
   undistLBound=ESMC_NULL_POINTER;  
   undistUBound=ESMC_NULL_POINTER;  
@@ -2511,6 +2597,7 @@ ProtoGrid::ProtoGrid(
   if (gridEdgeLWidth != ESMC_NULL_POINTER) _freeInterfaceInt(&gridEdgeLWidth);
   if (gridEdgeUWidth != ESMC_NULL_POINTER) _freeInterfaceInt(&gridEdgeUWidth);
   if (gridAlign != ESMC_NULL_POINTER) _freeInterfaceInt(&gridAlign);
+  if (gridMemLBound != ESMC_NULL_POINTER) _freeInterfaceInt(&gridMemLBound);
   if (distgridToGridMap != ESMC_NULL_POINTER) _freeInterfaceInt(&distgridToGridMap);
   if (undistLBound != ESMC_NULL_POINTER) _freeInterfaceInt(&undistLBound);
   if (undistUBound != ESMC_NULL_POINTER) _freeInterfaceInt(&undistUBound);
@@ -2602,7 +2689,8 @@ int Grid::setStaggerInfo(
   int staggerlocArg,     // (in)
   int *staggerAlignArg,  // (in)
   int *staggerEdgeLWidthArg, // (in)
-  int *staggerEdgeUWidthArg  // (in)
+  int *staggerEdgeUWidthArg,  // (in)
+  int *staggerMemLBoundArg  // (in)
   ){
 //
 // !DESCRIPTION:
@@ -2642,6 +2730,11 @@ int Grid::setStaggerInfo(
   // Set staggerEdgeUWidth
   for (int i=0; i<dimCount; i++) {
     staggerEdgeUWidthList[staggerlocArg][i]=staggerEdgeUWidthArg[i];
+   }
+
+  // Set staggerMemLBound
+  for (int i=0; i<dimCount; i++) {
+    staggerMemLBoundList[staggerlocArg][i]=staggerMemLBoundArg[i];
    }
 
   return ESMF_SUCCESS;
@@ -2773,6 +2866,8 @@ int Grid::serialize(
     SERIALIZE_VAR2D(cp, buffer,loffset,staggerAlignList,staggerLocCount,dimCount,int);
     SERIALIZE_VAR2D(cp, buffer,loffset,staggerEdgeLWidthList,staggerLocCount,dimCount,int);
     SERIALIZE_VAR2D(cp, buffer,loffset,staggerEdgeUWidthList,staggerLocCount,dimCount,int);
+    SERIALIZE_VAR2D(cp, buffer,loffset,staggerMemLBoundList,staggerLocCount,dimCount,int);
+
     // Don't serialize didIAllocList since this proxy grid won't
     // have Array's allocated 
 
@@ -2941,6 +3036,7 @@ int Grid::deserialize(
   DESERIALIZE_VAR2D( buffer,loffset,staggerAlignList,staggerLocCount,dimCount,int);
   DESERIALIZE_VAR2D( buffer,loffset,staggerEdgeLWidthList,staggerLocCount,dimCount,int);
   DESERIALIZE_VAR2D( buffer,loffset,staggerEdgeUWidthList,staggerLocCount,dimCount,int);
+  DESERIALIZE_VAR2D( buffer,loffset,staggerMemLBoundList,staggerLocCount,dimCount,int);
 
   DESERIALIZE_VAR1D( buffer,loffset,gridIsDist,dimCount,bool);
   DESERIALIZE_VAR1D( buffer,loffset,gridMapDim,dimCount,int);
@@ -3281,6 +3377,7 @@ int construct(
   InterfaceInt *undistUBoundArg,                 // (in) optional
   InterfaceInt *coordDimCountArg,               // (in) optional
   InterfaceInt *coordDimMapArg,             // (in) optional
+  InterfaceInt *gridMemLBoundArg,             // (in) optional
   ESMC_IndexFlag *indexflagArg,              // (in) optional
   bool *destroyDistgridArg,
   bool *destroyDELayoutArg
@@ -3309,6 +3406,7 @@ int construct(
   int *gridEdgeLWidth;
   int *gridEdgeUWidth;
   int *gridAlign;
+  int *gridMemLBound;
   ESMC_IndexFlag indexflag;
   int ind;
   char *name;  
@@ -3348,6 +3446,16 @@ int construct(
   } else {
     typekind=*typekindArg;
   }
+
+
+  // If indexflag wasn't passed in then use default, otherwise 
+  // copy passed in value
+  if (indexflagArg==NULL) {
+    indexflag=ESMF_INDEX_DELOCAL;  // default
+  } else {
+    indexflag=*indexflagArg;
+  }
+
 
   // Get DimCount of Distributed Dimensions
   distDimCount = distgridArg->getDimCount();
@@ -3493,6 +3601,40 @@ int construct(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
                            ESMF_ERR_PASSTHRU, &rc)) return rc;        
 
+
+  // Error check gridMemLBound and fill in value
+  gridMemLBound=new int[dimCount];
+  if (gridMemLBoundArg != NULL) {
+    if (indexflag != ESMF_INDEX_USER){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        "- if gridMemLBound is set then indexflag must be ESMF_INDEX_USER", &rc);
+      return rc;
+    }
+    if (gridMemLBoundArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- gridMemLBound array must be of dimCount 1", &rc);
+      return rc;
+    }
+    if (gridMemLBoundArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- gridMemLBound must be the same size as the dimCount of the Grid", &rc);
+      return rc;
+    }
+    for (int i=0; i<dimCount; i++) {
+      gridMemLBound[i]=gridMemLBoundArg->array[i];
+    }
+  } else {
+    if (indexflag == ESMF_INDEX_USER){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        "- if indexflag=ESMF_INDEX_USER then gridMemLBound must be set", &rc);
+      return rc;
+    }
+    for (int i=0; i<dimCount; i++) {
+      gridMemLBound[i]=1;
+    }
+  }
+
+
   // If the distgridToGridMapArg parameter has been passed in then error check 
   // and copy it, otherwise set a default.
   distgridToGridMap = new int[distDimCount];
@@ -3614,13 +3756,10 @@ int construct(
 
   }  
  
-  // If indexflag wasn't passed in then use default, otherwise 
-  // copy passed in value
-  if (indexflagArg==NULL) {
-    indexflag=ESMF_INDEX_DELOCAL;  // default
-  } else {
-    indexflag=*indexflagArg;
-  }
+
+
+
+
 
   // If destroyDistgrid wasn't passed in then use default, otherwise 
   // copy passed in value
@@ -3645,7 +3784,7 @@ int construct(
 				     undistDimCount, undistLBound, undistUBound,
 				     dimCount, gridEdgeLWidth, gridEdgeUWidth,
 				     gridAlign, coordDimCount, coordDimMap, 
-				     indexflag, destroyDistgrid, 
+				     gridMemLBound, indexflag, destroyDistgrid, 
 				     destroyDELayout);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -3660,6 +3799,8 @@ int construct(
   delete [] gridEdgeUWidth;
 
   delete [] gridAlign;
+
+  delete [] gridMemLBound;
 
   delete [] distgridToGridMap;
 
