@@ -11,7 +11,7 @@ setup_report: TRUE
 # test_report: FAILURE - report only failure configurations
 # test_report: SUCCESS - report only successful configurations
 # test_report: NONE - no report
-test_report: NONE
+test_report: FAILURE
 
 # descriptor file for the nonexhaustive case
 nonexhaustive::
