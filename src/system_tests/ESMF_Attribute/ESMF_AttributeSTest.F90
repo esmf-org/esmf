@@ -214,8 +214,8 @@ program ESMF_AttributeSTest
   value6 = 'Fortran 90'
   value7 = 'ESMF (Earth System Modeling Framework)'
   value8 = 'FV dycore'
-  value9 = 'Finite_Volume_Dynamical_Core'
-  value10 = ''
+  value9 = 'Finite Volume Dynamical Core'
+  value10 = 'GEOSagcm-EROS-beta7p12'
   
   ! Add the Attribute package to comp2
   call ESMF_AttributeAdd(comp2, convention=conv, purpose=purp, rc=rc)

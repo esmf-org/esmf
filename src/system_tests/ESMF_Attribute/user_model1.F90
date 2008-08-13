@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.29 2008/08/13 14:56:16 rokuingh Exp $
+! $Id: user_model1.F90,v 1.30 2008/08/13 21:28:32 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -193,6 +193,7 @@ module user_model1
  
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'QTR'
+    value2 = ''
     value3 = 'Advected quantities'
     value4 = 'unknown'
       
@@ -200,7 +201,7 @@ module user_model1
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
     call ESMF_AttributeAdd(QTR, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(QTR, name1, value1, convention=conv, purpose=purp, rc=status)
-!    call ESMF_AttributeSet(QTR, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(QTR, name2, value2, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(QTR, name3, value3, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(QTR, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
@@ -222,6 +223,7 @@ module user_model1
  
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'CONVCPT'
+    value2 = ''
     value3 = 'Vertically integrated enthalpy convergence'
     value4 = 'W m-2'
       
@@ -229,13 +231,14 @@ module user_model1
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
     call ESMF_AttributeAdd(CONVCPT, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(CONVCPT, name1, value1, convention=conv, purpose=purp, rc=status)
-!    call ESMF_AttributeSet(CONVCPT, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(CONVCPT, name2, value2, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(CONVCPT, name3, value3, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(CONVCPT, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'CONVKE'
+    value2 = ''
     value3 = 'Vertically integrated kinetic energy convergence'
     value4 = 'W m-2'
       
@@ -243,13 +246,14 @@ module user_model1
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
     call ESMF_AttributeAdd(CONVKE, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(CONVKE, name1, value1, convention=conv, purpose=purp, rc=status)
-!    call ESMF_AttributeSet(CONVKE, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(CONVKE, name2, value2, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(CONVKE, name3, value3, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(CONVKE, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
  
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'CONVPHI'
+    value2 = ''
     value3 = 'Vertically integrated geopotential convergence'
     value4 = 'W m-2'
       
@@ -257,7 +261,7 @@ module user_model1
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)
     call ESMF_AttributeAdd(CONVPHI, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(CONVPHI, name1, value1, convention=conv, purpose=purp, rc=status)
-!    call ESMF_AttributeSet(CONVPHI, name2, value2, convention=conv, purpose=purp, rc=status)
+    call ESMF_AttributeSet(CONVPHI, name2, value2, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(CONVPHI, name3, value3, convention=conv, purpose=purp, rc=status)
     call ESMF_AttributeSet(CONVPHI, name4, value4, convention=conv, purpose=purp, rc=status)
     if (status .ne. ESMF_SUCCESS) return
