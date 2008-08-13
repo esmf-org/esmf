@@ -89,6 +89,7 @@
 
   type test_record   
      integer, pointer :: test_status(:,:)  ! status of test
+     type(character_array), pointer :: test_string(:,:)
   end type test_record
 
   type process_record
@@ -192,6 +193,7 @@
      character(ESMF_MAXSTR) :: setupReportType ! setup report type 
      integer :: numRecords                     ! number of problem descriptor records
      type(problem_descriptor_records), pointer :: rcrd(:)  ! problem descriptor recd 
+     integer :: failures                       ! number of test failures
   end type harness_descriptor
 
 

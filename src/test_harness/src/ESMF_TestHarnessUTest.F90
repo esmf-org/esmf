@@ -42,8 +42,6 @@
 
   implicit none
 
-  ! cumulative result: count failures; no failure equals "all pass"
-
   ! individual test result code
   integer :: rc
 
@@ -55,7 +53,8 @@
 
   ! local variables
   integer :: localPet, petCount, rootPet = Harness_rootPet
-  integer :: result = 0
+  integer :: result = 0  ! cumulative result of failures; 0 failures => "all pass"
+
   character(ESMF_MAXSTR) :: name, failmsg
 
   logical :: localdebugflag = .false.
@@ -92,16 +91,26 @@
   !     * populate the information into problem descritpion data structure
   !   - go back and open each specifier file & populate the data structure
   !-----------------------------------------------------------------------------
-
   !-----------------------------------------------------------------------------
   ! read testharness configuration file, create the test harness record
   ! variable "harness" and extract (1) the test class, (2) report type, (3)
   ! number of records or problem descriptor files.
   !-----------------------------------------------------------------------------
   call Read_TestHarness_Config(rc)
-  write(name, *) "Test harness tests"
-  write(failMsg, *) "Error reading file test_harness.rc - see log file"
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (rc /= ESMF_SUCCESS)  then
+     print*,"Error reading file test_harness.rc - see log file"
+     call ESMF_Finalize(terminationflag=ESMF_ABORT)
+     stop
+  endif
+
+  !-----------------------------------------------------------------------------
+  ! announce beginning of test
+  !-----------------------------------------------------------------------------
+  if (localPet .eq. 0) then
+      print *, "--------------------------------------- "
+      print *, 'Start of test harness test for class ',trim(adjustL(har%testClass))
+      print *, "--------------------------------------- "
+  endif
 
   !-----------------------------------------------------------------------------
   ! Prepare to conduct the test runs by specifying complete tests
@@ -113,41 +122,51 @@
   ! in the harness descriptor record.
   !-----------------------------------------------------------------------------
   call Read_TestHarness_Specifier(rc)
-  write(name, *) "Test harness tests"
-  write(failMsg, *) "Error reading descriptor and specifier files - see log"
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (rc /= ESMF_SUCCESS)                                                      &
-     call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  if (rc /= ESMF_SUCCESS)  then
+     print*,"Error reading descriptor and specifier files - see log"
+     call ESMF_Finalize(terminationflag=ESMF_ABORT)
+     stop
+  endif
 
   !-----------------------------------------------------------------------------
   ! Now that the test configuration have been read successfully, conduct the
   ! tests.
   !-----------------------------------------------------------------------------
   call RunTests(rc)
-  write(name, *) "Test harness tests"
-  write(failMsg, *) "one or more test harness tests have failed"
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (rc /= ESMF_SUCCESS)                                                      &
-     call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
-
-  if (rc == ESMF_SUCCESS) then
-     print*,'PASS - all test harness tests have passed'
-  else
+  if (rc /= ESMF_SUCCESS) then
      print*,'FAIL - one or more test harness tests have failed - see stdout ', &
             'for complete details'
+     call ESMF_Finalize(terminationflag=ESMF_ABORT)
   endif
-
-
-  !-----------------------------------------------------------------------------
-  ! clean up and release memory
-  !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
   ! if everything has been successful up until now, return success
+  ! IMPORTANT: TestGlobal() prints the string "PASS:" that the testing scripts 
+  ! look for.
   !-----------------------------------------------------------------------------
+  result = har%failures
+  rc = ESMF_SUCCESS
+  if( result > 0 )  then
+    rc = ESMF_FAILURE
+  endif
+  write(failMsg, *) "Test Harness Failure - see stdout file for details. "
+  write(name, *) "Harness Test  for class " // trim(adjustL(har%testClass))
+  call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
+    ESMF_SRCLINE)
+
+  !-----------------------------------------------------------------------------
+  ! announce end of test
+  !-----------------------------------------------------------------------------
+  if (localPet .eq. 0) then
+      print *, "--------------------------------------- "
+      print *, 'End of harness test for class ',trim(adjustL(har%testClass))
+      print *, "--------------------------------------- "
+  endif
 
   !------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  ! calls ESMF_Finalize() internally
+  !------------------------------------------------------------------------
+  call ESMF_TestEnd(result, ESMF_SRCLINE) 
   !------------------------------------------------------------------------
 
 
@@ -195,6 +214,7 @@ contains
   ! local integer variables
   integer :: kfile, ncolumns
   integer :: localrc
+  integer :: allocRcToTest 
 
   ! local  logical
   logical :: flag = .true.
@@ -321,7 +341,11 @@ contains
   ! allocate space to hold problem descriptor filenames and advance through the
   ! table extracting the problem descriptor filenames
   !-----------------------------------------------------------------------------
-  allocate( har%rcrd(har%numRecords) )
+  allocate( har%rcrd(har%numRecords), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "rcrd type "//                 &
+     " in Read_TestHarness_Config", rcToReturn=rc)) then
+  endif
+
 
   do kfile=1,har%numRecords
      ! advance to new line in table
@@ -389,6 +413,7 @@ contains
   integer :: nDfiles, nGfiles, nstatus
   integer :: nDspec, nGspec
   integer :: localrc
+  integer :: allocRcToTest
 
   ! initialize return flag
   returnrc = ESMF_RC_NOT_IMPL
@@ -446,20 +471,34 @@ contains
         ! allocate and initialize test status
         nDfiles = har%rcrd(kfile)%str(kstr)%nDfiles
         nGfiles = har%rcrd(kfile)%str(kstr)%nGfiles
-        allocate( har%rcrd(kfile)%str(kstr)%test_record(nDfiles,nGfiles) )
+        allocate( har%rcrd(kfile)%str(kstr)%test_record(nDfiles,nGfiles),      &
+                  stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "rcrd type "//           &
+           " in Read_TestHarness_Config", rcToReturn=rc)) then
+        endif
 
         ! initialize test result to UNDEFINED
         do iDfile=1,har%rcrd(kfile)%str(kstr)%nDfiles
         do iGfile=1,har%rcrd(kfile)%str(kstr)%nGfiles
            nDspec = har%rcrd(kfile)%str(kstr)%Dfiles(iDfile)%nDspecs
            nGspec = har%rcrd(kfile)%str(kstr)%Gfiles(iGfile)%nGspecs
-           print*,'==== file  sizes',iDfile,iGfile,nDspec,nGspec
-           allocate( har%rcrd(kfile)%str(kstr)%test_record(iDfile,iGfile)%   &
-              test_status(nDspec,nGspec)  )
+        !  print*,'==== file  sizes',iDfile,iGfile,nDspec,nGspec
+           ! allocate work space for test result
+           allocate( har%rcrd(kfile)%str(kstr)%test_record(iDfile,iGfile)%     &
+              test_status(nDspec,nGspec), stat=allocRcToTest )
+           if (ESMF_LogMsgFoundAllocError(allocRcToTest, "test status type"//  &
+              " in Read_TestHarness_Config", rcToReturn=rc)) then
+           endif
+           ! allocate work space for test string
+           allocate( har%rcrd(kfile)%str(kstr)%test_record(iDfile,iGfile)%     &
+              test_string(nDspec,nGspec), stat=allocRcToTest )
+           if (ESMF_LogMsgFoundAllocError(allocRcToTest, "test status type"//  &
+              " in Read_TestHarness_Config", rcToReturn=rc)) then
+           endif
 
            do iD=1, nDspec
            do iG=1, nGspec
-             har%rcrd(kfile)%str(kstr)%test_record(iDfile,iGfile)%  &
+             har%rcrd(kfile)%str(kstr)%test_record(iDfile,iGfile)%             &
                  test_status(iD,iG) = HarnessTest_UNDEFINED 
            enddo   ! iG
            enddo   ! iD
@@ -473,15 +512,14 @@ contains
   !-----------------------------------------------------------------------------
   ! list imported problem configurations before continuing
   !-----------------------------------------------------------------------------
-  if( localPet == rootPet .and. trim(har%setupReportType) == "TRUE" ) then
-     nstatus = -1
-     do kfile=1,har%numrecords
-        do kstr=1,har%rcrd(kfile)%numStrings
-           call report_descriptor_string(har%rcrd(kfile)%str(kstr),nstatus,    &  
-                                         localrc)
-        enddo  ! kstr
-     enddo    ! kfile
-  endif
+  nstatus= 0
+  if( trim(har%setupReportType) == "TRUE" )  nstatus= 1
+  do kfile=1,har%numrecords
+     do kstr=1,har%rcrd(kfile)%numStrings
+        call construct_descriptor_string(har%rcrd(kfile)%str(kstr),nstatus, &  
+                                         localPet, localrc)
+     enddo  ! kstr
+  enddo    ! kfile
 
   !-----------------------------------------------------------------------------
 
@@ -524,12 +562,10 @@ contains
         do kfile=1,har%numRecords
            do kstr=1,har%rcrd(kfile)%numStrings
               ! test of a single problem descriptor string w/ specifiers
-              call array_redist_test(har%rcrd(kfile)%str(kstr), VM, localrc)
+              call array_redist_test(har%rcrd(kfile)%str(kstr),har%failures,   &
+                                     har%reportType, VM, localrc)
               if (ESMF_LogMsgFoundError(localrc," error array redist test",    &
                  rcToReturn=returnrc)) return
-              ! report on the single strings test 
-           !  call report_descriptor_string(har%rcrd(kfile)%str(kstr),nstatus, &  
-           !                                localrc)
            enddo  ! kstr
         enddo    ! kfile
 
@@ -552,112 +588,9 @@ contains
   !-----------------------------------------------------------------------------
   returnrc = ESMF_SUCCESS
 
+
   !-----------------------------------------------------------------------------
   end subroutine RunTests
-  !-----------------------------------------------------------------------------
-
-
-!-------------------------------------------------------------------------------
-! !IROUTINE: TestHarnessReport
-
-! !INTERFACE:
-  subroutine TestHarnessReport(returnrc)
-!
-! !ARGUMENTS:
-  integer, intent(  out) :: returnrc
-
-!
-! !DESCRIPTION:
-! This routine provides an additional reporting capability of the test results
-! in a more human readable form.
-!-------------------------------------------------------------------------------
-! Action associated to test report flag value.
-!-------------------------------------------------------------------------------
-  ! local variables
-  integer :: kfile, kstr, nstatus
-  integer :: localrc
-
-  ! initialize local rc
-  returnrc = ESMF_RC_NOT_IMPL
-  localrc = ESMF_RC_NOT_IMPL
-
-  !-----------------------------------------------------------------------------
-  ! select type of test result report
-  !-----------------------------------------------------------------------------
-  select case (trim(adjustL(har%reportType)))
-     case("FULL")
-     ! report both successes and failures
-     if( localPet == rootPet ) then
-        print*,"                                      "
-        print*,">----------FINAL TEST REPORT---------<"
-        nstatus = -1
-        do kfile=1,har%numRecords
-           print*,' Problem descriptor File:',  &
-                   trim(adjustL(har%rcrd(kfile)%filename))
-           print*,"                                      "
-           do kstr=1,har%rcrd(kfile)%numStrings
-              call report_descriptor_string(har%rcrd(kfile)%str(kstr),nstatus, &
-                                            localrc)
-           enddo  ! kstr
-           print*,"                                      "
-        enddo    ! kfile
-     endif
-
-     case("FAILURE")
-     ! only report failures
-     if( localPet == rootPet ) then
-        print*,"                                      "
-        print*,">----------FINAL TEST REPORT---------<"
-        nstatus = 0
-        do kfile=1,har%numRecords
-           print*,' Problem descriptor File:',  &
-                   trim(adjustL(har%rcrd(kfile)%filename))
-           print*,"                                      "
-           do kstr=1,har%rcrd(kfile)%numStrings
-              call report_descriptor_string(har%rcrd(kfile)%str(kstr),nstatus, &
-                                            localrc)
-           enddo  ! kstr
-           print*,"                                      "
-        enddo    ! kfile
-     endif
-
-     case("SUCCESS")
-        ! only report success
-     if( localPet == rootPet ) then
-        print*,"                                      "
-        print*,">----------FINAL TEST REPORT---------<"
-        nstatus = 1
-        do kfile=1,har%numRecords
-           print*,' Problem descriptor File:',  &
-                   trim(adjustL(har%rcrd(kfile)%filename))
-           print*,"                                      "
-           do kstr=1,har%rcrd(kfile)%numStrings
-              call report_descriptor_string(har%rcrd(kfile)%str(kstr),nstatus, &
-                                            localrc)
-           enddo  ! kstr
-           print*,"                                      "
-        enddo    ! kfile
-     endif
-
-     case("NONE")
-        ! no report
-  
-     case default
-     ! flag error
-     print*,"error, report flag improperly set"
-     call ESMF_LogMsgSetError( ESMF_FAILURE," report flag improperly set",     &
-               rcToReturn=returnrc)
-     return
-
-  end select  ! case of report flag
-
-  !-----------------------------------------------------------------------------
-  ! if I've gotten this far without an error, then the routine has succeeded.
-  !-----------------------------------------------------------------------------
-  returnrc = ESMF_SUCCESS
-
-  !-----------------------------------------------------------------------------
-  end subroutine TestHarnessReport
   !-----------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------

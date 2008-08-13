@@ -258,6 +258,7 @@
     integer :: k, nMem, nEnd, iBeg, iEnd
     integer :: EndPos(1)
     integer, allocatable :: MemPos(:)
+    integer :: allocRcToTest
 
     ! initialize variables
     localrc = ESMF_RC_NOT_IMPL
@@ -280,7 +281,11 @@
     else
        !------------------------------------------------------------------------
        !------------------------------------------------------------------------
-       allocate( MemPos(nMem) )
+       allocate( MemPos(nMem), stat=allocRcToTest  )
+       if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array "//        &
+          "MemPos in memory_separate", rcToReturn=localrc)) then
+       endif
+
        call pattern_locate(lstring, pattern, nMem, MemPos)
        call pattern_locate(lstring, ']', nEnd, EndPos)
 
@@ -660,7 +665,7 @@
  !------------------------------------------------------------------------------
 
     !---------------------------------------------------------------------------
-    logical function pattern_match(lstring, lcharL, lcharR)
+    logical function pattern_match(lstring, lcharL, lcharR, rc)
     !---------------------------------------------------------------------------
     ! function checks the input string and determines if there are matching 
     ! pairs of the enclosing symbols ( lcharL, lcharR) and that they are in the 
@@ -670,10 +675,12 @@
     ! arguments
     character(len=*), intent(in   ) :: lstring
     character(len=*), intent(in   ) :: lcharL, lcharR
+    integer, optional :: rc
 
     ! local variables
     integer, allocatable :: locL(:), locR(:)
     integer ::  k, ntestL, ntestR
+    integer :: allocRcToTest
     logical :: flag
 
     ! initialize variables
@@ -688,7 +695,14 @@
        !------------------------------------------------------------------------
        ! the numbers match, so now check that the order is left to right
        !------------------------------------------------------------------------
-       allocate( locL(ntestL), locR(ntestR) )
+       allocate( locL(ntestL), stat=allocRcToTest )
+       if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array "//        &
+          "locL in pattern_match", rcToReturn=rc)) then
+       endif
+       allocate( locR(ntestR), stat=allocRcToTest )
+       if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array "//        &
+          "locR in pattern_match", rcToReturn=rc)) then
+       endif
        call pattern_locate(lstring,trim(adjustL(lcharL)), ntestL, locL )
        call pattern_locate(lstring,trim(adjustL(lcharR)), ntestR, locR )
 

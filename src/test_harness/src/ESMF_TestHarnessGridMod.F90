@@ -65,14 +65,14 @@
   ! local ESMF types
   type(ESMF_Config)      :: localcf
 
-  ! local parameters
-  integer :: localrc ! local error status
-
   ! local character strings
   character(ESMF_MAXSTR) :: ltmp, lfilename
 
   ! local grid records 
   type(sized_char_array), pointer :: testfunction(:)
+
+  ! local integers variables
+  integer :: localrc ! local error status
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -110,7 +110,7 @@
   select case(trim(adjustL(ltmp)) )
 
      case('REDISTRIBUTION')
-       print*,' read grid specification for redistribution test'
+!      print*,' read grid specification for redistribution test'
        call read_redistribution_grid(lfilename, Gfile%nGspecs, Gfile%src_grid, &
                 Gfile%dst_grid,localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
@@ -178,9 +178,6 @@
   ! local esmf types
   type(ESMF_Config) :: localcf
 
-  ! local parameters
-  integer :: localrc ! local error status
-
   ! local character strings
   character(ESMF_MAXSTR) :: ltmp, lchar
   character(ESMF_MAXSTR) :: gtype, gunits
@@ -191,6 +188,8 @@
   integer :: ntmp, grank, gsize
   integer :: irow, krow, nrows, igrid, ngrid, irank, kelements
   integer, allocatable :: ncolumns(:), new_row(:)
+  integer :: localrc ! local error status
+  integer :: allocRcToTest
 
   ! local real variables
   real(ESMF_KIND_R8) :: gmin, gmax
@@ -265,7 +264,10 @@
          "cannot find config label " // trim(descriptor_label),                &
          rcToReturn=rc) ) return
 
-  allocate( ncolumns(nrows) )
+  allocate( ncolumns(nrows), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array ncolumns in "// &
+     " read_redistribution_grid", rcToReturn=rc)) then
+  endif
 
   do krow=1,nrows
      call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
@@ -298,7 +300,11 @@
   if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot find config label " // trim(descriptor_label),                &
          rcToReturn=rc) ) return
-  allocate( new_row(nrows) )
+  allocate( new_row(nrows), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array new_row "//     &
+     " in read_redistribution_grid", rcToReturn=rc)) then
+  endif
+
 
   !-----------------------------------------------------------------------------
   ! count the number of actual grids (less than or equal to number of table rows)
@@ -321,8 +327,14 @@
   ! allocate storage for the grid information, based on the calculated number of
   ! separate grid entries
   !-----------------------------------------------------------------------------
-  allocate( grid(ngrid) )
-  allocate( tmp_grid(ngrid) )
+  allocate( grid(ngrid), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array ncolumns in "// &
+     " read_redistribution_grid", rcToReturn=rc)) then
+  endif
+  allocate( tmp_grid(ngrid), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array ncolumns in "// &
+     " read_redistribution_grid", rcToReturn=rc)) then
+  endif
 
   !-----------------------------------------------------------------------------
   ! Read the grid specifications from the table:
@@ -371,16 +383,41 @@
         endif
         ! allocate workspace
         grid(igrid)%grank = grank
-        allocate( grid(igrid)%gtype(grank) )
-        allocate( grid(igrid)%gunits(grank) )
-        allocate( grid(igrid)%gsize(grank) )
-        allocate( grid(igrid)%grange(grank,2) )
+        allocate( grid(igrid)%gtype(grank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char array "//          &
+           " gtype in  read_redistribution_grid", rcToReturn=rc)) then
+        endif
+
+        allocate( grid(igrid)%gunits(grank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char array "//          &
+           " gunits in  read_redistribution_grid", rcToReturn=rc)) then
+        endif
+        allocate( grid(igrid)%gsize(grank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array "//       &
+           " gsize in  read_redistribution_grid", rcToReturn=rc)) then
+        endif
+        allocate( grid(igrid)%grange(grank,2), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "real array "//          &
+           " grange in  read_redistribution_grid", rcToReturn=rc)) then
+        endif
 
         tmp_grid(igrid)%grank = grank
-        allocate( tmp_grid(igrid)%gtype(grank) )
-        allocate( tmp_grid(igrid)%gunits(grank) )
-        allocate( tmp_grid(igrid)%gsize(grank) )
-        allocate( tmp_grid(igrid)%grange(grank,2) )
+        allocate( tmp_grid(igrid)%gtype(grank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char array "//          &
+           " gtype in  read_redistribution_grid", rcToReturn=rc)) then
+        endif
+        allocate( tmp_grid(igrid)%gunits(grank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char array "//          &
+           " gunits in  read_redistribution_grid", rcToReturn=rc)) then
+        endif
+        allocate( tmp_grid(igrid)%gsize(grank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array "//       &
+           " gsize in  read_redistribution_grid", rcToReturn=rc)) then
+        endif
+        allocate( tmp_grid(igrid)%grange(grank,2), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "real array "//          &
+           " grange in  read_redistribution_grid", rcToReturn=rc)) then
+        endif
 
 !       print*,'irow',irow
         ! read row elements until grid rank is reached
@@ -517,9 +554,6 @@
   ! local esmf types
   type(ESMF_Config) :: localcf
 
-  ! local parameters
-  integer :: localrc ! local error status
-
   ! local character strings
   character(ESMF_MAXSTR) :: ltmp, lchar
   character(ESMF_MAXSTR) :: gtype, gunits, gtag
@@ -532,6 +566,8 @@
   integer :: irow, krow, nrows, igrid, ngrid, irank, kelements
   integer :: iTFun, k
   integer, allocatable :: ncolumns(:), new_row(:)
+  integer :: localrc ! local error status
+  integer :: allocRcToTest
 
   ! local real variables
   real(ESMF_KIND_R8) :: gmin, gmax
@@ -605,7 +641,11 @@
      "cannot find config label " // trim(descriptor_label),                    &
      rcToReturn=rc) ) return
 
-  allocate( ncolumns(nrows) )
+  allocate( ncolumns(nrows), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array ncolumns"//     &
+     " in read_remapping_grid", rcToReturn=rc)) then
+  endif
+
 
   do krow=1,nrows
      call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
@@ -638,7 +678,11 @@
   if( ESMF_LogMsgFoundError(localrc,                                           &
      "cannot find config label " // trim(descriptor_label),                    &
      rcToReturn=rc) ) return
-  allocate( new_row(nrows) )
+  allocate( new_row(nrows), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array new_row"//      &
+     " in read_remapping_grid", rcToReturn=rc)) then
+  endif
+
 
   !-----------------------------------------------------------------------------
   ! count the number of actual grids (less than or equal to number of table rows)
@@ -661,7 +705,18 @@
   ! allocate storage for the grid information based on the calculated number of
   ! separate grid entries
   !-----------------------------------------------------------------------------
-  allocate( src_grid(ngrid), dst_grid(ngrid), testfunction(ngrid) )
+  allocate( src_grid(ngrid), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "grid type src_grid"//         &
+     " in read_remapping_grid", rcToReturn=rc)) then
+  endif
+  allocate( dst_grid(ngrid), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "grid type dst_grid "//        &
+     " in read_remapping_grid", rcToReturn=rc)) then
+  endif
+  allocate( testfunction(ngrid), stat=allocRcToTest  )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "test type"//                  &
+     " in read_remapping_grid", rcToReturn=rc)) then
+  endif
 
   !-----------------------------------------------------------------------------
   ! Read the grid specifications from the table:
@@ -684,7 +739,7 @@
   igrid= 0
   do krow=1,nrows
 
-     print*,'krow',krow,' new row columns',new_row(krow),ncolumns(krow) 
+!    print*,'krow',krow,' new row columns',new_row(krow),ncolumns(krow) 
 
      ! new grid specification - not continuation symbol and not end of row
      if( new_row(krow) /= 0 .and. ncolumns(krow) > 0 ) then
@@ -703,15 +758,47 @@
         endif
         ! allocate workspace
         src_grid(igrid)%grank = grank
-        allocate( src_grid(igrid)%gtype(grank) )
-        allocate( src_grid(igrid)%gunits(grank) )
-        allocate( src_grid(igrid)%gsize(grank) )
-        allocate( src_grid(igrid)%grange(grank,2) )
+        allocate( src_grid(igrid)%gtype(grank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char array "//          &
+           " gtype in read_remapping_grid", rcToReturn=rc)) then
+        endif
+
+        allocate( src_grid(igrid)%gunits(grank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char array "//          &
+           " gunits in read_remapping_grid", rcToReturn=rc)) then
+        endif
+
+        allocate( src_grid(igrid)%gsize(grank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array "//       &
+           " gsize in read_remapping_grid", rcToReturn=rc)) then
+        endif
+
+        allocate( src_grid(igrid)%grange(grank,2), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "real array "//          &
+           " grange in read_remapping_grid", rcToReturn=rc)) then
+        endif
+
         dst_grid(igrid)%grank = grank
-        allocate( dst_grid(igrid)%gtype(grank) )
-        allocate( dst_grid(igrid)%gunits(grank) )
-        allocate( dst_grid(igrid)%gsize(grank) )
-        allocate( dst_grid(igrid)%grange(grank,2) )
+        allocate( dst_grid(igrid)%gtype(grank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char array "//          &
+           " gtype in read_remapping_grid", rcToReturn=rc)) then
+        endif
+
+        allocate( dst_grid(igrid)%gunits(grank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char array "//          &
+           " grank in read_remapping_grid", rcToReturn=rc)) then
+        endif
+
+        allocate( dst_grid(igrid)%gsize(grank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array "//       &
+           " gsize in read_remapping_grid", rcToReturn=rc)) then
+        endif
+
+        allocate( dst_grid(igrid)%grange(grank,2), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "real array "//          &
+           " grange in read_remapping_grid", rcToReturn=rc)) then
+        endif
+
 
         !-----------------------------------------------------------------------
         ! Source Grid
@@ -927,7 +1014,11 @@
         !-----------------------------------------------------------------------
         ! allocate character array for test functions & copy values from work array
         !-----------------------------------------------------------------------
-        allocate( testfunction(ngrid)%tag(iTFun-1) )
+        allocate( testfunction(ngrid)%tag(iTFun-1), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type in "//             &
+           " read_remapping_grid", rcToReturn=rc)) then
+        endif
+
 
         testfunction(igrid)%tagsize = iTFun-1
 

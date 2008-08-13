@@ -42,7 +42,7 @@
 !-------------------------------------------------------------------------------
 ! PUBLIC METHODS:
 !-------------------------------------------------------------------------------
-  public report_descriptor_string
+  public report_descriptor_string, construct_descriptor_string
 
 
 
@@ -57,21 +57,22 @@
  !------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  subroutine report_descriptor_string(PDS, nstatus, localrc)
+  subroutine construct_descriptor_string(PDS, nstatus, localPet, localrc)
   !-----------------------------------------------------------------------------
-  ! routine reports the configuration 
+  ! routine constructs the test repost string and prints the test configurations
+  ! before the test commences.
   ! report string takes the form:
   ! {status}: {source string} {action} {destination string}
   !-----------------------------------------------------------------------------
   ! arguments
-  type(problem_descriptor_strings), intent(in   ) :: PDS
-  integer, intent(in   ) :: nstatus
+  type(problem_descriptor_strings), intent(inout) :: PDS
+  integer, intent(in   ) :: nstatus, localPet
   integer, intent(  out) :: localrc
 
   ! local character strings
   character(ESMF_MAXSTR) :: src_string, dst_string
   character(ESMF_MAXSTR) :: lstatus, laction, lgrid, ldist, lsuffix, ltmp
-  character(7) :: lsize, lorder, ltmpL, ltmpR  
+  character(7) :: lsize, lorder, ltmpL, ltmpR, l1, l2, l3, l4  
 
   ! local integer variables
   integer :: iDfile, iGfile, irank, iirank, igrid, idist, istatus
@@ -102,16 +103,16 @@
       ! error
   end select
 
+  ! print out result string if codes match
+  if( localPet == Harness_rootPet .and. nstatus > 0 ) then
+     print*,'( grid config, distribution config, Grid file, Distribution file)'
+  endif
 
   do iDfile=1, PDS%nDfiles    ! loop through each of the dist specifier files
   do iGfile=1, PDS%nGfiles    ! loop through each of the grid specifier files
     !---------------------------------------------------------------------------
     ! print specifier filenames
     !---------------------------------------------------------------------------
-    print*,iDfile,iGfile,'   > Specifier files:',trim(adjustL(                 &
-           PDS%Dfiles(iDfile)%filename)),                                      &
-           ', ',trim(adjustL(PDS%Gfiles(iGfile)%filename))
-
     do idist=1, PDS%Dfiles(iDfile)%nDspecs ! loop thru all dist and grid
     do igrid=1, PDS%Gfiles(iGfile)%nGspecs ! specifiers in a file
        !------------------------------------------------------------------------
@@ -244,19 +245,154 @@
       dst_string = trim(adjustL(dst_string)) // ']'
 
 
+      ! save result string to character array for later use
+      PDS%test_record(iDfile,iGfile)%test_string(idist,igrid)%string =         &
+          trim(adjustL(src_string)) // trim(adjustL(laction)) //               &
+          trim(adjustL(dst_string))
+
+      !-------------------------------------------------------------------------
       ! print out result string if codes match
-      if( istatus == nstatus .or. nstatus < 0 ) then
-         print*,trim(adjustL(lstatus)), trim(adjustL(src_string)),             &
-             trim(adjustL(laction)),trim(adjustL(dst_string))
+      !-------------------------------------------------------------------------
+      if( localPet == Harness_rootPet .and. nstatus > 0 ) then
+         write(l1,"(i6)") igrid
+         write(l2,"(i6)") idist
+         write(l3,"(i6)") iDfile
+         write(l4,"(i6)") iGfile
+         ltmp = '(' // trim(adjustL(l1)) // ',' // trim(adjustL(l2)) // ','    &
+            // trim(adjustL(l3)) // ',' //  trim(adjustL(l4)) //               &
+            ') test string=' //                                                &
+            trim(PDS%test_record(iDfile,iGfile)%test_string(idist,igrid)%string)
+         write(*,*) trim( ltmp )
       endif
+
     enddo    ! idist
     enddo    ! igrid
 
   enddo    ! iGfile
   enddo    ! iDfile
+
+  print*,'               '
+
   !-----------------------------------------------------------------------------
-  ! set destination string
+  ! if I've gotten this far without an error, then the routine has succeeded.
   !-----------------------------------------------------------------------------
+  localrc = ESMF_SUCCESS
+
+  !-----------------------------------------------------------------------------
+  end subroutine construct_descriptor_string
+  !-----------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  subroutine report_descriptor_string(PDS, iG, iD, iGfile, iDfile,             &
+                reportType, localPET, localrc)
+  !-----------------------------------------------------------------------------
+  ! routine displays the test result, followed by the problem descriptor string,
+  ! followed by the entry number and file names for the grid and distribution 
+  ! specifiers.
+  ! 
+  ! report string takes the form:
+  ! {status}: {source string} {action} {destination string}
+  !-----------------------------------------------------------------------------
+  ! arguments
+  type(problem_descriptor_strings), intent(inout) :: PDS
+  integer, intent(in   ) :: iG, iD, iDfile, iGfile
+  character(ESMF_MAXSTR), intent(in   ) :: reportType
+  integer, intent(in   ) :: localPET
+  integer, intent(  out) :: localrc
+
+  ! local character strings
+  character(ESMF_MAXSTR) :: lstatus, lout, test_string
+  character(7) :: l1, l2, lpet
+
+  ! local integer variables
+  integer :: test_status
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+
+
+  !-----------------------------------------------------------------------------
+  ! extract variables
+  !-----------------------------------------------------------------------------
+  test_string = PDS%test_record(iDfile,iGfile)%test_string(iD,iG)%string
+  test_status = PDS%test_record(iDfile,iGfile)%test_status(iD,iG)
+
+  !-----------------------------------------------------------------------------
+  ! output format 
+  !-----------------------------------------------------------------------------
+  write(l1,"(i6)") iG
+  write(l2,"(i6)") iD
+  write(lpet,"(i6)") localPET
+
+ 10  format('PET(',a,') ', a, /,'   > element=', a,' of grid file= ', a,       &
+            /,'   > element=', a,' of dist file= ', a)
+ 
+  !-----------------------------------------------------------------------------
+  ! set STATUS string
+  !-----------------------------------------------------------------------------
+  select case (trim(adjustL(reportType)))
+     case("FULL")
+     !--------------------------------------------------------------------------
+     ! report both successes and failures
+     !--------------------------------------------------------------------------
+     if( test_status == HarnessTest_SUCCESS ) then
+        lstatus = "SUCCESS:"
+        lout = trim(adjustL(lstatus)) // trim(adjustL(test_string))
+        write(*,10) trim(adjustL(lpet)), trim(adjustL(lout)),                  &
+           trim(adjustL(l1)), trim(adjustL(PDS%Gfiles(iGfile)%filename)),      &
+           trim(adjustL(l2)), trim(adjustL(PDS%Dfiles(iDfile)%filename)) 
+     elseif( test_status == HarnessTest_FAILURE ) then
+        lstatus = "FAILURE:"
+        lout = trim(adjustL(lstatus)) // trim(adjustL(test_string))
+        write(*,10) trim(adjustL(lpet)), trim(adjustL(lout)),                  &
+           trim(adjustL(l1)), trim(adjustL(PDS%Gfiles(iGfile)%filename)),      &
+           trim(adjustL(l2)), trim(adjustL(PDS%Dfiles(iDfile)%filename)) 
+     else
+        ! error
+        call ESMF_LogMsgSetError( ESMF_FAILURE,"invalid test status value ",   &
+             rcToReturn=localrc)
+        return
+     endif
+
+     case("FAILURE")
+     !--------------------------------------------------------------------------
+     ! only report failures
+     !--------------------------------------------------------------------------
+     if( test_status == HarnessTest_FAILURE ) then
+        lstatus = "FAILURE:"
+        lout = trim(adjustL(lstatus)) // trim(adjustL(test_string))
+        write(*,10) trim(adjustL(lpet)), trim(adjustL(lout)),                  &
+           trim(adjustL(l1)), trim(adjustL(PDS%Gfiles(iGfile)%filename)),      &
+           trim(adjustL(l2)), trim(adjustL(PDS%Dfiles(iDfile)%filename)) 
+     endif
+     
+     case("SUCCESS")
+     !--------------------------------------------------------------------------
+     ! only report success
+     !--------------------------------------------------------------------------
+     if( test_status == HarnessTest_SUCCESS ) then
+        lstatus = "SUCCESS:"
+        lout = trim(adjustL(lstatus)) // trim(adjustL(test_string))
+        write(*,10) trim(adjustL(lpet)), trim(adjustL(lout)),                  &
+           trim(adjustL(l1)), trim(adjustL(PDS%Gfiles(iGfile)%filename)),      &
+           trim(adjustL(l2)), trim(adjustL(PDS%Dfiles(iDfile)%filename)) 
+     endif
+
+     case("NONE")
+     !--------------------------------------------------------------------------
+     ! no report
+     !--------------------------------------------------------------------------
+  
+     case default
+     ! error
+     print*,"error, report flag improperly set"
+     call ESMF_LogMsgSetError( ESMF_FAILURE," report flag improperly set",     &
+               rcToReturn=localrc)
+     return
+
+  end select  ! case of report flag
 
   !-----------------------------------------------------------------------------
   ! if I've gotten this far without an error, then the routine has succeeded.

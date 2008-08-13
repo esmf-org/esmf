@@ -101,8 +101,7 @@
   integer :: counter, sanity_counter, out_counter
   integer, allocatable :: ncolumns(:), new_row(:)
   integer :: numOp(8)  ! dimensioned 8 = allowable number of operators
-
-
+  integer :: allocRcToTest
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -172,7 +171,10 @@
          "cannot find config label " // trim(distribution_label),              &
          rcToReturn=rc) ) return
 
-  allocate( ncolumns(nrows) )
+  allocate( ncolumns(nrows), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array ncolumns in "// &
+     " read_dist_specification", rcToReturn=rc)) then
+  endif
 
   do krow=1,nrows
      call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
@@ -205,7 +207,11 @@
   if( ESMF_LogMsgFoundError(localrc,"cannot find config label " //             &
           trim(distribution_label),rcToReturn=rc) ) return
 
-  allocate( new_row(nrows) )
+  allocate( new_row(nrows), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array new_row "//     &
+     " in read_dist_specification", rcToReturn=rc)) then
+  endif
+
 
   !-----------------------------------------------------------------------------
   ! count the number of actual grids (less than or equal to number of table rows)
@@ -228,7 +234,14 @@
   ! allocate storage for the dist information based on the calculated number of
   ! separate grid entries
   !-----------------------------------------------------------------------------
-  allocate( Dfile%src_dist(Dfile%nDspecs), Dfile%dst_dist(Dfile%nDspecs) )
+  allocate( Dfile%src_dist(Dfile%nDspecs), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array src_dist "//    &
+     " in read_dist_specification", rcToReturn=rc)) then
+  endif
+  allocate( Dfile%dst_dist(Dfile%nDspecs), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array dst_dist "//    &
+     " in read_dist_specification", rcToReturn=rc)) then
+  endif
 
   !-----------------------------------------------------------------------------
   ! Read the specifications from the table:
@@ -308,7 +321,10 @@
        return
     endif
 
-    allocate( Dfile%src_dist(idist)%dsize(SrcMem%memRank) )
+    allocate( Dfile%src_dist(idist)%dsize(SrcMem%memRank), stat=allocRcToTest )
+    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array dsize "//    &
+       " in read_dist_specification", rcToReturn=rc)) then
+    endif
     Dfile%src_dist(idist)%drank = src_rank
 
 
@@ -454,7 +470,10 @@
        return
     endif
 
-    allocate( Dfile%dst_dist(idist)%dsize(DstMem%memRank) )
+    allocate( Dfile%dst_dist(idist)%dsize(DstMem%memRank), stat=allocRcToTest )
+    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array dsize "//    &
+       " in read_dist_specification", rcToReturn=rc)) then
+    endif
     Dfile%dst_dist(idist)%drank = dst_rank
 
     !---------------------------------------------------------------------------
@@ -703,7 +722,6 @@
   end subroutine dist_size
   !-----------------------------------------------------------------------------
 
-!-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 
 !===============================================================================

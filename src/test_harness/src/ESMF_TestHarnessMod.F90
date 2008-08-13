@@ -36,6 +36,7 @@
 
   use ESMF_Mod
   use ESMF_TestHarnessTypesMod
+  use ESMF_TestHarnessReportMod
   use ESMF_TestHarnessUtilMod
 
 
@@ -131,6 +132,7 @@
   integer, allocatable :: kcount(:), ncolumns(:), nstrings(:)
   integer, allocatable :: pds_loc(:), pds_flag(:)
   integer :: localrc
+  integer :: allocRcToTest
 
 ! local logical variable
   logical :: endflag = .false.
@@ -143,7 +145,10 @@
   ! open each problem descriptor and extract the contents of the table
   ! containing the problem descriptor strings and the specifier filenames
   !-----------------------------------------------------------------------------
-  allocate( nstrings(numRecords) )
+  allocate( nstrings(numRecords), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array "//             &
+     " nstrings in read_descriptor_files", rcToReturn=rc)) then
+  endif
 
   do kfile=1,numRecords
     !---------------------------------------------------------------------------
@@ -195,8 +200,14 @@
     if( ESMF_LogMsgFoundError(localrc, "cannot find config label" //           &
            trim(adjustL(descriptor_label)), rcToReturn=rc) ) return
 
-    allocate( ncolumns(nstrings(kfile)) )
-    allocate ( ltmpstring(nstrings(kfile)) )
+    allocate( ncolumns(nstrings(kfile)), stat=allocRcToTest )
+    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array "//           &
+       " nstrings in read_descriptor_files", rcToReturn=rc)) then
+    endif
+    allocate ( ltmpstring(nstrings(kfile)), stat=allocRcToTest )
+    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//                    &
+       " ltmpstring in read_descriptor_files", rcToReturn=rc)) then
+    endif
 
     do kstr=1,nstrings(kfile)
       call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
@@ -216,7 +227,10 @@
       !-------------------------------------------------------------------------
       ! allocate tempory storage so that the file needs to be read only once
       !-------------------------------------------------------------------------
-      allocate ( ltmpstring(kstr)%tag( ncolumns(kstr) ) )
+      allocate ( ltmpstring(kstr)%tag( ncolumns(kstr) ), stat=allocRcToTest )
+      if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//                  &
+         " ltmpstring in read_descriptor_files", rcToReturn=rc)) then
+      endif
       ltmpstring(kstr)%tagsize = ncolumns(kstr)
     enddo    ! end string
 
@@ -255,7 +269,11 @@
     !---------------------------------------------------------------------------
     ncount = 0
     npds = 0
-    allocate( pds_flag(nstrings(kfile)) )
+    allocate( pds_flag(nstrings(kfile)), stat=allocRcToTest )
+    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//                    &
+       " pdf_flag in read_descriptor_files", rcToReturn=rc)) then
+    endif
+
     do kstr=1,nstrings(kfile)
        if( trim(adjustL(ltmpstring(kstr)%tag(1)%string)) /= "&") then
          pds_flag(kstr) = 1         
@@ -284,7 +302,11 @@
     ! save the addresses of the non-continuation lines
     !---------------------------------------------------------------------------
     k = 0
-    allocate( pds_loc(npds) )
+    allocate( pds_loc(npds), stat=allocRcToTest )
+    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//                    &
+       " pds_loc in read_descriptor_files", rcToReturn=rc)) then
+    endif
+
     do kstr=1,nstrings(kfile)
        if( pds_flag(kstr) == 1 ) then
          k = k + 1
@@ -311,7 +333,11 @@
     ! type of lines to that we can allocate enough memory to store the whole 
     ! specification.
     !---------------------------------------------------------------------------
-    allocate( kcount(npds) )
+    allocate( kcount(npds), stat=allocRcToTest )
+    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//        &
+       " kcount in read_descriptor_files", rcToReturn=rc)) then
+    endif
+
     do k=1,npds
       if( trim( ltmpstring( pds_loc(k) )%tag(1)%string ) == "&") then
         write(lchar,"(i5)")   pds_loc(k)
@@ -344,9 +370,16 @@
     !---------------------------------------------------------------------------
     ! create reshaped workspace to hold the problem descriptor table contents
     !---------------------------------------------------------------------------
-    allocate ( lstring(npds) )    
+    allocate ( lstring(npds), stat=allocRcToTest )    
+    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//                    &
+       " lstring in read_descriptor_files", rcToReturn=rc)) then
+    endif
+
     do k=1, npds
-      allocate ( lstring(k)%tag(kcount(k)) )    
+      allocate ( lstring(k)%tag(kcount(k)), stat=allocRcToTest )    
+      if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//                  &
+         " lstring tag in read_descriptor_files", rcToReturn=rc)) then
+      endif
 
       do n=1,ncolumns(pds_loc(k))
         lstring(k)%tag(n)%string = trim( ltmpstring(pds_loc(k))%tag(n)%string )
@@ -379,7 +412,10 @@
     !---------------------------------------------------------------------------
     ! mine the table entries for the problem descriptor strings
     !---------------------------------------------------------------------------
-    allocate( rcrd(kfile)%str(npds) )
+    allocate( rcrd(kfile)%str(npds), stat=allocRcToTest )
+    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//                    &
+       " rcrd string in read_descriptor_files", rcToReturn=rc)) then
+    endif
     do k=1,npds
        rcrd(kfile)%str(k)%pds = trim( lstring(k)%tag(1)%string )
     enddo     ! k
@@ -432,10 +468,14 @@
            endflag = .false.
          endif
 
-         allocate( rcrd(kfile)%str(k)%classfile%tag(csize) )
+         allocate( rcrd(kfile)%str(k)%classfile%tag(csize), stat=allocRcToTest )
+         if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//               &
+            " rcrd tag in read_descriptor_files", rcToReturn=rc)) then
+         endif
+
          rcrd(kfile)%str(k)%classfile%tagsize = csize
          do n=1,csize
-           rcrd(kfile)%str(k)%classfile%tag(n)%string =                 &
+           rcrd(kfile)%str(k)%classfile%tag(n)%string =                        &
                                  trim(adjustL( lstring(k)%tag(cpos+n)%string ))
          enddo      ! n
          cflag = .true.
@@ -470,10 +510,14 @@
            endflag =.false. 
          endif
 
-         allocate( rcrd(kfile)%str(k)%Dfiles(dsize) )
+         allocate( rcrd(kfile)%str(k)%Dfiles(dsize), stat=allocRcToTest )
+         if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//               &
+            " rcrd Dfiles in read_descriptor_files", rcToReturn=rc)) then
+         endif
+
          rcrd(kfile)%str(k)%nDfiles = dsize
          do n=1,dsize
-           rcrd(kfile)%str(k)%Dfiles(n)%filename =                      &
+           rcrd(kfile)%str(k)%Dfiles(n)%filename =                             &
                                trim(adjustL( lstring(k)%tag(dpos+n)%string ))
          enddo      ! n
          dflag = .true.
@@ -507,10 +551,14 @@
            endflag = .false.
          endif  
 
-         allocate( rcrd(kfile)%str(k)%Gfiles(gsize) )
+         allocate( rcrd(kfile)%str(k)%Gfiles(gsize), stat=allocRcToTest )
+         if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//               &
+            " rcrd Gfiles in read_descriptor_files", rcToReturn=rc)) then
+         endif
+
          rcrd(kfile)%str(k)%nGfiles = gsize
          do n=1,gsize
-           rcrd(kfile)%str(k)%Gfiles(n)%filename =                      &
+           rcrd(kfile)%str(k)%Gfiles(n)%filename =                             &
                              trim(adjustL(lstring(k)%tag(gpos+n)%string))
          enddo     ! n
          gflag = .true.
@@ -612,6 +660,7 @@
   integer :: src_mem_rank, dst_mem_rank
   integer :: dist_rank, grid_rank
   integer :: localrc
+  integer :: allocRcToTest
 
   integer, allocatable :: grid_order(:), dist_order(:)
   integer, allocatable :: grid_HaloL(:), grid_HaloR(:)
@@ -705,22 +754,67 @@
         !-----------------------------------------------------------------------
         ! create work space for parsing the source descriptor string
         !-----------------------------------------------------------------------
-        allocate( lsrc(src_mem_rank+1) )
-        allocate( grid_order(src_mem_rank) )
-        allocate( grid_type(src_mem_rank) )      
-        allocate( grid_HaloL(src_mem_rank) )
-        allocate( grid_HaloR(src_mem_rank) )
-        allocate( grid_StagLoc(src_mem_rank) )    
-        allocate( dist_order(src_mem_rank) )      
-        allocate( dist_type(src_mem_rank) )      
+        allocate( lsrc(src_mem_rank+1), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//                &
+           " lsrc in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( grid_order(src_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " grid_order in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( grid_type(src_mem_rank), stat=allocRcToTest )      
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char variable "//       &
+           " grid_type in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( grid_HaloL(src_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " grid_HaloL in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( grid_HaloR(src_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " grid_HaloR in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( grid_StagLoc(src_mem_rank), stat=allocRcToTest )    
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " grid_StagLoc in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( dist_order(src_mem_rank), stat=allocRcToTest )      
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " dist_order in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( dist_type(src_mem_rank), stat=allocRcToTest )      
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char variable "//       &
+           " dist_type in parse_descriptor_string", rcToReturn=rc)) then
+        endif
 
-        allocate( pds%SrcMem%GridType(src_mem_rank) )
-        allocate( pds%SrcMem%DistType(src_mem_rank) )
-        allocate( pds%SrcMem%GridOrder(src_mem_rank) )
-        allocate( pds%SrcMem%DistOrder(src_mem_rank) )
-        allocate( pds%SrcMem%HaloL(src_mem_rank) )
-        allocate( pds%SrcMem%HaloR(src_mem_rank) )
-        allocate( pds%SrcMem%StagLoc(src_mem_rank) )
+        allocate( pds%SrcMem%GridType(src_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char variable "//       &
+           " GridType in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( pds%SrcMem%DistType(src_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char variable "//       &
+           " DistType in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( pds%SrcMem%GridOrder(src_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " GridOrder in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( pds%SrcMem%DistOrder(src_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " DistOrder in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( pds%SrcMem%HaloL(src_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " HaloL in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( pds%SrcMem%HaloR(src_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " HaloR in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( pds%SrcMem%StagLoc(src_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " StagLoc in parse_descriptor_string", rcToReturn=rc)) then
+        endif
 
         !-----------------------------------------------------------------------
         ! partition the source descriptor string into separate parts which
@@ -764,22 +858,67 @@
         !-----------------------------------------------------------------------
         ! create work space for parsing the destination descriptor string
         !-----------------------------------------------------------------------
-        allocate( ldst(dst_mem_rank+1) )
-        allocate( grid_order(dst_mem_rank) )
-        allocate( grid_type(dst_mem_rank) )
-        allocate( grid_HaloL(dst_mem_rank) )
-        allocate( grid_HaloR(dst_mem_rank) )
-        allocate( grid_StagLoc(dst_mem_rank) )    
-        allocate( dist_order(dst_mem_rank) )
-        allocate( dist_type(dst_mem_rank) )      
+        allocate( ldst(dst_mem_rank+1), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//                &
+           " ldst in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( grid_order(dst_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " grid_order in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( grid_type(dst_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char variable "//       &
+           " grid_type in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( grid_HaloL(dst_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " grid_HaloL in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( grid_HaloR(dst_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " grid_HaloR in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( grid_StagLoc(dst_mem_rank), stat=allocRcToTest )    
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " grid_StagLoc in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( dist_order(dst_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " dist_order in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( dist_type(dst_mem_rank), stat=allocRcToTest )      
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char variable "//       &
+           " dist_type in parse_descriptor_string", rcToReturn=rc)) then
+        endif
 
-        allocate( pds%DstMem%GridOrder(dst_mem_rank) )
-        allocate( pds%DstMem%DistOrder(dst_mem_rank) )
-        allocate( pds%DstMem%GridType(dst_mem_rank) )
-        allocate( pds%DstMem%DistType(dst_mem_rank) )
-        allocate( pds%DstMem%HaloL(dst_mem_rank) )
-        allocate( pds%DstMem%HaloR(dst_mem_rank) )
-        allocate( pds%DstMem%StagLoc(dst_mem_rank) )
+        allocate( pds%DstMem%GridOrder(dst_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " GridOrder in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( pds%DstMem%DistOrder(dst_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " DistOrder in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( pds%DstMem%GridType(dst_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char variable "//       &
+           " GridType in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( pds%DstMem%DistType(dst_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char variable "//       &
+           " DistType in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( pds%DstMem%HaloL(dst_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " HaloL in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( pds%DstMem%HaloR(dst_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " HaloR in parse_descriptor_string", rcToReturn=rc)) then
+        endif
+        allocate( pds%DstMem%StagLoc(dst_mem_rank), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " StagLoc in parse_descriptor_string", rcToReturn=rc)) then
+        endif
 
         !-----------------------------------------------------------------------
         ! partition the destination descriptor string into separate parts
@@ -845,13 +984,15 @@
 !-------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  subroutine array_redist_test(PDS, VM, rc)
+  subroutine array_redist_test(PDS, test_failure, reportType, VM, rc)
   !-----------------------------------------------------------------------------
   !
   !-----------------------------------------------------------------------------
   ! arguments
   type(problem_descriptor_strings), intent(inout) :: PDS
+  character(ESMF_MAXSTR), intent(in   ) :: reportType 
   type(ESMF_VM), intent(in   ) :: VM
+  integer, intent(inout) :: test_failure
   integer, intent(  out) :: rc
 
   ! local parameters
@@ -866,13 +1007,14 @@
   integer :: localrc ! local error status
   integer :: iDfile, iGfile, iD, iG
   integer :: test_status
+  integer :: localPET
 
   ! local characters
   character(ESMF_MAXSTR) :: liG, liD
 
   ! debug
   real(ESMF_KIND_R8), pointer :: fptr2(:,:)
-  integer :: i1,i2,de, localDeCount, dimCount 
+  integer :: i1, i2, de, localDeCount, dimCount 
   integer, allocatable ::  localDeList(:)
   type(ESMF_LocalArray), allocatable :: larrayList(:)
   integer, allocatable :: LBnd(:,:), UBnd(:,:) 
@@ -882,42 +1024,42 @@
   localrc = ESMF_RC_NOT_IMPL
   rc = ESMF_RC_NOT_IMPL
 
+  ! initialize test counter
+  test_failure = 0
+
   !-----------------------------------------------------------------------------
   ! for a single problem descriptor string, loop through each specifier file
   ! combination
   !-----------------------------------------------------------------------------
   print*,'                                 '
   print*,'-----------------======array redist test==========-----------------------'
-  print*,'PDS%nDfiles  PDS%nGfiles  PDS%Dfiles%nDspecs  PDS%Gfiles%nGspecs ', &
-     PDS%nDfiles, PDS%nGfiles, PDS%Dfiles%nDspecs, PDS%Gfiles%nGspecs
-
 
   do iDfile=1,PDS%nDfiles         ! distribution specifier files
     do iGfile=1,PDS%nGfiles       ! grid specifier files
       do iD=1, PDS%Dfiles(iDfile)%nDspecs   ! entries in distribution specifier
         do iG=1, PDS%Gfiles(iGfile)%nGspecs ! entries in grid specifier file
 
-     print*,'                                 '
-     print*,'-----------------=====create objects===========-----------------------'
-     print*,' iG, iD, iGfile, iDfile ',iG,iD,iGfile,iDfile
-     print*,'                                 '
+!    print*,'                                 '
+!    print*,'-----------------=====create objects===========-----------------------'
+!    print*,' iG, iD, iGfile, iDfile ',iG,iD,iGfile,iDfile
+!    print*,'                                 '
           !---------------------------------------------------------------------
           ! Create Source objects
           !---------------------------------------------------------------------
-        print*, &
-         ' Source grid/dist/memory rank ', &
-          pds%SrcMem%GridRank,pds%SrcMem%DistRank,pds%SrcMem%memRank
-        print*, &
-         ' Destination grid/dist/memory rank ', &
-          pds%DstMem%GridRank,pds%DstMem%DistRank,pds%DstMem%memRank
+!       print*, &
+!        ' Source grid/dist/memory rank ', &
+!         pds%SrcMem%GridRank,pds%SrcMem%DistRank,pds%SrcMem%memRank
+!       print*, &
+!        ' Destination grid/dist/memory rank ', &
+!         pds%DstMem%GridRank,pds%DstMem%DistRank,pds%DstMem%memRank
 
           !---------------------------------------------------------------------
           ! create source and destination distributions
           !---------------------------------------------------------------------
-          print*,'> create source return distributions '
+!         print*,'> create source return distributions '
           call create_distribution(PDS%SrcMem, PDS%Dfiles(iDfile)%src_dist(iD),&
                     PDS%Gfiles(iGfile)%src_grid(iG), src_distgrid, VM, localrc)
-          print*,'               '
+!         print*,'               '
           write(liG,"(i5)") iG 
           write(liD,"(i5)") iD 
           if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
@@ -931,7 +1073,7 @@
           !---------------------------------------------------------------------
           ! create source array
           !---------------------------------------------------------------------
-          print*,'> create src_array '
+!         print*,'> create src_array '
           call create_array(src_array, src_distgrid, PDS%SrcMem,               &
                       PDS%Gfiles(iGfile)%src_grid(iG), localrc)
           if (ESMF_LogMsgFoundError(localrc,"error creating source array "     &
@@ -953,7 +1095,7 @@
           !---------------------------------------------------------------------
           ! create return array
           !---------------------------------------------------------------------
-          print*,'> create return_array '
+!         print*,'> create return_array '
           call create_array(return_array, src_distgrid, PDS%SrcMem,            &
                       PDS%Gfiles(iGfile)%src_grid(iG), localrc)
           if (ESMF_LogMsgFoundError(localrc,"error creating return array "     &
@@ -1015,8 +1157,8 @@
           !---------------------------------------------------------------------
           ! Create Destination distribution and array
           !---------------------------------------------------------------------
-          print*,'> create destination distribution'
-          print*,'               '
+!         print*,'> create destination distribution'
+!         print*,'               '
           call create_distribution(PDS%DstMem, PDS%Dfiles(iDfile)%dst_dist(iD),&
                     PDS%Gfiles(iGfile)%dst_grid(iG), dst_distgrid, VM, localrc)
           write(liG,"(i5)") iG 
@@ -1029,7 +1171,7 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
-          print*,'> create dst_array'
+!         print*,'> create dst_array'
           call create_array(dst_array, dst_distgrid, PDS%DstMem,               &
                       PDS%Gfiles(iGfile)%dst_grid(iG), localrc)
           if (ESMF_LogMsgFoundError(localrc,"error creating destinationarray " &
@@ -1058,7 +1200,7 @@
           !---------------------------------------------------------------------
           ! redistribution store for forward direction
           !---------------------------------------------------------------------
-          print*,'> run forward redist store'
+!         print*,'> run forward redist store'
           call ESMF_ArrayRedistStore(srcArray=src_array, dstArray=dst_array,   &
                    routehandle=redistHandle_forward, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
@@ -1067,7 +1209,7 @@
           !---------------------------------------------------------------------
           ! forward redistribution run
           !---------------------------------------------------------------------
-          print*,'> run forward redist '
+!         print*,'> run forward redist '
           call ESMF_ArrayRedist(srcArray=src_array, dstArray=dst_array,        &
                    routehandle=redistHandle_forward, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
@@ -1076,7 +1218,7 @@
           !---------------------------------------------------------------------
           ! release redistribution handles
           !---------------------------------------------------------------------
-          print*,' release forward routehandle'
+!         print*,' release forward routehandle'
           call ESMF_ArrayRedistRelease(routehandle=redistHandle_forward,       &
                    rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
@@ -1085,7 +1227,7 @@
           !---------------------------------------------------------------------
           ! redistribution store for reverse direction
           !---------------------------------------------------------------------
-          print*,'> run backward redist store'
+!         print*,'> run backward redist store'
           call ESMF_ArrayRedistStore(srcArray=dst_array, dstArray=return_array,&
                    routehandle=redistHandle_reverse, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
@@ -1094,7 +1236,7 @@
           !---------------------------------------------------------------------
           ! forward redistribution run
           !---------------------------------------------------------------------
-          print*,'> run backward redist '
+!         print*,'> run backward redist '
           call ESMF_ArrayRedist(srcArray=dst_array, dstArray=return_array,     &
                    routehandle=redistHandle_reverse, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
@@ -1103,7 +1245,7 @@
           !---------------------------------------------------------------------
           ! release redistribution handles
           !---------------------------------------------------------------------
-          print*,' release reverse routehandle'
+!         print*,' release reverse routehandle'
           call ESMF_ArrayRedistRelease(routehandle=redistHandle_reverse,       &
                    rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
@@ -1115,7 +1257,7 @@
           !---------------------------------------------------------------------
           ! compare source array values with the return array values
           !---------------------------------------------------------------------
-          print*,'> compare arrays'
+!         print*,'> compare arrays'
           call compare_redist_array(test_status,                               & 
                   src_array, return_array, src_distgrid, src_distgrid,         &
                   PDS%SrcMem, PDS%Gfiles(iGfile)%src_grid(iG), localrc)
@@ -1123,13 +1265,27 @@
                   " comparison failed ", rcToReturn=rc)) return
 
           PDS%test_record(iDfile,iGfile)%test_status(iD,iG) = test_status
+
+          if( test_status == HarnessTest_FAILURE ) then 
+             test_failure = test_failure + 1
+          endif
+
+          call ESMF_VMGet(VM, localPet=localPET, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"can not get local pet ",          &
+                  rcToReturn=rc)) return
+
+          call report_descriptor_string(PDS, iG, iD, iGfile, iDfile,           &
+                                        reportType, localPET, localrc)
+          if (ESMF_LogMsgFoundError(localrc,"redistribution array " //         &
+                  " test report failed ", rcToReturn=rc)) return
+
   !-----------------------------------------------------------------------------
   ! Clean up!!!!!!
   !-----------------------------------------------------------------------------
           !---------------------------------------------------------------------
           ! Destroy Array objects before moving to next test
           !---------------------------------------------------------------------
-          print*,' destroy arrays '
+!         print*,' destroy arrays '
           call ESMF_ArrayDestroy(src_array, rc=localrc) ! original source
           if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_array",     &
              rcToReturn=rc)) return
@@ -1145,7 +1301,7 @@
           !---------------------------------------------------------------------
           ! Destroy DistGrid objects before running next test
           !---------------------------------------------------------------------
-          print*,' destroy distgrids '
+!         print*,' destroy distgrids '
           call ESMF_DistGridDestroy(src_distgrid, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
              rcToReturn=rc)) return
@@ -1193,6 +1349,7 @@
 
   ! local parameters
   integer :: localrc ! local error status
+  integer :: allocRcToTest
 
   ! local integer variables
   integer :: k, nconnect
@@ -1213,9 +1370,26 @@
   ! allocate input arrays with size of the grid rank - since dist rank is now
   ! equal to the size of Grid Rank, with any dist missing dimensions set to one.
   !-----------------------------------------------------------------------------
-  allocate( BIndx(Memory%GridRank), EIndx(Memory%GridRank) )
-  allocate( decompOrder(Memory%GridRank), decompType(Memory%GridRank) )
-  allocate( connectionList(3*Memory%GridRank+2,1) )
+  allocate( BIndx(Memory%GridRank), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+     " BIndx in create_distribution", rcToReturn=rc)) then
+  endif
+  allocate( EIndx(Memory%GridRank), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+     " EIndx in create_distribution", rcToReturn=rc)) then
+  endif
+  allocate( decompOrder(Memory%GridRank), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+     " decompOrder in create_distribution", rcToReturn=rc)) then
+  endif
+  allocate( decompType(Memory%GridRank), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "Type "//                &
+     " decompType in create_distribution", rcToReturn=rc)) then
+  endif
+  allocate( connectionList(3*Memory%GridRank+2,1), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+     " connectionList in create_distribution", rcToReturn=rc)) then
+  endif
 
   !-----------------------------------------------------------------------------
   ! fill input arrays:
@@ -1281,8 +1455,18 @@
     ! singlely periodic domain
     noconnections = .FALSE. 
     ! workspace
-    allocate( repetitionVector(Memory%memRank) )
-    allocate( positionVector(Memory%memRank),orientationVector(Memory%memRank) )
+    allocate( repetitionVector(Memory%memRank), stat=allocRcToTest )
+    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//        &
+       " repetitionVector in create_distribution", rcToReturn=rc)) then
+    endif
+    allocate( positionVector(Memory%memRank), stat=allocRcToTest )
+    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//        &
+       " positionVector in create_distribution", rcToReturn=rc)) then
+    endif
+    allocate( orientationVector(Memory%memRank), stat=allocRcToTest )
+    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//        &
+       " orientationVector in create_distribution", rcToReturn=rc)) then
+    endif
 
     do k=1, Memory%GridRank
       positionVector(k) = 0
@@ -1375,14 +1559,13 @@
   ! local ESMF types
   type(ESMF_ArraySpec) :: ArraySpec
 
-  ! local parameters
-  integer :: localrc ! local error status
-
   ! local integer variables
   integer :: irank, k, tensorsize
   integer, allocatable :: haloL(:), haloR(:)
   integer, allocatable :: top(:), bottom(:)
 ! integer, allocatable :: map(:)
+  integer :: localrc ! local error status
+  integer :: allocRcToTest
 
   ! local logicals
   logical :: nohaloflag
@@ -1469,7 +1652,14 @@
         ! Memory Rank > Grid Rank, so there are tensor dimensions
         !-----------------------------------------------------------------------
         tensorsize = Memory%memRank-Memory%GridRank
-        allocate( top(tensorsize), bottom(tensorsize) )
+        allocate( top(tensorsize), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " top in create_array", rcToReturn=rc)) then
+        endif
+        allocate( bottom(tensorsize), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " bottom in create_array", rcToReturn=rc)) then
+        endif
 
         print*,'Tensor dims ',tensorsize,' - Memory Rank > Grid Rank ',        &
                Memory%memRank, Memory%GridRank
@@ -1501,7 +1691,15 @@
   ! else if halo is specified, create an array with halo padding by setting
   ! totalLWith and totalRwidth
   !-----------------------------------------------------------------------------
-     allocate( haloL(Memory%memRank), haloR(Memory%memRank) )
+     allocate( haloL(Memory%memRank), stat=allocRcToTest )
+     if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//       &
+        " haloL in create_array", rcToReturn=rc)) then
+     endif
+     allocate( haloR(Memory%memRank), stat=allocRcToTest )
+     if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//       &
+        " haloR in create_array", rcToReturn=rc)) then
+     endif
+
      do k=1,Memory%GridRank
         haloL(k) = Memory%HaloL(k)
         haloR(k) = Memory%HaloR(k)
@@ -1525,7 +1723,7 @@
         !-----------------------------------------------------------------------
         ! Memory Rank = Grid Rank
         !-----------------------------------------------------------------------
-        print*,'Memory Rank = Grid Rank ',Memory%memRank, Memory%GridRank
+!       print*,'Memory Rank = Grid Rank ',Memory%memRank, Memory%GridRank
         Array = ESMF_ArrayCreate(arrayspec=ArraySpec, distgrid=DistGrid,       &
                      totalLWidth=HaloL, totalUWidth=HaloR,                     &
                      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
@@ -1538,10 +1736,17 @@
         ! Memory Rank > Grid Rank, so there are tensor dimensions
         !-----------------------------------------------------------------------
         tensorsize = Memory%memRank-Memory%GridRank
-        allocate( top(tensorsize), bottom(tensorsize) )
+        allocate( top(tensorsize), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " top in create_array", rcToReturn=rc)) then
+        endif
+        allocate( bottom(tensorsize), stat=allocRcToTest )
+        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//    &
+           " bottom in create_array", rcToReturn=rc)) then
+        endif
 
-        print*,'Tensor dims ',tensorsize,' - Memory Rank > Grid Rank ',        &
-               Memory%memRank, Memory%GridRank
+!       print*,'Tensor dims ',tensorsize,' - Memory Rank > Grid Rank ',        &
+!              Memory%memRank, Memory%GridRank
 
         !-----------------------------------------------------------------------
         ! specify the bounds of the undistributed dimension(s).
@@ -1561,7 +1766,7 @@
 
         deallocate( top, bottom )
      else
-        print*,'error - Memory Rank < Grid Rank'
+!       print*,'error - Memory Rank < Grid Rank'
         call ESMF_LogMsgSetError( ESMF_FAILURE,"memory rank < Grid rank not"// &
                "supported ",rcToReturn=localrc)
         return
@@ -1619,6 +1824,7 @@
   integer :: irank, k, tensorsize, fsize(7)
   integer, allocatable :: haloL(:), haloR(:)
   integer, allocatable :: top(:), bottom(:)
+  integer :: allocRcToTest
 
   ! local real variables
   real(ESMF_KIND_R8), pointer :: fptr1(:), fptr2(:,:)
@@ -1640,12 +1846,18 @@
   if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
           rcToReturn=rc)) return
 
-  allocate(localDeList(localDeCount))
+  allocate(localDeList(localDeCount), stat=allocRcToTest)
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//          &
+     " localDeList in populate_redist_array", rcToReturn=rc)) then
+  endif
   call ESMF_ArrayGet(array, localDeList=localDeList, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
 
-  allocate(larrayList(localDeCount))
+  allocate(larrayList(localDeCount), stat=allocRcToTest)
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//                      &
+     " larrayList in populate_redist_array", rcToReturn=rc)) then
+  endif
   call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
           rcToReturn=rc)) return
@@ -1658,8 +1870,14 @@
   if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
           rcToReturn=rc)) return
   
-  allocate(UBnd(dimCount, localDeCount))
-  allocate(LBnd(dimCount, localDeCount))  
+  allocate(UBnd(dimCount, localDeCount), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//          &
+     " UBnd in populate_redist_array", rcToReturn=rc)) then
+  endif
+  allocate(LBnd(dimCount, localDeCount), stat=allocRcToTest )  
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable "//          &
+     " LBnd in populate_redist_array", rcToReturn=rc)) then
+  endif
 
   call ESMF_ArrayGet(array, indexflag=indexflag,                               &
            exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
@@ -1877,9 +2095,6 @@
   type(ESMF_LocalArray), allocatable :: larrayList(:)
   type(ESMF_IndexFlag) :: indexflag
 
-  ! local parameters
-  integer :: localrc ! local error status
-
   ! local integer variables
   integer :: de, localDeCount, dimCount 
   integer, allocatable ::  localDeList(:)
@@ -1888,6 +2103,8 @@
   integer :: irank, k, tensorsize, fsize(7)
   integer, allocatable :: haloL(:), haloR(:)
   integer, allocatable :: top(:), bottom(:)
+  integer :: localrc ! local error status
+  integer :: allocRcToTest
 
   ! local real variables
   real(ESMF_KIND_R8), pointer :: fptr1(:), fptr2(:,:)
@@ -1909,12 +2126,18 @@
   if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
           rcToReturn=rc)) return
 
-  allocate(localDeList(localDeCount))
+  allocate(localDeList(localDeCount), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable"//           &
+     " localDeList in populate_array_value", rcToReturn=rc)) then
+  endif
   call ESMF_ArrayGet(array, localDeList=localDeList, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
 
-  allocate(larrayList(localDeCount))
+  allocate(larrayList(localDeCount), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type "//                      &
+     " larrayList in populate_array_value", rcToReturn=rc)) then
+  endif
   call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
           rcToReturn=rc)) return
@@ -1927,8 +2150,14 @@
   if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
           rcToReturn=rc)) return
   
-  allocate(UBnd(dimCount, localDeCount))
-  allocate(LBnd(dimCount, localDeCount))  
+  allocate(UBnd(dimCount, localDeCount), stat=allocRcToTest)
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable"//           &
+     " UBnd in populate_array_value", rcToReturn=rc)) then
+  endif
+  allocate(LBnd(dimCount, localDeCount), stat=allocRcToTest)  
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable"//           &
+     " LBnd in populate_array_value", rcToReturn=rc)) then
+  endif
 
   call ESMF_ArrayGet(array, indexflag=indexflag,                               &
            exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
@@ -2138,9 +2367,6 @@
   type(ESMF_LocalArray), allocatable :: larrayList(:)
   type(ESMF_IndexFlag) :: indexflag
 
-  ! local parameters
-  integer :: localrc ! local error status
-
   ! local integer variables
   integer :: de, localDeCount, dimCount 
   integer, allocatable ::  localDeList(:)
@@ -2149,6 +2375,8 @@
   integer :: irank, k, tensorsize, fsize(7)
   integer, allocatable :: haloL(:), haloR(:)
   integer, allocatable :: top(:), bottom(:)
+  integer :: allocRcToTest
+  integer :: localrc ! local error status
 
   ! local real variables
   real(ESMF_KIND_R8), pointer :: fptr1(:), fptr2(:,:)
@@ -2174,12 +2402,18 @@
   if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
           rcToReturn=rc)) return
 
-  allocate(localDeList(localDeCount))
+  allocate(localDeList(localDeCount), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable"//           &
+     " localDeList in populate_grid", rcToReturn=rc)) then
+  endif
   call ESMF_ArrayGet(array, localDeList=localDeList, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
 
-  allocate(larrayList(localDeCount))
+  allocate(larrayList(localDeCount), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, " type "//                     &
+     " larrayList in populate_grid", rcToReturn=rc)) then
+  endif
   call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
           rcToReturn=rc)) return
@@ -2192,8 +2426,14 @@
   if (ESMF_LogMsgFoundError(localrc,"error getting dimCount from distGrid",    &
           rcToReturn=rc)) return
   
-  allocate(UBnd(dimCount, localDeCount))
-  allocate(LBnd(dimCount, localDeCount))  
+  allocate(UBnd(dimCount, localDeCount), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable   "//           &
+     " UBnd in populate_grid", rcToReturn=rc)) then
+  endif
+  allocate(LBnd(dimCount, localDeCount), stat=allocRcToTest )  
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable"//           &
+     " LBnd in populate_grid", rcToReturn=rc)) then
+  endif
 
   call ESMF_ArrayGet(array, indexflag=indexflag,                               &
            exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
@@ -2408,9 +2648,6 @@
   type(ESMF_LocalArray), allocatable :: larrayList2(:)
   type(ESMF_IndexFlag) :: indexflag
 
-  ! local parameters
-  integer :: localrc ! local error status
-
   ! local integer variables
   integer :: de, i1, i2, i3, i4, i5, i6, i7
   integer :: localDeCount1, dimCount1, localDeCount2, dimCount2
@@ -2420,6 +2657,8 @@
   integer :: irank, k, tensorsize, fsize(7)
   integer, allocatable :: haloL(:), haloR(:)
   integer, allocatable :: top(:), bottom(:)
+  integer :: allocRcToTest
+  integer :: localrc ! local error status
 
   ! local logicals
   logical :: nohaloflag
@@ -2456,12 +2695,18 @@
   if (ESMF_LogMsgFoundError(localrc,"error getting local DE count from array", &
           rcToReturn=rc)) return
 
-  allocate(localDeList1(localDeCount1))
+  allocate(localDeList1(localDeCount1), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable"//           &
+     " localDeList1 in compare redist array", rcToReturn=rc)) then
+  endif
   call ESMF_ArrayGet(array1, localDeList=localDeList1, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
 
-  allocate(larrayList1(localDeCount1))
+  allocate(larrayList1(localDeCount1), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char variable"//              &
+     " larrayList1 in compare redist array", rcToReturn=rc)) then
+  endif
   call ESMF_ArrayGet(array1, larrayList=larrayList1, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
           rcToReturn=rc)) return
@@ -2485,7 +2730,10 @@
      return
   endif
 
-  allocate(localDeList2(localDeCount2))
+  allocate(localDeList2(localDeCount2), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable"//           &
+     " localDeList2 in compare redist array", rcToReturn=rc)) then
+  endif
   call ESMF_ArrayGet(array2, localDeList=localDeList2, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
@@ -2503,7 +2751,10 @@
   enddo
 
   ! get local De List
-  allocate(larrayList2(localDeCount2))
+  allocate(larrayList2(localDeCount2), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char variable"//              &
+     " larrayList2 in compare redist array", rcToReturn=rc)) then
+  endif
   call ESMF_ArrayGet(array2, larrayList=larrayList2, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc,"error getting local array list",          &
           rcToReturn=rc)) return
@@ -2526,8 +2777,14 @@
   !-----------------------------------------------------------------------------
   ! allocate bound arrays and extract exclusive bounds
   !-----------------------------------------------------------------------------
-  allocate(UBnd(dimCount1, localDeCount1))
-  allocate(LBnd(dimCount1, localDeCount1))  
+  allocate(UBnd(dimCount1, localDeCount1), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable"//           &
+     " UBnd in compare redist array", rcToReturn=rc)) then
+  endif
+  allocate(LBnd(dimCount1, localDeCount1), stat=allocRcToTest )  
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable"//           &
+     " LBnd in compare redist array", rcToReturn=rc)) then
+  endif
 
   call ESMF_ArrayGet(array=array1, indexflag=indexflag,                        &
            exclusiveLBound=LBnd, exclusiveUBound=UBnd, rc=localrc)
@@ -2535,8 +2792,14 @@
           rcToReturn=rc)) return
 
 
-  allocate(UBnd2(dimCount2, localDeCount2))
-  allocate(LBnd2(dimCount2, localDeCount2))  
+  allocate(UBnd2(dimCount2, localDeCount2), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable"//           &
+     " UBnd2 in compare redist array", rcToReturn=rc)) then
+  endif
+  allocate(LBnd2(dimCount2, localDeCount2), stat=allocRcToTest )  
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer variable"//           &
+     " LBnd2 in compare redist array", rcToReturn=rc)) then
+  endif
 
   call ESMF_ArrayGet(array=array2, indexflag=indexflag,                        &
            exclusiveLBound=LBnd2, exclusiveUBound=UBnd2, rc=localrc)
@@ -2627,7 +2890,7 @@
                endif
              enddo   !   i2
            enddo    !   i1
-           print*,"move on to next de"
+!          print*,"move on to next de"
         enddo    ! de
      case(3)
      !--------------------------------------------------------------------------
@@ -2816,7 +3079,7 @@
 ! ---------
   endif
 
-  print*,'clean up'
+! print*,'clean up'
   !-----------------------------------------------------------------------------
   ! clean up allocated arrays
   !-----------------------------------------------------------------------------
@@ -2832,12 +3095,6 @@
   !-----------------------------------------------------------------------------
   end subroutine compare_redist_array 
   !-----------------------------------------------------------------------------
-
-!-------------------------------------------------------------------------------
-
-!-------------------------------------------------------------------------------
-! subroutine report_descriptor_string went here
-!-----------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
 
@@ -2874,6 +3131,7 @@
   integer :: itmp, itmp_beg, itmp_end
   integer, allocatable ::  sdelim(:)
   integer, allocatable ::  assoc_grid(:)
+  integer :: allocRcToTest
 
 
   !-----------------------------------------------------------------------------
@@ -2884,7 +3142,10 @@
   !-----------------------------------------------------------------------------
   ! work array
   !-----------------------------------------------------------------------------
-  allocate( assoc_grid(nstring) )
+  allocate( assoc_grid(nstring), stat=allocRcToTest )
+  if (ESMF_LogMsgFoundAllocError(allocRcToTest, " type "//                     &
+     " assoc_grid in interpret descriptor string", rcToReturn=localrc)) then
+  endif
   assoc_grid = 0
 
   !-----------------------------------------------------------------------------
@@ -3040,7 +3301,12 @@
         if( ndelim >= 1 .and. ndelim <= grid_rank-1 ) then   
            ! identify the separate entries, check that they are not empty,
            ! and read the values
-           allocate( sdelim(ndelim) )
+           allocate( sdelim(ndelim), stat=allocRcToTest )
+           if (ESMF_LogMsgFoundAllocError(allocRcToTest, " integer "//         &
+              "variable sdelim in interpret descriptor string",                &
+              rcToReturn=localrc)) then
+           endif
+
            call pattern_locate( lstagger, ',', ndelim, sdelim)
 
            if(  sdelim(1)-1 >= 1) then
