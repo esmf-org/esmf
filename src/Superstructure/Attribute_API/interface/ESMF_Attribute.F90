@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.24 2008/08/13 14:50:47 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.25 2008/08/13 21:27:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -102,7 +102,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.24 2008/08/13 14:50:47 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.25 2008/08/13 21:27:50 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -450,7 +450,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add an Attribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add a standard Attribute package
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
@@ -492,7 +492,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add an Attribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
@@ -4245,16 +4245,16 @@ contains
       fpurpose = purpose
       fobject = 'comp'
 
-      name1 = 'discipline'
-      name2 = 'physical_domain'
-      name3 = 'agency'
-      name4 = 'institution'
-      name5 = 'author'
-      name6 = 'coding_language'
-      name7 = 'model_component_framework'
-      name8 = 'name'
-      name9 = 'full_name'
-      name10 = 'version'
+      name1 = 'name'
+      name2 = 'full_name'
+      name3 = 'version'
+      name4 = 'discipline'
+      name5 = 'physical_domain'
+      name6 = 'agency'
+      name7 = 'institution'
+      name8 = 'author'
+      name9 = 'coding_language'
+      name10 = 'model_component_framework'
 
       call c_ESMC_AttPackCreate(comp%compp%base, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -7440,23 +7440,29 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Link a CplComp Attribute hierarchy with the
-!                               {\bf hierarchy of CplComp, GridComp, or State}
+! !IROUTINE: ESMF_AttributeSet - Link a Component Attribute hierarchy to that of
+!                                {\bf a Component or State}
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeSet()
-!      subroutine ESMF_CplCompAttSetLink(comp1, <object>, rc)
+!      subroutine ESMF_CplCompAttSetLink(<object1>, <object2>, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF\_CplComp), intent(inout) :: comp1  
-!      <object>, see below for supported values
+!      <object1>, see below for supported values  
+!      <object2>, see below for supported values
 !      integer, intent(out), optional :: rc   
 !
 !
 ! !DESCRIPTION:
-!     Attaches a {\tt CplComp} Attribute hierarchy to the hierarchy of
-!     a {\tt CplComp}, {\tt GridComp}, or {\tt State},. 
-!     Supported values for the <object> are:
+!     Attaches a {\tt CplComp} or {\tt GridComp} Attribute hierarchy to the 
+!     hierarchy of a {\tt CplComp}, {\tt GridComp}, or {\tt State}.
+!      
+!     Supported values for the <object1> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: comp1
+!     \item type(ESMF\_GridComp), intent(inout) :: comp1
+!     \end{description}
+!     Supported values for the <object2> are:
 !     \begin{description}
 !     \item type(ESMF\_CplComp), intent(inout) :: comp2
 !     \item type(ESMF\_GridComp), intent(inout) :: comp2
@@ -7465,10 +7471,10 @@ contains
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [comp1]
-!       An {\tt ESMF\_CplComp} object.
-!     \item [<object>]
-!       The object with which to link hierarchies.
+!     \item [<object1>]
+!       The ``parent" object in the Attribute hierarchy link.
+!     \item [<object2>]
+!       The ``child'' object in the Attribute hierarchy link.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -7478,7 +7484,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompAttSetLinkCplComp"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeSet - Link an CplComp Attribute hierarchy to a CplComp
 !
 ! !INTERFACE:
@@ -7504,7 +7510,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -7539,7 +7545,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompAttSetLinkGridComp"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeSet - Link an CplComp Attribute hierarchy to a GridComp
 !
 ! !INTERFACE:
@@ -7565,7 +7571,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -7600,7 +7606,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompAttSetLinkState"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeSet - Link an CplComp Attribute hierarchy to a State
 !
 ! !INTERFACE:
@@ -7626,7 +7632,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -7806,16 +7812,16 @@ contains
       fpurpose = purpose
       fobject = 'comp'
 
-      name1 = 'discipline'
-      name2 = 'physical_domain'
-      name3 = 'agency'
-      name4 = 'institution'
-      name5 = 'author'
-      name6 = 'coding_language'
-      name7 = 'model_component_framework'
-      name8 = 'name'
-      name9 = 'full_name'
-      name10 = 'version'
+      name1 = 'name'
+      name2 = 'full_name'
+      name3 = 'version'
+      name4 = 'discipline'
+      name5 = 'physical_domain'
+      name6 = 'agency'
+      name7 = 'institution'
+      name8 = 'author'
+      name9 = 'coding_language'
+      name10 = 'model_component_framework'
 
       call c_ESMC_AttPackCreate(comp%compp%base, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -10999,46 +11005,9 @@ contains
       end subroutine ESMF_GridCompAttSetCharList
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AttributeSet - Link a GridComp Attribute hierarchy with the
-!                               {\bf hierarchy of CplComp, GridComp, or State}
-!
-! !INTERFACE:
-!      ! Private name; call using ESMF_AttributeSet()
-!      subroutine ESMF_GridCompAttSetLink(comp1, <object>, rc)
-!
-! !ARGUMENTS:
-!      type(ESMF\_GridComp), intent(inout) :: comp1  
-!      <object>, see below for supported values
-!      integer, intent(out), optional :: rc   
-!
-!
-! !DESCRIPTION:
-!     Attaches a {\tt GridComp} Attribute hierarchy to the hierarchy of
-!     a {\tt CplComp}, {\tt GridComp}, or {\tt State},. 
-!     Supported values for the <object> are:
-!     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: comp2
-!     \item type(ESMF\_GridComp), intent(inout) :: comp2
-!     \item type(ESMF\_State), intent(inout) :: state
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [comp1]
-!       An {\tt ESMF\_GridComp} object.
-!     \item [<object>]
-!       The object with which to link hierarchies.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompAttSetLinkCplComp"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeSet - Link an GridComp Attribute hierarchy to a CplComp
 !
 ! !INTERFACE:
@@ -11064,7 +11033,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -11099,7 +11068,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompAttSetLinkGridComp"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeSet - Link an GridComp Attribute hierarchy to a GridComp
 !
 ! !INTERFACE:
@@ -11125,7 +11094,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -11160,7 +11129,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompAttSetLinkState"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeSet - Link an GridComp Attribute hierarchy to a State
 !
 ! !INTERFACE:
@@ -11186,7 +11155,7 @@ contains
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       integer :: localrc                           ! Error status
 
@@ -17860,7 +17829,8 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FBundleAttSetLinkField"
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Link an FBundle Attribute hierarchy to a Field
+! !IROUTINE: ESMF_AttributeSet - Link a FieldBundle Attribute hierarchy to that 
+!                                {\bf of a Field}
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -24617,7 +24587,7 @@ contains
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AttributeSet - Link a State Attribute hierarchy with the
-!                               {\bf hierarchy of Bundle, Field, or State}
+!                               {\bf hierarchy of a FieldBundle, Field, or State}
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeSet()
@@ -24631,7 +24601,7 @@ contains
 !
 ! !DESCRIPTION:
 !     Attaches a {\tt State} Attribute hierarchy to the hierarchy of
-!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State},. 
+!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}. 
 !     Supported values for the <object> are:
 !     \begin{description}
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle
