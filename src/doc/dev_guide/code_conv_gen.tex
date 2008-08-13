@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.17 2008/08/01 21:27:48 w6ws Exp $
+% CVS $Id: code_conv_gen.tex,v 1.18 2008/08/13 20:51:20 w6ws Exp $
 
 \subsection{Docs: Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -351,8 +351,8 @@ the option (as long as it is not too awkward); for example, an option
 
 \subsubsection{Variables Having Logical Data Type}
 Variables associated with flags or other boolean values shall use
-the Fortran {\tt logical} data type in the public ESMF API.  The ESMF_Logical
-derived type shall only be used in Fortran code internally - when passing
+the Fortran {\tt logical} data type in the public ESMF API.  The {\tt ESMF\_Logical}
+derived type shall only be used in Fortran code internally, for example when passing
 logical values between Fortran and C++ code.
 
 \subsection{Code: File Rules} 
@@ -362,14 +362,14 @@ The first line of every file in ESMF
   must be its CVS version identification. For example, each \LaTeX
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.17 2008/08/01 21:27:48 w6ws Exp $ 
+% $Id: code_conv_gen.tex,v 1.18 2008/08/13 20:51:20 w6ws Exp $ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.17 2008/08/01 21:27:48 w6ws Exp $'
+character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.18 2008/08/13 20:51:20 w6ws Exp $'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}
