@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.9 2008/07/07 19:46:55 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.10 2008/08/13 14:55:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -389,6 +389,11 @@ end function
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      !  link the Attribute hierarchies
+      call c_ESMC_AttributeSetLink(btype%base, field%ftypep%base, status)
+      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
       ! this resets the congruent flag as a side effect
       dummy = ESMF_FieldBundleIsCongruent(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -468,6 +473,14 @@ end function
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       
+      ! link the Attribute hierarchies
+      do i=1,fieldCount
+         call c_ESMC_AttributeSetLink(btype%base, &
+          fieldList(i)%ftypep%base, status)
+         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+      enddo
+
       ! this resets the congruent flag as a side effect
       dummy = ESMF_FieldBundleIsCongruent(bundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
