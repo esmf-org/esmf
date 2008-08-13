@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.21 2008/08/08 15:26:28 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.22 2008/08/13 14:53:23 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.21 2008/08/08 15:26:28 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.22 2008/08/13 14:53:23 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -740,7 +740,7 @@
         }
         //printf(msgbuf);
         fprintf(xml,msgbuf);
-        if ((i+1)%2 == 0 && i != attrCount-1) {
+        if (i != attrCount-1) {
           sprintf(msgbuf,"\n            ");
           //printf(msgbuf);
           fprintf(xml,msgbuf);
@@ -905,12 +905,12 @@
 }  // end ESMC_AttributeCountTree
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeDestroy"
+#define ESMC_METHOD "ESMC_AttributeRemove"
 //BOPI
-// !IROUTINE:  ESMC_AttributeDestroy - Destroy the {\tt ESMC_Attribute}
+// !IROUTINE:  ESMC_AttributeRemove - Remove the {\tt ESMC_Attribute}
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeDestroy(
+      int ESMC_Attribute::ESMC_AttributeRemove(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -922,7 +922,7 @@
       char *object) {                // in - object type to look for
 // 
 // !DESCRIPTION:
-//     Destroy the {\tt ESMC_Attribute} 
+//     Remove the {\tt ESMC_Attribute} 
 
 //EOPI
 
@@ -972,15 +972,15 @@
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeDestroy
+}  // end ESMC_AttributeRemove
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeDestroy"
+#define ESMC_METHOD "ESMC_AttributeRemove"
 //BOPI
-// !IROUTINE:  ESMC_AttributeDestroy - Destroy the {\tt ESMC_Attribute}
+// !IROUTINE:  ESMC_AttributeRemove - Remove the {\tt ESMC_Attribute}
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeDestroy(
+      int ESMC_Attribute::ESMC_AttributeRemove(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -989,7 +989,7 @@
       char *name) {                // in - name
 // 
 // !DESCRIPTION:
-//     Destroy the {\tt ESMC_Attribute} 
+//     Remove the {\tt ESMC_Attribute} 
 
 //EOPI
 
@@ -1024,7 +1024,7 @@
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeDestroy
+}  // end ESMC_AttributeRemove
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeGet"
@@ -2709,6 +2709,54 @@
   return ESMF_SUCCESS;
 
 }  // end ESMC_AttributeSetLink
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttributeSetObjsInTree"
+//BOPI
+// !IROUTINE:  ESMC_AttributeSetObjsInTree - set all objects in {\tt ESMC_Attribute} hierarchy 
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_AttributeSetObjsInTree(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      char *object,                  // in - object
+      char *name,                    // in - name
+      ESMC_TypeKind tk,              // in - typekind
+      int count,                     // in - count
+      void *value) {                 // in - value
+// 
+// !DESCRIPTION:
+//     Set the objects in the {\tt ESMC_Attribute} hierarchy 
+
+//EOPI
+
+  int localrc;
+
+  // Initialize local return code
+  localrc = ESMC_RC_NOT_IMPL;
+  
+  // If this is object matches, count it
+  if (strcmp(object,attrObject) == 0 && 
+      strcmp(name,attrName) == 0) {
+    localrc = ESMC_AttrModifyValue(tk, count, value);
+    if (localrc != ESMF_SUCCESS) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "AttributeSetObjsInTree failed to set an Attribute", &localrc);
+      return ESMF_FAILURE;
+    }
+  }
+  
+  // Recurse the hierarchy
+  for (int i = 0; i < attrCount; i++) {
+    localrc = attrList[i]->ESMC_AttributeSetObjsInTree(object,name,tk,count,value);
+  }
+  
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeSetObjsInTree
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //

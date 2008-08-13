@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.h,v 1.14 2008/08/08 15:26:27 rokuingh Exp $
+// $Id: ESMC_Attribute.h,v 1.15 2008/08/13 14:53:22 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -106,8 +106,8 @@ class ESMC_Attribute
       char *purpose, char *object, int &ans) const;
     
     // destroy an attribute or attpack
-    int ESMC_AttributeDestroy(char *name);
-    int ESMC_AttributeDestroy(char *name, char *convention, char *purpose, char *object);
+    int ESMC_AttributeRemove(char *name);
+    int ESMC_AttributeRemove(char *name, char *convention, char *purpose, char *object);
     
     // attribute methods - get
     int ESMC_AttributeGet(char *name, ESMC_I4 *value) const;
@@ -161,6 +161,10 @@ class ESMC_Attribute
     
     // attribute set a link in hierarchy
     int ESMC_AttributeSetLink(ESMC_Base *destination);
+
+    // attribute set a link in hierarchy
+    int ESMC_AttributeSetObjsInTree(char *object, char *name, ESMC_TypeKind tk,  
+      int count, void *value);
 
     // attribute write methods
     int ESMC_AttributeWriteTab(char *convention, char *purpose, char *object, 
@@ -252,6 +256,9 @@ extern "C" {
   void FTN(c_esmc_attributesetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk,
                                     int *count, void *value, int *rc, int nlen);
   void FTN(c_esmc_attributesetlink)(ESMC_Base **source, ESMC_Base **destination, int *rc);
+  void FTN(c_esmc_attributesetobjsintree)(ESMC_Base **base, char *object, char *name, 
+                                          ESMC_TypeKind *tk, int *count, void *value, 
+                                          int *rc, int olen, int nlen);
   }
 
 // class utility functions, not methods, since they operate on

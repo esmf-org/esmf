@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.16 2008/08/08 15:26:27 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.17 2008/08/13 14:53:22 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.16 2008/08/08 15:26:27 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.17 2008/08/13 14:53:22 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -184,13 +184,13 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attpackdestroy - Destroy the attribute package
+// !IROUTINE:  c_ESMC_attpackremove - Remove the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackdestroy)(
+      void FTN(c_esmc_attpackremove)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpackdestroy()"
+#define ESMC_METHOD "c_esmc_attpackremove()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -208,7 +208,7 @@ extern "C" {
       int olen) {                // hidden/in - strlen count for object
 // 
 // !DESCRIPTION:
-//    Destroy an attribute package
+//    Remove an attribute package
 //
 //EOP
 
@@ -300,10 +300,10 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttributeDestroy(cname, cconv, cpurp, cobj);
+  status = (**base).root.ESMC_AttributeRemove(cname, cconv, cpurp, cobj);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed destroying attribute package", &status);
+                         "failed removing attribute package", &status);
     delete [] cname;
     delete [] cconv;
     delete [] cpurp;
@@ -320,7 +320,7 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attpackdestroy
+}  // end c_ESMC_attpackremove
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -1886,13 +1886,13 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attributedestroy - Destroy the attribute
+// !IROUTINE:  c_ESMC_attributeremove - Remove the attribute
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributedestroy)(
+      void FTN(c_esmc_attributeremove)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributedestroy()"
+#define ESMC_METHOD "c_esmc_attributeremove()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1904,7 +1904,7 @@ extern "C" {
       int nlen) {                // hidden/in - strlen count for name
 // 
 // !DESCRIPTION:
-//    Destroy an attribute package
+//    Remove an attribute package
 //
 //EOP
 
@@ -1939,10 +1939,10 @@ extern "C" {
   }
   
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttributeDestroy(cname);
+  status = (**base).root.ESMC_AttributeRemove(cname);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed destroying the attribute", &status);
+                         "failed removing the attribute", &status);
     if (rc) *rc = status;
     delete [] cname;
     return;
@@ -1953,7 +1953,7 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attributedestroy
+}  // end c_ESMC_attributeremove
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -2963,6 +2963,98 @@ extern "C" {
   return;
 
 }  // end c_ESMC_AttributeSetLink
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeSetObjsInTree - Set an Attribute on all objects
+//                                               in an Attribute hierarchy
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributesetobjsintree)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributesetobjsintree()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *object,             // in - F90, object of the Attribute
+      char *name,               // in - F90, non-null terminated string
+      ESMC_TypeKind *tk,        // in - typekind of the Attribute
+      int *count,               // in - items
+      void *value,              // in - value
+      int *rc,                  // in - return code
+      int olen,                 // hidden/in - strlen count for object
+      int nlen) {               // hidden/in - strlen count for name
+// 
+// !DESCRIPTION:
+//     Change the Attribute values for Attribute <name> on all <object>s.
+//
+//EOP
+
+  int i, status;
+  char *cobject, *cname;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // simple sanity checks before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // copy and convert F90 string to null terminated one
+  cobject = ESMC_F90toCstring(object, olen);
+  if (!cobject) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object conversion", &status);
+      delete [] cname;
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Set the attribute on the object.
+  status = (**base).root.ESMC_AttributeSetObjsInTree(cobject,cname,*tk,*count,value);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed call AttributeSetObjsInTree", &status);
+  }
+
+  delete [] cname;
+  delete [] cobject;
+  
+  if (rc) *rc = status;
+  return;
+
+}  // end c_ESMC_AttributeSetObjsInTree
 
 #undef  ESMC_METHOD
 
