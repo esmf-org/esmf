@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.13 2008/07/23 04:51:57 theurich Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.14 2008/08/13 17:58:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.13 2008/07/23 04:51:57 theurich Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.14 2008/08/13 17:58:09 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -156,12 +156,6 @@ contains
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-    ! validate before using
-    call ESMF_FieldValidate(field, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
- 
     ftypep => field%ftypep
 
     if( (ftypep%datastatus .eq. ESMF_STATUS_READY ) .and. &
@@ -175,13 +169,6 @@ contains
     ftypep%array_internal = .false.
     ftypep%datastatus = ESMF_STATUS_READY
    
-    ! Now revalidate to be sure the grid and datamap, if they exist, are
-    ! consistent with the new array.
-    call ESMF_FieldValidate(field, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
- 
     ! Set return values.
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -234,12 +221,6 @@ contains
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-    ! validate before using
-    call ESMF_FieldValidate(field, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rc)) return
- 
     ftypep => field%ftypep
 
     ! TODO: do we allow this?  if so, do we just destroy the old array?
@@ -260,13 +241,6 @@ contains
                               ESMF_CONTEXT, rc)) return
 
     ftypep%arraystatus = ESMF_STATUS_READY
-   
-    ! Now revalidate to be sure the grid and datamap, if they exist, are
-    ! consistent with the new array.
-    call ESMF_FieldValidate(field, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
  
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -318,12 +292,6 @@ contains
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-    ! Validate first
-    call ESMF_FieldValidate(field, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
-
     ftype => field%ftypep
 
     ! decide if we're regridding or just adding a grid to a partially
@@ -344,13 +312,6 @@ contains
                            ESMF_LOG_WARNING, &
                            ESMF_CONTEXT)
     endif
-
-    ! now validate again to be sure that if the field had an existing
-    ! array or datamap, that we haven't created an inconsistent object
-    call ESMF_FieldValidate(field, "", rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -500,12 +461,6 @@ contains
                                     ESMF_CONTEXT, rc)) return @\
         endif @\
     endif @\
-@\
-    call ESMF_FieldValidate(field, rc=localrc) @\
-@\
-    if (ESMF_LogMsgFoundError(localrc, & @\
-      ESMF_ERR_PASSTHRU, & @\
-      ESMF_CONTEXT, rc)) return @\
 @\
     field%ftypep%datastatus = ESMF_STATUS_READY @\
     if (rcpresent) rc = ESMF_SUCCESS @\

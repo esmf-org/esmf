@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.21 2008/06/11 18:45:49 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.22 2008/08/13 17:58:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.21 2008/06/11 18:45:49 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.22 2008/08/13 17:58:09 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -222,12 +222,6 @@ contains
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-    ! Validate object first
-    call ESMF_FieldValidate(field, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                             ESMF_ERR_PASSTHRU, &
-                             ESMF_CONTEXT, rc)) return
- 
     ftype => field%ftypep
 
     if (present(grid)) then
@@ -354,12 +348,6 @@ contains
 
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
-    ! Validate first
-    call ESMF_FieldValidate(field, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
 
     call ESMF_FieldGetArray(field, array, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
