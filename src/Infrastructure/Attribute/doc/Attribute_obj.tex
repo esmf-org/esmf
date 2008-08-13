@@ -1,4 +1,4 @@
-% $Id: Attribute_obj.tex,v 1.5 2008/05/06 23:54:28 rokuingh Exp $
+% $Id: Attribute_obj.tex,v 1.6 2008/08/13 21:26:33 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -22,6 +22,7 @@ Each Attribute contains a name value pair in which the value can be any of sever
 \item {\tt ESMF\_TYPEKIND\_Logical}
 \item {\tt ESMF\_TYPEKIND\_Logical} list
 \item {\tt EMSF\_TYPEKIND\_Character}
+\item {\tt EMSF\_TYPEKIND\_Character} list
 \end{itemize}
 
 All Attributes also contain character strings specifying the convention, type, and object of the Attribute for the purpose of keeping track of Attribute packages.  All Attributes contain a pointer to a list of pointers to other Attributes, which is initialized as {\tt ESMF\_NULL} until specified otherwise.  This list of Attribute pointers is what allows Attribute hierarchies to be built.  Using this feature an Attribute for one ESMF class can be linked to an Attribute in another ESMF class.

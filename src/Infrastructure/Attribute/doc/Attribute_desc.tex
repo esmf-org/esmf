@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.5 2008/05/06 23:54:28 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.6 2008/08/13 21:26:33 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,7 +8,7 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-The ESMF Attribute class is used to hold the meta data for other ESMF objects.  This class can be used to build Attribute hierarchies which connect the Attributes of different ESMF classes.  The Attribute class is capable of allowing the representation of standard Attribute packages, or {\bf Attpacks} for more unified description of an object.  The Attribute class can also be used to build Attribute hierarchies, which connect the Attributes of different ESMF classes.  The Attribute class is only partially implemented in this release.
+The ESMF Attribute class is used to hold the meta data for other ESMF objects.  This class can be used to build Attribute hierarchies which connect the Attributes of different ESMF classes.  The Attribute class is capable of allowing the representation of standard Attribute packages for more unified description of an object.  The Attribute class can also be used to build Attribute hierarchies, which connect the Attributes of different ESMF classes.  The Attribute class is only partially implemented in this release.
 
 \subsubsection{Attribute Representation in ESMF}
 
@@ -16,6 +16,8 @@ ESMF Attributes are meant to be used as a tool for the user to help internally d
 
 \begin{itemize}
 \item Array
+\item CplComp
+\item GridComp
 \item FieldBundle
 \item Field
 \item Grid
@@ -24,20 +26,63 @@ ESMF Attributes are meant to be used as a tool for the user to help internally d
 
 \subsubsection{Attribute Hierarchies}
 
-Of these ESMF objects with Attributes, only three can link their Attributes together in an Attribute hierarchy.  These objects are:
+Of these ESMF objects with Attributes, only some can link their Attributes together in an Attribute hierarchy.  These objects are:
 
 \begin{itemize}
+\item CplComp
+\item GridComp
 \item Field
 \item FieldBundle
 \item State
 \end{itemize}
 
-The most common use for this capability if for linking the Attributes of a Field to the Field Bundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  
+The most common use for this capability if for linking the Attributes of a Field to the Field Bundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are done automatically by ESMF.  
 
-Attribute hierarchies are linked with "shallow" copies, meaning that the Attributes belonging to an external object are not recreated, they are only referenced by a pointer.  Therefore deleting objects which are on the receiving end of a link between Attribute hierarchies without deleting the object which holds the pointer is not suggested and can lead to undefined behavior.  On this note, the function used to copy an Attribute hierarchy follows a similar practice of "shallow" copying.  In this case the Attributes which {\it belong} to the object being copied are actually copied in full, while the Attributes which are linked to the object being copied are referenced by a pointer.  This means that after copying an Attribute hierarchy from ESMF object A to ESMF object B, the changes made to the lower portion of either A or B's Attribute hierarchy will be reflected on {\it both} object A and object B.
+Attribute hierarchies are linked with "shallow" copies, meaning that the Attributes belonging to an external object are not recreated, they are only referenced by a pointer.  On this note, the function used to copy an Attribute hierarchy follows a similar practice of "shallow" copying.  In this case the Attributes which {\it belong} to the object being copied are actually copied in full, while the Attributes which are linked to the object being copied are referenced by a pointer.  This means that after copying an Attribute hierarchy from ESMF object A to ESMF object B, the changes made to the lower portion of either A or B's Attribute hierarchy will be reflected on {\it both} object A and object B.
 
 \subsubsection{Attribute Packages}
 
-At this point, all classes that have Attribute capabilities also have Attribute packages.  The Attribute packages are a work in progress.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as "netCDF" and "basic".  These specifiers will be used much more rigorously in future releases to help incorporate many existing meta data standards.  In this release the user can specify their own Attribute packages, the process for doing this is quite involved.  It is anticipated that the Attribute package capabilities of the Attribute class will have much more added functionality in future releases.
+At this point, only select ESMF classes have Attribute packages.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as "CF" and "general".  These specifiers will be used much more rigorously in future releases to help incorporate many existing meta data standards.  In this release the user can use an ESMF supplied standard Attribute package, specify their own Attribute packages, or add customized Attributes to the ESMF supplied Attribute package.  Working with Attribute packages is quite involved, at present, but significant effort in automation of the meta data capabilities of ESMF is anticipated in future releases. 
+
+The standard Attribute packages supplied by ESMF exist for the following ESMF objects:
+
+\begin{itemize}
+\item CplComp
+\item GridComp
+\item Field
+\end{itemize}
+
+The standard Attribute package for the Field is based on the CF convention, and consists of 6 Attributes.  Two of these Attributes are not CF compliant, but used by the ESG data portal for meta data tracking and standardization.  These same two Attributes are part of an internal Attribute package on the ESMF State.  The four CF compliant Attributes that can be set by the user on an ESMF Field are:
+
+\begin{itemize}
+\item name
+\item long\_name
+\item standard\_name
+\item units
+\end{itemize}
+
+The standard Attribute package for the Components is only partially based on the CF convention, the majority of the Attributes in this package are used by the ESG data portal.  These Attribute, which can all be set by the user, are:
+
+\begin{itemize}
+\item name
+\item full\_name
+\item version
+\item discipline
+\item physical\_domain
+\item agency
+\item institution
+\item author
+\item coding\_language
+\item model\_component\_framework
+\end{itemize}
+
+
+
+
+
+
+
+
+
 
 

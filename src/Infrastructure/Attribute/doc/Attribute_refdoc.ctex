@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.6 2008/05/06 23:54:28 rokuingh Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.7 2008/08/13 21:26:33 rokuingh Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -67,8 +67,10 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Attribute_usage} 
+\input{AttributeEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Attribute/doc/Attribute_usage} 
+\input{../Superstructure/Attribute_API/doc/ESMF_AttributeEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}

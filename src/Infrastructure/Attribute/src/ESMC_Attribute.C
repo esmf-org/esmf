@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.22 2008/08/13 14:53:23 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.23 2008/08/13 21:26:34 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.22 2008/08/13 14:53:23 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.23 2008/08/13 21:26:34 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -462,13 +462,14 @@
 
   char msgbuf[ESMF_MAXSTR];
   int localrc;
-  int slen,llen,ulen,ilen,elen,tlen;
+  int slen,llen,snlen,ulen,ilen,elen,tlen;
   
   slen = 8;
-  llen = 30;
+  llen = 52;
+  snlen = 32;
   ulen = 8;
-  ilen = 10;
-  elen = 10;
+  ilen = 8;
+  elen = 8;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
@@ -478,8 +479,8 @@
       basename,convention,purpose);
     printf(msgbuf);
     ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
-    sprintf(msgbuf, "%-*s\t%-*s\t%-*s\t%-*s\t%-*s\t\r\n",slen,"Short Name",llen,"Long Name",ulen,
-      "Units",ilen,"Import",elen,"Export");
+    sprintf(msgbuf, "%-*s\t%-*s\t%-*s\t%-*s\t%-*s\t%-*s\t\r\n",slen,"Name",
+      snlen, "Standard Name", llen,"Long Name", ulen, "Units",ilen,"Import",elen,"Export");
     printf(msgbuf);
     ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     ++count;
@@ -488,9 +489,11 @@
   if (strcmp(convention,attrConvention) == 0 && 
       strcmp(purpose,attrPurpose) == 0 &&
       strcmp(varobj,attrObject) == 0) {
-      if(strcmp("shortname",attrName) == 0)
+      if(strcmp("name",attrName) == 0)
         tlen = slen;
-      else if(strcmp("longname",attrName) == 0)
+      else if(strcmp("standard_name",attrName) == 0)
+        tlen = snlen;
+      else if(strcmp("long_name",attrName) == 0)
         tlen = llen;
       else if(strcmp("units",attrName) == 0)
         tlen = ulen;
@@ -507,8 +510,12 @@
           sprintf(msgbuf, "%-*f\t",tlen,vf);  
         else if (tk == ESMC_TYPEKIND_R8) 
           sprintf(msgbuf, "%-*g\t",tlen,vd);  
-        else if (tk == ESMC_TYPEKIND_LOGICAL) 
-          sprintf(msgbuf, "%-*s\t",tlen,ESMC_LogicalString(vb));
+        else if (tk == ESMC_TYPEKIND_LOGICAL) {
+          if (vb == ESMF_TRUE) 
+            sprintf(msgbuf, "%-*s\t",tlen,"true");
+          else if (vb == ESMF_FALSE)
+            sprintf(msgbuf, "%-*s\t",tlen,"false");
+        }
         else if (tk == ESMC_TYPEKIND_CHARACTER)
           sprintf(msgbuf, "%-*s\t",tlen,vcp);
         else {
@@ -579,7 +586,9 @@
 //EOPI
 
   FILE* xml;
-  char msgbuf[ESMF_MAXSTR];
+  char msgbuf[ESMF_MAXSTR], modelcompname[ESMF_MAXSTR], fullname[ESMF_MAXSTR],
+       version[ESMF_MAXSTR];
+  ESMC_Attribute *attpack;
   int localrc;
   int stop = 0;
   int fldcount = 0;
@@ -596,9 +605,36 @@
                              msgbuf, &localrc);
     return ESMF_FAILURE;
   } 
+  
+  attpack = ESMC_AttPackGet(convention, purpose, object);
+  if (!attpack) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "failed getting attpack in WriteTab", &localrc);
+    return ESMF_FAILURE;
+  }
+
+  localrc = attpack->ESMC_AttributeGet(0,NULL,NULL,NULL,modelcompname);
+  if (localrc != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "failed getting Attribute in WriteTab", &localrc);
+    return ESMF_FAILURE;
+  }
+  localrc = attpack->ESMC_AttributeGet(1,NULL,NULL,NULL,fullname);
+  if (localrc != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "failed getting Attribute in WriteTab", &localrc);
+    return ESMF_FAILURE;
+  }
+  localrc = attpack->ESMC_AttributeGet(2,NULL,NULL,NULL,version);
+  if (localrc != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "failed getting Attribute in WriteTab", &localrc);
+    return ESMF_FAILURE;
+  }
 
   // Write the XML file header
-  sprintf(msgbuf,"<model_component name=\"%s\"\n",basename);
+  sprintf(msgbuf,"<model_component name=\"%s\" full_name=\"%s\" version=\"%s\"\n",
+    modelcompname,fullname,version);
   //printf(msgbuf);
   fprintf(xml,msgbuf);
   sprintf(msgbuf,"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
@@ -673,7 +709,7 @@
       strcmp(purpose,attrPurpose) == 0 &&
       strcmp(object,attrObject) == 0 &&
       attrPack == ESMF_TRUE) {
-    for (unsigned int i=0;  i<attrCount; i++) { 
+    for (unsigned int i=3;  i<attrCount; i++) { 
       sprintf(msgbuf,"<%s_set>\n",attrList[i]->attrName);
       //printf(msgbuf);
       fprintf(xml,msgbuf);
@@ -686,8 +722,12 @@
           sprintf(msgbuf, "  <%s name=\"%f\" />\n",attrList[i]->attrName,attrList[i]->vf);  
         else if (attrList[i]->tk == ESMC_TYPEKIND_R8) 
           sprintf(msgbuf, "  <%s name=\"%g\" />\n",attrList[i]->attrName,attrList[i]->vd);  
-        else if (attrList[i]->tk == ESMC_TYPEKIND_LOGICAL) 
-          sprintf(msgbuf, "  <%s name=\"%s\" />\n",attrList[i]->attrName,ESMC_LogicalString(attrList[i]->vb));
+        else if (attrList[i]->tk == ESMC_TYPEKIND_LOGICAL) {
+          if (attrList[i]->vb == ESMF_TRUE) 
+            sprintf(msgbuf, "  <%s name=\"%s\" />\n",attrList[i]->attrName,"true");
+          else if (attrList[i]->vb == ESMF_FALSE)
+            sprintf(msgbuf, "  <%s name=\"%s\" />\n",attrList[i]->attrName,"false");
+        }
         else if (attrList[i]->tk == ESMC_TYPEKIND_CHARACTER)
           sprintf(msgbuf, "  <%s name=\"%s\" />\n",attrList[i]->attrName,attrList[i]->vcp);
         else {
@@ -731,8 +771,12 @@
           sprintf(msgbuf, "%s=\"%f\" ",attrList[i]->attrName,attrList[i]->vf);  
         else if (attrList[i]->tk == ESMC_TYPEKIND_R8) 
           sprintf(msgbuf, "%s=\"%g\" ",attrList[i]->attrName,attrList[i]->vd);  
-        else if (attrList[i]->tk == ESMC_TYPEKIND_LOGICAL) 
-          sprintf(msgbuf, "%s=\"%s\" ",attrList[i]->attrName,ESMC_LogicalString(attrList[i]->vb));
+        else if (attrList[i]->tk == ESMC_TYPEKIND_LOGICAL) {
+          if (attrList[i]->vb == ESMF_TRUE) 
+            sprintf(msgbuf, "%s=\"%s\" ",attrList[i]->attrName,"true");
+          else if (attrList[i]->vb == ESMF_FALSE)
+            sprintf(msgbuf, "%s=\"%s\" ",attrList[i]->attrName,"false");
+        }
         else if (attrList[i]->tk == ESMC_TYPEKIND_CHARACTER)
           sprintf(msgbuf, "%s=\"%s\" ",attrList[i]->attrName,attrList[i]->vcp);
         else {
@@ -1861,7 +1905,7 @@
   localrc = ESMC_RC_NOT_IMPL;
 
   // simple sanity checks
-  if ((!num) || (num < 0)) {
+  if (num < 0) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              "Attribute number must be > 0", &localrc);
        return ESMF_FAILURE;
