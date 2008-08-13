@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.23 2008/08/08 15:25:26 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.24 2008/08/13 14:50:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -93,7 +93,7 @@ module ESMF_AttributeMod
 !  Attribute methods
       public ESMF_AttributeAdd
       public ESMF_AttributeCopy
-      public ESMF_AttributeDestroy
+      public ESMF_AttributeRemove
       public ESMF_AttributeGet
       public ESMF_AttributeSet
       public ESMF_AttributeWrite
@@ -102,7 +102,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.23 2008/08/08 15:25:26 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.24 2008/08/13 14:50:47 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -161,19 +161,19 @@ module ESMF_AttributeMod
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+! !IROUTINE: ESMF_AttributeRemove  - Remove an Attribute or Attribute Package
 !
 ! !INTERFACE:
-      interface ESMF_AttributeDestroy
+      interface ESMF_AttributeRemove
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_ArrayAttDestroy
-        module procedure ESMF_CplCompAttDestroy
-        module procedure ESMF_GridCompAttDestroy
-        module procedure ESMF_FieldAttDestroy
-        module procedure ESMF_FBundleAttDestroy
-        module procedure ESMF_GridAttDestroy
-        module procedure ESMF_StateAttDestroy
+        module procedure ESMF_ArrayAttRemove
+        module procedure ESMF_CplCompAttRemove
+        module procedure ESMF_GridCompAttRemove
+        module procedure ESMF_FieldAttRemove
+        module procedure ESMF_FBundleAttRemove
+        module procedure ESMF_GridAttRemove
+        module procedure ESMF_StateAttRemove
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that destroy
@@ -899,7 +899,7 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: name1, name2, name3, name4
+      character(ESMF_MAXSTR) :: name1, name2, name3, name4, name5, name6
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
@@ -912,10 +912,12 @@ contains
       fpurpose = purpose
       fobject = 'array'
 
-      name1 = 'shortname'
-      name2 = 'longname'
-      name3 = 'units'
-      name4 = 'dimensions'
+      name1 = 'name'
+      name2 = 'standard_name'
+      name3 = 'long_name'
+      name4 = 'units'
+      name5 = 'import'
+      name6 = 'export'
 
       call c_ESMC_AttPackCreate(array, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -924,6 +926,10 @@ contains
       call c_ESMC_AttPackCreate(array, name3, fconvention, &
         fpurpose, fobject, localrc)
       call c_ESMC_AttPackCreate(array, name4, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(array, name5, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(array, name6, fconvention, &
         fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1016,14 +1022,14 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayAttDestroy"
+#define ESMF_METHOD "ESMF_ArrayAttRemove"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+! !IROUTINE: ESMF_AttributeRemove  - Remove an Attribute or Attribute Package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_AttributeDestroy()
-      subroutine ESMF_ArrayAttDestroy(array, name, convention, purpose, rc)
+      ! Private name; call using ESMF_AttributeRemove()
+      subroutine ESMF_ArrayAttRemove(array, name, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
@@ -1033,7 +1039,7 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Destroys an Attribute on the {\tt array}.
+!     Removes an Attribute on the {\tt array}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1078,14 +1084,14 @@ contains
       
       fobject = 'array'
 
-      call c_ESMC_AttPackDestroy(array, name, fconvention, &
+      call c_ESMC_AttPackRemove(array, name, fconvention, &
         fpurpose, fobject, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
     else
       
-      call c_ESMC_AttributeDestroy(array, name, localrc)
+      call c_ESMC_AttributeRemove(array, name, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1093,7 +1099,7 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArrayAttDestroy
+      end subroutine ESMF_ArrayAttRemove
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1234,14 +1240,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetInt4List(array, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -1261,7 +1267,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -1324,8 +1330,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1349,8 +1355,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1503,14 +1509,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetInt8List(array, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -1530,7 +1536,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -1593,8 +1599,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1617,8 +1623,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1770,14 +1776,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetReal4List(array, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -1797,7 +1803,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -1861,8 +1867,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1885,8 +1891,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2037,14 +2043,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetReal8List(array, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -2064,7 +2070,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -2127,8 +2133,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2151,8 +2157,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2305,14 +2311,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetLogicalList(array, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, dimension(:), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -2332,7 +2338,7 @@ contains
 !     \item [valueList]
 !           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The logical default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -2399,8 +2405,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2426,8 +2432,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2774,19 +2780,19 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
-      subroutine ESMF_ArrayAttGetInfoByName(array, name, typekind, count, rc)
+      subroutine ESMF_ArrayAttGetInfoByName(array, name, typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character(len=*), intent(in) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Returns information associated with the named Attribute, 
-!     including {\tt typekind} and {\tt count}.
+!     including {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2796,7 +2802,7 @@ contains
 !           The name of the Attribute to query.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           The number of items in this Attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2807,7 +2813,7 @@ contains
 
       integer :: localrc             
       type(ESMF_TypeKind) :: localTk
-      integer :: localCount
+      integer :: localItemcount
 
       ! Initialize 
       localrc = ESMF_RC_NOT_IMPL
@@ -2817,13 +2823,13 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
       call c_ESMC_AttributeGetInfoName(array, name, &
-        localTk, localCount, localrc)
+        localTk, localItemcount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localCount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2839,20 +2845,20 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_ArrayAttGetInfoByNum(array, attributeIndex, name, &
-        typekind, count, rc)
+        typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !      Returns information associated with the indexed Attribute, 
-!      including {\tt name}, {\tt typekind} and {\tt count}.
+!      including {\tt name}, {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2864,7 +2870,7 @@ contains
 !           Returns the name of the Attribute.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           Returns the number of items in this Attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2893,7 +2899,7 @@ contains
 
       name = localName
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localItemcount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4225,7 +4231,8 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: name1, name2, name3, name4, name5, name6, name7
+      character(ESMF_MAXSTR) :: name1, name2, name3, name4, name5, name6, name7, &
+                                name8, name9, name10
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
@@ -4245,6 +4252,9 @@ contains
       name5 = 'author'
       name6 = 'coding_language'
       name7 = 'model_component_framework'
+      name8 = 'name'
+      name9 = 'full_name'
+      name10 = 'version'
 
       call c_ESMC_AttPackCreate(comp%compp%base, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -4259,6 +4269,12 @@ contains
       call c_ESMC_AttPackCreate(comp%compp%base, name6, fconvention, &
         fpurpose, fobject, localrc)
       call c_ESMC_AttPackCreate(comp%compp%base, name7, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(comp%compp%base, name8, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(comp%compp%base, name9, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(comp%compp%base, name10, fconvention, &
         fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -4352,14 +4368,14 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompAttDestroy"
+#define ESMF_METHOD "ESMF_CplCompAttRemove"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+! !IROUTINE: ESMF_AttributeRemove  - Remove an Attribute or Attribute Package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_AttributeDestroy()
-      subroutine ESMF_CplCompAttDestroy(comp, name, convention, purpose, rc)
+      ! Private name; call using ESMF_AttributeRemove()
+      subroutine ESMF_CplCompAttRemove(comp, name, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp  
@@ -4369,7 +4385,7 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Destroys an Attribute on the {\tt comp}.
+!     Removes an Attribute on the {\tt comp}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -4414,14 +4430,14 @@ contains
       
       fobject = 'comp'
 
-      call c_ESMC_AttPackDestroy(comp%compp%base, name, fconvention, &
+      call c_ESMC_AttPackRemove(comp%compp%base, name, fconvention, &
         fpurpose, fobject, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
     else
       
-      call c_ESMC_AttributeDestroy(comp%compp%base, name, localrc)
+      call c_ESMC_AttributeRemove(comp%compp%base, name, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -4429,7 +4445,7 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_CplCompAttDestroy
+      end subroutine ESMF_CplCompAttRemove
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -4570,14 +4586,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_CplCompAttGetInt4List(comp, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -4597,7 +4613,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -4660,8 +4676,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4685,8 +4701,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4839,14 +4855,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_CplCompAttGetInt8List(comp, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -4866,7 +4882,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -4929,8 +4945,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4953,8 +4969,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5106,14 +5122,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_CplCompAttGetReal4List(comp, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -5133,7 +5149,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -5197,8 +5213,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5221,8 +5237,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5373,14 +5389,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_CplCompAttGetReal8List(comp, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -5400,7 +5416,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -5463,8 +5479,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5487,8 +5503,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5641,14 +5657,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_CplCompAttGetLogicalList(comp, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, dimension(:), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -5668,7 +5684,7 @@ contains
 !     \item [valueList]
 !           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The logical default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -5735,8 +5751,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5762,8 +5778,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -6110,19 +6126,19 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
-      subroutine ESMF_CplCompAttGetInfoByName(comp, name, typekind, count, rc)
+      subroutine ESMF_CplCompAttGetInfoByName(comp, name, typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp  
       character(len=*), intent(in) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Returns information associated with the named Attribute, 
-!     including {\tt typekind} and {\tt count}.
+!     including {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -6132,7 +6148,7 @@ contains
 !           The name of the Attribute to query.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
@@ -6144,7 +6160,7 @@ contains
 
       integer :: localrc             
       type(ESMF_TypeKind) :: localTk
-      integer :: localCount
+      integer :: localItemcount
 
       ! Initialize 
       localrc = ESMF_RC_NOT_IMPL
@@ -6154,13 +6170,13 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
 
       call c_ESMC_AttributeGetInfoName(comp%compp%base, name, &
-        localTk, localCount, localrc)
+        localTk, localItemcount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localCount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -6176,20 +6192,20 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_CplCompAttGetInfoByNum(comp, attributeIndex, name, &
-        typekind, count, rc)
+        typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !      Returns information associated with the indexed Attribute, 
-!      including {\tt name}, {\tt typekind} and {\tt count}.
+!      including {\tt name}, {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -6201,7 +6217,7 @@ contains
 !           Returns the name of the Attribute.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
@@ -6231,7 +6247,7 @@ contains
 
       name = localName
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localItemcount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -7776,7 +7792,8 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: name1, name2, name3, name4, name5, name6, name7
+      character(ESMF_MAXSTR) :: name1, name2, name3, name4, name5, name6, name7, &
+                                name8, name9, name10
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
@@ -7796,6 +7813,9 @@ contains
       name5 = 'author'
       name6 = 'coding_language'
       name7 = 'model_component_framework'
+      name8 = 'name'
+      name9 = 'full_name'
+      name10 = 'version'
 
       call c_ESMC_AttPackCreate(comp%compp%base, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -7810,6 +7830,12 @@ contains
       call c_ESMC_AttPackCreate(comp%compp%base, name6, fconvention, &
         fpurpose, fobject, localrc)
       call c_ESMC_AttPackCreate(comp%compp%base, name7, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(comp%compp%base, name8, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(comp%compp%base, name9, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(comp%compp%base, name10, fconvention, &
         fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -7902,14 +7928,14 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCompAttDestroy"
+#define ESMF_METHOD "ESMF_GridCompAttRemove"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+! !IROUTINE: ESMF_AttributeRemove  - Remove an Attribute or Attribute Package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_AttributeDestroy()
-      subroutine ESMF_GridCompAttDestroy(comp, name, convention, purpose, rc)
+      ! Private name; call using ESMF_AttributeRemove()
+      subroutine ESMF_GridCompAttRemove(comp, name, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp  
@@ -7919,7 +7945,7 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Destroys an Attribute on the {\tt comp}.
+!     Removes an Attribute on the {\tt comp}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -7964,14 +7990,14 @@ contains
       
       fobject = 'comp'
 
-      call c_ESMC_AttPackDestroy(comp%compp%base, name, fconvention, &
+      call c_ESMC_AttPackRemove(comp%compp%base, name, fconvention, &
         fpurpose, fobject, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
     else
       
-      call c_ESMC_AttributeDestroy(comp%compp%base, name, localrc)
+      call c_ESMC_AttributeRemove(comp%compp%base, name, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -7979,7 +8005,7 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridCompAttDestroy
+      end subroutine ESMF_GridCompAttRemove
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -8120,14 +8146,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridCompAttGetInt4List(comp, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -8147,7 +8173,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -8210,8 +8236,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -8235,8 +8261,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -8389,14 +8415,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridCompAttGetInt8List(comp, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -8416,7 +8442,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -8479,8 +8505,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -8503,8 +8529,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -8656,14 +8682,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridCompAttGetReal4List(comp, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -8683,7 +8709,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -8747,8 +8773,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -8771,8 +8797,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -8923,14 +8949,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridCompAttGetReal8List(comp, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -8950,7 +8976,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -9013,8 +9039,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -9037,8 +9063,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -9191,14 +9217,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridCompAttGetLogicalList(comp, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, dimension(:), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -9218,7 +9244,7 @@ contains
 !     \item [valueList]
 !           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The logical default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -9285,8 +9311,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -9312,8 +9338,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -9660,19 +9686,19 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
-      subroutine ESMF_GridCompAttGetInfoByName(comp, name, typekind, count, rc)
+      subroutine ESMF_GridCompAttGetInfoByName(comp, name, typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp  
       character(len=*), intent(in) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Returns information associated with the named Attribute, 
-!     including {\tt typekind} and {\tt count}.
+!     including {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -9682,7 +9708,7 @@ contains
 !           The name of the Attribute to query.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
@@ -9694,7 +9720,7 @@ contains
 
       integer :: localrc             
       type(ESMF_TypeKind) :: localTk
-      integer :: localCount
+      integer :: localItemcount
 
       ! Initialize 
       localrc = ESMF_RC_NOT_IMPL
@@ -9704,13 +9730,13 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
 
       call c_ESMC_AttributeGetInfoName(comp%compp%base, name, &
-        localTk, localCount, localrc)
+        localTk, localItemcount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localCount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -9726,20 +9752,20 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridCompAttGetInfoByNum(comp, attributeIndex, name, &
-        typekind, count, rc)
+        typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !      Returns information associated with the indexed Attribute, 
-!      including {\tt name}, {\tt typekind} and {\tt count}.
+!      including {\tt name}, {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -9751,7 +9777,7 @@ contains
 !           Returns the name of the Attribute.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
@@ -9781,7 +9807,7 @@ contains
 
       name = localName
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localItemcount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -11326,7 +11352,7 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: name1, name2, name3, name4, name5
+      character(ESMF_MAXSTR) :: name1, name2, name3, name4, name5, name6
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
@@ -11339,11 +11365,12 @@ contains
       fpurpose = purpose
       fobject = 'field'
 
-      name1 = 'shortname'
-      name2 = 'longname'
-      name3 = 'units'
-      name4 = 'import'
-      name5 = 'export'
+      name1 = 'name'
+      name2 = 'standard_name'
+      name3 = 'long_name'
+      name4 = 'units'
+      name5 = 'import'
+      name6 = 'export'
 
       call c_ESMC_AttPackCreate(field%ftypep%base, name1, fconvention, &
         fpurpose, fobject, localrc)
@@ -11354,6 +11381,8 @@ contains
       call c_ESMC_AttPackCreate(field%ftypep%base, name4, fconvention, &
         fpurpose, fobject, localrc)
       call c_ESMC_AttPackCreate(field%ftypep%base, name5, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackCreate(field%ftypep%base, name6, fconvention, &
         fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -11446,14 +11475,14 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldAttDestroy"
+#define ESMF_METHOD "ESMF_FieldAttRemove"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+! !IROUTINE: ESMF_AttributeRemove  - Remove an Attribute or Attribute Package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_AttributeDestroy()
-      subroutine ESMF_FieldAttDestroy(field, name, convention, purpose, rc)
+      ! Private name; call using ESMF_AttributeRemove()
+      subroutine ESMF_FieldAttRemove(field, name, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
@@ -11463,7 +11492,7 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Destroys an Attribute on the {\tt field}.
+!     Removes an Attribute on the {\tt field}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -11508,14 +11537,14 @@ contains
       
       fobject = 'field'
 
-      call c_ESMC_AttPackDestroy(field%ftypep%base, name, fconvention, &
+      call c_ESMC_AttPackRemove(field%ftypep%base, name, fconvention, &
         fpurpose, fobject, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
     else
       
-      call c_ESMC_AttributeDestroy(field%ftypep%base, name, localrc)
+      call c_ESMC_AttributeRemove(field%ftypep%base, name, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -11523,7 +11552,7 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldAttDestroy
+      end subroutine ESMF_FieldAttRemove
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -11664,14 +11693,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetInt4List(field, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -11691,7 +11720,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -11754,8 +11783,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -11779,8 +11808,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -11933,14 +11962,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetInt8List(field, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -11960,7 +11989,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -12023,8 +12052,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -12047,8 +12076,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -12200,14 +12229,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetReal4List(field, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -12227,7 +12256,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -12291,8 +12320,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -12315,8 +12344,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -12467,14 +12496,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetReal8List(field, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -12494,7 +12523,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -12557,8 +12586,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -12581,8 +12610,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -12735,14 +12764,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetLogicalList(field, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, dimension(:), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -12762,7 +12791,7 @@ contains
 !     \item [valueList]
 !           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The logical default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -12829,8 +12858,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -12856,8 +12885,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -13204,19 +13233,19 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
-      subroutine ESMF_FieldAttGetInfoByName(field, name, typekind, count, rc)
+      subroutine ESMF_FieldAttGetInfoByName(field, name, typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character(len=*), intent(in) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Returns information associated with the named Attribute, 
-!     including {\tt typekind} and {\tt count}.
+!     including {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -13226,7 +13255,7 @@ contains
 !           The name of the Attribute to query.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
@@ -13238,7 +13267,7 @@ contains
 
       integer :: localrc             
       type(ESMF_TypeKind) :: localTk
-      integer :: localCount
+      integer :: localItemcount
 
       ! Initialize 
       localrc = ESMF_RC_NOT_IMPL
@@ -13248,13 +13277,13 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       call c_ESMC_AttributeGetInfoName(field%ftypep%base, name, &
-        localTk, localCount, localrc)
+        localTk, localItemcount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localCount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -13270,20 +13299,20 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FieldAttGetInfoByNum(field, attributeIndex, name, &
-        typekind, count, rc)
+        typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !      Returns information associated with the indexed Attribute, 
-!      including {\tt name}, {\tt typekind} and {\tt count}.
+!      including {\tt name}, {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -13295,7 +13324,7 @@ contains
 !           Returns the name of the Attribute.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
@@ -13325,7 +13354,7 @@ contains
 
       name = localName
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localItemcount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -14657,7 +14686,6 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: name1, name2, name3, name4
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
@@ -14669,24 +14697,8 @@ contains
       fconvention = convention
       fpurpose = purpose
       fobject = 'fieldbundle'
-
-      name1 = 'shortname'
-      name2 = 'longname'
-      name3 = 'units'
-      name4 = 'dimensions'
-
-      call c_ESMC_AttPackCreate(fieldbundle%btypep%base, name1, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(fieldbundle%btypep%base, name2, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(fieldbundle%btypep%base, name3, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(fieldbundle%btypep%base, name4, fconvention, &
-        fpurpose, fobject, localrc)
-
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      
+      ! no standard attribute package for FieldBundle at this time
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -14774,14 +14786,14 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FBundleAttDestroy"
+#define ESMF_METHOD "ESMF_FBundleAttRemove"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+! !IROUTINE: ESMF_AttributeRemove  - Remove an Attribute or Attribute Package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_AttributeDestroy()
-      subroutine ESMF_FBundleAttDestroy(fieldbundle, name, convention, purpose, rc)
+      ! Private name; call using ESMF_AttributeRemove()
+      subroutine ESMF_FBundleAttRemove(fieldbundle, name, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
@@ -14791,7 +14803,7 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Destroys an Attribute on the {\tt fieldbundle}.
+!     Removes an Attribute on the {\tt fieldbundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -14836,14 +14848,14 @@ contains
       
       fobject = 'fieldbundle'
 
-      call c_ESMC_AttPackDestroy(fieldbundle%btypep%base, name, fconvention, &
+      call c_ESMC_AttPackRemove(fieldbundle%btypep%base, name, fconvention, &
         fpurpose, fobject, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
     else
       
-      call c_ESMC_AttributeDestroy(fieldbundle%btypep%base, name, localrc)
+      call c_ESMC_AttributeRemove(fieldbundle%btypep%base, name, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -14851,7 +14863,7 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FBundleAttDestroy
+      end subroutine ESMF_FBundleAttRemove
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -14992,14 +15004,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetInt4List(fieldbundle, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -15019,7 +15031,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -15082,8 +15094,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -15107,8 +15119,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -15261,14 +15273,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetInt8List(fieldbundle, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -15288,7 +15300,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -15351,8 +15363,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -15375,8 +15387,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -15528,14 +15540,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetReal4List(fieldbundle, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -15555,7 +15567,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -15619,8 +15631,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -15643,8 +15655,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -15795,14 +15807,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetReal8List(fieldbundle, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -15822,7 +15834,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -15885,8 +15897,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -15909,8 +15921,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -16063,14 +16075,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetLogicalList(fieldbundle, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, dimension(:), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -16090,7 +16102,7 @@ contains
 !     \item [valueList]
 !           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The logical default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -16157,8 +16169,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -16184,8 +16196,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -16532,19 +16544,19 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
-      subroutine ESMF_FBundleAttGetInfoByName(fieldbundle, name, typekind, count, rc)
+      subroutine ESMF_FBundleAttGetInfoByName(fieldbundle, name, typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       character(len=*), intent(in) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Returns information associated with the named Attribute, 
-!     including {\tt typekind} and {\tt count}.
+!     including {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -16554,7 +16566,7 @@ contains
 !           The name of the Attribute to query.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
@@ -16566,7 +16578,7 @@ contains
 
       integer :: localrc             
       type(ESMF_TypeKind) :: localTk
-      integer :: localCount
+      integer :: localItemcount
 
       ! Initialize 
       localrc = ESMF_RC_NOT_IMPL
@@ -16576,13 +16588,13 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
       call c_ESMC_AttributeGetInfoName(fieldbundle%btypep%base, name, &
-        localTk, localCount, localrc)
+        localTk, localItemcount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localCount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -16598,20 +16610,20 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_FBundleAttGetInfoByNum(fieldbundle, attributeIndex, name, &
-        typekind, count, rc)
+        typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !      Returns information associated with the indexed Attribute, 
-!      including {\tt name}, {\tt typekind} and {\tt count}.
+!      including {\tt name}, {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -16623,7 +16635,7 @@ contains
 !           Returns the name of the Attribute.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
@@ -16653,7 +16665,7 @@ contains
 
       name = localName
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localItemcount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -18039,7 +18051,6 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: name1, name2, name3, name4
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
 
       ! Initialize return code; assume failure until success is certain
@@ -18052,23 +18063,7 @@ contains
       fpurpose = purpose
       fobject = 'grid'
 
-      name1 = 'shortname'
-      name2 = 'longname'
-      name3 = 'units'
-      name4 = 'dimensions'
-
-      call c_ESMC_AttPackCreate(grid, name1, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(grid, name2, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(grid, name3, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(grid, name4, fconvention, &
-        fpurpose, fobject, localrc)
-
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      ! no standard attribute package for Grid at this time
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -18156,14 +18151,14 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridAttDestroy"
+#define ESMF_METHOD "ESMF_GridAttRemove"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+! !IROUTINE: ESMF_AttributeRemove  - Remove an Attribute or Attribute Package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_AttributeDestroy()
-      subroutine ESMF_GridAttDestroy(grid, name, convention, purpose, rc)
+      ! Private name; call using ESMF_AttributeRemove()
+      subroutine ESMF_GridAttRemove(grid, name, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
@@ -18173,7 +18168,7 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Destroys an Attribute on the {\tt grid}.
+!     Removes an Attribute on the {\tt grid}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -18218,14 +18213,14 @@ contains
       
       fobject = 'grid'
 
-      call c_ESMC_AttPackDestroy(grid, name, fconvention, &
+      call c_ESMC_AttPackRemove(grid, name, fconvention, &
         fpurpose, fobject, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
     else
       
-      call c_ESMC_AttributeDestroy(grid, name, localrc)
+      call c_ESMC_AttributeRemove(grid, name, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -18233,7 +18228,7 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridAttDestroy
+      end subroutine ESMF_GridAttRemove
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -18374,14 +18369,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetInt4List(grid, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -18401,7 +18396,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -18464,8 +18459,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -18489,8 +18484,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -18643,14 +18638,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetInt8List(grid, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -18670,7 +18665,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -18733,8 +18728,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -18757,8 +18752,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -18910,14 +18905,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetReal4List(grid, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -18937,7 +18932,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -19001,8 +18996,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -19025,8 +19020,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -19177,14 +19172,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetReal8List(grid, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -19204,7 +19199,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -19267,8 +19262,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -19291,8 +19286,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -19445,14 +19440,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetLogicalList(grid, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, dimension(:), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -19472,7 +19467,7 @@ contains
 !     \item [valueList]
 !           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The logical default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -19539,8 +19534,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -19566,8 +19561,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -19914,19 +19909,19 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
-      subroutine ESMF_GridAttGetInfoByName(grid, name, typekind, count, rc)
+      subroutine ESMF_GridAttGetInfoByName(grid, name, typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character(len=*), intent(in) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Returns information associated with the named Attribute, 
-!     including {\tt typekind} and {\tt count}.
+!     including {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -19936,7 +19931,7 @@ contains
 !           The name of the Attribute to query.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
@@ -19948,7 +19943,7 @@ contains
 
       integer :: localrc             
       type(ESMF_TypeKind) :: localTk
-      integer :: localCount
+      integer :: localItemcount
 
       ! Initialize 
       localrc = ESMF_RC_NOT_IMPL
@@ -19958,13 +19953,13 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       call c_ESMC_AttributeGetInfoName(grid, name, &
-        localTk, localCount, localrc)
+        localTk, localItemcount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localCount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -19980,20 +19975,20 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_GridAttGetInfoByNum(grid, attributeIndex, name, &
-        typekind, count, rc)
+        typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !      Returns information associated with the indexed Attribute, 
-!      including {\tt name}, {\tt typekind} and {\tt count}.
+!      including {\tt name}, {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -20005,7 +20000,7 @@ contains
 !           Returns the name of the Attribute.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
@@ -20035,7 +20030,7 @@ contains
 
       name = localName
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localItemcount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -21362,8 +21357,9 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
-      character(ESMF_MAXSTR) :: name1, name2, name3, name4
+      character(ESMF_MAXSTR) :: name1, name2
       character(ESMF_MAXSTR) :: fconvention, fpurpose, fobject
+      type(ESMF_Logical) :: lvalue
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -21375,23 +21371,30 @@ contains
       fpurpose = purpose
       fobject = 'state'
 
-      name1 = 'shortname'
-      name2 = 'longname'
-      name3 = 'organization'
-      name4 = 'discipline'
+      name1 = 'import'
+      name2 = 'export'
 
       call c_ESMC_AttPackCreate(state%statep%base, name1, fconvention, &
         fpurpose, fobject, localrc)
       call c_ESMC_AttPackCreate(state%statep%base, name2, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(state%statep%base, name3, fconvention, &
-        fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(state%statep%base, name4, fconvention, &
-        fpurpose, fobject, localrc)
 
-      if (ESMF_LogMsgFoundError(localrc, &
+      lvalue = .true.
+      if (state%statep%st == ESMF_STATE_IMPORT) then
+        call c_ESMC_AttPackSetValue(state%statep%base, name1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue, &
+          fconvention, fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
+      else if (state%statep%st == ESMF_STATE_EXPORT) then
+        call c_ESMC_AttPackSetValue(state%statep%base, name2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue, &
+          fconvention, fpurpose, fobject, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -21541,14 +21544,14 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateAttDestroy"
+#define ESMF_METHOD "ESMF_StateAttRemove"
 
 !BOPI
-! !IROUTINE: ESMF_AttributeDestroy  - Destroy an Attribute or Attribute Package
+! !IROUTINE: ESMF_AttributeRemove  - Remove an Attribute or Attribute Package
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_AttributeDestroy()
-      subroutine ESMF_StateAttDestroy(state, name, convention, purpose, rc)
+      ! Private name; call using ESMF_AttributeRemove()
+      subroutine ESMF_StateAttRemove(state, name, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
@@ -21558,7 +21561,7 @@ contains
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Destroys an Attribute on the {\tt state}.
+!     Removes an Attribute on the {\tt state}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -21603,14 +21606,14 @@ contains
       
       fobject = 'state'
 
-      call c_ESMC_AttPackDestroy(state%statep%base, name, fconvention, &
+      call c_ESMC_AttPackRemove(state%statep%base, name, fconvention, &
         fpurpose, fobject, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
     else
       
-      call c_ESMC_AttributeDestroy(state%statep%base, name, localrc)
+      call c_ESMC_AttributeRemove(state%statep%base, name, localrc)
       if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -21618,7 +21621,7 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateAttDestroy
+      end subroutine ESMF_StateAttRemove
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -21759,14 +21762,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetInt4List(state, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -21786,7 +21789,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -21849,8 +21852,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -21874,8 +21877,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -22028,14 +22031,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetInt8List(state, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       integer(ESMF_KIND_I8), dimension(:), intent(out) :: valueList
-      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalue
+      integer(ESMF_KIND_I8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -22055,7 +22058,7 @@ contains
 !     \item [valueList]
 !           The integer values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The default integer value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -22118,8 +22121,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -22142,8 +22145,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -22295,14 +22298,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetReal4List(state, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R4), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R4), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -22322,7 +22325,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -22386,8 +22389,8 @@ contains
                                 ESMF_CONTEXT, rc)) return
         
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -22410,8 +22413,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -22562,14 +22565,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetReal8List(state, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
-      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalue
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -22589,7 +22592,7 @@ contains
 !     \item [valueList]
 !           The real values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The real default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -22652,8 +22655,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -22676,8 +22679,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -22830,14 +22833,14 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetLogicalList(state, name, count, valueList, &
-        defaultvalue, convention, purpose, rc)
+        defaultvalueList, convention, purpose, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
       logical, dimension(:), intent(out) :: valueList
-      logical, dimension(:), intent(inout), optional :: defaultvalue
+      logical, dimension(:), intent(inout), optional :: defaultvalueList
       character(ESMF_MAXSTR), intent(in), optional :: convention
       character(ESMF_MAXSTR), intent(in), optional :: purpose
       integer, intent(out), optional :: rc   
@@ -22857,7 +22860,7 @@ contains
 !     \item [valueList]
 !           The logical values of the named Attribute.
 !           The list must be at least {\tt count} items long.
-!     \item [defaultvalue]
+!     \item [defaultvalueList]
 !           The logical default value of the named Attribute.
 !     \item [convention]
 !           The convention of the Attribute package.
@@ -22924,8 +22927,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -22951,8 +22954,8 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else
-        if(present(defaultvalue)) then
-          valueList = defaultvalue
+        if(present(defaultvalueList)) then
+          valueList = defaultvalueList
         else 
           if(ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -23299,19 +23302,19 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
-      subroutine ESMF_StateAttGetInfoByName(state, name, typekind, count, rc)
+      subroutine ESMF_StateAttGetInfoByName(state, name, typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character(len=*), intent(in) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Returns information associated with the named Attribute, 
-!     including {\tt typekind} and {\tt count}.
+!     including {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -23321,7 +23324,7 @@ contains
 !           The name of the Attribute to query.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           The number of items in this Attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
@@ -23333,7 +23336,7 @@ contains
 
       integer :: localrc             
       type(ESMF_TypeKind) :: localTk
-      integer :: localCount
+      integer :: localItemcount
 
       ! Initialize 
       localrc = ESMF_RC_NOT_IMPL
@@ -23343,13 +23346,13 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       call c_ESMC_AttributeGetInfoName(state%statep%base, name, &
-        localTk, localCount, localrc)
+        localTk, localItemcount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localCount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -23365,20 +23368,20 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGet()
       subroutine ESMF_StateAttGetInfoByNum(state, attributeIndex, name, &
-        typekind, count, rc)
+        typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       integer, intent(in) :: attributeIndex
       character(len=*), intent(out) :: name
       type(ESMF_TypeKind), intent(out), optional :: typekind
-      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: itemcount   
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !      Returns information associated with the indexed Attribute, 
-!      including {\tt name}, {\tt typekind} and {\tt count}.
+!      including {\tt name}, {\tt typekind} and {\tt itemcount}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -23390,7 +23393,7 @@ contains
 !           Returns the name of the Attribute.
 !     \item [{[typekind]}]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
+!     \item [{[itemcount]}]
 !           Returns the number of items in this Attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
@@ -23420,7 +23423,7 @@ contains
 
       name = localName
       if (present(typekind)) typekind = localTk
-      if (present(count)) count = localItemcount
+      if (present(itemcount)) itemcount = localItemcount
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -24680,6 +24683,8 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: lobject, lname1, lname2
+      type(ESMF_Logical) :: lvalue1, lvalue2
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24697,6 +24702,30 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      ! set the import and export Attributes on any Field connected to this State
+      lobject = 'field'
+      lname1 = 'import'
+      lname2 = 'export'
+      lvalue1 = .true.
+      lvalue2 = .false.
+      if (state%statep%st == ESMF_STATE_IMPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (state%statep%st == ESMF_STATE_EXPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAttSetLinkFB
@@ -24733,6 +24762,8 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: lobject, lname1, lname2
+      type(ESMF_Logical) :: lvalue1, lvalue2
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24750,6 +24781,30 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      ! set the import and export Attributes on any Field connected to this State
+      lobject = 'field'
+      lname1 = 'import'
+      lname2 = 'export'
+      lvalue1 = .true.
+      lvalue2 = .false.
+      if (state%statep%st == ESMF_STATE_IMPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (state%statep%st == ESMF_STATE_EXPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAttSetLinkField
@@ -24786,6 +24841,8 @@ contains
 !EOPI
 
       integer :: localrc                           ! Error status
+      character(ESMF_MAXSTR) :: lobject, lname1, lname2
+      type(ESMF_Logical) :: lvalue1, lvalue2
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -24809,6 +24866,30 @@ contains
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      ! set the import and export Attributes on any Field connected to this State
+      lobject = 'field'
+      lname1 = 'import'
+      lname2 = 'export'
+      lvalue1 = .true.
+      lvalue2 = .false.
+      if (state1%statep%st == ESMF_STATE_IMPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state1%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state1%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (state1%statep%st == ESMF_STATE_EXPORT) then
+        call c_ESMC_AttributeSetObjsInTree(state1%statep%base, lobject, lname1, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
+        call c_ESMC_AttributeSetObjsInTree(state1%statep%base, lobject, lname2, &
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAttSetLinkState

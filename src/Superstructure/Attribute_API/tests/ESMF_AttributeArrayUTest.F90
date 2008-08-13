@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeArrayUTest.F90,v 1.2 2008/08/08 15:25:26 rokuingh Exp $
+! $Id: ESMF_AttributeArrayUTest.F90,v 1.3 2008/08/13 14:50:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeArrayUTest.F90,v 1.2 2008/08/08 15:25:26 rokuingh Exp $'
+      '$Id: ESMF_AttributeArrayUTest.F90,v 1.3 2008/08/13 14:50:48 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -126,10 +126,10 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute on an Array Test
-      call ESMF_AttributeDestroy(array, name="AttrI4", rc=rc)
+      ! Remove an Attribute on an Array Test
+      call ESMF_AttributeRemove(array, name="AttrI4", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying an ESMF_I4 Attribute on an Array Test"
+      write(name, *) "Removing an ESMF_I4 Attribute on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -169,10 +169,10 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute on an Array Test
-      call ESMF_AttributeDestroy(array, name="AttrI4l", rc=rc)
+      ! Remove an Attribute on an Array Test
+      call ESMF_AttributeRemove(array, name="AttrI4l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying an ESMF_I4l Attribute on an Array Test"
+      write(name, *) "Removeing an ESMF_I4l Attribute on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -180,7 +180,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Get an ESMF_I4 list Attribute from a Field Test
       call ESMF_AttributeGet(array, name="AttrI4l", count=count, &
-        valueList=dfltoutI4l, defaultvalue=defaultI4l, rc=rc)
+        valueList=dfltoutI4l, defaultvalueList=defaultI4l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting a default ESMF_I4l Attribute from an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultI4l==dfltoutI4l), &
@@ -209,10 +209,10 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute on an Array Test
-      call ESMF_AttributeDestroy(array, name="AttrI8", rc=rc)
+      ! Remove an Attribute on an Array Test
+      call ESMF_AttributeRemove(array, name="AttrI8", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying an ESMF_I8 Attribute on an Array Test"
+      write(name, *) "Removeing an ESMF_I8 Attribute on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -252,10 +252,10 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute on an Array Test
-      call ESMF_AttributeDestroy(array, name="AttrI8l", rc=rc)
+      ! Remove an Attribute on an Array Test
+      call ESMF_AttributeRemove(array, name="AttrI8l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying an ESMF_I8l Attribute on an Array Test"
+      write(name, *) "Removeing an ESMF_I8l Attribute on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -263,7 +263,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Get an ESMF_I8 list Attribute from a Field Test
       call ESMF_AttributeGet(array, name="AttrI8l", count=count, &
-        valueList=dfltoutI8l, defaultvalue=defaultI8l, rc=rc)
+        valueList=dfltoutI8l, defaultvalueList=defaultI8l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting a default ESMF_I8l Attribute from an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultI8l==dfltoutI8l), &
@@ -292,10 +292,10 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute on an Array Test
-      call ESMF_AttributeDestroy(array, name="AttrR4", rc=rc)
+      ! Remove an Attribute on an Array Test
+      call ESMF_AttributeRemove(array, name="AttrR4", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying an ESMF_R4 Attribute on an Array Test"
+      write(name, *) "Removeing an ESMF_R4 Attribute on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -335,10 +335,10 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute on an Array Test
-      call ESMF_AttributeDestroy(array, name="AttrR4l", rc=rc)
+      ! Remove an Attribute on an Array Test
+      call ESMF_AttributeRemove(array, name="AttrR4l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying an ESMF_R4l Attribute on an Array Test"
+      write(name, *) "Removeing an ESMF_R4l Attribute on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -346,7 +346,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Get an ESMF_R4 list Attribute from a Field Test
       call ESMF_AttributeGet(array, name="AttrR4l", count=count, &
-        valueList=dfltoutR4l, defaultvalue=defaultR4l, rc=rc)
+        valueList=dfltoutR4l, defaultvalueList=defaultR4l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting a default ESMF_R4l Attribute from an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultR4l==dfltoutR4l), &
@@ -375,10 +375,10 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute on an Array Test
-      call ESMF_AttributeDestroy(array, name="AttrR8", rc=rc)
+      ! Remove an Attribute on an Array Test
+      call ESMF_AttributeRemove(array, name="AttrR8", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying an ESMF_R8 Attribute on an Array Test"
+      write(name, *) "Removeing an ESMF_R8 Attribute on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -418,10 +418,10 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute on an Array Test
-      call ESMF_AttributeDestroy(array, name="AttrR8l", rc=rc)
+      ! Remove an Attribute on an Array Test
+      call ESMF_AttributeRemove(array, name="AttrR8l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying an ESMF_R8l Attribute on an Array Test"
+      write(name, *) "Removeing an ESMF_R8l Attribute on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -429,7 +429,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Get an ESMF_R8 list Attribute from a Field Test
       call ESMF_AttributeGet(array, name="AttrR8l", count=count, &
-        valueList=dfltoutR8l, defaultvalue=defaultR8l, rc=rc)
+        valueList=dfltoutR8l, defaultvalueList=defaultR8l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting a default ESMF_R8l Attribute from an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultR8l==dfltoutR8l), &
@@ -459,10 +459,10 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute on an Array Test
-      call ESMF_AttributeDestroy(array, name=attrname, rc=rc)
+      ! Remove an Attribute on an Array Test
+      call ESMF_AttributeRemove(array, name=attrname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying a char Attribute on an Array Test"
+      write(name, *) "Removeing a char Attribute on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
@@ -508,18 +508,18 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute on an Array Test
-      call ESMF_AttributeDestroy(array, name="Charl", rc=rc)
+      ! Remove an Attribute on an Array Test
+      call ESMF_AttributeRemove(array, name="Charl", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying a Character list Attribute on an Array Test"
+      write(name, *) "Removeing a Character list Attribute on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute on an Array Test, again
-      call ESMF_AttributeDestroy(array, name="Charl", rc=rc)
+      ! Remove an Attribute on an Array Test, again
+      call ESMF_AttributeRemove(array, name="Charl", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying a Character list Attribute on an Array Test, again"
+      write(name, *) "Removeing a Character list Attribute on an Array Test, again"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -558,10 +558,10 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute on an Array Test
-      call ESMF_AttributeDestroy(array, name=attrname, rc=rc)
+      ! Remove an Attribute on an Array Test
+      call ESMF_AttributeRemove(array, name=attrname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying a logical Attribute on an Array Test"
+      write(name, *) "Removeing a logical Attribute on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -605,10 +605,10 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute on an Array Test
-      call ESMF_AttributeDestroy(array, name=attrname, rc=rc)
+      ! Remove an Attribute on an Array Test
+      call ESMF_AttributeRemove(array, name=attrname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying a logical list Attribute on an Array Test"
+      write(name, *) "Removeing a logical list Attribute on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
   
@@ -617,7 +617,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Get a logical attribute - array version
       call ESMF_AttributeGet(array, name=attrname, count=count, &
-        valueList=dfltoutLogl, defaultvalue=defaultLogl, rc=rc)
+        valueList=dfltoutLogl, defaultvalueList=defaultLogl, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting Array default Attribute (type Fortran logical array)"
       call ESMF_Test((rc == ESMF_SUCCESS) .and. all (defaultLogl .eqv. dfltoutLogl),   &
@@ -678,10 +678,10 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute in an Attribute package on an Array Test
-      call ESMF_AttributeDestroy(array, name=attrname, convention=conv, purpose=purp, rc=rc)
+      ! Remove an Attribute in an Attribute package on an Array Test
+      call ESMF_AttributeRemove(array, name=attrname, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying an Attribute in an Attribute package on an Array Test"
+      write(name, *) "Removeing an Attribute in an Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -702,7 +702,8 @@ program ESMF_AttributeArrayUTest
 
       !EX_UTest
       ! Write the Attribute package from an Array Test
-      call ESMF_AttributeWrite(array, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeWrite(array, convention=conv, purpose=purp, &
+        attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Writing an Attribute package from an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -722,8 +723,8 @@ program ESMF_AttributeArrayUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      attrname = "units"
-      attrvalue = "m/s"
+      attrname = "name"
+      attrvalue = "Array Attribute"
       
       !EX_UTest
       ! Set an Attribute in an Attribute package on an Array Test
@@ -734,18 +735,18 @@ program ESMF_AttributeArrayUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
-      attpackListTNames(1) = "ESMF_I4"
-      attpackListTNames(2) = "ESMF_I4list"
-      attpackListTNames(3) = "ESMF_I8"
-      attpackListTNames(4) = "ESMF_I8list"
-      attpackListTNames(5) = "ESMF_R4"
-      attpackListTNames(6) = "ESMF_R4list"
-      attpackListTNames(7) = "ESMF_R8"
-      attpackListTNames(8) = "ESMF_R8list"
-      attpackListTNames(9) = "Logical_"
-      attpackListTNames(10) = "Logical_list"
-      attpackListTNames(11) = "Character_"
-      attpackListTNames(12) = "Character_list"
+      attpackListTNames(1) = "ESMF_I4name"
+      attpackListTNames(2) = "ESMF_I4namelist"
+      attpackListTNames(3) = "ESMF_I8name"
+      attpackListTNames(4) = "ESMF_I8namelist"
+      attpackListTNames(5) = "ESMF_R4name"
+      attpackListTNames(6) = "ESMF_R4namelist"
+      attpackListTNames(7) = "ESMF_R8name"
+      attpackListTNames(8) = "ESMF_R8namelist"
+      attpackListTNames(9) = "Logical_name"
+      attpackListTNames(10) = "Logical_namelist"
+      attpackListTNames(11) = "Character_name"
+      attpackListTNames(12) = "Character_namelist"
       count=12
     
       !EX_UTest
@@ -758,84 +759,84 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set an ESMF_I4 Attribute in an Attribute package on an Array Test
-      call ESMF_AttributeSet(array, name="ESMF_I4", value=inI4, &
+      ! Set an ESMF_I4name Attribute in an Attribute package on an Array Test
+      call ESMF_AttributeSet(array, name="ESMF_I4name", value=inI4, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_I4 Attribute in an Attribute package on an Array Test"
+      write(name, *) "Setting an ESMF_I4name Attribute in an Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       count = 3
       !EX_UTest
-      ! Set an ESMF_I4list Attribute in an Attribute package on an Array Test
-      call ESMF_AttributeSet(array, name="ESMF_I4list", count=count, valueList=inI4l, &
+      ! Set an ESMF_I4namelist Attribute in an Attribute package on an Array Test
+      call ESMF_AttributeSet(array, name="ESMF_I4namelist", count=count, valueList=inI4l, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_I4list Attribute in an Attribute package on an Array Test"
+      write(name, *) "Setting an ESMF_I4namelist Attribute in an Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set an ESMF_I8 Attribute in an Attribute package on an Array Test
-      call ESMF_AttributeSet(array, name="ESMF_I8", value=inI8, &
+      ! Set an ESMF_I8name Attribute in an Attribute package on an Array Test
+      call ESMF_AttributeSet(array, name="ESMF_I8name", value=inI8, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_I8 Attribute in an Attribute package on an Array Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      count = 3
-      !EX_UTest
-      ! Set an ESMF_I8list Attribute in an Attribute package on an Array Test
-      call ESMF_AttributeSet(array, name="ESMF_I8list", count=count, valueList=inI8l, &
-        convention=conv, purpose=purp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_I8list Attribute in an Attribute package on an Array Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Set an ESMF_R4 Attribute in an Attribute package on an Array Test
-      call ESMF_AttributeSet(array, name="ESMF_R4", value=inR4, &
-        convention=conv, purpose=purp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_R4 Attribute in an Attribute package on an Array Test"
+      write(name, *) "Setting an ESMF_I8name Attribute in an Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       count = 3
       !EX_UTest
-      ! Set an ESMF_R4list Attribute in an Attribute package on an Array Test
-      call ESMF_AttributeSet(array, name="ESMF_R4list", count=count, valueList=inR4l, &
+      ! Set an ESMF_I8namelist Attribute in an Attribute package on an Array Test
+      call ESMF_AttributeSet(array, name="ESMF_I8namelist", count=count, valueList=inI8l, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_R4list Attribute in an Attribute package on an Array Test"
+      write(name, *) "Setting an ESMF_I8namelist Attribute in an Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set an ESMF_R8 Attribute in an Attribute package on an Array Test
-      call ESMF_AttributeSet(array, name="ESMF_R8", value=inR8, &
+      ! Set an ESMF_R4name Attribute in an Attribute package on an Array Test
+      call ESMF_AttributeSet(array, name="ESMF_R4name", value=inR4, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_R8 Attribute in an Attribute package on an Array Test"
+      write(name, *) "Setting an ESMF_R4name Attribute in an Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       count = 3
       !EX_UTest
-      ! Set an ESMF_R8list Attribute in an Attribute package on an Array Test
-      call ESMF_AttributeSet(array, name="ESMF_R8list", count=count, valueList=inR8l, &
+      ! Set an ESMF_R4namelist Attribute in an Attribute package on an Array Test
+      call ESMF_AttributeSet(array, name="ESMF_R4namelist", count=count, valueList=inR4l, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting an ESMF_R8list Attribute in an Attribute package on an Array Test"
+      write(name, *) "Setting an ESMF_R4namelist Attribute in an Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Set an ESMF_R8 Attribute in an Attribute package on an Array Test
-      call ESMF_AttributeSet(array, name="Character_", value=attrvalue, &
+      ! Set an ESMF_R8name Attribute in an Attribute package on an Array Test
+      call ESMF_AttributeSet(array, name="ESMF_R8name", value=inR8, &
+        convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting an ESMF_R8name Attribute in an Attribute package on an Array Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      count = 3
+      !EX_UTest
+      ! Set an ESMF_R8namelist Attribute in an Attribute package on an Array Test
+      call ESMF_AttributeSet(array, name="ESMF_R8namelist", count=count, valueList=inR8l, &
+        convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting an ESMF_R8namelist Attribute in an Attribute package on an Array Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Set a character Attribute in an Attribute package on an Array Test
+      call ESMF_AttributeSet(array, name="Character_name", value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a Character Attribute in an Attribute package on an Array Test"
@@ -843,7 +844,7 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       count = 3
-      attrname = "Character_list"
+      attrname = "Character_namelist"
       !EX_UTest
       ! Set a char list Attribute in an Attribute package on an Array Test
       call ESMF_AttributeSet(array, name=attrname, count=count, &
@@ -864,18 +865,18 @@ program ESMF_AttributeArrayUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute in an Attribute package on an Array Test
-      call ESMF_AttributeDestroy(array, name=attrname, convention=conv, purpose=purp, rc=rc)
+      ! Remove an Attribute in an Attribute package on an Array Test
+      call ESMF_AttributeRemove(array, name=attrname, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying an Attribute in an Attribute package on an Array Test"
+      write(name, *) "Removeing an Attribute in an Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Destroy an Attribute in an Attribute package on an Array Test, again
-      call ESMF_AttributeDestroy(array, name=attrname, convention=conv, purpose=purp, rc=rc)
+      ! Remove an Attribute in an Attribute package on an Array Test, again
+      call ESMF_AttributeRemove(array, name=attrname, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying an Attribute in an Attribute package on an Array Test, again"
+      write(name, *) "Removeing an Attribute in an Attribute package on an Array Test, again"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -896,7 +897,8 @@ program ESMF_AttributeArrayUTest
 
       !EX_UTest
       ! Write the Attribute package from a Array Test
-      call ESMF_AttributeWrite(array, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeWrite(array, convention=conv, purpose=purp, &
+        attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Writing an Attribute package from an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -906,7 +908,7 @@ program ESMF_AttributeArrayUTest
     !  Attribute Info
     !-------------------------------------------------------------------------
 
-      attrname="Character_"
+      attrname="Character_name"
       attrvalue="stuff"
       ! Set a Character Attribute on an Array to test the get info calls
       call ESMF_AttributeSet(array, name=attrname, value=attrvalue, rc=rc)
@@ -923,7 +925,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Get Attribute info by name from an Array Test
       call ESMF_AttributeGet(array, name=attrname, typekind=attrTK, &
-        count=items, rc=rc)
+        itemcount=items, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting Attribute info by name from an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS) &
@@ -935,7 +937,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Get Attribute info by num from an Array Test
       call ESMF_AttributeGet(array, attributeIndex=count, name=attrnameOut, &
-        typekind=attrTK, count=count, rc=rc)
+        typekind=attrTK, itemcount=items, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting Attribute info by num from an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(attrname==attrnameOut) &
