@@ -34,8 +34,9 @@ program ESMF_AttributeSTest
   type(ESMF_GridComp) :: comp2
   type(ESMF_CplComp) :: cplcomp
   character(ESMF_MAXSTR) :: name1,name2,name3,name4,name5,name6,name7, &
-                            value1,value2,value3,value4,value5,value6,value7, &
-                            conv,purp
+                            name8, name9, name10, value1,value2,value3, &
+                            value4,value5,value6,value7,value8,value9, &
+                            value10,conv,purp
     
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: testresult = 0
@@ -202,6 +203,9 @@ program ESMF_AttributeSTest
   name5 = 'author'
   name6 = 'coding_language'
   name7 = 'model_component_framework'
+  name8 = 'name'
+  name9 = 'full_name'
+  name10 = 'version'
   value1 = 'Atmosphere'
   value2 = 'Earth system'
   value3 = 'NASA'
@@ -209,6 +213,9 @@ program ESMF_AttributeSTest
   value5 = 'Max Suarez'
   value6 = 'Fortran 90'
   value7 = 'ESMF (Earth System Modeling Framework)'
+  value8 = 'FV dycore'
+  value9 = 'Finite_Volume_Dynamical_Core'
+  value10 = ''
   
   ! Add the Attribute package to comp2
   call ESMF_AttributeAdd(comp2, convention=conv, purpose=purp, rc=rc)
@@ -219,6 +226,9 @@ program ESMF_AttributeSTest
   call ESMF_AttributeSet(comp2, name5, value5, convention=conv, purpose=purp, rc=rc)
   call ESMF_AttributeSet(comp2, name6, value6, convention=conv, purpose=purp, rc=rc)
   call ESMF_AttributeSet(comp2, name7, value7, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp2, name8, value8, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp2, name9, value9, convention=conv, purpose=purp, rc=rc)
+  call ESMF_AttributeSet(comp2, name10, value10, convention=conv, purpose=purp, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
