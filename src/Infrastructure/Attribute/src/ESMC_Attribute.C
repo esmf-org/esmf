@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.23 2008/08/13 21:26:34 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.24 2008/08/14 01:50:54 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.23 2008/08/13 21:26:34 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.24 2008/08/14 01:50:54 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -605,31 +605,25 @@
                              msgbuf, &localrc);
     return ESMF_FAILURE;
   } 
-  
+
+  if (strcmp(object,"comp")==0) {
   attpack = ESMC_AttPackGet(convention, purpose, object);
   if (!attpack) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed getting attpack in WriteTab", &localrc);
+                               "failed getting attpack in WriteXML", &localrc);
     return ESMF_FAILURE;
   }
 
   localrc = attpack->ESMC_AttributeGet(0,NULL,NULL,NULL,modelcompname);
-  if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed getting Attribute in WriteTab", &localrc);
-    return ESMF_FAILURE;
-  }
+  if (localrc != ESMF_SUCCESS) strcpy(modelcompname,"N/A");
   localrc = attpack->ESMC_AttributeGet(1,NULL,NULL,NULL,fullname);
-  if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed getting Attribute in WriteTab", &localrc);
-    return ESMF_FAILURE;
-  }
+  if (localrc != ESMF_SUCCESS) strcpy(fullname,"N/A");
   localrc = attpack->ESMC_AttributeGet(2,NULL,NULL,NULL,version);
-  if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed getting Attribute in WriteTab", &localrc);
-    return ESMF_FAILURE;
+  if (localrc != ESMF_SUCCESS) strcpy(version,"N/A");
+  } else {
+    strcpy(modelcompname,"N/A");
+    strcpy(fullname,"N/A");
+    strcpy(version,"N/A");
   }
 
   // Write the XML file header

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.30 2008/08/13 21:28:32 rokuingh Exp $
+! $Id: user_model1.F90,v 1.31 2008/08/14 01:50:20 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -180,7 +180,7 @@ module user_model1
     value1 = 'PHIS'
     value2 = 'surface_geopotential'
     value3 = 'Surface geopotential height'
-    value4 = 'm+2 sec-2'
+    value4 = 'm2 s-2'
       
     PHIS = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=status)

@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.6 2008/08/13 21:26:33 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.7 2008/08/14 01:50:54 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@ Attribute hierarchies are linked with "shallow" copies, meaning that the Attribu
 
 \subsubsection{Attribute Packages}
 
-At this point, only select ESMF classes have Attribute packages.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as "CF" and "general".  These specifiers will be used much more rigorously in future releases to help incorporate many existing meta data standards.  In this release the user can use an ESMF supplied standard Attribute package, specify their own Attribute packages, or add customized Attributes to the ESMF supplied Attribute package.  Working with Attribute packages is quite involved, at present, but significant effort in automation of the meta data capabilities of ESMF is anticipated in future releases. 
+At this point, only select ESMF classes have Attribute packages.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as "CF" (see below) and "general".  These specifiers will be used much more rigorously in future releases to help incorporate many existing meta data standards.  In this release the user can use an ESMF supplied standard Attribute package, specify their own Attribute packages, or add customized Attributes to the ESMF supplied Attribute package.  Working with Attribute packages is quite involved, at present, but significant effort in automation of the meta data capabilities of ESMF is anticipated in future releases. 
 
 The standard Attribute packages supplied by ESMF exist for the following ESMF objects:
 
@@ -52,7 +52,7 @@ The standard Attribute packages supplied by ESMF exist for the following ESMF ob
 \item Field
 \end{itemize}
 
-The standard Attribute package for the Field is based on the CF convention, and consists of 6 Attributes.  Two of these Attributes are not CF compliant, but used by the ESG data portal for meta data tracking and standardization.  These same two Attributes are part of an internal Attribute package on the ESMF State.  The four CF compliant Attributes that can be set by the user on an ESMF Field are:
+The standard Attribute package for the Field is based on the Climate and Forecast (CF) convention, and consists of 6 Attributes.  Two of these Attributes are not CF compliant, but used by the Earth System Grid (ESG) data portal for meta data tracking and standardization.  These same two Attributes are part of an internal Attribute package on the ESMF State.  The four CF compliant Attributes that can be set by the user on an ESMF Field are:
 
 \begin{itemize}
 \item name
@@ -75,8 +75,6 @@ The standard Attribute package for the Components is only partially based on the
 \item coding\_language
 \item model\_component\_framework
 \end{itemize}
-
-
 
 
 
