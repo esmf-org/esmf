@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.2 2008/08/13 21:27:50 rokuingh Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.3 2008/08/14 01:55:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@ program ESMF_AttributeEx
 !EOE
 
 !BOC 
-      conv = 'CF'
+      conv = 'ESG'
       purp = 'general'
 
       call ESMF_AttributeAdd(DPEDT, convention=conv, purpose=purp, rc=rc)
@@ -145,7 +145,7 @@ program ESMF_AttributeEx
 !     The remaining 4 Attributes in the standard Field Attribute
 !     package must be set manually by the user.  The names of the 4 
 !     Attributes that the user must set are currently in accordance 
-!     with the CF convention.
+!     with the CF convention, which is a subset of the ESG convention.
 !EOE
 
 !BOC
@@ -209,7 +209,7 @@ program ESMF_AttributeEx
       value1 = 'PHIS'
       value2 = 'surface_geopotential'
       value3 = 'Surface geopotential height'
-      value4 = 'm+2 sec-2'
+      value4 = 'm2 s-2'
       call ESMF_AttributeSet(PHIS, name1, value1, convention=conv, &
         purpose=purp, rc=rc)
       call ESMF_AttributeSet(PHIS, name2, value2, convention=conv, &
@@ -292,7 +292,6 @@ program ESMF_AttributeEx
 !EOE
 
 !BOC
-      ! now we set the Component Attributes
       name1 = 'discipline'
       name2 = 'physical_domain'
       name3 = 'agency'
@@ -310,8 +309,8 @@ program ESMF_AttributeEx
       value5 = 'Max Suarez'
       value6 = 'Fortran 90'
       value7 = 'ESMF (Earth System Modeling Framework)'
-      value8 = 'FV dycore'
-      value9 = 'Finite_Volume_Dynamical_Core'
+      value8 = 'GEOS-5 FV dynamical core'
+      value9 = 'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core'
       value10 = 'GEOSagcm-EROS-beta7p12'
       
       call ESMF_AttributeSet(gridcomp, name1, value1, convention=conv, &
@@ -369,26 +368,36 @@ program ESMF_AttributeEx
 !BOE
 !     There are (currently) two different formats available for writing
 !     the contents of the Attribute packages in an Attribute hierarchy.
-!     From the Component level there is an XML formatted write, which 
-!     generates a .xml file in the execution directory with the contents
-!     of the write.  From the State level there is a tab-delimited write
-!     which writes to standard out, a file generated in the exectuation
-!     directory with the extension .stdout.
+!     There is an XML formatted write, which generates a .xml file in the
+!     execution directory with the contents of the write.  There is also
+!     a tab-delimited write which writes to standard out, a file generated
+!     in the execution directory with the extension .stdout.  Either of 
+!     the AttributeWrite formats can be called on any of the objects which
+!     are capable of holding Attributes, but only from objects in an 
+!     Attribute hierarchy which contains Attribute packages will any 
+!     relevant information be written.  In the the tab-delimited case 
+!     relevant information will only be written if the Attribute hierarchy
+!     contains ESMF-supplied Attribute packages.  The AttributeWrite
+!     capability is in a developmental stage, present work is focusing
+!     on making it more robust in future releases.  A flag is used to 
+!     specify which format to write, the default is tab-delimited.
 !EOE
 
 
       if (localPet==0) then
 !BOC
-        call ESMF_AttributeWrite(gridcomp,conv,purp, &
-          attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
+      call ESMF_AttributeWrite(gridcomp,conv,purp, &
+        attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
 !EOC
         print *, ""
         print *, "--------------------------------------- "
-        print *, "Begin tab-delimited AttributeWrite format from 'exportState'"
+        print *, "Begin tab-delimited AttributeWrite format"
         print *, "--------------------------------------- "
-        call ESMF_AttributeWrite(exportState,conv,purp,rc=rc)
+!BOC
+      call ESMF_AttributeWrite(gridcomp,conv,purp,rc=rc)
+!EOC
         print *, "--------------------------------------- "
-        print *, "End tab-delimited AttributeWrite format from 'exportState'"
+        print *, "End tab-delimited AttributeWrite format"
         print *, "--------------------------------------- "
         print *, ""
         if (rc/=ESMF_SUCCESS) goto 10
@@ -495,27 +504,12 @@ program ESMF_AttributeEx
 
 !BOE
 !     Entire Attribute hierarchies can be copied from State to State, 
-!     this can come in handy in a coupling Component.  There is also
-!     a tab-delimited AttributeWrite capability.
+!     this can come in handy in a coupling Component.  
 !EOE
 
 !BOC
       call ESMF_AttributeCopy(exportState, importState, rc=rc)
 !EOC     
-      if (localPet==0) then
-        print *, ""
-        print *, "--------------------------------------- "
-        print *, "Begin tab-delimited AttributeWrite format from 'importState'"
-        print *, "--------------------------------------- "
-!BOC
-        call ESMF_AttributeWrite(importState,conv,purp,rc=rc)
-!EOC
-        print *, "--------------------------------------- "
-        print *, "End tab-delimited AttributeWrite format from 'importState'"
-        print *, "--------------------------------------- "
-        print *, ""
-      endif
-
 
   if (localPet==0) then
       print *, "--------------------------------------- "

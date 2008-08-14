@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.25 2008/08/13 21:27:50 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.26 2008/08/14 01:55:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -102,7 +102,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.25 2008/08/13 21:27:50 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.26 2008/08/14 01:55:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -540,7 +540,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeCopy - Copy an Attribute or Attribute hierarchy
+! !IROUTINE: ESMF_AttributeCopy - Copy an Attribute hierarchy
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeCopy() 
@@ -576,7 +576,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet  - Retrieve an Attribute
+! !IROUTINE: ESMF_AttributeGet  - Get an Attribute
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, count, <value argument>, &
@@ -587,13 +587,13 @@ contains
 !     character (len = *), intent(in) :: name
 !     integer, intent(in), optional :: count
 !     <value argument>, see below for supported values
-!     <defaultvalue>, see below for supported values   
+!     <defaultvalue argument>, see below for supported values   
 !     character(ESMF_MAXSTR), intent(in), optional :: convention
 !     character(ESMF_MAXSTR), intent(in), optional :: purpose
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Returns an Attribute from the <object>, or from the Attribute package
+!     Returns an Attribute value from the <object>, or from the Attribute package
 !     specified by {\tt convention} and {\tt purpose}.  A default value 
 !     argument may be given if a return code is not desired when the 
 !     Attribute is not found.
@@ -620,15 +620,22 @@ contains
 !     \item logical, intent(out) :: value
 !     \item logical, dimension(:), intent(out) :: valueList
 !     \item character (len = *), intent(out), value
+!     \item character (ESMF\_MAXSTR), dimension(count), intent(out), valueList
 !     \end{description}
 !     Supported values for <defaultvalue argument> are:
 !     \begin{description}
 !     \item integer(ESMF\_KIND\_I4), intent(out) :: defaultvalue
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: defaultdefaultvalueList
 !     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: defaultdefaultvalueList
 !     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: defaultdefaultvalueList
 !     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: defaultdefaultvalueList
 !     \item logical, intent(out) :: defaultvalue
+!     \item logical, dimension(:), intent(out) :: defaultdefaultvalueList
 !     \item character (len = *), intent(out), defaultvalue
+!     \item character (ESMF\_MAXSTR), dimension(count), intent(out), defaultdefaultvalueList
 !     \end{description}
 !
 !     The arguments are:
@@ -695,18 +702,18 @@ contains
 ! !IROUTINE: ESMF_AttributeGet - Get Attribute info by name
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeGetInfoByName(<object>, name, typekind, count, rc)
+!     subroutine ESMF_AttributeGetInfoByName(<object>, name, typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character (len = *), intent(in) :: name
 !     type(ESMF_TypeKind), intent(out), optional :: typekind
-!     integer, intent(out), optional :: count   
+!     integer, intent(out), optional :: itemcount   
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !     Returns information associated with the named Attribute, 
-!     including {\tt typekind} and {\tt count}.
+!     including {\tt typekind} and {\tt itemcount}.
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -724,11 +731,10 @@ contains
 !           An {\tt ESMF} object.
 !     \item [name]
 !           The name of the Attribute to query.
-!     \item [{[typekind]}]
+!     \item [typekind]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
-!           The number of items in this Attribute.  For character types,
-!           the length of the character string.
+!     \item [itemcount]
+!           The number of items in this Attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -741,19 +747,19 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGetInfoByNum(<object>, attributeIndex, name, &
-!       typekind, count, rc)
+!       typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     integer, intent(in) :: attributeIndex
 !     character (len = *), intent(in) :: name
 !     type(ESMF_TypeKind), intent(out), optional :: typekind
-!     integer, intent(out), optional :: count   
+!     integer, intent(out), optional :: itemcount   
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !     Returns information associated with the indexed Attribute, 
-!     including {\tt name}, {\tt typekind} and {\tt count}.
+!     including {\tt name}, {\tt typekind} and {\tt itemcount}.
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -773,11 +779,10 @@ contains
 !           The index number of the Attribute to query.
 !     \item [name]
 !           Returns the name of the Attribute.
-!     \item [{[typekind]}]
+!     \item [typekind]
 !           The typekind of the Attribute.
-!     \item [{[count]}]
-!           Returns the number of items in this Attribute.  For character types,
-!           this is the length of the character string.
+!     \item [itemcount]
+!           Returns the number of items in this Attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -790,14 +795,13 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(<object>, name, count, <value argument>, &
-!                            <defaultvalue argument>, convention, purpose, rc)
+!                                 convention, purpose, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character (len = *), intent(in) :: name
 !     integer, intent(in), optional :: count
 !     <value argument>, see below for supported values
-!     <defaultvalue>, see below for supported values   
 !     character(ESMF_MAXSTR), intent(in), optional :: convention
 !     character(ESMF_MAXSTR), intent(in), optional :: purpose
 !     integer, intent(out), optional :: rc   
@@ -829,7 +833,8 @@ contains
 !     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
 !     \item logical, intent(in) :: value
 !     \item logical, dimension(:), intent(in) :: valueList
-!     \item character (len = *), intent(in), value
+!     \item character (len = *), intent(in), :: value
+!     \item character (ESMF\_MAXSTR), dimension(:), intent(in), :: valueList
 !     \end{description}
 ! 
 !     The arguments are:
@@ -24963,17 +24968,19 @@ contains
 ! !IROUTINE: ESMF_AttributeWrite  - Write an Attribute package
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeWrite(<object>, convention, purpose, rc)
+!     subroutine ESMF_AttributeWrite(<object>, convention, purpose, attwriteflag, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character(ESMF_MAXSTR), intent(in), optional :: convention
 !     character(ESMF_MAXSTR), intent(in), optional :: purpose
+!     type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Write the Attribute package for object.  The Attribute package defines 
-!     the convention, purpose, and object type of the associated Attributes.
+!     Write the Attribute package for <object>.  The Attribute package defines 
+!     the convention, purpose, and object type of the associated Attributes.  Either
+!     tab-delimited or xml format is acheived by using the attwriteflag.
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -24993,6 +25000,11 @@ contains
 !           The convention of the Attribute package.
 !     \item [purpose]
 !           The purpose of the Attribute package.
+!     \item [attwriteflag]
+!           The flag to specify which format is desired for the write, the 
+!           default is tab-delimited.  The options for attwriteflag include:
+!              1. ESMF\_ATTWRITE\_XML will write in xml format
+!              2. ESMF\_ATTWRITE\_TAB will write in tab-delimited format
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
