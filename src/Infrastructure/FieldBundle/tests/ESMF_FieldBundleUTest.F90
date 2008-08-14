@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.8 2008/05/21 22:14:29 theurich Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.9 2008/08/14 18:30:40 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.8 2008/05/21 22:14:29 theurich Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.9 2008/08/14 18:30:40 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -383,23 +383,6 @@
       end do
 
       !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Getting Attribute count from a FieldBundle
-      call ESMF_AttributeGet(bundle2, count, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting Attribute Count from a FieldBundle Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Verify Attribute count Test
-      write(failMsg, *) "Incorrect count"
-      write(name, *) "Verify Attribute count from a FieldBundle "
-      call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
       !EX_UTest
       !  Verify that recreating a created FieldBundle is handled properly
       bundle2 = ESMF_FieldBundleCreate(name="time step 1", rc=rc)
@@ -555,7 +538,7 @@
 
       !EX_UTest
       ! Get an integer attribute from a FieldBundle Test
-      call ESMF_AttributeGet(bundle1, name="Sides", count=number, rc=rc)
+      call ESMF_AttributeGet(bundle1, name="Sides", itemcount=number, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an attribute info from a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
