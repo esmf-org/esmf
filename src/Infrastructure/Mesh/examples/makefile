@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2008/08/06 21:28:59 dneckels Exp $
+# $Id: makefile,v 1.9 2008/08/14 23:58:33 svasquez Exp $
 
 ALL: build_examples
 run: run_examples
@@ -14,14 +14,14 @@ EXAMPLES_BUILD    = \
                       $(ESMF_EXDIR)/ESMC_RendEx \
                       $(ESMF_EXDIR)/ESMC_DCatEx \
                       $(ESMF_EXDIR)/ESMC_RefineEx \
-                      $(ESMF_EXDIR)/ESMC_PatchWghtEx \
-                      $(ESMF_EXDIR)/ESMF_MeshEx \
+                      $(ESMF_EXDIR)/ESMC_PatchWghtEx
+#                      $(ESMF_EXDIR)/ESMF_MeshEx \
                       
 #                      $(ESMF_EXDIR)/ESMC_BreckEx \
 
-EXAMPLES_RUN      = run_ESMC_RefineEx run_ESMF_MeshEx
+EXAMPLES_RUN      = run_ESMC_RefineEx 
 
-EXAMPLES_RUN_UNI  = run_ESMC_RefineEx_uni run_ESMF_MeshEx
+EXAMPLES_RUN_UNI  = run_ESMC_RefineEx_uni 
 
 
 include $(ESMF_DIR)/makefile
