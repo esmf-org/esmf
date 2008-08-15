@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.17 2008/08/13 14:53:22 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.18 2008/08/15 22:44:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.17 2008/08/13 14:53:22 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.18 2008/08/15 22:44:16 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -718,13 +718,14 @@ extern "C" {
       if (rc) *rc = status;
       return;
     }
+    lens[i] = llens[i];
   }
   
   // allocate all char**s
   lcvalue = new char*[*count];
   for (i=0; i<*count; i++) {
     // allocate space for each char*
-    lcvalue[i] = new char[llens[i]+1];
+    lcvalue[i] = new char[lens[i]+1];
     if (!(lcvalue[i])) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value allocation", &status);
@@ -2180,13 +2181,14 @@ extern "C" {
       if (rc) *rc = status;
       return;
     }
+    lens[i] = llens[i];
   }
   
   // allocate all char**s
   lcvalue = new char*[*count];
   for (i=0; i<*count; i++) {
     // allocate space for each char*
-    lcvalue[i] = new char[llens[i]+1];
+    lcvalue[i] = new char[lens[i]+1];
     if (!(lcvalue[i])) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value allocation", &status);

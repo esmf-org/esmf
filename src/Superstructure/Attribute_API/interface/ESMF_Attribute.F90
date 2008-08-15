@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.F90,v 1.26 2008/08/14 01:55:02 rokuingh Exp $
+! $Id: ESMF_Attribute.F90,v 1.27 2008/08/15 22:45:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -102,7 +102,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.F90,v 1.26 2008/08/14 01:55:02 rokuingh Exp $'
+               '$Id: ESMF_Attribute.F90,v 1.27 2008/08/15 22:45:26 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -2638,7 +2638,7 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
       do  i=1,count
-        lens(i) = len_trim(valueList(i))
+        lens(i) = len(valueList(i))
       enddo
       
     if (present(convention) .OR. present(purpose)) then
@@ -2716,7 +2716,7 @@ contains
 
       j = 1
       do  i=1,count
-        valueList(i) = valueString(j:(j+lens(i)))
+        valueList(i) = valueString(j:(j+lens(i)-1))
         j = j + lens(i)
       enddo
 
@@ -4055,7 +4055,7 @@ contains
       j = 1
       do  i=1,count
         lens(i) = len_trim(valueList(i))
-        valueString(j:(j+lens(i))) = valueList(i)
+        valueString(j:(j+lens(i)-1)) = valueList(i)
         j = j + lens(i)
       enddo
 
@@ -5984,7 +5984,7 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
 
       do  i=1,count
-        lens(i) = len_trim(valueList(i))
+        lens(i) = len(valueList(i))
       enddo
       
     if (present(convention) .OR. present(purpose)) then
@@ -6062,7 +6062,7 @@ contains
 
       j = 1
       do  i=1,count
-        valueList(i) = valueString(j:(j+lens(i)))
+        valueList(i) = valueString(j:(j+lens(i)-1))
         j = j + lens(i)
       enddo
 
@@ -7403,7 +7403,7 @@ contains
       j = 1
       do  i=1,count
         lens(i) = len_trim(valueList(i))
-        valueString(j:(j+lens(i))) = valueList(i)
+        valueString(j:(j+lens(i)-1)) = valueList(i)
         j = j + lens(i)
       enddo
 
@@ -9550,7 +9550,7 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
 
       do  i=1,count
-        lens(i) = len_trim(valueList(i))
+        lens(i) = len(valueList(i))
       enddo
       
     if (present(convention) .OR. present(purpose)) then
@@ -9628,7 +9628,7 @@ contains
 
       j = 1
       do  i=1,count
-        valueList(i) = valueString(j:(j+lens(i)))
+        valueList(i) = valueString(j:(j+lens(i)-1))
         j = j + lens(i)
       enddo
 
@@ -10969,7 +10969,7 @@ contains
       j = 1
       do  i=1,count
         lens(i) = len_trim(valueList(i))
-        valueString(j:(j+lens(i))) = valueList(i)
+        valueString(j:(j+lens(i)-1)) = valueList(i)
         j = j + lens(i)
       enddo
 
@@ -13060,7 +13060,7 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       do  i=1,count
-        lens(i) = len_trim(valueList(i))
+        lens(i) = len(valueList(i))
       enddo
       
     if (present(convention) .OR. present(purpose)) then
@@ -13138,7 +13138,7 @@ contains
 
       j = 1
       do  i=1,count
-        valueList(i) = valueString(j:(j+lens(i)))
+        valueList(i) = valueString(j:(j+lens(i)-1))
         j = j + lens(i)
       enddo
 
@@ -14479,7 +14479,7 @@ contains
       j = 1
       do  i=1,count
         lens(i) = len_trim(valueList(i))
-        valueString(j:(j+lens(i))) = valueList(i)
+        valueString(j:(j+lens(i)-1)) = valueList(i)
         j = j + lens(i)
       enddo
 
@@ -16371,7 +16371,7 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
       do  i=1,count
-        lens(i) = len_trim(valueList(i))
+        lens(i) = len(valueList(i))
       enddo
       
     if (present(convention) .OR. present(purpose)) then
@@ -16449,7 +16449,7 @@ contains
 
       j = 1
       do  i=1,count
-        valueList(i) = valueString(j:(j+lens(i)))
+        valueList(i) = valueString(j:(j+lens(i)-1))
         j = j + lens(i)
       enddo
 
@@ -17790,7 +17790,7 @@ contains
       j = 1
       do  i=1,count
         lens(i) = len_trim(valueList(i))
-        valueString(j:(j+lens(i))) = valueList(i)
+        valueString(j:(j+lens(i)-1)) = valueList(i)
         j = j + lens(i)
       enddo
 
@@ -19737,7 +19737,7 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
       do  i=1,count
-        lens(i) = len_trim(valueList(i))
+        lens(i) = len(valueList(i))
       enddo
       
     if (present(convention) .OR. present(purpose)) then
@@ -19815,7 +19815,7 @@ contains
 
       j = 1
       do  i=1,count
-        valueList(i) = valueString(j:(j+lens(i)))
+        valueList(i) = valueString(j:(j+lens(i)-1))
         j = j + lens(i)
       enddo
 
@@ -21156,7 +21156,7 @@ contains
       j = 1
       do  i=1,count
         lens(i) = len_trim(valueList(i))
-        valueString(j:(j+lens(i))) = valueList(i)
+        valueString(j:(j+lens(i)-1)) = valueList(i)
         j = j + lens(i)
       enddo
 
@@ -23130,7 +23130,7 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       do  i=1,count
-        lens(i) = len_trim(valueList(i))
+        lens(i) = len(valueList(i))
       enddo
       
     if (present(convention) .OR. present(purpose)) then
@@ -23208,7 +23208,7 @@ contains
 
       j = 1
       do  i=1,count
-        valueList(i) = valueString(j:(j+lens(i)))
+        valueList(i) = valueString(j:(j+lens(i)-1))
         j = j + lens(i)
       enddo
 
@@ -24549,7 +24549,7 @@ contains
       j = 1
       do  i=1,count
         lens(i) = len_trim(valueList(i))
-        valueString(j:(j+lens(i))) = valueList(i)
+        valueString(j:(j+lens(i)-1)) = valueList(i)
         j = j + lens(i)
       enddo
 
