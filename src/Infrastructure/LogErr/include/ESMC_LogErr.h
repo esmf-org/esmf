@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.65 2008/07/30 11:29:43 rosalind Exp $
+// $Id: ESMC_LogErr.h,v 1.66 2008/08/15 17:04:59 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -18,13 +18,13 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS: LogErr - C++ interface to Log
+// !CLASS: ESMC_LogErr - Public C interface to the ESMF LogErr class
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the C++ Log members and declares all class
-// data and methods.  All methods, except for the Set and Get methods, which
-// are inlined, are defined in the companion file ESMC\_LogErr.C
+// The code in this file defines the public C LogErr interface and declares 
+// all class data and methods.  All methods are defined in the companion file 
+// ESMC\_LogErr.C
 //
 // !USES:
 
@@ -40,6 +40,21 @@
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrReturnCodes.inc"
 
+#include "ESMC_Interface.h"
+
+extern "C"{
+
+// Class declaration type
+typedef struct{
+void *ptr;
+}ESMC_LogErr;
+
+// Class API
+int ESMC_LogWrite(char msg[], int msgtype);
+
+}; // extern "C"
+
+
 enum ESMC_MsgType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
 enum ESMC_LogType{ESMC_LOG_SINGLE=1,ESMC_LOG_MULTI=2,ESMC_LOG_NONE=3};
 int ESMC_LogFinalize();
@@ -48,5 +63,6 @@ int ESMC_LogSetFilename(char filename[]);
 void ESMC_TimeStamp(int *y,int* mn,int *d,int *h,int *m,int *s,int *ms);
 
 //EOP
+
 
 #endif  //ESMC_LOGERR_H

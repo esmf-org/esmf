@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2008/03/19 21:02:16 svasquez Exp $ 
+# $Id: makefile,v 1.18 2008/08/15 17:05:00 rosalind Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -18,13 +18,16 @@ LOCDIR	  = src/Infrastructure/LogErr/tests
 
 # TODO:FIELDINTEGRATION Restore LogErrHaltUTest
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_LogErrUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_LogErrUTest \
+		$(ESMF_TESTDIR)/ESMF_LogErrUTest
 #		$(ESMF_TESTDIR)/ESMF_LogErrHaltUTest
 
-TESTS_RUN     = RUN_ESMF_LogErrUTest
+TESTS_RUN     = RUN_ESMC_LogErrUTest \
+		RUN_ESMF_LogErrUTest
 #                RUN_ESMF_LogErrHaltUTest
 
-TESTS_RUN_UNI = RUN_ESMF_LogErrUTestUNI
+TESTS_RUN_UNI = RUN_ESMC_LogErrUTestUNI \
+		RUN_ESMF_LogErrUTestUNI
 #                RUN_ESMF_LogErrHaltUTestUNI
 
 
@@ -49,6 +52,11 @@ RUN_ESMF_LogErrUTestUNI:
 	rm -f $(ESMF_TESTDIR)/*Log_Test_File* $(ESMF_TESTDIR)/Single_Log_File
 	$(MAKE) TNAME=LogErr NP=1 ftest
 
+RUN_ESMC_LogErrUTest:
+	$(MAKE) TNAME=LogErr NP=4 ctest
+
+RUN_ESMC_LogErrUTestUNI:
+	$(MAKE) TNAME=LogErr NP=1 ctest
 
 #
 # LogErrHalt - special for the lam implementation of MPI.  halting a
