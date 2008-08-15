@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.26 2008/08/13 18:42:28 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.27 2008/08/15 15:48:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.26 2008/08/13 18:42:28 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.27 2008/08/15 15:48:59 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4602,10 +4602,13 @@ int Array::sparseMatMulStore(
 #ifdef ASMMSTORETIMING
   double t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10X, t10Y, t11;//gjt - profile
   double t4a, t4b, t4c, t5a, t5b, t5c;  //gjt - profile
+  double t4a1, t4a2, t4a3;  //gjt - profile  
+  double t4b1, t4b2, t4b3;  //gjt - profile  
   double t4c1=0., t4c2=0., t4c3=0., t4c4=0., t4c5=0.;  //gjt - profile
   double t4c3a, t4c3b, t4c3c, t4c3d;  //gjt - profile
   double dt4c34=0., dt4c45=0.;  //gjt - profile
   double dt4c3ab=0., dt4c3bc=0., dt4c3cd=0.;  //gjt - profile
+  double t5a1, t5a2, t5a3;  //gjt - profile  
   VMK::wtime(&t0);   //gjt - profile
 #endif
   
@@ -5002,7 +5005,11 @@ int Array::sparseMatMulStore(
       }
     }
   }
-    
+  
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t4a1);   //gjt - profile
+#endif
+  
   // set up a distributed directory for srcArray seqIndex look-up
   int indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
     / petCount;
@@ -5036,6 +5043,11 @@ int Array::sparseMatMulStore(
     srcSeqIndexInterval[localPet].min, srcSeqIndexInterval[localPet].max);
 #endif
 
+  
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t4a2);   //gjt - profile
+#endif
+  
   int *srcLocalElementsPerIntervalCount = new int[petCount];
   for (int i=0; i<petCount; i++){
     // Pet "i" is the active srcSeqIndex interval
@@ -5052,6 +5064,11 @@ int Array::sparseMatMulStore(
     srcLocalElementsPerIntervalCount[i] = count;
   }
   int *srcLocalIntervalPerPetCount = new int[petCount];
+  
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t4a3);   //gjt - profile
+#endif
+  
   vm->alltoall(srcLocalElementsPerIntervalCount, sizeof(int),
     srcLocalIntervalPerPetCount, sizeof(int), vmBYTE);
   
@@ -5059,19 +5076,16 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t4a);   //gjt - profile
 #endif
   
-  // allocate local look-up table indexed by srcSeqIndex
-  DD::SeqIndexFactorLookup *srcSeqIndexFactorLookup = 
-    new DD::SeqIndexFactorLookup[srcSeqIndexInterval[localPet].countEff];
-  for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++){
-    srcSeqIndexFactorLookup[i].de = 0; // use during initialization as counter
-    srcSeqIndexFactorLookup[i].factorCount = 0; // reset
-  }
-
   // set up srcSeqIntervFactorListCount and srcSeqIntervFactorListIndex
   int *srcSeqIntervFactorListCount = new int[petCount];
   int **srcSeqIntervFactorListIndex = new int*[petCount];
   for (int i=0; i<petCount; i++)
     srcSeqIntervFactorListCount[i] = 0; // reset
+
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t4b1);   //gjt - profile
+#endif
+
   for (int j=0; j<factorListCount; j++){
     // loop over all factorList entries, find matching interval via bisection
     // and count factor towards that PETs factor list count.
@@ -5119,11 +5133,21 @@ int Array::sparseMatMulStore(
       return rc;
     }
   }
+
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t4b2);   //gjt - profile
+#endif
+  
   int *srcSeqIntervFactorCounter = new int[petCount];
   for (int i=0; i<petCount; i++){
     srcSeqIntervFactorListIndex[i] = new int[srcSeqIntervFactorListCount[i]];
     srcSeqIntervFactorCounter[i] = 0;  // reset
   }
+
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t4b3);   //gjt - profile
+#endif
+  
   for (int j=0; j<factorListCount; j++){
     // loop over all factorList entries, find matching interval via bisection
     // and factor list index
@@ -5157,6 +5181,14 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t4b);   //gjt - profile
 #endif
   
+  // allocate local look-up table indexed by srcSeqIndex
+  DD::SeqIndexFactorLookup *srcSeqIndexFactorLookup = 
+    new DD::SeqIndexFactorLookup[srcSeqIndexInterval[localPet].countEff];
+  for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++){
+    srcSeqIndexFactorLookup[i].de = 0; // use during initialization as counter
+    srcSeqIndexFactorLookup[i].factorCount = 0; // reset
+  }
+
   // all Pets construct their local srcSeqIndexFactorLookup[]
   int srcSeqIndexFactorCount = 0; // reset
   for (int factorPetIndex=0; factorPetIndex<factorPetCount; factorPetIndex++){
@@ -5729,13 +5761,18 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
       } // for ii
     }
   }
+  
+vm->barrier();  /// only for profiling tests
       
 #ifdef ASMMSTORETIMING
   printf("gjt - profile for PET %d:\n"
-    " t4a=%g\n t4b=%g\n t4c1=%g\n t4c2=%g\n dt4c3ab=%g\n dt4c3bc=%g\n "
-    "dt4c3cd=%g\n dt4c34=%g\n dt4c45=%g\n t4c=%g\n",
-    localPet, t4a-t3, t4b-t3, t4c1-t3, t4c2-t3, dt4c3ab, dt4c3bc, dt4c3cd, 
-    dt4c34, dt4c45, t4c-t3);
+    " t4a1=%g\n t4a2=%g\n t4a3=%g\n t4a=%g\n t4b1=%g\n t4b2=%g\n t4b3=%g\n"
+    " t4b=%g\n t4c1=%g\n"
+    " t4c2=%g\n dt4c3ab=%g\n dt4c3bc=%g\n dt4c3cd=%g\n dt4c34=%g\n dt4c45=%g\n"
+    " t4c=%g\n",
+    localPet, t4a1-t3, t4a2-t3, t4a3-t3, t4a-t3, t4b1-t3, t4b2-t3, t4b3-t3,
+    t4b-t3, t4c1-t3,
+    t4c2-t3, dt4c3ab, dt4c3bc, dt4c3cd, dt4c34, dt4c45, t4c-t3);
   VMK::wtime(&t4);   //gjt - profile
 #endif
 
@@ -5760,6 +5797,10 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }
   }
     
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t5a1);   //gjt - profile
+#endif
+
   // set up a distributed directory for dstArray seqIndex look-up
   indicesPerPet = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) / petCount;
   extraIndices = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) % petCount;
@@ -5791,6 +5832,11 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     dstSeqIndexInterval[localPet].min, dstSeqIndexInterval[localPet].max);
 #endif
 
+    
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t5a2);   //gjt - profile
+#endif
+
   int *dstLocalElementsPerIntervalCount = new int[petCount];
   for (int i=0; i<petCount; i++){
     // Pet "i" is the active dstSeqIndex interval
@@ -5806,6 +5852,11 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }
     dstLocalElementsPerIntervalCount[i] = count;
   }
+    
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t5a3);   //gjt - profile
+#endif
+
   int *dstLocalIntervalPerPetCount = new int[petCount];
   vm->alltoall(dstLocalElementsPerIntervalCount, sizeof(int),
     dstLocalIntervalPerPetCount, sizeof(int), vmBYTE);
@@ -5814,14 +5865,6 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   VMK::wtime(&t5a);   //gjt - profile
 #endif
   
-  // allocate local look-up table indexed by dstSeqIndex
-  DD::SeqIndexFactorLookup *dstSeqIndexFactorLookup = 
-    new DD::SeqIndexFactorLookup[dstSeqIndexInterval[localPet].countEff];
-  for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++){
-    dstSeqIndexFactorLookup[i].de = 0; // use during initialization as counter
-    dstSeqIndexFactorLookup[i].factorCount = 0; // reset
-  }
-
   // set up dstSeqIntervFactorListCount and dstSeqIntervFactorListIndex
   int *dstSeqIntervFactorListCount = new int[petCount];
   int **dstSeqIntervFactorListIndex = new int*[petCount];
@@ -5912,6 +5955,14 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   VMK::wtime(&t5b);   //gjt - profile
 #endif
   
+  // allocate local look-up table indexed by dstSeqIndex
+  DD::SeqIndexFactorLookup *dstSeqIndexFactorLookup = 
+    new DD::SeqIndexFactorLookup[dstSeqIndexInterval[localPet].countEff];
+  for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++){
+    dstSeqIndexFactorLookup[i].de = 0; // use during initialization as counter
+    dstSeqIndexFactorLookup[i].factorCount = 0; // reset
+  }
+
   // all Pets construct their local dstSeqIndexFactorLookup[]
   int dstSeqIndexFactorCount = 0; // reset
   for (int factorPetIndex=0; factorPetIndex<factorPetCount; factorPetIndex++){
@@ -6442,6 +6493,8 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     }
   }
     
+vm->barrier();  /// only for profiling tests
+      
   // garbage collection  
   delete [] srcElementCountList;
   delete [] dstElementCountList;
@@ -6459,7 +6512,8 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 
 #ifdef ASMMSTORETIMING
   printf("gjt - profile for PET %d:\n"
-    " t5a=%g\n t5b=%g\n t5c=%g\n", localPet, t5a-t4, t5b-t4, t5c-t4);
+    " t5a1=%g\n t5a2=%g\n t5a3=%g\n t5a=%g\n t5b=%g\n t5c=%g\n", localPet,
+    t5a1-t4, t5a2-t4, t5a3-t4, t5a-t4, t5b-t4, t5c-t4);
   VMK::wtime(&t5);   //gjt - profile
 #endif
   
