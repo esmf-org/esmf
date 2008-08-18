@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.24 2008/08/08 08:39:04 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.25 2008/08/18 22:03:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.24 2008/08/08 08:39:04 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.25 2008/08/18 22:03:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -6810,7 +6810,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       xxeRecvnbInfo->buffer = buffer[j][i];
       xxeRecvnbInfo->size = partnerDeCount[j][i] * dataSizeSrc;
       xxeRecvnbInfo->srcPet = srcPet;
-      xxeRecvnbInfo->tag = dstDe;
+      xxeRecvnbInfo->tag = dstDe*46340 + srcDe; // safe up to deCount=46340
       xxeRecvnbInfo->commhandle = new VMK::commhandle*;
       *(xxeRecvnbInfo->commhandle) = new VMK::commhandle;
       localrc = xxe->incCount();
@@ -7006,6 +7006,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       }
       ++count;
       // fill in XXE StreamElements for srcArray side
+      int srcDe = srcLocalDeList[j];
       int dstDe = partnerDeList[i];
       int dstPet;   //TODO: DE-based comms
       dstArray->delayout->getDEMatchPET(dstDe, *vm, NULL, &dstPet, 1);
@@ -7027,7 +7028,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
         xxeSendnbRRAInfo->size = partnerDeCount[i] * dataSizeSrc;
         xxeSendnbRRAInfo->dstPet = dstPet;
         xxeSendnbRRAInfo->rraIndex = j; // localDe index into srcArray
-        xxeSendnbRRAInfo->tag = dstDe;
+        xxeSendnbRRAInfo->tag = dstDe*46340 + srcDe; // safe up to deCount=46340
       }else{
 #ifdef ASMMSTOREPRINT
         printf("gjt: non-contiguous linIndex in srcArray -> need buffer \n");
@@ -7169,7 +7170,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
         xxeSendnbInfo->buffer = buffer;
         xxeSendnbInfo->size = partnerDeCount[i] * dataSizeSrc;
         xxeSendnbInfo->dstPet = dstPet;
-        xxeSendnbInfo->tag = dstDe;        
+        xxeSendnbInfo->tag = dstDe*46340 + srcDe; // safe up to deCount=46340
       }
       // add commhandle to last xxe element (sendnbRRA or sendnb) and keep track
       // of commhandle for xxe garbage collection
