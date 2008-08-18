@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindMacros.hcppF90,v 1.6 2008/08/08 21:17:42 w6ws Exp $
+! $Id: ESMF_TypeKindMacros.hcppF90,v 1.7 2008/08/18 23:40:08 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -103,12 +103,15 @@ funcname##Macro(real, R8) @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
 
+
 #if 0
 !------------------------------------------------------------------------------
-! Accept an additional user-defined argument and pass it through to the macro.
+! Accept additional user-defined arguments and pass them through to the macro.
 !
 ! The macro then needs to be written as:
-!  #define fredMacro(typename, typekind, p1) ... 
+!  #define fred1Macro(typename, typekind, p1) ... 
+!  #define fred2Macro(typename, typekind, p1, p2) ... 
+!  #define fred3Macro(typename, typekind, p1, p2, p3) ... 
 !------------------------------------------------------------------------------
 #endif
 
@@ -133,15 +136,6 @@ funcname##Macro(real, R8, userp1) @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
 
-#if 0
-!------------------------------------------------------------------------------
-! Accept two additional user-defined arguments and pass them through to the macro.
-!
-! The macro then needs to be written as:
-!  #define fredMacro(typename, typekind, p1, p2) ... 
-!------------------------------------------------------------------------------
-#endif
-
 #define TypeKind2DeclarationMacro(funcname, userp1, userp2) \
 !------------------------------------------------------------------------------ @\
 ! <This section created by macro - do not edit directly> @\
@@ -159,6 +153,27 @@ funcname##Macro(integer, I4, userp1, userp2) @\
 funcname##Macro(integer, I8, userp1, userp2) @\
 funcname##Macro(real, R4, userp1, userp2) @\
 funcname##Macro(real, R8, userp1, userp2) @\
+ @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------ @\
+
+#define TypeKind3DeclarationMacro(funcname, userp1, userp2, userp3) \
+!------------------------------------------------------------------------------ @\
+! <This section created by macro - do not edit directly> @\
+ @\
+!! < start of macros which become actual subroutine bodies after expansion > @\
+ @\
+funcname##Doc() @\
+^ifndef ESMF_NO_INTEGER_1_BYTE @\
+funcname##Macro(integer, I1, userp1, userp2, userp3) @\
+^endif @\
+^ifndef ESMF_NO_INTEGER_2_BYTE @\
+funcname##Macro(integer, I2, userp1, userp2, userp3) @\
+^endif @\
+funcname##Macro(integer, I4, userp1, userp2, userp3) @\
+funcname##Macro(integer, I8, userp1, userp2, userp3) @\
+funcname##Macro(real, R4, userp1, userp2, userp3) @\
+funcname##Macro(real, R8, userp1, userp2, userp3) @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
