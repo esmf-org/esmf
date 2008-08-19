@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.2 2008/07/29 01:34:56 rosalind Exp $
+// $Id: ESMC_VM.C,v 1.3 2008/08/19 22:52:43 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.2 2008/07/29 01:34:56 rosalind Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.3 2008/08/19 22:52:43 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -60,5 +60,74 @@ int ESMC_VMPrint(ESMC_VM vm){
   rc = ESMF_SUCCESS;
   return rc;
 }  
+
+ESMC_VM ESMC_VMGetGlobal(int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMGetGlobal()"
+
+  // initialize return code; assume routine not implemented
+  int localrc;                        // local return code
+  localrc = ESMC_RC_NOT_IMPL;
+  *rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  ESMC_VM vmOut;
+  ESMCI::VM *VM;
+
+  VM = ESMCI::VM::getGlobal(&localrc);
+  vmOut.ptr = (void*)VM;
+
+  *rc = localrc;
+  return vmOut;
+} // ESMC_VMGetGlobal
+
+
+ESMC_VM ESMC_VMGetCurrent(int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMGetCurrent()"
+
+  // initialize return code; assume routine not implemented
+  int localrc;                        // local return code
+  localrc = ESMC_RC_NOT_IMPL;
+  *rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  ESMC_VM vmOut;
+  ESMCI::VM *VM;
+
+  VM = ESMCI::VM::getCurrent(&localrc);
+  vmOut.ptr = (void*)VM;
+
+  *rc = localrc;
+  return vmOut;
+} // ESMC_VMGetCurrent
+
+
+int ESMC_VMGet(ESMC_VM *vm, int *localPet, int *petCount,
+               int *peCount, int *mpiCommunicator,
+               int *supportPthreadsFlag,
+               int * supportOpenMPFlag){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMGet()"
+
+  // initialize return code; assume routine not implemented
+  int localrc;                        // local return code
+  localrc = ESMC_RC_NOT_IMPL;
+  ESMCI::VM *vmPtr = (ESMCI::VM*)((*vm).ptr);
+
+      *localPet = vmPtr->getLocalPet();
+      *petCount = vmPtr->getPetCount();
+
+      //Compute peCount
+      int npets = vmPtr->getNpets();
+      *peCount = 0; // reset
+      for (int i=0; i<npets; i++)
+        *peCount += vmPtr->getNcpet(i);
+
+      *mpiCommunicator = vmPtr->getMpi_c();
+      *supportPthreadsFlag = vmPtr->getSupportPthreads();
+      *supportOpenMPFlag = vmPtr->getSupportOpenMP();
+
+  return ESMF_SUCCESS;
+} // ESMC_VMGet
+
 
 }; // extern "C"

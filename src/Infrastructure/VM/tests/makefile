@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.33 2007/07/11 19:44:02 svasquez Exp $ 
+# $Id: makefile,v 1.34 2008/08/19 22:52:43 rosalind Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -17,7 +17,8 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/VM/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_VMUTest \
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_VMUTest \
+		$(ESMF_TESTDIR)/ESMF_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMUserMpiInitUTest \
 		$(ESMF_TESTDIR)/ESMF_VMSendVMRecvUTest \
 		$(ESMF_TESTDIR)/ESMF_VMSendNbVMRecvNbUTest \
@@ -32,7 +33,8 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMBarrierUTest \
 		$(ESMF_TESTDIR)/ESMF_VMComponentUTest
 
-TESTS_RUN     = RUN_ESMF_VMUTest \
+TESTS_RUN     = RUN_ESMC_VMUTest \
+		RUN_ESMF_VMUTest \
                 RUN_ESMF_VMUserMpiInitUTest \
                 RUN_ESMF_VMSendVMRecvUTest \
                 RUN_ESMF_VMSendNbVMRecvNbUTest \
@@ -47,7 +49,8 @@ TESTS_RUN     = RUN_ESMF_VMUTest \
 		RUN_ESMF_VMBarrierUTest \
 		RUN_ESMF_VMComponentUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
+TESTS_RUN_UNI = RUN_ESMC_VMUTestUNI \
+		RUN_ESMF_VMUTestUNI \
                 RUN_ESMF_VMUserMpiInitUTestUNI \
                 RUN_ESMF_VMSendVMRecvUTestUNI \
                 RUN_ESMF_VMSendNbVMRecvNbUTestUNI \
@@ -78,6 +81,16 @@ RUN_ESMF_VMUTest:
 
 RUN_ESMF_VMUTestUNI:
 	$(MAKE) TNAME=VM NP=1 ftest
+
+#
+# VM -- C interface
+#
+RUN_ESMC_VMUTest:
+	$(MAKE) TNAME=VM NP=4 ctest
+
+RUN_ESMC_VMUTestUNI:
+	$(MAKE) TNAME=VM NP=1 ctest
+
 
 #
 # VM user mpi init

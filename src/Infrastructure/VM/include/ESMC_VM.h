@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.42 2008/07/21 23:51:21 theurich Exp $
+// $Id: ESMC_VM.h,v 1.43 2008/08/19 22:52:43 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -43,6 +43,12 @@ typedef struct{
 
 // Class API
 int ESMC_VMPrint(ESMC_VM vm);
+ESMC_VM ESMC_VMGetGlobal(int *rc);
+ESMC_VM ESMC_VMGetCurrent(int *rc);
+int ESMC_VMGet(ESMC_VM *vm, int *localPet, int *petCount,
+               int *peCount, int *mpiCommunicator,
+               int *supportPthreadsFlag,
+               int * supportOpenMPFlag);
 
 }; // extern "C"
 
