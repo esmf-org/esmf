@@ -307,11 +307,11 @@ contains
   ! and load the problem descriptor file names
   !-----------------------------------------------------------------------------
 !#ifdef ESMF_TESTEXHAUSTIVE
-!  ltag = 'exhaustive::'
-!  print *, "running exhaustive tests"
+! ltag = 'exhaustive::'
+! if(localPet == rootPet)  print *, "running exhaustive tests"
 !#else
   ltag = 'nonexhaustive::'
-  print *, "running nonexhaustive tests"
+  if(localPet == rootPet)  print *, "running nonexhaustive tests"
 !#endif
   call ESMF_ConfigFindLabel(localcf, trim(adjustL(ltag)), rc=localrc )
   if( ESMF_LogMsgFoundError(localrc, "cannot find config label " //            &

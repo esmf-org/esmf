@@ -105,6 +105,7 @@
 
   ! print out result string if codes match
   if( localPet == Harness_rootPet .and. nstatus > 0 ) then
+     print*,'Problem Descriptor String ',trim(adjustL(PDS%pds))
      print*,'( grid config, distribution config, Grid file, Distribution file)'
   endif
 
@@ -260,7 +261,7 @@
          write(l4,"(i6)") iGfile
          ltmp = '(' // trim(adjustL(l1)) // ',' // trim(adjustL(l2)) // ','    &
             // trim(adjustL(l3)) // ',' //  trim(adjustL(l4)) //               &
-            ') test string=' //                                                &
+            ') string=' //                                                     &
             trim(PDS%test_record(iDfile,iGfile)%test_string(idist,igrid)%string)
          write(*,*) trim( ltmp )
       endif

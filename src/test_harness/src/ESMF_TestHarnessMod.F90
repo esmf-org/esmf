@@ -1038,11 +1038,6 @@
     do iGfile=1,PDS%nGfiles       ! grid specifier files
       do iD=1, PDS%Dfiles(iDfile)%nDspecs   ! entries in distribution specifier
         do iG=1, PDS%Gfiles(iGfile)%nGspecs ! entries in grid specifier file
-
-!    print*,'                                 '
-!    print*,'-----------------=====create objects===========-----------------------'
-!    print*,' iG, iD, iGfile, iDfile ',iG,iD,iGfile,iDfile
-!    print*,'                                 '
           !---------------------------------------------------------------------
           ! Create Source objects
           !---------------------------------------------------------------------
@@ -1056,10 +1051,10 @@
           !---------------------------------------------------------------------
           ! create source and destination distributions
           !---------------------------------------------------------------------
-!         print*,'> create source return distributions '
+          print*,'> create source return distributions '
           call create_distribution(PDS%SrcMem, PDS%Dfiles(iDfile)%src_dist(iD),&
                     PDS%Gfiles(iGfile)%src_grid(iG), src_distgrid, VM, localrc)
-!         print*,'               '
+          print*,'               '
           write(liG,"(i5)") iG 
           write(liD,"(i5)") iD 
           if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
@@ -1073,7 +1068,7 @@
           !---------------------------------------------------------------------
           ! create source array
           !---------------------------------------------------------------------
-!         print*,'> create src_array '
+          print*,'> create src_array '
           call create_array(src_array, src_distgrid, PDS%SrcMem,               &
                       PDS%Gfiles(iGfile)%src_grid(iG), localrc)
           if (ESMF_LogMsgFoundError(localrc,"error creating source array "     &
@@ -1095,7 +1090,7 @@
           !---------------------------------------------------------------------
           ! create return array
           !---------------------------------------------------------------------
-!         print*,'> create return_array '
+          print*,'> create return_array '
           call create_array(return_array, src_distgrid, PDS%SrcMem,            &
                       PDS%Gfiles(iGfile)%src_grid(iG), localrc)
           if (ESMF_LogMsgFoundError(localrc,"error creating return array "     &
@@ -1157,8 +1152,8 @@
           !---------------------------------------------------------------------
           ! Create Destination distribution and array
           !---------------------------------------------------------------------
-!         print*,'> create destination distribution'
-!         print*,'               '
+          print*,'> create destination distribution'
+          print*,'               '
           call create_distribution(PDS%DstMem, PDS%Dfiles(iDfile)%dst_dist(iD),&
                     PDS%Gfiles(iGfile)%dst_grid(iG), dst_distgrid, VM, localrc)
           write(liG,"(i5)") iG 
@@ -1171,7 +1166,7 @@
              trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
              rcToReturn=rc)) return
 
-!         print*,'> create dst_array'
+          print*,'> create dst_array'
           call create_array(dst_array, dst_distgrid, PDS%DstMem,               &
                       PDS%Gfiles(iGfile)%dst_grid(iG), localrc)
           if (ESMF_LogMsgFoundError(localrc,"error creating destinationarray " &
@@ -1200,7 +1195,7 @@
           !---------------------------------------------------------------------
           ! redistribution store for forward direction
           !---------------------------------------------------------------------
-!         print*,'> run forward redist store'
+          print*,'> run forward redist store'
           call ESMF_ArrayRedistStore(srcArray=src_array, dstArray=dst_array,   &
                    routehandle=redistHandle_forward, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
@@ -1209,7 +1204,7 @@
           !---------------------------------------------------------------------
           ! forward redistribution run
           !---------------------------------------------------------------------
-!         print*,'> run forward redist '
+          print*,'> run forward redist '
           call ESMF_ArrayRedist(srcArray=src_array, dstArray=dst_array,        &
                    routehandle=redistHandle_forward, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
@@ -1218,7 +1213,7 @@
           !---------------------------------------------------------------------
           ! release redistribution handles
           !---------------------------------------------------------------------
-!         print*,' release forward routehandle'
+          print*,' release forward routehandle'
           call ESMF_ArrayRedistRelease(routehandle=redistHandle_forward,       &
                    rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
@@ -1227,7 +1222,7 @@
           !---------------------------------------------------------------------
           ! redistribution store for reverse direction
           !---------------------------------------------------------------------
-!         print*,'> run backward redist store'
+          print*,'> run backward redist store'
           call ESMF_ArrayRedistStore(srcArray=dst_array, dstArray=return_array,&
                    routehandle=redistHandle_reverse, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
@@ -1236,7 +1231,7 @@
           !---------------------------------------------------------------------
           ! forward redistribution run
           !---------------------------------------------------------------------
-!         print*,'> run backward redist '
+          print*,'> run backward redist '
           call ESMF_ArrayRedist(srcArray=dst_array, dstArray=return_array,     &
                    routehandle=redistHandle_reverse, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
@@ -1245,7 +1240,7 @@
           !---------------------------------------------------------------------
           ! release redistribution handles
           !---------------------------------------------------------------------
-!         print*,' release reverse routehandle'
+          print*,' release reverse routehandle'
           call ESMF_ArrayRedistRelease(routehandle=redistHandle_reverse,       &
                    rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
@@ -1257,7 +1252,7 @@
           !---------------------------------------------------------------------
           ! compare source array values with the return array values
           !---------------------------------------------------------------------
-!         print*,'> compare arrays'
+          print*,'> compare arrays'
           call compare_redist_array(test_status,                               & 
                   src_array, return_array, src_distgrid, src_distgrid,         &
                   PDS%SrcMem, PDS%Gfiles(iGfile)%src_grid(iG), localrc)
@@ -1285,7 +1280,7 @@
           !---------------------------------------------------------------------
           ! Destroy Array objects before moving to next test
           !---------------------------------------------------------------------
-!         print*,' destroy arrays '
+          print*,' destroy arrays '
           call ESMF_ArrayDestroy(src_array, rc=localrc) ! original source
           if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_array",     &
              rcToReturn=rc)) return
@@ -1328,7 +1323,7 @@
 
 !-------------------------------------------------------------------------------
 !===============================================================================
-! Public Methods
+! Internal Methods
 !===============================================================================
 !-------------------------------------------------------------------------------
 
