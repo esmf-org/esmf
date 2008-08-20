@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeIntervalUTest.C,v 1.3 2008/08/20 16:56:29 rosalind Exp $
+// $Id: ESMC_TimeIntervalUTest.C,v 1.4 2008/08/20 17:29:27 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <cstdlib>
 
 // ESMF header
 #include "ESMC.h"
