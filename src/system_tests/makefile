@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.47 2008/08/20 17:22:52 feiliu Exp $ 
+# $Id: makefile,v 1.48 2008/08/20 18:36:06 feiliu Exp $ 
 
 ALL: build_system_tests
 
@@ -23,7 +23,8 @@ DIRS      = ESMF_CompCreate \
 			ESMF_FieldConcurrentComp \
 			ESMF_FieldBundleSMM \
 			ESMF_ArrayRedist3D \
-            ESMF_FieldRedist \
+	        ESMF_FieldRedist \
+	        ESMF_FieldRedistBlk2Blk \
 
 # Tests not yet ready
 #           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray
@@ -38,7 +39,6 @@ DIRS      = ESMF_CompCreate \
 # TODO:FIELDINTEGRATION Restore when Field and FieldBundle comms are restored. 
 #           ESMF_FlowWithCoupling \
 #           ESMF_FlowComp \
-#           ESMF_FieldRedist \
 #           ESMF_FieldHalo \
 #           ESMF_FieldHaloPer \
 #           ESMF_FieldBundleRedistArb2Arb \
@@ -46,7 +46,6 @@ DIRS      = ESMF_CompCreate \
 #	    ESMF_FieldBundleRedistBlk2Blk \
 #           ESMF_FieldRedistArb2Arb \
 #           ESMF_FieldRedistBlk2Arb \
-#           ESMF_FieldRedistBlk2Blk \
 #           ESMF_SimpleCoupling \
 
 
