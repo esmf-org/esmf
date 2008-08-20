@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2008/08/14 23:58:33 svasquez Exp $
+# $Id: makefile,v 1.10 2008/08/20 21:00:11 theurich Exp $
 
 ALL: build_examples
 run: run_examples
@@ -19,9 +19,9 @@ EXAMPLES_BUILD    = \
                       
 #                      $(ESMF_EXDIR)/ESMC_BreckEx \
 
-EXAMPLES_RUN      = run_ESMC_RefineEx 
+#EXAMPLES_RUN      = run_ESMC_RefineEx 
 
-EXAMPLES_RUN_UNI  = run_ESMC_RefineEx_uni 
+#EXAMPLES_RUN_UNI  = run_ESMC_RefineEx_uni 
 
 
 include $(ESMF_DIR)/makefile
