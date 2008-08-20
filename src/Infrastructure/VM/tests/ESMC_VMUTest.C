@@ -1,4 +1,4 @@
-// $Id: ESMC_VMUTest.C,v 1.1 2008/08/19 22:52:43 rosalind Exp $
+// $Id: ESMC_VMUTest.C,v 1.2 2008/08/20 16:40:24 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -42,8 +42,9 @@ int main(void){
 
   ESMC_VM vm;
   ESMC_VM vmCurrent;
-  int localPet, petCount, peCount, mpiCommunicator;
+  int localPet, petCount, peCount;
   int supportPthreadsFlag, supportOpenMPFlag;
+  MPI_Comm mpiCommunicator;
 
   //----------------------------------------------------------------------------
   //NEX_UTest

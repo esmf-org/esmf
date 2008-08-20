@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.43 2008/08/19 22:52:43 rosalind Exp $
+// $Id: ESMC_VM.h,v 1.44 2008/08/20 16:40:24 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //EOPI
 //-----------------------------------------------------------------------------
 
-
+#include <mpi.h>
 #include "ESMC_Interface.h"
 
 extern "C" {
@@ -46,7 +46,7 @@ int ESMC_VMPrint(ESMC_VM vm);
 ESMC_VM ESMC_VMGetGlobal(int *rc);
 ESMC_VM ESMC_VMGetCurrent(int *rc);
 int ESMC_VMGet(ESMC_VM *vm, int *localPet, int *petCount,
-               int *peCount, int *mpiCommunicator,
+               int *peCount, MPI_Comm *mpiCommunicator,
                int *supportPthreadsFlag,
                int * supportOpenMPFlag);
 

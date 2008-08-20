@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.3 2008/08/19 22:52:43 rosalind Exp $
+// $Id: ESMC_VM.C,v 1.4 2008/08/20 16:40:24 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.3 2008/08/19 22:52:43 rosalind Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.4 2008/08/20 16:40:24 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -102,7 +102,7 @@ ESMC_VM ESMC_VMGetCurrent(int *rc){
 
 
 int ESMC_VMGet(ESMC_VM *vm, int *localPet, int *petCount,
-               int *peCount, int *mpiCommunicator,
+               int *peCount, MPI_Comm *mpiCommunicator,
                int *supportPthreadsFlag,
                int * supportOpenMPFlag){
 #undef  ESMC_METHOD
