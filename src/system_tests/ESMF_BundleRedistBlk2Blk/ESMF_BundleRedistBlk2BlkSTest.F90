@@ -1,10 +1,10 @@
-! $Id: ESMF_BundleRedistBlk2BlkSTest.F90,v 1.11 2008/08/20 20:12:44 feiliu Exp $
+! $Id: ESMF_BundleRedistBlk2BlkSTest.F90,v 1.12 2008/08/20 20:58:03 theurich Exp $
 !
 ! System test BundleRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
 
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_removeTEST        String used by test script to count system tests.
+!ESMF_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP
