@@ -1,4 +1,4 @@
-// $Id: ESMC_VMUTest.C,v 1.2 2008/08/20 16:40:24 rosalind Exp $
+// $Id: ESMC_VMUTest.C,v 1.3 2008/08/20 18:04:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -12,10 +12,10 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <mpi.h>
 
 // ESMF header
 #include "ESMC.h"
-#include "ESMC_VM.h"
 
 // ESMF Test header
 #include "ESMC_Test.h"
@@ -48,9 +48,9 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  // Get a pointer to the global VM
-  strcpy(name, "VMGetGlobal\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
+  // Get the global VM
+  strcpy(name, "VMGetGlobal");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   vm = ESMC_VMGetGlobal(&rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -58,17 +58,17 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Print a VM
-  strcpy(name, "VMPrint\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
+  strcpy(name, "VMPrint");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_VMPrint(vm);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  // Get a pointer to the current VM
-  strcpy(name, "VMGetCurrent\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
+  // Get the current VM
+  strcpy(name, "VMGetCurrent");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   vmCurrent = ESMC_VMGetCurrent(&rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -76,17 +76,16 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Get parameters from a VM
-  strcpy(name, "VMGet\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
-  rc = ESMC_VMGet( &vm, &localPet, &petCount, &peCount, &mpiCommunicator,
-                   &supportPthreadsFlag, &supportOpenMPFlag);
+  strcpy(name, "VMGet");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_VMGet(vm, &localPet, &petCount, &peCount, &mpiCommunicator,
+    &supportPthreadsFlag, &supportOpenMPFlag);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  printf("localPet= %d , petCount= %d, peCount= %d, supportPthreadsFlag= %d, "
+    "supportOpenMPFlag= %d \n", localPet, petCount, peCount,
+    supportPthreadsFlag, supportOpenMPFlag);
   //----------------------------------------------------------------------------
-
-//printf("localPet= %d , petCount= %d, peCount= %d, mpiCommunicator=%d,"
-//       " supportPthreadsFlag= %d, supportOpenMPFlag= %d \n", 
-//        localPet, petCount, peCount, mpiCommunicator, supportPthreadsFlag,
-//        supportOpenMPFlag);
+  
   //----------------------------------------------------------------------------
   ESMC_TestEnd(result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
