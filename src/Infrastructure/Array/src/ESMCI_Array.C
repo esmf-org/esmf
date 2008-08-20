@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.27 2008/08/15 15:48:59 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.28 2008/08/20 04:40:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.27 2008/08/15 15:48:59 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.28 2008/08/20 04:40:03 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4086,7 +4086,18 @@ namespace DD{
     const SeqIndexFactorLookup *seqIndexFactorLookupOut;
     bool tensorMixFlag;
   };
+  struct FillSelfDeInfo{
+    AssociationElement **linSeqList;
+    int localPet;
+    int localDeCount;
+    const int *localDeElementCount;
+    const int *localDeList;
+    const Interval *seqIndexInterval;
+    SeqIndexFactorLookup *seqIndexFactorLookup;
+    bool tensorMixFlag;
+  };
 
+// -- accessLookup()
 
 template<typename T>
 int requestSizeFactor(T *t);
@@ -4276,7 +4287,7 @@ void accessLookup(
   delete [] recv3commhList;
 }
 
-// FillLinSeqListInfo-specific DD routines
+// FillLinSeqListInfo-specific accessLookup routines
 
 int requestSizeFactor(FillLinSeqListInfo *fillLinSeqListInfo){
   return 3*sizeof(int); // lookupIndex, j, k
@@ -4419,7 +4430,7 @@ void clientProcess(FillLinSeqListInfo *fillLinSeqListInfo,
   }
 }
         
-// FillPartnerDeInfo-specific DD routines
+// FillPartnerDeInfo-specific accessLookup routines
 
 int requestSizeFactor(FillPartnerDeInfo *fillPartnerDeInfo){
   return 3*sizeof(int); // lookupIndex, j, k
@@ -4523,6 +4534,180 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
   }
 }
 
+// -- updateLookup()
+
+template<typename T>
+int updateSizeFactor(T *t);
+
+template<typename T>
+void clientUpdate(T *t, int i, char **updateStreamClient);
+
+template<typename T>
+void localClientServerUpdate(T *t);
+
+template<typename T>
+int serverUpdate(T *t, int count, int i, char **updateStreamServer);
+
+template<typename T>
+void updateLookup(
+  ESMCI::VM *vm,
+  int petCount,
+  int localPet,
+  int *localIntervalPerPetCount,
+  int *localElementsPerIntervalCount,
+  T *t
+  ){
+  // update look up table
+  VMK::commhandle **sendcommhList = new VMK::commhandle*[petCount];
+  VMK::commhandle **recvcommhList = new VMK::commhandle*[petCount];
+  char **updateStreamClient = new char*[petCount];
+  char **updateStreamServer = new char*[petCount];
+  // t-specific routine
+  int updateFactor = updateSizeFactor(t);
+  // localPet acts as server, posts non-blocking recvs for all client updates
+  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+    // localPet-dependent shifted loop reduces communication contention
+    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+    // receive update from Pet "i"
+    int count = localIntervalPerPetCount[i];
+    if (count>0){
+      updateStreamServer[i] = new char[updateFactor*count];
+      recvcommhList[i] = NULL;
+      vm->recv(updateStreamServer[i], updateFactor*count, i,
+        &(recvcommhList[i]));
+    }
+  }
+  // localPet acts as a client, sends its updates to the appropriate servers
+  for (int ii=localPet+petCount-1; ii>localPet; ii--){
+    // localPet-dependent shifted loop reduces communication contention
+    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+    if (localElementsPerIntervalCount[i]>0){
+      // localPet has elements that are located in interval of server Pet "i"
+      updateStreamClient[i] =
+        new char[updateFactor*localElementsPerIntervalCount[i]];
+      // t-specific client routine
+      clientUpdate(t, i, updateStreamClient);
+      // send information to the serving Pet
+      sendcommhList[i] = NULL;
+      vm->send(updateStreamClient[i],
+        updateFactor*localElementsPerIntervalCount[i], i, 
+        &(sendcommhList[i]));
+    }
+  }
+  // localPet locally acts as server and client to do update
+  // t-specific client-server routine
+  localClientServerUpdate(t);
+  // localPet acts as server, processing updates from clients
+  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+    // localPet-dependent shifted loop reduces communication contention
+    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+    int count = localIntervalPerPetCount[i];
+    if (count>0){
+      // wait for update from Pet "i"
+      vm->commwait(&(recvcommhList[i]));
+      // t-specific server routine
+      serverUpdate(t, count, i, updateStreamServer);
+    }
+  }
+  // localPet acts as a client, wait for sends to complete and collect garbage
+  for (int ii=localPet+petCount-1; ii>localPet; ii--){
+    // localPet-dependent shifted loop reduces communication contention
+    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+    if (localElementsPerIntervalCount[i]>0){
+      // localPet has elements that are located in interval of server Pet i
+      // wait for send
+      vm->commwait(&(sendcommhList[i]));
+      // garbage collection
+      delete [] updateStreamClient[i];
+    }
+  }
+  // garbage collection
+  delete [] updateStreamClient;
+  delete [] updateStreamServer;
+  delete [] sendcommhList;
+  delete [] recvcommhList;
+}
+
+// FillSelfDeInfo-specific updateLookup routines
+
+int updateSizeFactor(FillSelfDeInfo *fillSelfDeInfo){
+  return 2*sizeof(int); // lookupIndex, de
+}
+
+void clientUpdate(FillSelfDeInfo *fillSelfDeInfo, int i,
+  char **updateStreamClient){
+  const int localDeCount = fillSelfDeInfo->localDeCount;
+  const int *localDeList = fillSelfDeInfo->localDeList;
+  const int *localDeElementCount = fillSelfDeInfo->localDeElementCount;
+  const Interval *seqIndexInterval = fillSelfDeInfo->seqIndexInterval;
+  AssociationElement **linSeqList = fillSelfDeInfo->linSeqList;
+  const bool tensorMixFlag = fillSelfDeInfo->tensorMixFlag;
+  // fill the updateStreamClient[i] element
+  int seqIndexMin = seqIndexInterval[i].min;
+  int seqIndexMax = seqIndexInterval[i].max;
+  int seqIndexCount = seqIndexInterval[i].count;
+  int jj = 0; // reset
+  for (int j=0; j<localDeCount; j++){
+    int de = localDeList[j];  // global DE number
+    for (int k=0; k<localDeElementCount[j]; k++){
+      int seqIndex = linSeqList[j][k].seqIndex.decompSeqIndex;
+      if (seqIndex >= seqIndexMin && seqIndex <= seqIndexMax){
+        int lookupIndex = seqIndex - seqIndexMin;
+        if (tensorMixFlag){
+          lookupIndex += (linSeqList[j][k].seqIndex.tensorSeqIndex - 1)
+            * seqIndexCount;
+        }
+        int *updateStreamClientInt = (int *)updateStreamClient[i];
+        updateStreamClientInt[2*jj] = lookupIndex;
+        updateStreamClientInt[2*jj+1] = de;
+        ++jj; // increment counter
+      }
+    }
+  }
+}
+
+void localClientServerUpdate(FillSelfDeInfo *fillSelfDeInfo){
+  const int localPet = fillSelfDeInfo->localPet;
+  const int localDeCount = fillSelfDeInfo->localDeCount;
+  const int *localDeList = fillSelfDeInfo->localDeList;
+  const int *localDeElementCount = fillSelfDeInfo->localDeElementCount;
+  const Interval *seqIndexInterval = fillSelfDeInfo->seqIndexInterval;
+  AssociationElement **linSeqList = fillSelfDeInfo->linSeqList;
+  const bool tensorMixFlag = fillSelfDeInfo->tensorMixFlag;
+  SeqIndexFactorLookup *seqIndexFactorLookup =
+    fillSelfDeInfo->seqIndexFactorLookup;
+  // localPet locally acts as server and client
+  int seqIndexMin = seqIndexInterval[localPet].min;
+  int seqIndexMax = seqIndexInterval[localPet].max;
+  int seqIndexCount = seqIndexInterval[localPet].count;
+  for (int j=0; j<localDeCount; j++){
+    int de = localDeList[j];  // global DE number
+    for (int k=0; k<localDeElementCount[j]; k++){
+      int seqIndex = linSeqList[j][k].seqIndex.decompSeqIndex;
+      if (seqIndex >= seqIndexMin && seqIndex <= seqIndexMax){
+        int lookupIndex = seqIndex - seqIndexMin;
+        if (tensorMixFlag){
+          lookupIndex += (linSeqList[j][k].seqIndex.tensorSeqIndex - 1)
+            * seqIndexCount;
+        }
+        seqIndexFactorLookup[lookupIndex].de = de;
+      }
+    }
+  }
+}
+
+void serverUpdate(FillSelfDeInfo *fillSelfDeInfo, int count,
+  int i, char **updateStreamServer){
+  SeqIndexFactorLookup *seqIndexFactorLookup =
+    fillSelfDeInfo->seqIndexFactorLookup;
+  // update server according to update stream
+  int *updateStreamServerInt = (int *)updateStreamServer[i];
+  for (int jj=0; jj<count; jj++){
+    int lookupIndex = updateStreamServerInt[2*jj];
+    seqIndexFactorLookup[lookupIndex].de = updateStreamServerInt[2*jj+1];
+  }
+}        
+        
 } // namespace DD
 
 #define ASMMSTORETIMING___disable
@@ -4601,15 +4786,17 @@ int Array::sparseMatMulStore(
   
 #ifdef ASMMSTORETIMING
   double t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10X, t10Y, t11;//gjt - profile
-  double t4a, t4b, t4c, t5a, t5b, t5c;  //gjt - profile
+  double t4a, t4b;  //gjt - profile
   double t4a1, t4a2, t4a3;  //gjt - profile  
-  double t4b1, t4b2, t4b3;  //gjt - profile  
-  double t4c1=0., t4c2=0., t4c3=0., t4c4=0., t4c5=0.;  //gjt - profile
-  double t4c3a, t4c3b, t4c3c, t4c3d;  //gjt - profile
-  double dt4c34=0., dt4c45=0.;  //gjt - profile
-  double dt4c3ab=0., dt4c3bc=0., dt4c3cd=0.;  //gjt - profile
+  double t4b1, t4b2, t4b3;  //gjt - profile
+  double t5a, t5b, t5c, t5d, t5e, t5f;  //gjt - profile
   double t5a1, t5a2, t5a3;  //gjt - profile  
-  VMK::wtime(&t0);   //gjt - profile
+  double t5b1, t5b2, t5b3, t5b4, t5b5;  //gjt - profile
+  double t5b3a, t5b3b, t5b3c, t5b3d;  //gjt - profile
+  double dt5b34=0., dt5b45=0.;  //gjt - profile
+  double dt5b3ab=0., dt5b3bc=0., dt5b3cd=0.;  //gjt - profile
+  vm->barrier();      //synchronize start time across all PETs
+  VMK::wtime(&t0);    //gjt - profile
 #endif
   
   // every Pet must provide srcArray and dstArray
@@ -4967,10 +5154,6 @@ int Array::sparseMatMulStore(
   int *dstSeqIndexMinMaxList = new int[2*petCount];
   vm->allgather(dstSeqIndexMinMax, dstSeqIndexMinMaxList, 2*sizeof(int));
   
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t3);   //gjt - profile
-#endif
-
 #ifdef ASMMSTOREPRINT
   for (int i=0; i<dstLocalDeCount; i++)
     for (int j=0; j<dstLocalDeElementCount[i]; j++)
@@ -4979,12 +5162,12 @@ int Array::sparseMatMulStore(
         dstLinSeqList[i][j].seqIndex);
 #endif
 
-  // local structs to simplify code
-  struct SeqIndexDeInfo{
-    int lookupIndex;
-    int de;
-  };
-
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t3);   //gjt - profile
+#endif
+  
+  // set up structure and intervals of src and dst distributed directories
+  
   // determine the srcSeqIndexMinGlobal and MaxGlobal
   // todo: for nb-allgather(srcSeqIndexMinMaxList) here insert commwait()
   int srcSeqIndexMinGlobal, srcSeqIndexMaxGlobal;
@@ -5009,7 +5192,7 @@ int Array::sparseMatMulStore(
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t4a1);   //gjt - profile
 #endif
-  
+
   // set up a distributed directory for srcArray seqIndex look-up
   int indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
     / petCount;
@@ -5043,7 +5226,6 @@ int Array::sparseMatMulStore(
     srcSeqIndexInterval[localPet].min, srcSeqIndexInterval[localPet].max);
 #endif
 
-  
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t4a2);   //gjt - profile
 #endif
@@ -5076,6 +5258,98 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t4a);   //gjt - profile
 #endif
   
+  // determine the dstSeqIndexMinGlobal and MaxGlobal
+  // todo: for nb-allgather(dstSeqIndexMinMaxList) here insert commwait()
+  int dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal;
+  pastInitFlag = 0; // reset
+  for (int i=0; i<petCount; i++){
+    if (dstElementCountList[i]){
+      // this Pet does hold elements in dstArray
+      if (pastInitFlag){
+        if (dstSeqIndexMinMaxList[2*i] < dstSeqIndexMinGlobal)
+          dstSeqIndexMinGlobal = dstSeqIndexMinMaxList[2*i];
+        if (dstSeqIndexMinMaxList[2*i+1] > dstSeqIndexMaxGlobal)
+          dstSeqIndexMaxGlobal = dstSeqIndexMinMaxList[2*i+1];
+      }else{
+        // initialization
+        dstSeqIndexMinGlobal = dstSeqIndexMinMaxList[2*i];
+        dstSeqIndexMaxGlobal = dstSeqIndexMinMaxList[2*i+1];
+        pastInitFlag = 1; // set
+      }
+    }
+  }
+    
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t4b1);   //gjt - profile
+#endif
+
+  // set up a distributed directory for dstArray seqIndex look-up
+  indicesPerPet = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) / petCount;
+  extraIndices = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) % petCount;
+  DD::Interval *dstSeqIndexInterval = new DD::Interval[petCount];
+  dstSeqIndexInterval[0].min = dstSeqIndexMinGlobal;  // start
+  for (int i=0; i<petCount-1; i++){
+    dstSeqIndexInterval[i].max = dstSeqIndexInterval[i].min + indicesPerPet - 1;
+    if (i<extraIndices)
+      ++dstSeqIndexInterval[i].max;   // distribute extra indices homogeneously
+    dstSeqIndexInterval[i].count = 
+      dstSeqIndexInterval[i].max - dstSeqIndexInterval[i].min + 1;
+    dstSeqIndexInterval[i].countEff =
+      dstSeqIndexInterval[i].count * dstTensorElementCountEff;
+    dstSeqIndexInterval[i+1].min = dstSeqIndexInterval[i].max + 1;
+  }
+  dstSeqIndexInterval[petCount-1].max = dstSeqIndexMaxGlobal;  // finish
+  dstSeqIndexInterval[petCount-1].count = 
+    dstSeqIndexInterval[petCount-1].max - dstSeqIndexInterval[petCount-1].min
+    + 1;
+  dstSeqIndexInterval[petCount-1].countEff =
+    dstSeqIndexInterval[petCount-1].count * dstTensorElementCountEff;
+  
+#ifdef ASMMSTOREPRINT
+    printf("gjt: localPet %d, dstElementCountList[localPet] = %d, "
+    "dstSeqIndexMinMax = %d / %d, dstSeqIndexMinGlobal/MaxGlobal = %d, %d, "
+    "dstSeqIndexInterval[localPet].min/.max = %d, %d\n",
+    localPet, dstElementCountList[localPet], dstSeqIndexMinMax[0],
+    dstSeqIndexMinMax[1], dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal,
+    dstSeqIndexInterval[localPet].min, dstSeqIndexInterval[localPet].max);
+#endif
+
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t4b2);   //gjt - profile
+#endif
+
+  int *dstLocalElementsPerIntervalCount = new int[petCount];
+  for (int i=0; i<petCount; i++){
+    // Pet "i" is the active dstSeqIndex interval
+    int seqIndexMin = dstSeqIndexInterval[i].min;
+    int seqIndexMax = dstSeqIndexInterval[i].max;
+    int count = 0; // reset
+    for (int j=0; j<dstLocalDeCount; j++){
+      for (int k=0; k<dstLocalDeElementCount[j]; k++){
+        int dstSeqIndex = dstLinSeqList[j][k].seqIndex.decompSeqIndex;
+        if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax)
+          ++count; // increment counter
+      }
+    }
+    dstLocalElementsPerIntervalCount[i] = count;
+  }
+  int *dstLocalIntervalPerPetCount = new int[petCount];
+  
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t4b3);   //gjt - profile
+#endif
+
+  vm->alltoall(dstLocalElementsPerIntervalCount, sizeof(int),
+    dstLocalIntervalPerPetCount, sizeof(int), vmBYTE);
+  
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t4b);   //gjt - profile
+#endif
+
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t4);   //gjt - profile
+#endif
+  
   // set up srcSeqIntervFactorListCount and srcSeqIntervFactorListIndex
   int *srcSeqIntervFactorListCount = new int[petCount];
   int **srcSeqIntervFactorListIndex = new int*[petCount];
@@ -5083,7 +5357,7 @@ int Array::sparseMatMulStore(
     srcSeqIntervFactorListCount[i] = 0; // reset
 
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t4b1);   //gjt - profile
+  VMK::wtime(&t5a1);   //gjt - profile
 #endif
 
   for (int j=0; j<factorListCount; j++){
@@ -5135,7 +5409,7 @@ int Array::sparseMatMulStore(
   }
 
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t4b2);   //gjt - profile
+  VMK::wtime(&t5a2);   //gjt - profile
 #endif
   
   int *srcSeqIntervFactorCounter = new int[petCount];
@@ -5145,7 +5419,7 @@ int Array::sparseMatMulStore(
   }
 
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t4b3);   //gjt - profile
+  VMK::wtime(&t5a3);   //gjt - profile
 #endif
   
   for (int j=0; j<factorListCount; j++){
@@ -5178,7 +5452,7 @@ int Array::sparseMatMulStore(
   delete [] srcSeqIntervFactorCounter;
   
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t4b);   //gjt - profile
+  VMK::wtime(&t5a);   //gjt - profile
 #endif
   
   // allocate local look-up table indexed by srcSeqIndex
@@ -5206,7 +5480,7 @@ int Array::sparseMatMulStore(
         if (i == rootPet){
           
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t4c1);   //gjt - profile
+  VMK::wtime(&t5b1);   //gjt - profile
 #endif
     
           // rootPet -> rootPet "communication"
@@ -5385,14 +5659,14 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
           } // if - typekindFactors
           
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t4c2);   //gjt - profile
+  VMK::wtime(&t5b2);   //gjt - profile
 #endif
             
         }else{
           
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t4c3);   //gjt - profile
-  VMK::wtime(&t4c3a);   //gjt - profile
+  VMK::wtime(&t5b3);   //gjt - profile
+  VMK::wtime(&t5b3a);   //gjt - profile
 #endif
           // rootPet -> not rootPet communication
           int totalCountIndex = srcSeqIndexInterval[i].countEff; // last element
@@ -5416,7 +5690,7 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
           }
           
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t4c3b);   //gjt - profile
+  VMK::wtime(&t5b3b);   //gjt - profile
 #endif
     
           // send info to Pet "i"
@@ -5424,7 +5698,7 @@ printf("srcArray: %d, %d, rootPet-rootPet R8: partnerSeqIndex %d, factor: %g\n",
             (srcSeqIndexInterval[i].countEff + 1) * sizeof(int), i);
             
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t4c3c);   //gjt - profile
+  VMK::wtime(&t5b3c);   //gjt - profile
 #endif
   
           // prepare to send remaining information to Pet "i" in one long stream
@@ -5555,22 +5829,22 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           }
           // ready to send information to Pet "i" in one long stream
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t4c3d);   //gjt - profile
-  VMK::wtime(&t4c4);   //gjt - profile
+  VMK::wtime(&t5b3d);   //gjt - profile
+  VMK::wtime(&t5b4);   //gjt - profile
 #endif
   
           vm->send(stream, byteCount, i);
           
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t4c5);   //gjt - profile
+  VMK::wtime(&t5b5);   //gjt - profile
 #endif
   
 #ifdef ASMMSTORETIMING
-  dt4c34 += t4c4 - t4c3;
-  dt4c45 += t4c5 - t4c4;
-  dt4c3ab += t4c3b - t4c3a;
-  dt4c3bc += t4c3c - t4c3b;
-  dt4c3cd += t4c3d - t4c3c;
+  dt5b34 += t5b4 - t5b3;
+  dt5b45 += t5b5 - t5b4;
+  dt5b3ab += t5b3b - t5b3a;
+  dt5b3bc += t5b3c - t5b3b;
+  dt5b3cd += t5b3d - t5b3c;
 #endif
   
           // garbage collection
@@ -5684,187 +5958,32 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   } // factorPetIndex
   
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t4c);   //gjt - profile
+  VMK::wtime(&t5b);   //gjt - profile
 #endif
 
   // communicate between Pets to set up "de" member in srcSeqIndexFactorLookup[]
-  for (int i=0; i<petCount; i++){
-    // Pet "i" is the active srcSeqIndex interval
-    int seqIndexMin = srcSeqIndexInterval[i].min;
-    int seqIndexMax = srcSeqIndexInterval[i].max;
-    int seqIndexCount = srcSeqIndexInterval[i].count;
-    int seqIndexCountTotal = seqIndexCount * srcArray->tensorElementCount;
-    if (localPet!=i){
-      // localPet is a client for the active srcSeqIndex interval
-      SeqIndexDeInfo *seqIndexDeInfoList =
-        new SeqIndexDeInfo[seqIndexCountTotal];
-      int count = 0; // reset
-      for (int j=0; j<srcLocalDeCount; j++){
-        int de = srcLocalDeList[j];  // global DE number
-        for (int k=0; k<srcLocalDeElementCount[j]; k++){
-          int srcSeqIndex = srcLinSeqList[j][k].seqIndex.decompSeqIndex;
-          if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
-            int lookupIndex = srcSeqIndex - seqIndexMin;
-            if (tensorMixFlag){
-              lookupIndex += (srcLinSeqList[j][k].seqIndex.tensorSeqIndex - 1)
-                * seqIndexCount;
-            }
-            seqIndexDeInfoList[count].lookupIndex = lookupIndex;
-            seqIndexDeInfoList[count].de = de;
-            ++count; // increment counter
-          }
-        }
-      }
-      // send information to the serving Pet
-      vm->send(&count, sizeof(int), i);
-//printf("localPet %d sending count %d to Pet %i\n", localPet, count, i);
-      if (count)
-        vm->send(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), i);
-      // garbage collection
-      delete [] seqIndexDeInfoList;
-    }else{
-      // localPet serves the active srcSeqIndex interval
-      // todo: this can be rewritten with nb-recv to hide latencies
-      for (int ii=0; ii<petCount; ii++){
-        if (ii==i){
-          // server Pet itself
-          for (int j=0; j<srcLocalDeCount; j++){
-            int de = srcLocalDeList[j];  // global DE number
-            for (int k=0; k<srcLocalDeElementCount[j]; k++){
-              int srcSeqIndex = srcLinSeqList[j][k].seqIndex.decompSeqIndex;
-              if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax){
-                int kk = srcSeqIndex - seqIndexMin;
-                if (tensorMixFlag){
-                  kk += (srcLinSeqList[j][k].seqIndex.tensorSeqIndex - 1)
-                    * seqIndexCount;
-                }
-                srcSeqIndexFactorLookup[kk].de = de;
-              }
-            }
-          }
-        }else{
-          // receive seqIndexWithinInterval from Pet "ii"
-          int count;
-          vm->recv(&count, sizeof(int), ii);
-          SeqIndexDeInfo *seqIndexDeInfoList = new SeqIndexDeInfo[count];
-//printf("localPet %d receiving count %d from Pet %i\n", localPet, count, ii);
-          if (count)
-            vm->recv(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), ii);
-          // process seqIndexDeInfoList and set srcSeqIndexFactorLookup[]
-          for (int j=0; j<count; j++){
-            int k = seqIndexDeInfoList[j].lookupIndex;
-            srcSeqIndexFactorLookup[k].de = seqIndexDeInfoList[j].de;
-          }
-          // garbage collection
-          delete [] seqIndexDeInfoList;
-        }
-      } // for ii
-    }
+  {
+    DD::FillSelfDeInfo *fillSelfDeInfo = new DD::FillSelfDeInfo;
+    fillSelfDeInfo->linSeqList = srcLinSeqList;
+    fillSelfDeInfo->localPet = localPet;
+    fillSelfDeInfo->localDeCount = srcLocalDeCount;
+    fillSelfDeInfo->localDeElementCount = srcLocalDeElementCount;
+    fillSelfDeInfo->localDeList = srcLocalDeList;
+    fillSelfDeInfo->seqIndexInterval = srcSeqIndexInterval;
+    fillSelfDeInfo->seqIndexFactorLookup = srcSeqIndexFactorLookup;
+    fillSelfDeInfo->tensorMixFlag = tensorMixFlag;
+      
+    DD::updateLookup(vm, petCount, localPet, srcLocalIntervalPerPetCount,
+      srcLocalElementsPerIntervalCount, fillSelfDeInfo);
+    delete fillSelfDeInfo;
   }
   
-vm->barrier();  /// only for profiling tests
+//vm->barrier();  /// only for profiling tests
       
 #ifdef ASMMSTORETIMING
-  printf("gjt - profile for PET %d:\n"
-    " t4a1=%g\n t4a2=%g\n t4a3=%g\n t4a=%g\n t4b1=%g\n t4b2=%g\n t4b3=%g\n"
-    " t4b=%g\n t4c1=%g\n"
-    " t4c2=%g\n dt4c3ab=%g\n dt4c3bc=%g\n dt4c3cd=%g\n dt4c34=%g\n dt4c45=%g\n"
-    " t4c=%g\n",
-    localPet, t4a1-t3, t4a2-t3, t4a3-t3, t4a-t3, t4b1-t3, t4b2-t3, t4b3-t3,
-    t4b-t3, t4c1-t3,
-    t4c2-t3, dt4c3ab, dt4c3bc, dt4c3cd, dt4c34, dt4c45, t4c-t3);
-  VMK::wtime(&t4);   //gjt - profile
+  VMK::wtime(&t5c);   //gjt - profile
 #endif
 
-  // determine the dstSeqIndexMinGlobal and MaxGlobal
-  // todo: for nb-allgather(dstSeqIndexMinMaxList) here insert commwait()
-  int dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal;
-  pastInitFlag = 0; // reset
-  for (int i=0; i<petCount; i++){
-    if (dstElementCountList[i]){
-      // this Pet does hold elements in dstArray
-      if (pastInitFlag){
-        if (dstSeqIndexMinMaxList[2*i] < dstSeqIndexMinGlobal)
-          dstSeqIndexMinGlobal = dstSeqIndexMinMaxList[2*i];
-        if (dstSeqIndexMinMaxList[2*i+1] > dstSeqIndexMaxGlobal)
-          dstSeqIndexMaxGlobal = dstSeqIndexMinMaxList[2*i+1];
-      }else{
-        // initialization
-        dstSeqIndexMinGlobal = dstSeqIndexMinMaxList[2*i];
-        dstSeqIndexMaxGlobal = dstSeqIndexMinMaxList[2*i+1];
-        pastInitFlag = 1; // set
-      }
-    }
-  }
-    
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5a1);   //gjt - profile
-#endif
-
-  // set up a distributed directory for dstArray seqIndex look-up
-  indicesPerPet = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) / petCount;
-  extraIndices = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) % petCount;
-  DD::Interval *dstSeqIndexInterval = new DD::Interval[petCount];
-  dstSeqIndexInterval[0].min = dstSeqIndexMinGlobal;  // start
-  for (int i=0; i<petCount-1; i++){
-    dstSeqIndexInterval[i].max = dstSeqIndexInterval[i].min + indicesPerPet - 1;
-    if (i<extraIndices)
-      ++dstSeqIndexInterval[i].max;   // distribute extra indices homogeneously
-    dstSeqIndexInterval[i].count = 
-      dstSeqIndexInterval[i].max - dstSeqIndexInterval[i].min + 1;
-    dstSeqIndexInterval[i].countEff =
-      dstSeqIndexInterval[i].count * dstTensorElementCountEff;
-    dstSeqIndexInterval[i+1].min = dstSeqIndexInterval[i].max + 1;
-  }
-  dstSeqIndexInterval[petCount-1].max = dstSeqIndexMaxGlobal;  // finish
-  dstSeqIndexInterval[petCount-1].count = 
-    dstSeqIndexInterval[petCount-1].max - dstSeqIndexInterval[petCount-1].min
-    + 1;
-  dstSeqIndexInterval[petCount-1].countEff =
-    dstSeqIndexInterval[petCount-1].count * dstTensorElementCountEff;
-  
-#ifdef ASMMSTOREPRINT
-    printf("gjt: localPet %d, dstElementCountList[localPet] = %d, "
-    "dstSeqIndexMinMax = %d / %d, dstSeqIndexMinGlobal/MaxGlobal = %d, %d, "
-    "dstSeqIndexInterval[localPet].min/.max = %d, %d\n",
-    localPet, dstElementCountList[localPet], dstSeqIndexMinMax[0],
-    dstSeqIndexMinMax[1], dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal,
-    dstSeqIndexInterval[localPet].min, dstSeqIndexInterval[localPet].max);
-#endif
-
-    
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5a2);   //gjt - profile
-#endif
-
-  int *dstLocalElementsPerIntervalCount = new int[petCount];
-  for (int i=0; i<petCount; i++){
-    // Pet "i" is the active dstSeqIndex interval
-    int seqIndexMin = dstSeqIndexInterval[i].min;
-    int seqIndexMax = dstSeqIndexInterval[i].max;
-    int count = 0; // reset
-    for (int j=0; j<dstLocalDeCount; j++){
-      for (int k=0; k<dstLocalDeElementCount[j]; k++){
-        int dstSeqIndex = dstLinSeqList[j][k].seqIndex.decompSeqIndex;
-        if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax)
-          ++count; // increment counter
-      }
-    }
-    dstLocalElementsPerIntervalCount[i] = count;
-  }
-    
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5a3);   //gjt - profile
-#endif
-
-  int *dstLocalIntervalPerPetCount = new int[petCount];
-  vm->alltoall(dstLocalElementsPerIntervalCount, sizeof(int),
-    dstLocalIntervalPerPetCount, sizeof(int), vmBYTE);
-  
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5a);   //gjt - profile
-#endif
-  
   // set up dstSeqIntervFactorListCount and dstSeqIntervFactorListIndex
   int *dstSeqIntervFactorListCount = new int[petCount];
   int **dstSeqIntervFactorListIndex = new int*[petCount];
@@ -5952,7 +6071,7 @@ vm->barrier();  /// only for profiling tests
   delete [] dstSeqIntervFactorCounter;
   
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t5b);   //gjt - profile
+  VMK::wtime(&t5d);   //gjt - profile
 #endif
   
   // allocate local look-up table indexed by dstSeqIndex
@@ -6415,86 +6534,32 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   } // factorPetIndex
   
 #ifdef ASMMSTORETIMING
-  VMK::wtime(&t5c);   //gjt - profile
+  VMK::wtime(&t5e);   //gjt - profile
 #endif
   
   // communicate between Pets to set up "de" member in dstSeqIndexFactorLookup[]
-  for (int i=0; i<petCount; i++){
-    // Pet "i" is the active dstSeqIndex interval
-    int seqIndexMin = dstSeqIndexInterval[i].min;
-    int seqIndexMax = dstSeqIndexInterval[i].max;
-    int seqIndexCount = dstSeqIndexInterval[i].count;
-    int seqIndexCountTotal = seqIndexCount * dstArray->tensorElementCount;
-    if (localPet!=i){
-      // localPet is a client for the active dstSeqIndex interval
-      SeqIndexDeInfo *seqIndexDeInfoList =
-        new SeqIndexDeInfo[seqIndexCountTotal];
-      int count = 0; // reset
-      for (int j=0; j<dstLocalDeCount; j++){
-        int de = dstLocalDeList[j];  // global DE number
-        for (int k=0; k<dstLocalDeElementCount[j]; k++){
-          int dstSeqIndex = dstLinSeqList[j][k].seqIndex.decompSeqIndex;
-          if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
-            int lookupIndex = dstSeqIndex - seqIndexMin;
-            if (tensorMixFlag){
-              lookupIndex += (dstLinSeqList[j][k].seqIndex.tensorSeqIndex - 1)
-                * seqIndexCount;
-            }
-            seqIndexDeInfoList[count].lookupIndex = lookupIndex;
-            seqIndexDeInfoList[count].de = de;
-            ++count; // increment counter
-          }
-        }
-      }      
-      // send information to the serving Pet
-      vm->send(&count, sizeof(int), i);
-//printf("localPet %d sending count %d to Pet %i\n", localPet, count, i);
-      if (count)
-        vm->send(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), i);
-      // garbage collection
-      delete [] seqIndexDeInfoList;
-    }else{
-      // localPet serves the active dstSeqIndex interval
-      // todo: this can be rewritten with nb-recv to hide latencies
-      for (int ii=0; ii<petCount; ii++){
-        if (ii==i){
-          // server Pet itself
-          for (int j=0; j<dstLocalDeCount; j++){
-            int de = dstLocalDeList[j];  // global DE number
-            for (int k=0; k<dstLocalDeElementCount[j]; k++){
-              int dstSeqIndex = dstLinSeqList[j][k].seqIndex.decompSeqIndex;
-              if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax){
-                int kk = dstSeqIndex - seqIndexMin;
-                if (tensorMixFlag){
-                  kk += (dstLinSeqList[j][k].seqIndex.tensorSeqIndex - 1)
-                    * seqIndexCount;
-                }
-                dstSeqIndexFactorLookup[kk].de = de;
-              }
-            }
-          }
-        }else{
-          // receive seqIndexWithinInterval from Pet "ii"
-          int count;
-          vm->recv(&count, sizeof(int), ii);
-          SeqIndexDeInfo *seqIndexDeInfoList = new SeqIndexDeInfo[count];
-//printf("localPet %d receiving count %d from Pet %i\n", localPet, count, ii);
-          if (count)
-            vm->recv(seqIndexDeInfoList, count*sizeof(SeqIndexDeInfo), ii);
-          // process seqIndexDeInfoList and set dstSeqIndexFactorLookup[]
-          for (int j=0; j<count; j++){
-            int k = seqIndexDeInfoList[j].lookupIndex;
-            dstSeqIndexFactorLookup[k].de = seqIndexDeInfoList[j].de;
-          }
-          // garbage collection
-          delete [] seqIndexDeInfoList;
-        }
-      } // for ii
-    }
-  }
-    
-vm->barrier();  /// only for profiling tests
+  {
+    DD::FillSelfDeInfo *fillSelfDeInfo = new DD::FillSelfDeInfo;
+    fillSelfDeInfo->linSeqList = dstLinSeqList;
+    fillSelfDeInfo->localPet = localPet;
+    fillSelfDeInfo->localDeCount = dstLocalDeCount;
+    fillSelfDeInfo->localDeElementCount = dstLocalDeElementCount;
+    fillSelfDeInfo->localDeList = dstLocalDeList;
+    fillSelfDeInfo->seqIndexInterval = dstSeqIndexInterval;
+    fillSelfDeInfo->seqIndexFactorLookup = dstSeqIndexFactorLookup;
+    fillSelfDeInfo->tensorMixFlag = tensorMixFlag;
       
+    DD::updateLookup(vm, petCount, localPet, dstLocalIntervalPerPetCount,
+      dstLocalElementsPerIntervalCount, fillSelfDeInfo);
+    delete fillSelfDeInfo;
+  }
+
+//vm->barrier();  /// only for profiling tests
+      
+#ifdef ASMMSTORETIMING
+  VMK::wtime(&t5f);   //gjt - profile
+#endif
+  
   // garbage collection  
   delete [] srcElementCountList;
   delete [] dstElementCountList;
@@ -6511,9 +6576,6 @@ vm->barrier();  /// only for profiling tests
   delete [] dstSeqIntervFactorListIndex;
 
 #ifdef ASMMSTORETIMING
-  printf("gjt - profile for PET %d:\n"
-    " t5a1=%g\n t5a2=%g\n t5a3=%g\n t5a=%g\n t5b=%g\n t5c=%g\n", localPet,
-    t5a1-t4, t5a2-t4, t5a3-t4, t5a-t4, t5b-t4, t5c-t4);
   VMK::wtime(&t5);   //gjt - profile
 #endif
   
@@ -6773,6 +6835,18 @@ vm->barrier();  /// only for profiling tests
     
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t11);   //gjt - profile
+  printf("gjt - profile for PET %d:\n"
+    " t4a1=%g\n t4a2=%g\n t4a3=%g\n t4a=%g\n"
+    " t4b1=%g\n t4b2=%g\n t4b3=%g\n t4b=%g\n",
+    localPet, t4a1-t3, t4a2-t3, t4a3-t3, t4a-t3, t4b1-t3, t4b2-t3, t4b3-t3,
+    t4b-t3);
+  printf("gjt - profile for PET %d:\n"
+    " t5a1=%g\n t5a2=%g\n t5a3=%g\n t5a=%g\n"
+    " t5b1=%g\n t5b2=%g\n t5b3=%g\n t5b4=%g\n t5b5=%g\n t5b=%g\n"
+    " t5c=%g\n t5d=%g\n t5e=%g\n t5f=%g\n",
+    localPet, t5a1-t4, t5a2-t4, t5a3-t4, t5a-t4,
+    t5b1-t4, t5b2-t4, t5b3-t4, t5b4-t4, t5b5-t4, t5b-t4, 
+    t5c-t4, t5d-t4, t5e-t4, t5f-t4);
   printf("gjt - profile for PET %d:\n"
     " t1=%g\n t2=%g\n t3=%g\n t4=%g\n t5=%g\n t6=%g\n"
     " t7=%g\n t8=%g\n t10X=%g\n t9=%g\n t10Y=%g\n t11=%g\n", localPet,
