@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.28 2008/08/20 04:40:03 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.29 2008/08/20 17:34:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.28 2008/08/20 04:40:03 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.29 2008/08/20 17:34:24 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -7205,13 +7205,14 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       int srcDe = partnerDeList[i];
       int srcPet;   //TODO: DE-based comms
       srcDelayout->getDEMatchPET(srcDe, *vm, NULL, &srcPet, 1);
+      int dstDe = dstLocalDeList[j];
+      int tag = dstDe*46340 + srcDe; // safe up to deCount=46340
 #ifdef ASMMSTOREPRINT
       printf("gjt: XXE::recvnb on localPet %d from Pet %d\n", localPet, srcPet);
 #endif
       recvnbIndex[j][i] = xxe->count;  // need index for the associated wait
-      int dstDe = dstLocalDeList[j];
       localrc = xxe->appendRecvnb(0x0, buffer[j][i],
-        partnerDeCount[j][i] * dataSizeSrc, srcPet, dstDe);
+        partnerDeCount[j][i] * dataSizeSrc, srcPet, tag);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMPROFILE
@@ -7387,9 +7388,11 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       }
       ++count;
       // fill in XXE StreamElements for src side
+      int srcDe = srcLocalDeList[j];
       int dstDe = partnerDeList[i];
       int dstPet;   //TODO: DE-based comms
       dstDelayout->getDEMatchPET(dstDe, *vm, NULL, &dstPet, 1);
+      int tag = dstDe*46340 + srcDe; // safe up to deCount=46340
       
 #ifdef ASMMPROFILE
       sprintf(message, "<(%04d/%04d)-Snb-(%04d/%04d)> ", srcLocalDeList[j],
@@ -7407,7 +7410,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 #endif
         // sendnbRRA out of single contiguous linIndex run
         localrc = xxe->appendSendnbRRA(0x0, linIndexContigBlockList[0].linIndex
-          * dataSizeSrc, partnerDeCount[i] * dataSizeSrc, dstPet, j, dstDe);
+          * dataSizeSrc, partnerDeCount[i] * dataSizeSrc, dstPet, j, tag);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
       }else{
@@ -7482,7 +7485,7 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
 #endif
         // sendnb out of contiguous intermediate buffer
         localrc = xxe->appendSendnb(0x0, buffer, partnerDeCount[i]
-          * dataSizeSrc, dstPet, dstDe);
+          * dataSizeSrc, dstPet, tag);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
           ESMF_ERR_PASSTHRU, &rc)) return rc;
       }
