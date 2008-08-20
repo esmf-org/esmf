@@ -1,10 +1,10 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.42 2007/12/14 19:53:23 svasquez Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.43 2008/08/20 17:22:53 feiliu Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
 
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_removeTEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP
@@ -26,6 +26,9 @@
     program FieldRedist
 
 #include <ESMF_Macros.inc>
+#include <ESMF_Conf.inc>
+#include <ESMF.h>
+#define ESMF_METHOD "FieldRedistSTest"
 
     ! ESMF Framework module
     use ESMF_Mod
@@ -34,22 +37,21 @@
     implicit none
     
     ! Local variables
-    integer :: i, j, ifld, jfld, rc
-    integer :: npets, my_pet, my_de
-    integer :: miscount, hWidth
-    integer, dimension(2) :: decompids1, decompids2, counts, localCounts
+    integer :: i, j, rc, localrc
+    integer :: npets, my_pet
+    integer :: miscount
+    integer, dimension(2) :: counts
     logical :: match
     real(ESMF_KIND_R8) :: pi, compval
-    real(ESMF_KIND_R8), dimension(2) :: min, max
-    real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
+    integer, dimension(1) :: gclbx, gcubx, gclby, gcuby
+    integer, dimension(2) :: src_fclb, src_fcub, res_fclb, res_fcub
+    real(ESMF_KIND_R8), dimension(:), pointer :: coordX, coordY
     real(ESMF_KIND_R8), dimension(:,:), pointer :: srcdata, resdata
-    type(ESMF_IGridHorzStagger) :: horzStagger
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_IGrid)  ::  igrid1,  igrid2
+    type(ESMF_Grid)  ::  grid1,  grid2
     type(ESMF_Field) :: field1, field2, field3
     type(ESMF_RouteHandle) :: rh12, rh23
     type(ESMF_VM):: vm
-    type(ESMF_DELayout) :: delayout1
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
@@ -64,6 +66,8 @@
 !-------------------------------------------------------------------------
 
     print *, "System Test FieldRedist:"
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -72,19 +76,25 @@
 !-------------------------------------------------------------------------
 !
     ! Initialize the framework and get back the default global VM
-    call ESMF_Initialize(vm=vm, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_Initialize(vm=vm, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     ! Get the PET count and our PET number
-    call ESMF_VMGet(vm, localPet=my_pet, petCount=npets, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_VMGet(vm, localPet=my_pet, petCount=npets, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     miscount = 0
 
-     if (2*(npets/2) .ne. npets) then
-       print *, "This test must run on an even number of processes"
-       goto 20
-     endif
+    if (2*(npets/2) .ne. npets) then
+        print *, "This test must run on an even number of processes"
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) &
+            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    endif
 
     print *, "Create section finished"
 
@@ -95,77 +105,101 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    ! Create a 2D layout to be used by the Fields
-    delayout1 = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
 
     !  Create the igrids and corresponding Fields
     !  note that the IGrids are the same but decomposed differently
     pi              = 3.14159
-    hWidth          = 2
     counts(1)       = 60
     counts(2)       = 50
-    min(1)          = 0.0
-    max(1)          = 60.0
-    min(2)          = 0.0
-    max(2)          = 50.0
-    horzStagger     = ESMF_IGRID_HORZ_STAGGER_A
+    ! create arrayspec
     call ESMF_ArraySpecSet(arrayspec, rank=2, &
-                           typekind=ESMF_TYPEKIND_R8)
+                           typekind=ESMF_TYPEKIND_R8, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    
+    ! create src and dst grids
+    grid1 = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=counts, &
+        coordDep1=(/1/), coordDep2=(/2/), &
+        regDecomp=(/2, npets/2/), rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-    decompids1(1) = 1
-    decompids1(2) = 2
-    igrid1 = ESMF_IGridCreateHorzXYUni(counts=counts, &
-                                     minGlobalCoordPerDim=min, &
-                                     maxGlobalCoordPerDim=max, &
-                                     horzStagger=horzStagger, &
-                                     name="source igrid", rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_IGridDistribute(igrid1, delayout=delayout1, &
-                             decompIds=decompids1, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    field1 = ESMF_FieldCreate(igrid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                              haloWidth=hWidth, name="field1", rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    field3 = ESMF_FieldCreate(igrid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                              haloWidth=hWidth, name="field3", rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
+    grid2 = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=counts, &
+        coordDep1=(/1/), coordDep2=(/2/), &
+        regDecomp=(/npets/2, 2/), rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-    decompids2(1) = 2
-    decompids2(2) = 1
-    igrid2 = ESMF_IGridCreateHorzXYUni(counts=counts, &
-                                     minGlobalCoordPerDim=min, &
-                                     maxGlobalCoordPerDim=max, &
-                                     horzStagger=horzStagger, &
-                                     name="destination igrid", rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_IGridDistribute(igrid2, delayout=delayout1, &
-                             decompIds=decompids2, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    field2 = ESMF_FieldCreate(igrid2, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                              haloWidth=hWidth, name="field2", rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_GridAddCoord(grid1, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+    call ESMF_GridAddCoord(grid2, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+    ! create src and dst fields
+    field1 = ESMF_FieldCreate(grid1, arrayspec, maxHaloLWidth=(/2,2/), &
+        maxHaloUWidth=(/0,0/), rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+    field3 = ESMF_FieldCreate(grid1, arrayspec, maxHaloLWidth=(/2,2/), &
+        maxHaloUWidth=(/0,0/), rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+    field2 = ESMF_FieldCreate(grid2, arrayspec, maxHaloLWidth=(/2,2/), &
+        maxHaloUWidth=(/0,0/), rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     ! precompute communication patterns
-    call ESMF_FieldRedistStore(field1, field2, vm, routehandle=rh12, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldRedistStore(field2, field3, vm, routehandle=rh23, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldRedistStore(field1, field2, routehandle=rh12, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    call ESMF_FieldRedistStore(field2, field3, routehandle=rh23, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     ! get coordinate arrays available for setting the source data array
-    call ESMF_IGridGetCoord(igrid1, dim=1, horzRelloc=ESMF_CELL_CENTER, &
-                           centerCoord=coordX, localCounts=localCounts, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_IGridGetCoord(igrid1, dim=2, horzRelloc=ESMF_CELL_CENTER, &
-                           centerCoord=coordY, localCounts=localCounts, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_GridGetCoord(grid1, localDe=0, coordDim=1, &
+        computationalLBound=gclbx, computationalUBound=gcubx, &
+        fptr=coordX, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    call ESMF_GridGetCoord(grid1, localDe=0, coordDim=2, &
+        computationalLBound=gclby, computationalUBound=gcuby, &
+        fptr=coordY, rc=localrc)
+        !fptr=coordY, totalCount=localCounts, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     
     ! Get pointers to the data and set it up
-    call ESMF_FieldGetDataPointer(field1, srcdata, ESMF_DATA_REF, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldGetDataPointer(field3, resdata, ESMF_DATA_REF, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-
+    call ESMF_FieldGet(field1, localDe=0, farray=srcdata, &
+        computationalLBound=src_fclb, computationalUBound=src_fcub, & 
+        rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    call ESMF_FieldGet(field3, localDe=0, farray=resdata, &
+        computationalLBound=res_fclb, computationalUBound=res_fcub, & 
+        rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     ! initialize data arrays
     srcdata = 0.0
@@ -173,10 +207,17 @@
 
     ! set data array to a function of coordinates (in the computational part
     ! of the array only, not the halo region)
-    do j    = 1,localCounts(2)
-       do i = 1,localCounts(1)
-           srcdata(i+hWidth,j+hWidth) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
-                                             + 2.0*sin(coordY(i,j)/50.0*pi) 
+    do i = gclbx(1), gcubx(1)
+        coordX(i) = i*0.5
+    enddo
+    do i = gclby(1), gcuby(1)
+        coordY(i) = i*0.5
+    enddo
+
+    do j    = gclby(1), gcuby(1)
+       do i = gclbx(1), gcubx(1)
+           srcdata(i,j) = 10.0 + 5.0*sin(coordX(i)/60.0*pi) &
+                                             + 2.0*sin(coordY(j)/50.0*pi) 
       enddo
     enddo
 
@@ -195,15 +236,19 @@
 !
 
     !! Call transpose method here, output ends up in field2
-    call ESMF_FieldRedist(field1, field2, rh12, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldRedist(field1, field2, rh12, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     print *, "Array contents after Transpose:"
 
     !! Transpose back so we can compare contents
     !! Call transpose method again here, output ends up in field3
-    call ESMF_FieldRedist(field2, field3, rh23, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldRedist(field2, field3, rh23, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     print *, "Array contents after second Transpose, should match original:"
 
@@ -217,28 +262,24 @@
 !-------------------------------------------------------------------------
 !   Print result
 
-    call ESMF_DELayoutGetDeprecated(delayout1, localDE=my_de, rc=rc)
-
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
-    print *, "Result from DE number ", my_de
+    print *, "Result from PET number ", my_pet
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
 
     match    = .true.
     miscount = 0
-    do j   = 1,localCounts(2)
-      jfld = j+hWidth
-      do i = 1,localCounts(1)
-        ifld = i+hWidth
-        compval = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
-                       + 2.0*sin(coordY(i,j)/50.0*pi)
-        print *, srcdata(ifld,jfld), resdata(ifld,jfld), compval
-        if ((srcdata(ifld,jfld) .ne. resdata(ifld,jfld)) .OR. &
-            (abs(resdata(ifld,jfld)-compval).ge.1.0d-12)) then
-          print *, "array contents do not match at: (", i,j, ") on DE ", &
-                   my_de, ".  src=", srcdata(ifld,jfld), "dst=", &
-                   resdata(ifld,jfld), "realval=", compval
+    do j   = gclby(1), gcuby(1)
+      do i = gclbx(1), gcubx(1)
+        compval = 10.0 + 5.0*sin(coordX(i)/60.0*pi) &
+                       + 2.0*sin(coordY(j)/50.0*pi)
+        print *, srcdata(i,j), resdata(i,j), compval
+        if ((srcdata(i,j) .ne. resdata(i,j)) .OR. &
+            (abs(resdata(i,j)-compval).ge.1.0d-12)) then
+          print *, "array contents do not match at: (", i,j, ") on PET ", &
+                   my_pet, ".  src=", srcdata(i,j), "dst=", &
+                   resdata(i,j), "realval=", compval
           match = .false.
           miscount = miscount + 1
           if (miscount .gt. 40) then
@@ -248,7 +289,7 @@
         endif
       enddo
     enddo
-    if (match) print *, "Array contents matched correctly!! DE = ", my_de
+    if (match) print *, "Array contents matched correctly!! PET = ", my_pet
 10  continue
 
     print *, "Finalize section finished"
@@ -261,22 +302,41 @@
 !-------------------------------------------------------------------------
 !   Clean up
 
-    call ESMF_FieldRedistRelease(rh12, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldRedistRelease(rh23, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(field1, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(field2, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(field3, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_IGridDestroy(igrid1, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_IGridDestroy(igrid2, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_DELayoutDestroy(delayout1, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldRedistRelease(rh12, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+    call ESMF_FieldRedistRelease(rh23, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+    call ESMF_FieldDestroy(field1, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+    call ESMF_FieldDestroy(field2, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+    call ESMF_FieldDestroy(field3, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+    call ESMF_GridDestroy(grid1, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+    call ESMF_GridDestroy(grid2, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
     print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
@@ -309,4 +369,3 @@
     end program FieldRedist
     
 !\end{verbatim}
-    

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.46 2008/07/14 17:31:01 feiliu Exp $ 
+# $Id: makefile,v 1.47 2008/08/20 17:22:52 feiliu Exp $ 
 
 ALL: build_system_tests
 
@@ -23,6 +23,7 @@ DIRS      = ESMF_CompCreate \
 			ESMF_FieldConcurrentComp \
 			ESMF_FieldBundleSMM \
 			ESMF_ArrayRedist3D \
+            ESMF_FieldRedist \
 
 # Tests not yet ready
 #           ESMF_RowReduce \        gjt: currently the code depends on DELayout comms, but it should be covered/converted to newArray

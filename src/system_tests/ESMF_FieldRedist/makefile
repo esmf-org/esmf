@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2006/01/30 18:11:25 nscollins Exp $ 
+# $Id: makefile,v 1.6 2008/08/20 17:22:53 feiliu Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -26,9 +26,6 @@ SYSTEM_TESTS_OBJ     =
 
 SYSTEM_TESTS_RUN     = RUN_FieldRedist  
 
-SYSTEM_TESTS_RUN_UNI = RUN_FieldRedistUNI
-
-
 include $(ESMF_DIR)/makefile
 
 DIRS = 
@@ -39,10 +36,3 @@ CLOBBERDIRS =
 
 RUN_FieldRedist:
 	$(MAKE) TNAME=FieldRedist NP=6 stest
-
-RUN_FieldRedistUNI:
-	$(MAKE) TNAME=FieldRedist NP=1 stest
-
-
-
-
