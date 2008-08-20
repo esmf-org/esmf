@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.35 2008/05/08 02:27:18 theurich Exp $ 
+# $Id: makefile,v 1.36 2008/08/20 21:01:17 theurich Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -28,21 +28,21 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
 #                 $(ESMF_EXDIR)/ESMF_FieldWriteEx
 
 EXAMPLES_RUN = run_ESMF_FieldCreateEx \
-               run_ESMF_FieldEx \
-               run_ESMF_FieldRegridEx \
-               run_ESMF_FieldSphereRegridEx 
-#               run_ESMF_FieldGetEx
-#                   run_ESMF_FieldSetEx
-#                   run_ESMF_FieldFromUserEx \
-#                   run_ESMF_FieldGlobalEx \
-#                   run_ESMF_FieldWriteEx 
+               run_ESMF_FieldEx
+#               run_ESMF_FieldRegridEx \
+#               run_ESMF_FieldSphereRegridEx \
+#               run_ESMF_FieldGetEx \
+#               run_ESMF_FieldSetEx \
+#               run_ESMF_FieldFromUserEx \
+#               run_ESMF_FieldGlobalEx \
+#               run_ESMF_FieldWriteEx 
 
 EXAMPLES_RUN_UNI = run_ESMF_FieldCreateEx_uni \
-                   run_ESMF_FieldEx_uni \
-                   run_ESMF_FieldRegridEx_uni \
-                   run_ESMF_FieldSphereRegridEx_uni
-#                   run_ESMF_FieldGetEx_uni
-#                   run_ESMF_FieldSetEx_uni
+                   run_ESMF_FieldEx_uni
+#                   run_ESMF_FieldRegridEx_uni \
+#                   run_ESMF_FieldSphereRegridEx_uni \
+#                   run_ESMF_FieldGetEx_uni \
+#                   run_ESMF_FieldSetEx_uni \
 #                   run_ESMF_FieldFromUserEx_uni \
 #                   run_ESMF_FieldGlobalEx_uni \
 #                   run_ESMF_FieldWriteEx_uni
@@ -86,10 +86,10 @@ run_ESMF_FieldRegridEx_uni:
 ## ESMF_FieldSphereRegridEx
 #
 run_ESMF_FieldSphereRegridEx:
-        $(MAKE) EXNAME=FieldSphereRegrid NP=4 exfrun
+	$(MAKE) EXNAME=FieldSphereRegrid NP=4 exfrun
 
 run_ESMF_FieldSphereRegridEx_uni:
-        echo "PASS: ESMF_FieldSphereRegridEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldSphereRegridEx.stdout
+	echo "PASS: ESMF_FieldSphereRegridEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldSphereRegridEx.stdout
 
 
 #
