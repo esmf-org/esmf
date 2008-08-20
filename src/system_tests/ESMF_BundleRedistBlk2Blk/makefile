@@ -24,9 +24,6 @@ SYSTEM_TESTS_OBJ     =
 
 SYSTEM_TESTS_RUN     = RUN_BundleRedistBlk2Blk
 
-SYSTEM_TESTS_RUN_UNI = RUN_BundleRedistBlk2BlkUNI
-
-
 include $(ESMF_DIR)/makefile
 
 DIRS = 
@@ -37,9 +34,3 @@ CLOBBERDIRS =
 
 RUN_BundleRedistBlk2Blk:
 	$(MAKE) TNAME=BundleRedistBlk2Blk NP=6 stest
-
-RUN_BundleRedistBlk2BlkUNI:
-	$(MAKE) TNAME=BundleRedistBlk2Blk NP=1 stest
-
-
-

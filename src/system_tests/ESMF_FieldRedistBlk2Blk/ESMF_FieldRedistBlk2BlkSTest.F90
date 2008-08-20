@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.11 2008/08/20 18:36:06 feiliu Exp $
+! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.12 2008/08/20 20:12:45 feiliu Exp $
 !
 ! System test FieldRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -67,7 +67,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "System Test FieldRedist:"
+    print *, "System Test FieldRedistBlk2Blk:"
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 !
