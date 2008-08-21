@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.12 2008/06/13 04:48:20 theurich Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.13 2008/08/21 21:17:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -71,7 +71,7 @@ module ESMF_DELayoutWQUTest_mod
     
     rc = ESMF_SUCCESS
 
-    print *, "*** hi from mygcomp_run ***"
+!    print *, "*** hi from mygcomp_run ***"
     
     call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
