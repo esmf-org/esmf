@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.25 2008/08/21 21:11:35 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.26 2008/08/21 23:12:55 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.25 2008/08/21 21:11:35 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.26 2008/08/21 23:12:55 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -586,10 +586,12 @@
 //EOPI
 
   FILE* xml;
-  char msgbuf[ESMF_MAXSTR], modelcompname[ESMF_MAXSTR], fullname[ESMF_MAXSTR],
-       version[ESMF_MAXSTR];
-  ESMC_Attribute *attpack;
+  char msgbuf[ESMF_MAXSTR];
+  char *modelcompname, *fullname, *version;
+  ESMC_Attribute *attpack, *attr;
   int localrc;
+  ESMC_Logical presentflag;
+  int templen;
   int stop = 0;
   int fldcount = 0;
   
@@ -606,6 +608,7 @@
     return ESMF_FAILURE;
   } 
 
+//  *** THIS IS A HACK, DON'T LIKE IT, TEMPORARY UNTIL WRITE CLASS AVAILABLE ***
   if (strcmp(object,"comp")==0) {
   attpack = ESMC_AttPackGet(convention, purpose, object);
   if (!attpack) {
@@ -614,18 +617,81 @@
     return ESMF_FAILURE;
   }
 
-  localrc = attpack->ESMC_AttributeGet(0,NULL,NULL,NULL,modelcompname);
-  if (localrc != ESMF_SUCCESS) strcpy(modelcompname,"N/A");
-  localrc = attpack->ESMC_AttributeGet(1,NULL,NULL,NULL,fullname);
-  if (localrc != ESMF_SUCCESS) strcpy(fullname,"N/A");
-  localrc = attpack->ESMC_AttributeGet(2,NULL,NULL,NULL,version);
-  if (localrc != ESMF_SUCCESS) strcpy(version,"N/A");
-  } else {
+  // get value of attribute 0 or set to N/A if not present
+  localrc = attpack->ESMC_AttributeIsPresent("name", &presentflag);
+  if (localrc != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "failed finding an attribute", &localrc);
+    fclose(xml);
+    return ESMF_FAILURE;
+  }
+  if (presentflag == ESMF_SUCCESS) {
+    attr = attpack->ESMC_AttributeGet(0);
+    templen = strlen(attr->vcp);
+    modelcompname = new char[templen];
+    localrc = attpack->ESMC_AttributeGet(0,NULL,NULL,NULL,modelcompname);
+    if (localrc != ESMF_SUCCESS) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "failed getting attribute value", &localrc);
+      fclose(xml);
+      return ESMF_FAILURE;
+    }
+  }
+  else {
+    modelcompname = new char[4];
     strcpy(modelcompname,"N/A");
+  }
+  
+  // get value of attribute 1 or set to N/A if not present
+  localrc = attpack->ESMC_AttributeIsPresent("full_name", &presentflag);
+  if (localrc != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "failed finding an attribute", &localrc);
+    fclose(xml);
+    return ESMF_FAILURE;
+  }
+  if (presentflag == ESMF_SUCCESS) {
+    attr = attpack->ESMC_AttributeGet(1);
+    templen = strlen(attr->vcp);
+    fullname = new char[templen];
+    localrc = attpack->ESMC_AttributeGet(1,NULL,NULL,NULL,fullname);
+    if (localrc != ESMF_SUCCESS) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "failed getting attribute value", &localrc);
+      fclose(xml);
+      return ESMF_FAILURE;
+    }
+  }
+  else {
+    fullname = new char[4];
     strcpy(fullname,"N/A");
+  }
+  
+  // get value of attribute 2 or set to N/A if not present
+  localrc = attpack->ESMC_AttributeIsPresent("version", &presentflag);
+  if (localrc != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "failed finding an attribute", &localrc);
+    fclose(xml);
+    return ESMF_FAILURE;
+  }
+  if (presentflag == ESMF_SUCCESS) {
+    attr = attpack->ESMC_AttributeGet(2);
+    templen = strlen(attr->vcp);
+    version = new char[templen];
+    localrc = attpack->ESMC_AttributeGet(2,NULL,NULL,NULL,version);
+    if (localrc != ESMF_SUCCESS) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "failed getting attribute value", &localrc);
+      fclose(xml);
+      return ESMF_FAILURE;
+    }
+  }
+  else {
+    version = new char[4];
     strcpy(version,"N/A");
   }
-
+  
   // Write the XML file header
   sprintf(msgbuf,"<model_component name=\"%s\" full_name=\"%s\" version=\"%s\"\n",
     modelcompname,fullname,version);
@@ -640,7 +706,9 @@
   sprintf(msgbuf,"xmlns=\"http://www.esmf.ucar.edu\">\n\n");
   //printf(msgbuf);
   fprintf(xml,msgbuf);
-  
+  }
+// *** HACK ***
+   
   // determine the number of fields to write
   localrc = ESMC_AttributeCountTree(convention, purpose, varobj, stop);
   if (localrc != ESMF_SUCCESS) {
