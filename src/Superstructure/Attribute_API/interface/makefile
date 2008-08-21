@@ -1,9 +1,10 @@
-# $Id: makefile,v 1.1 2008/04/24 21:30:00 rokuingh Exp $ 
+# $Id: makefile,v 1.2 2008/08/21 19:03:35 w6ws Exp $ 
 
 ALL: build_here 
 
+AUTOGEN	  = ESMF_Attribute.F90
 SOURCEC	  = 
-SOURCEF	  = ESMF_Attribute.F90
+SOURCEF	  = $(AUTOGEN)
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
@@ -19,7 +20,7 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  =
+CLEANFILES  = $(AUTOGEN)
 CLOBBERDIRS =
 
 
