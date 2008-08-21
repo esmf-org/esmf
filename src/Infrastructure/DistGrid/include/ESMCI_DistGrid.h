@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.9 2008/07/24 17:08:31 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.10 2008/08/21 23:12:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -69,9 +69,9 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     int **connectionList;         // list of connection elements
     int ***arbSeqIndexListPCollPLocalDe;// local arb sequence indices
                                   // [collocationCount][localDeCount]
-                                  // [arbSeqIndexCountPCollLocalDe(localDe)]
-    int seqIndexCollocationCount; // number different seqIndex collocations
-    int *seqIndexCollocation;     // collocation [dimCount]
+                                  // [elementCountPCollPLocalDe(localDe)]
+    int *collocationPDim;         // collocation [dimCount]
+    int diffCollocationCount;     // number different seqIndex collocations
     int *collocationTable;        // collocation in packed format [dimCount]
     int **elementCountPCollPLocalDe; // number of elements 
                                   // [collocationCount][localDeCount]
@@ -128,6 +128,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     // get() and set()
     int getDimCount()                   const {return dimCount;}
     int getPatchCount()                 const {return patchCount;}
+    int getDiffCollocationCount()   const {return diffCollocationCount;}
     const int *getMinIndexPDimPPatch()  const {return minIndexPDimPPatch;}
     const int *getMinIndexPDimPPatch(int patch, int *rc) const;
     const int *getMaxIndexPDimPPatch()  const {return maxIndexPDimPPatch;}
@@ -145,6 +146,8 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getIndexCountPDimPDe()   const {return indexCountPDimPDe;}
     const int *getIndexListPDimPLocalDe(int localDe, int dim, int *rc=NULL)
       const;
+    const int *getCollocationPDim() const {return collocationPDim;}
+    const int *getCollocationTable() const {return collocationTable;}
     DELayout *getDELayout()         const {return delayout;}
     ESMC_Logical getRegDecompFlag() const {return regDecompFlag;}
     int getSequenceIndexLocalDe(int localDe, int *index, int *rc=NULL) const;
@@ -155,7 +158,7 @@ class DistGrid : public ESMC_Base {    // inherits from ESMC_Base class
     const int *getArbSeqIndexListPLocalDe(int localDe, int collocation,
       int *rc=NULL) const;
     int setArbSeqIndex(InterfaceInt *arbSeqIndex, int localDe, int collocation);
-    int setSeqIndexCollocation(InterfaceInt *seqIndexCollocation);
+    int setCollocationPDim(InterfaceInt *collocationPDim);
     // fill()
     int fillIndexListPDimPDe(int *indexList, int de, int dim,
       VMK::commhandle **commh, int rootPet, VM *vm=NULL) const;

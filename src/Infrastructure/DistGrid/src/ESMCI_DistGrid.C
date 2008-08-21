@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.13 2008/08/01 23:36:52 rosalind Exp $
+// $Id: ESMCI_DistGrid.C,v 1.14 2008/08/21 23:12:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.13 2008/08/01 23:36:52 rosalind Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.14 2008/08/21 23:12:03 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1589,18 +1589,18 @@ int DistGrid::construct(
     if (elementCountPDe[i]==0) patchListPDe[i]=0;
   }
   // complete sequence index collocation by default
-  seqIndexCollocationCount = 1; // collocate all dimensions
-  seqIndexCollocation = new int[dimCount];
+  diffCollocationCount = 1; // collocate all dimensions
+  collocationPDim = new int[dimCount];
   collocationTable = new int[dimCount];
   for (int i=0; i<dimCount; i++){
-    seqIndexCollocation[i]=1;
+    collocationPDim[i]=1;
     collocationTable[i]=-1;
   }
   collocationTable[0]=1;
   // no arbitrary sequence indices by default
-  arbSeqIndexListPCollPLocalDe = new int**[seqIndexCollocationCount];
-  elementCountPCollPLocalDe = new int*[seqIndexCollocationCount];
-  for (int i=0; i<seqIndexCollocationCount; i++){
+  arbSeqIndexListPCollPLocalDe = new int**[diffCollocationCount];
+  elementCountPCollPLocalDe = new int*[diffCollocationCount];
+  for (int i=0; i<diffCollocationCount; i++){
     arbSeqIndexListPCollPLocalDe[i] = new int*[localDeCount];
     elementCountPCollPLocalDe[i] = new int[localDeCount];
     for (int j=0; j<localDeCount; j++){
@@ -1655,7 +1655,7 @@ int DistGrid::destruct(void){
     delete [] connectionList[i];
   if (connectionList)
     delete [] connectionList;
-  for (int i=0; i<seqIndexCollocationCount; i++){
+  for (int i=0; i<diffCollocationCount; i++){
     for (int j=0; j<localDeCount; j++)
       if (arbSeqIndexListPCollPLocalDe[i][j])
         delete [] arbSeqIndexListPCollPLocalDe[i][j];
@@ -1664,7 +1664,7 @@ int DistGrid::destruct(void){
   }
   delete [] arbSeqIndexListPCollPLocalDe;
   delete [] elementCountPCollPLocalDe;
-  delete [] seqIndexCollocation;
+  delete [] collocationPDim;
   delete [] collocationTable;
   
   if (delayoutCreator){
@@ -2034,13 +2034,13 @@ int DistGrid::print()const{
     }
     printf("\n");
   }
-  printf("seqIndexCollocationCount = %d\n", seqIndexCollocationCount);
-  printf("seqIndexCollocation:\t");
+  printf("diffCollocationCount = %d\n", diffCollocationCount);
+  printf("collocationPDim:\t");
   for (int i=0; i<dimCount-1; i++)
-    printf("%d / ", seqIndexCollocation[i]);
-  printf("%d\n", seqIndexCollocation[dimCount-1]);
+    printf("%d / ", collocationPDim[i]);
+  printf("%d\n", collocationPDim[dimCount-1]);
   printf("arbSeqIndexListPCollPLocalDe:\n");
-  for (int i=0; i<seqIndexCollocationCount; i++){
+  for (int i=0; i<diffCollocationCount; i++){
     for (int j=0; j<localDeCount; j++){
       printf(" for collocation %d, localDE %d - DE %d - "
         " elementCountPCollPLocalDe %d: ", collocationTable[i], j,
@@ -2878,10 +2878,10 @@ const int *DistGrid::getArbSeqIndexListPLocalDe(
     return NULL;
   }
   int collocationIndex;
-  for (collocationIndex=0; collocationIndex<seqIndexCollocationCount;
+  for (collocationIndex=0; collocationIndex<diffCollocationCount;
     collocationIndex++)
     if (collocationTable[collocationIndex] == collocation) break;
-  if (collocationIndex==seqIndexCollocationCount){
+  if (collocationIndex==diffCollocationCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified collocation not found", rc);
     return NULL;
@@ -2975,9 +2975,9 @@ int DistGrid::serialize(
     *ip++ = elementCountPDe[i];
     *ip++ = patchListPDe[i];
   }
-  *ip++ = seqIndexCollocationCount;
+  *ip++ = diffCollocationCount;
   for (int i=0; i<dimCount; i++){
-    *ip++ = seqIndexCollocation[i];
+    *ip++ = collocationPDim[i];
     *ip++ = collocationTable[i];
   }
   *ip++ = connectionCount;
@@ -3070,20 +3070,20 @@ DistGrid *DistGrid::deserialize(
     a->elementCountPDe[i] = *ip++;
     a->patchListPDe[i] = *ip++;
   }
-  a->seqIndexCollocationCount = *ip++;
-  a->seqIndexCollocation = new int[a->dimCount];
+  a->diffCollocationCount = *ip++;
+  a->collocationPDim = new int[a->dimCount];
   a->collocationTable = new int[a->dimCount];
   for (int i=0; i<a->dimCount; i++){
-    a->seqIndexCollocation[i] = *ip++;
+    a->collocationPDim[i] = *ip++;
     a->collocationTable[i] = *ip++;
   }
   a->connectionCount = *ip++;
   a->connectionList = new int*[a->connectionCount];
   // reset all xxPLocalDe variables on proxy object
   a->indexListPDimPLocalDe = new int*[0];
-  a->arbSeqIndexListPCollPLocalDe = new int**[a->seqIndexCollocationCount];
-  a->elementCountPCollPLocalDe = new int*[a->seqIndexCollocationCount];
-  for (int i=0; i<a->seqIndexCollocationCount; i++){
+  a->arbSeqIndexListPCollPLocalDe = new int**[a->diffCollocationCount];
+  a->elementCountPCollPLocalDe = new int*[a->diffCollocationCount];
+  for (int i=0; i<a->diffCollocationCount; i++){
     a->arbSeqIndexListPCollPLocalDe[i] = new int*[0];
     a->elementCountPCollPLocalDe[i] = new int[0];
     a->arbSeqIndexListPCollPLocalDe[i][0] = NULL;
@@ -3237,19 +3237,19 @@ int DistGrid::connection(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::setSeqIndexCollocation()"
+#define ESMC_METHOD "ESMCI::DistGrid::setCollocationPDim()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::setSeqIndexCollocation
+// !IROUTINE:  ESMCI::DistGrid::setCollocationPDim
 //
 // !INTERFACE:
 //
-int DistGrid::setSeqIndexCollocation(
+int DistGrid::setCollocationPDim(
 // !RETURN VALUE:
 //    int return code
 //
 // !ARGUMENTS:
 //
-  InterfaceInt *seqIndexCollocationArg // in
+  InterfaceInt *collocationPDimArg // in
   ){
 //
 // !DESCRIPTION:
@@ -3262,30 +3262,29 @@ int DistGrid::setSeqIndexCollocation(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   // check input
-  if (seqIndexCollocationArg == NULL){
+  if (collocationPDimArg == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to seqIndexCollocationArg array", &rc);
+      "- Not a valid pointer to collocationPDimArg array", &rc);
     return rc;
   }
-  if (seqIndexCollocationArg->dimCount != 1){
+  if (collocationPDimArg->dimCount != 1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-      "- seqIndexCollocationArg array must be of rank 1", &rc);
+      "- collocationPDimArg array must be of rank 1", &rc);
     return rc;
   }
-  if (seqIndexCollocationArg->extent[0] != dimCount){
+  if (collocationPDimArg->extent[0] != dimCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-      "- seqIndexCollocationArg array must supply exactly dimCount entries",
+      "- collocationPDimArg array must supply exactly dimCount entries",
       &rc);
     return rc;
   }
 
-  // set seqIndexCollocation[]
-  memcpy(seqIndexCollocation, seqIndexCollocationArg->array,  
-    sizeof(int)*dimCount);
+  // set collocationPDim[]
+  memcpy(collocationPDim, collocationPDimArg->array, sizeof(int)*dimCount);
   
   // delete arbSeqIndex if previously set
   int localDeCount = delayout->getLocalDeCount();
-  for (int i=0; i<seqIndexCollocationCount; i++){
+  for (int i=0; i<diffCollocationCount; i++){
     for (int j=0; j<localDeCount; j++)
       if (arbSeqIndexListPCollPLocalDe[i][j])
         delete [] arbSeqIndexListPCollPLocalDe[i][j];
@@ -3295,30 +3294,30 @@ int DistGrid::setSeqIndexCollocation(
   delete [] arbSeqIndexListPCollPLocalDe;
   delete [] elementCountPCollPLocalDe;
   
-  // determine seqIndexCollocationCount and construct collocationTable
-  seqIndexCollocationCount = 0; // reset
+  // determine diffCollocationCount and construct collocationTable
+  diffCollocationCount = 0; // reset
   for (int i=0; i<dimCount; i++){
     int j;
     for (j=0; j<i; j++)
-      if (seqIndexCollocation[i] == seqIndexCollocation[j]) break;
+      if (collocationPDim[i] == collocationPDim[j]) break;
     if (j==i){
-      collocationTable[seqIndexCollocationCount] = seqIndexCollocation[i];
-      ++seqIndexCollocationCount; // found a new collocation
+      collocationTable[diffCollocationCount] = collocationPDim[i];
+      ++diffCollocationCount; // found a new collocation
     }
   }
   
   // no arbitrary sequence indices by default
-  arbSeqIndexListPCollPLocalDe = new int**[seqIndexCollocationCount];
-  elementCountPCollPLocalDe = new int*[seqIndexCollocationCount];
+  arbSeqIndexListPCollPLocalDe = new int**[diffCollocationCount];
+  elementCountPCollPLocalDe = new int*[diffCollocationCount];
   const int *localDeList = delayout->getLocalDeList();
-  for (int i=0; i<seqIndexCollocationCount; i++){
+  for (int i=0; i<diffCollocationCount; i++){
     arbSeqIndexListPCollPLocalDe[i] = new int*[localDeCount];
     elementCountPCollPLocalDe[i] = new int[localDeCount];
     for (int j=0; j<localDeCount; j++){
       arbSeqIndexListPCollPLocalDe[i][j] = NULL;
       elementCountPCollPLocalDe[i][j] = 1;  // initialize
       for (int k=0; k<dimCount; k++){
-        if ((seqIndexCollocation[k]==collocationTable[i])){
+        if ((collocationPDim[k]==collocationTable[i])){
           elementCountPCollPLocalDe[i][j] *=
             indexCountPDimPDe[localDeList[j]*dimCount+k];
         }
@@ -3369,10 +3368,10 @@ int DistGrid::setArbSeqIndex(
     return rc;
   }
   int collocationIndex;
-  for (collocationIndex=0; collocationIndex<seqIndexCollocationCount;
+  for (collocationIndex=0; collocationIndex<diffCollocationCount;
     collocationIndex++)
     if (collocationTable[collocationIndex] == collocation) break;
-  if (collocationIndex==seqIndexCollocationCount){
+  if (collocationIndex==diffCollocationCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified collocation not found", &rc);
     return rc;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.10 2008/07/29 01:34:49 rosalind Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.11 2008/08/21 23:12:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -191,6 +191,7 @@ extern "C" {
     ESMCI::InterfaceInt **elementCountPDe,
     ESMCI::InterfaceInt **patchListPDe,
     ESMCI::InterfaceInt **indexCountPDimPDe,
+    ESMCI::InterfaceInt **collocationPDim,
     ESMC_Logical *regDecompFlag, ESMCI::DELayout **delayout, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridget()"
@@ -414,13 +415,31 @@ extern "C" {
           &(((*ptr)->getIndexCountPDimPDe())[i*(*ptr)->getDimCount()]),
           sizeof(int)*(*ptr)->getDimCount());
     }
+    // fill collocationPDim
+    if (*collocationPDim != NULL){
+      // collocationPDim was provided -> do some error checking
+      if ((*collocationPDim)->dimCount != 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- collocationPDim array must be of rank 1", rc);
+        return;
+      }
+      int dimCount = (*ptr)->getDimCount();
+      if ((*collocationPDim)->extent[0] < dimCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- 1st dim of collocationPDim array must be of size 'dimCount'", rc);
+        return;
+      }
+      // fill in values
+      memcpy((*collocationPDim)->array, (*ptr)->getCollocationPDim(),
+        sizeof(int)*dimCount);
+    }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN(c_esmc_distgridgetplocalde)(ESMCI::DistGrid **ptr,
-    int *localDeArg, ESMCI::InterfaceInt **seqIndexList, int *elementCount,
-    int *rc){
+    int *localDeArg, int *collocationArg, ESMC_Logical *arbSeqIndexFlag,
+    ESMCI::InterfaceInt **seqIndexList, int *elementCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetplocalde()"
     // Initialize return code; assume routine not implemented
@@ -435,6 +454,34 @@ extern "C" {
         "- Specified local DE out of bounds", rc);
       return;
     }
+    // check incoming collocation argument
+    int diffCollocationCount = (*ptr)->getDiffCollocationCount();
+    const int *collocationTable = (*ptr)->getCollocationTable();
+    int collocation;
+    int collIndex;
+    if (collocationArg != NULL){
+      collocation = *collocationArg;
+      int i;
+      for (i=0; i<diffCollocationCount; i++)
+        if (collocationTable[i]==collocation) break;
+      if (i==diffCollocationCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          "- specified collocation not valid", rc);
+        return;
+      }
+      collIndex = i;
+    }else{
+      collocation = collocationTable[0]; // default to first collocation 
+      collIndex = 0;
+    }
+    const int *arbSeqIndexListPLocalDe =
+      (*ptr)->getArbSeqIndexListPLocalDe(localDe, collocation, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    if (arbSeqIndexListPLocalDe)
+      *arbSeqIndexFlag = ESMF_TRUE;
+    else
+      *arbSeqIndexFlag = ESMF_FALSE;
     // fill seqIndexList
     if (*seqIndexList != NULL){
       // seqIndexList provided -> error checking
@@ -453,18 +500,14 @@ extern "C" {
       // check for arbitrary sequence indices
       int *const*arbSeqIndexCountPCollPLocalDe =
         (*ptr)->getElementCountPCollPLocalDe();
-      //TODO: this is hardcoded for first collocation
-      const int *arbSeqIndexListPLocalDe =
-        (*ptr)->getArbSeqIndexListPLocalDe(localDe, 1, &localrc);
       if (arbSeqIndexListPLocalDe){
         // arbitrary seq indices -> fill in arbSeqIndexListPLocalDe
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-          ESMC_NOT_PRESENT_FILTER(rc))) return;
         memcpy((*seqIndexList)->array, arbSeqIndexListPLocalDe,
-          sizeof(int) * arbSeqIndexCountPCollPLocalDe[0][localDe]);
+          sizeof(int) * arbSeqIndexCountPCollPLocalDe[collIndex][localDe]);
       }else{
         // default seq indices
         int dimCount = (*ptr)->getDimCount();
+        // TODO: must consider collocation subspace here!!!
         int *ii = new int[dimCount];     // index tuple basis 0
         const int *iiEnd = (*ptr)->getIndexCountPDimPDe() + dimCount*
           (*ptr)->getDELayout()->getLocalDeList()[localDe];
@@ -491,8 +534,9 @@ extern "C" {
     }
     // set elementCount
     if (ESMC_NOT_PRESENT_FILTER(elementCount) != ESMC_NULL_POINTER){
-      *elementCount = ((*ptr)->getElementCountPDe())[(*ptr)->getDELayout()->
-        getLocalDeList()[localDe]];
+      int *const *elementCountPCollPLocalDe =
+        (*ptr)->getElementCountPCollPLocalDe();
+      *elementCount = elementCountPCollPLocalDe[collIndex][localDe];
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -591,14 +635,14 @@ extern "C" {
   }
 
   void FTN(c_esmc_distgridset)(
-    ESMCI::DistGrid **ptr, ESMCI::InterfaceInt **seqIndexCollocation, int *rc){
+    ESMCI::DistGrid **ptr, ESMCI::InterfaceInt **collocationPDim, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridset()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(
-      (*ptr)->setSeqIndexCollocation(*seqIndexCollocation),
+      (*ptr)->setCollocationPDim(*collocationPDim),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

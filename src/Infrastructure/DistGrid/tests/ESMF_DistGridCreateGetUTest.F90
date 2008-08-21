@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.12 2008/07/25 17:08:27 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.13 2008/08/21 23:12:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.12 2008/07/25 17:08:27 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.13 2008/08/21 23:12:04 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -65,8 +65,10 @@ program ESMF_DistGridCreateGetUTest
   integer, allocatable:: indexList(:), seqIndexList(:)
   integer, allocatable:: deBlockList(:,:,:)
   integer, allocatable:: arbSeqIndexList(:)
+  integer, allocatable:: collocationPDim(:)
   logical:: loopResult
   logical:: matchResult
+  logical:: arbSeqIndexFlag
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -585,6 +587,65 @@ program ESMF_DistGridCreateGetUTest
   call ESMF_DistGridPrint(distgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridGet() - dimCount, collocationPDim"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(collocationPDim(3))  ! dimCount
+  call ESMF_DistGridGet(distgrid, dimCount=dimCount, &
+    collocationPDim=collocationPDim, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify dimCount"
+  write(failMsg, *) "Wrong dimCount"
+  call ESMF_Test((dimCount.eq.3), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Obtain arbSeqIndexFlag for dim=1"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocationPDim(1), &
+    arbSeqIndexFlag=arbSeqIndexFlag, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify arbSeqIndexFlag for dim=1"
+  write(failMsg, *) "Wrong arbSeqIndexFlag"
+  call ESMF_Test((.not.arbSeqIndexFlag), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Obtain arbSeqIndexFlag for dim=2"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocationPDim(2), &
+    arbSeqIndexFlag=arbSeqIndexFlag, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify arbSeqIndexFlag for dim=2"
+  write(failMsg, *) "Wrong arbSeqIndexFlag"
+  call ESMF_Test((arbSeqIndexFlag), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Obtain arbSeqIndexFlag for dim=3"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocationPDim(3), &
+    arbSeqIndexFlag=arbSeqIndexFlag, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify arbSeqIndexFlag for dim=3"
+  write(failMsg, *) "Wrong arbSeqIndexFlag"
+  call ESMF_Test((.not.arbSeqIndexFlag), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(collocationPDim)
+  
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "DistGridDestroy()"

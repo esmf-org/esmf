@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.50 2008/07/25 17:08:27 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.51 2008/08/21 23:12:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.50 2008/07/25 17:08:27 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.51 2008/08/21 23:12:03 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1939,7 +1939,7 @@ contains
     integer, allocatable    :: deblock(:,:,:)  ! Array of sizes
     integer                 :: i, j, jj, csum  ! loop variable
     integer, allocatable    :: minC(:), maxC(:)! min/max corner
-    integer, allocatable    :: seqIndexCollocation(:)
+    integer, allocatable    :: collocationPDim(:)
     integer                 :: dimCount     ! number of dimension
 
     ! initialize return code; assume routine not implemented
@@ -2016,14 +2016,14 @@ contains
     ESMF_DistGridCreateDBAI = distgrid 
 
     ! set collocations to separate arbDim from the reset
-    allocate(seqIndexCollocation(dimCount+1))
-    seqIndexCollocation = 2 ! initialize
-    seqIndexCollocation(arbDim) = 1 ! arbDim singled out as collocation "1"
-    call ESMF_DistGridSet(distgrid, seqIndexCollocation=seqIndexCollocation, &
+    allocate(collocationPDim(dimCount+1))
+    collocationPDim = 2 ! initialize
+    collocationPDim(arbDim) = 1 ! arbDim singled out as collocation "1"
+    call ESMF_DistGridSet(distgrid, collocationPDim=collocationPDim, &
       rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    deallocate(seqIndexCollocation)
+    deallocate(collocationPDim)
 
     ! prepare to set local arbitrary sequence indices
     indicesArg = ESMF_InterfaceIntCreate(farray1D=arbSeqIndexList, rc=localrc)
@@ -2116,7 +2116,7 @@ contains
   subroutine ESMF_DistGridGetDefault(distgrid, delayout, dimCount, patchCount, &
     minIndexPDimPPatch, maxIndexPDimPPatch, elementCountPPatch, &
     minIndexPDimPDe, maxIndexPDimPDe, elementCountPDe, patchListPDe, &
-    indexCountPDimPDe, regDecompFlag, rc)
+    indexCountPDimPDe, collocationPDim, regDecompFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid
@@ -2131,6 +2131,7 @@ contains
     integer,                intent(out), optional :: elementCountPDe(:)
     integer,                intent(out), optional :: patchListPDe(:)
     integer,                intent(out), optional :: indexCountPDimPDe(:,:)
+    integer,                intent(out), optional :: collocationPDim(:)
     logical,                intent(out), optional :: regDecompFlag
     integer,                intent(out), optional :: rc
 !         
@@ -2172,6 +2173,9 @@ contains
 !   \item[{[indexCountPDimPDe]}]
 !     Array of extents per {\tt dim}, per {\tt de}, with
 !     {\tt size(indexCountPDimPDe) == (/dimCount, deCount/)}.
+!   \item[{[collocationPDim]}]
+!     List of collocation id numbers, one for each dim, with
+!     {\tt size(collocationPDim) == (/dimCount/)}
 !   \item[{[regDecompFlag]}]
 !     Flag equal to {\tt ESMF\_TRUE} for regular decompositions
 !     and equal to {\tt ESMF\_FALSE} otherwise.
@@ -2190,6 +2194,7 @@ contains
     type(ESMF_InterfaceInt) :: elementCountPDeArg     ! helper variable
     type(ESMF_InterfaceInt) :: patchListPDeArg        ! helper variable
     type(ESMF_InterfaceInt) :: indexCountPDimPDeArg   ! helper variable
+    type(ESMF_InterfaceInt) :: collocationPDimArg     ! helper variable
     type(ESMF_Logical)      :: regDecompFlagArg       ! helper variable
 
     ! initialize return code; assume routine not implemented
@@ -2230,13 +2235,16 @@ contains
       rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    collocationPDimArg = ESMF_InterfaceIntCreate(collocationPDim, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridGet(distgrid, dimCount, patchCount, &
       minIndexPDimPPatchArg, maxIndexPDimPPatchArg, elementCountPPatchArg, &
       minIndexPDimPDeArg, maxIndexPDimPDeArg, elementCountPDeArg, &
-      patchListPDeArg, indexCountPDimPDeArg, regDecompFlagArg, delayout, &
-      localrc)
+      patchListPDeArg, indexCountPDimPDeArg, collocationPDimArg, &
+      regDecompFlagArg, delayout, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -2273,6 +2281,9 @@ contains
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(indexCountPDimPDeArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(collocationPDimArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2351,12 +2362,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridGet()
-  subroutine ESMF_DistGridGetPLocalDe(distgrid, localDe, seqIndexList, &
-    elementCount, rc)
+  subroutine ESMF_DistGridGetPLocalDe(distgrid, localDe, collocation, &
+    arbSeqIndexFlag, seqIndexList, elementCount, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid
     integer,                intent(in)            :: localDe
+    integer,                intent(in),  optional :: collocation
+    logical,                intent(out), optional :: arbSeqIndexFlag
     integer,                intent(out), optional :: seqIndexList(:)
     integer,                intent(out), optional :: elementCount
     integer,                intent(out), optional :: rc
@@ -2371,20 +2384,27 @@ contains
 !     Queried {\tt ESMF\_DistGrid} object.
 !   \item[localDe]
 !     Local DE for which information is requested. {\tt [0,..,localDeCount-1]}
-!   \item[{[elementCount]}]
-!     Number of elements in the localDe, i.e. identical to
-!     elementCountPDe(localDe).
+!   \item[{[collocation]}]
+!     Collocation for which information is requested. Default to first
+!     collocation in {\tt collocationPDim} list.
+!   \item[{[arbSeqIndexFlag]}]
+!     Indicates whether collocation is associated with arbitrary sequence
+!     indices.
 !   \item[{[seqIndexList]}]
 !     List of DistGrid patch-local sequence indices for {\tt localDe}, with
 !     {\tt size(seqIndexList) == (/elementCountPDe(localDe)/)}.
+!   \item[{[elementCount]}]
+!     Number of elements in the localDe, i.e. identical to
+!     elementCountPDe(localDe).
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc          ! local return code
-    type(ESMF_InterfaceInt) :: seqIndexListArg  ! helper variable
+    integer                 :: localrc            ! local return code
+    type(ESMF_Logical)      :: arbSeqIndexFlagArg ! helper variable
+    type(ESMF_InterfaceInt) :: seqIndexListArg    ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2399,10 +2419,14 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridGetPLocalDe(distgrid, localDe, seqIndexListArg, &
-      elementCount, localrc)
+    call c_ESMC_DistGridGetPLocalDe(distgrid, localDe, collocation, &
+      arbSeqIndexFlagArg, seqIndexListArg, elementCount, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! logicals
+    if (present (arbSeqIndexFlag)) &
+      arbSeqIndexFlag = arbSeqIndexFlagArg
     
     ! garbage collection
     call ESMF_InterfaceIntDestroy(seqIndexListArg, rc=localrc)
@@ -2430,7 +2454,7 @@ contains
     type(ESMF_DistGrid),    intent(in)            :: distgrid
     integer,                intent(in)            :: localDe
     integer,                intent(in)            :: dim
-    integer,                intent(out), optional :: indexList(:)
+    integer,                intent(out)           :: indexList(:)
     integer,                intent(out), optional :: rc
 !         
 !
@@ -2445,7 +2469,7 @@ contains
 !     Local DE for which information is requested. {\tt [0,..,localDeCount-1]}
 !   \item[dim] 
 !     Dimension for which information is requested. {\tt [1,..,dimCount]}
-!   \item[{[indexList]}]
+!   \item[indexList]
 !     Upon return this holds the list of DistGrid patch-local indices
 !     for {\tt localDe} along dimension {\tt dim}. The supplied variable 
 !     must be at least of size {\tt indexCountPDimPDe(dim, de(localDe))}.
@@ -2684,11 +2708,11 @@ contains
 ! !IROUTINE: ESMF_DistGridSet - Set DistGrid sequence index collocation labels
 
 ! !INTERFACE:
-  subroutine ESMF_DistGridSet(distgrid, seqIndexCollocation, rc)
+  subroutine ESMF_DistGridSet(distgrid, collocationPDim, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),  intent(in)              :: distgrid
-    integer,              intent(in)              :: seqIndexCollocation(:)
+    integer,              intent(in)              :: collocationPDim(:)
     integer,              intent(out),  optional  :: rc  
 !         
 !
@@ -2700,11 +2724,11 @@ contains
 !     \begin{description}
 !     \item[distgrid] 
 !          Specified {\tt ESMF\_DistGrid} object.
-!     \item[seqIndexCollocation] 
+!     \item[collocationPDim] 
 !          List of size {\tt dimCount} specifying which dimensions are
 !          covered by which sequence index. Each entry is associated with the
 !          corresponding dimension. Dimensions with identical entries in the
-!          {\tt seqIndexCollocation} argument are collocated within the same
+!          {\tt collocationPDim} argument are collocated within the same
 !          sequence index space. Dimensions with different entries are located
 !          in orthogonal sequence index spaces.
 !     \item[{[rc]}] 
@@ -2714,7 +2738,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_InterfaceInt) :: seqIndexCollocationArg  ! helper variable
+    type(ESMF_InterfaceInt) :: collocationPDimArg  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2723,18 +2747,18 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
-    seqIndexCollocationArg = &
-      ESMF_InterfaceIntCreate(seqIndexCollocation, rc=localrc)
+    collocationPDimArg = &
+      ESMF_InterfaceIntCreate(collocationPDim, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DistGridSet(distgrid, seqIndexCollocationArg, localrc)
+    call c_ESMC_DistGridSet(distgrid, collocationPDimArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(seqIndexCollocationArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(collocationPDimArg, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
