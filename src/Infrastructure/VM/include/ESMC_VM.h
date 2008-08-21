@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.45 2008/08/20 18:04:10 theurich Exp $
+// $Id: ESMC_VM.h,v 1.46 2008/08/21 16:51:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -31,7 +31,11 @@
 //EOPI
 //-----------------------------------------------------------------------------
 
+#ifndef MPICH_IGNORE_CXX_SEEK
+#define MPICH_IGNORE_CXX_SEEK
+#endif
 #include <mpi.h>
+
 #include "ESMC_Interface.h"
 
 extern "C" {
