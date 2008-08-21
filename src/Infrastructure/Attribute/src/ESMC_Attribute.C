@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.24 2008/08/14 01:50:54 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.25 2008/08/21 21:11:35 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.24 2008/08/14 01:50:54 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.25 2008/08/21 21:11:35 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -329,28 +329,28 @@
   if ((!name) || (name[0] == '\0')) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute name", NULL);
-       return NULL;
+       return ESMF_FAILURE;
   }
 
   // simple sanity checks
   if ((!purpose) || (purpose[0] == '\0')) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute purpose", NULL);
-       return NULL;
+       return ESMF_FAILURE;
   }
   
   // simple sanity checks
   if ((!convention) || (convention[0] == '\0')) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute convention", NULL);
-       return NULL;
+       return ESMF_FAILURE;
   }
   
   // simple sanity checks
   if ((!object) || (object[0] == '\0')) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute object", NULL);
-       return NULL;
+       return ESMF_FAILURE;
   }
 
   attpack = ESMC_AttPackGet(convention, purpose, object);
@@ -2084,7 +2084,7 @@
   if ((!name) || (name[0] == '\0')) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "bad Attribute name", NULL);
-       return NULL;
+       return ESMF_FAILURE;
   }
 
   // look for the Attribute
@@ -3222,6 +3222,7 @@
             else if (tk == ESMC_TYPEKIND_LOGICAL)
                 vb = *(ESMC_Logical *)datap;  
             else if (tk == ESMC_TYPEKIND_CHARACTER) {
+                delete [] vcp;
                 slen = strlen((char *)datap) + 1;
                 vcp = new char[slen];
                 strncpy(vcp, (char *)datap, slen);
@@ -3232,31 +3233,37 @@
   } else  if (items > 1) {
     // items > 1, alloc space for a list and do the copy
         if (tk == ESMC_TYPEKIND_I4) {
+            delete [] vip;
             vip = new ESMC_I4[items];      
             if (datap) 
               for (i=0; i<items; i++)
                 vip[i] = ((ESMC_I4 *)datap)[i];  
         } else if (tk == ESMC_TYPEKIND_I8) {
+            delete [] vlp;
             vlp = new ESMC_I8[items];      
             if (datap) 
               for (i=0; i<items; i++)
                 vlp[i] = ((ESMC_I8 *)datap)[i];  
         } else if (tk == ESMC_TYPEKIND_R4) {
+            delete [] vfp;
             vfp = new ESMC_R4[items];      
             if (datap) 
               for (i=0; i<items; i++)
                 vfp[i] = ((ESMC_R4 *)datap)[i];  
         } else if (tk == ESMC_TYPEKIND_R8) {
+            delete [] vdp;
             vdp = new ESMC_R8[items];      
             if (datap) 
               for (i=0; i<items; i++)
                 vdp[i] = ((ESMC_R8 *)datap)[i];  
         } else if (tk == ESMC_TYPEKIND_LOGICAL) {
+            delete [] vbp;
             vbp = new ESMC_Logical[items];      
             if (datap) 
               for (i=0; i<items; i++)
                 vbp[i] = ((ESMC_Logical *)datap)[i];  
         } else if (tk == ESMC_TYPEKIND_CHARACTER) {
+            delete [] vcpp;
             vcpp = new char*[items];
             if (datap) {
               for (i=0; i<items; i++) {
