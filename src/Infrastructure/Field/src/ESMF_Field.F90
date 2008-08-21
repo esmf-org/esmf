@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.327 2008/05/22 17:25:46 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.328 2008/08/21 19:59:33 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,6 +55,7 @@ module ESMF_FieldMod
   use ESMF_StaggerLocMod
   use ESMF_DistGridMod
   use ESMF_GridMod
+  use ESMF_GeomBaseMod
   use ESMF_ArrayMod
   use ESMF_ArrayCreateMod
   use ESMF_ArrayGetMod
@@ -105,13 +106,12 @@ module ESMF_FieldMod
     !private
     type (ESMF_Base)              :: base             ! base class object
     type (ESMF_Array)             :: array
-    type (ESMF_Grid)              :: grid
+    type (ESMF_GeomBase)        :: geombase
     type (ESMF_Status)            :: fieldstatus
     type (ESMF_Status)            :: gridstatus
     type (ESMF_Status)            :: datastatus
     type (ESMF_IOSpec)            :: iospec           ! iospec values
     type (ESMF_Status)            :: iostatus         ! if unset, inherit from gcomp
-    type (ESMF_StaggerLoc)        :: staggerloc
     logical                       :: array_internal   ! .true. if field%array is
                                                       ! internally allocated
     logical                       :: is_proxy         ! .true. for a proxy field
@@ -176,7 +176,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.327 2008/05/22 17:25:46 feiliu Exp $'
+    '$Id: ESMF_Field.F90,v 1.328 2008/08/21 19:59:33 oehmke Exp $'
 
 !==============================================================================
 !
@@ -339,7 +339,6 @@ contains
       integer :: localrc
 
       type(ESMF_FieldType), pointer :: ftypep
-      type(ESMF_StaggerLoc) :: staggerloc
       integer :: exclLBounds(ESMF_MAXDIM)  ! exclusive grid lower bounds
       integer :: exclUBounds(ESMF_MAXDIM)  ! exclusive grid upper bounds
       integer :: gridrank, arrayrank
@@ -376,17 +375,16 @@ contains
          return
       endif 
 
-      staggerloc = ftypep%staggerloc
 
       ! make sure there is a grid before asking it questions.
       if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
-          call ESMF_GridValidate(grid=ftypep%grid, rc=localrc)
+          call ESMF_GeomBaseValidate(ftypep%geombase, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
           ! get grid dim and extents for the local piece
-          call ESMF_GridGet(ftypep%grid, dimCount=gridrank, &
+          call ESMF_GeomBaseGet(ftypep%geombase, dimCount=gridrank, &
                             distgrid=gridDistGrid, localDECount=localDECount, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
@@ -396,7 +394,7 @@ contains
           endif 
           ! Bounds only valid if there are local DE's
           do lDE=0, localDECount-1
-             call ESMF_GridGet(ftypep%grid, localDE=lDE, staggerloc=staggerloc, &
+             call ESMF_GeomBaseGetPLocalDe(ftypep%geombase, localDE=lDE,  &
                                exclusiveLBound=exclLBounds, &
                                exclusiveUBound=exclUBounds, &
                                rc=localrc)
@@ -449,7 +447,7 @@ contains
           allocate(arrayCompLBnd(dimCount, 0:localDECount-1))
           allocate(arrayCompUBnd(dimCount, 0:localDECount-1))
 
-          call ESMF_GridGet(ftypep%grid, distgridToGridMap=distgridToGridMap, rc=localrc)
+          call ESMF_GeomBaseGet(ftypep%geombase, distgridToGridMap=distgridToGridMap, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                 "Cannot retrieve distgridToGridMap from ftypep%grid", &
@@ -470,7 +468,7 @@ contains
           ! verify array computational bounds match grid computational bounds per localDE
           do lDE=0, localDECount-1
               allocate(gridCompUBnd(dimCount), gridCompLBnd(dimCount))
-              call ESMF_GridGet(ftypep%grid, staggerloc=staggerloc, localDE=lDE, &
+              call ESMF_GeomBaseGetPLocalDe(ftypep%geombase, localDE=lDE, &
                   computationalUBound=gridCompUBnd, computationalLBound=gridCompLBnd, &
                   rc=localrc)
               if (localrc .ne. ESMF_SUCCESS) then
@@ -693,7 +691,7 @@ contains
         ! Local variables
         integer :: localrc, de_id
         type(ESMF_Array) :: outarray
-        type(ESMF_Grid) :: grid
+        type(ESMF_GeomBase) :: geombase
         type(ESMF_DistGrid) :: distgrid
         type(ESMF_DELayout) :: delayout
         character(len=ESMF_MAXSTR) :: filename
@@ -1009,7 +1007,7 @@ contains
 
       call c_ESMC_FieldSerialize(fp%fieldstatus, fp%gridstatus, &
                                  fp%datastatus, fp%iostatus, & 
-                                 fp%staggerloc%staggerloc, fp%gridToFieldMap, &
+                                 0, fp%gridToFieldMap, &
                                  fp%ungriddedLBound, fp%ungriddedUBound, &
                                  fp%maxHaloLWidth, fp%maxHaloUWidth, &
                                  buffer(1), length, offset, localrc)
@@ -1019,7 +1017,7 @@ contains
 
 
       if (fp%gridstatus .eq. ESMF_STATUS_READY) then
-         call ESMF_GridSerialize(fp%grid, buffer, length, offset, localrc)
+         call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -1081,6 +1079,7 @@ contains
 
       integer :: localrc
       type(ESMF_FieldType), pointer :: fp    ! field type
+      integer staggerloc
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1108,7 +1107,7 @@ contains
 
       call c_ESMC_FieldDeserialize(fp%fieldstatus, fp%gridstatus, &
                                    fp%datastatus, fp%iostatus, &
-                                   fp%staggerloc%staggerloc, fp%gridToFieldMap, &
+                                   staggerloc, fp%gridToFieldMap, &
                                    fp%ungriddedLBound, fp%ungriddedUBound, &
                                    fp%maxHaloLWidth, fp%maxHaloUWidth, &
                                    buffer(1), offset, localrc)
@@ -1117,7 +1116,7 @@ contains
                                 ESMF_CONTEXT, rc)) return
 
       if (fp%gridstatus .eq. ESMF_STATUS_READY) then
-          fp%grid=ESMF_GridDeserialize(vm, buffer, offset, localrc)
+          fp%geombase=ESMF_GeomBaseDeserialize(vm, buffer, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -1309,8 +1308,6 @@ contains
         ftypep%datastatus  = ESMF_STATUS_UNINIT
         ftypep%iostatus    = ESMF_STATUS_UNINIT
        
-        ftypep%staggerloc = ESMF_STAGGERLOC_CENTER
-
         ftypep%array_internal = .false. 
         ftypep%is_proxy       = .false. 
         ftypep%gridToFieldMap = -1

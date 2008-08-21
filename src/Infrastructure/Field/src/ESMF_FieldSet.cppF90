@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.14 2008/08/13 17:58:09 feiliu Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.15 2008/08/21 19:59:35 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,6 +35,7 @@ module ESMF_FieldSetMod
   use ESMF_DistGridMod
   use ESMF_StaggerLocMod
   use ESMF_GridMod
+  use ESMF_GeomBaseMod
   use ESMF_ArrayMod
   use ESMF_ArrayCreateMod
   use ESMF_InitMacrosMod
@@ -56,7 +57,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.14 2008/08/13 17:58:09 feiliu Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.15 2008/08/21 19:59:35 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -96,7 +97,8 @@ end interface
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    TypeKindRankInterfaceMacro(FieldSetCommit)
+    TypeKindRankInterfaceMacro(FieldSetCommitGrid)
+    TypeKindRankInterfaceMacro(FieldSetCommitGB)
 
 ! !DESCRIPTION:
 !   This interface finishes a {\tt ESMF\_Field} started with FieldCreateEmpty
@@ -294,6 +296,8 @@ contains
 
     ftype => field%ftypep
 
+#if 0
+
     ! decide if we're regridding or just adding a grid to a partially
     ! created field.
     had_grid = .FALSE.
@@ -312,6 +316,14 @@ contains
                            ESMF_LOG_WARNING, &
                            ESMF_CONTEXT)
     endif
+
+    ! now validate again to be sure that if the field had an existing
+    ! array or datamap, that we haven't created an inconsistent object
+    call ESMF_FieldValidate(field, "", rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                              ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rc)) return
+#endif
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -426,7 +438,7 @@ contains
     end if @\
 @\
     ! fetch the distgrid from field%grid @\
-    call ESMF_GridGet(field%ftypep%grid, distgrid=distgrid, rc=localrc) @\
+    call ESMF_GeomBaseGet(field%ftypep%geombase, distgrid=distgrid, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rc)) return @\
@@ -471,14 +483,14 @@ contains
 TypeKindRankDeclarationMacro(FieldSetDataPtr)
 
 
-#define FieldSetCommitDoc() \
+#define FieldSetCommitGridDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
 ! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
-! subroutine ESMF_FieldSetCommit<rank><type><kind>(field, grid, & @\
+! subroutine ESMF_FieldSetCommitGrid<rank><type><kind>(field, grid, & @\
 !   farray, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
 !   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
 ! @\
@@ -586,11 +598,12 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 !EOP @\
 !---------------------------------------------------------------------------- @\
 
-#define FieldSetCommitMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+
+#define FieldSetCommitGridMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !---------------------------------------------------------------------------- @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_FieldSetCommit" @\
-  subroutine ESMF_FieldSetCommit##mrank##D##mtypekind(field, grid, farray, & @\
+^define ESMF_METHOD "ESMF_FieldSetCommitGrid" @\
+  subroutine ESMF_FieldSetCommitGrid##mrank##D##mtypekind(field, grid, farray, & @\
     copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
 @\
@@ -609,6 +622,204 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     ! local variables @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
     type(ESMF_StaggerLoc)          :: localStaggerLoc  @\
+    integer                        :: localrc  @\
+    type(ESMF_GeomBase)   :: geombase @\
+@\
+    if (present(rc)) then @\
+      rc = ESMF_RC_NOT_IMPL @\
+    endif @\
+    localrc = ESMF_RC_NOT_IMPL @\
+@\
+    ! make sure field, grid, farray are properly initialized @\
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc) @\
+@\
+    ! The following use of fptr is a bit of trickery to get all F90 @\
+    ! compilers to cooperate. For some compilers the associated() test @\
+    ! will return .false. for farray of size 0. Some of those compilers @\
+    ! will produce a run-time error in size(fptr). Other compilers will @\
+    ! return .true. for the associated() test but return 0 in size(). @\
+    fpointer => farray @\
+    if(.not. associated(fpointer,farray)) then @\
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
+        "- farray is not associated with memory allocation)", & @\
+        ESMF_CONTEXT, rc)  @\
+      return @\
+    endif @\
+@\
+    if (size(fpointer)==0) then @\
+      call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
+        "- farray is not associated with memory allocation)", & @\
+        ESMF_CONTEXT, rc)  @\
+      return @\
+    endif @\
+@\
+    ! Set default values. @\
+    if (present(staggerloc)) then @\
+      localStaggerloc = staggerloc @\
+    else @\
+      localStaggerLoc = ESMF_STAGGERLOC_CENTER @\
+    endif @\
+@\
+    geombase=ESMF_GeomBaseCreate(grid,localStaggerloc, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+@\
+  ! Do General GeomBase SetCommit @\
+  call ESMF_FieldSetCommitGB##mrank##D##mtypekind(field, geombase, farray, & @\
+    copyflag, gridToFieldMap, ungriddedLBound, & @\
+    ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+@\
+@\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+  end subroutine ESMF_FieldSetCommitGrid##mrank##D##mtypekind  @\
+!---------------------------------------------------------------------------- @\
+
+TypeKindRankDeclarationMacro(FieldSetCommitGrid)
+
+
+
+#define FieldSetCommitGBDoc() \
+!---------------------------------------------------------------------------- @\
+!BOPI @\
+! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field started with FieldCreateEmpty @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_FieldSetCommit() @\
+! subroutine ESMF_FieldSetCommitGB<rank><type><kind>(field, geombase, & @\
+!   farray, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
+!   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_Field),                intent(inout)         :: field @\
+!   type(ESMF_GeomBase),                 intent(in)            :: geombase @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farray @\
+!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
+!   type(ESMF_STAGGERLOC), intent(in), optional :: staggerloc @\
+!   integer,               intent(in), optional :: gridToFieldMap(:) @\
+!   integer,               intent(in), optional :: ungriddedLBound(:) @\
+!   integer,               intent(in), optional :: ungriddedUBound(:) @\
+!   integer,               intent(in), optional :: maxHaloLWidth(:) @\
+!   integer,               intent(in), optional :: maxHaloUWidth(:) @\
+!   integer,               intent(inout), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+! This call completes an {\tt ESMF\_Field} allocated with the @\
+! {\tt ESMF\_FieldCreateEmpty()} call. For an example and @\
+! associated documentation using this method see Section  @\
+! \ref{sec:field:usage:create_empty_setcommit}. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item [field]  @\
+!       The {\tt ESMF\_Field} object to be completed and @\
+!       committed in this call.  The {\tt field} will have the same dimension @\
+!       (dimCount) as the rank of the {\tt farray}.  @\
+! \item [geombase]  @\
+!       The {\tt ESMF\_GeomBase} object to finish the Field.  The dimCount of the @\
+!       GeomBase must be smaller than or equal to the rank of the {\tt farray}. @\
+! \item [farray] @\
+!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
+!       for the farray. @\
+! \item [{[copyflag]}] @\
+!       Indicates whether to copy the {\tt farray} or reference it directly. @\
+!       For valid values see \ref{opt:copyflag}.  The default is @\
+!       {\tt ESMF\_DATA\_REF}. @\
+! \item [{[staggerloc]}] @\
+!       Stagger location of data in grid cells.  For valid  @\
+!       predefined values see Section \ref{sec:opt:staggerloc}. @\
+!       To create a custom stagger location see Section @\
+!       \ref{sec:usage:staggerloc:adv}. The default @\
+!       value is ESMF\_STAGGERLOC\_CENTER. @\
+! \item [{[gridToFieldMap]}] @\
+!       List with number of elements equal to the @\
+!       {\tt grid}'s dimCount.  The list elements map each dimension @\
+!       of the {\tt grid} to a dimension in the {\tt field} by @\
+!       specifying the appropriate {\tt field} dimension index. The default is to @\
+!       map all of the {\tt grid}'s dimensions against the lowest dimensions of @\
+!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
+!       to one and smaller than or equal to the {\tt field} rank. @\
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
+!       multiple times. The total ungridded dimensions in the {\tt field} @\
+!       are the total {\tt field} dimensions less @\
+!       the dimensions in @\
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
+!       stored in the {\t field}.   @\
+! \item [{[ungriddedLBound]}] @\
+!       Lower bounds of the ungridded dimensions of the {\tt field}. @\
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
+!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
+!       for consistency.  Note that the the ordering of @\
+!       these ungridded dimensions is the same as their order in the {\tt field}. @\
+! \item [{[ungriddedUBound]}] @\
+!       Upper bounds of the ungridded dimensions of the {\tt field}. @\
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
+!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
+!       for consistency.  Note that the the ordering of @\
+!       these ungridded dimensions is the same as their order in the {\tt field}. @\
+! \item [{[maxHaloLWidth]}] @\
+!       Lower bound of halo region.  The size of this array is the number @\
+!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       needs to be the same as they appear in the {\tt field}.  Values default @\
+!       to 0.  If values for maxHaloLWidth are specified they must be reflected in @\
+!       the size of the {\tt field}.  That is, for each gridded dimension the @\
+!       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
+!       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
+!       in preparation for the implementation of the halo method. @\
+!       HALO OPERATION NOT IMPLEMENTED @\
+! \item [{[maxHaloUWidth]}] @\
+!       Upper bound of halo region.  The size of this array is the number @\
+!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       needs to be the same as they appear in the {\tt field}.  Values default @\
+!       to 0.  If values for maxHaloUWidth are specified they must be reflected in @\
+!       the size of the {\tt field}.  That is, for each gridded dimension the @\
+!       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
+!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored @\
+!       in preparation for the implementation of the halo method.  @\
+!       HALO OPERATION NOT IMPLEMENTED @\
+! \item [{[rc]}]  @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOPI @\
+!---------------------------------------------------------------------------- @\
+
+
+#define FieldSetCommitGBMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldSetCommitGB" @\
+  subroutine ESMF_FieldSetCommitGB##mrank##D##mtypekind(field, geombase, farray, & @\
+    copyflag, gridToFieldMap, ungriddedLBound, & @\
+    ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
+@\
+    ! input arguments @\
+    type(ESMF_Field) :: field @\
+    type(ESMF_GeomBase) :: geombase            @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
+    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    integer, intent(in), optional :: gridToFieldMap(:)     @\
+    integer, intent(in), optional :: ungriddedLBound(:) @\
+    integer, intent(in), optional :: ungriddedUBound(:) @\
+    integer, intent(in), optional :: maxHaloLWidth(:) @\
+    integer, intent(in), optional :: maxHaloUWidth(:) @\
+    integer, intent(out), optional :: rc                @\
+    ! local variables @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
     integer                        :: localrc, i, count @\
     integer                        :: fieldDimCount, fieldUngriddedDimCount @\
     integer                        :: gridDimCount  @\
@@ -636,7 +847,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 @\
     ! make sure field, grid, farray are properly initialized @\
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc) @\
+    ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit,geombase,rc) @\
     ! The following use of fptr is a bit of trickery to get all F90 @\
     ! compilers to cooperate. For some compilers the associated() test @\
     ! will return .false. for farray of size 0. Some of those compilers @\
@@ -664,7 +875,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     ! of distributed grid dimensions, distgrid, @\
     ! number of ungridded Field dimensions, @\
     ! and number of undistributed Field Dimensions @\
-    call ESMF_GridGet(grid, dimCount=gridDimCount, & @\
+    call ESMF_GeomBaseGet(geombase, dimCount=gridDimCount, & @\
           distgridToGridMap=distgridToGridMap, & @\
           distgrid=distgrid, indexflag=indexflag, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
@@ -734,13 +945,6 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
             ESMF_CONTEXT, rc)  @\
     return @\
          endif @\
-    endif @\
-@\
-    ! Set default values. @\
-    if (present(staggerloc)) then @\
-      localStaggerloc = staggerloc @\
-    else @\
-      localStaggerLoc = ESMF_STAGGERLOC_CENTER @\
     endif @\
 @\
     if (present(gridToFieldMap)) then @\
@@ -851,8 +1055,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     ! The undistributed info from the Grid needs to be @\
     ! combined with the ungridded info from the Field in order @\
     ! to create the Array for the Field. @\
-    call ESMF_GridGetArrayInfo(grid, & @\
-         staggerloc=localStaggerLoc, & @\
+    call ESMF_GeomBaseGetArrayInfo(geombase, & @\
          gridToArrayMap=localGridToFieldMap, & @\
          ungriddedLBound=localUngriddedLBound (1:fieldUngriddedDimCount), & @\
          ungriddedUBound=localUngriddedUBound (1:fieldUngriddedDimCount), & @\
@@ -874,7 +1077,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
             computationalEdgeUWidth=compEUWidth(1:gridDimCount), & @\
             totalLWidth=localMaxHaloLWidth(1:gridDimCount), & @\
             totalUWidth=localMaxHaloUWidth(1:gridDimCount), & @\
-            staggerloc=localStaggerLoc%staggerloc, indexflag=indexflag, rc=localrc) @\
+            indexflag=indexflag, rc=localrc) @\
             if (ESMF_LogMsgFoundError(localrc, & @\
                    ESMF_ERR_PASSTHRU, & @\
                    ESMF_CONTEXT, rc)) return @\
@@ -886,7 +1089,6 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     ! Should call a common FieldSetCommitConstructor here instead @\
     ! of just setting things up ourselves @\
     ! (The field Sets were all moved here in preparation for this) @\
-    field%ftypep%staggerloc = localStaggerLoc @\
     field%ftypep%gridToFieldMap(1:gridDimCount) = & @\
        localGridToFieldMap(1:gridDimCount) @\
     field%ftypep%maxHaloLWidth(1:gridDimCount) = & @\
@@ -898,7 +1100,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     field%ftypep%ungriddedUBound(1:fieldUngriddedDimCount) = & @\
        localUngriddedUBound(1:fieldUngriddedDimCount) @\
     field%ftypep%datastatus = ESMF_STATUS_READY @\
-    field%ftypep%grid  = grid @\
+    field%ftypep%geombase  = geombase @\
     field%ftypep%gridstatus = ESMF_STATUS_READY @\
     field%ftypep%fieldstatus = ESMF_STATUS_READY  @\
 @\
@@ -908,10 +1110,10 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
       ESMF_CONTEXT, rc)) return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
-  end subroutine ESMF_FieldSetCommit##mrank##D##mtypekind  @\
+  end subroutine ESMF_FieldSetCommitGB##mrank##D##mtypekind  @\
 !---------------------------------------------------------------------------- @\
 
-TypeKindRankDeclarationMacro(FieldSetCommit)
+TypeKindRankDeclarationMacro(FieldSetCommitGB)
 
 
 end module ESMF_FieldSetMod

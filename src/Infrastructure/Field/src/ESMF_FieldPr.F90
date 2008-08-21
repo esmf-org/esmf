@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.3 2008/07/03 23:07:48 eschwab Exp $
+! $Id: ESMF_FieldPr.F90,v 1.4 2008/08/21 19:59:35 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,6 +38,7 @@ module ESMF_FieldPrMod
   use ESMF_StaggerLocMod
   use ESMF_DistGridMod
   use ESMF_GridMod
+  use ESMF_GeomBaseMod
   use ESMF_ArrayMod
   use ESMF_ArrayCreateMod
   use ESMF_ArrayGetMod
@@ -170,7 +171,7 @@ contains
         write(*, *)  "Grid status = ", trim(str)
 ! TODO:FIELDINTEGRATION Write ESMF_GridPrint() method.
 !        if (fp%gridstatus .eq. ESMF_STATUS_READY) then 
-!           call ESMF_GridPrint(fp%grid, "", localrc)
+!           call ESMF_GeomBasePrint(fp%geombase, "", localrc)
 !        endif
 
         call ESMF_StatusString(fp%datastatus, str, localrc)
@@ -181,9 +182,9 @@ contains
         if (fp%datastatus .eq. ESMF_STATUS_READY) then 
            call c_ESMC_ArrayPrint(fp%array, localrc)
         endif
-        call ESMF_StaggerLocPrint(fp%staggerloc, localrc)
+!        call ESMF_StaggerLocPrint(fp%staggerloc, localrc)
 
-        call ESMF_GridGet(fp%grid, dimCount=gridrank, rc=localrc)
+        call ESMF_GeomBaseGet(fp%geombase, dimCount=gridrank, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

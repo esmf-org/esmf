@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2007/12/11 20:49:30 dneckels Exp $
+# $Id: makefile,v 1.4 2008/08/21 19:59:36 oehmke Exp $
 
 # leave alone.
 ALL: build_here 
@@ -13,7 +13,7 @@ FFLAGS    =
 SOURCEC	  = ESMC_SparseMsgVM.C ESMC_DistDir.C ESMC_GridToMesh.C
             
 # If you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = 
+SOURCEF	  = ESMF_GeomBase.F90
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # List all .h files which should be copied to common include dir

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2008/02/29 22:06:08 dneckels Exp $
+# $Id: makefile,v 1.3 2008/08/21 19:59:36 oehmke Exp $
 
 # leave alone.
 ALL: build_here 
@@ -10,7 +10,7 @@ CFLAGS    =
 FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMCI_GridUtil_F.C
+SOURCEC	  = ESMCI_GridUtil_F.C ESMCI_GeomBase_F.C
 # if you have F90 files in this directory, list them all on the line below.
 SOURCEF	  =  ESMF_GridUtil.F90
 # if you have .h include files in this dir, list them all on the line below.
