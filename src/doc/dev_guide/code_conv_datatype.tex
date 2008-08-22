@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_datatype.tex,v 1.2 2007/05/02 22:53:12 cdeluca Exp $
+% CVS $Id: code_conv_datatype.tex,v 1.3 2008/08/22 01:31:36 w6ws Exp $
 
 \subsection{Code: Data Type Consistency Guidelines}
 
@@ -95,6 +95,44 @@ To provide some background, the handle {\tt ESMF\_KIND\_I} is provided to aid us
                  integer(ESMF_KIND_I) :: my_foo
                  call ESMF_SomeRoutine(my_foo)
 \end{verbatim}
+
+{\bf Logical Data:}
+
+The standards for logical data differ between logicals which are used as dummy arguments in user-callable entry points, and those which need to be passed
+to ESMF C++ routines.
+
+Routines with user logical data arguments use default kind arguments:
+\begin{verbatim}
+                 logical :: isActive
+\end{verbatim}
+
+Local logicals within Fortran code also generally use the default Fortran logical data type.
+
+ESMF defines a {\tt ESMF\_Logical} derived type for use when passing logical values between Fortran and C++ code.  The constants {\tt ESMF\_TRUE} and
+{\tt ESMF\_FALSE} are available, and must be used to ensure compatibility with the C++ code.
+
+For convenience, defined assignment operators are available which convert between Fortran logical and the {\tt ESMF\_Logical} derived type. 
+Finally, there are .eq. and .ne. operators defined to compare {\tt ESMF\_Logical} values.
+
+\begin{verbatim}
+               subroutine ESMF_SomeRoutine(myFlag)
+                 use ESMF_Mod
+                 implicit none
+		 
+                 logical, intent(inout) :: myFlag
+	       
+                 type(ESMF_Logical) :: myFlag_local
+
+                 myFlag_local = myFlag                  ! Defined assignment
+                 if (myFlag_local .eq. ESMF_TRUE) then  ! Use of .eq. operator
+                   call c_ESMC_SomeCRoutine (myFlag_local)  ! Pass to C++
+                 else
+                   call c_ESMC_OtherCRtoutine (myFlag_local)
+                 end if
+                 myFlag = myFlag_local                  ! Defined assignment
+               end subroutine
+\end{verbatim}
+
 \subsubsection{C and C++}
 
 ESMF C datatypes are also declared with the property that their size remains constant across platforms. This convention is set in order to make ESMF more robust in terms of portability, as well as for the correct matching of Fortran-C routine interfaces. They have a direct size correspondence to their Fortran counterparts. Their names are:
@@ -132,6 +170,14 @@ here {\tt someFloat} is a 4 byte floating point in any platform.
 \item All integers that do not represent user data must be declared using the C datatype {\tt int}.
 
 \item Methods containing user data - such as arrays - as arguments must handle all supported integer user data types and sizes.
+\end{enumerate}
+
+{\bf Boolean Data:}
+\begin{enumerate}
+\item Boolean values used internally within the C++ routines may use the {\tt bool} data type.
+
+\item Methods which are Fortran-callable, and pass boolean values through the dummy argument list, must use the {\tt ESMC\_Logical} type.  The constants
+{\tt ESMF\_TRUE} and {\tt ESMF\_FALSE} are available for comparison purposes.  These constants must be used to ensure compatibility with the Fortran code.
 \end{enumerate}
 
 \subsubsection{ESMF\_TypeKind ``labels'': When knowing the data type/kind is necessary}
@@ -205,6 +251,7 @@ There must be a one to one correspondence of Fortran and C arguments as illustra
      real(ESMF_KIND_R4)     <-->  ESMC_R4  [4 bytes]
      real(ESMF_KIND_R8)     <-->  ESMC_R8  [8 bytes]
      integer                <-->  int
+     type(ESMF_Logical)     <-->  ESMC_Logical
      etc.
 \end{verbatim}
 Also, {\tt ESMF\_TypeKind} and {\tt ESMC\_TypeKind} values are set to have matching values. That is:
