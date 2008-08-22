@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.29 2008/08/20 17:34:24 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.30 2008/08/22 18:35:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.29 2008/08/20 17:34:24 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.30 2008/08/22 18:35:28 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4710,6 +4710,20 @@ void serverUpdate(FillSelfDeInfo *fillSelfDeInfo, int count,
         
 } // namespace DD
 
+namespace ArrayHelper{
+  int cmpInt(const void *a, const void *b){
+    int aa = *(int *)a;
+    int bb = *(int *)b;
+    if (aa<bb)
+      return -1;
+    else if (aa>bb)
+      return +1;
+    // must be equal
+    return 0;
+  }
+}
+
+
 #define ASMMSTORETIMING___disable
 #define ASMMSTORETIMING
 
@@ -5231,20 +5245,30 @@ int Array::sparseMatMulStore(
 #endif
   
   int *srcLocalElementsPerIntervalCount = new int[petCount];
-  for (int i=0; i<petCount; i++){
-    // Pet "i" is the active srcSeqIndex interval
-    int seqIndexMin = srcSeqIndexInterval[i].min;
-    int seqIndexMax = srcSeqIndexInterval[i].max;
-    int count = 0; // reset
+  {
+    // prepare temporary seqIndexList for sorting
+    int *seqIndexList = new int[srcElementCount];
+    int jj=0;
     for (int j=0; j<srcLocalDeCount; j++){
       for (int k=0; k<srcLocalDeElementCount[j]; k++){
-        int srcSeqIndex = srcLinSeqList[j][k].seqIndex.decompSeqIndex;
-        if (srcSeqIndex >= seqIndexMin && srcSeqIndex <= seqIndexMax)
-          ++count; // increment counter
+        seqIndexList[jj] = srcLinSeqList[j][k].seqIndex.decompSeqIndex;
+        ++jj;
       }
     }
-    srcLocalElementsPerIntervalCount[i] = count;
+    qsort(seqIndexList, srcElementCount, sizeof(int), ArrayHelper::cmpInt);
+    jj=0;
+    for (int i=0; i<petCount; i++){
+      int seqIndexMax = srcSeqIndexInterval[i].max;
+      int count = 0; // reset
+      while (jj<srcElementCount && seqIndexList[jj]<=seqIndexMax){
+        ++count;  // increment counter
+        ++jj;
+      }
+      srcLocalElementsPerIntervalCount[i] = count;
+    }
+    delete [] seqIndexList;
   }
+  
   int *srcLocalIntervalPerPetCount = new int[petCount];
   
 #ifdef ASMMSTORETIMING
@@ -5319,20 +5343,30 @@ int Array::sparseMatMulStore(
 #endif
 
   int *dstLocalElementsPerIntervalCount = new int[petCount];
-  for (int i=0; i<petCount; i++){
-    // Pet "i" is the active dstSeqIndex interval
-    int seqIndexMin = dstSeqIndexInterval[i].min;
-    int seqIndexMax = dstSeqIndexInterval[i].max;
-    int count = 0; // reset
+  {
+    // prepare temporary seqIndexList for sorting
+    int *seqIndexList = new int[dstElementCount];
+    int jj=0;
     for (int j=0; j<dstLocalDeCount; j++){
       for (int k=0; k<dstLocalDeElementCount[j]; k++){
-        int dstSeqIndex = dstLinSeqList[j][k].seqIndex.decompSeqIndex;
-        if (dstSeqIndex >= seqIndexMin && dstSeqIndex <= seqIndexMax)
-          ++count; // increment counter
+        seqIndexList[jj] = dstLinSeqList[j][k].seqIndex.decompSeqIndex;
+        ++jj;
       }
     }
-    dstLocalElementsPerIntervalCount[i] = count;
+    qsort(seqIndexList, dstElementCount, sizeof(int), ArrayHelper::cmpInt);
+    jj=0;
+    for (int i=0; i<petCount; i++){
+      int seqIndexMax = dstSeqIndexInterval[i].max;
+      int count = 0; // reset
+      while (jj<dstElementCount && seqIndexList[jj]<=seqIndexMax){
+        ++count;  // increment counter
+        ++jj;
+      }
+      dstLocalElementsPerIntervalCount[i] = count;
+    }
+    delete [] seqIndexList;
   }
+  
   int *dstLocalIntervalPerPetCount = new int[petCount];
   
 #ifdef ASMMSTORETIMING
