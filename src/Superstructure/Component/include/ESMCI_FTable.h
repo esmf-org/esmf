@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.h,v 1.24 2008/07/21 23:25:54 theurich Exp $
+// $Id: ESMCI_FTable.h,v 1.1 2008/08/25 22:03:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -17,8 +17,8 @@
  // these lines prevent this file from being read more than once if it
  // ends up being included multiple times
 
-#ifndef ESMC_FTable_H
-#define ESMC_FTable_H
+#ifndef ESMCI_FTable_H
+#define ESMCI_FTable_H
 
 //-----------------------------------------------------------------------------
 
@@ -174,5 +174,5 @@ typedef struct{
   int userrc;             // return code of registered user method
 } cargotype;
 
- #endif  // ESMC_FTable_H
+#endif  // ESMCI_FTable_H
 

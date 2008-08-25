@@ -1,24 +1,16 @@
-# $Id: makefile,v 1.30 2008/08/06 17:35:40 tjcnrl Exp $
+# $Id: makefile,v 1.31 2008/08/25 22:04:17 theurich Exp $
 
 # leave alone.
 ALL: build_here 
 
-# Don't set these unless absolutely necessary - they've got to be
-# architecture and compiler independent and should be inherited
-# from the upper level makefile if possible.
-CFLAGS    += ${MPI_INCLUDE}
-FFLAGS    =
-
 # If you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_FTable.C
-
+SOURCEC	  = ESMCI_FTable.C
 # If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = ESMF_Comp.F90 ESMF_GridComp.F90 ESMF_CplComp.F90 
-
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # If you have public .h files in this dir, list them here
-STOREH    = ESMC_Comp.h ESMC_FTable.h ESMC_GridComp.h ESMC_CplComp.h
+STOREH    = ESMCI_FTable.h
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
@@ -43,4 +35,3 @@ DIRS	  =
 CLEANDIRS   =
 CLEANFILES  = 
 CLOBBERDIRS =
-

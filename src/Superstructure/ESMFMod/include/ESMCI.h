@@ -1,4 +1,4 @@
-// $Id: ESMCI.h,v 1.22 2008/07/29 01:34:57 rosalind Exp $
+// $Id: ESMCI.h,v 1.23 2008/08/25 22:04:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -52,11 +52,7 @@
 #include "ESMCI_Config.h"
 
 // components and related items
-#include "ESMC_State.h"
-#include "ESMC_FTable.h"
-#include "ESMC_Comp.h"
-#include "ESMC_GridComp.h"
-#include "ESMC_CplComp.h"
+#include "ESMCI_State.h"
 
 // framework-wide initialization and finalization
 #include "ESMCI_Init.h"

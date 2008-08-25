@@ -1,23 +1,16 @@
-# $Id: makefile,v 1.24 2007/06/23 07:00:50 cdeluca Exp $
+# $Id: makefile,v 1.25 2008/08/25 22:04:02 theurich Exp $
 
 # Leave alone.
 ALL: build_here 
 
-# Don't set these unless absolutely necessary - they've got to be
-# architecture and compiler independent and should be inherited
-# from the upper level makefile if possible.
-CFLAGS    += ${MPI_INCLUDE}
-FFLAGS    =
-
 # If you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_FTable_F.C ESMC_Comp.C ESMC_Comp_F.C ESMC_GridComp.C \
-            ESMC_CplComp.C
+SOURCEC	  = ESMCI_Comp.C
 # If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  =  ESMF_Comp_C.F90 
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # List .h files to be copied to higher level common include directory
-STOREH	  =  ESMC_Comp.h
+STOREH	  =  ESMCI_Comp.h
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
@@ -40,5 +33,3 @@ DIRS	  =
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
-
-

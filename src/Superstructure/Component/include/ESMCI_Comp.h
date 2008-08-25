@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.35 2008/08/25 22:03:54 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.1 2008/08/25 22:03:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -14,8 +14,8 @@
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMC_Comp_H
-#define ESMC_Comp_H
+#ifndef ESMCI_Comp_H
+#define ESMCI_Comp_H
 
 //-----------------------------------------------------------------------------
 //BOPI
@@ -49,9 +49,8 @@ extern const char *ESMC_SetReadRestart;
 
 
 // Class declaration type
-typedef struct{
+class ESMC_Comp{
   void *fortranclass;
-    
-}ESMC_Comp;
+};
 
-#endif  // ESMC_Comp_H
+#endif  // ESMCI_Comp_H

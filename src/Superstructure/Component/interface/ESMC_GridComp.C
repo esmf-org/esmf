@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.C,v 1.19 2008/06/24 14:23:56 rosalind Exp $
+// $Id: ESMC_GridComp.C,v 1.20 2008/08/25 22:04:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -36,8 +36,8 @@
 //-----------------------------------------------------------------------------
 
  // associated class definition file
-#include "ESMC_Comp.h"
 #include "ESMC_GridComp.h"
+#include "ESMC_Comp.h"
 
  // return min value 
 #define min(a,b)  (((a)<(b))?(a):(b))
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_GridComp.C,v 1.19 2008/06/24 14:23:56 rosalind Exp $";
+           "$Id: ESMC_GridComp.C,v 1.20 2008/08/25 22:04:01 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
