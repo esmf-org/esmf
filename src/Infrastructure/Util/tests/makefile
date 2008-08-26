@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2007/02/27 20:50:47 rosalind Exp $ 
+# $Id: makefile,v 1.9 2008/08/26 20:48:19 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -73,7 +73,7 @@ RUN_ESMF_TypeKindGetUTestUNI:
 #
 # InitMacrosTest
 #
-UTEST_InitMacros_OBJS = ESMF_InitMacrosTestTypes.o
+ESMF_UTEST_InitMacros_OBJS = ESMF_InitMacrosTestTypes.o
 ESMF_InitMacrosUTest.o: ESMF_InitMacrosTestTypes.o
 
 RUN_ESMF_InitMacrosUTest:

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2005/11/22 00:27:38 nscollins Exp $
+# $Id: makefile,v 1.28 2008/08/26 20:48:19 theurich Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -129,7 +129,7 @@ RUN_ESMC_RTableUTestUNI:
 #
 #  F90 Redist
 #
-UTEST_Redist_OBJS =  ESMF_RedistHelpers.o
+ESMF_UTEST_Redist_OBJS =  ESMF_RedistHelpers.o
 
 ESMF_RedistUTest.o: ESMF_RedistHelpers.o
 
@@ -143,7 +143,7 @@ RUN_ESMF_RedistUTestUNI:
 #
 #  F90 Halo
 #
-UTEST_Halo_OBJS =  ESMF_HaloHelpers.o
+ESMF_UTEST_Halo_OBJS =  ESMF_HaloHelpers.o
 
 ESMF_HaloUTest.o: ESMF_HaloHelpers.o
 

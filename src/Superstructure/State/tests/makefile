@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2008/06/18 20:18:19 theurich Exp $ 
+# $Id: makefile,v 1.24 2008/08/26 20:48:20 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -79,7 +79,7 @@ RUN_ESMC_StateUTestUNI:
 # StateLimit Unit Test
 #
 
-UTEST_StateLimit_OBJS = ESMF_StateHelpers.o
+ESMF_UTEST_StateLimit_OBJS = ESMF_StateHelpers.o
 
 ESMF_StateLimitUTest.o: ESMF_StateHelpers.o
 

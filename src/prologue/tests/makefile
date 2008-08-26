@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2008/06/13 05:13:40 theurich Exp $ 
+# $Id: makefile,v 1.15 2008/08/26 20:48:20 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -47,7 +47,7 @@ CLOBBERDIRS =
 # Special for strings passed between C++ and F90
 #
 
-UTEST_String_OBJS = ESMC_StringSubr.o
+ESMF_UTEST_String_OBJS = ESMC_StringSubr.o
 ESMF_StringUTest.o : ESMC_StringSubr.o
 
 RUN_ESMF_StringUTest:
@@ -77,7 +77,7 @@ RUN_ESMF_F90ArrayPtrUTestUNI:
 # Special for testing wordsizes
 #
 
-UTEST_Wordsize_OBJS = ESMC_WordsizeSubr.o
+ESMF_UTEST_Wordsize_OBJS = ESMC_WordsizeSubr.o
 ESMF_WordsizeUTest.o : ESMC_WordsizeSubr.o
 
 RUN_ESMF_WordsizeUTest:
@@ -90,7 +90,7 @@ RUN_ESMF_WordsizeUTestUNI:
 # Test for pointers to derived types changing size based on type
 #
 
-UTEST_F95Ptr_OBJS =	ESMF_F95PtrBData.o
+ESMF_UTEST_F95Ptr_OBJS =	ESMF_F95PtrBData.o
 ESMF_F95PtrUTest.o:	ESMF_F95PtrBData.o
 
 RUN_ESMF_F95PtrUTest:

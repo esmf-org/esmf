@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.36 2008/08/20 21:01:17 theurich Exp $ 
+# $Id: makefile,v 1.37 2008/08/26 20:48:17 theurich Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -111,7 +111,7 @@ run_ESMF_FieldSetEx_uni:
 #
 # ESMF_FieldFromUserEx
 #
-EXAMPLE_FieldFromUser_OBJS = UserCodeMod.o
+ESMF_EXAMPLE_FieldFromUser_OBJS = UserCodeMod.o
 ESMF_FieldFromUserEx.o	: UserCodeMod.o
 
 run_ESMF_FieldFromUserEx:
