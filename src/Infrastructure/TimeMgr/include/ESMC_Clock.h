@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.56 2008/07/17 16:41:55 rosalind Exp $
+// $Id: ESMC_Clock.h,v 1.57 2008/08/26 15:46:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -19,6 +19,8 @@
 #define ESMC_Clock_H
 
 #include "ESMC_Interface.h"
+#include "ESMC_Time.h"
+#include "ESMC_TimeInterval.h"
 
 //-----------------------------------------------------------------------------
 //BOPI
