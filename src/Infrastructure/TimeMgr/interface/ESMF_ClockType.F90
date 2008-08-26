@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockType.F90,v 1.15 2008/04/05 03:38:58 cdeluca Exp $
+! $Id: ESMF_ClockType.F90,v 1.16 2008/08/26 17:27:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -68,7 +68,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ClockType.F90,v 1.15 2008/04/05 03:38:58 cdeluca Exp $'
+      '$Id: ESMF_ClockType.F90,v 1.16 2008/08/26 17:27:45 theurich Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -186,6 +186,94 @@
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_ClockSetInitDeleted
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockGetThis()"
+!BOPI
+! !IROUTINE: ESMF_ClockGetThis - Internal access routine for C++ pointer
+
+! !INTERFACE:
+  subroutine ESMF_ClockGetThis(clock, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Clock),   intent(in)              :: clock
+    type(ESMF_Pointer), intent(out)             :: this
+    integer,            intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Internal access routine for C++ pointer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock] 
+!          Specified {\tt ESMF\_Clock} object.
+!     \item[this] 
+!          C++ pointer.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Copy C++ pointer
+    this = clock%this
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_ClockGetThis
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockSetThis()"
+!BOPI
+! !IROUTINE: ESMF_ClockSetThis - Set C++ pointer in Clock
+
+! !INTERFACE:
+  subroutine ESMF_ClockSetThis(clock, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Clock),   intent(inout)           :: clock
+    type(ESMF_Pointer), intent(in)              :: this
+    integer,            intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Set C++ pointer in Clock.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock] 
+!          Specified {\tt ESMF\_Clock} object.
+!     \item[this] 
+!          C++ pointer.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Copy C++ pointer
+    clock%this = this
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_ClockSetThis
 !------------------------------------------------------------------------------
 
 
