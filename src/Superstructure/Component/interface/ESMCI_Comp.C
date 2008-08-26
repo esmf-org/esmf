@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.3 2008/08/26 17:28:59 theurich Exp $
+// $Id: ESMCI_Comp.C,v 1.4 2008/08/26 18:51:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.3 2008/08/26 17:28:59 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.4 2008/08/26 18:51:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for fortran interface routines
@@ -53,8 +53,16 @@ extern "C" {
   void FTN(f_esmf_gridcompdestroy)(ESMCI::GridComp *comp, int *rc);
   void FTN(f_esmf_gridcompprint)(const ESMCI::GridComp *gcomp,
     const char *options, int *rc, ESMCI_FortranStrLenArg olen);
+  void FTN(f_esmf_gridcompinitialize)(const ESMCI::GridComp *gcomp,
+    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::Clock *clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
+  void FTN(f_esmf_gridcomprun)(const ESMCI::GridComp *gcomp,
+    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::Clock *clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
+  void FTN(f_esmf_gridcompfinalize)(const ESMCI::GridComp *gcomp,
+    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::Clock *clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
 };
-
 
 
 namespace ESMCI {

@@ -7,16 +7,19 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMC_State.C"
+//==============================================================================
+//
 // ESMC State method implementation (body) file
-
+//
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt State} methods declared
-// in the companion file {\tt ESMC\_State.h}.  These are wrappers for the
-// actual code which is implemented in F90.
+// The code in this file implements the public C State methods declared
+// in the companion file ESMC_State.h
 //
 //-----------------------------------------------------------------------------
 //
@@ -44,9 +47,9 @@
 //EOP
 //-----------------------------------------------------------------------------
 
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.23 2008/07/29 01:34:57 rosalind Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMC_State.C,v 1.24 2008/08/26 18:51:06 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -79,7 +82,6 @@ extern "C" {
 //EOP
    //Local variables
     int localrc;
-    int nlen;
     ESMC_State state;
 
     // Initialize return code. Assume routine not implemented
@@ -216,7 +218,7 @@ extern "C" {
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State state) {    // in - state object to destroy
+      ESMC_State *state) {    // in - state object to destroy
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a State object previously allocated
@@ -234,16 +236,21 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
     localrc = ESMC_RC_NOT_IMPL;
+    
+    // typecase into ESMCI type
+    ESMCI::State *statep = (ESMCI::State *)(state->ptr);
 
     // Invoque the C++ interface
-    localrc = ((ESMCI::State*)state.ptr)->destroy();
+    localrc = ESMCI::State::destroy(statep);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return localrc;
 
-//  FTN(f_esmf_statedestroy)(state, &rc);
+    // invalidate pointer
+    state->ptr = NULL;
 
-    return rc=localrc;
-
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
  }  // end ESMC_StateDestroy
 
 }; // extern "C"

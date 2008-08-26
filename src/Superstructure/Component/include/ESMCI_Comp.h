@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.3 2008/08/26 17:28:59 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.4 2008/08/26 18:51:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -34,7 +34,6 @@
 #include "ESMCI_State.h"
 #include "ESMCI_Clock.h"
 #include "ESMCI_Grid.h"
-
 
 
 namespace ESMCI {

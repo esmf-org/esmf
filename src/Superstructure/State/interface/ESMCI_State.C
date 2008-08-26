@@ -7,15 +7,19 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_State.C"
+//==============================================================================
+//
 // ESMC State method implementation (body) file
-
+//
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ {\tt State} methods declared
-// in the companion file {\tt ESMC\_State.h}.  These are wrappers for the
+// in the companion file {\tt ESMCI\_State.h}.  These are wrappers for the
 // actual code which is implemented in F90.
 //
 //-----------------------------------------------------------------------------
@@ -40,8 +44,34 @@
 
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_State.C,v 1.8 2008/07/29 01:34:57 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_State.C,v 1.9 2008/08/26 18:51:06 theurich Exp $";
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//
+// prototypes for the fortran interface routines.
+//
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+extern "C" {
+
+  void FTN(f_esmf_statecreate)(ESMCI::State* state, char* statename, int* rc,
+				ESMCI_FortranStrLenArg nlen);
+
+  void FTN(f_esmf_stateaddarray)(ESMCI::State* state, ESMCI::Array** array, 
+                                 int* rc);
+
+  void FTN(f_esmf_stateprint)(ESMCI::State* state, int* rc);
+
+  void FTN(f_esmf_stategetarray)(ESMCI::State* state, char* name, 
+                                 ESMCI::Array** array, int* rc, 
+                                 ESMCI_FortranStrLenArg nlen);
+
+  void FTN(f_esmf_statedestroy)(ESMCI::State* state, int* rc);
+
+};
 
 //
 //-----------------------------------------------------------------------------
@@ -238,14 +268,14 @@ namespace ESMCI {
 // !IROUTINE:  ESMCI::State::destroy - free a State created with Create
 //
 // !INTERFACE:
-      int State::destroy(){
+      int State::destroy(
 //
 // !RETURN VALUE:
 //    int error return code
   
 // !ARGUMENTS:
-//  none
-
+  State *state){
+  
 // !DESCRIPTION:
 //      ESMF routine which destroys a State object previously allocated
 //      via an ESMC\_StateCreate routine.  Define for deep classes only.
@@ -264,9 +294,11 @@ namespace ESMCI {
     localrc = ESMC_RC_NOT_IMPL;
 
     // Invoque the fortran interface through the F90-C++ "glue" code
-    FTN(f_esmf_statedestroy)(this, &localrc);
+    FTN(f_esmf_statedestroy)(state, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return localrc;
+    
+    delete state;
 
     rc = localrc;
     return rc;

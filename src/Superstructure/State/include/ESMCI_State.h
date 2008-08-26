@@ -1,4 +1,4 @@
-// $Id: ESMCI_State.h,v 1.12 2008/07/29 01:34:57 rosalind Exp $
+// $Id: ESMCI_State.h,v 1.13 2008/08/26 18:51:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -7,18 +7,16 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
-// ESMF State C declaration include file
 //
-// (all lines below between the !BOP and !EOP markers will be included in 
+//-------------------------------------------------------------------------
+// (all lines below between the !BOP and !EOP markers will be included in
 //  the automated document processing.)
-//-----------------------------------------------------------------------------
-//
- // these lines prevent this file from being read more than once if it
- // ends up being included multiple times
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
 
- #ifndef ESMCI_State_H
- #define ESMCI_State_H
+#ifndef ESMCI_State_H
+#define ESMCI_State_H
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -46,45 +44,20 @@
 // C++ State class declaration
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-   namespace ESMCI{
-   class State{
+namespace ESMCI{
+  class State{
 
      // pointer to fortran derived type
-     ESMC_F90ClassHolder* f90this;
+     ESMC_F90ClassHolder fortranclass;
 
      public:
      static State* create(char* name, int *rc);
-     int addArray( Array *array);
+     int addArray(Array *array);
      int print();
      int getArray(char* name, Array **array);
-     int destroy();
-   }; // class State
-   };// namespace ESMCI
+     static int destroy(State *state);
+  }; // class State
+};// namespace ESMCI
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//
-// prototypes for the fortran interface routines.
-//
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-extern "C" {
 
-  void FTN(f_esmf_statecreate)(ESMCI::State* state, char* statename, int* rc,
-				ESMCI_FortranStrLenArg nlen);
-
-  void FTN(f_esmf_stateaddarray)(ESMCI::State* state, ESMCI::Array** array, 
-                                 int* rc);
-
-  void FTN(f_esmf_stateprint)(ESMCI::State* state, int* rc);
-
-  void FTN(f_esmf_stategetarray)(ESMCI::State* state, char* name, 
-                                 ESMCI::Array** array, int* rc, 
-                                 ESMCI_FortranStrLenArg nlen);
-
-  void FTN(f_esmf_statedestroy)(ESMCI::State* state, int* rc);
-
- }; // end prototypes for fortran interface
-
- #endif  // ESMC_State_H
+#endif  // ESMCI_State_H
