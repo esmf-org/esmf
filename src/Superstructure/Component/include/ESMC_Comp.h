@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.35 2008/08/25 22:03:54 theurich Exp $
+// $Id: ESMC_Comp.h,v 1.36 2008/08/26 05:15:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -29,15 +29,6 @@
 //EOPI
 //-----------------------------------------------------------------------------
 
-#define ESMF_INIT 1
-#define ESMF_RUN 2
-#define ESMF_FINAL 3
-#define ESMF_WRITERESTART 4
-#define ESMF_READRESTART 5
-#define ESMF_SINGLEPHASE 0
-
-enum ESMC_CompType { ESMF_COMPTYPE_GRID=1, ESMF_COMPTYPE_CPL, 
-                     ESMF_COMPTYPE_UNKNOWN };
 enum ESMC_GridCompType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE, 
                       ESMF_RIVER, ESMF_GRIDCOMPTYPE_UNKNOWN };
 
@@ -52,6 +43,6 @@ extern const char *ESMC_SetReadRestart;
 typedef struct{
   void *fortranclass;
     
-}ESMC_Comp;
+}ESMC_CompPublic;
 
 #endif  // ESMC_Comp_H

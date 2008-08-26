@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.1 2008/08/25 22:04:05 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.2 2008/08/26 05:15:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,30 +37,35 @@
 
 // LogErr
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
+#include "ESMC_LogMacros.inc"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.1 2008/08/25 22:04:05 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.2 2008/08/26 05:15:12 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
 // prototypes for fortran interface routines
 extern "C" {
-   void FTN(f_esmf_compsetvminfo)(ESMC_Comp *compp, void *vm_info, int *rc);
-   void FTN(f_esmf_compgetvmparent)(ESMC_Comp *compp, ESMCI::VM **vmparent, 
-     int *rc);
-   void FTN(f_esmf_compgetvmplan)(ESMC_Comp *compp, ESMCI::VMPlan **vmplan, 
-     int *rc);
-   void FTN(f_esmf_compinsertvm)(ESMC_Comp *compp, void *vm, int *rc);
-   void FTN(f_esmf_compget)(ESMC_Comp *compp, ESMC_CompType *ctype, int *rc);
-   void FTN(f_esmf_compreplicate)(ESMC_Comp *compp, ESMC_Comp *compp_src,
-     void *vm, int *rc);
-   void FTN(f_esmf_compcopy)(ESMC_Comp *compp, ESMC_Comp *compp_src, int *rc);
-   void FTN(f_esmf_compdelete)(ESMC_Comp *compp, int *rc);
+  void FTN(f_esmf_compsetvminfo)(ESMCI::Comp *compp, void *vm_info, int *rc);
+  void FTN(f_esmf_compgetvmparent)(ESMCI::Comp *compp, ESMCI::VM **vmparent, 
+    int *rc);
+  void FTN(f_esmf_compgetvmplan)(ESMCI::Comp *compp, ESMCI::VMPlan **vmplan, 
+    int *rc);
+  void FTN(f_esmf_compinsertvm)(ESMCI::Comp *compp, void *vm, int *rc);
+  void FTN(f_esmf_compget)(ESMCI::Comp *compp, ESMCI::CompType *ctype, int *rc);
+  void FTN(f_esmf_compreplicate)(ESMCI::Comp *compp, ESMCI::Comp *compp_src,
+    void *vm, int *rc);
+  void FTN(f_esmf_compcopy)(ESMCI::Comp *compp, ESMCI::Comp *compp_src, int     
+    *rc);
+  void FTN(f_esmf_compdelete)(ESMCI::Comp *compp, int *rc);
 };
 
+extern "C"{
+  void FTN(f_esmf_fortranudtpointersize)(int *size);
+  void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);
+}
 
 
 //==============================================================================
@@ -151,21 +156,19 @@ static void newtrim(char *c, int clen, int *phase, int *nstate, char **newc) {
 //==============================================================================
 
 
-
-
 // these interface subroutine names MUST be in lower case
 extern "C" {
 
      // no need for explicit create methods - call the native class 
      // constructor and destructor methods directly.
-     void FTN(c_esmc_ftablecreate)(ESMC_FTable **ptr, int *status) {
+     void FTN(c_esmc_ftablecreate)(ESMCI::FTable **ptr, int *status) {
          *status = ESMC_RC_NOT_IMPL;
 
-         (*ptr) = new ESMC_FTable;
+         (*ptr) = new ESMCI::FTable;
          (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
 
-     void FTN(c_esmc_ftabledestroy)(ESMC_FTable **ptr, int *status) {
+     void FTN(c_esmc_ftabledestroy)(ESMCI::FTable **ptr, int *status) {
          *status = ESMC_RC_NOT_IMPL;
          delete (*ptr);
          *ptr = 0;
@@ -173,7 +176,7 @@ extern "C" {
      }
   
      // call a function 
-     void FTN(c_esmc_ftablecallentrypoint)(ESMC_FTable **ptr, char *type, 
+     void FTN(c_esmc_ftablecallentrypoint)(ESMCI::FTable **ptr, char *type, 
                                         int *phase, int *status, int slen) {
          int funcrc;
          char *name;
@@ -187,7 +190,7 @@ extern "C" {
          // the right function to call; the other is the actual return code
          // from the user function itself.
 
-         localrc = (*ptr)->ESMC_FTableCallVFuncPtr(name, &funcrc);
+         localrc = (*ptr)->callVFuncPtr(name, &funcrc);
 
          if (status) {
              if (localrc != ESMF_SUCCESS)
@@ -203,20 +206,20 @@ extern "C" {
 
      // get and set routines for both function and data pointers.
      // index them by name.
-     void FTN(c_esmc_ftablegetentrypoint)(ESMC_FTable **ptr, char *type, 
-                       void **func, enum ftype *ftype, int *status, int slen) {
+     void FTN(c_esmc_ftablegetentrypoint)(ESMCI::FTable **ptr, char *type, 
+                       void **func, enum ESMCI::ftype *ftype, int *status, int slen) {
          char *name;
          *status = ESMC_RC_NOT_IMPL;
 
          newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
-         *status = (*ptr)->ESMC_FTableGetFuncPtr(name, func, ftype);
+         *status = (*ptr)->getFuncPtr(name, func, ftype);
 
          delete[] name;
      }
 
-     void FTN(c_esmc_ftablesetentrypoint)(ESMC_FTable **ptr, char *type,
+     void FTN(c_esmc_ftablesetentrypoint)(ESMCI::FTable **ptr, char *type,
                                            void *func, int *status, int slen) {
          char *name;
          *status = ESMC_RC_NOT_IMPL;
@@ -224,12 +227,12 @@ extern "C" {
          newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
-         *status = (*ptr)->ESMC_FTableSetFuncPtr(name, func);
+         *status = (*ptr)->setFuncPtr(name, func);
 
          delete[] name;
      }
 
-     void FTN(c_esmc_ftablesetargs)(ESMC_FTable **ptr, char *type,
+     void FTN(c_esmc_ftablesetargs)(ESMCI::FTable **ptr, char *type,
                             int *acount, void **alist, int *status, int slen) {
          char *name;
 
@@ -238,12 +241,12 @@ extern "C" {
          newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
-         *status = (*ptr)->ESMC_FTableSetFuncArgs(name, *acount, alist);
+         *status = (*ptr)->setFuncArgs(name, *acount, alist);
 
          delete[] name;
      }
 
-     void FTN(c_esmc_ftablesetstateargs)(ESMC_FTable **ptr, char *type,
+     void FTN(c_esmc_ftablesetstateargs)(ESMCI::FTable **ptr, char *type,
                          int *phase, void *comp, 
                          void *importState, void *exportState,
 	                 void *clock, int *status, int slen) {
@@ -263,13 +266,13 @@ extern "C" {
          alist[3] = (void *)clock;
          alist[4] = (void *)status;
 
-         *status = (*ptr)->ESMC_FTableSetFuncArgs(fname, acount, alist);
+         *status = (*ptr)->setFuncArgs(fname, acount, alist);
 
          delete[] fname;
      }
 
 
-     void FTN(c_esmc_ftablesetioargs)(ESMC_FTable **ptr, char *type,
+     void FTN(c_esmc_ftablesetioargs)(ESMCI::FTable **ptr, char *type,
                                        int *phase, void *comp, 
                                        void *iospec, void *clock, 
                                        int *status, int slen) {
@@ -286,14 +289,14 @@ extern "C" {
          alist[2] = (void *)clock;
          alist[3] = (void *)status;
 
-         *status = (*ptr)->ESMC_FTableSetFuncArgs(fname, acount, alist);
+         *status = (*ptr)->setFuncArgs(fname, acount, alist);
 
          delete[] fname;
      }
 
 
-     void FTN(c_esmc_ftablesetinternalstate)(ESMC_FTable ***ptr, char *type,
-                        void **data, enum dtype *dtype, int *status, int slen) {
+     void FTN(c_esmc_ftablesetinternalstate)(ESMCI::FTable ***ptr, char *type,
+                        void **data, enum ESMCI::dtype *dtype, int *status, int slen) {
          char *name;
 
          *status = ESMC_RC_NOT_IMPL;
@@ -301,13 +304,13 @@ extern "C" {
          newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
-         *status = (**ptr)->ESMC_FTableSetDataPtr(name, data, *dtype);
+         *status = (**ptr)->setDataPtr(name, data, *dtype);
 
          delete[] name;
      }
 
-     void FTN(c_esmc_ftablegetinternalstate)(ESMC_FTable ***ptr, char *type,
-                       void **data, enum dtype *dtype, int *status, int slen) {
+     void FTN(c_esmc_ftablegetinternalstate)(ESMCI::FTable ***ptr, char *type,
+                       void **data, enum ESMCI::dtype *dtype, int *status, int slen) {
          char *name;
 
          *status = ESMC_RC_NOT_IMPL;
@@ -315,7 +318,7 @@ extern "C" {
          newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
-         *status = (**ptr)->ESMC_FTableGetDataPtr(name, data, dtype);
+         *status = (**ptr)->getDataPtr(name, data, dtype);
 
          delete[] name;
      }
@@ -323,16 +326,18 @@ extern "C" {
 };
 
 
+namespace ESMCI {
 
+  
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_SetTypedEP"
-static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase, 
-                        int nstate, enum ftype ftype, void *func, int *status) {
+#define ESMC_METHOD "ESMCI::FTable::SetTypedEP()"
+void FTable::setTypedEP(void *ptr, char *tname, int slen, int *phase, 
+  int nstate, enum ftype ftype, void *func, int *status) {
      char *name;
      int *tablerc;
      int localrc;
      void *f90comp = ptr;
-     ESMC_FTable *tabptr;
+     FTable *tabptr;
 
      // Initialize return code; assume routine not implemented
      if (status) *status = ESMC_RC_NOT_IMPL;
@@ -346,7 +351,7 @@ static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase,
         return;
      }
 
-     tabptr = **(ESMC_FTable***)ptr;
+     tabptr = **(FTable***)ptr;
      //printf("tabptr = 0x%08x\n", (ESMC_POINTER)(tabptr));
      newtrim(tname, slen, phase, &nstate, &name);
          
@@ -358,17 +363,17 @@ static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase,
          // which cannot.  maybe the args need to all be allocated and all
          // nuked at table destroy time.
          tablerc = new int;
-         localrc = (tabptr)->ESMC_FTableSetFuncPtr(name, func, f90comp, tablerc);
+         localrc = (tabptr)->setFuncPtr(name, func, f90comp, tablerc);
      } else
-         localrc = (tabptr)->ESMC_FTableSetFuncPtr(name, func, ftype);
+         localrc = (tabptr)->setFuncPtr(name, func, ftype);
 
      if (status) *status = localrc;
      delete[] name;
 }
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_GetDP"
-static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
+#define ESMC_METHOD "ESMCI::FTable::getDP()"
+void FTable::getDP(FTable ***ptr, void **datap, int *status){
     char *name = "localdata";
     enum dtype dtype;
     int localrc;
@@ -385,13 +390,13 @@ static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
        return;
     }
 
-    localrc = (**ptr)->ESMC_FTableGetDataPtr(name, datap, &dtype);
+    localrc = (**ptr)->getDataPtr(name, datap, &dtype);
     if (status) *status = localrc;
 }
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_SetDP"
-static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
+#define ESMC_METHOD "ESMCI::FTable::setDP()"
+void FTable::setDP(FTable ***ptr, void **datap, int *status){
     char *name = "localdata";
     enum dtype dtype = DT_FORTRAN_UDT_POINTER;
     int localrc;
@@ -408,22 +413,26 @@ static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
         return;
     }
 
-    localrc = (**ptr)->ESMC_FTableSetDataPtr(name, datap, dtype);
+    localrc = (**ptr)->setDataPtr(name, datap, dtype);
     if (status) *status = localrc;
 }
 
+} // namespace ESMCI
 
 extern "C" {
-static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargo);
+static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargo);
 }
 
+
+namespace ESMCI {
+
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_SetServ"
-extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
+#define ESMC_METHOD "ESMCI::Ftable::setServices"
+void FTable::setServices(void *ptr, void (*func)(), int *status) {
      int localrc, funcrc;
      int *tablerc;
-     ESMC_Comp *f90comp = (ESMC_Comp *)ptr;
-     ESMC_FTable *tabptr;
+     ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
+     ESMCI::FTable *tabptr;
      
      if (status) *status = ESMF_SUCCESS;  // assume success 'till problems found
 
@@ -435,12 +444,12 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
                                               "null pointer found", status);
         return;
      }
-     tabptr = **(ESMC_FTable***)ptr;
+     tabptr = **(ESMCI::FTable***)ptr;
      //printf("tabptr = 0x%08x\n", (ESMC_POINTER)(tabptr));
 
      // TODO: shouldn't need to expand the table here - should be buried
      // inside ftable code.
-     localrc = (tabptr)->ESMC_FTableExtend(8, 2); // room for 8 funcs, 2 data
+     localrc = (tabptr)->extend(8, 2); // room for 8 funcs, 2 data
      if (localrc != ESMF_SUCCESS) {
          if (status) *status = localrc;
          return;
@@ -454,7 +463,7 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      // table is destroyed.  for now, it is a leak; small, and only shows up
      // when you delete a component which does not happen often, thankfully.
      tablerc = new int;
-     localrc = (tabptr)->ESMC_FTableSetFuncPtr("register", (void *)func, 
+     localrc = (tabptr)->setFuncPtr("register", (void *)func, 
                                                            f90comp, tablerc);
 
      // TODO: decide what to do if tablerc comes back
@@ -465,7 +474,7 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
          return;
      }
 
-     localrc = (tabptr)->ESMC_FTableCallVFuncPtr("register", &funcrc);
+     localrc = (tabptr)->callVFuncPtr("register", &funcrc);
      if (localrc != ESMF_SUCCESS) {
          if (status) *status = localrc;
          return;
@@ -487,7 +496,7 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
        status)) return;
      // parent VM and plan for child can now be used to startup the child VM
      void *vm_info = vm_parent->startup(vmplan_p,
-       ESMC_FTableCallEntryPointVMHop, NULL, &localrc);
+       ESMCI_FTableCallEntryPointVMHop, NULL, &localrc);
      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
        status)) return;
      // keep vm_info in a safe place (in parent component) 'till it's used again
@@ -503,6 +512,7 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      // *status = ESMF_SUCCESS;
      // return; 
 }
+} // namespace ESMCI
 
 
 // these interface subroutine names MUST be in lower case
@@ -522,51 +532,53 @@ extern "C" {
      // be the first entry in the comp derived type.
 
      // ---------- Set Services ---------------
-     void FTN(esmf_gridcompsetservices)(void *ptr, int (*func)(), int *status) {
-         ESMC_SetServ(ptr, func, status);
+     void FTN(esmf_gridcompsetservices)(void *ptr, void (*func)(), int *status){
+         ESMCI::FTable::setServices(ptr, func, status);
      }
-     void FTN(esmf_cplcompsetservices)(void *ptr, int (*func)(), int *status) {
-         ESMC_SetServ(ptr, func, status);
+     
+     void FTN(esmf_cplcompsetservices)(void *ptr, void (*func)(), int *status){
+         ESMCI::FTable::setServices(ptr, func, status);
      }
 
-     void FTN(esmf_usercompsetservices)(void *ptr, int (*func)(), int *status) {
-         ESMC_SetServ(ptr, func, status);
+     void FTN(esmf_usercompsetservices)(void *ptr, void (*func)(), int *status){
+         ESMCI::FTable::setServices(ptr, func, status);
      }
 
      // ---------- Set Entry Point ---------------
      void FTN(esmf_gridcompsetentrypoint)(void *ptr, char *tname,
                                void *func, int *phase, int *status, int slen) {
-        //ESMC_SetTypedEP(ptr, tname, slen, phase, 1, FT_COMP1STAT, func, status);
-        ESMC_SetTypedEP(ptr, tname, slen, phase, 0, FT_COMP2STAT, func, status);
+        ESMCI::FTable::setTypedEP(ptr, tname, slen, phase, 0,
+          ESMCI::FT_COMP2STAT, func, status);
      }
      void FTN(esmf_cplcompsetentrypoint)(void *ptr, char *tname,
                                void *func, int *phase, int *status, int slen) {
-        //ESMC_SetTypedEP(ptr, tname, slen, phase, 1, FT_COMP1STAT, func, status);
-        ESMC_SetTypedEP(ptr, tname, slen, phase, 0, FT_COMP2STAT, func, status);
+        ESMCI::FTable::setTypedEP(ptr, tname, slen, phase, 0,
+          ESMCI::FT_COMP2STAT, func, status);
      }
 
      void FTN(esmf_usercompsetentrypoint)(void *ptr, char *tname,
                              void *func, int *phase, int *status, int slen) {
-       ESMC_SetTypedEP(ptr, tname, slen, phase, 0, FT_VOIDPINTP, func,  status);
+        ESMCI::FTable::setTypedEP(ptr, tname, slen, phase, 0,
+          ESMCI::FT_VOIDPINTP, func,  status);
      }
 
 
      // ---------- Set Internal State ---------------
-     void FTN(esmf_gridcompsetinternalstate)(ESMC_FTable ***ptr, 
+     void FTN(esmf_gridcompsetinternalstate)(ESMCI::FTable ***ptr, 
                                                  void **datap, int *status) {
-         ESMC_SetDP(ptr, datap, status);
+         ESMCI::FTable::setDP(ptr, datap, status);
      }
-     void FTN(esmf_cplcompsetinternalstate)(ESMC_FTable ***ptr, 
+     void FTN(esmf_cplcompsetinternalstate)(ESMCI::FTable ***ptr, 
                                                  void **datap, int *status) {
-         ESMC_SetDP(ptr, datap, status);
+         ESMCI::FTable::setDP(ptr, datap, status);
      }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMF_UserCompSetInternalState"
-     void FTN(esmf_usercompsetinternalstate)(ESMC_FTable ***ptr, char *name, 
+     void FTN(esmf_usercompsetinternalstate)(ESMCI::FTable ***ptr, char *name, 
                                          void **datap, int *status, int slen) {
          char *tbuf; 
-         enum dtype dtype = DT_FORTRAN_UDT_POINTER;
+         enum ESMCI::dtype dtype = ESMCI::DT_FORTRAN_UDT_POINTER;
          int localrc;
 
      // Initialize return code; assume routine not implemented
@@ -582,28 +594,28 @@ extern "C" {
          newtrim(name, slen, NULL, NULL, &tbuf);
          //printf("after newtrim, name = '%s'\n", tbuf);
 
-         localrc = (**ptr)->ESMC_FTableSetDataPtr(tbuf, datap, dtype);
+         localrc = (**ptr)->setDataPtr(tbuf, datap, dtype);
   
          delete[] tbuf;
          if (status) *status = localrc;
      }
 
      // ---------- Get Internal State ---------------
-     void FTN(esmf_gridcompgetinternalstate)(ESMC_FTable ***ptr, 
+     void FTN(esmf_gridcompgetinternalstate)(ESMCI::FTable ***ptr, 
                                                  void **datap, int *status) {
-         ESMC_GetDP(ptr, datap, status);
+         ESMCI::FTable::getDP(ptr, datap, status);
      }
-     void FTN(esmf_cplcompgetinternalstate)(ESMC_FTable ***ptr, 
+     void FTN(esmf_cplcompgetinternalstate)(ESMCI::FTable ***ptr, 
                                                  void **datap, int *status) {
-         ESMC_GetDP(ptr, datap, status);
+         ESMCI::FTable::getDP(ptr, datap, status);
      }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMF_UserCompGetInternalState"
-     void FTN(esmf_usercompgetinternalstate)(ESMC_FTable ***ptr, char *name,
+     void FTN(esmf_usercompgetinternalstate)(ESMCI::FTable ***ptr, char *name,
                                          void **datap, int *status, int slen) {
          char *tbuf; 
-         enum dtype dtype;
+         enum ESMCI::dtype dtype;
          int localrc;
 
      // Initialize return code; assume routine not implemented
@@ -619,7 +631,7 @@ extern "C" {
          newtrim(name, slen, NULL, NULL, &tbuf);
          //printf("after newtrim, name = '%s'\n", tbuf);
 
-         localrc = (**ptr)->ESMC_FTableGetDataPtr(tbuf, datap, &dtype);
+         localrc = (**ptr)->getDataPtr(tbuf, datap, &dtype);
   
          delete[] tbuf;
          if (status) *status = localrc;
@@ -632,21 +644,21 @@ extern "C" {
 extern "C" {
 
      
-static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargo){
+static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargo){
   // This routine is the first level that gets instantiated in new VM
   // The first argument must be of type (void *) and points to a derived
   // ESMCI::VMK class object. The second argument is also of type (void *)
   // and points to a cargotype structure.
   
   // pull out info from cargo
-  char *name = ((cargotype *)cargo)->name;              // name of callback
-  ESMC_FTable *ftable = ((cargotype *)cargo)->ftable;   // pointer to ftable
+  char *name = ((ESMCI::cargotype *)cargo)->name;         // name of callback
+  ESMCI::FTable *ftable = ((ESMCI::cargotype *)cargo)->ftable; // ptr to ftable
   
-  int esmfrc;   // ESMF return code of ESMC_FTableCallVFuncPtr()
+  int esmfrc;   // ESMF return code of ESMCI::FTableCallVFuncPtr()
   int userrc;   // user return code from the registered component method 
   
   // call into user code through ESMF function table...
-  esmfrc = ftable->ESMC_FTableCallVFuncPtr(name, (ESMCI::VM*)vm, &userrc);
+  esmfrc = ftable->callVFuncPtr(name, (ESMCI::VM*)vm, &userrc);
   // ...back from user code
   
   // put the return codes into cargo 
@@ -655,8 +667,8 @@ static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargo){
   // the parent in the cargo structure (btw, each child PET that's a thread
   // has the same pointer to cargo. Naturally the above must be done in a
   // threadsafe manner :-). 
-  ((cargotype *)cargo)->esmfrc = esmfrc;
-  ((cargotype *)cargo)->userrc = userrc;
+  ((ESMCI::cargotype *)cargo)->esmfrc = esmfrc;
+  ((ESMCI::cargotype *)cargo)->userrc = userrc;
   
   return NULL;
 }
@@ -667,7 +679,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   ESMCI::VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
   void **vm_info,           // p2 to member which holds info returned by enter
   void **vm_cargo,          // p2 to member which holds cargo
-  ESMC_FTable **ptr,        // p2 to the ftable of this component
+  ESMCI::FTable **ptr,        // p2 to the ftable of this component
   char *type,               // string holding type of called entry point
   int *phase,               // phase selector
   int *status,              // return error code in status
@@ -687,16 +699,16 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   // some temp. variables that make matters a little clearer I hope:
   ESMCI::VM *vm_parent = *ptr_vm_parent;      // pointer to parent VM
   ESMCI::VMPlan *vmplan = *ptr_vmplan;        // pointer to VMPlan
-  ESMC_FTable *ftable = *ptr;               // pointer to function table
+  ESMCI::FTable *ftable = *ptr;               // pointer to function table
          
-  cargotype *cargo = new cargotype;
+  ESMCI::cargotype *cargo = new ESMCI::cargotype;
   strcpy(cargo->name, name);   // copy trimmed type string
   cargo->ftable = ftable;      // pointer to function table
   cargo->esmfrc = ESMF_SUCCESS;// initialize return code to SUCCESS for all PETs
   cargo->userrc = ESMF_SUCCESS;// initialize return code to SUCCESS for all PETs
   *vm_cargo=(void*)cargo;      // store pointer to the cargo structure
 
-  // enter the child VM -> resurface in ESMC_FTableCallEntryPointVMHop()
+  // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
   localrc = vm_parent->enter(vmplan, *vm_info, (void*)cargo);
   ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, status);
         
@@ -723,7 +735,7 @@ void FTN(c_esmc_compwait)(
   // some temp. variables that make matters a little clearer I hope:
   ESMCI::VM *vm_parent = *ptr_vm_parent;        // pointer to parent VM
   ESMCI::VMPlan *vmplan = *ptr_vmplan;          // pointer to VMPlan
-  cargotype *cargo = (cargotype *)*vm_cargo;  // pointer to cargo
+  ESMCI::cargotype *cargo = (ESMCI::cargotype *)*vm_cargo;  // pointer to cargo
   
   // initialize the return codes
   *esmfrc = ESMC_RC_NOT_SET; // return code of ESMF callback code
@@ -751,30 +763,28 @@ void FTN(c_esmc_compwait)(
     " - ESMF internal error during user function callback", NULL)) return;
   
 }
-
   
 } // extern "C"
 
 
-
-
-//
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
 // This section includes all the FTable routines
 //
-//
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
+namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTableExtend"
+#define ESMC_METHOD "ESMCI::FTable::extend()"
 //BOP
-// !IROUTINE:  ESMC_FTableExtend - make space for additional functions/data
+// !IROUTINE:  extend - make space for additional functions/data
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTableExtend(
+      int FTable::extend(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -806,16 +816,16 @@ void FTN(c_esmc_compwait)(
     rc = ESMF_SUCCESS;
     return rc;
 
- } // end ESMC_FTableExtend
+}
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTableQuery"
+#define ESMC_METHOD "ESMCI::FTable::query()"
 //BOP
-// !IROUTINE:  ESMC_FTableQuery - return count of functions/data
+// !IROUTINE:  query - return count of functions/data
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTableQuery(
+      int FTable::query(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -840,17 +850,17 @@ void FTN(c_esmc_compwait)(
     rc = ESMF_SUCCESS;
     return rc;
 
- } // end ESMC_FTableQuery
+}
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTableSetFuncPtr"
+#define ESMC_METHOD "ESMCI::FTable::setFuncPtr()"
 //BOP
-// !IROUTINE:  ESMC_FTableSetFuncPtr - set function pointer, no extra args
+// !IROUTINE:  setFuncPtr - set function pointer, no extra args
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTableSetFuncPtr(
+      int FTable::setFuncPtr(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -901,16 +911,16 @@ void FTN(c_esmc_compwait)(
     rc = ESMF_SUCCESS;
     return rc;
 
- } // end ESMC_FTableSetFuncPtr
+}
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTableSetFuncPtr"
+#define ESMC_METHOD "ESMCI::FTable::setFuncPtr()"
 //BOP
-// !IROUTINE:  ESMC_FTableSetFuncPtr - set function pointer, type; no args yet.
+// !IROUTINE:  setFuncPtr - set function pointer, type; no args yet.
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTableSetFuncPtr(
+      int FTable::setFuncPtr(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -964,16 +974,16 @@ void FTN(c_esmc_compwait)(
     rc = ESMF_SUCCESS;
     return rc;
 
- } // end ESMC_FTableSetFuncPtr
+}
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTableSetFuncPtr"
+#define ESMC_METHOD "ESMCI::FTable::setFuncPtr()"
 //BOP
-// !IROUTINE:  ESMC_FTableSetFuncPtr - set voidp, intp specifically
+// !IROUTINE:  setFuncPtr - set voidp, intp specifically
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTableSetFuncPtr(
+      int FTable::setFuncPtr(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1033,16 +1043,16 @@ void FTN(c_esmc_compwait)(
     rc = ESMF_SUCCESS;
     return rc;
 
- } // end ESMC_FTableSetFuncPtr
+}
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTableSetFuncPtr"
+#define ESMC_METHOD "ESMCI::FTable::setFuncPtr()"
 //BOP
-// !IROUTINE:  ESMC_FTableSetFuncPtr - set function pointer, arg list
+// !IROUTINE:  setFuncPtr - set function pointer, arg list
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTableSetFuncPtr(
+      int FTable::setFuncPtr(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1098,16 +1108,16 @@ void FTN(c_esmc_compwait)(
     rc = ESMF_SUCCESS;
     return rc;
 
- } // end ESMC_FTableSetFuncPtr
+}
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTableSetFuncArgs"
+#define ESMC_METHOD "ESMCI::FTable::setFuncArgs()"
 //BOP
-// !IROUTINE:  ESMC_FTableSetFuncArgs - set arglist for existing function
+// !IROUTINE:  setFuncArgs - set arglist for existing function
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTableSetFuncArgs(
+      int FTable::setFuncArgs(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1145,23 +1155,16 @@ void FTN(c_esmc_compwait)(
 
     return status;
 
- } // end ESMC_FTableSetFuncArgs
+}
 
 //-----------------------------------------------------------------------------
- 
-extern "C"{ 
-void FTN(f_esmf_fortranudtpointersize)(int *size);  // prototype used below
-void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
-}
- 
-//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTableSetDataPtr"
+#define ESMC_METHOD "ESMCI::FTable::setDataPtr()"
 //BOP
-// !IROUTINE:  ESMC_FTableSetDataPtr - set data pointer
+// !IROUTINE:  setDataPtr - set data pointer
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTableSetDataPtr(
+      int FTable::setDataPtr(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1204,17 +1207,17 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
     rc = ESMF_SUCCESS;
     return rc;
 
- } // end ESMC_FTableSetDataPtr
+}
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTableGetFuncPtr"
+#define ESMC_METHOD "ESMCI::FTable::getFuncPtr()"
 //BOP
-// !IROUTINE:  ESMC_FTableGetFuncPtr - get function pointer from name
+// !IROUTINE:  getFuncPtr - get function pointer from name
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTableGetFuncPtr(
+      int FTable::getFuncPtr(
 //
 // !RETURN VALUE:
 //    integer return code
@@ -1247,16 +1250,16 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
 
     return ESMF_FAILURE;
 
- } // end ESMC_FTableGetFuncPtr
+}
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTableGetDataPtr"
+#define ESMC_METHOD "ESMCI::FTable::getDataPtr()"
 //BOP
-// !IROUTINE:  ESMC_FTableGetDataPtr - get data pointer from name
+// !IROUTINE:  getDataPtr - get data pointer from name
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTableGetDataPtr(
+      int FTable::getDataPtr(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1290,18 +1293,17 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
 
     return ESMF_FAILURE;
 
- } // end ESMC_FTableGetDataPtr
-
+}
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTableCallVFuncPtr"
+#define ESMC_METHOD "ESMCI::FTable::callVFuncPtr()"
 //BOP
-// !IROUTINE:  ESMC_FTableCallVFuncPtr - call a function w/ proper args
+// !IROUTINE:  callVFuncPtr - call a function w/ proper args
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTableCallVFuncPtr(
+      int FTable::callVFuncPtr(
 //
 // !RETURN VALUE:
 //    integer return code
@@ -1407,24 +1409,24 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
 
     return ESMF_FAILURE;
 
- } // end ESMC_FTableCallVFuncPtr
+}
 
  
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTableCallVFuncPtr"
+#define ESMC_METHOD "ESMCI::FTable::callVFuncPtr()"
 //BOP
-// !IROUTINE:  ESMC_FTableCallVFuncPtr - call a function w/ proper args
+// !IROUTINE:  callVFuncPtr - call a function w/ proper args
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTableCallVFuncPtr(
+      int FTable::callVFuncPtr(
 //
 // !RETURN VALUE:
 //    integer return code
 //
 // !ARGUMENTS:
       char *name,           // in, function name
-      ESMCI::VM *vm_pointer,  // in, pointer to this PET's VM instance
+      VM *vm_pointer,  // in, pointer to this PET's VM instance
       int *rc) {            // out, function return
 //
 // !DESCRIPTION:
@@ -1434,8 +1436,8 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
 // !REQUIREMENTS:  
 
     int i, status;
-    ESMCI::VM *vmm = vm_pointer;
-    ESMCI::VM **vm = &vmm;
+    VM *vmm = vm_pointer;
+    VM **vm = &vmm;
     
     *rc = ESMC_RC_NOT_IMPL;
     status = ESMC_RC_NOT_IMPL;
@@ -1492,52 +1494,48 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
             C1SFunc vf;
 //printf("calling out of case FT_COMP1STAT VM\n");
             int rrc;
-            void *comp;
-            ESMC_CompType ctype;
+            Comp *comp;
+            CompType ctype;
             // Replicate the component object on the heap for this thread
-            FTN(f_esmf_compget)((ESMC_Comp *)funcs[i].funcarg[0], &ctype, &rrc);
-            if (ctype == ESMF_COMPTYPE_GRID)
-              comp = (void *) new ESMC_Comp;
-            else if (ctype == ESMF_COMPTYPE_CPL)
-              comp = (void *) new ESMC_Comp;
+            FTN(f_esmf_compget)((Comp *)funcs[i].funcarg[0], &ctype, &rrc);
+            if (ctype == COMPTYPE_GRID || ctype == COMPTYPE_CPL)
+              comp = new Comp;
             else
-              comp = NULL;
-            FTN(f_esmf_compreplicate)((ESMC_Comp *)comp, 
-              (ESMC_Comp *)funcs[i].funcarg[0], vm, &rrc);
+              comp = (Comp *)NULL;
+            FTN(f_esmf_compreplicate)(comp, 
+              (Comp *)funcs[i].funcarg[0], vm, &rrc);
             // Callback: prepare prototype, call, store return code
             vf = (C1SFunc)funcs[i].funcptr;
             (*vf)(comp, funcs[i].funcarg[1],
                   funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
             *rc = *(int *)(funcs[i].funcarg[3]);
             // Update the original with any changes made by the child
-            FTN(f_esmf_compcopy)((ESMC_Comp *)funcs[i].funcarg[0], 
-                                 (ESMC_Comp *)comp, &rrc);
+            FTN(f_esmf_compcopy)((Comp *)funcs[i].funcarg[0], 
+                                 (Comp *)comp, &rrc);
             // Delete the heap copy of the component object for this thread
-            FTN(f_esmf_compdelete)((ESMC_Comp *)comp, &rrc);
-            delete (ESMC_Comp *)comp;
+            FTN(f_esmf_compdelete)((Comp *)comp, &rrc);
+            delete (Comp *)comp;
             break;
           }
           case FT_COMP2STAT: {
 //printf("calling out of case FT_COMP2STAT VM\n");
             C2SFunc vf = (C2SFunc)funcs[i].funcptr;
             int rrc;
-            void *comp;
+            Comp *comp;
             int mypet = vm_pointer->getMypet();
             if (vm_pointer->getNthreads(mypet) > 1){
               // mypet is part of a thread group
-              ESMC_CompType ctype;
+              CompType ctype;
               // Replicate the component object on the heap for this thread
-              FTN(f_esmf_compget)((ESMC_Comp *)funcs[i].funcarg[0], &ctype,
+              FTN(f_esmf_compget)((Comp *)funcs[i].funcarg[0], &ctype,
                 &rrc);
-              if (ctype == ESMF_COMPTYPE_GRID)
-                comp = (void *) new ESMC_Comp;
-              else if (ctype == ESMF_COMPTYPE_CPL)
-                comp = (void *) new ESMC_Comp;
+              if (ctype == COMPTYPE_GRID || ctype == COMPTYPE_CPL)
+                comp = new Comp;
               else
-                comp = NULL;
+                comp = (Comp *)NULL;
               // replicate the component object for each thread
-              FTN(f_esmf_compreplicate)((ESMC_Comp *)comp,
-                (ESMC_Comp *)funcs[i].funcarg[0], vm, &rrc);
+              FTN(f_esmf_compreplicate)(comp,
+                (Comp *)funcs[i].funcarg[0], vm, &rrc);
               // call-back into user code with reference to comp object copy
               (*vf)(comp, funcs[i].funcarg[1],
                 funcs[i].funcarg[2], funcs[i].funcarg[3],
@@ -1545,15 +1543,15 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
               // Update the original with any changes made by the child
               // todo: how can this be done correctly merging all the copies
               // todo: into a single object?
-              //FTN(f_esmf_compcopy)((ESMC_Comp *)funcs[i].funcarg[0],
-              //  (ESMC_Comp *)comp, &rrc);
+              //FTN(f_esmf_compcopy)((Comp *)funcs[i].funcarg[0],
+              //  (Comp *)comp, &rrc);
               // Delete the heap copy of the component object for this thread
-              FTN(f_esmf_compdelete)((ESMC_Comp *)comp, &rrc);
-              delete (ESMC_Comp *)comp;
+              FTN(f_esmf_compdelete)((Comp *)comp, &rrc);
+              delete (Comp *)comp;
             }else{
               // mypet is a single-threaded process within this VM
               // insert the current vm object into component object
-              FTN(f_esmf_compinsertvm)((ESMC_Comp *)funcs[i].funcarg[0], vm,
+              FTN(f_esmf_compinsertvm)((Comp *)funcs[i].funcarg[0], vm,
                 &rrc);
               // call-back into user code with reference to actual comp object
               (*vf)((void *)funcs[i].funcarg[0], funcs[i].funcarg[1],
@@ -1568,29 +1566,27 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
             CSLFunc vf;
 //printf("calling out of case FT_COMPSLIST VM\n");
             int rrc;
-            void *comp;
-            ESMC_CompType ctype;
+            Comp *comp;
+            CompType ctype;
             // Replicate the component object on the heap for this thread
-            FTN(f_esmf_compget)((ESMC_Comp *)funcs[i].funcarg[0], &ctype, &rrc);
-            if (ctype == ESMF_COMPTYPE_GRID)
-              comp = (void *) new ESMC_Comp;
-            else if (ctype == ESMF_COMPTYPE_CPL)
-              comp = (void *) new ESMC_Comp;
+            FTN(f_esmf_compget)((Comp *)funcs[i].funcarg[0], &ctype, &rrc);
+            if (ctype == COMPTYPE_GRID || ctype == COMPTYPE_CPL)
+              comp = new Comp;
             else
-              comp = NULL;
-            FTN(f_esmf_compreplicate)((ESMC_Comp *)comp, 
-              (ESMC_Comp *)funcs[i].funcarg[0], vm, &rrc);
+              comp = (Comp *)NULL;
+            FTN(f_esmf_compreplicate)(comp, 
+              (Comp *)funcs[i].funcarg[0], vm, &rrc);
             // Callback: prepare prototype, call, store return code
             vf = (CSLFunc)funcs[i].funcptr;
             (*vf)(comp, funcs[i].funcarg[1],
                   funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
             *rc = *(int *)(funcs[i].funcarg[3]);
             // Update the original with any changes made by the child
-            FTN(f_esmf_compcopy)((ESMC_Comp *)funcs[i].funcarg[0], 
-                                 (ESMC_Comp *)comp, &rrc);
+            FTN(f_esmf_compcopy)((Comp *)funcs[i].funcarg[0], 
+                                 (Comp *)comp, &rrc);
             // Delete the heap copy of the component object for this thread
-            FTN(f_esmf_compdelete)((ESMC_Comp *)comp, &rrc);
-            delete (ESMC_Comp *)comp;
+            FTN(f_esmf_compdelete)((Comp *)comp, &rrc);
+            delete (Comp *)comp;
             break;
           }
           default:
@@ -1604,16 +1600,16 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
 
     return ESMF_FAILURE;
 
- } // end ESMC_FTableCallVFuncPtr
+}
  
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTableValidate"
+#define ESMC_METHOD "ESMCI::FTable::validate()"
 //BOP
-// !IROUTINE:  ESMC_FTableValidate - internal consistency check for a Component
+// !IROUTINE:  validate - internal consistency check for a Component
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTableValidate(
+      int FTable::validate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1636,17 +1632,17 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
 
     return ESMC_RC_NOT_IMPL;
 
- } // end ESMC_FTableValidate
+}
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTablePrint"
+#define ESMC_METHOD "ESMCI::FTable::print()"
 //BOP
-// !IROUTINE:  ESMC_FTablePrint - print contents of a Component
+// !IROUTINE:  print - print contents of a Component
 //
 // !INTERFACE:
-      int ESMC_FTable::ESMC_FTablePrint(
+      int FTable::print(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1669,17 +1665,17 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
 
     return rc;
 
- } // end ESMC_FTablePrint
+}
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FTable()"
+#define ESMC_METHOD "ESMCI::FTable()"
 //BOP
-// !IROUTINE:  ESMC_FTable - native C++ constructor
+// !IROUTINE:  FTable - native C++ constructor
 //
 // !INTERFACE:
-      ESMC_FTable::ESMC_FTable(
+      FTable::FTable(
 //
 // !RETURN VALUE:
 //    none
@@ -1701,16 +1697,16 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
     dataalloc = 0; 
     data = NULL;
 
- } // end ESMC_FTable
+}
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "~ESMC_FTable()"
+#define ESMC_METHOD "~ESMCI::FTable()"
 //BOP
-// !IROUTINE:  ~ESMC_FTable - native C++ destructor
+// !IROUTINE:  ~FTable - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_FTable::~ESMC_FTable(void) {
+      FTable::~FTable(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -1746,5 +1742,6 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
     dataalloc = 0; 
     data = 0;
 
- } // end ~ESMC_FTable
+}
 
+} // namespace ESMCI

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.1 2008/08/25 22:03:52 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.2 2008/08/26 05:15:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -19,38 +19,41 @@
 
 //-----------------------------------------------------------------------------
 //BOPI
-// !CLASS:  ESMC_Comp - Public C interface to the ESMF Comp class
+// !CLASS:  ESMCI::Comp - C++ interface to the ESMF Comp class
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the public C Comp class and declares global
-// variables to be used in user code written in C.
+// The code in this file defines the internal ESMCI::Comp class and declares
+// global variables.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 
-#define ESMF_INIT 1
-#define ESMF_RUN 2
-#define ESMF_FINAL 3
-#define ESMF_WRITERESTART 4
-#define ESMF_READRESTART 5
-#define ESMF_SINGLEPHASE 0
 
-enum ESMC_CompType { ESMF_COMPTYPE_GRID=1, ESMF_COMPTYPE_CPL, 
-                     ESMF_COMPTYPE_UNKNOWN };
-enum ESMC_GridCompType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE, 
-                      ESMF_RIVER, ESMF_GRIDCOMPTYPE_UNKNOWN };
-
-extern const char *ESMC_SetInit;
-extern const char *ESMC_SetRun;
-extern const char *ESMC_SetFinal;
-extern const char *ESMC_SetWriteRestart;
-extern const char *ESMC_SetReadRestart;
+#include "ESMC_F90Interface.h"
+#include "ESMCI_State.h"
+#include "ESMCI_Clock.h"
 
 
-// Class declaration type
-class ESMC_Comp{
-  void *fortranclass;
+
+namespace ESMCI {
+
+// constants and enums
+
+enum CompType { COMPTYPE_GRID=1, COMPTYPE_CPL, COMPTYPE_UNKNOWN };
+enum GridCompType { ATM=1, LAND, OCEAN, SEAICE, RIVER, UNKNOWN };
+
+
+// class definition
+class Comp{
+  private:
+    ESMC_F90ClassHolder fortranclass;
+  public:
+    int setServices(void (*func)(Comp *, int *));
+    int setEntryPoint(const char *functionType,
+      void (*functionPtr)(Comp *, State *, State *, Clock *), int phase);
 };
+
+} // namespace ESMCI
 
 #endif  // ESMCI_Comp_H

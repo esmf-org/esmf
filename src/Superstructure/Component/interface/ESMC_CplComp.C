@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.C,v 1.16 2008/06/24 14:23:55 rosalind Exp $
+// $Id: ESMC_CplComp.C,v 1.17 2008/08/26 05:15:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -39,14 +39,12 @@
 #include "ESMC_Comp.h"
 #include "ESMC_CplComp.h"
 
- // return min value 
-#define min(a,b)  (((a)<(b))?(a):(b))
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_CplComp.C,v 1.16 2008/06/24 14:23:55 rosalind Exp $";
+           "$Id: ESMC_CplComp.C,v 1.17 2008/08/26 05:15:12 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
