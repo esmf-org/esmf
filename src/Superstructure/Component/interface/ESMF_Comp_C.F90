@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.48 2008/08/26 17:29:00 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.49 2008/08/26 23:47:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.48 2008/08/26 17:29:00 theurich Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.49 2008/08/26 23:47:51 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -320,11 +320,19 @@ subroutine f_esmf_gridcompinitialize(comp, importState, exportState, clock, &
   type(ESMF_BlockingFlag) :: blockingFlag
   integer                 :: rc
 
+  type(ESMF_Clock)   :: local_clock
+  type(ESMF_Pointer) :: this
+
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompInitialize(comp, importState, exportState, clock, phase, &
-    blockingFlag, rc)
+  ! Construct a local copy of the incoming clock with initializers
+  call ESMF_ClockGetThis(clock, this, rc=rc)
+  call ESMF_ClockSetThis(local_clock, this, rc=rc)
+  call ESMF_ClockSetInitCreated(local_clock)
+
+  call ESMF_GridCompInitialize(comp, importState, exportState, local_clock, &
+    phase, blockingFlag, rc)
 end subroutine f_esmf_gridcompinitialize
 
 #undef  ESMF_METHOD
@@ -349,10 +357,18 @@ subroutine f_esmf_gridcomprun(comp, importState, exportState, clock, phase, &
   type(ESMF_BlockingFlag) :: blockingFlag
   integer                 :: rc
 
+  type(ESMF_Clock)   :: local_clock
+  type(ESMF_Pointer) :: this
+
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompRun(comp, importState, exportState, clock, phase, &
+  ! Construct a local copy of the incoming clock with initializers
+  call ESMF_ClockGetThis(clock, this, rc=rc)
+  call ESMF_ClockSetThis(local_clock, this, rc=rc)
+  call ESMF_ClockSetInitCreated(local_clock)
+
+  call ESMF_GridCompRun(comp, importState, exportState, local_clock, phase, &
     blockingFlag, rc)
 end subroutine f_esmf_gridcomprun
 
@@ -378,11 +394,19 @@ subroutine f_esmf_gridcompfinalize(comp, importState, exportState, clock, &
   type(ESMF_BlockingFlag) :: blockingFlag
   integer                 :: rc
 
+  type(ESMF_Clock)   :: local_clock
+  type(ESMF_Pointer) :: this
+
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompFinalize(comp, importState, exportState, clock, phase, &
-    blockingFlag, rc)
+  ! Construct a local copy of the incoming clock with initializers
+  call ESMF_ClockGetThis(clock, this, rc=rc)
+  call ESMF_ClockSetThis(local_clock, this, rc=rc)
+  call ESMF_ClockSetInitCreated(local_clock)
+
+  call ESMF_GridCompFinalize(comp, importState, exportState, local_clock, &
+    phase, blockingFlag, rc)
 end subroutine f_esmf_gridcompfinalize
 
 #undef  ESMF_METHOD

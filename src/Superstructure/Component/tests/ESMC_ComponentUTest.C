@@ -1,4 +1,4 @@
-// $Id: ESMC_ComponentUTest.C,v 1.2 2008/08/26 20:46:49 theurich Exp $
+// $Id: ESMC_ComponentUTest.C,v 1.3 2008/08/26 23:47:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -29,16 +29,58 @@
 //EOP
 //-----------------------------------------------------------------------------
 
+void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock *clock, int *rc){
+  // do something here
+  printf("I am in myInitInC()\n");
+  
+  ESMC_StatePrint(importState);
+  ESMC_ClockPrint(*clock);
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
 
-void myRegistrationInC(ESMC_GridComp *comp, int *rc){
-  // put some code here
+void myRunInC(ESMC_GridComp gcomp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock *clock, int *rc){
+  // do something here
+  printf("I am in myRunInC()\n");
+  
+  ESMC_StatePrint(importState);
+  ESMC_ClockPrint(*clock);
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+void myFinalInC(ESMC_GridComp gcomp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock *clock, int *rc){
+  // do something here
+  printf("I am in myFinalizeInC()\n");
+  
+  ESMC_StatePrint(importState);
+  ESMC_ClockPrint(*clock);
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+
+void myRegistrationInC(ESMC_GridComp gcomp, int *rc){
+  // register Init(), Run(), Finalize()
   printf("I am in myRegistrationInC()\n");
+  ESMC_GridCompPrint(gcomp, "");
+  
+  ESMC_GridCompSetEntryPoint(gcomp, ESMC_SetInit, myInitInC, 0);
+  ESMC_GridCompSetEntryPoint(gcomp, ESMC_SetRun, myRunInC, 0);
+  ESMC_GridCompSetEntryPoint(gcomp, ESMC_SetFinal, myFinalInC, 0);
+    
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
 extern "C"{
-  void FTN(myregistrationinfortran)(ESMC_GridComp *comp, int *rc);
+  void FTN(myregistrationinfortran)(ESMC_GridComp comp, int *rc);
 }
 
 
@@ -108,6 +150,22 @@ int main(void){
   
   //----------------------------------------------------------------------------
   //NEX_UTest
+  strcpy(name, "Create ESMC_State object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  ESMC_State importState = ESMC_StateCreate("my import state", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Create ESMC_State object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  ESMC_State exportState = ESMC_StateCreate("my export state", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+    
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   strcpy(name, "Create ESMC_GridComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_GridComp gcomp =
@@ -134,6 +192,30 @@ int main(void){
   
   //----------------------------------------------------------------------------
   //NEX_UTest
+  strcpy(name, "ESMC_GridCompInitialize() w/ myRegistrationInC() methods");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridCompInitialize(gcomp, importState, exportState, clock, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_GridCompRun() w/ myRegistrationInC() methods");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridCompRun(gcomp, importState, exportState, clock, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_GridCompFinalize() w/ myRegistrationInC() methods");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridCompFinalize(gcomp, importState, exportState, clock, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   strcpy(name, "Destroy ESMC_GridComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_GridCompDestroy(&gcomp);
@@ -145,8 +227,8 @@ int main(void){
   strcpy(name, "Create ESMC_GridComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   gcomp =
-    ESMC_GridCompCreate("my gridded component in C", ESMF_ATM,"grid.rc", clock,
-    &rc);
+    ESMC_GridCompCreate("my gridded component in C with Fortran registration",
+      ESMF_ATM,"grid.rc", clock, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -160,16 +242,64 @@ int main(void){
   
   //----------------------------------------------------------------------------
   //NEX_UTest
+  strcpy(name, "ESMC_GridCompInitialize() w/ myRegistrationInFortran() meths");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridCompInitialize(gcomp, importState, exportState, clock, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_GridCompRun() w/ myRegistrationInFortran() meths");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridCompRun(gcomp, importState, exportState, clock, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_GridCompFinalize() w/ myRegistrationInFortran() meths");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridCompFinalize(gcomp, importState, exportState, clock, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   strcpy(name, "Destroy ESMC_GridComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_GridCompDestroy(&gcomp);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
-
+  
+// add CPL tests here
   
   
-      
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_Clock object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ClockDestroy(&clock);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_State object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_StateDestroy(&importState);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_State object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_StateDestroy(&exportState);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
   //----------------------------------------------------------------------------
   ESMC_TestEnd(result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.38 2008/08/26 20:46:48 theurich Exp $
+// $Id: ESMC_Comp.h,v 1.39 2008/08/26 23:47:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -31,11 +31,12 @@
 
 
 #include "ESMC_Clock.h"
+#include "ESMC_State.h"
 
 extern "C" {
 
 enum ESMC_GridCompType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE, 
-                      ESMF_RIVER, ESMF_GRIDCOMPTYPE_UNKNOWN };
+  ESMF_RIVER, ESMF_GRIDCOMPTYPE_UNKNOWN };
 
 extern const char *ESMC_SetInit;
 extern const char *ESMC_SetRun;
@@ -54,7 +55,16 @@ ESMC_GridComp ESMC_GridCompCreate(char *name, enum ESMC_GridCompType mtype,
  char *configFile, ESMC_Clock clock, int *rc);
 int ESMC_GridCompDestroy(ESMC_GridComp *comp);
 int ESMC_GridCompSetServices(ESMC_GridComp comp, 
-  void (*func)(ESMC_GridComp *, int *));
+  void (*func)(ESMC_GridComp, int *));
+int ESMC_GridCompSetEntryPoint(ESMC_GridComp comp, const char *functionType,
+  void (*func)(ESMC_GridComp, ESMC_State, ESMC_State, ESMC_Clock *, int *),
+  int phase);
+int ESMC_GridCompInitialize(ESMC_GridComp comp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock clock, int phase);
+int ESMC_GridCompRun(ESMC_GridComp comp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock clock, int phase);
+int ESMC_GridCompFinalize(ESMC_GridComp comp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock clock, int phase);
 int ESMC_GridCompPrint(ESMC_GridComp comp, const char *options);
 
 
