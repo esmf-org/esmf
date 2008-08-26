@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.44 2008/08/26 17:29:09 theurich Exp $ 
+# $Id: makefile,v 1.45 2008/08/26 20:46:50 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -42,11 +42,6 @@ CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
-# 
-ESMF_CompSetServUTest.o: ESMF_SetServCode.o
-
-UTEST_CompSetServ_OBJS = ESMF_SetServCode.o
-
 
 #
 # Components
@@ -59,6 +54,7 @@ RUN_ESMF_ComponentUTestUNI:
 	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Component NP=1 ftest
 
+# ---
 
 RUN_ESMF_GridCompCreateUTest:
 	cp -f grid.rc $(ESMF_TESTDIR)
@@ -68,6 +64,7 @@ RUN_ESMF_GridCompCreateUTestUNI:
 	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=GridCompCreate NP=1 ftest
 
+# ---
 
 RUN_ESMF_CplCompCreateUTest:
 	cp -f grid.rc $(ESMF_TESTDIR)
@@ -77,6 +74,10 @@ RUN_ESMF_CplCompCreateUTestUNI:
 	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=CplCompCreate NP=1 ftest
 
+# ---
+
+ESMF_CompSetServUTest.o: ESMF_SetServCode.o
+ESMF_UTEST_CompSetServ_OBJS = ESMF_SetServCode.o
 
 RUN_ESMF_CompSetServUTest:
 	cp -f grid.rc $(ESMF_TESTDIR)
@@ -88,9 +89,14 @@ RUN_ESMF_CompSetServUTestUNI:
 
 # ---
 
+ESMC_ComponentUTest.o: ESMF_MyRegistrationInFortran.o
+ESMC_UTEST_Component_OBJS = ESMF_MyRegistrationInFortran.o
+
 RUN_ESMC_ComponentUTest:
+	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Component NP=4 ctest
 
 RUN_ESMC_ComponentUTestUNI:
+	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Component NP=1 ctest
 

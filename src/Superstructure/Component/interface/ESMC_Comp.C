@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.36 2008/08/26 17:29:00 theurich Exp $
+// $Id: ESMC_Comp.C,v 1.37 2008/08/26 20:46:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,17 +37,19 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Comp.C,v 1.36 2008/08/26 17:29:00 theurich Exp $";
+static const char *const version = "$Id: ESMC_Comp.C,v 1.37 2008/08/26 20:46:49 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
 
+  
 // initilalize global character constants to be used by user code written in C
 const char *ESMC_SetInit         = "ESMF_Initialize";
 const char *ESMC_SetRun          = "ESMF_Run";
 const char *ESMC_SetFinal        = "ESMF_Finalize";
 const char *ESMC_SetWriteRestart = "ESMF_WriteRestart";
 const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
+
 
 ESMC_GridComp ESMC_GridCompCreate(char *name, enum ESMC_GridCompType mtype,
   char *configFile, ESMC_Clock clock, int *rc){
@@ -100,6 +102,30 @@ int ESMC_GridCompDestroy(ESMC_GridComp *comp){
   rc = ESMF_SUCCESS;
   return rc;
 }  
+
+
+int ESMC_GridCompSetServices(ESMC_GridComp comp,
+  void (*func)(ESMC_GridComp *, int *)){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridCompSetServices()"
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::GridComp *compp = (ESMCI::GridComp *)(comp.ptr);
+
+  // call into ESMCI method  
+  localrc = compp->setServices((void(*)(ESMCI::Comp *, int*))func);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;  // bail out
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+
 
 int ESMC_GridCompPrint(ESMC_GridComp comp, const char *options){
 #undef  ESMC_METHOD
