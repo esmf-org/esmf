@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.2 2008/08/21 20:11:23 theurich Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.3 2008/08/26 04:08:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.2 2008/08/21 20:11:23 theurich Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.3 2008/08/26 04:08:26 w6ws Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -2924,7 +2924,7 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 !     The arguments are:
 !     \begin{description}
 !     \item [<object1>]
-!       The ``parent" object in the Attribute hierarchy link.
+!       The ``parent'' object in the Attribute hierarchy link.
 !     \item [<object2>]
 !       The ``child'' object in the Attribute hierarchy link.
 !     \item [{[rc]}] 
