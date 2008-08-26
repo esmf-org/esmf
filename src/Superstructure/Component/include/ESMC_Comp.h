@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.36 2008/08/26 05:15:11 theurich Exp $
+// $Id: ESMC_Comp.h,v 1.37 2008/08/26 17:28:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -29,6 +29,11 @@
 //EOPI
 //-----------------------------------------------------------------------------
 
+
+#include "ESMC_Clock.h"
+
+extern "C" {
+
 enum ESMC_GridCompType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE, 
                       ESMF_RIVER, ESMF_GRIDCOMPTYPE_UNKNOWN };
 
@@ -41,8 +46,15 @@ extern const char *ESMC_SetReadRestart;
 
 // Class declaration type
 typedef struct{
-  void *fortranclass;
-    
-}ESMC_CompPublic;
+  void *ptr;
+}ESMC_GridComp;
+
+// Class API
+ESMC_GridComp ESMC_GridCompCreate(char *name, enum ESMC_GridCompType mtype,
+ char *configFile, ESMC_Clock clock, int *rc);
+int ESMC_GridCompPrint(ESMC_GridComp comp, const char *options);
+int ESMC_GridCompDestroy(ESMC_GridComp *comp);
+
+}; // extern "C"
 
 #endif  // ESMC_Comp_H

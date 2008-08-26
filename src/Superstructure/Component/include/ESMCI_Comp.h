@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.2 2008/08/26 05:15:11 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.3 2008/08/26 17:28:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -33,6 +33,7 @@
 #include "ESMC_F90Interface.h"
 #include "ESMCI_State.h"
 #include "ESMCI_Clock.h"
+#include "ESMCI_Grid.h"
 
 
 
@@ -52,6 +53,14 @@ class Comp{
     int setServices(void (*func)(Comp *, int *));
     int setEntryPoint(const char *functionType,
       void (*functionPtr)(Comp *, State *, State *, Clock *), int phase);
+};
+
+class GridComp:Comp{
+  public:
+    static GridComp *create(char *name, enum GridCompType mtype,
+      char *configFile, ESMCI::Clock *clock, int *rc=NULL);
+    static int destroy(GridComp *comp);
+    int print(const char *options) const;
 };
 
 } // namespace ESMCI
