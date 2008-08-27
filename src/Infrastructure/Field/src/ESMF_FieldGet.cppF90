@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.23 2008/08/21 19:59:34 oehmke Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.24 2008/08/27 17:15:57 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -36,6 +36,7 @@ module ESMF_FieldGetMod
   use ESMF_ArrayMod
   use ESMF_ArrayGetMod
   use ESMF_GridMod
+  use ESMF_MeshMod
   use ESMF_GeomBaseMod
   use ESMF_StaggerLocMod
   use ESMF_InitMacrosMod
@@ -56,7 +57,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.23 2008/08/21 19:59:34 oehmke Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.24 2008/08/27 17:15:57 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -76,6 +77,7 @@ module ESMF_FieldGetMod
 !
     module procedure ESMF_FieldGetDefault
     module procedure ESMF_FieldGetGridAllocBounds
+    module procedure ESMF_FieldGetMeshAllocBounds
     !module procedure ESMF_FieldGetDataBounds
     !module procedure ESMF_FieldGetLocalArray !TODO: FIELDINTEGRATION
     TypeKindRankInterfaceMacro(FieldGetDataPtr)
@@ -105,13 +107,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-  subroutine ESMF_FieldGetDefault(field, grid, array, typekind, dimCount, &
+  subroutine ESMF_FieldGetDefault(field, grid, mesh, array, typekind, dimCount, &
     staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     maxHaloLWidth, maxHaloUWidth, name, iospec, rc) 
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(inout) :: field    
     type(ESMF_Grid), intent(out), optional :: grid     
+    type(ESMF_Mesh), intent(out), optional :: mesh     
     type(ESMF_Array), intent(out), optional :: array     
     type(ESMF_TypeKind), intent(out), optional :: typekind
     integer, intent(out), optional :: dimCount
@@ -139,6 +142,8 @@ contains
 !       {\tt ESMF\_Field} object to query.
 ! \item [{[grid]}]
 !       {\tt ESMF\_Grid}.
+! \item [{[mesh]}]
+!       {\tt ESMF\_Mesh}.
 ! \item [{[array]}]
 !       {\tt ESMF\_Array}.
 ! \item [{[typekind]}]
@@ -233,6 +238,19 @@ contains
         endif
         call ESMF_GeomBaseGet(ftype%geombase, &
                   grid=grid, staggerloc=staggerloc, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+    endif
+
+    if (present(mesh)) then
+        if (ftype%gridstatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                            "No Mesh or invalid Mesh attached to Field", &
+                             ESMF_CONTEXT, rc)) return
+        endif
+        call ESMF_GeomBaseGet(ftype%geombase, &
+                  mesh=mesh, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1029,6 +1047,132 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
     if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_FieldGetGridAllocBounds
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldGetMeshAllocBounds"
+!BOP
+! !IROUTINE: ESMF_FieldGet -  Get precomputed Fortran data array bounds
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldGet()
+    subroutine ESMF_FieldGetMeshAllocBounds(mesh, localDe, &
+        gridToFieldMap, &
+        ungriddedLBound, ungriddedUBound, &
+        totalLBound, totalUBound, totalCount, rc)
+    
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(inout) :: mesh     
+    integer, intent(in)            :: localDe
+    integer, intent(in), optional :: gridToFieldMap(:)    
+    integer, intent(in), optional :: ungriddedLBound(:)
+    integer, intent(in), optional :: ungriddedUBound(:)
+    integer, intent(out), optional :: totalLBound(:)
+    integer, intent(out), optional :: totalUBound(:)
+    integer, intent(out), optional :: totalCount(:)
+    integer, intent(out), optional :: rc     
+
+!
+! !DESCRIPTION:
+! Compute the lower and upper bounds of Fortran data array that can later
+! be used in FieldCreate interface to create a {\tt ESMF\_Field} from a
+! {\tt ESMF\_Mesh} and the Fortran data array. For an example and
+! associated documentation using this method see Section 
+! \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}.
+!
+! The arguments are:
+! \begin{description}
+! \item [mesh]
+!       {\tt ESMF\_Mesh}.
+! \item [localDe]
+!       The local DE number in its PET context to compute the bounds and counts
+!       information based on the computational and exclusive bounds and counts 
+!       information of the grid from that local DE in its PET context.
+! \item [{[gridToFieldMap]}]
+!       List with number of elements equal to the
+!       {\tt grid}'s dimCount.  The list elements map each dimension
+!       of the {\tt grid} to a dimension in the {\tt field} by
+!       specifying the appropriate {\tt field} dimension index. The default is to
+!       map all of the {\tt grid}'s dimensions against the lowest dimensions of
+!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt field} rank.
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry
+!       multiple times. The total ungridded dimensions in the {\tt field}
+!       are the total {\tt field} dimensions less
+!       the dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t field}.  
+! \item [{[ungriddedLBound]}]
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[ungriddedUBound]}]
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[totalLBound]}]
+!       The relative lower bounds of Fortran data array to be used
+!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Mesh} and Fortran data array.
+!       This is an output variable from this user interface.
+! \item [{[totalUBound]}]
+!       The relative upper bounds of Fortran data array to be used
+!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Mesh} and Fortran data array.
+!       This is an output variable from this user interface.
+! \item [{[totalCount]}]
+!       Number of elements need to be allocated for Fortran data array to be used
+!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Mesh} and Fortran data array.
+!       This is an output variable from this user interface.
+!
+! \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+
+!  !Local Variables
+    integer :: localrc
+    type(ESMF_STAGGERLOC)                  :: l_staggerloc
+    type(ESMF_GeomBase) :: geombase
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
+
+     ! Create GeomBase from Mesh
+    geombase=ESMF_GeomBaseCreate(mesh,rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+ 
+
+    ! call into generic alloc bound calculation subroutine
+    call ESMF_FieldGetGBAllocBounds(geombase, localDe, gridToFieldMap, &
+        ungriddedLBound, ungriddedUBound, &
+        totalLBound=totalLBound, totalUBound=totalUBound, &
+        totalCount=totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    ! Destroy GeomBase
+    call ESMF_GeomBaseDestroy(geombase, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    end subroutine ESMF_FieldGetMeshAllocBounds
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD

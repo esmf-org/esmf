@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.13 2008/08/01 18:56:58 dneckels Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.14 2008/08/27 17:16:00 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -113,6 +113,8 @@ extern "C" void FTN(c_esmc_meshcreate)(Mesh **meshpp,
 
     //Initialize return code
     localrc = ESMF_SUCCESS;
+
+    if (*pdim > *sdim) throw;
 
     *meshpp = new Mesh();
 
@@ -372,15 +374,12 @@ extern "C" void FTN(c_esmc_meshfreememory)(Mesh **meshpp, int *rc) {
 
 }
 
-typedef struct {
-   void *ptr;
-} generic_f90;
+extern "C" void FTN(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
-extern "C" generic_f90 FTN(f_esmf_getmeshdistgrid)(int*, int*, int*);
-
-extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, ESMCI::DistGrid **ngrid, ESMCI::DistGrid **egrid, int *rc) {
+extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *egrid, int *num_lnodes, int *num_lelems, int *rc) {
 
 
+  *rc = ESMF_SUCCESS;
 
   Mesh *meshp = *meshpp;
   
@@ -396,21 +395,36 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, ESMCI::DistGrid *
     getMeshGIDS(*meshp, ae, egids);
   }
 
-meshp->Print(Par::Out());
-
+/*
   Par::Out() << "Node ids:" << std::endl;
   std::copy(ngids.begin(), ngids.end(), std::ostream_iterator<UInt>(Par::Out(), "\n"));
 
   Par::Out() << "Elem ids:" << std::endl;
   std::copy(egids.begin(), egids.end(), std::ostream_iterator<UInt>(Par::Out(), "\n"));
   Par::Out().flush();
+*/
 
   // Create the distgrids
-  int nsize = ngids.size();
-  int rc1;
-  generic_f90 gf90 = FTN(f_esmf_getmeshdistgrid)(&nsize, &ngids[0], &rc1);
+  {
+    int nsize = *num_lnodes = ngids.size();
+    int rc1;
+    FTN(f_esmf_getmeshdistgrid)(ngrid, &nsize, &ngids[0], &rc1);
 
-  *ngrid = static_cast<ESMCI::DistGrid*>(gf90.ptr);
+    ESMC_LogDefault.MsgFoundError(rc1,
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+
+  }
+  {
+    int esize = *num_lelems = egids.size();
+    int rc1;
+    FTN(f_esmf_getmeshdistgrid)(egrid, &esize, &egids[0], &rc1);
+
+    ESMC_LogDefault.MsgFoundError(rc1,
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+
+  }
 
 }
 

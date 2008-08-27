@@ -46,6 +46,7 @@
       use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
       use ESMF_ArraySpecMod
       use ESMF_GridMod
+      use ESMF_MeshMod
 
 !     NEED TO ADD MORE HERE
       implicit none
@@ -82,7 +83,7 @@
     type(ESMF_StaggerLoc) :: staggerloc
     type(ESMF_Grid) :: grid
 !    type(ESMF_MeshLoc) :: meshloc ! either nodes or elements or both?
-!    type(ESMF_Mesh) :: mesh
+    type(ESMF_Mesh) :: mesh
   end type
 
 
@@ -143,7 +144,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.1 2008/08/21 19:59:36 oehmke Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.2 2008/08/27 17:15:59 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -163,6 +164,7 @@ interface ESMF_GeomBaseCreate
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_GeomBaseCreateGrid
+      module procedure ESMF_GeomBaseCreateMesh
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -298,6 +300,19 @@ end interface
                            computationalEdgeLWidth, computationalEdgeUWidth, &
                            rc)
 
+       case(2) ! Mesh
+          if (present(gridToArrayMap)) then
+            distgridToArrayMap = gridToArrayMap
+          else
+            distgridToArrayMap = 1
+          endif
+
+          if (present(ungriddedLBound)) undistLBound = ungriddedLBound
+          if (present(ungriddedUBound)) undistUBound = ungriddedUBound
+
+          computationalEdgeLWidth = 0
+          computationalEdgeUWidth = 0
+
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                " Bad type value", &
@@ -380,6 +395,70 @@ end interface
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GeomBaseCreate"
+!BOPI
+! !IROUTINE: ESMF_GeomBaseCreate - Create a GeomBase from a Mesh
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GeomBaseCreate()
+      function ESMF_GeomBaseCreateMesh(mesh, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_GeomBase) :: ESMF_GeomBaseCreateMesh
+!
+! !ARGUMENTS:
+       type(ESMF_Mesh),       intent(in)              :: mesh
+       integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_GeomBase} object from an {\tt ESMF\_Mesh} object. 
+! This will be overloaded for each type of object a GeomBase can represent. 
+!
+! The arguments are:
+! \begin{description}
+! \item[mesh]
+!      {\tt ESMF\_Mesh} object to create the Mesh Base from.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+    type(ESMF_GeomBaseClass),pointer :: gbcp
+    integer :: localrc ! local error status
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_MeshGetInit, mesh, rc)
+
+    ! initialize pointers
+    nullify(gbcp)
+    nullify( ESMF_GeomBaseCreateMesh%gbcp)
+
+    ! allocate GeomBase type
+    allocate(gbcp, stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating GeomBase type object", &
+                                     ESMF_CONTEXT, rc)) return
+
+    ! Set values in GeomBase
+    gbcp%type = ESMF_GEOMTYPE_MESH
+    gbcp%mesh = mesh
+
+    ! Set GeomBase Type into GeomBase
+     ESMF_GeomBaseCreateMesh%gbcp=>gbcp
+
+    ! Set init status
+    ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateMesh)
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    end function ESMF_GeomBaseCreateMesh
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GeomBaseDestroy"
 !BOPI
 ! !IROUTINE: ESMF_GeomBaseDestroy - Free all resources associated with a GeomBase 
@@ -433,7 +512,8 @@ end interface
 ! !INTERFACE:
       subroutine ESMF_GeomBaseGet(gridbase, &
           dimCount, localDECount, distgrid, &
-          distgridToGridMap, indexFlag, geomType, grid, staggerloc, rc)
+          distgridToGridMap, indexFlag, geomType, &
+          grid, staggerloc, mesh, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GeomBase),       intent(in)              :: gridbase
@@ -445,6 +525,7 @@ end interface
       type(ESMF_GeomType),   intent(out), optional :: geomType
       type(ESMF_Grid),       intent(out), optional :: grid      
       type(ESMF_StaggerLoc), intent(out), optional :: staggerloc
+      type(ESMF_Mesh),       intent(out), optional :: mesh      
       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -471,12 +552,17 @@ end interface
 !    Can be {\tt ESMF_GEOMTYPE_GRID}, {\tt ESMF_GEOMTYPE_MESH},...
 ! \item[{[grid]}]
 !    The Grid object that this gridbase object holds. 
+! \item[{[staggerloc]}]
+!    The Grid stagger location.
+! \item[{[mesh]}]
+!    The Mesh object that this gridbase object holds. 
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
 !
 !EOPI
     type(ESMF_GeomBaseClass),pointer :: gbcp
+    integer                          :: localrc
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -496,6 +582,17 @@ end interface
     if (present(grid)) then
        if (gbcp%type==ESMF_GEOMTYPE_GRID) then
           grid=gbcp%grid
+       else
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                               " Grid not geometry type", &
+                               ESMF_CONTEXT, rc)) return
+       endif
+    endif
+
+    ! Get objects plus error checking
+    if (present(mesh)) then
+       if (gbcp%type==ESMF_GEOMTYPE_Mesh) then
+          mesh=gbcp%mesh
        else
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                " Grid not geometry type", &
@@ -521,8 +618,24 @@ end interface
             call ESMF_GridGet(grid=gbcp%grid,  &
                       dimCount=dimCount,  localDECount=localDECount, &
                       distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
-                      indexflag=indexFlag, rc=rc)
+                      indexflag=indexFlag, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                               " GridGet failed", &
+                               ESMF_CONTEXT, rc)) return
 
+       case(2) ! Mesh
+            if (present(dimCount)) dimCount = 1
+            if (present(localDECount)) localDECount = 1
+            if (present(distgridToGridMap)) distgridToGridMap = 1
+            ! Distgrid
+            call ESMF_MeshGet(mesh=gbcp%mesh, &
+                              nodal_distgrid=distgrid, &
+                              rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                               " MeshGet failed", &
+                               ESMF_CONTEXT, rc)) return
+            if (present(indexFlag)) indexFlag = ESMF_INDEX_DELOCAL
+             
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                " Bad type value", &
@@ -534,101 +647,6 @@ end interface
     if (present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_GeomBaseGet
-
-#if 0
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GeomBaseGetMesh"
-!BOPI
-! !IROUTINE: ESMF_GeomBaseGetMesh - Get a Mesh from a Grid 
-
-! !INTERFACE:
-      subroutine ESMF_GeomBaseGetMesh(gridbase, mesh, destroyMesh, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GeomBase),   intent(in)            :: gridbase
-      type(ESMF_Mesh),       intent(out)           :: mesh      
-      logical,               intent(out)           :: destroyMesh
-      integer,               intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    Gets various types of information about a grid. 
-!
-!The arguments are:
-!\begin{description}
-!\item[{gridbase}]
-!   Gridbase to get the information from.
-!\item[{[dimCount]}]
-!   DimCount of the GeomBase object (e.g. the number of dimensions in the Array
-!   it will be mapped to (e.g. Mesh=1)). 
-!\item[{[localDECount]}]
-!   The number of DEs in this grid on this PET.
-!\item[{[distgrid]}]
-!   The structure describing the distribution of the grid. 
-!\item[{[distgridToGridMap]}]
-!   List that has as many elements as the distgrid dimCount. This array describes
-!   mapping between the grids dimensions and the distgrid.
-! \item[{[indexflag]}]
-!    Flag that indicates how the DE-local indices are to be defined.
-! \item[{[geomType]}]
-!    Flag that indicates what type of object this gridbase holds. 
-!    Can be {\tt ESMF_GEOMTYPE_GRID}, {\tt ESMF_GEOMTYPE_MESH},...
-! \item[{[grid]}]
-!    The Grid object that this gridbase object holds. 
-!\item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!\end{description}
-!
-!EOPI
-    type(ESMF_GeomBaseClass),pointer :: gbcp
-
-    ! Initialize return code; assume failure until success is certain
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit, gridbase, rc)
-
-    ! Get GeomBaseClass
-    gbcp=>gridbase%gbcp
-
-    ! get type
-    if (present(geomType)) then
-       geomType=gbcp%type
-    endif
-
-    ! Get objects plus error checking
-    if (present(grid)) then
-       if (gbcp%type==ESMF_GEOMTYPE_GRID) then
-          grid=gbcp%grid
-       else
-          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                               " Grid not geometry type", &
-                               ESMF_CONTEXT, rc)) return
-       endif
-    endif
-
-
-    ! Get info depending on type
-    select case(gbcp%type%type)
-       case(1) ! Grid 
-            call ESMF_GridGet(grid=gbcp%grid,  &
-                      dimCount=dimCount,  localDECount=localDECount, &
-                      distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
-                      indexflag=indexFlag, rc=rc)
-
-       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                               " Bad type value", &
-                               ESMF_CONTEXT, rc)) return
-    end select
-
-
-    ! Set return value
-    if (present(rc)) rc = ESMF_SUCCESS
-
-end subroutine ESMF_GeomBaseGetMesh
-
-#endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD  
@@ -722,6 +740,16 @@ end subroutine ESMF_GeomBaseGetMesh
           computationalUBound=computationalUBound, &
           computationalCount=computationalCount, rc=rc)
 
+       case(2) ! Mesh
+          if (present(exclusiveLBound)) exclusiveLBound(1) = 1
+          call ESMF_MeshGet(gbcp%mesh, num_nodes=exclusiveUBound(1), rc=rc)
+          call ESMF_MeshGet(gbcp%mesh, num_nodes=exclusiveCount(1), rc=rc)
+
+          if (present(computationalLBound)) computationalLBound(1) = 1
+
+          call ESMF_MeshGet(gbcp%mesh, num_nodes=computationalUBound(1), rc=rc)
+          call ESMF_MeshGet(gbcp%mesh, num_nodes=computationalCount(1), rc=rc)
+     
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                " Bad type value", &
@@ -801,6 +829,11 @@ end subroutine ESMF_GeomBaseGetMesh
           call ESMF_GridSerialize(grid=gbcp%grid, buffer=buffer, &
                      length=length, offset=offset, rc=rc) 
 
+       case(2)
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                               " Mesh serialize not implemented", &
+                               ESMF_CONTEXT, rc)) return
+
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                " Bad type value", &
@@ -879,6 +912,11 @@ end subroutine ESMF_GeomBaseGetMesh
           gbcp%grid=ESMF_GridDeserialize(vm=vm, buffer=buffer, &
               offset=offset, rc=rc)  
 
+       case(2)
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                               " Mesh deserialize not implemented", &
+                               ESMF_CONTEXT, rc)) return
+
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                " Bad type value", &
@@ -941,6 +979,9 @@ end subroutine ESMF_GeomBaseGetMesh
     select case(gbcp%type%type)
        case(1) ! Grid 
          call ESMF_GridValidate(grid=gbcp%grid, rc=rc)
+
+       case(2) ! Mesh
+         !call ESMF_MeshValidate(grid=gbcp%grid, rc=rc)
 
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &

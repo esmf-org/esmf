@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.10 2008/08/14 23:59:31 svasquez Exp $
+! $Id: ESMF_MeshEx.F90,v 1.11 2008/08/27 17:15:59 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-program ESMF_FieldRegridEx
+program ESMF_MeshEx
 
 !==============================================================================
 !ESMF____EXAMPLE        String used by test script to count examples.
@@ -38,14 +38,14 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshEx.F90,v 1.10 2008/08/14 23:59:31 svasquez Exp $'
+    '$Id: ESMF_MeshEx.F90,v 1.11 2008/08/27 17:15:59 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
 
   ! individual test result code
-  integer :: localrc, rc, petCount,localPet
+  integer :: finalrc, rc, petCount,localPet
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: name, failMsg
@@ -64,15 +64,16 @@ program ESMF_FieldRegridEx
   integer, allocatable :: elemType(:)
   integer, allocatable :: elemConn(:)
 
-  !-----------------------------------------------------------------------------
-  call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
-  !-----------------------------------------------------------------------------
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_Field)  :: srcField
 
+
+  finalrc = ESMF_SUCCESS
+  call  ESMF_Initialize(vm=vm, rc=rc)
+
+  ! Temporary bridge to mesh code initialization
   call C_ESMC_MeshInit("MeshTest", 1)
 
-  ! get global VM
-  call ESMF_VMGetGlobal(vm, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -85,20 +86,13 @@ program ESMF_FieldRegridEx
   correct=.true.
   rc=ESMF_SUCCESS
 
+!  meshSrc = ESMF_MeshCreate(2,3,rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  meshSrc = ESMF_MeshCreate(2,3,localrc)
-  write(failMsg, *) "ESMF_MeshCreate fail"
-  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (localrc .ne. ESMF_SUCCESS) goto 10
+  call C_ESMC_MeshVTKHeader("data/testmesh", num_elem, num_node, conn_size, rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  
-  call C_ESMC_MeshVTKHeader("data/testmesh", num_elem, num_node, conn_size, localrc)
-  write(failMsg, *) "C_ESMC_MeshVTKHeader fail"
-  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (localrc .ne. ESMF_SUCCESS) goto 10
-
-
-  print *, 'num_elem:', num_elem, 'num_node:', num_node, 'conn_size:', conn_size
+  !print *, 'num_elem:', num_elem, 'num_node:', num_node, 'conn_size:', conn_size
 
   ! Allocate the arrays to describe Mesh
 
@@ -113,10 +107,8 @@ program ESMF_FieldRegridEx
 
   ! Get the arrays from the test mesh
   call C_ESMC_MeshVTKBody("data/testmesh", nodeId(1), nodeCoord(1), nodeOwner(1), &
-          elemId(1), elemType(1), elemConn(1), localrc)
-  write(failMsg, *) "C_ESMC_MeshVTKBody fail"
-  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (localrc .ne. ESMF_SUCCESS) goto 10
+          elemId(1), elemType(1), elemConn(1), rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! VTKBody returns zero based elemConn, so make them 1 based
   do i=1, conn_size
@@ -124,45 +116,40 @@ program ESMF_FieldRegridEx
   enddo
 
   ! Declare the nodes
-  call ESMF_MeshAddNodes(meshSrc, nodeId, nodeCoord, nodeOwner, localrc)
-  write(failMsg, *) "ESMF_MeshAddNodes fail"
-  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (localrc .ne. ESMF_SUCCESS) goto 10
+!  call ESMF_MeshAddNodes(meshSrc, nodeId, nodeCoord, nodeOwner, rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! Declare the elements
-  call ESMF_MeshAddElements(meshSrc, elemId, elemType, elemConn, localrc)
-  write(failMsg, *) "ESMF_MeshAddElements fail"
-  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (localrc .ne. ESMF_SUCCESS) goto 10
+!  call ESMF_MeshAddElements(meshSrc, elemId, elemType, elemConn, rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! Write the mesh for debug
-  call ESMF_MeshWrite(meshSrc, "outmesh", localrc)
-  write(failMsg, *) "ESMF_MeshWrite fail"
-  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (localrc .ne. ESMF_SUCCESS) goto 10
+!  call ESMF_MeshWrite(meshSrc, "outmesh", rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_MeshDestroy(meshSrc, localrc)
-  write(failMsg, *) "ESMF_MeshDelete fail"
-  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (localrc .ne. ESMF_SUCCESS) goto 10
+!  call ESMF_MeshDestroy(meshSrc, rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! Now do the same, but with the all in one function
   meshSrc = ESMF_MeshCreate(2,3,nodeId, nodeCoord, nodeOwner, &
-                           elemId, elemType, elemConn, localrc)
-  write(failMsg, *) "ESMF_MeshCreate1 fail"
-  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (localrc .ne. ESMF_SUCCESS) goto 10
+                           elemId, elemType, elemConn, rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
   ! Write the mesh for debug
-  call ESMF_MeshWrite(meshSrc, "outmesh1", localrc)
-  write(failMsg, *) "ESMF_MeshWrite fail"
-  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (localrc .ne. ESMF_SUCCESS) goto 10
+  call ESMF_MeshWrite(meshSrc, "outmesh1", rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_MeshDestroy(meshSrc, localrc)
-  write(failMsg, *) "ESMF_MeshDelete fail"
-  call ESMF_Test((localrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (localrc .ne. ESMF_SUCCESS) goto 10
+  ! Create a field on the Mesh
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc)
 
+  srcField = ESMF_FieldCreate(meshSrc, arrayspec, &
+         name="test_var", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_FieldPrint(srcField)
+
+  call ESMF_MeshDestroy(meshSrc, rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! Done with node arrays, zap
   deallocate(nodeId)
@@ -176,9 +163,15 @@ program ESMF_FieldRegridEx
 
 
 10   continue
+  call ESMF_Finalize(rc=rc)
+
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (finalrc==ESMF_SUCCESS) then
+    print *, "PASS: ESMF_MeshEx.F90"
+  else
+    print *, "FAIL: ESMF_MeshEx.F90"
+  endif
 
 
-  !-----------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-end program ESMF_FieldRegridEx
+
+end program ESMF_MeshEx

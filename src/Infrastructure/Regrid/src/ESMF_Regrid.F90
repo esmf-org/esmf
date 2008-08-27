@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.130 2008/08/06 17:35:39 tjcnrl Exp $
+! $Id: ESMF_Regrid.F90,v 1.131 2008/08/27 17:16:02 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -50,6 +50,7 @@
       use ESMF_LogErrMod
       use ESMF_ArrayMod
       use ESMF_F90InterfaceMod
+      use ESMF_MeshMod
 
 
       implicit none
@@ -115,6 +116,9 @@
     module procedure ESMF_RegridStoreRH
     module procedure ESMF_RegridStoreRHIW
     module procedure ESMF_RegridStoreIW
+    module procedure ESMF_RegridStoreMeshRH
+    !module procedure ESMF_RegridStoreMeshRHIW
+    !module procedure ESMF_RegridStoreMeshIW
 !EOPI
 
   end interface
@@ -125,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.130 2008/08/06 17:35:39 tjcnrl Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.131 2008/08/27 17:16:02 dneckels Exp $'
 
 !==============================================================================
 !
@@ -445,6 +449,91 @@
 
 
       end subroutine ESMF_RegridStoreIW
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridStoreMeshRH"
+!BOPI
+! !IROUTINE: ESMF_RegridStoreMeshRH - Precomputes Regrid data
+
+! !INTERFACE:
+      subroutine ESMF_RegridStoreMeshRH(srcMesh, srcArray, &
+                 dstMesh, dstArray, &
+                 regridMethod, regridScheme, &
+                 routehandle, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Mesh), intent(inout)         :: srcMesh
+      type(ESMF_Array), intent(inout)        :: srcArray
+      type(ESMF_Mesh), intent(inout)         :: dstMesh
+      type(ESMF_Array), intent(inout)        :: dstArray
+      type(ESMF_RegridMethod), intent(in)    :: regridMethod
+      integer, intent(in)                    :: regridScheme
+      type(ESMF_RouteHandle),  intent(inout) :: routehandle
+      integer,                  intent(  out), optional :: rc
+!
+! !DESCRIPTION:
+!     The arguments are:
+!     \begin{description}
+!     \item[srcMesh]
+!          The source mesh.
+!     \item[srcArray]
+!          The source grid array.
+!     \item[dstMesh]
+!          The destination mesh.
+!     \item[dstArray]
+!          The destination array.
+!     \item[regridMethod]
+!          The interpolation method to use.
+!     \item[regridScheme]
+!          Whether to use 3d or native coordinates
+!     \item[routeHandle]
+!          Handle to store the resulting sparseMatrix
+!     \item[{rc}]
+!          Return code.
+!     \end{description}
+!EOPI
+       integer :: localrc
+       type(ESMF_StaggerLoc) :: staggerLoc
+       type(ESMF_VM)        :: vm
+       integer :: has_rh, has_iw, nentries
+       type(ESMF_TempWeights) :: tweights
+
+       ! Initialize return code; assume failure until success is certain
+       localrc = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! global vm for now
+       call ESMF_VMGetGlobal(vm, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Choose the stagger.  Perhaps eventually this can be more configurable,
+       ! but for now, conserve = node, bilinear = center
+       if (regridMethod .eq. ESMF_REGRID_METHOD_BILINEAR) then
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       elseif (regridMethod .eq. ESMF_REGRID_METHOD_PATCH) then
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       else
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       endif
+
+       has_rh = 1
+       has_iw = 0
+       ! Call through to the C++ object that does the work
+       call c_ESMC_regrid_create_mesh(vm, srcMesh, srcArray, staggerLoc,  &
+                   dstMesh, dstArray, staggerLoc%staggerloc, &
+                   regridMethod, regridScheme, &
+                   routehandle, has_rh, has_iw, &
+                   nentries, tweights, &
+                   localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Mark route handle created
+       call ESMF_RouteHandleSetInitCreated(routeHandle, rc)
+
+      end subroutine ESMF_RegridStoreMeshRH
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

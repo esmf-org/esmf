@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.3 2008/04/21 21:40:09 dneckels Exp $
+! $Id: ESMF_GridUtil.F90,v 1.4 2008/08/27 17:15:58 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -46,6 +46,7 @@ module ESMF_GridUtilMod
   use ESMF_GridMod
   use ESMF_StaggerLocMod
   use ESMF_ArrayMod
+  use ESMF_MeshMod
   
   implicit none
 
@@ -64,6 +65,7 @@ module ESMF_GridUtilMod
 
 ! - ESMF-public methods:
   public ESMF_MeshIO
+  public ESMF_GridToMesh
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -71,7 +73,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.3 2008/04/21 21:40:09 dneckels Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.4 2008/08/27 17:15:58 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -175,5 +177,47 @@ module ESMF_GridUtilMod
 
   end subroutine ESMF_MeshIO
 !------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridToMesh()"
+!BOPI
+! !IROUTINE: ESMF_GridToMesh -- return a mesh with same topo as mesh
+!
+! !INTERFACE:
+    function ESMF_GridToMesh(grid, staggerLoc, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)                               :: ESMF_GridToMesh
+!
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(inout)                :: grid
+    integer,                intent(inout)         :: staggerLoc
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Create a mesh object with the same topology as the grid.
+!
+!   \begin{description}
+!   \item [grid]
+!         The grid to copy.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    type(ESMF_Pointer) :: theMesh
+
+    localrc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+ 
+    call c_esmc_gridtomesh(grid, staggerLoc, theMesh)
+
+    ESMF_GridToMesh = ESMF_MeshCreate(theMesh)
+
+    end function ESMF_GridToMesh
 
 end module ESMF_GridUtilMod

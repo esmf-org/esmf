@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.11 2008/07/29 01:34:51 rosalind Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.12 2008/08/27 17:15:58 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -107,6 +107,29 @@ extern "C" void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *
     std::cout << "Error, unknown exception" << std::endl;
     *rc = ESMF_FAILURE;
     return;
+  }
+
+  *rc = ESMF_SUCCESS;
+
+}
+
+extern "C" void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, Mesh **meshpp, int *rc) {
+
+
+  ESMCI::Grid &grid = **gridpp;
+
+  Mesh *meshp = new Mesh();
+
+  try {
+
+    std::vector<ESMCI::Array*> arrays;
+    ESMCI::GridToMesh(grid, *staggerLoc, *meshp, arrays);
+
+    meshpp = &meshp;
+
+  } catch(std::exception &x) {
+    std::cout << "Error!!! " << " <" << x.what() << ">" << std::endl;
+    *rc = ESMF_FAILURE;
   }
 
   *rc = ESMF_SUCCESS;

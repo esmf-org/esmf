@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.10 2008/08/01 16:41:11 dneckels Exp $
+! $Id: ESMF_Mesh.F90,v 1.11 2008/08/27 17:16:01 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -60,9 +60,11 @@ module ESMF_MeshMod
   sequence
   private
     type(ESMF_Pointer) :: this
-    type(ESMF_Pointer) :: nodal_distgrid
-    type(ESMF_Pointer) :: element_distgrid
+    type(ESMF_DistGrid) :: nodal_distgrid
+    type(ESMF_DistGrid) :: element_distgrid
     integer :: mesh_freed   ! Has the mesh memory been release?
+    integer :: num_nodes
+    integer :: num_elements
     ESMF_INIT_DECLARE
   end type
 
@@ -112,6 +114,8 @@ module ESMF_MeshMod
   public ESMF_MeshAddElements
   public ESMF_MeshDestroy
   public ESMF_MeshFreeMemory
+  public ESMF_MeshGetInit
+  public ESMF_MeshGet
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -119,7 +123,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.10 2008/08/01 16:41:11 dneckels Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.11 2008/08/27 17:16:01 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -130,6 +134,7 @@ module ESMF_MeshMod
    interface ESMF_MeshCreate
      module procedure ESMF_MeshCreate3Part
      module procedure ESMF_MeshCreate1Part
+     module procedure ESMF_MeshCreateFromPointer
    end interface
 
       contains
@@ -281,9 +286,62 @@ module ESMF_MeshMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! We create two dist grids, one for nodal one for element
+    call C_ESMC_MeshCreateDistGrids(ESMF_MeshCreate1Part%this, ESMF_MeshCreate1Part%nodal_distgrid, &
+                      ESMF_MeshCreate1Part%element_distgrid, &
+                      ESMF_MeshCreate1Part%num_nodes, ESMF_MeshCreate1Part%num_elements, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !call ESMF_DistGridPrint(ESMF_MeshCreate1Part%nodal_distgrid)
+    !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, ESMF_MeshCreate1Part%nodal_distgrid, rc)
+
     rc = localrc
     
   end function ESMF_MeshCreate1Part
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateFromPointer()"
+!BOPI
+! !IROUTINE: ESMF_MeshCreateFromPointer - Create a Mesh from a C++ mesh pointer.
+!
+! !INTERFACE:
+    function ESMF_MeshCreateFromPointer(mesh_pointer)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)         :: ESMF_MeshCreateFromPointer
+! !ARGUMENTS:
+    type(ESMF_Pointer),                intent(in)            :: mesh_pointer
+!
+! !DESCRIPTION:
+!   Create an empty mesh.
+!
+!   \begin{description}
+!   \item [parametricDim]
+!         Dimension of the topology (quad=2, hex=3,...)
+!   \item[spatialDim] 
+!         For a manifold, this can be larger than the parametric dim.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+
+    ESMF_MeshCreateFromPointer%this = mesh_pointer
+
+    ESMF_MeshCreateFromPointer%mesh_freed = 0  ! memory has not been released
+
+    ! Check init status of arguments
+    ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromPointer)
+
+  end function ESMF_MeshCreateFromPointer
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -346,7 +404,7 @@ module ESMF_MeshMod
 
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh), intent(in)                   :: mesh
+    type(ESMF_Mesh), intent(inout)                :: mesh
     integer, dimension(:), intent(in)             :: nodeIds
     real(ESMF_KIND_R8), dimension(:), intent(in)  :: nodeCoords
     integer, dimension(:), intent(in)             :: nodeOwners
@@ -382,6 +440,7 @@ module ESMF_MeshMod
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
     num_nodes = size(nodeIds)
+    mesh%num_nodes = num_nodes
     call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds(1), nodeCoords(1), &
                              nodeOwners(1), localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -404,7 +463,7 @@ module ESMF_MeshMod
 
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh), intent(in)                   :: mesh
+    type(ESMF_Mesh), intent(inout)                :: mesh
     integer, dimension(:), intent(in)             :: elementIds
     integer, dimension(:), intent(in)             :: elementTypes
     integer, dimension(:), intent(in)             :: elementConn
@@ -449,10 +508,15 @@ module ESMF_MeshMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! We create two dist grids, one for nodal one for element
     call C_ESMC_MeshCreateDistGrids(mesh%this, mesh%nodal_distgrid, &
-                      mesh%element_distgrid, localrc)
+                      mesh%element_distgrid, &
+                      mesh%num_nodes, mesh%num_elements, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !call ESMF_DistGridPrint(mesh%nodal_distgrid)
+    !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, mesh%nodal_distgrid, rc)
 
     rc = localrc
     
@@ -492,6 +556,52 @@ module ESMF_MeshMod
     endif
 
     end function ESMF_MeshGetInit
+
+!------------------------------------------------------------------------------
+
+! -----------------------------------------------------------------------------
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshGet"
+!BOPI
+! !IROUTINE: ESMF_MeshGet - Get information from the mesh.
+!
+! !INTERFACE:
+      subroutine ESMF_MeshGet(mesh, nodal_distgrid, element_distgrid, &
+                   num_nodes, num_elements, rc)
+!
+! !RETURN VALUE:
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(inout)                :: mesh
+    type(ESMF_DistGrid), intent(inout), optional  :: nodal_distgrid
+    type(ESMF_DistGrid), intent(inout), optional  :: element_distgrid
+    integer, intent(inout), optional              :: num_nodes
+    integer, intent(inout), optional              :: num_elements
+    integer,        intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+! The arguments are:
+! \begin{description}
+! \item [mesh]
+! Mesh object.
+! \end{description}
+!
+!EOPI
+      integer  :: localrc
+
+      localrc = ESMF_SUCCESS
+
+      ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+      if (present(nodal_distgrid)) nodal_distgrid = mesh%nodal_distgrid
+      if (present(element_distgrid)) element_distgrid = mesh%element_distgrid
+      if (present(num_nodes)) num_nodes =mesh%num_nodes
+      if (present(num_elements)) num_elements =mesh%num_elements 
+
+      rc = localrc
+
+    end subroutine ESMF_MeshGet
 
 !------------------------------------------------------------------------------
 
