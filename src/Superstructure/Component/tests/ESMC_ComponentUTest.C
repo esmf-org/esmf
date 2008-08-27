@@ -1,4 +1,4 @@
-// $Id: ESMC_ComponentUTest.C,v 1.3 2008/08/26 23:47:51 theurich Exp $
+// $Id: ESMC_ComponentUTest.C,v 1.4 2008/08/27 00:49:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -79,8 +79,60 @@ void myRegistrationInC(ESMC_GridComp gcomp, int *rc){
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
+
+void myCplInitInC(ESMC_CplComp cplcomp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock *clock, int *rc){
+  // do something here
+  printf("I am in myInitInC()\n");
+  
+  ESMC_StatePrint(importState);
+  ESMC_ClockPrint(*clock);
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+void myCplRunInC(ESMC_CplComp cplcomp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock *clock, int *rc){
+  // do something here
+  printf("I am in myRunInC()\n");
+  
+  ESMC_StatePrint(importState);
+  ESMC_ClockPrint(*clock);
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+void myCplFinalInC(ESMC_CplComp cplcomp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock *clock, int *rc){
+  // do something here
+  printf("I am in myFinalizeInC()\n");
+  
+  ESMC_StatePrint(importState);
+  ESMC_ClockPrint(*clock);
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+
+void myCplRegistrationInC(ESMC_CplComp cplcomp, int *rc){
+  // register Init(), Run(), Finalize()
+  printf("I am in myCplRegistrationInC()\n");
+  ESMC_CplCompPrint(cplcomp, "");
+  
+  ESMC_CplCompSetEntryPoint(cplcomp, ESMC_SetInit, myCplInitInC, 0);
+  ESMC_CplCompSetEntryPoint(cplcomp, ESMC_SetRun, myCplRunInC, 0);
+  ESMC_CplCompSetEntryPoint(cplcomp, ESMC_SetFinal, myCplFinalInC, 0);
+    
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
 extern "C"{
   void FTN(myregistrationinfortran)(ESMC_GridComp comp, int *rc);
+  void FTN(mycplregistrationinfortran)(ESMC_CplComp comp, int *rc);
 }
 
 
@@ -95,6 +147,9 @@ int main(void){
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
+  
+  // Preparation
+    
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Create ESMC_Calendar object");
@@ -163,13 +218,16 @@ int main(void){
   ESMC_State exportState = ESMC_StateCreate("my export state", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-    
+
+      
+  // ESMC_GridComp tests
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Create ESMC_GridComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_GridComp gcomp =
-    ESMC_GridCompCreate("my gridded component in C", ESMF_ATM,"grid.rc", clock,
+    ESMC_GridCompCreate("my gridded component in C", ESMF_ATM, "grid.rc", clock,
     &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -228,7 +286,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   gcomp =
     ESMC_GridCompCreate("my gridded component in C with Fortran registration",
-      ESMF_ATM,"grid.rc", clock, &rc);
+      ESMF_ATM, "grid.rc", clock, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -273,9 +331,118 @@ int main(void){
   //----------------------------------------------------------------------------
   
   
-// add CPL tests here
+  // ESMC_CplComp tests
   
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Create ESMC_CplComp object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  ESMC_CplComp cplcomp =
+    ESMC_CplCompCreate("my coupler component in C", "grid.rc", clock, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
   
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Print ESMC_CplComp object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_CplCompPrint(cplcomp, "");
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_CplCompSetServices() using myCplRegistrationInC()");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_CplCompSetServices(cplcomp, myCplRegistrationInC);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_CplCompInitialize() w/ myCplRegistrationInC() methods");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_CplCompInitialize(cplcomp, importState, exportState, clock, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_CplCompRun() w/ myCplRegistrationInC() methods");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_CplCompRun(cplcomp, importState, exportState, clock, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_CplCompFinalize() w/ myCplRegistrationInC() methods");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_CplCompFinalize(cplcomp, importState, exportState, clock, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_CplComp object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_CplCompDestroy(&cplcomp);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Create ESMC_CplComp object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  cplcomp =
+    ESMC_CplCompCreate("my coupler component in C with Fortran registration",
+      "grid.rc", clock, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_CplCompSetServices() using myRegistrationInFortran()");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_CplCompSetServices(cplcomp, FTN(mycplregistrationinfortran));
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_CplCompInitialize() w/ myRegistrationInFortran() meths");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_CplCompInitialize(cplcomp, importState, exportState, clock, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_CplCompRun() w/ myRegistrationInFortran() meths");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_CplCompRun(cplcomp, importState, exportState, clock, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_CplCompFinalize() w/ myRegistrationInFortran() meths");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_CplCompFinalize(cplcomp, importState, exportState, clock, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_CplComp object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_CplCompDestroy(&cplcomp);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  
+  // Garbage collection
+    
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Destroy ESMC_Clock object");

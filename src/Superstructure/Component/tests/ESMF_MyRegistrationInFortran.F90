@@ -1,4 +1,4 @@
-! $Id: ESMF_MyRegistrationInFortran.F90,v 1.2 2008/08/26 23:47:52 theurich Exp $
+! $Id: ESMF_MyRegistrationInFortran.F90,v 1.3 2008/08/27 00:49:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -55,6 +55,46 @@ contains
     rc = ESMF_SUCCESS
   end subroutine
 
+
+  subroutine myCplInitInFortran(cplcomp, importState, exportState, clock, rc)
+    type(ESMF_CplComp)    :: cplcomp
+    type(ESMF_State)      :: importState, exportState
+    type(ESMF_Clock)      :: clock
+    integer               :: rc
+    ! do something here
+    print *, "I am in myInitInFortran()"
+    call ESMF_StatePrint(importState);
+    call ESMF_ClockPrint(clock);
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+
+  subroutine myCplRunInFortran(cplcomp, importState, exportState, clock, rc)
+    type(ESMF_CplComp)    :: cplcomp
+    type(ESMF_State)      :: importState, exportState
+    type(ESMF_Clock)      :: clock
+    integer               :: rc
+    ! do something here
+    print *, "I am in myRunInFortran()"
+    call ESMF_StatePrint(importState);
+    call ESMF_ClockPrint(clock);
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+
+  subroutine myCplFinalInFortran(cplcomp, importState, exportState, clock, rc)
+    type(ESMF_CplComp)    :: cplcomp
+    type(ESMF_State)      :: importState, exportState
+    type(ESMF_Clock)      :: clock
+    integer               :: rc
+    ! do something here
+    print *, "I am in myFinalInFortran()"
+    call ESMF_StatePrint(importState);
+    call ESMF_ClockPrint(clock);
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+
 end module
 
 
@@ -73,6 +113,28 @@ subroutine myRegistrationInFortran(gcomp, rc)
   call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, myRunInFortran, &
     ESMF_SINGLEPHASE, rc)
   call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, myFinalInFortran, &
+    ESMF_SINGLEPHASE, rc)
+  
+  ! return successfully
+  rc = ESMF_SUCCESS
+end subroutine
+
+
+subroutine myCplRegistrationInFortran(cplcomp, rc)
+  use ESMF_Mod
+  use myFortranIRFMod
+  implicit none
+  type(ESMF_CplComp) :: cplcomp
+  integer, intent(out) :: rc
+  ! do something here
+  print *, "I am in myRegistrationInFortran()"
+  call ESMF_CplCompPrint(cplcomp)
+  
+  call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETINIT, myCplInitInFortran, &
+    ESMF_SINGLEPHASE, rc)
+  call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETRUN, myCplRunInFortran, &
+    ESMF_SINGLEPHASE, rc)
+  call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETFINAL, myCplFinalInFortran, &
     ESMF_SINGLEPHASE, rc)
   
   ! return successfully

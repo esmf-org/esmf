@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.39 2008/08/26 23:47:50 theurich Exp $
+// $Id: ESMC_Comp.h,v 1.40 2008/08/27 00:49:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -66,6 +66,28 @@ int ESMC_GridCompRun(ESMC_GridComp comp, ESMC_State importState,
 int ESMC_GridCompFinalize(ESMC_GridComp comp, ESMC_State importState,
   ESMC_State exportState, ESMC_Clock clock, int phase);
 int ESMC_GridCompPrint(ESMC_GridComp comp, const char *options);
+
+// Class declaration type
+typedef struct{
+  void *ptr;
+}ESMC_CplComp;
+
+// Class API
+ESMC_CplComp ESMC_CplCompCreate(char *name, char *configFile, ESMC_Clock clock,
+  int *rc);
+int ESMC_CplCompDestroy(ESMC_CplComp *comp);
+int ESMC_CplCompSetServices(ESMC_CplComp comp, 
+  void (*func)(ESMC_CplComp, int *));
+int ESMC_CplCompSetEntryPoint(ESMC_CplComp comp, const char *functionType,
+  void (*func)(ESMC_CplComp, ESMC_State, ESMC_State, ESMC_Clock *, int *),
+  int phase);
+int ESMC_CplCompInitialize(ESMC_CplComp comp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock clock, int phase);
+int ESMC_CplCompRun(ESMC_CplComp comp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock clock, int phase);
+int ESMC_CplCompFinalize(ESMC_CplComp comp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock clock, int phase);
+int ESMC_CplCompPrint(ESMC_CplComp comp, const char *options);
 
 
 }; // extern "C"

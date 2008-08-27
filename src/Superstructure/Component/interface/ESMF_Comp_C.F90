@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.49 2008/08/26 23:47:51 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.50 2008/08/27 00:49:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.49 2008/08/26 23:47:51 theurich Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.50 2008/08/27 00:49:27 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -368,8 +368,8 @@ subroutine f_esmf_gridcomprun(comp, importState, exportState, clock, phase, &
   call ESMF_ClockSetThis(local_clock, this, rc=rc)
   call ESMF_ClockSetInitCreated(local_clock)
 
-  call ESMF_GridCompRun(comp, importState, exportState, local_clock, phase, &
-    blockingFlag, rc)
+  call ESMF_GridCompRun(comp, importState, exportState, local_clock, &
+    phase, blockingFlag, rc)
 end subroutine f_esmf_gridcomprun
 
 #undef  ESMF_METHOD
@@ -493,7 +493,7 @@ end subroutine f_esmf_gridcompprint
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_cplcompcreate"
-subroutine f_esmf_cplcompcreate(ccomp, name, config, configFile, clock, rc)
+subroutine f_esmf_cplcompcreate(ccomp, name, configFile, clock, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
@@ -505,17 +505,24 @@ subroutine f_esmf_cplcompcreate(ccomp, name, config, configFile, clock, rc)
   implicit none
 
   type(ESMF_CplComp) :: ccomp
-  character(len=*), optional :: name
-  type(ESMF_Config), optional :: config
-  character(len=*), optional :: configFile
-  type(ESMF_Clock), optional :: clock
-  integer, optional :: rc
+  character(len=*)   :: name
+  character(len=*)   :: configFile
+  type(ESMF_Clock)   :: clock
+  integer            :: rc
+
+  type(ESMF_Clock)   :: local_clock
+  type(ESMF_Pointer) :: this
 
   ! Initialize return code; assume routine not implemented
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
 
-  ccomp = ESMF_CplCompCreate(name=name, config=config, configFile=configFile, &
-    clock=clock, rc=rc)
+  ! Construct a local copy of the incoming clock with initializers
+  call ESMF_ClockGetThis(clock, this, rc=rc)
+  call ESMF_ClockSetThis(local_clock, this, rc=rc)
+  call ESMF_ClockSetInitCreated(local_clock)
+
+  ccomp = ESMF_CplCompCreate(name=name, configFile=configFile, &
+    clock=local_clock, rc=rc)
 end subroutine f_esmf_cplcompcreate
 
 #undef  ESMF_METHOD
@@ -529,10 +536,10 @@ subroutine f_esmf_cplcompdestroy(comp, rc)
   implicit none
 
   type(ESMF_CplComp) :: comp
-  integer, optional :: rc              
+  integer            :: rc              
 
   ! Initialize return code; assume routine not implemented
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
 
   call ESMF_CplCompDestroy(comp, rc)
 end subroutine f_esmf_cplcompdestroy
@@ -544,25 +551,34 @@ subroutine f_esmf_cplcompinitialize(comp, importState, exportState, clock, &
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
+  use ESMF_ClockTypeMod
   use ESMF_StateMod
   use ESMF_CompMod
   use ESMF_CplCompMod
   use ESMF_InitMacrosMod
   implicit none
 
-  type(ESMF_CplComp) :: comp      
-  type(ESMF_State), optional :: importState
-  type(ESMF_State), optional :: exportState
-  type(ESMF_Clock), optional :: clock
-  integer, optional :: phase
-  type(ESMF_BlockingFlag), optional :: blockingFlag
-  integer, optional :: rc     
+  type(ESMF_CplComp)      :: comp      
+  type(ESMF_State)        :: importState
+  type(ESMF_State)        :: exportState
+  type(ESMF_Clock)        :: clock
+  integer                 :: phase
+  type(ESMF_BlockingFlag) :: blockingFlag
+  integer                 :: rc     
+
+  type(ESMF_Clock)   :: local_clock
+  type(ESMF_Pointer) :: this
 
   ! Initialize return code; assume routine not implemented
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_CplCompInitialize(comp, importState, exportState, clock, phase, &
-    blockingFlag, rc)
+  ! Construct a local copy of the incoming clock with initializers
+  call ESMF_ClockGetThis(clock, this, rc=rc)
+  call ESMF_ClockSetThis(local_clock, this, rc=rc)
+  call ESMF_ClockSetInitCreated(local_clock)
+
+  call ESMF_CplCompInitialize(comp, importState, exportState, local_clock, &
+    phase, blockingFlag, rc)
 end subroutine f_esmf_cplcompinitialize
 
 #undef  ESMF_METHOD
@@ -572,26 +588,34 @@ subroutine f_esmf_cplcomprun(comp, importState, exportState, clock, phase, &
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
-  use ESMF_StateMod
   use ESMF_ClockTypeMod
+  use ESMF_StateMod
   use ESMF_CompMod
   use ESMF_CplCompMod
   use ESMF_InitMacrosMod
   implicit none
 
-  type(ESMF_CplComp) :: comp      
-  type(ESMF_State), optional :: importState
-  type(ESMF_State), optional :: exportState
-  type(ESMF_Clock), optional :: clock
-  integer, optional :: phase
-  type(ESMF_BlockingFlag), optional :: blockingFlag
-  integer, optional :: rc     
+  type(ESMF_CplComp)      :: comp      
+  type(ESMF_State)        :: importState
+  type(ESMF_State)        :: exportState
+  type(ESMF_Clock)        :: clock
+  integer                 :: phase
+  type(ESMF_BlockingFlag) :: blockingFlag
+  integer                 :: rc     
+
+  type(ESMF_Clock)   :: local_clock
+  type(ESMF_Pointer) :: this
 
   ! Initialize return code; assume routine not implemented
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_CplCompRun(comp, importState, exportState, clock, phase, &
-    blockingFlag, rc)
+  ! Construct a local copy of the incoming clock with initializers
+  call ESMF_ClockGetThis(clock, this, rc=rc)
+  call ESMF_ClockSetThis(local_clock, this, rc=rc)
+  call ESMF_ClockSetInitCreated(local_clock)
+
+  call ESMF_CplCompRun(comp, importState, exportState, local_clock, &
+    phase, blockingFlag, rc)
 end subroutine f_esmf_cplcomprun
 
 #undef  ESMF_METHOD
@@ -608,19 +632,27 @@ subroutine f_esmf_cplcompfinalize(comp, importState, exportState, clock, &
   use ESMF_InitMacrosMod
   implicit none
 
-  type(ESMF_CplComp) :: comp      
-  type(ESMF_State), optional :: importState
-  type(ESMF_State), optional :: exportState
-  type(ESMF_Clock), optional :: clock
-  integer, optional :: phase
-  type(ESMF_BlockingFlag), optional :: blockingFlag
-  integer, optional :: rc     
+  type(ESMF_CplComp)      :: comp      
+  type(ESMF_State)        :: importState
+  type(ESMF_State)        :: exportState
+  type(ESMF_Clock)        :: clock
+  integer                 :: phase
+  type(ESMF_BlockingFlag) :: blockingFlag
+  integer                 :: rc     
+
+  type(ESMF_Clock)   :: local_clock
+  type(ESMF_Pointer) :: this
 
   ! Initialize return code; assume routine not implemented
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_CplCompFinalize(comp, importState, exportState, clock, phase, &
-    blockingFlag, rc)
+  ! Construct a local copy of the incoming clock with initializers
+  call ESMF_ClockGetThis(clock, this, rc=rc)
+  call ESMF_ClockSetThis(local_clock, this, rc=rc)
+  call ESMF_ClockSetInitCreated(local_clock)
+
+  call ESMF_CplCompFinalize(comp, importState, exportState, local_clock, &
+    phase, blockingFlag, rc)
 end subroutine f_esmf_cplcompfinalize
 
 #undef  ESMF_METHOD
@@ -634,13 +666,13 @@ subroutine f_esmf_cplcompset(comp, rc)
   implicit none
 
   type(ESMF_CplComp) :: comp      
-  integer, optional :: rc     
+  integer            :: rc     
 
   ! Initialize return code; assume routine not implemented
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
 
   call ESMF_CplCompSet(comp)
-  if (present(rc)) rc = ESMF_SUCCESS
+  rc = ESMF_SUCCESS
 
 end subroutine f_esmf_cplcompset
 
@@ -655,9 +687,9 @@ subroutine f_esmf_cplcompget(comp, rc)
   implicit none
 
   type(ESMF_CplComp) :: comp      
-  integer, optional :: rc     
+  integer            :: rc     
 
-  if (present(rc)) rc = ESMF_SUCCESS
+  rc = ESMF_SUCCESS
 
   call ESMF_CplCompGet(comp)
 end subroutine f_esmf_cplcompget
@@ -673,8 +705,8 @@ subroutine f_esmf_cplcompvalidate(comp, options, rc)
   implicit none
 
   type(ESMF_CplComp) :: comp      
-  character(len=*), optional :: options
-  integer, optional :: rc     
+  character(len=*)   :: options
+  integer            :: rc     
 
   call ESMF_CplCompValidate(comp, options, rc)
 end subroutine f_esmf_cplcompvalidate
@@ -690,11 +722,11 @@ subroutine f_esmf_cplcompprint(comp, options, rc)
   implicit none
 
   type(ESMF_CplComp) :: comp      
-  character(len=*), optional :: options
-  integer, optional :: rc     
+  character(len=*)   :: options
+  integer            :: rc     
 
   ! Initialize return code; assume routine not implemented
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
 
   call ESMF_CplCompPrint(comp, options, rc)
 end subroutine f_esmf_cplcompprint

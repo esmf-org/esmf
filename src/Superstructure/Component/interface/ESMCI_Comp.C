@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.5 2008/08/26 23:47:50 theurich Exp $
+// $Id: ESMCI_Comp.C,v 1.6 2008/08/27 00:49:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.5 2008/08/26 23:47:50 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.6 2008/08/27 00:49:26 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for fortran interface routines
@@ -51,8 +51,6 @@ extern "C" {
     ESMCI::GridCompType *mtype, char *configFile, ESMCI::Clock **clock, 
     int *rc, ESMCI_FortranStrLenArg nlen, ESMCI_FortranStrLenArg clen);
   void FTN(f_esmf_gridcompdestroy)(ESMCI::GridComp *comp, int *rc);
-  void FTN(f_esmf_gridcompprint)(const ESMCI::GridComp *gcomp,
-    const char *options, int *rc, ESMCI_FortranStrLenArg olen);
   void FTN(f_esmf_gridcompinitialize)(const ESMCI::GridComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
     ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
@@ -62,6 +60,24 @@ extern "C" {
   void FTN(f_esmf_gridcompfinalize)(const ESMCI::GridComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
     ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
+  void FTN(f_esmf_gridcompprint)(const ESMCI::GridComp *gcomp,
+    const char *options, int *rc, ESMCI_FortranStrLenArg olen);
+  
+  void FTN(f_esmf_cplcompcreate)(ESMCI::CplComp *comp, char *name, 
+    char *configFile, ESMCI::Clock **clock, 
+    int *rc, ESMCI_FortranStrLenArg nlen, ESMCI_FortranStrLenArg clen);
+  void FTN(f_esmf_cplcompdestroy)(ESMCI::CplComp *comp, int *rc);
+  void FTN(f_esmf_cplcompinitialize)(const ESMCI::CplComp *gcomp,
+    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
+  void FTN(f_esmf_cplcomprun)(const ESMCI::CplComp *gcomp,
+    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
+  void FTN(f_esmf_cplcompfinalize)(const ESMCI::CplComp *gcomp,
+    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::Clock **clock, int *phase, ESMC_BlockingFlag *blockingFlag, int *rc);
+  void FTN(f_esmf_cplcompprint)(const ESMCI::CplComp *gcomp,
+    const char *options, int *rc, ESMCI_FortranStrLenArg olen);
 };
 
 
@@ -107,6 +123,8 @@ int Comp::setServices(
   rc = ESMF_SUCCESS;
   return rc;
 }
+//-----------------------------------------------------------------------------
+
   
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -155,6 +173,7 @@ int Comp::setEntryPoint(
   rc = ESMF_SUCCESS;
   return rc;
 }
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
@@ -197,6 +216,7 @@ GridComp *GridComp::create(
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return comp;
 }
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
@@ -241,6 +261,7 @@ int GridComp::destroy(
   rc = ESMF_SUCCESS;
   return rc;
 }
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
@@ -289,6 +310,7 @@ int GridComp::initialize(
   rc = ESMF_SUCCESS;
   return rc;
 }
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
@@ -337,6 +359,7 @@ int GridComp::run(
   rc = ESMF_SUCCESS;
   return rc;
 }
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
@@ -385,6 +408,7 @@ int GridComp::finalize(
   rc = ESMF_SUCCESS;
   return rc;
 }
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
@@ -427,6 +451,284 @@ int GridComp::print(
   rc = ESMF_SUCCESS;
   return rc;
 }
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::CplComp:create()"
+//BOPI
+// !IROUTINE:  ESMCI::CplComp:create
+//
+// !INTERFACE:
+CplComp *CplComp::create(
+//
+// !RETURN VALUE:
+//    CplComp *
+//
+// !ARGUMENTS:
+//
+    char *name, 
+    char *configFile,
+    ESMCI::Clock *clock,
+    int *rc
+  ){
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  CplComp *comp = new CplComp;
+  
+  FTN(f_esmf_cplcompcreate)(comp, name, configFile, &clock, &localrc,
+    strlen(name), strlen(configFile));
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    return comp;
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return comp;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::CplComp:destroy()"
+//BOPI
+// !IROUTINE:  ESMCI::CplComp:destroy
+//
+// !INTERFACE:
+int CplComp::destroy(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    CplComp *comp
+  ){
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (comp==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  FTN(f_esmf_cplcompdestroy)(comp, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  delete comp;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::CplComp:initialize()"
+//BOPI
+// !IROUTINE:  ESMCI::CplComp:initialize
+//
+// !INTERFACE:
+int CplComp::initialize(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    ESMCI::State *importState,
+    ESMCI::State *exportState,
+    ESMCI::Clock *clock,
+    int phase
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
+  
+  FTN(f_esmf_cplcompinitialize)(this, importState, exportState, &clock,
+    &phase, &blockingFlag, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::CplComp:run()"
+//BOPI
+// !IROUTINE:  ESMCI::CplComp:run
+//
+// !INTERFACE:
+int CplComp::run(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    ESMCI::State *importState,
+    ESMCI::State *exportState,
+    ESMCI::Clock *clock,
+    int phase
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
+  
+  FTN(f_esmf_cplcomprun)(this, importState, exportState, &clock,
+    &phase, &blockingFlag, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::CplComp:finalize()"
+//BOPI
+// !IROUTINE:  ESMCI::CplComp:finalize
+//
+// !INTERFACE:
+int CplComp::finalize(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    ESMCI::State *importState,
+    ESMCI::State *exportState,
+    ESMCI::Clock *clock,
+    int phase
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
+  
+  FTN(f_esmf_cplcompfinalize)(this, importState, exportState, &clock,
+    &phase, &blockingFlag, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::CplComp:print()"
+//BOPI
+// !IROUTINE:  ESMCI::CplComp:print
+//
+// !INTERFACE:
+int CplComp::print(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    const char *options
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  FTN(f_esmf_cplcompprint)(this, options, &localrc, strlen(options));
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
 
 
 } // namespace ESMCI

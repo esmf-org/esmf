@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.38 2008/08/26 23:47:51 theurich Exp $
+// $Id: ESMC_Comp.C,v 1.39 2008/08/27 00:49:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Comp.C,v 1.38 2008/08/26 23:47:51 theurich Exp $";
+static const char *const version = "$Id: ESMC_Comp.C,v 1.39 2008/08/27 00:49:26 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -51,10 +51,11 @@ const char *ESMC_SetWriteRestart = "ESMF_WriteRestart";
 const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridCompCreate()"
 ESMC_GridComp ESMC_GridCompCreate(char *name, enum ESMC_GridCompType mtype,
   char *configFile, ESMC_Clock clock, int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_GridCompESMC_GridCompCreate()"
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -77,11 +78,13 @@ ESMC_GridComp ESMC_GridCompCreate(char *name, enum ESMC_GridCompType mtype,
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return comp;
 }
+//-----------------------------------------------------------------------------
 
 
-int ESMC_GridCompDestroy(ESMC_GridComp *comp){
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCompDestroy()"
+int ESMC_GridCompDestroy(ESMC_GridComp *comp){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -102,12 +105,14 @@ int ESMC_GridCompDestroy(ESMC_GridComp *comp){
   rc = ESMF_SUCCESS;
   return rc;
 }  
+//-----------------------------------------------------------------------------
 
 
-int ESMC_GridCompSetServices(ESMC_GridComp comp,
-  void (*func)(ESMC_GridComp, int *)){
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCompSetServices()"
+int ESMC_GridCompSetServices(ESMC_GridComp comp,
+  void (*func)(ESMC_GridComp, int *)){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -125,13 +130,15 @@ int ESMC_GridCompSetServices(ESMC_GridComp comp,
   rc = ESMF_SUCCESS;
   return rc;
 }  
+//-----------------------------------------------------------------------------
 
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridCompSetEntryPoint()"
 int ESMC_GridCompSetEntryPoint(ESMC_GridComp comp, const char *functionType,
   void (*func)(ESMC_GridComp, ESMC_State, ESMC_State, ESMC_Clock *, int *),
   int phase){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_GridCompSetEntryPoint()"
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -151,12 +158,14 @@ int ESMC_GridCompSetEntryPoint(ESMC_GridComp comp, const char *functionType,
   rc = ESMF_SUCCESS;
   return rc;
 }  
+//-----------------------------------------------------------------------------
 
 
-int ESMC_GridCompInitialize(ESMC_GridComp comp, ESMC_State importState,
-  ESMC_State exportState, ESMC_Clock clock, int phase){
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCompInitialize()"
+int ESMC_GridCompInitialize(ESMC_GridComp comp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock clock, int phase){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -177,12 +186,14 @@ int ESMC_GridCompInitialize(ESMC_GridComp comp, ESMC_State importState,
   rc = ESMF_SUCCESS;
   return rc;
 }  
+//-----------------------------------------------------------------------------
 
 
-int ESMC_GridCompRun(ESMC_GridComp comp, ESMC_State importState,
-  ESMC_State exportState, ESMC_Clock clock, int phase){
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCompRun()"
+int ESMC_GridCompRun(ESMC_GridComp comp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock clock, int phase){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -203,12 +214,14 @@ int ESMC_GridCompRun(ESMC_GridComp comp, ESMC_State importState,
   rc = ESMF_SUCCESS;
   return rc;
 }  
+//-----------------------------------------------------------------------------
 
 
-int ESMC_GridCompFinalize(ESMC_GridComp comp, ESMC_State importState,
-  ESMC_State exportState, ESMC_Clock clock, int phase){
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCompFinalize()"
+int ESMC_GridCompFinalize(ESMC_GridComp comp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock clock, int phase){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -229,11 +242,13 @@ int ESMC_GridCompFinalize(ESMC_GridComp comp, ESMC_State importState,
   rc = ESMF_SUCCESS;
   return rc;
 }  
+//-----------------------------------------------------------------------------
 
 
-int ESMC_GridCompPrint(ESMC_GridComp comp, const char *options){
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCompPrint()"
+int ESMC_GridCompPrint(ESMC_GridComp comp, const char *options){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -251,6 +266,224 @@ int ESMC_GridCompPrint(ESMC_GridComp comp, const char *options){
   rc = ESMF_SUCCESS;
   return rc;
 }  
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CplCompCreate()"
+ESMC_CplComp ESMC_CplCompCreate(char *name, char *configFile, ESMC_Clock clock,
+  int *rc){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  ESMC_CplComp comp;
+  
+  // typecast into ESMCI types
+  ESMCI::Clock *clockp = (ESMCI::Clock *)clock.ptr;
+  
+  comp.ptr = (void *)
+    ESMCI::CplComp::create(name, configFile, clockp, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+    comp.ptr = NULL;
+    return comp;  // bail out
+  }
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return comp;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CplCompDestroy()"
+int ESMC_CplCompDestroy(ESMC_CplComp *comp){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::CplComp *compp = (ESMCI::CplComp *)(comp->ptr);
+
+  // call into ESMCI method  
+  localrc = ESMCI::CplComp::destroy(compp);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;  // bail out
+  
+  // invalidate pointer
+  comp->ptr = NULL;
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CplCompSetServices()"
+int ESMC_CplCompSetServices(ESMC_CplComp comp,
+  void (*func)(ESMC_CplComp, int *)){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::CplComp *compp = (ESMCI::CplComp *)(comp.ptr);
+
+  // call into ESMCI method  
+  localrc = compp->setServices((void(*)(ESMCI::Comp *, int *))func);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;  // bail out
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CplCompSetEntryPoint()"
+int ESMC_CplCompSetEntryPoint(ESMC_CplComp comp, const char *functionType,
+  void (*func)(ESMC_CplComp, ESMC_State, ESMC_State, ESMC_Clock *, int *),
+  int phase){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::CplComp *compp = (ESMCI::CplComp *)(comp.ptr);
+
+  // call into ESMCI method  
+  localrc = compp->setEntryPoint(functionType,
+    (void(*)(ESMCI::Comp *, ESMCI::State *, ESMCI::State *, ESMCI::Clock **,
+    int *))func, phase);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;  // bail out
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CplCompInitialize()"
+int ESMC_CplCompInitialize(ESMC_CplComp comp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock clock, int phase){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::CplComp *compp = (ESMCI::CplComp *)(comp.ptr);
+  ESMCI::State *importStatep = (ESMCI::State *)(importState.ptr);
+  ESMCI::State *exportStatep = (ESMCI::State *)(exportState.ptr);
+  ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
+
+  // call into ESMCI method  
+  localrc = compp->initialize(importStatep, exportStatep, clockp, phase);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;  // bail out
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CplCompRun()"
+int ESMC_CplCompRun(ESMC_CplComp comp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock clock, int phase){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::CplComp *compp = (ESMCI::CplComp *)(comp.ptr);
+  ESMCI::State *importStatep = (ESMCI::State *)(importState.ptr);
+  ESMCI::State *exportStatep = (ESMCI::State *)(exportState.ptr);
+  ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
+
+  // call into ESMCI method  
+  localrc = compp->run(importStatep, exportStatep, clockp, phase);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;  // bail out
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CplCompFinalize()"
+int ESMC_CplCompFinalize(ESMC_CplComp comp, ESMC_State importState,
+  ESMC_State exportState, ESMC_Clock clock, int phase){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::CplComp *compp = (ESMCI::CplComp *)(comp.ptr);
+  ESMCI::State *importStatep = (ESMCI::State *)(importState.ptr);
+  ESMCI::State *exportStatep = (ESMCI::State *)(exportState.ptr);
+  ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
+
+  // call into ESMCI method  
+  localrc = compp->finalize(importStatep, exportStatep, clockp, phase);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;  // bail out
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CplCompPrint()"
+int ESMC_CplCompPrint(ESMC_CplComp comp, const char *options){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::CplComp *compp = (ESMCI::CplComp *)(comp.ptr);
+
+  // call into ESMCI method  
+  localrc = compp->print(options);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;  // bail out
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+//-----------------------------------------------------------------------------
 
 
 }; // extern "C"

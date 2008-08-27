@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.6 2008/08/26 23:47:50 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.7 2008/08/27 00:49:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -60,6 +60,20 @@ class GridComp:public Comp{
     static GridComp *create(char *name, enum GridCompType mtype,
       char *configFile, ESMCI::Clock *clock, int *rc=NULL);
     static int destroy(GridComp *comp);
+    int print(const char *options) const;
+    int initialize(ESMCI::State *importState, ESMCI::State *exportState,
+      ESMCI::Clock *clock, int phase) const;
+    int run(ESMCI::State *importState, ESMCI::State *exportState,
+      ESMCI::Clock *clock, int phase) const;
+    int finalize(ESMCI::State *importState, ESMCI::State *exportState,
+      ESMCI::Clock *clock, int phase) const;
+};
+
+class CplComp:public Comp{
+  public:
+    static CplComp *create(char *name, char *configFile, ESMCI::Clock *clock,
+      int *rc=NULL);
+    static int destroy(CplComp *comp);
     int print(const char *options) const;
     int initialize(ESMCI::State *importState, ESMCI::State *exportState,
       ESMCI::Clock *clock, int phase) const;
