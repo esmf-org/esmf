@@ -1,4 +1,4 @@
-// $Id: pthread_stubs.h,v 1.6 2008/08/28 20:32:19 theurich Exp $
+// $Id: pthread_stubs.h,v 1.7 2008/08/28 21:32:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -17,6 +17,9 @@
 
 #ifndef _PTHREAD_H
 #define _PTHREAD_H	1
+#ifndef _POSIX_PTHREAD_H
+#define _POSIX_PTHREAD_H 1
+
 #include <sys/types.h>
 
 #ifndef __sgi
@@ -60,4 +63,5 @@ typedef int pthread_t;
 #define pthread_create(a,b,c,d) 0
 #define pthread_join(a,b)
 
+#endif  /* _POSIX_PTHREAD_H */
 #endif	/* _PTHREAD_H */
