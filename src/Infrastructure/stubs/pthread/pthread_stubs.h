@@ -1,4 +1,4 @@
-// $Id: pthread_stubs.h,v 1.4.2.1 2008/04/05 03:14:00 cdeluca Exp $
+// $Id: pthread_stubs.h,v 1.4.2.2 2008/08/28 21:51:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -17,6 +17,9 @@
 
 #ifndef _PTHREAD_H
 #define _PTHREAD_H	1
+#ifndef _POSIX_PTHREAD_H
+#define _POSIX_PTHREAD_H 1
+
 #include <sys/types.h>
 
 #ifndef __sgi
@@ -26,9 +29,20 @@
 #ifndef _BITS_PTHREADTYPES_H
 #define _BITS_PTHREADTYPES_H	1
 
+#ifndef _PTHREAD_MUTEX_T
+#define _PTHREAD_MUTEX_T
 typedef struct{} pthread_mutex_t;
+#endif
+
+#ifndef _PTHREAD_COND_T
+#define _PTHREAD_COND_T
 typedef struct{} pthread_cond_t;
+#endif
+
+#ifndef _PTHREAD_T
+#define _PTHREAD_T
 typedef int pthread_t;
+#endif
 
 #endif
 
@@ -49,4 +63,5 @@ typedef int pthread_t;
 #define pthread_create(a,b,c,d) 0
 #define pthread_join(a,b)
 
+#endif  /* _POSIX_PTHREAD_H */
 #endif	/* _PTHREAD_H */
