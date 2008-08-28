@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.87 2008/06/10 18:12:26 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.88 2008/08/28 23:14:39 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -148,6 +148,8 @@
 #include "../Infrastructure/Grid/doc/Grid_refdoc.ctex"
 
 #include "../Infrastructure/LocStream/doc/LocStream_refdoc.ctex"
+
+#include "../Infrastructure/Mesh/doc/Mesh_refdoc.ctex"
 
 #include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
 

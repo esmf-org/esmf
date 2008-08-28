@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.11 2008/08/27 17:16:01 dneckels Exp $
+! $Id: ESMF_Mesh.F90,v 1.12 2008/08/28 23:14:39 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -123,7 +123,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.11 2008/08/27 17:16:01 dneckels Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.12 2008/08/28 23:14:39 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -139,14 +139,147 @@ module ESMF_MeshMod
 
       contains
 
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshAddElements()"
+!BOP
+! !IROUTINE: ESMF_MeshAddElements - Add elements to a mesh
+!
+! !INTERFACE:
+    subroutine ESMF_MeshAddElements(mesh, elementIds, elementTypes, elementConn, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(inout)                :: mesh
+    integer, dimension(:), intent(in)             :: elementIds
+    integer, dimension(:), intent(in)             :: elementTypes
+    integer, dimension(:), intent(in)             :: elementConn
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Add elements to a mesh.  This call should follow a call to AddNodes.
+!   The elements will link together nodes to form topological entitites.
+!
+!   \begin{description}
+!   \item [{[elementIds]}]
+!         The global id's of the elements resident on this processor
+!   \item[elementTypes] 
+!         Topology of the given element (one of ESMF\_MeshElement)
+!   \item[elementConn] 
+!         Connectivity table.  The table should line up with the elementIds and
+!         elementTypes list.  The indices into the node declaration for each
+!         element will reside one after the other in this list.  The number
+!         of entries should be equal to the number of nodes in the given
+!         topology.  The indices should be the local index (1 based) into the array
+!         of nodes that was declared with MeshAddNodes
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: num_elems
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    num_elems = size(elementIds)
+    call C_ESMC_MeshAddElements(mesh%this, num_elems, &
+                             elementIds(1), elementTypes(1), &
+                             elementConn(1), localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! We create two dist grids, one for nodal one for element
+    call C_ESMC_MeshCreateDistGrids(mesh%this, mesh%nodal_distgrid, &
+                      mesh%element_distgrid, &
+                      mesh%num_nodes, mesh%num_elements, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !call ESMF_DistGridPrint(mesh%nodal_distgrid)
+    !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, mesh%nodal_distgrid, rc)
+
+    rc = localrc
+    
+  end subroutine ESMF_MeshAddElements
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshAddNodes()"
+!BOP
+! !IROUTINE: ESMF_MeshAddNodes - Add nodes to a mesh
+!
+! !INTERFACE:
+    subroutine ESMF_MeshAddNodes(mesh, nodeIds, nodeCoords, nodeOwners, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(inout)                :: mesh
+    integer, dimension(:), intent(in)             :: nodeIds
+    real(ESMF_KIND_R8), dimension(:), intent(in)  :: nodeCoords
+    integer, dimension(:), intent(in)             :: nodeOwners
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Create an empty mesh.
+!
+!   \begin{description}
+!   \item [nodeIds]
+!         The global id's of the nodes resident on this processor
+!   \item[nodeCoords] 
+!         Physical coordinates of the nodes.  This 1d array will be
+!         interpreted by using mesh.spatial\_dim, and is ordered 
+!         (ndim, nnodes), fortran ordering
+!   \item[nodeOwners] 
+!         Processor that owns the node.  If the node is shared, the value
+!         will be a processor other than the current one.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: num_nodes
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    num_nodes = size(nodeIds)
+    mesh%num_nodes = num_nodes
+    call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds(1), nodeCoords(1), &
+                             nodeOwners(1), localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rc = localrc
+    
+  end subroutine ESMF_MeshAddNodes
+!------------------------------------------------------------------------------
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreate3Part()"
-!BOPI
-! !IROUTINE: ESMF_MeshCreate3Part - Create a Mesh as a 3 step process.  First
-!            the mesh, then add nodes and finally add elements.
+!BOP
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh as a 3 step process - first
+!            the mesh, then add nodes and finally add elements
 !
 ! !INTERFACE:
+  ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreate3Part(parametricDim, spatialDim, rc)
 !
 !
@@ -169,7 +302,7 @@ module ESMF_MeshMod
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -196,10 +329,11 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreate1Part()"
-!BOPI
-! !IROUTINE: ESMF_MeshCreate1Part - Create a Mesh all at once.
+!BOP
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh all at once
 !
 ! !INTERFACE:
+  ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreate1Part(parametricDim, spatialDim, &
                          nodeIds, nodeCoords, nodeOwners, &
                          elementIds, elementTypes, elementConn, &
@@ -231,7 +365,7 @@ module ESMF_MeshMod
 !         The global id's of the nodes resident on this processor
 !   \item[nodeCoords] 
 !         Physical coordinates of the nodes.  This 1d array will be
-!         interpreted by using mesh.spatial_dim, and is ordered 
+!         interpreted by using mesh.spatial\_dim, and is ordered 
 !         (ndim, nnodes), fortran ordering
 !   \item[nodeOwners] 
 !         Processor that owns the node.  If the node is shared, the value
@@ -239,7 +373,7 @@ module ESMF_MeshMod
 !   \item [{[elementIds]}]
 !         The global id's of the elements resident on this processor
 !   \item[elementTypes] 
-!         Topology of the given element (one of ESMF_MeshElement)
+!         Topology of the given element (one of ESMF\_MeshElement)
 !   \item[elementConn] 
 !         Connectivity table.  The table should line up with the elementIds and
 !         elementTypes list.  The indices into the node declaration for each
@@ -251,7 +385,7 @@ module ESMF_MeshMod
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: num_nodes
@@ -304,17 +438,18 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromPointer()"
-!BOPI
-! !IROUTINE: ESMF_MeshCreateFromPointer - Create a Mesh from a C++ mesh pointer.
+!BOP
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a C++ mesh pointer
 !
 ! !INTERFACE:
+  ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromPointer(mesh_pointer)
 !
 !
 ! !RETURN VALUE:
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromPointer
 ! !ARGUMENTS:
-    type(ESMF_Pointer),                intent(in)            :: mesh_pointer
+    type(ESMF_Pointer),        intent(in)            :: mesh_pointer
 !
 ! !DESCRIPTION:
 !   Create an empty mesh.
@@ -328,7 +463,7 @@ module ESMF_MeshMod
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -344,11 +479,143 @@ module ESMF_MeshMod
   end function ESMF_MeshCreateFromPointer
 !------------------------------------------------------------------------------
 
+! -----------------------------------------------------------------------------
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshDestroy"
+!BOP
+! !IROUTINE: ESMF_MeshDestroy - Destroy the Mesh.
+!
+! !INTERFACE:
+      subroutine ESMF_MeshDestroy(mesh, rc)
+!
+! !RETURN VALUE:
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(inout)           :: mesh
+    integer,        intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+! The arguments are:
+! \begin{description}
+! \item [mesh]
+! Mesh object.
+! \end{description}
+!
+!EOP
+      integer  :: localrc
+
+      ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+      if (mesh%mesh_freed .eq. 0) then
+        call C_ESMC_MeshDestroy(mesh, localrc)
+      endif
+
+      ESMF_INIT_SET_DELETED(mesh)
+
+      rc = localrc
+
+    end subroutine ESMF_MeshDestroy
+
+!-----------------------------------------------------------------------------
+
+! -----------------------------------------------------------------------------
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshFreeMemory"
+!BOP
+! !IROUTINE: ESMF_MeshFreeMemory - Remove the underlying
+!    mesh and its memory, but keep the fortran mesh scheme around
+!
+! !INTERFACE:
+      subroutine ESMF_MeshFreeMemory(mesh, rc)
+!
+! !RETURN VALUE:
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(inout)        :: mesh
+    integer,        intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+! The arguments are:
+! \begin{description}
+! \item [mesh]
+! Mesh object.
+! \end{description}
+!
+!EOP
+      integer  :: localrc
+
+      ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+      ! If already free, fine just return
+      if (mesh%mesh_freed .eq. 1) then
+        rc = ESMF_SUCCESS
+        return
+      endif
+
+   
+      call C_ESMC_MeshFreeMemory(mesh,localrc)
+
+      mesh%mesh_freed = 1
+
+      rc = localrc
+
+    end subroutine ESMF_MeshFreeMemory
+
+!------------------------------------------------------------------------------
+
+! -----------------------------------------------------------------------------
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshGet"
+!BOP
+! !IROUTINE: ESMF_MeshGet - Get information from the mesh.
+!
+! !INTERFACE:
+      subroutine ESMF_MeshGet(mesh, nodal_distgrid, element_distgrid, &
+                   num_nodes, num_elements, rc)
+!
+! !RETURN VALUE:
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(inout)                :: mesh
+    type(ESMF_DistGrid), intent(inout), optional  :: nodal_distgrid
+    type(ESMF_DistGrid), intent(inout), optional  :: element_distgrid
+    integer, intent(inout), optional              :: num_nodes
+    integer, intent(inout), optional              :: num_elements
+    integer,        intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+! The arguments are:
+! \begin{description}
+! \item [mesh]
+! Mesh object.
+! \end{description}
+!
+!EOP
+      integer  :: localrc
+
+      localrc = ESMF_SUCCESS
+
+      ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+      if (present(nodal_distgrid)) nodal_distgrid = mesh%nodal_distgrid
+      if (present(element_distgrid)) element_distgrid = mesh%element_distgrid
+      if (present(num_nodes)) num_nodes =mesh%num_nodes
+      if (present(num_elements)) num_elements =mesh%num_elements 
+
+      rc = localrc
+
+    end subroutine ESMF_MeshGet
+
+!------------------------------------------------------------------------------
+
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshWrite()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_MeshWrite - Write mesh to a VTK file
 !
 ! !INTERFACE:
@@ -372,7 +639,7 @@ module ESMF_MeshMod
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
 
@@ -390,137 +657,6 @@ module ESMF_MeshMod
     rc = localrc
     
   end subroutine ESMF_MeshWrite
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_MeshAddNodes()"
-!BOPI
-! !IROUTINE: ESMF_MeshAddNodes - Add nodes to a mesh
-!
-! !INTERFACE:
-    subroutine ESMF_MeshAddNodes(mesh, nodeIds, nodeCoords, nodeOwners, rc)
-
-!
-! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)                :: mesh
-    integer, dimension(:), intent(in)             :: nodeIds
-    real(ESMF_KIND_R8), dimension(:), intent(in)  :: nodeCoords
-    integer, dimension(:), intent(in)             :: nodeOwners
-    integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Create an empty mesh.
-!
-!   \begin{description}
-!   \item [nodeIds]
-!         The global id's of the nodes resident on this processor
-!   \item[nodeCoords] 
-!         Physical coordinates of the nodes.  This 1d array will be
-!         interpreted by using mesh.spatial_dim, and is ordered 
-!         (ndim, nnodes), fortran ordering
-!   \item[nodeOwners] 
-!         Processor that owns the node.  If the node is shared, the value
-!         will be a processor other than the current one.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    integer                 :: num_nodes
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
-
-    num_nodes = size(nodeIds)
-    mesh%num_nodes = num_nodes
-    call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds(1), nodeCoords(1), &
-                             nodeOwners(1), localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    rc = localrc
-    
-  end subroutine ESMF_MeshAddNodes
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_MeshAddElements()"
-!BOPI
-! !IROUTINE: ESMF_MeshAddElements - Add elements to a mesh
-!
-! !INTERFACE:
-    subroutine ESMF_MeshAddElements(mesh, elementIds, elementTypes, elementConn, rc)
-
-!
-! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)                :: mesh
-    integer, dimension(:), intent(in)             :: elementIds
-    integer, dimension(:), intent(in)             :: elementTypes
-    integer, dimension(:), intent(in)             :: elementConn
-    integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add elements to a mesh.  This call should follow a call to AddNodes.
-!   The elements will link together nodes to form topological entitites.
-!
-!   \begin{description}
-!   \item [{[elementIds]}]
-!         The global id's of the elements resident on this processor
-!   \item[elementTypes] 
-!         Topology of the given element (one of ESMF_MeshElement)
-!   \item[elementConn] 
-!         Connectivity table.  The table should line up with the elementIds and
-!         elementTypes list.  The indices into the node declaration for each
-!         element will reside one after the other in this list.  The number
-!         of entries should be equal to the number of nodes in the given
-!         topology.  The indices should be the local index (1 based) into the array
-!         of nodes that was declared with MeshAddNodes
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    integer                 :: num_elems
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
-
-    num_elems = size(elementIds)
-    call C_ESMC_MeshAddElements(mesh%this, num_elems, &
-                             elementIds(1), elementTypes(1), &
-                             elementConn(1), localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! We create two dist grids, one for nodal one for element
-    call C_ESMC_MeshCreateDistGrids(mesh%this, mesh%nodal_distgrid, &
-                      mesh%element_distgrid, &
-                      mesh%num_nodes, mesh%num_elements, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    !call ESMF_DistGridPrint(mesh%nodal_distgrid)
-    !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, mesh%nodal_distgrid, rc)
-
-    rc = localrc
-    
-  end subroutine ESMF_MeshAddElements
 !------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-internal method -----------------------------
@@ -556,138 +692,6 @@ module ESMF_MeshMod
     endif
 
     end function ESMF_MeshGetInit
-
-!------------------------------------------------------------------------------
-
-! -----------------------------------------------------------------------------
-#undef ESMF_METHOD
-#define ESMF_METHOD "ESMF_MeshGet"
-!BOPI
-! !IROUTINE: ESMF_MeshGet - Get information from the mesh.
-!
-! !INTERFACE:
-      subroutine ESMF_MeshGet(mesh, nodal_distgrid, element_distgrid, &
-                   num_nodes, num_elements, rc)
-!
-! !RETURN VALUE:
-!
-! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)                :: mesh
-    type(ESMF_DistGrid), intent(inout), optional  :: nodal_distgrid
-    type(ESMF_DistGrid), intent(inout), optional  :: element_distgrid
-    integer, intent(inout), optional              :: num_nodes
-    integer, intent(inout), optional              :: num_elements
-    integer,        intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!
-! The arguments are:
-! \begin{description}
-! \item [mesh]
-! Mesh object.
-! \end{description}
-!
-!EOPI
-      integer  :: localrc
-
-      localrc = ESMF_SUCCESS
-
-      ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
-
-      if (present(nodal_distgrid)) nodal_distgrid = mesh%nodal_distgrid
-      if (present(element_distgrid)) element_distgrid = mesh%element_distgrid
-      if (present(num_nodes)) num_nodes =mesh%num_nodes
-      if (present(num_elements)) num_elements =mesh%num_elements 
-
-      rc = localrc
-
-    end subroutine ESMF_MeshGet
-
-!------------------------------------------------------------------------------
-
-! -----------------------------------------------------------------------------
-#undef ESMF_METHOD
-#define ESMF_METHOD "ESMF_MeshDestroy"
-!BOPI
-! !IROUTINE: ESMF_MeshDestroy - Destroy the Mesh.
-!
-! !INTERFACE:
-      subroutine ESMF_MeshDestroy(mesh, rc)
-!
-! !RETURN VALUE:
-!
-! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)           :: mesh
-    integer,        intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!
-! The arguments are:
-! \begin{description}
-! \item [mesh]
-! Mesh object.
-! \end{description}
-!
-!EOPI
-      integer  :: localrc
-
-      ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
-
-      if (mesh%mesh_freed .eq. 0) then
-        call C_ESMC_MeshDestroy(mesh, localrc)
-      endif
-
-      ESMF_INIT_SET_DELETED(mesh)
-
-      rc = localrc
-
-    end subroutine ESMF_MeshDestroy
-
-!------------------------------------------------------------------------------
-
-! -----------------------------------------------------------------------------
-#undef ESMF_METHOD
-#define ESMF_METHOD "ESMF_MeshFreeMemory"
-!BOPI
-! !IROUTINE: ESMF_MeshFreeMemory - Remove the underlying
-!    mesh and its memory, but keep the fortran mesh scheme around.
-!
-! !INTERFACE:
-      subroutine ESMF_MeshFreeMemory(mesh, rc)
-!
-! !RETURN VALUE:
-!
-! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)        :: mesh
-    integer,        intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!
-! The arguments are:
-! \begin{description}
-! \item [mesh]
-! Mesh object.
-! \end{description}
-!
-!EOPI
-      integer  :: localrc
-
-      ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
-
-      ! If already free, fine just return
-      if (mesh%mesh_freed .eq. 1) then
-        rc = ESMF_SUCCESS
-        return
-      endif
-
-   
-      call C_ESMC_MeshFreeMemory(mesh,localrc)
-
-      mesh%mesh_freed = 1
-
-      rc = localrc
-
-    end subroutine ESMF_MeshFreeMemory
 
 !------------------------------------------------------------------------------
 
