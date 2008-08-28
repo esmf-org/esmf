@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.h,v 1.6 2008/07/29 19:28:00 feiliu Exp $
+// $Id: ESMCI_Alarm.h,v 1.7 2008/08/28 21:33:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -27,7 +27,6 @@
  // include files.
  #include <ESMC_Start.h>
  #include <ESMF_TimeMgr.inc>
- #include "ESMF_Pthread.h"
 
 //-------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.1 2008/07/21 23:25:53 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.2 2008/08/28 21:33:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,13 +37,6 @@
 #undef _XOPEN_SOURCE_EXTENDED
 #endif
 
-// VMKernel can be compiled stand-alone outside of ESMF 
-#ifdef VMK_STANDALONE
-#include <pthread.h>
-#else
-#include "ESMF_Pthread.h"
-#endif
-
 // Standard headers
 #include <stdio.h>
 #include <stdlib.h>
@@ -64,6 +57,13 @@
 #define MPICH_IGNORE_CXX_SEEK
 #endif
 #include <mpi.h>
+
+// VMKernel can be compiled stand-alone outside of ESMF
+#ifdef VMK_STANDALONE
+#include <pthread.h>
+#else
+#include "ESMF_Pthread.h"
+#endif
 
 // macros used within this source file
 #define VERBOSITY             (0)       // 0: off, 10: max
