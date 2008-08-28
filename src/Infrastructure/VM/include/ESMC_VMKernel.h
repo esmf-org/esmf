@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.53.2.7 2008/04/23 18:19:18 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.53.2.8 2008/08/28 22:17:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -13,16 +13,16 @@
 #ifndef ESMC_VMKERNEL_H
 #define ESMC_VMKERNEL_H
 
+#ifndef MPICH_IGNORE_CXX_SEEK
+#define MPICH_IGNORE_CXX_SEEK
+#endif
+#include <mpi.h>
+
 #ifdef VMK_STANDALONE
 #include <pthread.h>
 #else
 #include "ESMF_Pthread.h"
 #endif
-
-#ifndef MPICH_IGNORE_CXX_SEEK
-#define MPICH_IGNORE_CXX_SEEK
-#endif
-#include <mpi.h>
 
 // define NULL
 #include <cstddef> 

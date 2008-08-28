@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.46.2.1 2008/04/05 03:13:36 cdeluca Exp $
+// $Id: ESMC_Clock.h,v 1.46.2.2 2008/08/28 22:17:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -27,7 +27,6 @@
  // include files.
  #include <ESMC_Start.h>
  #include <ESMF_TimeMgr.inc>
- #include "ESMF_Pthread.h"
 
 //-------------------------------------------------------------------------
 //BOP
