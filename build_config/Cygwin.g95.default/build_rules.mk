@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.6 2008/07/23 04:51:53 theurich Exp $
+# $Id: build_rules.mk,v 1.7 2008/08/28 19:10:42 theurich Exp $
 #
 # Cygwin.g95.default
 #
@@ -74,6 +74,11 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v --version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+
+############################################################
+# g95 runtime library is not currently thread-safe
+#
+ESMF_PTHREADS := OFF
 
 ############################################################
 # Cygwin 1.5.24 does not yet support POSIX IPC (memory mapped files)
