@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.13.2.5 2008/07/16 00:19:11 theurich Exp $
+# $Id: build_rules.mk,v 1.13.2.6 2008/08/28 18:57:07 theurich Exp $
 #
 # Linux.g95.default
 #
@@ -74,6 +74,11 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v --version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+
+############################################################
+# g95 runtime library is not currently thread-safe
+#
+ESMF_PTHREADS := OFF
 
 ############################################################
 # Fortran symbol convention
