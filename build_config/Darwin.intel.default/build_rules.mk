@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5.2.5 2008/07/16 00:19:09 theurich Exp $
+# $Id: build_rules.mk,v 1.5.2.6 2008/08/28 18:57:29 theurich Exp $
 #
 # Darwin.intel.default
 #
@@ -81,6 +81,11 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
+
+############################################################
+# Intel runtime library on Darwin does not currently seem thread-safe
+#
+ESMF_PTHREADS := OFF
 
 ############################################################
 # Construct the ABISTRING
