@@ -1,4 +1,4 @@
-// $Id: pthread_stubs.h,v 1.5 2008/04/05 03:39:10 cdeluca Exp $
+// $Id: pthread_stubs.h,v 1.6 2008/08/28 20:32:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -26,9 +26,20 @@
 #ifndef _BITS_PTHREADTYPES_H
 #define _BITS_PTHREADTYPES_H	1
 
+#ifndef _PTHREAD_MUTEX_T
+#define _PTHREAD_MUTEX_T
 typedef struct{} pthread_mutex_t;
+#endif
+
+#ifndef _PTHREAD_COND_T
+#define _PTHREAD_COND_T
 typedef struct{} pthread_cond_t;
+#endif
+
+#ifndef _PTHREAD_T
+#define _PTHREAD_T
 typedef int pthread_t;
+#endif
 
 #endif
 
