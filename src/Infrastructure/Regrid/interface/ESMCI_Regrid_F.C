@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.20 2008/08/27 17:16:01 dneckels Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.21 2008/08/28 20:33:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -17,6 +17,8 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+#include <iostream>
+
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMCI_VM.h"
@@ -34,8 +36,6 @@
 #include <Mesh/include/ESMC_Exception.h>
 #include <Mesh/include/ESMC_Interp.h>
 #include <Mesh/include/ESMC_Extrapolation.h>
-
-#include <iostream>
 
 //------------------------------------------------------------------------------
 //BOP

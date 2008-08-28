@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.14 2008/08/27 17:16:00 dneckels Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.15 2008/08/28 20:33:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -17,6 +17,10 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+#include <string>
+#include <ostream>
+#include <iterator>
+
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMCI_VM.h"
@@ -33,9 +37,7 @@
 
 #include "ESMC_MeshCAPI.h"
 
-#include <string>
-#include <ostream>
-#include <iterator>
+
 
 using namespace ESMC;
 
