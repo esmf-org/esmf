@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.57 2008/08/26 15:46:36 theurich Exp $
+// $Id: ESMC_Clock.h,v 1.58 2008/08/29 22:07:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -7,7 +7,12 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-//
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// This file is part of the pure C public ESMC API
+//-----------------------------------------------------------------------------
+
 //-------------------------------------------------------------------------
 // (all lines below between the !BOP and !EOP markers will be included in
 //  the automated document processing.)
@@ -18,7 +23,6 @@
 #ifndef ESMC_Clock_H
 #define ESMC_Clock_H
 
-#include "ESMC_Interface.h"
 #include "ESMC_Time.h"
 #include "ESMC_TimeInterval.h"
 
@@ -45,9 +49,8 @@ typedef struct{
 
 // Class API
 
-ESMC_Clock ESMC_ClockCreate(int, const char*,
-                            ESMC_TimeInterval, 
-                            ESMC_Time, ESMC_Time, int*);
+ESMC_Clock ESMC_ClockCreate(int, const char*, ESMC_TimeInterval, ESMC_Time,
+  ESMC_Time, int*);
 
 int ESMC_ClockPrint(ESMC_Clock);
 

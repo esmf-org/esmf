@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.105 2008/04/24 14:33:03 rosalind Exp $
+// $Id: ESMC_Array.h,v 1.106 2008/08/29 22:07:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -7,7 +7,12 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-//
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// This file is part of the pure C public ESMC API
+//-----------------------------------------------------------------------------
+
 //-------------------------------------------------------------------------
 // (all lines below between the !BOP and !EOP markers will be included in
 //  the automated document processing.)

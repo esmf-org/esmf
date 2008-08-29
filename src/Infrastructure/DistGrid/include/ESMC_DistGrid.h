@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.37 2008/04/05 03:38:14 cdeluca Exp $
+// $Id: ESMC_DistGrid.h,v 1.38 2008/08/29 22:07:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -7,7 +7,12 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-//
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// This file is part of the pure C public ESMC API
+//-----------------------------------------------------------------------------
+
 //-------------------------------------------------------------------------
 // (all lines below between the !BOP and !EOP markers will be included in
 //  the automated document processing.)

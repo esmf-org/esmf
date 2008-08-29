@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.15 2008/04/05 03:39:14 cdeluca Exp $
+// $Id: ESMC_Init.h,v 1.16 2008/08/29 22:07:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -10,7 +10,7 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-// ESMC Init include file for C
+// This file is part of the pure C public ESMC API
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

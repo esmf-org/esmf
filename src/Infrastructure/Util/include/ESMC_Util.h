@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.27 2008/04/05 03:39:01 cdeluca Exp $
+// $Id: ESMC_Util.h,v 1.28 2008/08/29 22:07:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -7,14 +7,20 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-//
-// ESMF Util C++ declaration include file
-//
 //-----------------------------------------------------------------------------
-//
+
+//-----------------------------------------------------------------------------
+// This file is part of the pure C public ESMC API
+//-----------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
 
 #ifndef ESMC_UTIL_H
 #define ESMC_UTIL_H
+
+#include "ESMC_Conf.h"
 
 enum ESMC_TypeKind { ESMC_TYPEKIND_I1=1,
                      ESMC_TYPEKIND_I2,
@@ -28,5 +34,23 @@ enum ESMC_TypeKind { ESMC_TYPEKIND_I1=1,
                      ESMC_TYPEKIND_CHARACTER,
                      ESMF_NOKIND=99 };
 
+// ESMF platform-dependent data types
+#ifdef ESMF_IS_32BIT_MACHINE
+  typedef long long ESMC_I8;
+  typedef int       ESMC_I4;
+  typedef short     ESMC_I2;
+  typedef char      ESMC_I1;
+  typedef double    ESMC_R8;
+  typedef float     ESMC_R4;
+  typedef unsigned long      ESMC_POINTER;
+#else // 64-bit or larger machine
+  typedef long      ESMC_I8;
+  typedef int       ESMC_I4;
+  typedef short     ESMC_I2;
+  typedef char      ESMC_I1;
+  typedef double    ESMC_R8;
+  typedef float     ESMC_R4;
+  typedef unsigned long long ESMC_POINTER;
+#endif
 
 #endif  // ESMC_UTIL_H

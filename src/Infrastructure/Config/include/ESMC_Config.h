@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.11 2008/04/05 03:38:10 cdeluca Exp $
+// $Id: ESMC_Config.h,v 1.12 2008/08/29 22:07:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -7,15 +7,18 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
+//-----------------------------------------------------------------------------
 
-// ESMC Config class public include file
-//
+//-----------------------------------------------------------------------------
+// This file is part of the pure C public ESMC API
+//-----------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
 // (all lines below between the !BOP and !EOP markers will be included in 
 //  the automated document processing.)
 //-----------------------------------------------------------------------------
-//
- // these lines prevent this file from being read more than once if it
- // ends up being included multiple times
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
 
 #ifndef ESMC_Config_H
 #define ESMC_Config_H
@@ -30,12 +33,13 @@
 // signatures (prototypes).  The companion file ESMC\_Config.C contains
 // the definitions (full code bodies) for the Config methods.
 //
+//EOP
 //-----------------------------------------------------------------------------
-// 
+
 // !USES:
-#include "ESMCI_Util.h"
-#include "ESMC_F90Interface.h"
 #include "ESMC_Arg.h"
+#include "ESMC_Util.h"
+#include "ESMC_F90Interface.h"
 
 // Optional argument identifier list for the ESMC_Config API.
 enum {
@@ -63,12 +67,6 @@ typedef struct {
 
     // pointer to fortran derived type
     ESMC_F90ClassHolder* f90this;
-
-
-//
-//EOP
-//-----------------------------------------------------------------------------
-
 } ESMC_Config ; // end class ESMC_Config
 
 

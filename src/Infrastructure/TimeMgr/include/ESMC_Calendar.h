@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.59 2008/07/09 14:20:16 rosalind Exp $
+// $Id: ESMC_Calendar.h,v 1.60 2008/08/29 22:07:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -7,7 +7,12 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-//
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// This file is part of the pure C public ESMC API
+//-----------------------------------------------------------------------------
+
 //-------------------------------------------------------------------------
 // (all lines below between the !BOP and !EOP markers will be included in
 //  the automated document processing.)
@@ -17,8 +22,6 @@
 
 #ifndef ESMC_Calendar_H
 #define ESMC_Calendar_H
-
-#include "ESMC_Interface.h"
 
 //-----------------------------------------------------------------------------
 //BOPI
@@ -60,8 +63,7 @@ typedef struct{
 
 // Class API
 
-ESMC_Calendar ESMC_CalendarCreate(int, const char*,
-                                       ESMC_CalendarType, int*);  
+ESMC_Calendar ESMC_CalendarCreate(int, const char*, ESMC_CalendarType, int*);  
 
 int ESMC_CalendarPrint(ESMC_Calendar);
 

@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.23 2008/08/26 17:29:09 theurich Exp $
+// $Id: ESMC.h,v 1.24 2008/08/29 22:07:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,14 +8,22 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
-
-// main include file which includes all others
-
+//-------------------------------------------------------------------------
+//
+// Main include file of the pure C public ESMC API
+//
+//-------------------------------------------------------------------------
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
 #ifndef ESMC_H
 #define ESMC_H
+
+// platform specific configuration details
+#include "ESMC_Conf.h"
 
 // optional arguments in ESMC interfaces
 #include "ESMC_Arg.h"
@@ -24,11 +32,12 @@
 #include "ESMC_Interface.h"
 
 // Infrastructure headers
+#include "ESMC_Util.h"
 #include "ESMC_VM.h"
-#include "ESMC_Config.h"
-#include "ESMC_ArraySpec.h"
 #include "ESMC_DistGrid.h"
+#include "ESMC_ArraySpec.h"
 #include "ESMC_Array.h"
+#include "ESMC_Config.h"
 #include "ESMC_Calendar.h"
 #include "ESMC_Time.h"
 #include "ESMC_TimeInterval.h"

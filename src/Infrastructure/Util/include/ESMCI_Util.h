@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.7 2008/07/13 22:58:18 rokuingh Exp $
+// $Id: ESMCI_Util.h,v 1.8 2008/08/29 22:07:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -91,25 +91,6 @@ enum ESMC_RegionFlag { ESMF_REGION_TOTAL=0,
 // attwrite flag type
 enum ESMC_AttWriteFlag { ESMF_ATTWRITE_TAB=0,
                          ESMF_ATTWRITE_XML};
-
-// ESMF platform-dependent data types
-#ifdef ESMF_IS_32BIT_MACHINE
-  typedef long long ESMC_I8;
-  typedef int       ESMC_I4;
-  typedef short     ESMC_I2;
-  typedef char      ESMC_I1;
-  typedef double    ESMC_R8;
-  typedef float     ESMC_R4;
-  typedef unsigned long      ESMC_POINTER;
-#else // 64-bit or larger machine
-  typedef long      ESMC_I8;
-  typedef int       ESMC_I4;
-  typedef short     ESMC_I2;
-  typedef char      ESMC_I1;
-  typedef double    ESMC_R8;
-  typedef float     ESMC_R4;
-  typedef unsigned long long ESMC_POINTER;
-#endif
 
 // are the index numbers relative to a local chunk or the overall
 // combined igrid?
