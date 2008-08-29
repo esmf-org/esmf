@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.11 2008/08/27 17:15:59 dneckels Exp $
+! $Id: ESMF_MeshEx.F90,v 1.12 2008/08/29 17:09:42 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshEx.F90,v 1.11 2008/08/27 17:15:59 dneckels Exp $'
+    '$Id: ESMF_MeshEx.F90,v 1.12 2008/08/29 17:09:42 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -72,7 +72,7 @@ program ESMF_MeshEx
   call  ESMF_Initialize(vm=vm, rc=rc)
 
   ! Temporary bridge to mesh code initialization
-  call C_ESMC_MeshInit("MeshTest", 1)
+  !call C_ESMC_MeshInit("MeshTest", 1)
 
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
