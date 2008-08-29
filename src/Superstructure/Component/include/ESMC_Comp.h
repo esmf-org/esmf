@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.40 2008/08/27 00:49:25 theurich Exp $
+// $Id: ESMC_Comp.h,v 1.41 2008/08/29 17:10:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -65,6 +65,8 @@ int ESMC_GridCompRun(ESMC_GridComp comp, ESMC_State importState,
   ESMC_State exportState, ESMC_Clock clock, int phase);
 int ESMC_GridCompFinalize(ESMC_GridComp comp, ESMC_State importState,
   ESMC_State exportState, ESMC_Clock clock, int phase);
+void *ESMC_GridCompGetInternalState(ESMC_GridComp comp, int *rc);
+int ESMC_GridCompSetInternalState(ESMC_GridComp comp, void *data);
 int ESMC_GridCompPrint(ESMC_GridComp comp, const char *options);
 
 // Class declaration type
@@ -87,6 +89,8 @@ int ESMC_CplCompRun(ESMC_CplComp comp, ESMC_State importState,
   ESMC_State exportState, ESMC_Clock clock, int phase);
 int ESMC_CplCompFinalize(ESMC_CplComp comp, ESMC_State importState,
   ESMC_State exportState, ESMC_Clock clock, int phase);
+void *ESMC_CplCompGetInternalState(ESMC_CplComp comp, int *rc);
+int ESMC_CplCompSetInternalState(ESMC_CplComp comp, void *data);
 int ESMC_CplCompPrint(ESMC_CplComp comp, const char *options);
 
 

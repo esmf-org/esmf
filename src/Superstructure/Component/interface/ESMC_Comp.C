@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.39 2008/08/27 00:49:26 theurich Exp $
+// $Id: ESMC_Comp.C,v 1.40 2008/08/29 17:10:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Comp.C,v 1.39 2008/08/27 00:49:26 theurich Exp $";
+static const char *const version = "$Id: ESMC_Comp.C,v 1.40 2008/08/29 17:10:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -238,6 +238,54 @@ int ESMC_GridCompFinalize(ESMC_GridComp comp, ESMC_State importState,
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridCompGetInternalState()"
+void *ESMC_GridCompGetInternalState(ESMC_GridComp comp, int *rc){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::GridComp *compp = (ESMCI::GridComp *)(comp.ptr);
+
+  // call into ESMCI method  
+  void *data = compp->getInternalState(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    return NULL;  // bail out
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return data;
+}  
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridCompSetInternalState()"
+int ESMC_GridCompSetInternalState(ESMC_GridComp comp, void *data){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::GridComp *compp = (ESMCI::GridComp *)(comp.ptr);
+
+  // call into ESMCI method  
+  localrc = compp->setInternalState(data);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;  // bail out
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -455,6 +503,54 @@ int ESMC_CplCompFinalize(ESMC_CplComp comp, ESMC_State importState,
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CplCompGetInternalState()"
+void *ESMC_CplCompGetInternalState(ESMC_CplComp comp, int *rc){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::CplComp *compp = (ESMCI::CplComp *)(comp.ptr);
+
+  // call into ESMCI method  
+  void *data = compp->getInternalState(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    return NULL;  // bail out
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return data;
+}  
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CplCompSetInternalState()"
+int ESMC_CplCompSetInternalState(ESMC_CplComp comp, void *data){
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::CplComp *compp = (ESMCI::CplComp *)(comp.ptr);
+
+  // call into ESMCI method  
+  localrc = compp->setInternalState(data);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;  // bail out
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;

@@ -1,4 +1,4 @@
-// $Id: ESMC_ComponentUTest.C,v 1.5 2008/08/28 18:21:27 theurich Exp $
+// $Id: ESMC_ComponentUTest.C,v 1.6 2008/08/29 17:10:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,6 +37,11 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   ESMC_StatePrint(importState);
   ESMC_ClockPrint(*clock);
   
+  // test internal state -> set
+  int *data = (int *)malloc(10*sizeof(int));
+  printf("setting GridComp internal state to data: %p\n", data);
+  ESMC_GridCompSetInternalState(gcomp, data);
+  
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
@@ -49,6 +54,10 @@ void myRunInC(ESMC_GridComp gcomp, ESMC_State importState,
   ESMC_StatePrint(importState);
   ESMC_ClockPrint(*clock);
   
+  // test internal state -> get
+  int *data = (int *)ESMC_GridCompGetInternalState(gcomp, NULL);
+  printf("getting GridComp internal state to data: %p\n", data);
+  
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
@@ -60,6 +69,11 @@ void myFinalInC(ESMC_GridComp gcomp, ESMC_State importState,
   
   ESMC_StatePrint(importState);
   ESMC_ClockPrint(*clock);
+
+  // test internal state -> get and free
+  int *data = (int *)ESMC_GridCompGetInternalState(gcomp, NULL);
+  printf("getting GridComp internal state to data: %p\n", data);
+  free(data);
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -88,6 +102,11 @@ void myCplInitInC(ESMC_CplComp cplcomp, ESMC_State importState,
   ESMC_StatePrint(importState);
   ESMC_ClockPrint(*clock);
   
+  // test internal state -> set
+  int *data = (int *)malloc(10*sizeof(int));
+  printf("setting CplComp internal state to data: %p\n", data);
+  ESMC_CplCompSetInternalState(cplcomp, data);
+  
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
@@ -99,6 +118,10 @@ void myCplRunInC(ESMC_CplComp cplcomp, ESMC_State importState,
   
   ESMC_StatePrint(importState);
   ESMC_ClockPrint(*clock);
+  
+  // test internal state -> get
+  int *data = (int *)ESMC_CplCompGetInternalState(cplcomp, NULL);
+  printf("getting CplComp internal state to data: %p\n", data);
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -112,6 +135,11 @@ void myCplFinalInC(ESMC_CplComp cplcomp, ESMC_State importState,
   ESMC_StatePrint(importState);
   ESMC_ClockPrint(*clock);
   
+  // test internal state -> get and free
+  int *data = (int *)ESMC_CplCompGetInternalState(cplcomp, NULL);
+  printf("getting CplComp internal state to data: %p\n", data);
+  free(data);
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }

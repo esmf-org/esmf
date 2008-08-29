@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.7 2008/08/27 00:49:25 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.8 2008/08/29 17:10:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -53,6 +53,8 @@ class Comp{
     int setEntryPoint(const char *functionType,
       void (*functionPtr)(Comp *, State *, State *, Clock **, int *),
       int phase);
+    void *getInternalState(int *rc)const;
+    int setInternalState(void *data);
 };
 
 class GridComp:public Comp{

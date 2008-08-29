@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.6 2008/08/27 00:49:26 theurich Exp $
+// $Id: ESMCI_Comp.C,v 1.7 2008/08/29 17:10:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.6 2008/08/27 00:49:26 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.7 2008/08/29 17:10:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for fortran interface routines
@@ -115,7 +115,7 @@ int Comp::setServices(
     return rc;
   }
 
-  ESMCI::FTable::setServices(this, (void(*)())func, &localrc);
+  FTable::setServices(this, (void(*)())func, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -163,7 +163,7 @@ int Comp::setEntryPoint(
   int slen = strlen(functionType);
   char *tname = new char[slen+1];
   strcpy(tname, functionType);
-  ESMCI::FTable::setTypedEP(this, tname, strlen(functionType),
+  FTable::setTypedEP(this, tname, strlen(functionType),
     &phase, 0, FT_COMP2STAT, (void *)functionPtr, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
@@ -176,6 +176,113 @@ int Comp::setEntryPoint(
 //-----------------------------------------------------------------------------
 
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp:getInternalState()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp:getInternalState
+//
+// !INTERFACE:
+void *Comp::getInternalState(
+//
+// !RETURN VALUE:
+//    void * to data
+//
+// !ARGUMENTS:
+//
+  int *rc                       // (out)
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", rc);
+    return NULL;
+  }
+  
+  FTable *ftable = **(FTable***)this;
+  if (ftable==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid FTable pointer", rc);
+    return NULL;
+  }
+  
+  char *name = "localdata";
+  enum dtype dtype;
+  void *data;
+  
+  localrc = ftable->getDataPtr(name, &data, &dtype);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    return NULL;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return data;
+}
+//-----------------------------------------------------------------------------
+
+  
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp:setInternalState()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp:setInternalState
+//
+// !INTERFACE:
+int Comp::setInternalState(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void *data                    // (in)
+  ){
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  FTable *ftable = **(FTable***)this;
+  if (ftable==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid FTable pointer", &rc);
+    return rc;
+  }
+  
+  char *name = "localdata";
+  enum dtype dtype = DT_VOIDP;
+  
+  localrc = ftable->setDataPtr(name, &data, dtype);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+  
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridComp:create()"
@@ -193,7 +300,7 @@ GridComp *GridComp::create(
     char *name, 
     enum GridCompType mtype,
     char *configFile,
-    ESMCI::Clock *clock,
+    Clock *clock,
     int *rc
   ){
 //
@@ -278,9 +385,9 @@ int GridComp::initialize(
 //
 // !ARGUMENTS:
 //
-    ESMCI::State *importState,
-    ESMCI::State *exportState,
-    ESMCI::Clock *clock,
+    State *importState,
+    State *exportState,
+    Clock *clock,
     int phase
   )const{
 //
@@ -327,9 +434,9 @@ int GridComp::run(
 //
 // !ARGUMENTS:
 //
-    ESMCI::State *importState,
-    ESMCI::State *exportState,
-    ESMCI::Clock *clock,
+    State *importState,
+    State *exportState,
+    Clock *clock,
     int phase
   )const{
 //
@@ -376,9 +483,9 @@ int GridComp::finalize(
 //
 // !ARGUMENTS:
 //
-    ESMCI::State *importState,
-    ESMCI::State *exportState,
-    ESMCI::Clock *clock,
+    State *importState,
+    State *exportState,
+    Clock *clock,
     int phase
   )const{
 //
@@ -470,7 +577,7 @@ CplComp *CplComp::create(
 //
     char *name, 
     char *configFile,
-    ESMCI::Clock *clock,
+    Clock *clock,
     int *rc
   ){
 //
@@ -555,9 +662,9 @@ int CplComp::initialize(
 //
 // !ARGUMENTS:
 //
-    ESMCI::State *importState,
-    ESMCI::State *exportState,
-    ESMCI::Clock *clock,
+    State *importState,
+    State *exportState,
+    Clock *clock,
     int phase
   )const{
 //
@@ -604,9 +711,9 @@ int CplComp::run(
 //
 // !ARGUMENTS:
 //
-    ESMCI::State *importState,
-    ESMCI::State *exportState,
-    ESMCI::Clock *clock,
+    State *importState,
+    State *exportState,
+    Clock *clock,
     int phase
   )const{
 //
@@ -653,9 +760,9 @@ int CplComp::finalize(
 //
 // !ARGUMENTS:
 //
-    ESMCI::State *importState,
-    ESMCI::State *exportState,
-    ESMCI::Clock *clock,
+    State *importState,
+    State *exportState,
+    Clock *clock,
     int phase
   )const{
 //
