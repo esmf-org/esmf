@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.12 2008/08/28 23:14:39 cdeluca Exp $
+! $Id: ESMF_Mesh.F90,v 1.13 2008/08/29 19:21:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@ module ESMF_MeshMod
 ! !MODULE: ESMF_MeshMod
 !
 
-!   F90 API wrapper of C++ implemenation of Mesh
+!   F90 API wrapper of C++ implementation of Mesh
 !
 !------------------------------------------------------------------------------
 
@@ -123,7 +123,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.12 2008/08/28 23:14:39 cdeluca Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.13 2008/08/29 19:21:31 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -275,8 +275,7 @@ module ESMF_MeshMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreate3Part()"
 !BOP
-! !IROUTINE: ESMF_MeshCreate - Create a Mesh as a 3 step process - first
-!            the mesh, then add nodes and finally add elements
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh as a 3 step process
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
@@ -291,7 +290,8 @@ module ESMF_MeshMod
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Create an empty mesh.
+!   Create an empty mesh in three parts - first the mesh, then add
+!   nodes and finally add elements.
 !
 !   \begin{description}
 !   \item [parametricDim]
@@ -483,7 +483,7 @@ module ESMF_MeshMod
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshDestroy"
 !BOP
-! !IROUTINE: ESMF_MeshDestroy - Destroy the Mesh.
+! !IROUTINE: ESMF_MeshDestroy - Destroy the Mesh
 !
 ! !INTERFACE:
       subroutine ESMF_MeshDestroy(mesh, rc)
@@ -495,6 +495,7 @@ module ESMF_MeshMod
     integer,        intent(out), optional :: rc
 !
 ! !DESCRIPTION:
+!    Destroy the mesh.
 !
 ! The arguments are:
 ! \begin{description}
@@ -523,8 +524,7 @@ module ESMF_MeshMod
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshFreeMemory"
 !BOP
-! !IROUTINE: ESMF_MeshFreeMemory - Remove the underlying
-!    mesh and its memory, but keep the fortran mesh scheme around
+! !IROUTINE: ESMF_MeshFreeMemory - Remove the mesh and its memory
 !
 ! !INTERFACE:
       subroutine ESMF_MeshFreeMemory(mesh, rc)
@@ -536,6 +536,8 @@ module ESMF_MeshMod
     integer,        intent(out), optional :: rc
 !
 ! !DESCRIPTION:
+!    Remove the mesh and its memory,  but retain the Fortran
+!    mesh scheme.
 !
 ! The arguments are:
 ! \begin{description}
@@ -569,7 +571,7 @@ module ESMF_MeshMod
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshGet"
 !BOP
-! !IROUTINE: ESMF_MeshGet - Get information from the mesh.
+! !IROUTINE: ESMF_MeshGet - Get information from the Mesh
 !
 ! !INTERFACE:
       subroutine ESMF_MeshGet(mesh, nodal_distgrid, element_distgrid, &
@@ -586,6 +588,7 @@ module ESMF_MeshMod
     integer,        intent(out), optional :: rc
 !
 ! !DESCRIPTION:
+!   Get information from the mesh.
 !
 ! The arguments are:
 ! \begin{description}
@@ -616,7 +619,7 @@ module ESMF_MeshMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshWrite()"
 !BOP
-! !IROUTINE: ESMF_MeshWrite - Write mesh to a VTK file
+! !IROUTINE: ESMF_MeshWrite - Write Mesh to a VTK file
 !
 ! !INTERFACE:
     subroutine ESMF_MeshWrite(mesh, filename, rc)
