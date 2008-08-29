@@ -54,7 +54,7 @@ program ESMF_LocStreamEx
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-#if 0
+#if 1
 !BOE
 !\subsubsection{Creating A LocStream Employing User Allocated Memory}
 !
@@ -92,7 +92,6 @@ program ESMF_LocStreamEx
    ! define the number and distribution of the locations. 
    !-------------------------------------------------------------------
    locstream=ESMF_LocStreamCreate(name="Equatorial Measurements",   &
-                                  keyNames="Lat:Long",              &
                                   localCount=numLocationsOnThisPet, &
                                   rc=rc)
 
@@ -164,7 +163,6 @@ program ESMF_LocStreamEx
    ! define the number and distribution of the locations. 
    !-------------------------------------------------------------------
    locstream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
-                                  keyNames="Lat:Long", &
                                   localCount=numLocationsOnThisPet, &
                                   rc=rc)
 
@@ -198,7 +196,6 @@ program ESMF_LocStreamEx
                              keyName="Lon",                &
                              farray=lon,                   &
                              rc=rc)
-   
 
    !-------------------------------------------------------------------
    ! Set key data. 
@@ -238,9 +235,9 @@ program ESMF_LocStreamEx
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
-    print *, "PASS: ESMF_GridUsageEx.F90"
+    print *, "PASS: ESMF_LocStreamEx.F90"
   else
-    print *, "FAIL: ESMF_GridUsageEx.F90"
+    print *, "FAIL: ESMF_LocStreamEx.F90"
   endif
   
 end program
