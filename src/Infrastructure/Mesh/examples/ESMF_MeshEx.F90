@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.12 2008/08/29 17:09:42 dneckels Exp $
+! $Id: ESMF_MeshEx.F90,v 1.13 2008/08/29 20:22:29 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,13 +13,23 @@
 program ESMF_MeshEx
 
 !==============================================================================
-!ESMF____EXAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
+!BOE
+! \subsubsection{Example: Create a Mesh}~\label{sec:usage:ex:adv:reg}
+!
+! This example uses the mesh creation API to create a mesh, and then to create
+! a field on the mesh.
+!EOE
+
+!  !PROGRAM: ESMF_MeshEx - Example of Mesh creation.
+!
+!  !DESCRIPTION: 
+!
+! This program shows examples of Mesh creation
 
 
-
-!------------------------------------------------------------------------------
 
 #include <ESMF_Macros.inc>
 
@@ -38,7 +48,7 @@ program ESMF_MeshEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshEx.F90,v 1.12 2008/08/29 17:09:42 dneckels Exp $'
+    '$Id: ESMF_MeshEx.F90,v 1.13 2008/08/29 20:22:29 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -56,6 +66,10 @@ program ESMF_MeshEx
   integer :: num_elem, num_node, conn_size
   integer :: i
 
+!BOE
+! The following arrays are used to declare the mesh to the ESMF framework.
+!EOE
+!BOC
   integer, allocatable :: nodeId(:)
   real(ESMF_KIND_R8), allocatable :: nodeCoord(:)
   integer, allocatable :: nodeOwner(:)
@@ -63,6 +77,7 @@ program ESMF_MeshEx
   integer, allocatable :: elemId(:)
   integer, allocatable :: elemType(:)
   integer, allocatable :: elemConn(:)
+!EOC
 
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_Field)  :: srcField
@@ -71,28 +86,34 @@ program ESMF_MeshEx
   finalrc = ESMF_SUCCESS
   call  ESMF_Initialize(vm=vm, rc=rc)
 
-  ! Temporary bridge to mesh code initialization
-  !call C_ESMC_MeshInit("MeshTest", 1)
-
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-!  !-----------------------------------------------------------------------------
-!  !NEX_Ex
   write(name, *) "Test GridToMesh"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! init success flag
   correct=.true.
   rc=ESMF_SUCCESS
 
-!  meshSrc = ESMF_MeshCreate(2,3,rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
-  call C_ESMC_MeshVTKHeader("data/testmesh", num_elem, num_node, conn_size, rc)
+!BOE
+! \subsubsection{Mesh Creation as a three step process}
+!
+! Here we create a mesh first by defining the mesh structure, then adding
+! nodes (with node coordinates) and finally adding the element types and
+! connectivities.
+! 
+! The benefit of having this as a three step process is that the node arrays
+! may be freed (if desired) before creating and using the element arrays. This
+! may be desirable in a low-memory scenario.
+!EOE
+!BOC
+  meshSrc = ESMF_MeshCreate(2,3,rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  !print *, 'num_elem:', num_elem, 'num_node:', num_node, 'conn_size:', conn_size
+  call C_ESMC_MeshVTKHeader("data/testmesh", num_elem, num_node, conn_size, rc)
+!BOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! Allocate the arrays to describe Mesh
 
@@ -115,35 +136,62 @@ program ESMF_MeshEx
     elemConn(i) = elemConn(i)+1
   enddo
 
-  ! Declare the nodes
-!  call ESMF_MeshAddNodes(meshSrc, nodeId, nodeCoord, nodeOwner, rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! Declare the nodes
+!EOE
+!BOC
+  call ESMF_MeshAddNodes(meshSrc, nodeId, nodeCoord, nodeOwner, rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  ! Declare the elements
-!  call ESMF_MeshAddElements(meshSrc, elemId, elemType, elemConn, rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! Declare the elements
+!EOE
+!BOC
+  call ESMF_MeshAddElements(meshSrc, elemId, elemType, elemConn, rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  ! Write the mesh for debug
-!  call ESMF_MeshWrite(meshSrc, "outmesh", rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! Write the mesh for debug
+!EOE
+!BOC
+  call ESMF_MeshWrite(meshSrc, "outmesh", rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-!  call ESMF_MeshDestroy(meshSrc, rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!BOE
+! Destroy the mesh.
+!EOE
+!BOC
+  call ESMF_MeshDestroy(meshSrc, rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  ! Now do the same, but with the all in one function
+!BOE
+! Now create, but with the all in one function.
+!EOE
+!BOC
   meshSrc = ESMF_MeshCreate(2,3,nodeId, nodeCoord, nodeOwner, &
                            elemId, elemType, elemConn, rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! Write the mesh for debug
   call ESMF_MeshWrite(meshSrc, "outmesh1", rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  ! Create a field on the Mesh
+!BOE
+! Here we create a field that lives on the nodes of the mesh.
+!
+! Create a field on the Mesh
+!EOE
+!BOC
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc)
 
   srcField = ESMF_FieldCreate(meshSrc, arrayspec, &
          name="test_var", rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldPrint(srcField)
