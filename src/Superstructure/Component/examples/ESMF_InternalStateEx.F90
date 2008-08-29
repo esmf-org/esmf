@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.13 2008/07/25 20:28:30 theurich Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.14 2008/08/29 05:22:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -9,22 +9,11 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-!
-      program ESMF_InternalStateEx
 
 !==============================================================================
-!
-! !PROGRAM: ESMF_InternalStateEx - Example of using Set/Get Internal State
-!
-! !DESCRIPTION:
-!  Example of using the Component level Internal State routines.
+!ESMF_EXAMPLE        String used by test script to count examples.
+!==============================================================================
 
-!  These include:
-!   ESMF_GridCompGetInternalState
-!   ESMF_GridCompSetInternalState
-!   ESMF_CplCompGetInternalState
-!   ESMF_CplCompSetInternalState
-!
 !-------------------------------------------------------------------------
 !BOP
 !\subsubsection{Setting and Getting the Internal State}  
@@ -43,7 +32,11 @@
 !   See the code below for a simple example of using this capability.
 !
 !EOP
-!
+!-------------------------------------------------------------------------
+
+     program ESMF_InternalStateEx
+
+!-------------------------------------------------------------------------
 ! !USES:
 !BOC
     ! ESMF Framework module

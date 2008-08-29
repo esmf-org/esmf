@@ -1,11 +1,20 @@
-! $Id: ESMF_AppMainEx.F90,v 1.32 2008/04/02 19:44:08 theurich Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.33 2008/08/29 05:22:23 theurich Exp $
 !
-! Example code for a main Application program. 
+! Earth System Modeling Framework
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
 
-!-------------------------------------------------------------------------
+!==============================================================================
 !ESMF_EXAMPLE        String used by test script to count examples.
-!-------------------------------------------------------------------------
+!==============================================================================
 
+!-------------------------------------------------------------------------
 !BOP
 !
 ! !DESCRIPTION:

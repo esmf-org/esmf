@@ -1,21 +1,20 @@
-! $Id: ESMF_GCompEx.F90,v 1.36 2008/07/25 20:28:30 theurich Exp $
+! $Id: ESMF_GCompEx.F90,v 1.37 2008/08/29 05:22:23 theurich Exp $
 !
-! Example/test code which shows Gridded Component calls.
+! Earth System Modeling Framework
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
 
-!-------------------------------------------------------------------------
+!==============================================================================
 !ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
-!
-! !PROGRAM: ESMF_GCompEx.F90 - Gridded Component example
-!
-! !DESCRIPTION:
-!
-!   The skeleton of one of many possible Gridded component models.
-!
-!-----------------------------------------------------------------------------
 
-!
-
+!-------------------------------------------------------------------------
 !BOP
 !\subsubsection{Specifying a User-Code SetServices Routine}
 !
