@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.61.2.3 2008/08/29 05:49:54 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.61.2.4 2008/08/29 21:46:13 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.61.2.3 2008/08/29 05:49:54 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.61.2.4 2008/08/29 21:46:13 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -713,7 +713,7 @@ int ESMC_Alarm::count=0;
 
     } else {      // ESMF_MODE_REVERSE
       // for sticky alarms, step back ring times
-      if (sticky && ringTime != firstRingTime) {
+      if (sticky && ringTime - ringInterval != firstRingTime) {
         ringTime     -= ringInterval;
         prevRingTime -= ringInterval; 
 
@@ -1080,6 +1080,9 @@ int ESMC_Alarm::count=0;
 
       // else if not sticky, check if time to turn off alarm
       //   (user is responsible for turning off sticky alarms via RingerOff())
+      // TODO:  maybe should not be else clause, just an "if" on its own, since
+      // ringTimeStepCount=1 would imply turning off in the same timeStep? But
+      // would need to move timeStepRingingCount++ up.
       else if (!sticky && ringing && enabled) {
 
         // first check if next alarm time has been reached,
@@ -1145,12 +1148,24 @@ int ESMC_Alarm::count=0;
         return(false);
       }
 
+      // check if ringEnd is past clock currTime (e.g. 1st step in reverse)
+      if (sticky && ringTime - ringInterval != firstRingTime) {
+        if (positive  && ringEnd > clock->currTime ||
+            !positive && ringEnd < clock->currTime) {
+          ringEnd      -= ringInterval;
+          ringTime     -= ringInterval;
+          prevRingTime -= ringInterval;
+        }
+      }
+
       // determine when alarm ends ringing in forward mode
       ESMC_Time ringTimeEnd;
       if (sticky) {
         ringTimeEnd = ringEnd;
       } else { // non-sticky
         if (ringTimeStepCount > 0) {  // use ringTimeStepCount ...
+          // TODO:  base on ringBegin rather than ringTime, to be consistent
+          //  with checkTurnOn() logic?
           ringTimeEnd = ringTime + ringTimeStepCount * clock->timeStep;
         } else { // ... otherwise use ringDuration
           ringTimeEnd = ringTime + ringDuration; 
@@ -1163,6 +1178,7 @@ int ESMC_Alarm::count=0;
           ringingOnCurrTimeStep = ringing = (clock->currTime == ringTimeEnd);
         } else {
           ringingOnCurrTimeStep = ringing = (positive) ?
+                    // TODO: <= && > (for positive), >= && < (for negative) ?
                     (clock->currTime < ringTimeEnd) &&
                       (clock->currTime + clock->timeStep) >= ringTimeEnd :
                                        // (negative)
@@ -1229,7 +1245,7 @@ int ESMC_Alarm::count=0;
           timeStepRingingCount--;
         }
 
-      }
+      } // if (!sticky)
 
       // determine if alarm was ringing on previous timeStep
       if (enabled) {
