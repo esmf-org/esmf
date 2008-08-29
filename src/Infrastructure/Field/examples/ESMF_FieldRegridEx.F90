@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.17 2008/08/27 20:33:23 dneckels Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.18 2008/08/29 18:31:17 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.17 2008/08/27 20:33:23 dneckels Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.18 2008/08/29 18:31:17 cdeluca Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -271,13 +271,13 @@ program ESMF_FieldRegridEx
 !BOE
 !
 !\subsubsection{Applying the Regrid Operator to a pair of Fields}
-! The {\tt ESMF\_FieldRegridRun} subroutine calls {\tt ESMF\_ArraySparseMatMul}
+! The {\tt ESMF\_FieldRegrid} subroutine calls {\tt ESMF\_ArraySparseMatMul}
 ! and performs a regrid from source to destination field.
 !EOE
 
   ! Test the regrid application
 !BOC
-  call ESMF_FieldRegridRun(srcField, dstField, routeHandle, localrc)
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, localrc)
 !EOC
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
