@@ -1,4 +1,4 @@
-! $Id: ESMF_MyRegistrationInFortran.F90,v 1.4 2008/08/28 18:21:27 theurich Exp $
+! $Id: ESMF_MyRegistrationInFortran.F90,v 1.5 2008/08/29 03:30:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@ contains
     type(ESMF_GridComp)   :: gcomp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
-    integer               :: rc
+    integer, intent(out)  :: rc
     ! do something here
     print *, "I am in myInitInFortran()"
     call ESMF_StatePrint(importState);
@@ -33,7 +33,7 @@ contains
     type(ESMF_GridComp)   :: gcomp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
-    integer               :: rc
+    integer, intent(out)  :: rc
     ! do something here
     print *, "I am in myRunInFortran()"
     call ESMF_StatePrint(importState);
@@ -46,7 +46,7 @@ contains
     type(ESMF_GridComp)   :: gcomp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
-    integer               :: rc
+    integer, intent(out)  :: rc
     ! do something here
     print *, "I am in myFinalInFortran()"
     call ESMF_StatePrint(importState);
@@ -60,7 +60,7 @@ contains
     type(ESMF_CplComp)    :: cplcomp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
-    integer               :: rc
+    integer, intent(out)  :: rc
     ! do something here
     print *, "I am in myInitInFortran()"
     call ESMF_StatePrint(importState);
@@ -73,7 +73,7 @@ contains
     type(ESMF_CplComp)    :: cplcomp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
-    integer               :: rc
+    integer, intent(out)  :: rc
     ! do something here
     print *, "I am in myRunInFortran()"
     call ESMF_StatePrint(importState);
@@ -86,7 +86,7 @@ contains
     type(ESMF_CplComp)    :: cplcomp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
-    integer               :: rc
+    integer, intent(out)  :: rc
     ! do something here
     print *, "I am in myFinalInFortran()"
     call ESMF_StatePrint(importState);
