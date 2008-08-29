@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.61.2.2 2008/06/19 00:30:41 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.61.2.3 2008/08/29 05:49:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.61.2.2 2008/06/19 00:30:41 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.61.2.3 2008/08/29 05:49:54 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -140,7 +140,7 @@ int ESMC_Alarm::count=0;
 
       // TODO: handle case where *ringTime < clock->currTime;
       //       same or similar to refTime
-      
+
       if (ringTime == ESMC_NULL_POINTER) {
         // works for positive or negative ringInterval
         alarm->ringTime = clock->currTime + alarm->ringInterval;
@@ -1595,7 +1595,9 @@ int ESMC_Alarm::count=0;
         printf("sticky = %s\n", sticky ? "true" : "false");
       }
 
-    } else {
+    } 
+
+    if (options == ESMC_NULL_POINTER || strncmp(options, "string", 6) == 0) {
       // default:  print out all properties
 
       printf("name = %s\n", name);
@@ -1759,9 +1761,17 @@ int ESMC_Alarm::count=0;
     // here for the sake of X1 compiler.  That may be taken off later.
     ringingOnCurrTimeStep = false;
 
-    bool checkRinging = (timeStepPositive) ?
-                clock->currTime >= ringTime && clock->prevTime < ringTime :
-                clock->currTime <= ringTime && clock->prevTime > ringTime;
+    bool checkRinging;
+
+    if (clock->advanceCount != 0) { // clock has been advanced; use prevTime
+      checkRinging = (timeStepPositive) ?
+             clock->currTime >= ringTime && clock->prevTime < ringTime :
+             clock->currTime <= ringTime && clock->prevTime > ringTime;
+    } else {  // clock in initial state; don't use prevTime since
+              //   it equals currTime
+      checkRinging = (timeStepPositive) ?
+             clock->currTime >= ringTime : clock->currTime <= ringTime ;
+    }
 
     if (checkRinging) {
       // if so, refresh ringing state; if not, leave previous state alone:
