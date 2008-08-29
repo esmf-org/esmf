@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.37 2008/08/26 20:48:17 theurich Exp $ 
+# $Id: makefile,v 1.38 2008/08/29 17:28:41 dneckels Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -28,9 +28,9 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
 #                 $(ESMF_EXDIR)/ESMF_FieldWriteEx
 
 EXAMPLES_RUN = run_ESMF_FieldCreateEx \
-               run_ESMF_FieldEx
-#               run_ESMF_FieldRegridEx \
-#               run_ESMF_FieldSphereRegridEx \
+               run_ESMF_FieldEx \
+               run_ESMF_FieldRegridEx \
+               run_ESMF_FieldSphereRegridEx 
 #               run_ESMF_FieldGetEx \
 #               run_ESMF_FieldSetEx \
 #               run_ESMF_FieldFromUserEx \
@@ -38,9 +38,9 @@ EXAMPLES_RUN = run_ESMF_FieldCreateEx \
 #               run_ESMF_FieldWriteEx 
 
 EXAMPLES_RUN_UNI = run_ESMF_FieldCreateEx_uni \
-                   run_ESMF_FieldEx_uni
-#                   run_ESMF_FieldRegridEx_uni \
-#                   run_ESMF_FieldSphereRegridEx_uni \
+                   run_ESMF_FieldEx_uni \
+                   run_ESMF_FieldRegridEx_uni \
+                   run_ESMF_FieldSphereRegridEx_uni 
 #                   run_ESMF_FieldGetEx_uni \
 #                   run_ESMF_FieldSetEx_uni \
 #                   run_ESMF_FieldFromUserEx_uni \
