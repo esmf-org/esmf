@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.18 2008/08/15 22:44:16 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.19 2008/08/29 23:04:40 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.18 2008/08/15 22:44:16 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.19 2008/08/29 23:04:40 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1592,7 +1592,6 @@ extern "C" {
 
   int status;
   char *cconv, *cpurp, *cobj, *ctarobj;
-  int temp = 0;
   
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -1680,7 +1679,7 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.ESMC_AttributeWriteTab(cconv, cpurp, cobj, ctarobj,
-    (*base)->ESMC_Base::ESMC_BaseGetName(), temp);
+    (*base)->ESMC_Base::ESMC_BaseGetName());
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed attributewritetab", &status);

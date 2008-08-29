@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.h,v 1.15 2008/08/13 14:53:22 rokuingh Exp $
+// $Id: ESMC_Attribute.h,v 1.16 2008/08/29 23:04:40 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -102,8 +102,10 @@ class ESMC_Attribute
     int ESMC_AttributeCopyAll(ESMC_Base *source);
     
     // count the number of objects in an attribute hierarchy
-    int ESMC_AttributeCountTree(char *convention, 
-      char *purpose, char *object, int &ans) const;
+    int ESMC_AttributeCountTree(char *convention, char *purpose,  
+      char *object, int &objCount, int &objmaxattrCount) const;
+    int ESMC_AttributeCountTreeLens(char *convention, char *purpose,  
+      char *object, int *attrLens, char **attrNames) const;
     
     // destroy an attribute or attpack
     int ESMC_AttributeRemove(char *name);
@@ -168,13 +170,13 @@ class ESMC_Attribute
 
     // attribute write methods
     int ESMC_AttributeWriteTab(char *convention, char *purpose, char *object, 
-                          char *varobj, char *basename, int &count) const;
-
+                               char *varobj, char *basename) const;
+    int ESMC_AttributeWriteTabrecurse(FILE *tab, char *convention, char *purpose, 
+                          char *obj, int *attrLens, int maxattrs, int &count) const;
     int ESMC_AttributeWriteXML(char *convention, char *purpose, char *object, 
                                char *varobj, char *basename) const;
-    
     int ESMC_AttributeWriteXMLrecurse(FILE *xml, char *convention, char *purpose, char *object, 
-                               char *varobj, int stop, int& fldcount) const;
+                               char *varobj, int stop, int &fldcount) const;
 
     // not implemented yet
     int ESMC_AttributeCopy(char *name, ESMC_Attribute *destination);
