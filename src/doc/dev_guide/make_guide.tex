@@ -1,4 +1,4 @@
-% CVS $Id: make_guide.tex,v 1.6 2007/04/12 21:18:56 cdeluca Exp $
+% CVS $Id: make_guide.tex,v 1.7 2008/08/29 14:23:30 w6ws Exp $
 
 \subsection{Code: Makefile Conventions} 	 
 
@@ -81,42 +81,4 @@ Below the Superstructure \& Infrastructure level are the individual
 component levels (TimeMgr, Field, Component, etc).  Under each of these
 directories is an include directory for the component specific include
 files.
-
-\subsection{System Dependent Strategy Using Preprocessor} Since the code
-must compile across different platforms, a stategy must be adopted to
-handle the system differences. Examples of system differences are: the
-subroutines (bcopy vs memcopy) or include filenames (strings.h vs str.h,
-etc).
-
-Rather than putting architecture names in all the source files, there will
-be an ESMF-wide file which contains sections like this: 
-\begin{verbatim}
-
- #ifdef sgi 
- #define HAS_VFORK 0 
- #define BCOPY_FASTER 1 
- #define FOPEN_3RD_ARG 1 
- #endif
-
- #ifdef sun 
- #define HAS_VFORK 1 
- #define BCOPY_FASTER 0 
- #define FOPEN_3RD_ARG 1 
- #endif
-
-\end{verbatim} This allows system-dependent code to be bracketed with
-meaningful names: 
-
-\begin{verbatim} 
-
- #if HAS_VFORK
-    vfork();
- #else
-    fork(); 
-    exec();
- #endif
-
-\end{verbatim} 
-and not an endless string of architecture names.
-
 

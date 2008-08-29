@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_datatype.tex,v 1.3 2008/08/22 01:31:36 w6ws Exp $
+% CVS $Id: code_conv_datatype.tex,v 1.4 2008/08/29 14:23:30 w6ws Exp $
 
 \subsection{Code: Data Type Consistency Guidelines}
 
@@ -176,9 +176,24 @@ here {\tt someFloat} is a 4 byte floating point in any platform.
 \begin{enumerate}
 \item Boolean values used internally within the C++ routines may use the {\tt bool} data type.
 
-\item Methods which are Fortran-callable, and pass boolean values through the dummy argument list, must use the {\tt ESMC\_Logical} type.  The constants
-{\tt ESMF\_TRUE} and {\tt ESMF\_FALSE} are available for comparison purposes.  These constants must be used to ensure compatibility with the Fortran code.
+\item Methods which are Fortran-callable, and pass boolean values through the dummy argument list, must use the
+{\tt ESMC\_Logical} enumerated type.  The constants {\tt ESMF\_TRUE} and {\tt ESMF\_FALSE} are available
+for comparison purposes.  These constants must be used to ensure compatibility with the Fortran code.
 \end{enumerate}
+
+\begin{verbatim}
+               void fortran_caller(bool &myFlag) {	       
+                 ESMF_Logical myFlag_local;
+
+                 myFlag_local = myFlag;
+                 if (myFlag_local == ESMF_TRUE)
+                   ESMF_SomeFortranRoutine (&myFlag_local);  // Pass to Fortran
+                 else
+                   ESMF_OtherFortranRtoutine (&myFlag_local);
+
+                 myFlag = myFlag_local;
+               }
+\end{verbatim}
 
 \subsubsection{ESMF\_TypeKind ``labels'': When knowing the data type/kind is necessary}
 

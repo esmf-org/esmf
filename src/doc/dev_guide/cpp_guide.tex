@@ -1,0 +1,143 @@
+% CVS $Id: cpp_guide.tex,v 1.1 2008/08/29 14:23:30 w6ws Exp $
+
+\subsection{Preprocessor Usage}
+
+\subsubsection{Using the Preprocessor For Generic Fortran Code}
+
+Fortran allows the creation of generic subprogram names via the
+{\tt INTERFACE} facility.  This lets the caller use a simplified
+single name for a call.  Then, based on the callers actual argument list,
+the compiler will choose an appropriate specific routine to perform
+the task.
+
+When several specific variants of a generic call exist, and only
+differ in minor ways, for example by ESMF object type, it can be
+desirable to have the variants generated from a single definition.
+This allows improvements in the reliability and maintainability of
+the code.  Feature code can be added in a single place, and all
+of the specific routines will automatically incorporate the new code.
+
+By convention, generic ESMF Fortran code uses the GNU C preprocessor
+macro facility to generate specific routines.  These routines generally
+differ only in the type, kind, and rank of the dummy arguments.  The
+internal code is otherwise identical.
+
+When writing a cpp macro, the definition must be 'one line' long.
+Since coding an entire subprogram requires many lines to implement,
+a backslash character is used at the end of each line to concatenate
+multiple lines from the input file into a single, very long, preprocessor
+line.  After macro expansion, each preprocessor line needs to be
+converted into a sequence of Fortran statements.  So again by
+convention, at-sign characters, @, are used as the second-to-last
+character in each line.  After cpp has been run, the long lines from
+the result are split at the @ characters by converting them to newline
+characters.  The {\tt tr} command is used for this translation.
+
+ESMF Fortran files which need to be preprocessed in this manner use
+the file name suffix {\tt .cppF90}.  This triggers the makefile system
+to use the following sequence when processing the file:
+
+\begin{itemize}
+
+\item The gcc version of cpp is run.  This causes a first pass of
+preprocessing to occur.  All macro expansion for generic routines
+should be performed in this pass.
+
+\item The {\tt tr} command is run to convert @ characters to newline
+characters.  Secondarily, \^\ characters are converted to \# characters
+in order to allow selected preprocessing directives to pass through to the
+second level of preprocessing performed by the actual compiler.
+
+\item The Fortran compiler is run.  The built-in preprocessor is used for
+the second preprocessing pass.  This pass is used for other preprocessing
+tasks - such as including header files needed for compilation, or for
+conditional compilation of system-dependent code.
+
+\end{itemize}
+
+A simple example of generic code written in this style is:
+
+\begin{verbatim}
+
+  module ESMF_Example_mod
+    use ESMF_Mod
+    implicit none
+
+! The following header needs to be preprocessed by the compiler,
+! not the first cpp pass.  So use a caret as the first character,
+! rather than a pound-sign.
+
+^include "my_header.inc"
+
+! Define a generic name with three specific routines
+
+    interface ESMF_generic_name
+      module procedure ESMF_ArraySpecifc
+      module procedure ESMF_FieldSpecfic
+      module procedure ESMF_MeshSpecific
+    end interface
+
+  contains
+
+! Define a macro for expansion.  Each line is terminated with a
+! @\ sequence.  Also note the use of ## for concatenation
+! and # for stringization.
+
+#define MySpecificMacro(mclass, mthis)  \
+  subroutine mclass##Specific (mclass, rc) @\
+    type(mclass), intent(inout) :: mthis @\
+    integer, optional :: rc @\
+ @\
+    print *, 'class = ', #mclass @\
+ @\
+    if (present (rc)) rc = ESMF_SUCCESSFUL @\
+ @\
+  end subroutine mclass##Specfic @\
+
+! Expand macro for a few classes
+
+MySpecificMacro(ESMF_Array, array)
+MySpefificMacro(ESMF_Field, field)
+MySpecificMacro(ESMF_Mesh, mesh)
+
+end module ESMF_Example_mod
+
+\end{verbatim}
+
+\subsubsection{System Dependent Strategy Using Preprocessor} Since the code
+must compile across different platforms, a stategy must be adopted to
+handle the system differences. Examples of system differences are: the
+subroutines (bcopy vs memcopy) or include filenames (strings.h vs str.h,
+etc).
+
+Rather than putting architecture names in all the source files, there will
+be an ESMF-wide file which contains sections like this: 
+\begin{verbatim}
+
+ #ifdef sgi 
+ #define HAS_VFORK 0 
+ #define BCOPY_FASTER 1 
+ #define FOPEN_3RD_ARG 1 
+ #endif
+
+ #ifdef sun 
+ #define HAS_VFORK 1 
+ #define BCOPY_FASTER 0 
+ #define FOPEN_3RD_ARG 1 
+ #endif
+
+\end{verbatim} This allows system-dependent code to be bracketed with
+meaningful names: 
+
+\begin{verbatim} 
+
+ #if HAS_VFORK
+    vfork();
+ #else
+    fork(); 
+    exec();
+ #endif
+
+\end{verbatim} 
+and not an endless string of architecture names.
+
