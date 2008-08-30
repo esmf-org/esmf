@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.32 2008/08/30 04:13:58 oehmke Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.33 2008/08/30 05:09:24 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.32 2008/08/30 04:13:58 oehmke Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.33 2008/08/30 05:09:24 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1743,6 +1743,7 @@ contains
 TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 
 
+
 #define FieldCreateLocStreamDataPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
@@ -1770,27 +1771,38 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_LocStream}. @\
+! For examples and @\
+! associated documentations using this method see Section  @\
+! \ref{sec:field:usage:create_2dptr}, @\
+! \ref{sec:field:usage:create_2dmesh_3dptr}, @\
+! \ref{sec:field:usage:create_2dmesh_3dptr_map}, @\
+! \ref{sec:field:usage:create_2dmesh_3dptr_map_halo}, and @\
+! \ref{sec:field:usage:create_5dmesh_7dptr_2dungridded}. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [locstream]  @\
-!       {\tt ESMF\_LocStream} object. @\
+!       {\tt ESMF\_LocStream} object.  The dimCount of the @\
+!       LocStream must be smaller than or equal to the rank of the {\tt farray}. @\
 ! \item [farray] @\
 !       Native fortran data array to be copied/referenced in the {\tt field} @\
+!       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
+!       for the farray. @\
 ! \item [{[copyflag]}] @\
 !       Whether to copy the {\tt farray} or reference directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
 !       {\tt ESMF\_DATA\_REF}. @\
 ! \item [{[gridToFieldMap]}] @\
-!       List with number of elements equal to 1. @\
-!       The list elements map the single dimension @\
+!       List with number of elements equal to the @\
+!       {\tt locstream}'s dimCount.  The list elements map each dimension @\
 !       of the {\tt locstream} to a dimension in the {\tt farray} by @\
 !       specifying the appropriate {\tt farray} dimension index. The default is to @\
-!       map the {\tt locstream}'s dimension against the lowest dimension of @\
-!       the {\tt farray}, i.e. {\tt gridToFieldMap} = (/1/). @\
-!       The value of the {\tt gridToFieldMap} entry must be greater than or equal @\
+!       map all of the {\tt locstream}'s dimensions against the lowest dimensions of @\
+!       the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
 !       to one and smaller than or equal to the {\tt farray} rank. @\
-!       The total ungridded dimensions in the {\tt field} @\
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
+!       multiple times. The total ungridded dimensions in the {\tt field} @\
 !       are the total {\tt farray} dimensions less @\
 !       the total (distributed + undistributed) dimensions in @\
 !       the {\tt locstream}.  Unlocstreamded dimensions must be in the same order they are @\
@@ -2042,6 +2054,7 @@ TypeKindRankDeclarationMacro(FieldCreateLocStreamDataPtr)
 !------------------------------------------------------------------------------ @\
 
 TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
+
 
 
 #define FieldCreateGBDataPtrDoc() \
