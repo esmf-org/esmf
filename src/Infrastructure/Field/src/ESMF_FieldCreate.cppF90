@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.33 2008/08/30 05:09:24 oehmke Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.34 2008/08/30 06:09:33 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.33 2008/08/30 05:09:24 oehmke Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.34 2008/08/30 06:09:33 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -87,9 +87,9 @@ module ESMF_FieldCreateMod
     module procedure ESMF_FieldCreateGridArray
     TypeKindRankInterfaceMacro(FieldCreateGridDataPtr)
 
-    module procedure ESMF_FieldCreateLocStreamArraySpec
-    module procedure ESMF_FieldCreateLocStreamArray
-    TypeKindRankInterfaceMacro(FieldCreateLocStreamDataPtr)
+    module procedure ESMF_FieldCreateLSArraySpec
+    module procedure ESMF_FieldCreateLSArray
+    TypeKindRankInterfaceMacro(FieldCreateLSDataPtr)
 
     module procedure ESMF_FieldCreateMeshArraySpec
     module procedure ESMF_FieldCreateMeshArray
@@ -290,18 +290,18 @@ contains
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldCreateLocStreamArraySpec"
+^define ESMF_METHOD "ESMF_FieldCreateLSArraySpec"
 !BOP
 ! !IROUTINE:   ESMF_FieldCreate - Create a Field from LocStream and ArraySpec
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateLocStreamArraySpec(locstream, arrayspec, &
+  function ESMF_FieldCreateLSArraySpec(locstream, arrayspec, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, iospec, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_Field) :: ESMF_FieldCreateLocStreamArraySpec
+    type(ESMF_Field) :: ESMF_FieldCreateLSArraySpec
 !
 ! !ARGUMENTS:
     type(ESMF_LocStream) :: locstream
@@ -389,7 +389,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
 
     ! Create Field from GeomBase
-    ESMF_FieldCreateLocStreamArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
+    ESMF_FieldCreateLSArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
         arrayspec, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         name=name, iospec=iospec, rc=localrc)
@@ -398,7 +398,7 @@ contains
 
     if(present(rc)) rc = ESMF_SUCCESS
 
-  end function ESMF_FieldCreateLocStreamArraySpec
+  end function ESMF_FieldCreateLSArraySpec
 !------------------------------------------------------------------------------
 
 
@@ -978,18 +978,18 @@ contains
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldCreateLocStreamArray"
+^define ESMF_METHOD "ESMF_FieldCreateLSArray"
 !BOP
 ! !IROUTINE: ESMF_FieldCreate - Create a Field from LocStream and Array
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateLocStreamArray(locstream, array, copyflag, &
+  function ESMF_FieldCreateLSArray(locstream, array, copyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, iospec, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_Field) :: ESMF_FieldCreateLocStreamArray    
+    type(ESMF_Field) :: ESMF_FieldCreateLSArray    
 !
 ! !ARGUMENTS:
     type(ESMF_LocStream), intent(in) :: locstream                
@@ -1082,7 +1082,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
 
     ! Create Field from GeomBase
-    ESMF_FieldCreateLocStreamArray=ESMF_FieldCreateGBArray(geombase, array, copyflag, &
+    ESMF_FieldCreateLSArray=ESMF_FieldCreateGBArray(geombase, array, copyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name=name, iospec=iospec, rc=localrc)
 
@@ -1091,7 +1091,7 @@ contains
  
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end function ESMF_FieldCreateLocStreamArray
+  end function ESMF_FieldCreateLSArray
 !------------------------------------------------------------------------------
 
    
@@ -1744,19 +1744,19 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 
 
 
-#define FieldCreateLocStreamDataPtrDoc() \
+#define FieldCreateLSDataPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
 ! !IROUTINE: ESMF_FieldCreate - Create a Field from Fortran array pointer @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
-! function ESMF_FieldCreateLocStreamDataPtr<rank><type><kind>(locstream, & @\
+! function ESMF_FieldCreateLSDataPtr<rank><type><kind>(locstream, & @\
 !   farray, copyflag, gridToFieldMap, ungriddedLBound, & @\
 !   ungriddedUBound, name, iospec, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-!   type(ESMF_Field) :: ESMF_FieldCreateLocStreamDataPtr<rank><type><kind> @\
+!   type(ESMF_Field) :: ESMF_FieldCreateLSDataPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_LocStream) :: locstream                  @\
@@ -1839,16 +1839,16 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 !EOP @\
 !---------------------------------------------------------------------------- @\
 
-#define FieldCreateLocStreamDataPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+#define FieldCreateLSDataPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !---------------------------------------------------------------------------- @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_FieldCreateLocStreamDataPtr" @\
-  function ESMF_FieldCreateLocStreamDataPtr##mrank##D##mtypekind(locstream, & @\
+^define ESMF_METHOD "ESMF_FieldCreateLSDataPtr" @\
+  function ESMF_FieldCreateLSDataPtr##mrank##D##mtypekind(locstream, & @\
     farray, copyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, name, iospec, rc) @\
 @\
     ! return value @\
-    type(ESMF_Field) :: ESMF_FieldCreateLocStreamDataPtr##mrank##D##mtypekind @\
+    type(ESMF_Field) :: ESMF_FieldCreateLSDataPtr##mrank##D##mtypekind @\
 @\
     ! input arguments @\
     type(ESMF_LocStream) :: locstream                  @\
@@ -1883,7 +1883,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
                                      ESMF_CONTEXT, rc)) return@\
 @\
 @\
-       ESMF_FieldCreateLocStreamDataPtr##mrank##D##mtypekind = & @\
+       ESMF_FieldCreateLSDataPtr##mrank##D##mtypekind = & @\
               ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind(geombase, & @\
                                farray, copyflag,  gridToFieldMap, ungriddedLBound, & @\
                                ungriddedUBound, & @\
@@ -1894,10 +1894,10 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
-  end function ESMF_FieldCreateLocStreamDataPtr##mrank##D##mtypekind  @\
+  end function ESMF_FieldCreateLSDataPtr##mrank##D##mtypekind  @\
 !------------------------------------------------------------------------------ @\
 
-TypeKindRankDeclarationMacro(FieldCreateLocStreamDataPtr)
+TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 
 
 #define FieldCreateMeshDataPtrDoc() \

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.18 2008/08/30 05:09:24 oehmke Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.19 2008/08/30 06:09:34 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.18 2008/08/30 05:09:24 oehmke Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.19 2008/08/30 06:09:34 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -100,7 +100,7 @@ end interface
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     TypeKindRankInterfaceMacro(FieldSetCommitGrid)
-    TypeKindRankInterfaceMacro(FieldSetCommitLocStream)
+    TypeKindRankInterfaceMacro(FieldSetCommitLS)
     TypeKindRankInterfaceMacro(FieldSetCommitMesh)
     TypeKindRankInterfaceMacro(FieldSetCommitGB)
 
@@ -686,14 +686,14 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 
 
-#define FieldSetCommitLocStreamDoc() \
+#define FieldSetCommitLSDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
 ! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
-! subroutine ESMF_FieldSetCommitLocStream<rank><type><kind>(field, locstream, & @\
+! subroutine ESMF_FieldSetCommitLS<rank><type><kind>(field, locstream, & @\
 !   farray, copyflag, gridToFieldMap, ungriddedLBound, & @\
 !   ungriddedUBound, rc) @\
 ! @\
@@ -771,11 +771,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 !---------------------------------------------------------------------------- @\
 
 
-#define FieldSetCommitLocStreamMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+#define FieldSetCommitLSMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !---------------------------------------------------------------------------- @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_FieldSetCommitLocStream" @\
-  subroutine ESMF_FieldSetCommitLocStream##mrank##D##mtypekind(field, locstream, farray, & @\
+^define ESMF_METHOD "ESMF_FieldSetCommitLS" @\
+  subroutine ESMF_FieldSetCommitLS##mrank##D##mtypekind(field, locstream, farray, & @\
     copyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, rc) @\
 @\
@@ -837,10 +837,10 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
-  end subroutine ESMF_FieldSetCommitLocStream##mrank##D##mtypekind  @\
+  end subroutine ESMF_FieldSetCommitLS##mrank##D##mtypekind  @\
 !---------------------------------------------------------------------------- @\
 
-TypeKindRankDeclarationMacro(FieldSetCommitLocStream)
+TypeKindRankDeclarationMacro(FieldSetCommitLS)
 
 
 #define FieldSetCommitMeshDoc() \

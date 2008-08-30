@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.25 2008/08/30 04:13:58 oehmke Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.26 2008/08/30 06:09:33 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.25 2008/08/30 04:13:58 oehmke Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.26 2008/08/30 06:09:33 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -79,7 +79,7 @@ module ESMF_FieldGetMod
     module procedure ESMF_FieldGetDefault
     module procedure ESMF_FieldGetGridAllocBounds
     module procedure ESMF_FieldGetMeshAllocBounds
-    module procedure ESMF_FieldGetLocStreamAllocBounds
+    module procedure ESMF_FieldGetLSAllocBounds
     !module procedure ESMF_FieldGetDataBounds
     !module procedure ESMF_FieldGetLocalArray !TODO: FIELDINTEGRATION
     TypeKindRankInterfaceMacro(FieldGetDataPtr)
@@ -1082,13 +1082,13 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldGetLocStreamAllocBounds"
+^define ESMF_METHOD "ESMF_FieldGetLSAllocBounds"
 !BOP
 ! !IROUTINE: ESMF_FieldGet -  Get precomputed Fortran data array bounds
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-    subroutine ESMF_FieldGetLocStreamAllocBounds(locstream, localDe, &
+    subroutine ESMF_FieldGetLSAllocBounds(locstream, localDe, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound, totalUBound, totalCount, rc)
@@ -1203,7 +1203,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         ESMF_CONTEXT, rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
-    end subroutine ESMF_FieldGetLocStreamAllocBounds
+    end subroutine ESMF_FieldGetLSAllocBounds
 
 
 !------------------------------------------------------------------------------
