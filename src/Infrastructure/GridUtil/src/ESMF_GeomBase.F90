@@ -47,6 +47,7 @@
       use ESMF_ArraySpecMod
       use ESMF_GridMod
       use ESMF_MeshMod
+      use ESMF_LocStreamMod
 
 !     NEED TO ADD MORE HERE
       implicit none
@@ -69,7 +70,8 @@
                       ESMF_GEOMTYPE_INVALID=ESMF_GeomType(-1), &
                       ESMF_GEOMTYPE_UNINIT=ESMF_GeomType(0), &
                       ESMF_GEOMTYPE_GRID=ESMF_GeomType(1), &
-                      ESMF_GEOMTYPE_MESH=ESMF_GeomType(2)
+                      ESMF_GEOMTYPE_MESH=ESMF_GeomType(2), &
+                      ESMF_GEOMTYPE_LOCSTREAM=ESMF_GeomType(3)
 
 !------------------------------------------------------------------------------
 ! ! ESMF_GeomBaseClass
@@ -84,6 +86,7 @@
     type(ESMF_Grid) :: grid
 !    type(ESMF_MeshLoc) :: meshloc ! either nodes or elements or both?
     type(ESMF_Mesh) :: mesh
+    type(ESMF_LocStream) :: locstream
   end type
 
 
@@ -108,7 +111,8 @@
 public ESMF_GeomBase
 public ESMF_GeomBaseClass ! for internal use only
 public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
-                         ESMF_GEOMTYPE_GRID,  ESMF_GEOMTYPE_MESH
+                       ESMF_GEOMTYPE_GRID,  ESMF_GEOMTYPE_MESH, &
+                       ESMF_GEOMTYPE_LOCSTREAM
 
 !------------------------------------------------------------------------------
 !
@@ -144,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.2 2008/08/27 17:15:59 dneckels Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.3 2008/08/30 04:13:59 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -165,6 +169,7 @@ interface ESMF_GeomBaseCreate
 !
       module procedure ESMF_GeomBaseCreateGrid
       module procedure ESMF_GeomBaseCreateMesh
+      module procedure ESMF_GeomBaseCreateLocStream
       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -280,6 +285,7 @@ end interface
 ! \end{description}
 !
 !EOPI
+    integer :: localrc
     type(ESMF_GeomBaseClass),pointer :: gbcp
 
     ! Initialize return code; assume failure until success is certain
@@ -293,18 +299,34 @@ end interface
 
     ! Get info depending on type
     select case(gbcp%type%type)
-       case(1) ! Grid 
+       case (ESMF_GEOMTYPE_GRID%type) ! Grid 
          call ESMF_GridGetArrayInfo(gbcp%grid, gbcp%staggerloc,     &
                            gridToArrayMap, ungriddedLBound, ungriddedUBound, &
                            distgridToArrayMap, undistLBound, undistUBound,       &
                            computationalEdgeLWidth, computationalEdgeUWidth, &
-                           rc)
+                           rc=localrc)
+         if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
-       case(2) ! Mesh
+       case (ESMF_GEOMTYPE_MESH%type) ! Mesh
           if (present(gridToArrayMap)) then
             distgridToArrayMap = gridToArrayMap
           else
             distgridToArrayMap = 1
+          endif
+
+          if (present(ungriddedLBound)) undistLBound = ungriddedLBound
+          if (present(ungriddedUBound)) undistUBound = ungriddedUBound
+
+          computationalEdgeLWidth = 0
+          computationalEdgeUWidth = 0
+
+       case (ESMF_GEOMTYPE_LOCSTREAM%type) ! LocStream
+          if (present(gridToArrayMap)) then
+             distgridToArrayMap = gridToArrayMap
+          else
+             distgridToArrayMap = 1
           endif
 
           if (present(ungriddedLBound)) undistLBound = ungriddedLBound
@@ -457,6 +479,72 @@ end interface
 
     end function ESMF_GeomBaseCreateMesh
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GeomBaseCreate"
+!BOPI
+! !IROUTINE: ESMF_GeomBaseCreate - Create a GeomBase from a LocStream
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GeomBaseCreate()
+      function ESMF_GeomBaseCreateLocStream(locstream, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_GeomBase) :: ESMF_GeomBaseCreateLocStream
+!
+! !ARGUMENTS:
+       type(ESMF_LocStream),  intent(in)              :: locstream
+       integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_GeomBase} object from an {\tt ESMF\_LocStream} object. 
+! This will be overloaded for each type of object a GeomBase can represent. 
+!
+! The arguments are:
+! \begin{description}
+! \item[locstream]
+!      {\tt ESMF\_LocStream} object to create the GeomBase from.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+    type(ESMF_GeomBaseClass),pointer :: gbcp
+    integer :: localrc ! local error status
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc)
+
+    ! initialize pointers
+    nullify(gbcp)
+    nullify( ESMF_GeomBaseCreateLocStream%gbcp)
+
+    ! allocate GeomBase type
+    allocate(gbcp, stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating GeomBase type object", &
+                                     ESMF_CONTEXT, rc)) return
+
+    ! Set values in GeomBase
+    gbcp%type = ESMF_GEOMTYPE_LOCSTREAM
+    gbcp%locstream = locstream
+
+    ! Set GeomBase Type into GeomBase
+     ESMF_GeomBaseCreateLocStream%gbcp=>gbcp
+
+    ! Set init status
+    ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateLocStream)
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    end function ESMF_GeomBaseCreateLocStream
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GeomBaseDestroy"
@@ -513,12 +601,12 @@ end interface
       subroutine ESMF_GeomBaseGet(gridbase, &
           dimCount, localDECount, distgrid, &
           distgridToGridMap, indexFlag, geomType, &
-          grid, staggerloc, mesh, rc)
+          grid, staggerloc, mesh, locstream, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GeomBase),       intent(in)              :: gridbase
-      integer,               intent(out), optional          :: dimCount
-      integer,               intent(out), optional          :: localDECount
+      type(ESMF_GeomBase),   intent(in)            :: gridbase
+      integer,               intent(out), optional :: dimCount
+      integer,               intent(out), optional :: localDECount
       type(ESMF_DistGrid),   intent(out), optional :: distgrid
       integer,               intent(out), optional :: distgridToGridMap(:)
       type(ESMF_IndexFlag),  intent(out), optional :: indexflag
@@ -526,6 +614,7 @@ end interface
       type(ESMF_Grid),       intent(out), optional :: grid      
       type(ESMF_StaggerLoc), intent(out), optional :: staggerloc
       type(ESMF_Mesh),       intent(out), optional :: mesh      
+      type(ESMF_LocStream),  intent(out), optional :: locstream
       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -556,6 +645,8 @@ end interface
 !    The Grid stagger location.
 ! \item[{[mesh]}]
 !    The Mesh object that this gridbase object holds. 
+! \item[{[locstream]}]
+!    The LocStream object that this gridbase object holds. 
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -578,7 +669,7 @@ end interface
        geomType=gbcp%type
     endif
 
-    ! Get objects plus error checking
+    ! Get grid object plus error checking
     if (present(grid)) then
        if (gbcp%type==ESMF_GEOMTYPE_GRID) then
           grid=gbcp%grid
@@ -589,13 +680,24 @@ end interface
        endif
     endif
 
-    ! Get objects plus error checking
+    ! Get mesh object plus error checking
     if (present(mesh)) then
        if (gbcp%type==ESMF_GEOMTYPE_Mesh) then
           mesh=gbcp%mesh
        else
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                               " Grid not geometry type", &
+                               " Mesh not geometry type", &
+                               ESMF_CONTEXT, rc)) return
+       endif
+    endif
+
+    ! Get locstream object plus error checking
+    if (present(locstream)) then
+       if (gbcp%type==ESMF_GEOMTYPE_LOCSTREAM) then
+          locstream=gbcp%locstream
+       else
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                               " LocStream not geometry type", &
                                ESMF_CONTEXT, rc)) return
        endif
     endif
@@ -614,16 +716,17 @@ end interface
 
     ! Get info depending on type
     select case(gbcp%type%type)
-       case(1) ! Grid 
+       case (ESMF_GEOMTYPE_GRID%type) ! Grid 
             call ESMF_GridGet(grid=gbcp%grid,  &
                       dimCount=dimCount,  localDECount=localDECount, &
                       distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
                       indexflag=indexFlag, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
-                               " GridGet failed", &
-                               ESMF_CONTEXT, rc)) return
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
-       case(2) ! Mesh
+
+       case (ESMF_GEOMTYPE_MESH%type) ! Mesh
             if (present(dimCount)) dimCount = 1
             if (present(localDECount)) localDECount = 1
             if (present(distgridToGridMap)) distgridToGridMap = 1
@@ -632,9 +735,19 @@ end interface
                               nodal_distgrid=distgrid, &
                               rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
-                               " MeshGet failed", &
-                               ESMF_CONTEXT, rc)) return
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
             if (present(indexFlag)) indexFlag = ESMF_INDEX_DELOCAL
+
+
+       case (ESMF_GEOMTYPE_LOCSTREAM%type) ! LocStream
+            if (present(dimCount)) dimCount = 1
+            if (present(distgridToGridMap)) distgridToGridMap = 1
+            call ESMF_LocStreamGet(gbcp%locstream, distgrid=distgrid, &
+                   localDECount=localDECount, indexflag=indexflag, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
              
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
@@ -718,6 +831,7 @@ end subroutine ESMF_GeomBaseGet
 !\end{description}
 !
 !EOPI
+    integer :: localrc
     type(ESMF_GeomBaseClass),pointer :: gbcp
 
     ! Initialize return code; assume failure until success is certain
@@ -731,25 +845,55 @@ end subroutine ESMF_GeomBaseGet
 
     ! Get info depending on type
     select case(gbcp%type%type)
-       case(1) ! Grid 
+
+       case (ESMF_GEOMTYPE_GRID%type) ! Grid 
           call ESMF_GridGet(grid=gbcp%grid, localDE=localDE, &
           staggerloc=gbcp%staggerloc,  &
           exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, &
           exclusiveCount=exclusiveCount,  &
           computationalLBound=computationalLBound, &
           computationalUBound=computationalUBound, &
-          computationalCount=computationalCount, rc=rc)
+          computationalCount=computationalCount, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
-       case(2) ! Mesh
+       case  (ESMF_GEOMTYPE_MESH%type) ! Mesh
           if (present(exclusiveLBound)) exclusiveLBound(1) = 1
-          call ESMF_MeshGet(gbcp%mesh, num_nodes=exclusiveUBound(1), rc=rc)
-          call ESMF_MeshGet(gbcp%mesh, num_nodes=exclusiveCount(1), rc=rc)
+          call ESMF_MeshGet(gbcp%mesh, num_nodes=exclusiveUBound(1), rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+          call ESMF_MeshGet(gbcp%mesh, num_nodes=exclusiveCount(1), rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
           if (present(computationalLBound)) computationalLBound(1) = 1
 
-          call ESMF_MeshGet(gbcp%mesh, num_nodes=computationalUBound(1), rc=rc)
-          call ESMF_MeshGet(gbcp%mesh, num_nodes=computationalCount(1), rc=rc)
-     
+          call ESMF_MeshGet(gbcp%mesh, num_nodes=computationalUBound(1), rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+          call ESMF_MeshGet(gbcp%mesh, num_nodes=computationalCount(1), rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+
+       case  (ESMF_GEOMTYPE_LOCSTREAM%type) ! LocStream
+          call ESMF_LocStreamGet(gbcp%locstream, localDE, &   
+               exclusiveLBound=exclusiveLBound(1), &
+               exclusiveUBound=exclusiveUBound(1), &
+               exclusiveCount=exclusiveCount(1),  &
+               computationalLBound=computationalLBound(1), &
+               computationalUBound=computationalUBound(1), &
+               computationalCount=computationalCount(1), &
+               rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                " Bad type value", &
@@ -819,19 +963,28 @@ end subroutine ESMF_GeomBaseGet
     call c_ESMC_GeomBaseSerialize(gbcp%type%type, &
                                                     gbcp%staggerloc%staggerloc, &
                                                     buffer(1), length, offset, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
     ! Get info depending on type
     select case(gbcp%type%type)
-       case(1) ! Grid 
-          call ESMF_GridSerialize(grid=gbcp%grid, buffer=buffer, &
-                     length=length, offset=offset, rc=rc) 
 
-       case(2)
+       case (ESMF_GEOMTYPE_GRID%type) ! Grid 
+          call ESMF_GridSerialize(grid=gbcp%grid, buffer=buffer, &
+                     length=length, offset=offset, rc=localrc) 
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+       case  (ESMF_GEOMTYPE_MESH%type)
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                " Mesh serialize not implemented", &
+                               ESMF_CONTEXT, rc)) return
+
+       case  (ESMF_GEOMTYPE_LOCSTREAM%type)
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                               " LocStream serialize not implemented", &
                                ESMF_CONTEXT, rc)) return
 
        case default
@@ -908,13 +1061,22 @@ end subroutine ESMF_GeomBaseGet
 
     ! Get info depending on type
     select case(gbcp%type%type)
-       case(1) ! Grid
-          gbcp%grid=ESMF_GridDeserialize(vm=vm, buffer=buffer, &
-              offset=offset, rc=rc)  
 
-       case(2)
+       case (ESMF_GEOMTYPE_GRID%type) ! Grid
+          gbcp%grid=ESMF_GridDeserialize(vm=vm, buffer=buffer, &
+              offset=offset, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return  
+
+       case  (ESMF_GEOMTYPE_MESH%type)
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                " Mesh deserialize not implemented", &
+                               ESMF_CONTEXT, rc)) return
+
+       case  (ESMF_GEOMTYPE_LOCSTREAM%type)
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                               " LocStream deserialize not implemented", &
                                ESMF_CONTEXT, rc)) return
 
        case default
@@ -964,6 +1126,7 @@ end subroutine ESMF_GeomBaseGet
 !
 !EOPI
 !------------------------------------------------------------------------------
+    integer :: localrc
     type(ESMF_GeomBaseClass),pointer :: gbcp
 
     ! Initialize return code; assume failure until success is certain
@@ -977,11 +1140,24 @@ end subroutine ESMF_GeomBaseGet
 
     ! Get info depending on type
     select case(gbcp%type%type)
-       case(1) ! Grid 
-         call ESMF_GridValidate(grid=gbcp%grid, rc=rc)
 
-       case(2) ! Mesh
-         !call ESMF_MeshValidate(grid=gbcp%grid, rc=rc)
+       case (ESMF_GEOMTYPE_GRID%type) ! Grid 
+         call ESMF_GridValidate(grid=gbcp%grid, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+       case (ESMF_GEOMTYPE_MESH%type) ! Mesh
+         !call ESMF_MeshValidate(mesh=gbcp%mesh, rc=localrc)
+         ! if (ESMF_LogMsgFoundError(localrc, &
+         !                        ESMF_ERR_PASSTHRU, &
+         !                        ESMF_CONTEXT, rc)) return
+
+       case (ESMF_GEOMTYPE_LOCSTREAM%type) ! LocStream
+          call ESMF_LocStreamValidate(locstream=gbcp%locstream, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &

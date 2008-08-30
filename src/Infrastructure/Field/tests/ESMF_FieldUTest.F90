@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.128 2008/05/21 22:14:26 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.129 2008/08/30 04:13:58 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.128 2008/05/21 22:14:26 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.129 2008/08/30 04:13:58 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -51,10 +51,11 @@
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
-      integer :: i, count
+      integer :: i, count, localrc, cl(2),cu(2),cc(2)
       integer, dimension(3) :: cellCounts
       type(ESMF_DELayout) :: delayout
       type(ESMF_VM) :: vm
+      type(ESMF_LocStream) :: locstream
       type(ESMF_Grid) :: grid, grid2, grid3, grid4, grid5
       type(ESMF_ArraySpec) :: arrayspec
       real, dimension(:,:), pointer :: f90ptr2, f90ptr4, f90ptr5
@@ -64,7 +65,7 @@
       character (len = 20) :: gname, gname3
       type(ESMF_IOSpec) :: ios
       !type(ESMF_Mask) :: mask
-      type(ESMF_Field) :: f1, f2, f3, f4, f5, f6, f7, f8, f9
+      type(ESMF_Field) :: f1, f2, f3, f4, f5, f6, f7, f8, f9, fls
       integer(ESMF_KIND_I4) :: intattr, intattr2
       integer(ESMF_KIND_I4) :: intattrlist(6)
       real(ESMF_KIND_R8) :: rattr, rattrlist(2)
@@ -77,11 +78,14 @@
       type(ESMF_ArraySpec)                        :: arrayspec8
       type(ESMF_DistGrid)                         :: distgrid
       type(ESMF_StaggerLoc)                       :: staggerloc8
+      logical :: correct
 
       integer :: im, jm, km
       real(ESMF_KIND_R8) :: xmin,xmax,ymin,ymax
       real(ESMF_KIND_R8), dimension(:), allocatable :: delta
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: fptr
+      real(ESMF_KIND_R8), dimension(:), pointer :: lsfptr, lsfptrOut
+      real(ESMF_KIND_R4), dimension(:,:), pointer :: lsfptrR4Out
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -123,6 +127,97 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing creating a field on a locstream
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Test creating a Field on a LocStream from an ArraySpec"
+      ! initialize 
+      rc=ESMF_SUCCESS
+      correct=.true.
+      
+      ! Create locstream
+      locstream=ESMF_LocStreamCreate(localCount=10, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
+
+      ! Set Array Spec
+      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
+
+      ! Create Field
+      fls=ESMF_FieldCreate(locstream, arrayspec, &
+            ungriddedLBound=(/1/), ungriddedUBound=(/4/), rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
+
+      ! check bounds
+      call ESMF_FieldGet(fls, localDE=0, computationalCount=cc, &
+             computationalLBound=cl, computationalUBound=cu, &
+             farray=lsfptrR4Out, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
+
+      ! Check output
+      if (cl(1) .ne. 1) correct=.false.
+      if (cu(1) .ne. 10) correct=.false.
+      if (cc(1) .ne. 10) correct=.false.
+      if (cl(2) .ne. 1) correct=.false.
+      if (cu(2) .ne. 4) correct=.false.
+      if (cc(2) .ne. 4) correct=.false.
+
+      ! Destroy Field
+      call ESMF_FieldDestroy(fls, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
+
+      ! Destroy LocStream 
+      call ESMF_LocStreamDestroy(locstream, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
+
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing creating a field on a locstream
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Test creating a Field on a LocStream from an farray"
+      ! initialize 
+      rc=ESMF_SUCCESS
+      correct=.true.
+      
+      ! Create locstream
+      locstream=ESMF_LocStreamCreate(localCount=10, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
+
+      ! Allocate array
+      allocate (lsfptr(10))
+
+      ! Create Field
+      fls=ESMF_FieldCreate(locstream, lsfptr, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
+
+      ! check bounds
+      call ESMF_FieldGet(fls, localDE=0, computationalCount=cc(1:1), &
+             computationalLBound=cl(1:1), computationalUBound=cu(1:1), &
+             farray=lsfptrOut, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
+
+      ! Check output
+      if (cl(1) .ne. 1) correct=.false.
+      if (cu(1) .ne. 10) correct=.false.
+      if (cc(1) .ne. 10) correct=.false.
+
+      ! Destroy Field
+      call ESMF_FieldDestroy(fls, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
+
+      ! Destroy LocStream 
+      call ESMF_LocStreamDestroy(locstream, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
+
+      ! deallocate array
+      deallocate (lsfptr)
+
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only

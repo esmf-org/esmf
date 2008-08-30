@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.31 2008/08/27 17:15:56 dneckels Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.32 2008/08/30 04:13:58 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,6 +38,7 @@ module ESMF_FieldCreateMod
   use ESMF_StaggerLocMod
   use ESMF_GridMod
   use ESMF_MeshMod
+  use ESMF_LocStreamMod
   use ESMF_GeomBaseMod
   use ESMF_ArrayMod
   use ESMF_ArrayGetMod
@@ -64,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.31 2008/08/27 17:15:56 dneckels Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.32 2008/08/30 04:13:58 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -86,9 +87,15 @@ module ESMF_FieldCreateMod
     module procedure ESMF_FieldCreateGridArray
     TypeKindRankInterfaceMacro(FieldCreateGridDataPtr)
 
+    module procedure ESMF_FieldCreateLocStreamArraySpec
+    module procedure ESMF_FieldCreateLocStreamArray
+    TypeKindRankInterfaceMacro(FieldCreateLocStreamDataPtr)
+
     module procedure ESMF_FieldCreateMeshArraySpec
     module procedure ESMF_FieldCreateMeshArray
     TypeKindRankInterfaceMacro(FieldCreateMeshDataPtr)
+
+
 
 ! !DESCRIPTION:
 !   This interface provides an entry point for methods that create a complete
@@ -280,6 +287,121 @@ contains
   end function ESMF_FieldCreateGridArraySpec
 !------------------------------------------------------------------------------
 
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldCreateLocStreamArraySpec"
+!BOP
+! !IROUTINE:   ESMF_FieldCreate - Create a Field from LocStream and ArraySpec
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldCreate()
+  function ESMF_FieldCreateLocStreamArraySpec(locstream, arrayspec, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    name, iospec, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Field) :: ESMF_FieldCreateLocStreamArraySpec
+!
+! !ARGUMENTS:
+    type(ESMF_LocStream) :: locstream
+    type(ESMF_ArraySpec), intent(inout) :: arrayspec     
+    integer, intent(in), optional :: gridToFieldMap(:)    
+    integer, intent(in), optional :: ungriddedLBound(:)
+    integer, intent(in), optional :: ungriddedUBound(:)
+    character (len=*), intent(in), optional :: name 
+    type(ESMF_IOSpec), intent(in), optional :: iospec 
+    integer, intent(out), optional :: rc              
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Field} and allocate space internally for an
+! {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}. For an example and
+! associated documentation using this method see Section 
+! \ref{sec:field:usage:create_grid_arrayspec}.
+! 
+! The arguments are:
+! \begin{description}
+! \item [locstream] 
+!       {\tt ESMF\_LocStream} object. 
+! \item [arrayspec]
+!       Data type and kind specification. 
+! \item [{[gridToFieldMap]}]
+!       List with number of elements equal to the
+!       {\tt grid}'s dimCount.  The list elements map each dimension
+!       of the {\tt grid} to a dimension in the {\tt field} by
+!       specifying the appropriate {\tt field} dimension index. The default is to
+!       map all of the {\tt grid}'s dimensions against the lowest dimensions of
+!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt field} rank.
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry
+!       multiple times. The total ungridded dimensions in the {\tt field}
+!       are the total {\tt field} dimensions less
+!       the dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t field}.  
+! \item [{[ungriddedLBound]}]
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[ungriddedUBound]}]
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[name]}] 
+!       {\tt Field} name. 
+! \item [{[iospec]}] 
+!       I/O specification. ! NOT IMPLEMENTED
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                          !  Local error code
+    type(ESMF_GeomBase) :: geombase
+    type(ESMF_StaggerLoc)  :: localStaggerLoc
+
+    ! Initialize pointers
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Initialize return code   
+    if(present(rc)) then
+      rc = ESMF_RC_NOT_IMPL
+    endif
+
+    ! check init status of input parameters
+    ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit, arrayspec)
+ 
+    ! Create GeomBase from Mesh
+    geombase=ESMF_GeomBaseCreate(locstream, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+    ! Create Field from GeomBase
+    ESMF_FieldCreateLocStreamArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
+        arrayspec, gridToFieldMap, &
+        ungriddedLBound, ungriddedUBound, &
+        name=name, iospec=iospec, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_FieldCreateLocStreamArraySpec
+!------------------------------------------------------------------------------
+
+
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateMeshArraySpec"
@@ -392,6 +514,7 @@ contains
 
   end function ESMF_FieldCreateMeshArraySpec
 !------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
@@ -851,6 +974,125 @@ contains
   end function ESMF_FieldCreateGridArray
 !------------------------------------------------------------------------------
 
+
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldCreateLocStreamArray"
+!BOP
+! !IROUTINE: ESMF_FieldCreate - Create a Field from LocStream and Array
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldCreate()
+  function ESMF_FieldCreateLocStreamArray(locstream, array, copyflag, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    name, iospec, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Field) :: ESMF_FieldCreateLocStreamArray    
+!
+! !ARGUMENTS:
+    type(ESMF_LocStream), intent(in) :: locstream                
+    type(ESMF_Array), intent(in) :: array              
+    type(ESMF_CopyFlag), intent(in), optional :: copyflag       
+    integer, intent(in), optional :: gridToFieldMap(:)    
+    integer, intent(in), optional :: ungriddedLBound(:)
+    integer, intent(in), optional :: ungriddedUBound(:)
+    character (len = *), intent(in), optional :: name   
+    type(ESMF_IOSpec), intent(in), optional :: iospec   
+    integer, intent(out), optional :: rc                
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Field}.  This version of creation
+! assumes the data exists already and is being
+! passed in through an {\tt ESMF\_Array}.  For an example and
+! associated documentation using this method see Section 
+! \ref{sec:field:usage:create_grid_array}.
+! 
+! The arguments are:
+! \begin{description}
+! \item [locstream] 
+!       {\tt ESMF\_LocStream} object. 
+! \item [array]
+!       {\tt ESMF\_Array} object.
+! \item [{[copyflag]}]
+!       Indicates whether to copy the {\tt array} or reference it directly.
+!       For valid values see \ref{opt:copyflag}.  The default is
+!       {\tt ESMF\_DATA\_REF}.
+! \item [{[gridToFieldMap]}]
+!       List with number of elements equal to the
+!       {\tt grid}'s dimCount.  The list elements map each dimension
+!       of the {\tt grid} to a dimension in the {\tt field} by
+!       specifying the appropriate {\tt field} dimension index. The default is to
+!       map all of the {\tt grid}'s dimensions against the lowest dimensions of
+!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt field} rank.
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry
+!       multiple times. The total ungridded dimensions in the {\tt field}
+!       are the total {\tt field} dimensions less
+!       the dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t field}.  
+! \item [{[ungriddedLBound]}]
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[ungriddedUBound]}]
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[name]}] 
+!       {\tt Field} name. 
+! \item [{[iospec]}] 
+!       I/O specification. NOT IMPLEMENTED
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                       !  Local error code
+    type(ESMF_GeomBase) :: geombase
+
+    ! Initialize pointers
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Initialize return code   
+    if (present(rc)) then
+      rc = ESMF_RC_NOT_IMPL
+    endif     
+
+    ! check init status of input parameters
+    ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+    ! Create GeomBase from Mesh
+    geombase=ESMF_GeomBaseCreate(locstream, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+    ! Create Field from GeomBase
+    ESMF_FieldCreateLocStreamArray=ESMF_FieldCreateGBArray(geombase, array, copyflag, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    name=name, iospec=iospec, rc=localrc)
+
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+ 
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_FieldCreateLocStreamArray
+!------------------------------------------------------------------------------
 
    
 !------------------------------------------------------------------------------
@@ -1499,6 +1741,152 @@ contains
 !------------------------------------------------------------------------------ @\
 
 TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
+
+
+#define FieldCreateLocStreamDataPtrDoc() \
+!---------------------------------------------------------------------------- @\
+!BOP @\
+! !IROUTINE: ESMF_FieldCreate - Create a Field from Fortran array pointer @\
+! @\
+! !INTERFACE: @\
+! ! Private name; call using ESMF_FieldCreate() @\
+! function ESMF_FieldCreateLocStreamDataPtr<rank><type><kind>(locstream, & @\
+!   farray, copyflag, gridToFieldMap, ungriddedLBound, & @\
+!   ungriddedUBound, name, iospec, rc) @\
+! @\
+! !RETURN VALUE: @\
+!   type(ESMF_Field) :: ESMF_FieldCreateLocStreamDataPtr<rank><type><kind> @\
+! @\
+! !ARGUMENTS: @\
+!   type(ESMF_LocStream) :: locstream                  @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
+!   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+!   integer, intent(in), optional :: gridToFieldMap(:)     @\
+!   integer, intent(in), optional :: ungriddedLBound(:) @\
+!   integer, intent(in), optional :: ungriddedUBound(:) @\
+!   character (len=*), intent(in), optional :: name  @\
+!   type(ESMF_IOSpec), intent(in), optional :: iospec @\
+!   integer, intent(out), optional :: rc                @\
+! @\
+! !DESCRIPTION: @\
+! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_LocStream}. @\
+! @\
+! The arguments are: @\
+! \begin{description} @\
+! \item [locstream]  @\
+!       {\tt ESMF\_LocStream} object. @\
+! \item [farray] @\
+!       Native fortran data array to be copied/referenced in the {\tt field} @\
+! \item [{[copyflag]}] @\
+!       Whether to copy the {\tt farray} or reference directly. @\
+!       For valid values see \ref{opt:copyflag}.  The default is @\
+!       {\tt ESMF\_DATA\_REF}. @\
+! \item [{[gridToFieldMap]}] @\
+!       List with number of elements equal to 1. @\
+!       The list elements map the single dimension @\
+!       of the {\tt locstream} to a dimension in the {\tt farray} by @\
+!       specifying the appropriate {\tt farray} dimension index. The default is to @\
+!       map the {\tt locstream}'s dimension against the lowest dimension of @\
+!       the {\tt farray}, i.e. {\tt gridToFieldMap} = (/1/). @\
+!       The value of the {\tt gridToFieldMap} entry must be greater than or equal @\
+!       to one and smaller than or equal to the {\tt farray} rank. @\
+!       The total ungridded dimensions in the {\tt field} @\
+!       are the total {\tt farray} dimensions less @\
+!       the total (distributed + undistributed) dimensions in @\
+!       the {\tt locstream}.  Unlocstreamded dimensions must be in the same order they are @\
+!       stored in the {\t farray}.  Permutations of the order of @\
+!       dimensions are handled via individual communication methods.  For example, @\
+!       an undistributed dimension can be remapped to a distributed dimension @\
+!       as part of the ESMF\_ ArrayRedist() operation. @\
+! \item [{[ungriddedLBound]}] @\
+!       Lower bounds of the ungridded dimensions of the {\tt field}. @\
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
+!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than locstream dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
+!       for consistency.  Note that the the ordering of @\
+!       these ungridded dimensions is the same as their order in the {\tt farray}. @\
+! \item [{[ungriddedUBound]}] @\
+!       Upper bounds of the ungridded dimensions of the {\tt field}. @\
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
+!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
+!       {\tt field} are also undistributed. When field dimension count is @\
+!       greater than locstream dimension count, both ungriddedLBound and ungriddedUBound @\
+!       must be specified. When both are specified the values are checked @\
+!       for consistency.  Note that the the ordering of @\
+!       these ungridded dimensions is the same as their order in the {\tt farray}. @\
+! \item [{[name]}]  @\
+!       {\tt Field} name.  @\
+! \item [{[iospec]}]  @\
+!       I/O specification. NOT IMPLEMENTED @\
+! \item [{[rc]}]  @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+! \end{description} @\
+! @\
+!EOP @\
+!---------------------------------------------------------------------------- @\
+
+#define FieldCreateLocStreamDataPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldCreateLocStreamDataPtr" @\
+  function ESMF_FieldCreateLocStreamDataPtr##mrank##D##mtypekind(locstream, & @\
+    farray, copyflag, gridToFieldMap, ungriddedLBound, & @\
+    ungriddedUBound, name, iospec, rc) @\
+@\
+    ! return value @\
+    type(ESMF_Field) :: ESMF_FieldCreateLocStreamDataPtr##mrank##D##mtypekind @\
+@\
+    ! input arguments @\
+    type(ESMF_LocStream) :: locstream                  @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
+    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    integer, intent(in), optional :: gridToFieldMap(:)     @\
+    integer, intent(in), optional :: ungriddedLBound(:) @\
+    integer, intent(in), optional :: ungriddedUBound(:) @\
+    character (len=*), intent(in), optional :: name  @\
+    type(ESMF_IOSpec), intent(in), optional :: iospec @\
+    integer, intent(out), optional :: rc                @\
+@\
+    integer :: localrc                       !  Local error code@\
+    type(ESMF_GeomBase) :: geombase @\
+    type(ESMF_StaggerLoc) :: localStaggerloc@\
+@\
+    ! Initialize pointers@\
+    localrc = ESMF_RC_NOT_IMPL@\
+@\
+    ! Initialize return code   @\
+    if (present(rc)) then@\
+      rc = ESMF_RC_NOT_IMPL@\
+    endif     @\
+@\
+    ! check init status of input parameters@\
+    ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)@\
+@\
+@\
+    ! Create GeomBase from LocStream@\
+    geombase=ESMF_GeomBaseCreate(locstream,rc=localrc)@\
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
+                                     ESMF_CONTEXT, rc)) return@\
+@\
+@\
+       ESMF_FieldCreateLocStreamDataPtr##mrank##D##mtypekind = & @\
+              ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind(geombase, & @\
+                               farray, copyflag,  gridToFieldMap, ungriddedLBound, & @\
+                               ungriddedUBound, & @\
+                               name=name, iospec=iospec, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+@\
+@\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+  end function ESMF_FieldCreateLocStreamDataPtr##mrank##D##mtypekind  @\
+!------------------------------------------------------------------------------ @\
+
+TypeKindRankDeclarationMacro(FieldCreateLocStreamDataPtr)
+
 
 #define FieldCreateMeshDataPtrDoc() \
 !---------------------------------------------------------------------------- @\
