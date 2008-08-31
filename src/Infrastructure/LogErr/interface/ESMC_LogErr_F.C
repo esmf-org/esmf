@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr_F.C,v 1.26 2008/07/29 01:34:52 rosalind Exp $
+// $Id: ESMC_LogErr_F.C,v 1.27 2008/08/31 15:02:54 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -22,14 +22,16 @@
  // associated class definition file and others
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 #include <sys/time.h>
+
 #include "ESMCI_LogErr.h"
 #include "ESMC_Base.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.26 2008/07/29 01:34:52 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.27 2008/08/31 15:02:54 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
