@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.3 2008/08/30 04:13:59 oehmke Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.4 2008/08/31 04:55:04 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -833,6 +833,7 @@ end subroutine ESMF_GeomBaseGet
 !EOPI
     integer :: localrc
     type(ESMF_GeomBaseClass),pointer :: gbcp
+    integer :: cl,cu,cc,el,eu,ec
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -860,39 +861,52 @@ end subroutine ESMF_GeomBaseGet
 
        case  (ESMF_GEOMTYPE_MESH%type) ! Mesh
           if (present(exclusiveLBound)) exclusiveLBound(1) = 1
-          call ESMF_MeshGet(gbcp%mesh, num_nodes=exclusiveUBound(1), rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (present(exclusiveUBound)) then
+             call ESMF_MeshGet(gbcp%mesh, num_nodes=exclusiveUBound(1), rc=localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
-          call ESMF_MeshGet(gbcp%mesh, num_nodes=exclusiveCount(1), rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          endif
+          if (present(exclusiveCount)) then
+              call ESMF_MeshGet(gbcp%mesh, num_nodes=exclusiveCount(1), rc=localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
-
+          endif
           if (present(computationalLBound)) computationalLBound(1) = 1
 
-          call ESMF_MeshGet(gbcp%mesh, num_nodes=computationalUBound(1), rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (present(computationalUBound)) then
+             call ESMF_MeshGet(gbcp%mesh, num_nodes=computationalUBound(1), rc=localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
-          call ESMF_MeshGet(gbcp%mesh, num_nodes=computationalCount(1), rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+          endif
 
+          if (present(computationalCount)) then
+             call ESMF_MeshGet(gbcp%mesh, num_nodes=computationalCount(1), rc=localrc)
+             if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+          endif
 
        case  (ESMF_GEOMTYPE_LOCSTREAM%type) ! LocStream
           call ESMF_LocStreamGet(gbcp%locstream, localDE, &   
-               exclusiveLBound=exclusiveLBound(1), &
-               exclusiveUBound=exclusiveUBound(1), &
-               exclusiveCount=exclusiveCount(1),  &
-               computationalLBound=computationalLBound(1), &
-               computationalUBound=computationalUBound(1), &
-               computationalCount=computationalCount(1), &
+               exclusiveLBound=el, &
+               exclusiveUBound=eu, &
+               exclusiveCount=ec,  &
+               computationalLBound=cl, &
+               computationalUBound=cu, &
+               computationalCount=cc, &
                rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
+          if (present(exclusiveLBound)) exclusiveLBound(1)=el
+          if (present(exclusiveUBound)) exclusiveUBound(1)=eu
+          if (present(exclusiveCount)) exclusiveCount(1)=ec
+          if (present(computationalLBound)) computationalLBound(1)=cl
+          if (present(computationalUBound)) computationalUBound(1)=cu
+          if (present(computationalCount)) computationalCount(1)=cc
 
        case default
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
