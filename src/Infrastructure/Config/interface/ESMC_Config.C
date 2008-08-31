@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.C,v 1.11 2008/08/29 22:07:37 theurich Exp $
+// $Id: ESMC_Config.C,v 1.12 2008/08/31 03:09:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // copyright 2002-2007, University Corporation for Atmospheric Research, 
@@ -25,20 +25,23 @@
 
 #include "ESMC_Config.h"
 
-// required includes
+#include <string.h>
 #include "ESMCI_Util.h"
 #include "ESMCI_Arg.h"
+#include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
-#include <string.h>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char* const version = 
-             "$Id: ESMC_Config.C,v 1.11 2008/08/29 22:07:37 theurich Exp $";
+static const char* const version = "$Id: ESMC_Config.C,v 1.12 2008/08/31 03:09:07 theurich Exp $";
 //-----------------------------------------------------------------------------
 
+// class declaration type -> this should be moved into ESMCI namespace
+class ESMCI_Config{
+  ESMCI::F90ClassHolder fortranclass;
+};
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -50,67 +53,70 @@
 //
 extern "C" {
 
-  void FTN(f_esmf_configcreate)(ESMC_Config* config, int* rc);
+  void FTN(f_esmf_configcreate)(ESMCI_Config* config, int* rc);
 
-  void FTN(f_esmf_configdestroy)(ESMC_Config* config, int* rc);
+  void FTN(f_esmf_configdestroy)(ESMCI_Config* config, int* rc);
 
-  void FTN(f_esmf_configloadfile)(ESMC_Config* config, char* fname, int* unique,
-                            //    int* rc          );
-                                  int* rc, ESMCI_FortranStrLenArg flen);
+  void FTN(f_esmf_configloadfile)(ESMCI_Config* config, char* fname,
+    int* unique, int* rc, ESMCI_FortranStrLenArg flen);
 
-  void FTN(f_esmf_configfindlabel)(ESMC_Config* config, char* label, int* rc,
-				ESMCI_FortranStrLenArg llen);
+  void FTN(f_esmf_configfindlabel)(ESMCI_Config* config, char* label, int* rc,
+    ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_confignextline)(ESMC_Config* config, int* ltable, int* rc);
+  void FTN(f_esmf_confignextline)(ESMCI_Config* config, int* ltable, int* rc);
 
-  void FTN(f_esmf_configgetchar)(ESMC_Config* config, char* value, char* label,
-                                 char* dvalue, int* rc, ESMCI_FortranStrLenArg,
-				ESMCI_FortranStrLenArg llen, ESMCI_FortranStrLenArg);
+  void FTN(f_esmf_configgetchar)(ESMCI_Config* config, char* value, char* label,
+    char* dvalue, int* rc, ESMCI_FortranStrLenArg, ESMCI_FortranStrLenArg llen,
+    ESMCI_FortranStrLenArg);
 
-  void FTN(f_esmf_configgetlen)(ESMC_Config* config, int* wordCount, char* label,
-                                int* rc, ESMCI_FortranStrLenArg llen);
+  void FTN(f_esmf_configgetlen)(ESMCI_Config* config, int* wordCount,
+    char* label, int* rc, ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_configgetdim)(ESMC_Config* config, int* lineCount, int* columnCount,
-                                char* label, int* rc, ESMCI_FortranStrLenArg llen);
+  void FTN(f_esmf_configgetdim)(ESMCI_Config* config, int* lineCount,
+    int* columnCount, char* label, int* rc, ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_configvalidate)(ESMC_Config* config, char* options, int* rc,
-				ESMCI_FortranStrLenArg olen);
+  void FTN(f_esmf_configvalidate)(ESMCI_Config* config, char* options, int* rc,
+    ESMCI_FortranStrLenArg olen);
 
   //
   // Functions for ConfigGetAttribute interface
   //
-  void FTN(f_esmf_configgetstring)(ESMC_Config* config, char* value, char* label,
-                                   char* dvalue, int* rc, ESMCI_FortranStrLenArg vlen,
-				ESMCI_FortranStrLenArg llen, ESMCI_FortranStrLenArg dlen);
+  void FTN(f_esmf_configgetstring)(ESMCI_Config* config, char* value,
+    char* label, char* dvalue, int* rc, ESMCI_FortranStrLenArg vlen,
+    ESMCI_FortranStrLenArg llen, ESMCI_FortranStrLenArg dlen);
 
-  void FTN(f_esmf_configgetinti4)(ESMC_Config* config, ESMC_I4* value, char* label,
-                                  ESMC_I4* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
+  void FTN(f_esmf_configgetinti4)(ESMCI_Config* config, ESMC_I4* value,
+    char* label, ESMC_I4* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_configgetinti8)(ESMC_Config* config, ESMC_I8* value, char* label,
-                                  ESMC_I8* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
+  void FTN(f_esmf_configgetinti8)(ESMCI_Config* config, ESMC_I8* value,
+    char* label, ESMC_I8* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_configgetfloatr4)(ESMC_Config* config, ESMC_R4* value, char* label,
-                                    ESMC_R4* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
+  void FTN(f_esmf_configgetfloatr4)(ESMCI_Config* config, ESMC_R4* value,
+    char* label, ESMC_R4* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_configgetfloatr8)(ESMC_Config* config, ESMC_R8* value, char* label,
-                                    ESMC_R8* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
+  void FTN(f_esmf_configgetfloatr8)(ESMCI_Config* config, ESMC_R8* value,
+    char* label, ESMC_R8* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_configgetlogical)(ESMC_Config* config, int* value, char* label,
-                                    int* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
+  void FTN(f_esmf_configgetlogical)(ESMCI_Config* config, int* value,
+    char* label, int* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_configgetintsi4)(ESMC_Config* config, int* count,
-    ESMC_I4* value, char* label, ESMC_I4* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
+  void FTN(f_esmf_configgetintsi4)(ESMCI_Config* config, int* count,
+    ESMC_I4* value, char* label, ESMC_I4* dvalue, int* rc,
+    ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_configgetintsi8)(ESMC_Config* config, int* count,
-    ESMC_I8* value, char* label, ESMC_I8* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
+  void FTN(f_esmf_configgetintsi8)(ESMCI_Config* config, int* count,
+    ESMC_I8* value, char* label, ESMC_I8* dvalue, int* rc,
+    ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_configgetfloatsr4)(ESMC_Config* config, int* count,
-    ESMC_R4* value, char* label, ESMC_R4* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
+  void FTN(f_esmf_configgetfloatsr4)(ESMCI_Config* config, int* count,
+    ESMC_R4* value, char* label, ESMC_R4* dvalue, int* rc,
+    ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_configgetfloatsr8)(ESMC_Config* config, int* count,
-    ESMC_R8* value, char* label, ESMC_R8* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
+  void FTN(f_esmf_configgetfloatsr8)(ESMCI_Config* config, int* count,
+    ESMC_R8* value, char* label, ESMC_R8* dvalue, int* rc,
+    ESMCI_FortranStrLenArg llen);
 
-  void FTN(f_esmf_configgetlogicals)(ESMC_Config* config, int* count,
+  void FTN(f_esmf_configgetlogicals)(ESMCI_Config* config, int* count,
     int* value, char* label, int* dvalue, int* rc, ESMCI_FortranStrLenArg llen);
 
 }; // end prototypes for fortran interface
@@ -137,7 +143,7 @@ extern "C" {
 // !IROUTINE:  ESMC_ConfigCreate - Create a Config object
 //
 // !INTERFACE:
-ESMC_Config* ESMC_ConfigCreate(
+ESMC_Config ESMC_ConfigCreate(
 //
 // !RETURN VALUE:
 //  ESMC_Config*  to newly allocated ESMC_Config
@@ -165,28 +171,31 @@ ESMC_Config* ESMC_ConfigCreate(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
   localrc = ESMC_RC_NOT_IMPL;
 
+  ESMC_Config config;
+  config.ptr = NULL;  // initialize
+  
   // allocate the new Config object
-  ESMC_Config* config;
+  ESMCI_Config* configp;
   try{
-    config = new ESMC_Config;
+    configp = new ESMCI_Config;
   }catch(...){
      // allocation error
-     ESMC_LogDefault.MsgAllocError("for new ESMC_Config.", ESMC_CONTEXT, rc);  
-     return ESMC_NULL_POINTER;
+     ESMC_LogDefault.MsgAllocError("for new ESMCI_Config.", ESMC_CONTEXT, rc);  
+     return config;
   }
 
   // call into Fortran interface
-  FTN(f_esmf_configcreate)(config, &localrc);
+  FTN(f_esmf_configcreate)(configp, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
-    delete config;
-    config = ESMC_NULL_POINTER;
-    return ESMC_NULL_POINTER;
+    delete configp;
+    return config;
   }
 
   // set return code for this branch
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-
+  
   // final return
+  config.ptr = (void*)configp;
   return config;
 
 } // end ESMC_ConfigCreate
@@ -230,19 +239,22 @@ int ESMC_ConfigDestroy(
   localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
-  if (config == ESMC_NULL_POINTER) {
+  if (config == ESMC_NULL_POINTER || config->ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Config", &rc);
     return rc;
   }
+  
+  // typecase into ESMCI type
+  ESMCI_Config *configp = (ESMCI_Config*)(config->ptr);
 
   // call into Fortran interface
-  FTN(f_esmf_configdestroy)(config, &localrc);
+  FTN(f_esmf_configdestroy)(configp, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
     return rc;
   }
-  delete config;
-  config = ESMC_NULL_POINTER;
+  delete configp;
+  config->ptr = ESMC_NULL_POINTER;
 
   // set return code for this branch
   rc = ESMF_SUCCESS;
@@ -267,7 +279,7 @@ int ESMC_ConfigLoadFile(
 //  Equals {\tt ESMF\_SUCCESS} if there are no errors.
 //
 // !ARGUMENTS: 
-  ESMC_Config* config,       // in  - ESMC_Config object
+  ESMC_Config config,        // in  - ESMC_Config object
   char* name,                // in  - file name
   ...                        // optional argument list: (unique)
   ) {
@@ -311,11 +323,14 @@ int ESMC_ConfigLoadFile(
   uniquep = &unique;
 
   // return with errors for NULL pointer
-  if (config == ESMC_NULL_POINTER) {
+  if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Config", &rc);
     return rc;
   }
+
+  // typecase into ESMCI type
+  ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
 
   // check the optional argument list:
   ESMCI_ArgStart(argPtr,name);
@@ -356,7 +371,7 @@ int ESMC_ConfigLoadFile(
   }
 
   // call Fortran interface
-  FTN(f_esmf_configloadfile)(config, fName, uniquep, &localrc, nlen);
+  FTN(f_esmf_configloadfile)(configp, fName, uniquep, &localrc, nlen);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
     delete[] fName;
     return rc;
@@ -391,7 +406,7 @@ int ESMC_ConfigFindLabel(
 //  and -3 if invalid operation with index.
 //
 // !ARGUMENTS: 
-  ESMC_Config* config,       // in  - ESMC_Config object
+  ESMC_Config config,        // in  - ESMC_Config object
   char* label                // in  - label
   ) {
 //
@@ -425,11 +440,14 @@ int ESMC_ConfigFindLabel(
   localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
-  if (config == ESMC_NULL_POINTER) {
+  if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Config", &rc);
     return rc;
   }
+
+  // typecase into ESMCI type
+  ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
 
   // convert label to fortran string
   llen = strlen(label);
@@ -441,7 +459,7 @@ int ESMC_ConfigFindLabel(
   }
 
   // call Fortran interface
-  FTN(f_esmf_configfindlabel)(config, fLabel, &localrc, llen);
+  FTN(f_esmf_configfindlabel)(configp, fLabel, &localrc, llen);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
     delete[] fLabel;
     return rc;
@@ -474,7 +492,7 @@ int ESMC_ConfigNextLine(
 //  Equals {\tt ESMF\_SUCCESS} if there are no errors.
 //
 // !ARGUMENTS:
-  ESMC_Config* config,       // in  - ESMC_Config object
+  ESMC_Config config,       // in  - ESMC_Config object
   ...                        // optional argument list: (tableEnd)
   ) {
 //
@@ -504,11 +522,14 @@ int ESMC_ConfigNextLine(
   localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
-  if (config == ESMC_NULL_POINTER) {
+  if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Config", &rc);
     return rc;
   }
+
+  // typecase into ESMCI type
+  ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
 
   // check the optional argument list:
   ESMCI_ArgStart(argPtr,config);
@@ -539,7 +560,7 @@ int ESMC_ConfigNextLine(
   ESMCI_ArgEnd(argPtr);
 
   // call Fortran interface
-  FTN(f_esmf_confignextline)(config, tableEndp, &localrc);
+  FTN(f_esmf_confignextline)(configp, tableEndp, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
     return rc;
   }
@@ -568,7 +589,7 @@ int ESMC_ConfigNextLine(
 //  Equals {\tt ESMF\_SUCCESS} if there are no errors.
 //
 // !ARGUMENTS: 
-  ESMC_Config* config,       // in  - ESMC_Config object
+  ESMC_Config config,        // in  - ESMC_Config object
   char* value,               // out - value
   ...                        // optional argument list: (label, dvalue)
   ) {
@@ -607,11 +628,14 @@ int ESMC_ConfigNextLine(
   localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
-  if (config == ESMC_NULL_POINTER) {
+  if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Config", &rc);
     return rc;
   }
+
+  // typecase into ESMCI type
+  ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
 
   // check the optional argument list
   ESMCI_ArgStart(argPtr,value);
@@ -660,7 +684,8 @@ int ESMC_ConfigNextLine(
   }
 
   // call Fortran interface
-  FTN(f_esmf_configgetchar)(config, value, fLabel, dvaluep, &localrc, 1, llen, 1);
+  FTN(f_esmf_configgetchar)(configp, value, fLabel, dvaluep, &localrc, 1, llen,
+    1);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
     if (fLabel != NULL) {delete[] fLabel;}
     return rc;
@@ -693,7 +718,7 @@ int ESMC_ConfigNextLine(
 //  Equals {\tt ESMF\_SUCCESS} if there are no errors.
 //
 // !ARGUMENTS: 
-  ESMC_Config* config,       // in  - ESMC_Config object
+  ESMC_Config config,        // in  - ESMC_Config object
   int* wordCount,            // out - length of line in words
   ...                        // optional argument list: (label)
   ) {
@@ -729,11 +754,14 @@ int ESMC_ConfigNextLine(
   localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
-  if (config == ESMC_NULL_POINTER) {
+  if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Config", &rc);
     return rc;
   }
+
+  // typecase into ESMCI type
+  ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
 
   // check the optional argument list
   ESMCI_ArgStart(argPtr,wordCount);
@@ -775,7 +803,7 @@ int ESMC_ConfigNextLine(
   }
 
   // call into Fortran interface
-  FTN(f_esmf_configgetlen)(config, wordCount, fLabel, &localrc, llen);
+  FTN(f_esmf_configgetlen)(configp, wordCount, fLabel, &localrc, llen);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
     if (fLabel != NULL) {delete[] fLabel;}
     return rc;
@@ -808,7 +836,7 @@ int ESMC_ConfigNextLine(
 //  Equals {\tt ESMF\_SUCCESS} if there are no errors.
 //
 // !ARGUMENTS: 
-  ESMC_Config* config,       // in  - ESMC_Config object
+  ESMC_Config config,        // in  - ESMC_Config object
   int* lineCount,            // out - number of lines in table
   int* columnCount,          // out - number of columns in table
   ...                        // optional argument list: (label)
@@ -847,11 +875,14 @@ int ESMC_ConfigNextLine(
   localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
-  if (config == ESMC_NULL_POINTER) {
+  if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Config", &rc);
     return rc;
   }
+
+  // typecase into ESMCI type
+  ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
 
   // check the optional argument list
   ESMCI_ArgStart(argPtr,columnCount);
@@ -893,7 +924,8 @@ int ESMC_ConfigNextLine(
   }
 
   // call Fortran interface
-  FTN(f_esmf_configgetdim)(config, lineCount, columnCount, fLabel, &localrc, llen);
+  FTN(f_esmf_configgetdim)(configp, lineCount, columnCount, fLabel, &localrc,
+    llen);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
     if (fLabel != NULL) {delete[] fLabel;}
     return rc;
@@ -928,7 +960,7 @@ int ESMC_ConfigValidate(
 //  with option "unusedAttributes" below.
 //
 // !ARGUMENTS: 
-  ESMC_Config* config,       // in  - ESMC_Config object
+  ESMC_Config config,        // in  - ESMC_Config object
   ...                        // optional argument list: (options)
   ) {
 //
@@ -968,11 +1000,14 @@ int ESMC_ConfigValidate(
   localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
-  if (config == ESMC_NULL_POINTER) {
+  if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Config", &rc);
     return rc;
   }
+
+  // typecase into ESMCI type
+  ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
 
   // check the optional argument list
   ESMCI_ArgStart(argPtr,config);
@@ -1014,7 +1049,7 @@ int ESMC_ConfigValidate(
   }
 
   // call Fortran interface
-  FTN(f_esmf_configvalidate)(config, foptions, &localrc, olen);
+  FTN(f_esmf_configvalidate)(configp, foptions, &localrc, olen);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
     if (foptions != NULL) {delete[] foptions;}
     return rc;
@@ -1047,7 +1082,7 @@ int ESMC_ConfigGetAttribute(
 //  Equals {\tt ESMF\_SUCCESS} if there are no errors.
 //
 // !ARGUMENTS: 
-  ESMC_Config* config,       // in  - ESMC_Config object
+  ESMC_Config config,        // in  - ESMC_Config object
   void* value,               // out - value
   ESMC_TypeKind tk,          // in  - tk
   ...                        // optional argument list: (count, label, dvalue)
@@ -1104,11 +1139,14 @@ int ESMC_ConfigGetAttribute(
   localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
-  if (config == ESMC_NULL_POINTER) {
+  if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Config", &rc);
     return rc;
   }
+
+  // typecase into ESMCI type
+  ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
 
   // check for supported type/kind:
   switch ( tk ) {
@@ -1233,10 +1271,10 @@ int ESMC_ConfigGetAttribute(
 
       // call Fortran interface
       if (count > 1) {
-        FTN(f_esmf_configgetintsi4)(config, &count, (ESMC_I4*)value,
+        FTN(f_esmf_configgetintsi4)(configp, &count, (ESMC_I4*)value,
                    fLabel, (ESMC_I4*)dvaluep, &localrc, llen);
       } else {
-        FTN(f_esmf_configgetinti4)( config, (ESMC_I4*)value,
+        FTN(f_esmf_configgetinti4)(configp, (ESMC_I4*)value,
                    fLabel, (ESMC_I4*)dvaluep, &localrc, llen);
       }
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
@@ -1255,10 +1293,10 @@ int ESMC_ConfigGetAttribute(
 
       // call Fortran interface
       if (count > 1) {
-        FTN(f_esmf_configgetintsi8)(config,  &count, (ESMC_I8*)value,
+        FTN(f_esmf_configgetintsi8)(configp,  &count, (ESMC_I8*)value,
                    fLabel, (ESMC_I8*)dvaluep, &localrc, llen);
       } else {
-        FTN(f_esmf_configgetinti8)( config, (ESMC_I8*)value,
+        FTN(f_esmf_configgetinti8)(configp, (ESMC_I8*)value,
                    fLabel, (ESMC_I8*)dvaluep, &localrc, llen);
       }
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
@@ -1277,10 +1315,10 @@ int ESMC_ConfigGetAttribute(
 
       // call Fortran interface
       if (count > 1) {
-        FTN(f_esmf_configgetfloatsr4)(config, &count, (ESMC_R4*)value,
+        FTN(f_esmf_configgetfloatsr4)(configp, &count, (ESMC_R4*)value,
                    fLabel, (ESMC_R4*)dvaluep, &localrc, llen);
       } else {
-        FTN(f_esmf_configgetfloatr4)( config, (ESMC_R4*)value,
+        FTN(f_esmf_configgetfloatr4)(configp, (ESMC_R4*)value,
                    fLabel, (ESMC_R4*)dvaluep, &localrc, llen);
       }
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
@@ -1299,10 +1337,10 @@ int ESMC_ConfigGetAttribute(
 
       // call Fortran interface
       if (count > 1) {
-        FTN(f_esmf_configgetfloatsr8)(config, &count, (ESMC_R8*)value,
+        FTN(f_esmf_configgetfloatsr8)(configp, &count, (ESMC_R8*)value,
                    fLabel, (ESMC_R8*)dvaluep, &localrc, llen);
       } else {
-        FTN(f_esmf_configgetfloatr8)( config, (ESMC_R8*)value,
+        FTN(f_esmf_configgetfloatr8)(configp, (ESMC_R8*)value,
                    fLabel, (ESMC_R8*)dvaluep, &localrc, llen);
       }
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
@@ -1321,10 +1359,10 @@ int ESMC_ConfigGetAttribute(
 
       // call Fortran interface
       if (count > 1) {
-        FTN(f_esmf_configgetlogicals)(config, &count, (int*)value,
+        FTN(f_esmf_configgetlogicals)(configp, &count, (int*)value,
                    fLabel, (int*)dvaluep, &localrc, llen);
       } else {
-        FTN(f_esmf_configgetlogical)( config, (int*)value,
+        FTN(f_esmf_configgetlogical)(configp, (int*)value,
                    fLabel, (int*)dvaluep, &localrc, llen);
       }
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
@@ -1354,7 +1392,7 @@ int ESMC_ConfigGetAttribute(
       }
 
       // call Fortran interface
-      FTN(f_esmf_configgetstring)(config, fValue,
+      FTN(f_esmf_configgetstring)(configp, fValue,
                  fLabel, fDvalue, &localrc, vlen, llen, dlen);
 
       // handle special case of internal non-zero non-failure return code
@@ -1411,7 +1449,7 @@ int ESMC_ConfigSetAttribute(
 //  Equals {\tt ESMF\_SUCCESS} if there are no errors.
 //
 // !ARGUMENTS: 
-  ESMC_Config* config,       // in  - ESMC_Config object
+  ESMC_Config config,        // in  - ESMC_Config object
   void* value,               // in  - value
   ESMC_TypeKind tk,          // in  - tk
   ...                        // optional argument list: (count, label)
@@ -1455,11 +1493,14 @@ int ESMC_ConfigSetAttribute(
   localrc = ESMC_RC_NOT_IMPL;
 
   // return with errors for NULL pointer
-  if (config == ESMC_NULL_POINTER) {
+  if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Config", &rc);
     return rc;
   }
+
+  // typecase into ESMCI type
+  ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
 
   // check for supported type/kind:
   switch ( tk ) {
@@ -1535,10 +1576,10 @@ int ESMC_ConfigSetAttribute(
       // call Fortran interface
 /* ***** THIS SECTION IS UNIMPLEMENTED *****
       if (count > 1) {
-        FTN(f_esmf_configsetintsi4)(config, (ESMC_I4*)value, &count,
+        FTN(f_esmf_configsetintsi4)(configp, (ESMC_I4*)value, &count,
                    fLabel, &localrc, llen);
       } else {
-        FTN(f_esmf_configsetinti4)( config, (ESMC_I4*)value,
+        FTN(f_esmf_configsetinti4)(configp, (ESMC_I4*)value,
                    fLabel, &localrc, llen);
       }
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
@@ -1559,10 +1600,10 @@ int ESMC_ConfigSetAttribute(
       // call Fortran interface
 /* ***** THIS SECTION IS UNIMPLEMENTED *****
       if (count > 1) {
-        FTN(f_esmf_configsetintsi8)(config, (ESMC_I8*)value, &count,
+        FTN(f_esmf_configsetintsi8)(configp, (ESMC_I8*)value, &count,
                    fLabel, &localrc, llen);
       } else {
-        FTN(f_esmf_configsetinti8)( config, (ESMC_I8*)value,
+        FTN(f_esmf_configsetinti8)(configp, (ESMC_I8*)value,
                    fLabel, &localrc, llen);
       }
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
@@ -1583,10 +1624,10 @@ int ESMC_ConfigSetAttribute(
       // call Fortran interface
 /* ***** THIS SECTION IS UNIMPLEMENTED *****
       if (count > 1) {
-        FTN(f_esmf_configsetfloatsr4)(config, (ESMC_R4*)value, &count,
+        FTN(f_esmf_configsetfloatsr4)(configp, (ESMC_R4*)value, &count,
                    fLabel, &localrc, llen);
       } else {
-        FTN(f_esmf_configsetfloatr4)( config, (ESMC_R4*)value,
+        FTN(f_esmf_configsetfloatr4)(configp, (ESMC_R4*)value,
                    fLabel, &localrc, llen);
       }
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
@@ -1607,10 +1648,10 @@ int ESMC_ConfigSetAttribute(
       // call Fortran interface
 /* ***** THIS SECTION IS UNIMPLEMENTED *****
       if (count > 1) {
-        FTN(f_esmf_configsetfloatsr8)(config, (ESMC_R8*)value, &count,
+        FTN(f_esmf_configsetfloatsr8)(configp, (ESMC_R8*)value, &count,
                    fLabel, &localrc, llen);
       } else {
-        FTN(f_esmf_configsetfloatr8)( config, (ESMC_R8*)value,
+        FTN(f_esmf_configsetfloatr8)(configp, (ESMC_R8*)value,
                    fLabel, &localrc, llen);
       }
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
@@ -1631,10 +1672,10 @@ int ESMC_ConfigSetAttribute(
       // call Fortran interface
 /* ***** THIS SECTION IS UNIMPLEMENTED *****
       if (count > 1) {
-        FTN(f_esmf_configsetlogicals)(config, (int*)value, &count,
+        FTN(f_esmf_configsetlogicals)(configp, (int*)value, &count,
                    fLabel, &localrc, llen);
       } else {
-        FTN(f_esmf_configsetlogical)( config, (int*)value,
+        FTN(f_esmf_configsetlogical)(configp, (int*)value,
                    fLabel, &localrc, llen);
       }
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
@@ -1664,7 +1705,7 @@ int ESMC_ConfigSetAttribute(
 
       // call Fortran interface
 /* ***** THIS SECTION IS UNIMPLEMENTED *****
-      FTN(f_esmf_configsetstring)(config, fValue,
+      FTN(f_esmf_configsetstring)(configp, fValue,
                  fLabel, &localrc, vlen, llen);
 
       // check local return code

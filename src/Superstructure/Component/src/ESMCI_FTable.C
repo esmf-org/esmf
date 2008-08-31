@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.4 2008/08/29 17:08:03 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.5 2008/08/31 03:09:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -31,19 +31,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// include ESMF headers
-#include "ESMC_Start.h"
-#include "ESMCI_Comp.h"
-
 // LogErr
 #include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
+
+// include ESMF headers
+#include "ESMCI_Comp.h"
 
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.4 2008/08/29 17:08:03 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.5 2008/08/31 03:09:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 

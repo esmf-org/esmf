@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.7 2008/08/29 17:10:30 theurich Exp $
+// $Id: ESMCI_Comp.C,v 1.8 2008/08/31 03:09:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -23,6 +23,10 @@
 //
 //-----------------------------------------------------------------------------
 
+// LogErr headers
+#include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"             // for LogErr
+
 // include associated header file
 #include "ESMCI_Comp.h"
 
@@ -31,18 +35,15 @@
 #include <string.h>
 
 // include ESMF headers
-#include "ESMC_Start.h"
 #include "ESMCI_FTable.h"
 
-// LogErr headers
-#include "ESMCI_LogErr.h"
-#include "ESMC_LogMacros.inc"             // for LogErr
+
 
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.7 2008/08/29 17:10:30 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.8 2008/08/31 03:09:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for fortran interface routines

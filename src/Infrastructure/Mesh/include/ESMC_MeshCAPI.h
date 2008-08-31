@@ -13,12 +13,12 @@
 #define ESMC_Mesh_h
 
 #include "ESMCI_Util.h"
-#include "ESMC_F90Interface.h"
+#include "ESMCI_F90Interface.h"
 
 extern "C" {
 
 typedef struct {
-  ESMC_F90ClassHolder *f90this;
+  ESMCI::F90ClassHolder *f90this;
 } ESMC_Mesh;
 
 typedef enum {ESMC_MESHELEMENT_QUAD=0, ESMC_MESHELEMENT_TRI=1,

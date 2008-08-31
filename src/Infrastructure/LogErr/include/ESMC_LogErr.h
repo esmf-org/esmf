@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.66 2008/08/15 17:04:59 rosalind Exp $
+// $Id: ESMC_LogErr.h,v 1.67 2008/08/31 03:09:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -29,18 +29,8 @@
 // !USES:
 
 
-#include <ESMC_Base.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <mpi.h>
-#include <time.h>
-#include <ctype.h>
-
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrReturnCodes.inc"
-
-#include "ESMC_Interface.h"
 
 extern "C"{
 

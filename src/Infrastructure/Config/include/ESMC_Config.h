@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.12 2008/08/29 22:07:37 theurich Exp $
+// $Id: ESMC_Config.h,v 1.13 2008/08/31 03:09:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -39,7 +39,6 @@
 // !USES:
 #include "ESMC_Arg.h"
 #include "ESMC_Util.h"
-#include "ESMC_F90Interface.h"
 
 // Optional argument identifier list for the ESMC_Config API.
 enum {
@@ -64,35 +63,35 @@ extern "C" {
 
 // class declaration type
 typedef struct {
-
-    // pointer to fortran derived type
-    ESMC_F90ClassHolder* f90this;
-} ESMC_Config ; // end class ESMC_Config
+  void* ptr;
+}ESMC_Config ;
 
 
 // prototypes for the ESMC_Config API
 
-ESMC_Config* ESMC_ConfigCreate(int* rc);
+ESMC_Config ESMC_ConfigCreate(int* rc);
 
 int ESMC_ConfigDestroy(ESMC_Config* config);
 
-int ESMC_ConfigLoadFile(ESMC_Config* config, char* fname, ...);
+int ESMC_ConfigLoadFile(ESMC_Config config, char* fname, ...);
 
-int ESMC_ConfigFindLabel(ESMC_Config* config, char* label);
+int ESMC_ConfigFindLabel(ESMC_Config config, char* label);
 
-int ESMC_ConfigNextLine(ESMC_Config* config, ...);
+int ESMC_ConfigNextLine(ESMC_Config config, ...);
 
-int ESMC_ConfigGetChar(ESMC_Config* config, char* value, ...);
+int ESMC_ConfigGetChar(ESMC_Config config, char* value, ...);
 
-int ESMC_ConfigGetLen(ESMC_Config* config, int* wordCount, ...);
+int ESMC_ConfigGetLen(ESMC_Config config, int* wordCount, ...);
 
-int ESMC_ConfigGetDim(ESMC_Config* config, int* lineCount, int* columnCount, ...);
+int ESMC_ConfigGetDim(ESMC_Config config, int* lineCount, int* columnCount,
+  ...);
 
-int ESMC_ConfigValidate(ESMC_Config* config, ...);
+int ESMC_ConfigValidate(ESMC_Config config, ...);
 
-int ESMC_ConfigGetAttribute(ESMC_Config* config, void* value, ESMC_TypeKind tk, ...);
+int ESMC_ConfigGetAttribute(ESMC_Config config, void* value, ESMC_TypeKind tk,
+  ...);
 
-int ESMC_ConfigSetAttribute(ESMC_Config* config, void* value, ESMC_TypeKind tk, ...);
+int ESMC_ConfigSetAttribute(ESMC_Config config, void* value, ESMC_TypeKind tk, ...);
 
 
 }; // end extern "C"

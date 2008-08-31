@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface.h,v 1.5 2008/04/05 03:39:00 cdeluca Exp $
+// $Id: ESMCI_F90Interface.h,v 1.6 2008/08/31 03:09:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,6 +35,14 @@
 
 namespace ESMCI {
 
+
+class F90ClassHolder{
+  void *memoryHolder[8];  // reserve 8 times the space of a void pointer
+                          // this value has been determined empirically to work
+                          // on the supported platforms.
+};
+
+
 class InterfaceInt{
   public: // this thin class is public to make it's usage uncomplicated
     int *array;
@@ -46,6 +54,7 @@ class InterfaceInt{
     InterfaceInt(int *arrayArg, int dimArg, const int *lenArg); //n. constructor
     ~InterfaceInt(void);                                  // native destructor
 };
+
 
 } // namespace ESMCI
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.8 2008/08/29 22:07:38 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.9 2008/08/31 03:09:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -46,9 +46,6 @@
 // WARNING:  the values of these enums MUST match the values defined
 //  in ../interface/ESMF_Util.F90
 
-// general logical value - MUST MATCH F90
-enum ESMC_Logical { ESMF_TRUE=1,
-                    ESMF_FALSE };
 
 // ESMF class states
 enum ESMC_Status { ESMF_STATUS_UNINIT=1,

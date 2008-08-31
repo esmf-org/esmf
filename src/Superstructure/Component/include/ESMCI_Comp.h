@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.8 2008/08/29 17:10:30 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.9 2008/08/31 03:09:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -30,10 +30,10 @@
 //-----------------------------------------------------------------------------
 
 
-#include "ESMC_F90Interface.h"
 #include "ESMCI_State.h"
 #include "ESMCI_Clock.h"
 #include "ESMCI_Grid.h"
+#include "ESMCI_F90Interface.h"
 
 
 namespace ESMCI {
@@ -47,7 +47,7 @@ enum GridCompType { ATM=1, LAND, OCEAN, SEAICE, RIVER, UNKNOWN };
 // class definition
 class Comp{
   private:
-    ESMC_F90ClassHolder fortranclass;
+    F90ClassHolder fortranclass;
   public:
     int setServices(void (*func)(Comp *, int *));
     int setEntryPoint(const char *functionType,

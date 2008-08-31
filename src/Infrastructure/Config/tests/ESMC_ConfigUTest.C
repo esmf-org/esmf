@@ -1,4 +1,4 @@
-// $Id: ESMC_ConfigUTest.C,v 1.5 2008/06/25 22:59:55 theurich Exp $
+// $Id: ESMC_ConfigUTest.C,v 1.6 2008/08/31 03:09:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -25,9 +25,9 @@
 
 int main(void){
 
-  ESMC_Config* cf;              // ESMC_Config object
-  char* fileName = "ESMF_Resource_File_Sample.rc";                   // file name
-  char* fileName2= "ESMF_Resource_File_Sample2.rc";                  // file name
+  ESMC_Config cf;              // ESMC_Config object
+  char* fileName = "ESMF_Resource_File_Sample.rc";                // file name
+  char* fileName2= "ESMF_Resource_File_Sample2.rc";               // file name
   char name[80];
   char failMsg[80];
   int result = 0;
@@ -40,42 +40,39 @@ int main(void){
   
   //----------------------------------------------------------------------------
   //NEX_UTest
-  rc = ESMF_RC_NOT_IMPL;
-  strcpy(name, "ESMC_Initialize Unit test \0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
+  strcpy(name, "ESMC_Initialize Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_Initialize(NULL, ESMC_ArgLast);
-  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Create a config object -- cf
-  strcpy(name, "ConfigCreate Unit test \0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
+  strcpy(name, "ConfigCreate Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   cf = ESMC_ConfigCreate(&rc);
-  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
   
- //----------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //NEX_UTest
   //Load resource file into memory
-  rc = ESMF_RC_NOT_IMPL;
-  strcpy(name, "ConfigLoadFile Unit test \0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
+  strcpy(name, "ConfigLoadFile Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ConfigLoadFile(cf, fileName2,  ESMC_ArgLast);
-  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
 
- //----------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //NEX_UTest
   //Load resource file into memory - set optional argument unique to .true.
-  rc = ESMF_RC_NOT_IMPL;
   unique = 1;
-  strcpy(name, "ConfigLoadFile Unit test - optional arg. \0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
-  rc = ESMC_ConfigLoadFile(cf, fileName2, ESMCI_ConfigArgUniqueID,
-                            unique, ESMC_ArgLast);
-  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  strcpy(name, "ConfigLoadFile Unit test - optional arg");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ConfigLoadFile(cf, fileName2, ESMCI_ConfigArgUniqueID, unique,
+    ESMC_ArgLast);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
  
 #ifdef ESMF_TESTEXHAUSTIVE
@@ -84,16 +81,23 @@ int main(void){
   //Load resource file into memory
   //This UTest tests whether the code will recognize that the input file 
   //repeats the definition of an attribute
-  rc = ESMF_RC_NOT_IMPL;
-  strcpy(name, "ConfigLoadFile Unit test \0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
-  rc = ESMC_ConfigLoadFile(cf, fileName, ESMCI_ConfigArgUniqueID,
-                            unique, ESMC_ArgLast);
-  ESMC_Test((rc == ESMF_RC_DUP_NAME), name, failMsg, &result, __FILE__, __LINE__,
- 0);
+  strcpy(name, "ConfigLoadFile Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ConfigLoadFile(cf, fileName, ESMCI_ConfigArgUniqueID, unique,
+    ESMC_ArgLast);
+  ESMC_Test((rc == ESMF_RC_DUP_NAME), name, failMsg, &result, __FILE__, 
+    __LINE__, 0);
   //----------------------------------------------------------------------------
 #endif
 
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //Destroy Config object
+  strcpy(name, "ConfigDestroy Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ConfigDestroy(&cf);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(result, __FILE__, __LINE__, 0);

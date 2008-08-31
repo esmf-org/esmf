@@ -1,4 +1,4 @@
-// $Id: ESMC_Start.h,v 1.5 2008/04/05 03:39:01 cdeluca Exp $
+// $Id: ESMC_Start.h,v 1.6 2008/08/31 03:09:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,8 +13,6 @@
 
 // common macros and constants
 #include "ESMC_Macros.h"
-#include "ESMC_F90Interface.h"
-#include "ESMCI_F90Interface.h"
 
 // shared macros between fortran and C++.  this must come first before
 // the system dependent file below.  also shared error messages.

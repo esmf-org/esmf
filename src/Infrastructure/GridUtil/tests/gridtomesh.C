@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// $Id: gridtomesh.C,v 1.6 2008/07/29 01:34:51 rosalind Exp $
+// $Id: gridtomesh.C,v 1.7 2008/08/31 03:09:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -15,6 +15,9 @@
 //  the automated document processing.)
 //-----------------------------------------------------------------------------
 #include "ESMC_GridToMesh.h"
+
+#include "ESMC_Conf.h"
+#include "ESMCI_VM.h"
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"
 #include <Mesh/include/ESMC_Mesh.h>

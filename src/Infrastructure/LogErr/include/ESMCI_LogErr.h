@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.h,v 1.4 2008/08/01 23:36:54 rosalind Exp $
+// $Id: ESMCI_LogErr.h,v 1.5 2008/08/31 03:09:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -28,8 +28,11 @@
 //
 // !USES:
 
+#include <stdlib.h>
 
 #include "ESMC_LogErr.h"
+#include "ESMCI_Util.h"
+#include "ESMC_Conf.h"
 
 namespace ESMCI{
 
@@ -75,8 +78,8 @@ private:
          int *rcToReturn);
     bool MsgAllocError(char msg[],int *rcToReturn);
     bool MsgAllocError(char msg[],int LINE,char FILE[],char method[],
-    int *rcToReturn);
-        bool MsgFoundError(int rcToCheck,char msg[],int *rcToReturn);
+      int *rcToReturn);
+    bool MsgFoundError(int rcToCheck,char msg[],int *rcToReturn);
     bool MsgFoundError(int rcToCheck,char msg[],int LINE,char FILE[],
          char method[],int *rcToReturn);
     void Open(char filename[]);

@@ -25,12 +25,15 @@
 //-----------------------------------------------------------------------------
 //
 
-
 // associated header file
 #include "ESMCI_State.h"
 
 //insert any higher level, 3rd party or system includes here
 #include <string.h>         // strlen()
+
+// LogErr headers
+#include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -42,9 +45,9 @@
 //EOP
 //-----------------------------------------------------------------------------
 
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_State.C,v 1.9 2008/08/26 18:51:06 theurich Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_State.C,v 1.10 2008/08/31 03:09:10 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -83,6 +86,8 @@ extern "C" {
 
 namespace ESMCI {
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::create()"
 //BOP
 // !IROUTINE:  ESMCI::State::create - Create a new State
 //
@@ -146,6 +151,8 @@ namespace ESMCI {
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::addArray()"
 //BOP
 // !IROUTINE:  ESMCI::State::addArray - Add an array to this state
 //
@@ -183,6 +190,8 @@ namespace ESMCI {
    } // end ESMC_StateAddArray
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::getArray()"
 //BOP
 // !IROUTINE:  ESMCI::State::getArray - Get an array from this state
 //
@@ -235,6 +244,8 @@ namespace ESMCI {
    } // end ESMC_StateGetArray
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::print()"
 //BOP
 // !IROUTINE:  ESMCI::State::print - print the internal data for a state
 
@@ -264,6 +275,8 @@ namespace ESMCI {
 } // end State::print
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::State::destroy()"
 //BOP
 // !IROUTINE:  ESMCI::State::destroy - free a State created with Create
 //

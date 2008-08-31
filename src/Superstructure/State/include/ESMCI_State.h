@@ -1,4 +1,4 @@
-// $Id: ESMCI_State.h,v 1.13 2008/08/26 18:51:05 theurich Exp $
+// $Id: ESMCI_State.h,v 1.14 2008/08/31 03:09:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,8 +35,7 @@
 // 
 // !USES:
 #include "ESMCI_Array.h"
-#include "ESMC_Start.h"
-#include "ESMCI_LogErr.h"
+#include "ESMCI_F90Interface.h"
 
 
 //-----------------------------------------------------------------------------
@@ -46,16 +45,15 @@
 //-----------------------------------------------------------------------------
 namespace ESMCI{
   class State{
-
-     // pointer to fortran derived type
-     ESMC_F90ClassHolder fortranclass;
-
-     public:
-     static State* create(char* name, int *rc);
-     int addArray(Array *array);
-     int print();
-     int getArray(char* name, Array **array);
-     static int destroy(State *state);
+    // pointer to fortran derived type
+    F90ClassHolder fortranclass;
+    // methods
+    public:
+    static State* create(char* name, int *rc);
+    int addArray(Array *array);
+    int print();
+    int getArray(char* name, Array **array);
+    static int destroy(State *state);
   }; // class State
 };// namespace ESMCI
 

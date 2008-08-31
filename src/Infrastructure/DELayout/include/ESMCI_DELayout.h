@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.7 2008/08/08 08:39:04 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.8 2008/08/31 03:09:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -33,6 +33,7 @@
 
 #include "ESMC_Base.h"      // Base is superclass to DELayout
 #include "ESMCI_VM.h"
+#include "ESMCI_F90Interface.h"
 
 //-------------------------------------------------------------------------
 

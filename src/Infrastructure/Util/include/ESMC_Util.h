@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.28 2008/08/29 22:07:38 theurich Exp $
+// $Id: ESMC_Util.h,v 1.29 2008/08/31 03:09:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -21,6 +21,10 @@
 #define ESMC_UTIL_H
 
 #include "ESMC_Conf.h"
+
+// general logical value - MUST MATCH F90
+enum ESMC_Logical { ESMF_TRUE=1,
+                    ESMF_FALSE };
 
 enum ESMC_TypeKind { ESMC_TYPEKIND_I1=1,
                      ESMC_TYPEKIND_I2,
