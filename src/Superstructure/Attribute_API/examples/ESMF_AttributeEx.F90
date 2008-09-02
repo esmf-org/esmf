@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.3 2008/08/14 01:55:02 rokuingh Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.4 2008/09/02 22:28:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -56,7 +56,6 @@ program ESMF_AttributeEx
                                  value4,value5,value6,value7,value8,value9, &
                                  value10,conv,purp
       
-      integer                               :: count
       character(ESMF_MAXSTR), dimension(12) :: attpackListTNames
       integer(kind=4)                       :: inI4
       integer(kind=4), dimension(3)         :: inI4l
@@ -426,10 +425,9 @@ program ESMF_AttributeEx
       attpackListTNames(10) = "Logical_namelist"
       attpackListTNames(11) = "Character_name"
       attpackListTNames(12) = "Character_namelist"
-      count=12
       
       call ESMF_AttributeAdd(gridcomp, convention=conv, purpose=purp, &
-        attrList=attpackListTNames, count=count, rc=rc)
+        attrList=attpackListTNames, rc=rc)
       
       inI4 = 4
       inI4l = (/1,2,3/)
@@ -439,38 +437,36 @@ program ESMF_AttributeEx
       inR4l = (/1,2,3/)
       inR8 = 4
       inR8l = (/1,2,3/)
-      count = 3
       inChar = "Character string 4"
       inCharl = (/ "Character string 1", &
                    "Character string 2", &
                    "Character string 3" /)
       inLog = .true.
       inLogl = (/.true., .false., .true. /)
-      count = 3
       
       call ESMF_AttributeSet(gridcomp, name="ESMF_I4name", value=inI4, &
         convention=conv, purpose=purp, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name="ESMF_I4namelist", count=count, &
+      call ESMF_AttributeSet(gridcomp, name="ESMF_I4namelist", &
         valueList=inI4l, convention=conv, purpose=purp, rc=rc)
       call ESMF_AttributeSet(gridcomp, name="ESMF_I8name", value=inI8, &
         convention=conv, purpose=purp, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name="ESMF_I8namelist", count=count, &
+      call ESMF_AttributeSet(gridcomp, name="ESMF_I8namelist", &
         valueList=inI4l, convention=conv, purpose=purp, rc=rc)
       call ESMF_AttributeSet(gridcomp, name="ESMF_R4name", value=inR4, &
         convention=conv, purpose=purp, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name="ESMF_R4namelist", count=count, &
+      call ESMF_AttributeSet(gridcomp, name="ESMF_R4namelist", &
         valueList=inI4l, convention=conv, purpose=purp, rc=rc)
       call ESMF_AttributeSet(gridcomp, name="ESMF_R8name", value=inR8, &
         convention=conv, purpose=purp, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name="ESMF_R8namelist", count=count, &
+      call ESMF_AttributeSet(gridcomp, name="ESMF_R8namelist", &
         valueList=inI4l, convention=conv, purpose=purp, rc=rc)
       call ESMF_AttributeSet(gridcomp, name="Character_name", value=inChar, &
         convention=conv, purpose=purp, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name="Character_namelist", count=count, &
+      call ESMF_AttributeSet(gridcomp, name="Character_namelist", &
         valueList=inCharl, convention=conv, purpose=purp, rc=rc)
       call ESMF_AttributeSet(gridcomp, name="Logical_name", value=inLog, &
         convention=conv, purpose=purp, rc=rc)
-      call ESMF_AttributeSet(gridcomp, name="Logical_namelist", count=count, &
+      call ESMF_AttributeSet(gridcomp, name="Logical_namelist", &
         valueList=inLogl, convention=conv, purpose=purp, rc=rc)
 !EOC
 
@@ -487,13 +483,13 @@ program ESMF_AttributeEx
                         "Character string 5", &
                         "Character string 6" /)
       
-      call ESMF_AttributeGet(gridcomp, name="Character_namelist", count=count, &
+      call ESMF_AttributeGet(gridcomp, name="Character_namelist", &
         valueList=outCharl, convention=conv, purpose=purp, rc=rc) 
                     
       call ESMF_AttributeRemove(gridcomp, name="Character_namelist", &
         convention=conv, purpose=purp, rc=rc)
       
-      call ESMF_AttributeGet(gridcomp, name="Character_namelist", count=count, &
+      call ESMF_AttributeGet(gridcomp, name="Character_namelist", &
         valueList=dfltoutCharl, defaultvalueList=defaultCharl, &
         convention=conv, purpose=purp, rc=rc)
 !EOC
