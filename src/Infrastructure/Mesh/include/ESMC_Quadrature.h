@@ -60,11 +60,7 @@ protected:
 // Assign arbitrary parametric coords, null weights
 class arbq : public intgRule {
 public:
-  arbq(UInt _pdim, UInt nq, const double pcoord[], const double *_wgts=NULL) :
-    intgRule(nq,nq,_pdim) {
-    std::copy(pcoord, pcoord+(nq*pdim), locs);
-    if (_wgts) std::copy(_wgts, _wgts+nq, wgts);
-  }
+  arbq(UInt _pdim, UInt nq, const double pcoord[], const double *_wgts=NULL);
   ~arbq() {}
   const std::string &iname() const {return name;}
 
@@ -76,7 +72,7 @@ public:
     Throw() << "Arbq doesnt swap order";
   }
   private:
-  static const std::string name;
+  const std::string name;
 };
 
 // Gauss Legendre on [-1,1]
@@ -84,7 +80,7 @@ class barq : public intgRule {
 public:
   static barq &instance(UInt q);
   ~barq();
-  static const std::string name;
+  const std::string name;
   const std::string &iname() const {return name;}
   const intgRule *ChangeOrder(UInt q) const {
     return &instance(q);
@@ -94,7 +90,6 @@ public:
   }
 private:
   barq(UInt ord);  // order of quadrature
-  static std::map<UInt,barq*> classInstances;
 };
 
 // Gauss Legendre tensor on [-1,1]^2
@@ -102,7 +97,7 @@ class quadq : public intgRule {
 public:
   static quadq &instance(UInt order);
   ~quadq();
-  static const std::string name;
+  const std::string name;
   const std::string &iname() const {return name;}
   const intgRule *ChangeOrder(UInt q) const {
     return &instance(q);
@@ -112,14 +107,13 @@ public:
   }
 private:
   quadq(UInt ord);  // order of quadrature
-  static std::map<UInt,quadq*> classInstances;
 };
 
 class triq : public intgRule {
 public:
   static triq &instance(UInt q);
   ~triq();
-  static const std::string name;
+  const std::string name;
   const std::string &iname() const {return name;}
   const intgRule *ChangeOrder(UInt q) const {
     return &instance(q);
@@ -129,7 +123,6 @@ public:
   }
 private:
   triq(UInt q);  // order of quadrature
-  static std::map<UInt, triq*> classInstances;
 };
 
 // Gauss Legendre tensor on [-1,1]^3
@@ -137,7 +130,7 @@ class hexq : public intgRule {
 public:
   static hexq &instance(UInt q);
   ~hexq();
-  static const std::string name;
+  const std::string name;
   const std::string &iname() const {return name;}
   const intgRule *ChangeOrder(UInt q) const {
     return &instance(q);
@@ -147,14 +140,13 @@ public:
   }
 private:
   hexq(UInt q);  // order of quadrature
-  static std::map<UInt, hexq*> classInstances;
 };
 
 class tetraq : public intgRule {
 public:
   static tetraq &instance(UInt q);
   ~tetraq();
-  static const std::string name;
+  const std::string name;
   const std::string &iname() const {return name;}
   const intgRule *ChangeOrder(UInt q) const {
     return &instance(q);
@@ -164,7 +156,6 @@ public:
   }
 private:
   tetraq(UInt q);  // order of quadrature
-  static std::map<UInt, tetraq*> classInstances;
 };
 
 

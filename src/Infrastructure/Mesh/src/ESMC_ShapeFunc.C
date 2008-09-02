@@ -24,7 +24,7 @@ ShapeFunc::~ShapeFunc() {
 // DG0
 
 template<int PDIM>
-const std::string dg0_shape_func<PDIM>::name("dgo");
+const char *dg0_shape_func<PDIM>::name = "dg0";
 
 template<int PDIM>
 const int dg0_shape_func<PDIM>::dof_description[1][4] = {
@@ -58,7 +58,7 @@ const double dg0_shape_func<PDIM>::ipoints[1] =
 
 // Bar
 
-const std::string bar_shape_func::name("bar");
+const char *bar_shape_func::name = "bar";
 
 const int bar_shape_func::dof_description[ndofs][4] = {
 {DOF_NODE, 0, 0, 1},
@@ -100,7 +100,7 @@ const double bar_shape_func::ipoints[ndofs*pdim] = {
 
 // Bar3
 
-const std::string bar3_shape_func::name("bar3");
+const char *bar3_shape_func::name="bar3";
 
 const int bar3_shape_func::dof_description[ndofs][4] = {
 {DOF_NODE, 0, 0, 1},
@@ -146,7 +146,7 @@ const double bar3_shape_func::ipoints[ndofs*pdim] = {
 };
 
 // TRI 
-const std::string tri_shape_func::name("tri");
+const char *tri_shape_func::name="tri";
 const int tri_shape_func::dof_description[ndofs][4] = {
 {DOF_NODE, 0, 0, 1},
 {DOF_NODE, 1, 0, 1},
@@ -205,7 +205,7 @@ const double tri_shape_func::ipoints[ndofs*pdim] = {
 };
 
 // QUAD
-const std::string quad_shape_func::name("quad");
+const char *quad_shape_func::name="quad";
 const double quad_shape_func::one4th = 1.0/4.0;
 const int quad_shape_func::dof_description[ndofs][4] = {
 {DOF_NODE, 0, 0, 1},
@@ -299,7 +299,7 @@ const double quad_shape_func::ipoints[ndofs*pdim] = {
 };
 
 // Quad9
-const std::string quad9_shape_func::name("quad9");
+const char *quad9_shape_func::name="quad9";
 const int quad9_shape_func::dof_description[ndofs][4] = {
 {DOF_NODE, 0, 0, 1},
 {DOF_NODE, 1, 0, 1},
@@ -402,7 +402,7 @@ const double quad9_shape_func::ipoints[ndofs*pdim] = {
 
 // HEX
 
-const std::string hex_shape_func::name("hex");
+const char *hex_shape_func::name="hex";
 const double hex_shape_func::one8th = 1.0/8.0;
 const int hex_shape_func::dof_description[ndofs][4] = {
 {DOF_NODE, 0, 0, 1},
@@ -498,7 +498,7 @@ const double hex_shape_func::ipoints[ndofs*pdim] = {
 };
 
 // Tet
-const std::string tet_shape_func::name("tet");
+const char *tet_shape_func::name="tet";
 const int tet_shape_func::dof_description[ndofs][4] = {
 {DOF_NODE, 0, 0, 1},
 {DOF_NODE, 1, 0, 1},
@@ -561,7 +561,7 @@ const double tet_shape_func::ipoints[ndofs*pdim] = {
 };
 
 // QUAD_ZERODERIV
-const std::string quad_zeroderiv_shape_func::name("quad_zero_deriv");
+const char *quad_zeroderiv_shape_func::name="quad_zero_deriv";
 const double quad_zeroderiv_shape_func::one16th = 1.0/16.0;
 
 

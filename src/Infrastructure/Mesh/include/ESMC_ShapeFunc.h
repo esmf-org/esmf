@@ -137,7 +137,7 @@ class dg0_shape_func {
   // Is the parametric point in the cell??
   static bool is_in(const double pcoord[], double *dist = NULL);
  
-  static const std::string name;
+  static const char* name;
 
   static bool is_nodal() { return false;}
 
@@ -173,7 +173,7 @@ class bar_shape_func {
   // Is the parametric point in the cell??
   static bool is_in(const double pcoord[], double *dist = NULL);
  
-  static const std::string name;
+  static const char* name;
 
   static const UInt NumInterp = ndofs;
 
@@ -208,7 +208,7 @@ class bar3_shape_func {
   // Is the parametric point in the cell??
   static bool is_in(const double pcoord[], double *dist = NULL);
  
-  static const std::string name;
+  static const char* name;
 
   static const UInt NumInterp = ndofs;
 
@@ -244,7 +244,7 @@ class tri_shape_func {
   // Is the parametric point in the cell??
   static bool is_in(const double pcoord[], double *dist=NULL);
 
-  static const std::string name;
+  static const char* name;
   const static int dof_description[ndofs][4];
 
   static const UInt NumInterp = ndofs;
@@ -279,7 +279,7 @@ class quad_shape_func {
   // Is the parametric point in the cell??
   static bool is_in(const double pcoord[], double *dist=NULL);
 
-  static const std::string name;
+  static const char* name;
   const static int dof_description[ndofs][4];
 
   static const UInt NumInterp = ndofs;
@@ -313,7 +313,7 @@ class quad9_shape_func {
   // Is the parametric point in the cell??
   static bool is_in(const double pcoord[], double *dist=NULL);
 
-  static const std::string name;
+  static const char *name;
   const static int dof_description[ndofs][4];
 
   static const UInt NumInterp = ndofs;
@@ -348,7 +348,7 @@ class hex_shape_func {
   // Is the parametric point in the cell??
   static bool is_in(const double pcoord[], double *dist = NULL);
 
-  static const std::string name;
+  static const char *name;
   const static int dof_description[ndofs][4];
 
   static const UInt NumInterp = ndofs;
@@ -383,7 +383,7 @@ class tet_shape_func {
   // Is the parametric point in the cell??
   static bool is_in(const double pcoord[], double *dist = NULL);
 
-  static const std::string name;
+  static const char *name;
   const static int dof_description[ndofs][4];
 
   static const UInt NumInterp = ndofs;
@@ -420,7 +420,7 @@ class quad_zeroderiv_shape_func {
 
   static const UInt NumInterp = ndofs;
 
-  static const std::string name;
+  static const char *name;
 
   static bool is_nodal() { return false;}
 

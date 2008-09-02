@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.12 2008/08/29 18:31:17 cdeluca Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.13 2008/09/02 19:26:53 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,6 +44,7 @@ module ESMF_FieldRegridMod
 !
 ! - ESMF-public methods:
    public ESMF_FieldRegridStore        ! Store a regrid matrix
+   public ESMF_FieldRegridRun          ! apply a regrid operator
    public ESMF_FieldRegrid             ! apply a regrid operator
    public ESMF_FieldRegridRelease      ! apply a regrid operator
 
@@ -82,7 +83,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.12 2008/08/29 18:31:17 cdeluca Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.13 2008/09/02 19:26:53 dneckels Exp $'
 
 !==============================================================================
 !
@@ -98,6 +99,94 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRegridStore"
+
+!BOP
+! !IROUTINE: ESMF_FieldRegridStore - Store the regrid in routeHandle
+!
+! !INTERFACE:
+      subroutine ESMF_FieldRegridStore1(srcField, dstField, routeHandle,&
+                      regridMethod, regridScheme, rc)
+!
+! !RETURN VALUE:
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout)     :: srcField
+      type(ESMF_Field), intent(inout)     :: dstField
+      type(ESMF_RouteHandle), intent(inout) :: routeHandle
+      type(ESMF_RegridMethod), intent(in) :: regridMethod
+      integer, intent(in), optional       :: regridScheme
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!       Creates a sparse matrix (stored in routehandle) that regrids
+!       from src to dst Field.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [srcField]
+!           Source Field.
+!     \item [dstField]
+!           Destination Field.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+        integer :: localrc
+        integer              :: lregridScheme
+
+        type(ESMF_Grid)      :: srcGrid
+        type(ESMF_Grid)      :: dstGrid
+        type(ESMF_Array)     :: srcArray
+        type(ESMF_Array)     :: dstArray
+        type(ESMF_VM)        :: vm
+
+        ! Initialize return code; assume failure until success is certain
+        localrc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+
+        ! global vm for now
+        call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Now we go through the painful process of extracting the data members
+        ! that we need.
+        call ESMF_FieldGet(srcField, grid=srcGrid, array=srcArray, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldGet(dstField, grid=dstGrid, array=dstArray, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Will eventually determine scheme either as a parameter or from properties
+        ! of the source grid
+        if (present(regridScheme)) then
+          lregridScheme = regridScheme
+        else
+          lregridScheme = ESMF_REGRID_SCHEME_NATIVE
+        endif
+
+        
+        call ESMF_RegridStore(srcGrid, srcArray, dstGrid, dstArray, &
+                 regridMethod, lregridScheme, routeHandle, localrc)
+
+        if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+
+        if(present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_FieldRegridStore1
+
+!------------------------------------------------------------------------------
 
 
 

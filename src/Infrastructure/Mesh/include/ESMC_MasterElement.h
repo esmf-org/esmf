@@ -292,7 +292,6 @@ private:
    * Pointer to the shape function object used by this ME.
    */
   const ShapeFunc *m_shape;
-  static std::map<std::string, MasterElementV*> meVMap;
 public:
   
   /**

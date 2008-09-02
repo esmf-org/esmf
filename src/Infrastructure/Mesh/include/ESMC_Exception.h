@@ -73,15 +73,10 @@ class TraceBack {
 public:
 TraceBack(const char *_func) : funcName(_func)
 {}
-~TraceBack() {
-  if (std::uncaught_exception()) {
-    traceBuf.push_back(std::string(funcName));
-  }
-}
+~TraceBack();
 static std::string StackTrace();
 private:
 const char *funcName;
-static std::vector<std::string> traceBuf;
 };
 
 /**

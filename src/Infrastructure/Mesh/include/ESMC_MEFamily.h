@@ -113,28 +113,9 @@ const std::string fname;
 
 };
 
-// Hierarchical
-class MEFamilyHier : public MEFamily {
-MEFamilyHier(UInt order);
-static std::map<UInt, MEFamilyHier *> classInstances;
-public:
-bool is_nodal() const { return false;} 
-bool is_elemental() const { return false;} 
-static const MEFamilyHier &instance(UInt order);
-
-MasterElement<METraits<> > *getME(const std::string &toponame, METraits<>) const;
-const std::string &name() const { return fname;}
-private:
-MEFamilyHier(const MEFamilyHier&);
-const std::string fname;
-UInt order;
-
-};
-
 // High order lagrange
 class MEFLagrange : public MEFamily {
 MEFLagrange(UInt order);
-static std::map<UInt, MEFLagrange*> classInstances;
 public:
 bool is_nodal() const { return false;} 
 bool is_elemental() const { return false;} 
@@ -152,7 +133,6 @@ UInt order;
 // High order lagrange, DG
 class MEFLagrangeDG : public MEFamily {
 MEFLagrangeDG(UInt order);
-static std::map<UInt, MEFLagrangeDG*> classInstances;
 public:
 bool is_nodal() const { return false;} 
 bool is_elemental() const { return true;} 

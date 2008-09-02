@@ -66,16 +66,20 @@ int MasterElementBase::GetDofValSet(UInt dof) const {
 /*------------------------------------------------------------------*/
 
 template <class METRAITS>
-std::map<std::string, MasterElementV<METRAITS>*>  MasterElementV<METRAITS>::meVMap;
+std::map<std::string, MasterElementV<METRAITS>*> &get_meVMap() {
+  static std::map<std::string, MasterElementV<METRAITS>*>  meVMap;
+
+  return meVMap;
+}
 
 template <class METRAITS>
 MasterElementV<METRAITS> *MasterElementV<METRAITS>::instance(const ShapeFunc *shape) {
   typename std::map<std::string, MasterElementV<METRAITS>*>::iterator mi =
-    meVMap.find(shape->name());
+    get_meVMap<METRAITS>().find(shape->name());
   MasterElementV *me;
-  if (mi == meVMap.end()) {
+  if (mi == get_meVMap<METRAITS>().end()) {
     me = new MasterElementV(shape);
-    meVMap[shape->name()] = me;
+    get_meVMap<METRAITS>()[shape->name()] = me;
   } else me = mi->second;
   
   return me;

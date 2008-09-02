@@ -11,7 +11,6 @@
 #include <Mesh/include/ESMC_MEFamily.h>
 #include <Mesh/include/ESMC_Exception.h>
 
-#include <Mesh/include/ESMC_ShapeHierarchic.h>
 #include <Mesh/include/ESMC_ShapeLagrange.h>
 #include <Mesh/include/ESMC_SFuncAdaptor.h>
 
@@ -100,38 +99,15 @@ MasterElement<METraits<> > *MEFamilyDG0::getME(const std::string &toponame, METr
   } else Throw() << "DG0 getME, unexpected pdim";
 }
 
-// Hier
-std::map<UInt, MEFamilyHier*> MEFamilyHier::classInstances;
-
-MEFamilyHier::MEFamilyHier(UInt _order) :
-MEFamily(),
-fname("Hier"),
-order(_order)
-{
-}
-
-const MEFamilyHier &MEFamilyHier::instance(UInt order) {
-  std::map<UInt, MEFamilyHier*>::iterator fi = classInstances.find(order);
-  MEFamilyHier *mef;
-  if (fi == classInstances.end()) {
-    mef = new MEFamilyHier(order);
-    classInstances[order] = mef;
-  } else mef = fi->second;
-
-  return *mef;
-}
-
-MasterElement<METraits<> > *MEFamilyHier::getME(const std::string &name, METraits<>) const {
-  if (name == "SHELL" || name == "SHELL4" || name == "QUAD" || name == "QUAD4" || name == "QUAD_3D") {
-    return MasterElementV<METraits<> >::instance(QuadHier::instance(order));
-  } else if (name == "SHELL3" || name == "TRI" || name == "TRI3" || name == "TRISHELL") {
-    return MasterElementV<METraits<> >::instance(TriHier::instance(order));
-  } else Throw() << "Hierar not implemented for topo:" << name;
-}
-
 // Lagrange
 
-std::map<UInt, MEFLagrange*> MEFLagrange::classInstances;
+
+std::map<UInt, MEFLagrange*> &get_MEFLagrange_classInstances() {
+  static std::map<UInt, MEFLagrange*> classInstances;
+
+  return classInstances;
+}
+
 
 MEFLagrange::MEFLagrange(UInt _order) :
 MEFamily(),
@@ -141,6 +117,8 @@ order(_order)
 }
 
 const MEFLagrange &MEFLagrange::instance(UInt order) {
+  std::map<UInt, MEFLagrange*> &classInstances =
+           get_MEFLagrange_classInstances();
   std::map<UInt, MEFLagrange*>::iterator fi = classInstances.find(order);
   MEFLagrange *mef;
   if (fi == classInstances.end()) {
@@ -158,7 +136,11 @@ MasterElement<METraits<> > *MEFLagrange::getME(const std::string &name, METraits
 }
 
 // Lagrange DG
-std::map<UInt, MEFLagrangeDG*> MEFLagrangeDG::classInstances;
+std::map<UInt, MEFLagrangeDG*> &get_MEFLagrangeDG_classInstances() {
+  static std::map<UInt, MEFLagrangeDG*> classInstances;
+
+  return classInstances;
+}
 
 MEFLagrangeDG::MEFLagrangeDG(UInt _order) :
 MEFamily(),
@@ -168,6 +150,8 @@ order(_order)
 }
 
 const MEFLagrangeDG &MEFLagrangeDG::instance(UInt order) {
+  std::map<UInt, MEFLagrangeDG*> &classInstances =
+             get_MEFLagrangeDG_classInstances();
   std::map<UInt, MEFLagrangeDG*>::iterator fi = classInstances.find(order);
   MEFLagrangeDG *mef;
   if (fi == classInstances.end()) {

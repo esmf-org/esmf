@@ -65,6 +65,16 @@ void gauss_legendre(UInt n, double locs[], double *wgts) {
 }
 
 
+// Static initialization in classes has issues when the linker
+// is F90, since C++ is not able to insert the necessary initialization
+// code.  Hence use the static function approach.
+template <typename quad_type>
+std::map<UInt,quad_type*> &get_quadclassInstances() {
+  static std::map<UInt,quad_type*> classInstances;
+
+  return classInstances;
+}
+
 intgRule::intgRule(UInt _q, UInt _n, UInt _pdim) :
 q(_q),
 n(_n),
@@ -79,14 +89,21 @@ intgRule::~intgRule() {
   delete [] wgts;
 }
 
-const std::string arbq::name("arbq");
+// ** arbq
+
+arbq::arbq(UInt _pdim, UInt nq, const double pcoord[], const double *_wgts) :
+intgRule(nq,nq,_pdim),
+name("arbq")
+{
+  std::copy(pcoord, pcoord+(nq*pdim), locs);
+  if (_wgts) std::copy(_wgts, _wgts+nq, wgts);
+}
+
 
 // ** 1D bar
-std::map<UInt,barq*> barq::classInstances;
-
-const std::string barq::name("barq");
 
 barq &barq::instance(UInt q) {
+  std::map<UInt,barq*> &classInstances = get_quadclassInstances<barq>();
   std::map<UInt,barq*>::iterator qi = classInstances.find(q);
   barq *qp;
   if (qi == classInstances.end()) {
@@ -98,7 +115,8 @@ barq &barq::instance(UInt q) {
 }
 
 barq::barq(UInt q) :
-intgRule(q, q, 1)
+intgRule(q, q, 1),
+name("barq")
 {
   gauss_legendre(n, locs, wgts);
 }
@@ -107,11 +125,9 @@ barq::~barq() {
 }
 
 // ** 2D quadrilateral
-std::map<UInt,quadq*> quadq::classInstances;
-
-const std::string quadq::name("quadq");
 
 quadq &quadq::instance(UInt q) {
+  std::map<UInt,quadq*> &classInstances = get_quadclassInstances<quadq>();
   std::map<UInt,quadq*>::iterator qi = classInstances.find(q);
   quadq *qp;
   if (qi == classInstances.end()) {
@@ -123,7 +139,8 @@ quadq &quadq::instance(UInt q) {
 }
 
 quadq::quadq(UInt tq) :
-intgRule(tq, tq*tq, 2)
+intgRule(tq, tq*tq, 2),
+name("barq")
 {
   std::vector<double> tlocs(q), twgts(q);
   gauss_legendre(q, &tlocs[0], &twgts[0]);
@@ -141,11 +158,9 @@ quadq::~quadq() {
 }
 
 // ** 2D triangle
-std::map<UInt,triq*> triq::classInstances;
-
-const std::string triq::name("triq");
 
 triq &triq::instance(UInt q) {
+  std::map<UInt,triq*> &classInstances = get_quadclassInstances<triq>();
   std::map<UInt,triq*>::iterator qi = classInstances.find(q);
   triq *qp;
   if (qi == classInstances.end()) {
@@ -166,7 +181,8 @@ static UInt tri_order2q(UInt o) {
 }
 
 triq::triq(UInt tq) :
-intgRule(tq, tri_order2q(tq), 2)
+intgRule(tq, tri_order2q(tq), 2),
+name("triq")
 {
 
   if( tq == 1){
@@ -330,11 +346,9 @@ triq::~triq() {
 }
 
 // ** 3D hexahedron
-std::map<UInt,hexq*> hexq::classInstances;
-
-const std::string hexq::name("hexq");
 
 hexq &hexq::instance(UInt q) {
+  std::map<UInt,hexq*> &classInstances = get_quadclassInstances<hexq>();
   std::map<UInt,hexq*>::iterator qi = classInstances.find(q);
   hexq *qp;
   if (qi == classInstances.end()) {
@@ -346,7 +360,8 @@ hexq &hexq::instance(UInt q) {
 }
 
 hexq::hexq(UInt tq) :
-intgRule(tq, tq*tq*tq, 3)
+intgRule(tq, tq*tq*tq, 3),
+name("hexq")
 {
   std::vector<double> tlocs(q), twgts(q);
   gauss_legendre(q, &tlocs[0], &twgts[0]);
@@ -367,11 +382,9 @@ hexq::~hexq() {
 }
 
 // ** 3D Tetrahedron
-std::map<UInt,tetraq*> tetraq::classInstances;
-
-const std::string tetraq::name("tetraq");
 
 tetraq &tetraq::instance(UInt q) {
+  std::map<UInt,tetraq*> &classInstances = get_quadclassInstances<tetraq>();
   std::map<UInt,tetraq*>::iterator qi = classInstances.find(q);
   tetraq *qp;
   if (qi == classInstances.end()) {
@@ -391,7 +404,8 @@ static UInt tetra_order2q(UInt o) {
 }
 
 tetraq::tetraq(UInt tq) :
-intgRule(tq, tetra_order2q(tq), 3)
+intgRule(tq, tetra_order2q(tq), 3),
+name("tetraq")
 {
 
   if( tq == 1){

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2008/06/12 20:49:23 theurich Exp $
+# $Id: makefile,v 1.10 2008/09/02 19:26:54 dneckels Exp $
 
 # leave alone.
 ALL: build_here 
@@ -60,7 +60,6 @@ SOURCEC	  = \
            ESMC_Search.C \
            ESMC_SFuncAdaptor.C \
            ESMC_ShapeFunc.C \
-           ESMC_ShapeHierarchic.C \
            ESMC_ShapeLagrange.C \
            ESMC_SmallAlloc.C \
            ESMC_SparseMsg.C \

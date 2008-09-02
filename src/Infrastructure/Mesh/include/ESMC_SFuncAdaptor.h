@@ -28,7 +28,7 @@ namespace ESMC {
 template<typename SFUNC>
 class SFuncAdaptor : public ShapeFunc {
 private:
-  SFuncAdaptor() : ShapeFunc(), m_name("SFunc_Adapt_" + SFUNC::name) {}
+  SFuncAdaptor() : ShapeFunc(), m_name("SFunc_Adapt_" + std::string(SFUNC::name)) {}
   static SFuncAdaptor *classInstance;
 public:
   static SFuncAdaptor *instance();

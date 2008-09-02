@@ -37,28 +37,28 @@ POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>::cl
 template<class SFUNC_TYPE,typename MPTRAITS, int SPATIAL_DIM, int PARAMETRIC_DIM>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::instance() {
   if (classInstance == NULL)
-    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>("mapdd" + SFUNC_TYPE::name);
+    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>("mapdd" + std::string(SFUNC_TYPE::name));
 
   return classInstance;
 }
 template<class SFUNC_TYPE,typename MPTRAITS>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::instance() {
   if (classInstance == NULL)
-    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>("map32," + SFUNC_TYPE::name);
+    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>("map32," + std::string(SFUNC_TYPE::name));
 
   return classInstance;
 }
 template<class SFUNC_TYPE,typename MPTRAITS>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1>::instance() {
   if (classInstance == NULL)
-    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1>("map31," + SFUNC_TYPE::name);
+    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1>("map31," + std::string(SFUNC_TYPE::name));
 
   return classInstance;
 }
 template<class SFUNC_TYPE,typename MPTRAITS>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>::instance() {
   if (classInstance == NULL)
-    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>("map21," + SFUNC_TYPE::name);
+    classInstance = new POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>("map21," + std::string(SFUNC_TYPE::name));
 
   return classInstance;
 }

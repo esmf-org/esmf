@@ -13,12 +13,23 @@
 
 namespace ESMC {
 
-std::vector<std::string> TraceBack::traceBuf;
+
+static std::vector<std::string> &get_traceBuf() {
+  static std::vector<std::string> traceBuf;
+
+  return traceBuf;
+}
+
+TraceBack::~TraceBack() {
+  if (std::uncaught_exception()) {
+    get_traceBuf().push_back(std::string(funcName));
+  }
+}
 
 std::string TraceBack::StackTrace() {
   std::string res("** STACKTRACE **:\n");
-  for (int i = traceBuf.size() - 1; i >= 0; --i) {
-    res += traceBuf[i] + "\n";
+  for (int i = get_traceBuf().size() - 1; i >= 0; --i) {
+    res += get_traceBuf()[i] + "\n";
   }
   return res;
 }
