@@ -1,4 +1,4 @@
-// $Id: ESMC_VMUTest.C,v 1.4 2008/08/31 03:09:09 theurich Exp $
+// $Id: ESMC_VMUTest.C,v 1.5 2008/09/02 16:57:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,6 +13,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#ifndef MPICH_IGNORE_CXX_SEEK
+#define MPICH_IGNORE_CXX_SEEK
+#endif
 #include <mpi.h>
 
 // ESMF header
