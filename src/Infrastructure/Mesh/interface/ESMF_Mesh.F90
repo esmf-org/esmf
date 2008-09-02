@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.13 2008/08/29 19:21:31 cdeluca Exp $
+! $Id: ESMF_Mesh.F90,v 1.14 2008/09/02 20:12:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -123,7 +123,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.13 2008/08/29 19:21:31 cdeluca Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.14 2008/09/02 20:12:56 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -145,7 +145,7 @@ module ESMF_MeshMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshAddElements()"
 !BOP
-! !IROUTINE: ESMF_MeshAddElements - Add elements to a mesh
+! !IROUTINE: ESMF_MeshAddElements - Add elements to a Mesh
 !
 ! !INTERFACE:
     subroutine ESMF_MeshAddElements(mesh, elementIds, elementTypes, elementConn, rc)
@@ -217,7 +217,7 @@ module ESMF_MeshMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshAddNodes()"
 !BOP
-! !IROUTINE: ESMF_MeshAddNodes - Add nodes to a mesh
+! !IROUTINE: ESMF_MeshAddNodes - Add nodes to a Mesh
 !
 ! !INTERFACE:
     subroutine ESMF_MeshAddNodes(mesh, nodeIds, nodeCoords, nodeOwners, rc)
@@ -439,7 +439,7 @@ module ESMF_MeshMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromPointer()"
 !BOP
-! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a C++ mesh pointer
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a C++ pointer
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
@@ -483,7 +483,7 @@ module ESMF_MeshMod
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshDestroy"
 !BOP
-! !IROUTINE: ESMF_MeshDestroy - Destroy the Mesh
+! !IROUTINE: ESMF_MeshDestroy - Destroy a Mesh
 !
 ! !INTERFACE:
       subroutine ESMF_MeshDestroy(mesh, rc)
@@ -524,7 +524,7 @@ module ESMF_MeshMod
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshFreeMemory"
 !BOP
-! !IROUTINE: ESMF_MeshFreeMemory - Remove the mesh and its memory
+! !IROUTINE: ESMF_MeshFreeMemory - Remove a Mesh and its memory
 !
 ! !INTERFACE:
       subroutine ESMF_MeshFreeMemory(mesh, rc)
@@ -571,7 +571,7 @@ module ESMF_MeshMod
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshGet"
 !BOP
-! !IROUTINE: ESMF_MeshGet - Get information from the Mesh
+! !IROUTINE: ESMF_MeshGet - Get information from a Mesh
 !
 ! !INTERFACE:
       subroutine ESMF_MeshGet(mesh, nodal_distgrid, element_distgrid, &
@@ -619,7 +619,7 @@ module ESMF_MeshMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshWrite()"
 !BOP
-! !IROUTINE: ESMF_MeshWrite - Write Mesh to a VTK file
+! !IROUTINE: ESMF_MeshWrite - Write a Mesh to a VTK file
 !
 ! !INTERFACE:
     subroutine ESMF_MeshWrite(mesh, filename, rc)

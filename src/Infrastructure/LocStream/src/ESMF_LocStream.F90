@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.4 2008/08/29 04:55:56 oehmke Exp $
+! $Id: ESMF_LocStream.F90,v 1.5 2008/09/02 20:12:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.4 2008/08/29 04:55:56 oehmke Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.5 2008/09/02 20:12:55 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1373,7 +1373,7 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGet()
-  subroutine ESMF_LocStreamGetDefault(locstream, distgrid, keyCount, keyNames, localDECount, indexflag, name, rc)
+  subroutine ESMF_LocStreamGetDeOBfault(locstream, distgrid, keyCount, keyNames, localDECount, indexflag, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)             :: locstream
@@ -1400,7 +1400,7 @@ contains
 ! \item [{[keyNames]}]
 ! The names of the keys in the {\tt locstream}. Keynames should
 ! be an array of character strings. The character strings should
-! be of length ESMF_MAXSTR and the array's length should be
+! be of length ESMF\_MAXSTR and the array's length should be
 ! at least keyCount. 
 ! \item [{[localDECount]}]
 ! Number of DEs on this PET in the {\tt locstream}.

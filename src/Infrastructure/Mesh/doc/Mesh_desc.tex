@@ -1,0 +1,10 @@
+% $Id: Mesh_desc.tex,v 1.1 2008/09/02 20:12:55 cdeluca Exp $
+
+Unstructured grids are commonly used in the computational solution of Partial Differential equations.  The are especially useful for problems that involve complex geometry, where a structured approach
+would suffer from over-prescription of resources to cells where no computation is performed.  Finite
+element and finite volume methods map naturally to these representations and are used commonly
+in hydrology, ocean modeling, and many other applications.
+
+In order to provide general regridding capability for unstructured $\leftrightarrow$ unstructured,
+and unstructured $\leftrightarrow$ structured grids, the ESMF library provides a representation of the topology, fields, and interpolation routines for a general unstructured grid.  A simple array based API allows a code to create a mesh, which can then be used to generate weight matrices for these types of regridding scenarios. 
+

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.26 2008/08/30 06:09:33 oehmke Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.27 2008/09/02 20:12:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.26 2008/08/30 06:09:33 oehmke Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.27 2008/09/02 20:12:55 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -145,8 +145,8 @@ contains
 ! \item [field]
 !       {\tt ESMF\_Field} object to query.
 ! \item [{[geomtype]}]
-!       Specifies what type of geometry the field is built on. {\tt ESMF\_GEOMTYPE_GRID}={\tt ESMF\_Grid}.
-!       {\tt ESMF\_GEOMTYPE_MESH}={\tt ESMF\_Mesh}. {\tt ESMF\_GEOMTYPE_LOCSTREAM}={\tt ESMF\_LocStream}.
+!       Specifies what type of geometry the field is built on. {\tt ESMF\_GEOMTYPE\_GRID}={\tt ESMF\_Grid}.
+!       {\tt ESMF\_GEOMTYPE\_MESH}={\tt ESMF\_Mesh}. {\tt ESMF\_GEOMTYPE\_LOCSTREAM}={\tt ESMF\_LocStream}.
 ! \item [{[grid]}]
 !       {\tt ESMF\_Grid}.
 ! \item [{[mesh]}]

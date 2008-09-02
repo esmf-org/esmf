@@ -1,4 +1,4 @@
-% $Id: Mesh_refdoc.ctex,v 1.1 2008/08/28 23:14:39 cdeluca Exp $
+% $Id: Mesh_refdoc.ctex,v 1.2 2008/09/02 20:12:56 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -37,9 +37,9 @@
 
 \subsection{Description}
 #ifdef STANDALONE
-%\input{Mesh_desc}
+\input{Mesh_desc}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/Mesh/doc/Mesh_desc}
+\input{../Infrastructure/Mesh/doc/Mesh_desc}
 #endif
 
 \subsection{Use and Examples}
