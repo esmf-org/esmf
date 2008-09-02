@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.13 2008/09/02 20:15:58 dneckels Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.14 2008/09/02 20:25:24 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.13 2008/09/02 20:15:58 dneckels Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.14 2008/09/02 20:25:24 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -319,12 +319,14 @@ program ESMF_FieldSphereRegridEx
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! The patch recovery interpolant
+#ifdef ESMF_LAPACK
   call ESMF_FieldRegridStore(srcField, dstField1, &
           routeHandle1, &
           regridMethod=ESMF_REGRID_METHOD_PATCH, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
 !EOC
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+#endif
 
 !BOE
 !
@@ -339,8 +341,10 @@ program ESMF_FieldSphereRegridEx
 !EOC
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+#ifdef ESMF_LAPACK
   call ESMF_FieldRegrid(srcField, dstField1, routeHandle1, localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+#endif
 
 !BOE
 ! 
@@ -349,7 +353,9 @@ program ESMF_FieldSphereRegridEx
 
 !BOC
   call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+#ifdef ESMF_LAPACK
   call ESMF_FieldRegridRelease(routeHandle1, rc=localrc)
+#endif
 !EOC
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
