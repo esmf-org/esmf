@@ -1,4 +1,4 @@
-// $Id: ESMC_ArraySpecUTest.C,v 1.4 2008/06/25 22:59:55 theurich Exp $
+// $Id: ESMC_ArraySpecUTest.C,v 1.5 2008/09/02 20:07:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -53,8 +53,8 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Create an arrayspec object -- cf
-  strcpy(name, "ArraySpecSet Unit test \0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
+  strcpy(name, "ArraySpecSet Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ArraySpecSet(&arrayspec, rank, typekind);
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -62,8 +62,8 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Get the data values of an arrayspec object -- cf
-  strcpy(name, "ArraySpecGet Unit test \0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS \0");
+  strcpy(name, "ArraySpecGet Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ArraySpecGet(arrayspec, &rank_out, &typekind_out);
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -71,16 +71,16 @@ int main(void){
 #ifdef ESMF_TESTEXHAUSTIVE
   //EX_UTest
   // Verify output of ESMC_ArraySpecGet: kind
-  strcpy(name, "ArraySpecGet: rank Unit test \0");
-  strcpy(failMsg, "Rank returned is wrong \0");
+  strcpy(name, "ArraySpecGet: rank Unit test");
+  strcpy(failMsg, "Rank returned is wrong");
   ESMC_Test((rank == rank_out), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
 
   //EX_UTest
   // Verify output of ESMC_ArraySpecGet: typekind
-  strcpy(name, "ArraySpecGet: typekind Unit test \0");
-  strcpy(failMsg, "Typekind returned is wrong \0");
+  strcpy(name, "ArraySpecGet: typekind Unit test");
+  strcpy(failMsg, "Typekind returned is wrong");
   ESMC_Test((typekind == typekind_out), name, failMsg, &result, __FILE__, __LINE__, 0);
 
 #endif

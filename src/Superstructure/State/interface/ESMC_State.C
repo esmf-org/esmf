@@ -27,15 +27,11 @@
 // associated header file
 #include "ESMC_State.h"
 
-// insert any higher level, 3rd party or system includes here
-#include <string.h>         // strlen()
-
-#include "ESMCI_Array.h"
-#include "ESMCI_State.h"
-#include "ESMC_Start.h"
+// include ESMF headers
+#include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMC_ArraySpec.h"
-
+#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_State.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -49,7 +45,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_State.C,v 1.24 2008/08/26 18:51:06 theurich Exp $";
+static const char *const version = "$Id: ESMC_State.C,v 1.25 2008/09/02 20:07:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -61,6 +57,8 @@ static const char *const version = "$Id: ESMC_State.C,v 1.24 2008/08/26 18:51:06
 //
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_StateCreate()"
 //BOP
 // !IROUTINE:  ESMC_StateCreate - Create a new State
 //
@@ -101,6 +99,8 @@ extern "C" {
  } // end ESMC_StateCreate
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_StateAddArray()"
 //BOP
 // !IROUTINE:  ESMC_StateAddArray - Add an array to this state
 //
@@ -136,6 +136,8 @@ extern "C" {
    } // end ESMC_StateAddArray
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_StateGetArray()"
 //BOP
 // !IROUTINE:  ESMC_StateGetArray - Get an array to this state
 //
@@ -173,6 +175,8 @@ extern "C" {
    } // end ESMC_StateGetArray
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_StatePrint()"
 //BOP
 // !IROUTINE:  ESMC_StatePrint - print the internal data for a State
 //
@@ -208,6 +212,8 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_StateDestroy()"
 //BOP
 // !IROUTINE:  ESMC_StateDestroy - free a State created with Create
 //

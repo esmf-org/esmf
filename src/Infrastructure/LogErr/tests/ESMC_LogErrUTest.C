@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrUTest.C,v 1.1 2008/08/15 17:05:00 rosalind Exp $
+// $Id: ESMC_LogErrUTest.C,v 1.2 2008/09/02 20:07:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -21,15 +21,12 @@
 
 //==============================================================================
 //BOP
-// !PROGRAM: ESMC_TimeUTest - Check ESMC_Time functionality
+// !PROGRAM: ESMC_LogErrUTest - Check ESMC_LogErr functionality
 //
 // !DESCRIPTION:
 //
 //EOP
 //-----------------------------------------------------------------------------
-
-// LogErr header
-#include "ESMC_LogErr.h"
 
 int main(void){
 
@@ -38,7 +35,7 @@ int main(void){
   int result = 0;
   int trueFalseRc;
 
-  char msg[80] = "C LogErr Write Message\0";
+  char *msg = "C LogErr Write Message";
   int msgtype = ESMC_LOG_INFO;
 
   //----------------------------------------------------------------------------
@@ -47,12 +44,13 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Write a Log Message\0"); 
-  strcpy(failMsg, "Did not return ESMF_TRUE\0");
+  strcpy(name, "Write a Log Message"); 
+  strcpy(failMsg, "Did not return ESMF_TRUE");
   trueFalseRc = ESMC_LogWrite(msg, msgtype);
-  ESMC_Test((trueFalseRc=ESMF_TRUE), name, failMsg, &result, __FILE__, 
-            __LINE__, 0);
+  ESMC_Test((trueFalseRc=ESMF_TRUE), name, failMsg, &result, __FILE__, __LINE__,
+    0);
   //----------------------------------------------------------------------------
+  
   //----------------------------------------------------------------------------
   ESMC_TestEnd(result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

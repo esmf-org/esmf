@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockUTest.C,v 1.13 2008/07/29 01:34:55 rosalind Exp $
+// $Id: ESMC_ClockUTest.C,v 1.14 2008/09/02 20:07:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -8,22 +8,8 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
-//-----------------------------------------------------------------------------
-//BOP
-// !PROGRAM:  ESMF_ClockTest - one line general statement about this test 
-//
-// !DESCRIPTION:
-//
-// The code in this file drives C Clock unit tests.
-// The companion files ESMC\_Clock.h and ESMC\_Clock.C contain
-// the declarations and definitions for the Clock methods.
-//
-// 
-//
-//EOP
-//-----------------------------------------------------------------------------
-//
-// insert any higher level, 3rd party or system includes here
+//==============================================================================
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,36 +17,32 @@
 //ESMF header
 #include "ESMC.h"
 
-// associated class definition file
-#include "ESMC_Clock.h"
-
 // ESMC_Test function
 #include "ESMC_Test.h"
 
 //-----------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.13 2008/07/29 01:34:55 rosalind Exp $";
+//BOP
+// !PROGRAM:  ESMC_ClockUTest - one line general statement about this test 
+//
+// !DESCRIPTION:
+//
+// The code in this file drives C Clock unit tests.
+// The companion files ESMC\_Clock.h and ESMC\_Clock.C contain
+// the declarations and definitions for the Clock methods.
+//
+//EOP
 //-----------------------------------------------------------------------------
 
 
- int main(void)
- {
-   // cumulative result: count failures; no failures equals "all pass"
-   int result = 0;
+int main(void){
+ 
+  char name[80];
+  char failMsg[80];
+  int result = 0;
+  int rc;
 
-   // individual test result code
-   int rc;
-
-   // individual test name
-   char name[ESMF_MAXSTR];
-
-   // individual test failure message
-   char failMsg[ESMF_MAXSTR];
-
-   //  the C clock object that points to the C++ allocated one
-   ESMC_Clock clock;
-
+  //  the ESMC_Clock object
+  ESMC_Clock clock;
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
@@ -83,40 +65,40 @@
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Create ESMC_Calendar object\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Create ESMC_Calendar object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   calendar = ESMC_CalendarCreate(9, "Gregorian", ESMC_CAL_GREGORIAN, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Set Start Time\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Set Start Time");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_TimeSet(&startTime, yy1, h1, calendar, calType1, tZ1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Set Stop Time\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Set Stop Time");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_TimeSet(&stopTime, yy1, h2, calendar, calType1, tZ1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Set a TimeInterval\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Set a TimeInterval");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_TimeIntervalSet(&timeStep, one);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Create ESMC_Clock object\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Create ESMC_Clock object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   clock = ESMC_ClockCreate(10,"TEST_CLOCK",timeStep,startTime, stopTime,
   //      0, 0, 0, 
           &rc);
@@ -125,24 +107,24 @@
   
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Print ESMC_Clock object\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Print ESMC_Clock object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ClockPrint(clock);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Get ESMC_Clock object current time and advance count\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Get ESMC_Clock object current time and advance count");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ClockGet(clock, &currSimTime, &advanceCount);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Advance the Clock object\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Advance the Clock object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ClockAdvance(clock);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -150,39 +132,40 @@
 #ifdef ESMF_TESTEXHAUSTIVE
   //----------------------------------------------------------------------------
   //EX_UTest
-  strcpy(name, "Get ESMC_Clock object current time and advance count\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Get ESMC_Clock object current time and advance count");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ClockGet(clock, &currSimTime, &advanceCount1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //EX_UTest
-  strcpy(name, "Get currSimTime in seconds and in hours\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Get currSimTime in seconds and in hours");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_TimeIntervalGet(currSimTime, &currSec1, &currHour1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
   //EX_UTest
-  strcpy(name, "Verify that currSimTime in second units\0");
-  strcpy(failMsg, "Did not return 3600\0");
-  ESMC_Test((int(currSec1)==3600), name, failMsg, &result, __FILE__, __LINE__, 0);
+  strcpy(name, "Verify that currSimTime in second units");
+  strcpy(failMsg, "Did not return 3600");
+  ESMC_Test((int(currSec1)==3600), name, failMsg, &result, __FILE__, __LINE__,
+    0);
   //----------------------------------------------------------------------------
  
   //----------------------------------------------------------------------------
   //EX_UTest
-  strcpy(name, "Verify that currSimTime in hour units\0");
-  strcpy(failMsg, "Did not return 1\0");
+  strcpy(name, "Verify that currSimTime in hour units");
+  strcpy(failMsg, "Did not return 1");
   ESMC_Test((int(currHour1)==1), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 #endif
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Destroy ESMC_Clock object\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Destroy ESMC_Clock object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ClockDestroy(&clock);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -298,7 +281,8 @@
   ESMC_TestEnd(result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-   // return number of failures to environment; 0 = success (all pass)
-   printf("result = %d\n",result);
-   return(result);
- } // end unit test main()
+  // return number of failures to environment; 0 = success (all pass)
+  printf("result = %d\n",result);
+  return(result);
+  
+}

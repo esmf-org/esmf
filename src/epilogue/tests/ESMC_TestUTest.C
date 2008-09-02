@@ -1,4 +1,4 @@
-// $Id: ESMC_TestUTest.C,v 1.2 2008/04/05 03:39:21 cdeluca Exp $
+// $Id: ESMC_TestUTest.C,v 1.3 2008/09/02 20:07:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -34,8 +34,8 @@ int main(void){
   
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Use of ESMC_Test(), true\0");
-  strcpy(failMsg, "Dummy fail message\0");
+  strcpy(name, "Use of ESMC_Test(), true");
+  strcpy(failMsg, "Dummy fail message");
   ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   

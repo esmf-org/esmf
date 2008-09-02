@@ -1,4 +1,4 @@
-// $Id: ESMC_StateUTest.C,v 1.12 2008/08/26 18:51:07 theurich Exp $
+// $Id: ESMC_StateUTest.C,v 1.13 2008/09/02 20:07:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -139,7 +139,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Verify array object name retrieved");
   strcpy(failMsg, "Did not retrieve array name correctly");
-  ESMC_Test(!strcmp(arrayName, "array1"), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(!strcmp(arrayName, "array1"), name, failMsg, &result, __FILE__,
+    __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -157,7 +158,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
- //----------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Get an array from a state, based on its name");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");

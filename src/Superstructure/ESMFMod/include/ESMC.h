@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.26 2008/08/31 03:09:09 theurich Exp $
+// $Id: ESMC.h,v 1.27 2008/09/02 20:07:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -50,10 +50,10 @@
 // framework-wide initialization and finalization
 #include "ESMC_Init.h"
 
-// ---------
+// --- include these for now, but need re-consideration and clean-up ---
 #include "ESMC_LogErr.h"
 #include "ESMC_Macros.h"
-// ---------
+// ---------------------------------------------------------------------
 
 #endif  // ESMC_H
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_CalendarUTest.C,v 1.2 2008/07/09 14:20:17 rosalind Exp $
+// $Id: ESMC_CalendarUTest.C,v 1.3 2008/09/02 20:07:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -28,9 +28,6 @@
 //EOP
 //-----------------------------------------------------------------------------
 
-// Calendar header
-#include "ESMC_Calendar.h"
-
 int main(void){
 
   char name[80];
@@ -46,24 +43,24 @@ int main(void){
   
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Create ESMC_Calendar object\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Create ESMC_Calendar object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   calendar = ESMC_CalendarCreate(9, "Gregorian", ESMC_CAL_GREGORIAN, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Print ESMC_Calendar object\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Print ESMC_Calendar object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_CalendarPrint(calendar);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Destroy ESMC_Calendar object\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Destroy ESMC_Calendar object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_CalendarDestroy(&calendar);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

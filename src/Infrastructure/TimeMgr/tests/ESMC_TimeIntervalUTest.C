@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeIntervalUTest.C,v 1.4 2008/08/20 17:29:27 rosalind Exp $
+// $Id: ESMC_TimeIntervalUTest.C,v 1.5 2008/09/02 20:07:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -29,12 +29,6 @@
 //EOP
 //-----------------------------------------------------------------------------
 
-// TimeInterval header
-#include "ESMC_TimeInterval.h"
-
-// Calendar header
-#include "ESMC_Calendar.h"
-
 int main(void){
 
   char name[80];
@@ -57,24 +51,24 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Set a TimeInterval\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Set a TimeInterval");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_TimeIntervalSet(&timeInterval1, h1_I4);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Print ESMC_TimeInterval object\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Print ESMC_TimeInterval object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_TimeIntervalPrint(timeInterval1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Get a TimeInterval\0");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS\0");
+  strcpy(name, "Get a TimeInterval");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_TimeIntervalGet(timeInterval1, &s_I8, &h_R8);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -83,15 +77,16 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //EX_UTest
-  strcpy(name, "Check that hour parameter is returned correctly\0");
-  strcpy(failMsg, "h_R8 is not 1.\0");
-  ESMC_Test((fabs(h_R8-1.) < 1.e-10), name, failMsg, &result, __FILE__, __LINE__, 0);
+  strcpy(name, "Check that hour parameter is returned correctly");
+  strcpy(failMsg, "h_R8 is not 1.");
+  ESMC_Test((fabs(h_R8-1.) < 1.e-10), name, failMsg, &result, __FILE__,
+    __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //EX_UTest
-  strcpy(name, "Check that the integer sec. parameter is returned correctly\0");
-  strcpy(failMsg, "s_I8 is not 3600\0");
+  strcpy(name, "Check that the integer sec. parameter is returned correctly");
+  strcpy(failMsg, "s_I8 is not 3600");
   ESMC_Test((int(s_I8)==3600), name, failMsg, &result, __FILE__, __LINE__, 0); 
   //----------------------------------------------------------------------------
 
