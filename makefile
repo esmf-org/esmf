@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.93 2008/08/06 17:35:34 tjcnrl Exp $
+# $Id: makefile,v 1.94 2008/09/02 20:30:21 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -334,7 +334,11 @@ install:
 	-@echo "Installing ESMF:"
 	-@echo " "
 	mkdir -p $(ESMF_INSTALL_HEADERDIR_ABSPATH)
-	cp -f $(ESMF_BUILD)/src/include/*.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	cp -f $(ESMF_BUILD)/src/include/ESMF.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	cp -f $(ESMF_BUILD)/src/include/ESMF_*.inc $(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	cp -f $(ESMF_BUILD)/src/include/ESMC.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	cp -f $(ESMF_BUILD)/src/include/ESMC_*.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	cp -f $(ESMF_DIR)/build_config/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_SITE)/ESMC_Conf.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_MODDIR_ABSPATH)
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
