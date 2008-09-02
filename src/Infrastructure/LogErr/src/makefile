@@ -1,9 +1,6 @@
-# $Id: makefile,v 1.13 2008/07/30 11:29:51 rosalind Exp $ 
+# $Id: makefile,v 1.14 2008/09/02 22:35:21 theurich Exp $ 
 
 ALL: build_here 
-
-CFLAGS    += ${MPI_INCLUDE}
-FFLAGS    =
 
 SOURCEC	  = ESMCI_LogErr.C
 SOURCEF	  = 

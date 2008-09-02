@@ -1,11 +1,6 @@
-# $Id: makefile,v 1.3 2008/03/05 05:49:09 theurich Exp $ 
+# $Id: makefile,v 1.4 2008/09/02 22:35:22 theurich Exp $ 
 
 ALL: build_here 
-
-# add the logerr include dir, since the logerr code has to be compiled 
-# before the Base class so base routines can use it.
-CFLAGS    += -I$(ESMF_DIR)/src/Infrastructure/LogErr/include ${MPI_INCLUDE}
-FFLAGS    =
 
 SOURCEC	  = ESMC_Util_F.C ESMC_F90Interface_F.C ESMC_Interface.C
 SOURCEF	  = ESMF_Util.F90 ESMF_Util_C.F90 ESMF_F90Interface.F90

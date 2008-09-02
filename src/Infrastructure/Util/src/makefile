@@ -1,10 +1,7 @@
-# $Id: makefile,v 1.23 2008/08/31 03:09:09 theurich Exp $ 
+# $Id: makefile,v 1.24 2008/09/02 22:35:25 theurich Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
-
-CFLAGS    += -I$(ESMF_DIR)/src/Infrastructure/LogErr/include ${MPI_INCLUDE}
-FFLAGS    =
 
 # files which are generated from .cpp files
 AUTOGEN   = ESMF_FortranWordsize.F90 ESMF_TypeKindGet.F90

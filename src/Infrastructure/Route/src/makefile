@@ -1,13 +1,7 @@
-# $Id: makefile,v 1.11 2007/04/12 18:08:24 theurich Exp $
+# $Id: makefile,v 1.12 2008/09/02 22:35:22 theurich Exp $
 
 # leave alone.
 ALL: build_here 
-
-# Don't set these unless absolutely necessary - they've got to be
-# architecture and compiler independent and should be inherited
-# from the upper level makefile if possible.
-CFLAGS    = ${MPI_INCLUDE}
-FFLAGS    =
 
 # If you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMC_XPacket.C ESMC_RTable.C ESMC_CommTable.C ESMC_Route.C \

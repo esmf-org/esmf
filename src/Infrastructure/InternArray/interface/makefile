@@ -1,13 +1,7 @@
-# $Id: makefile,v 1.5 2008/08/06 17:35:36 tjcnrl Exp $
+# $Id: makefile,v 1.6 2008/09/02 22:35:18 theurich Exp $
 
 # leave alone.
 ALL: build_here 
-
-# don't set these unless absolutely necessary - they've got to be
-#  architecture and compiler independent and should be inherited
-#  from the upper level makefile if possible.
-CFLAGS    = ${MPI_INCLUDE}
-FFLAGS    =
 
 # files which are generated from .cpp files
 AUTOGEN   = ESMF_InternArrayCreate.F90 ESMF_InternArrayGet.F90

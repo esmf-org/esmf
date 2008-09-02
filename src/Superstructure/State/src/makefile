@@ -1,13 +1,7 @@
-# $Id: makefile,v 1.18 2008/08/06 17:35:42 tjcnrl Exp $
+# $Id: makefile,v 1.19 2008/09/02 22:35:25 theurich Exp $
 
 # Leave alone.
 ALL: build_here 
-
-# Don't set these unless absolutely necessary - they've got to be
-# architecture and compiler independent and should be inherited
-# from the upper level makefile if possible.
-CFLAGS    += ${MPI_INCLUDE}
-FFLAGS    =
 
 AUTOGEN   = 
 # ESMF_StateGet.F90
