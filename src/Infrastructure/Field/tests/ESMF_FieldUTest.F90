@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.130 2008/08/31 04:55:03 oehmke Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.131 2008/09/02 19:23:42 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.130 2008/08/31 04:55:03 oehmke Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.131 2008/09/02 19:23:42 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -129,7 +129,7 @@
 #ifdef ESMF_TESTEXHAUSTIVE
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Testing creating a field on a locstream
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Creating a Field on a LocStream from an ArraySpec"
@@ -176,7 +176,7 @@
 
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Testing creating a field on a locstream
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Creating a Field on a LocStream from an farray"
