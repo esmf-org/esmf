@@ -32,6 +32,14 @@
 ########################################################################################
 problem_descriptor_string::
 # simple block redistribution
-'[B1G1;B2G2] --> [B1G1;B2G2]' -d DistGrid.rc -g RedistGrid2D.rc 
-'[B1G1;B2G2;B3G3] --> [B1G1;B2G2;B3G3]' -d DistGrid.rc -g RedistGrid3D.rc     
+'[B1G1;B2G2] --> [B1G1;B2G2]' -d DistGrid2D2D_exh.rc -g RedistGrid2D.rc 
+'[B1G1;B2G2] --> [B2G2;B1G1]' -d DistGrid2D2D_exh.rc -g RedistGrid2D.rc 
+'[B2G2;B1G1] --> [B1G1;B2G2]' -d DistGrid2D2D_exh.rc -g RedistGrid2D.rc 
+#
+'[B1G1;B2G2;B3G3] --> [B1G1;B2G2;B3G3]' -d DistGrid3D3D_exh.rc -g RedistGrid3D.rc 
+'[B1G1;B2G2;B3G3] --> [B1G1;B3G3;B2G2]' -d DistGrid3D3D_exh.rc -g RedistGrid3D.rc 
+'[B1G1;B2G2;B3G3] --> [B2G2;B1G1;B3G3]' -d DistGrid3D3D_exh.rc -g RedistGrid3D.rc 
+'[B1G1;B2G2;B3G3] --> [B3G3;B1G1;B2G2]' -d DistGrid3D3D_exh.rc -g RedistGrid3D.rc 
+'[B1G1;B2G2;B3G3] --> [B2G2;B3G3;B1G1]' -d DistGrid3D3D_exh.rc -g RedistGrid3D.rc 
+'[B1G1;B2G2;B3G3] --> [B3G3;B2G2;B1G1]' -d DistGrid3D3D_exh.rc -g RedistGrid3D.rc 
 ::   # end of list
