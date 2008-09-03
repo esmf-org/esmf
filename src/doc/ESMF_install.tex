@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.62 2008/07/23 04:51:57 theurich Exp $
+% $Id: ESMF_install.tex,v 1.63 2008/09/03 04:14:24 w6ws Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -21,21 +21,90 @@ to build the library and link it with your application.
 \subsection{3rd Party Libraries}
 \label{sec:3rdParty}
 
-Some pieces of the ESMF library require access to 3rd party library code. This
-section describes these dependencies and the associated environment settings
+Some pieces of the ESMF library can offer enhanced capabilities when
+certain 3rd party libraries are available. This section describes
+these dependencies and the associated environment settings
 that allow the user to control them.
 
-TODO: Need to discuss LAPACK dependency in Mesh code and how {\tt ESMF\_LAPACK},
-{\tt ESMF\_LAPACK\_LIBS} and {\tt ESMF\_LAPACK\_LIBPATH} variables are used
-during ESMF library build.
 
-TODO: Need to discuss NETCDF dependency in library and test code and how 
-{\tt ESMF\_NETCDF}, {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBS} and 
-{\tt ESMF\_NETCDF\_LIBPATH} variables are used during ESMF library build.
+\begin{description}
 
-TODO: Need to discuss PNETCDF dependency in library and test code and how 
-{\tt ESMF\_PNETCDF}, {\tt ESMF\_PNETCDF\_INCLUDE}, {\tt ESMF\_PNETCDF\_LIBS} and
-{\tt ESMF\_PNETCDF\_LIBPATH} variables are used during ESMF library build.
+\item[LAPACK]  TODO: Need to discuss LAPACK dependency in Mesh code
+
+A few targets are known to always have a vendor-provided LAPACK
+library available.  Where possible, these are incorporated into
+the build environment by default.  
+
+The following environment variables enable, and specify the name and location of
+the desired LAPACK library:
+\begin{description}
+
+\item[ESMF\_LAPACK]  Possible value: ON (default depends on system)
+
+When defined, enables the use of LAPACK.
+
+\item[ESMF\_LAPACK\_LIBPATH] Typical value:/usr/local/lib (default depends on
+system)
+
+Specifies the path where the LAPACK library is located.
+
+\item[ESMF\_LAPACK\_LIBS] Typical value: "-l lapack -l blas" (default depends
+on system)
+
+Specifies the linker directives needed to link the LAPACK library to the
+application.  Note that on some system, the BLAS library must also be
+named.
+\end{description}
+
+\item[NETCDF]
+ESMF provides the ability to read grid and mesh data in NETCDF form.  The
+following environment variables enable, and specify the name and location
+of the desired NETCDF library and associated header files:
+
+\begin{description}
+
+\item[ESMF\_NETCDF] Possible value: ON (default none)
+
+When defined, enables the use of NETCDF.
+
+\item[ESMF\_NETCDF\_INCLUDE] Typical value: /usr/local/include (default none)
+
+Specifies the path where the NETCDF header files are located.
+
+\item[ESMF\_NETCDF\_LIBPATH] Typical value: /usr/local/lib (default none)
+
+Specifies the path where the NETCDF library is located.
+
+\item[ESMF\_NETCDF\_LIBS] Typical value: -lnetcdf (default none)
+Specifies the linker directives needed to link the NETCDF library to the
+application.  For example, ESMF\_NETCDF\_LIBS=-lnetcdf.
+\end{description}
+
+\item[PNETCDF]
+ESMF provides the ability to write mesh weights in PNETCDF form.  The
+following environment variables enable, and specify the name and location
+of the desired PNETCDF library and associated header files:
+\begin{description}
+
+\item[ESMF\_PNETCDF] Possible value: ON (default none)
+
+When defined, enables the use of PNETCDF.
+
+\item[ESMF\_PNETCDF\_INCLUDE] Typical value: /usr/local/include (default none)
+
+Specifies the path where the PNETCDF header files are located.
+
+\item[ESMF\_PNETCDF\_LIBPATH] Typical value: /usr/local/lib (default none)
+
+Specifies the path where the PNETCDF library is located.
+
+\item[ESMF\_PNETCDF\_LIBS] Typical value: -lpnetcdf (default none)
+
+Specifies the linker directives needed to link the PNETCDF library to the
+application.
+\end{description}
+
+\end{description}
 
 \subsection{ESMF Environment Variables}
 \label{EnvironmentVariables}
