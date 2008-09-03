@@ -1,9 +1,11 @@
-// $Id: user_CComponent.C,v 1.4 2008/09/03 21:48:27 theurich Exp $
+// $Id: user_CComponent.C,v 1.5 2008/09/03 23:39:23 rosalind Exp $
 //==============================================================================
+
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 // ESMF header
 #include "ESMC.h"
@@ -13,19 +15,29 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   int localrc;
   ESMC_Array retrievedArray;
 
-  // do something here
   printf("I am in myInitInC()\n");
 
-  ESMC_StatePrint(importState);
-  ESMC_ClockPrint(*clock);
+//  ESMC_ClockPrint(*clock);
 
-  localrc=ESMC_StateGetArray(importState, "array1", &retrievedArray);
-  localrc=ESMC_ArrayPrint(retrievedArray);
+  localrc=ESMC_StateGetArray(exportState, "array1", &retrievedArray);
+//  localrc=ESMC_ArrayPrint(retrievedArray);
   
   double *ptr = (double *)ESMC_ArrayGetPtr(retrievedArray, 0, &localrc);
   
   printf("local ptr[0] = %g\n", ptr[0]);
+  printf("local ptr[1] = %g\n", ptr[1]);
 
+
+   for (int j=0; j<2; j++){
+     for (int i=0; i<5; i++){
+       int ij= j*5 +i;
+       ptr[ij] = j;
+     }
+   }
+    
+  printf("local ptr[0] = %g\n", ptr[0]);
+
+  printf("Reset farray values to farray(i,j)=j \n");
   printf("Leaving myInitInC()\n");
 
   // return successfully
@@ -34,11 +46,29 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
 
 void myRunInC(ESMC_GridComp gcomp, ESMC_State importState,
   ESMC_State exportState, ESMC_Clock *clock, int *rc){
-  // do something here
+
+  // local data
+  ESMC_Array retrievedArray;
+  int localrc;
   printf("I am in myRunInC()\n");
 
-  ESMC_StatePrint(importState);
-  ESMC_ClockPrint(*clock);
+//ESMC_StatePrint(importState);
+//ESMC_ClockPrint(*clock);
+
+    localrc=ESMC_StateGetArray(exportState, "array1", &retrievedArray);
+    double *ptr = (double *)ESMC_ArrayGetPtr(retrievedArray, 0, &localrc);
+
+  // verify data values
+     for (int j=0; j<2; j++){
+       for (int i=0; i<5; i++){
+         int ij= j*5 +i;
+         if ( fabs(ptr[ij]-float((j+1)*10+i+1)) > 1.e-8 ){
+           printf("ptr has wrong values at i=%d,j=%d,ij=%d\n", i,j,ij);
+           *rc = ESMC_Finalize();
+         }
+       }
+     }
+     printf("Data values in exp state correct in myRunInC\n");
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;

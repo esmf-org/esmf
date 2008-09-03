@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.3 2008/09/03 21:48:27 theurich Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.4 2008/09/03 23:39:23 rosalind Exp $
 !
 ! System test CompFortranAndC
 !  Description on Sourceforge under System Test #63029
@@ -161,18 +161,16 @@
 
       call ESMF_GridCompInitialize(compInFortran, imp, exp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "Comp Initialize 1 finished"
+      print *, "Comp Initialize Fortran component finished"
  
-      ! extract and print the Array in exp
-      call ESMF_StateGet(exp,"array1", array=array, rc=rc)
-      call ESMF_ArrayPrint(array)
+    ! ! extract and print the Array in exp
+    ! call ESMF_StateGet(exp,"array1", array=array, rc=rc)
+    ! call ESMF_ArrayPrint(array)
 
-      call ESMF_GridCompInitialize(compInC, exp, exp, clock, rc=rc)
+      call ESMF_GridCompInitialize(compInC, imp, exp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "Comp Initialize 2 finished"
+      print *, "Comp Initialize C component finished"
 
-      !Debug
-     !go to 10
  
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -184,13 +182,10 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "CompInFortran Run returned"
 
-     !call ESMF_GridCompRun(compInC, imp, exp, rc=rc)
-     !if (rc .ne. ESMF_SUCCESS) goto 10
-     !print *, "CompInC Run returned"
+      call ESMF_GridCompRun(compInC, imp, exp, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "CompInC Run returned"
  
-     !call ESMF_GridCompRun(compInFortran, imp, exp, rc=rc)
-     !if (rc .ne. ESMF_SUCCESS) goto 10
-     !print *, "CompInFortran Run returned second time"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -227,22 +222,6 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(exp, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-
-      !Deallocate fortran array in all De's
-      call ESMF_ArrayGet(array, localDeCount=localDeCount,rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "THE VALUE OF localDeCount is ",localDeCount, " in PET ", my_pet
-      allocate (localDeList(localDeCount))
-      call ESMF_ArrayGet(array, localDeList=localDeList, rc=rc)
-            if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "THE VALUE OF localDeList is", localDeList," in PET ", my_pet
-     !do i=1,localDeCount
-     !  call ESMF_ArrayGet(array, localDe=localDeList(i), farrayPtr=farrayPtr, &
-     !                     rc=rc)
-     !  deallocate (farrayPtr, stat=stat)
-     !  if (stat.ne.0) print* , "deallocation of farrayPtr failed, stat = ",stat
-     !end do
-     !deallocate (localDeList)
 
       print *, "All Destroy routines done"
 

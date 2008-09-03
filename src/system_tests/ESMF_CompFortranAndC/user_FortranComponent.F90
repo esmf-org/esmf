@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.1 2008/09/03 01:20:00 rosalind Exp $
+! $Id: user_FortranComponent.F90,v 1.2 2008/09/03 23:39:23 rosalind Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -22,6 +22,7 @@
     
     public user_register
         
+    real(ESMF_KIND_R8), save, allocatable    :: farray(:,:)
     contains
 
 !-------------------------------------------------------------------------
@@ -89,8 +90,9 @@
         type (ESMF_DistGrid) :: distgrid
         character(ESMF_MAXSTR) :: name
         integer, intent(out) :: rc
-        real(ESMF_KIND_R8), save, allocatable    :: farray(:,:)
 
+        !local data
+        integer :: i
         print *, "Fortran User Comp Init starting"
 
         ! Allocate the Fortran array
@@ -111,7 +113,9 @@
            rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-        farray = 5.
+        do i=1,5
+          farray(i,:) = float(i)
+        end do
 
         array = ESMF_ArrayCreate(farray=farray, distgrid=distgrid, &
           name="array1", rc=rc)
@@ -145,18 +149,54 @@
         type(ESMF_Clock) :: clock
         integer, intent(out) :: rc
 
-       type(ESMF_Field) :: humidity
         integer, save :: onetime=1              ! static variable
 
+        type(ESMF_Array) :: array0
+        real(ESMF_KIND_R8), pointer, dimension(:,:) :: farrayPtr
         integer :: status
+        integer :: i,j
 
-        print *, "User Comp Run starting"
+        print *, "User Fortran Comp Run starting"
 
-        call ESMF_StatePrint(exportState, rc=status)
+        ! static data array farray modified in my_InitInC
+        print *, "In Fortran Component Run, farray= ",farray
+
+        call ESMF_StateGet(exportState,"array1", array0, rc=rc)
+        call ESMF_ArrayPrint(array0)
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+        call ESMF_ArrayGet(array0, 0, farrayPtr=farrayPtr, rc=rc)
+
+          ! values must be as set in "myInitInC"
+          do j=1,2
+            do i=1,5
+              if ( abs(farrayPtr(i,j)-float(j-1)) > 1.e-8 ) then
+                print *, "ERROR! farrayPtr has wrong value at i,j=",i,j
+                call ESMF_Finalize(terminationflag=ESMF_ABORT)
+              end if
+            end do
+          end do 
+
+       print *,"data in exp state successfully transmitted to user_run in", &
+               " Fortran Component"
+
+       ! modify the data again 
+       do j=1,2
+         do i=1,5
+           farrayPtr(i,j) = float(j*10+i)
+         end do
+       end do 
+
+       print *," data in exp state data modified in user_run in Fortran", &
+               " component"
+
+       call ESMF_ArrayPrint(array0)
+
+       !call ESMF_StatePrint(exportState, rc=status)
  
         print *, "User Comp Run returning"
 
-        rc = status
+        rc = ESMF_SUCCESS
 
     end subroutine user_run
 
@@ -174,6 +214,7 @@
 
         print *, "User Comp Final starting"
     
+        deallocate (farray)    
  
         print *, "User Comp Final returning"
    
