@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.2 2008/09/03 03:58:22 theurich Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.3 2008/09/03 21:48:27 theurich Exp $
 !
 ! System test CompFortranAndC
 !  Description on Sourceforge under System Test #63029
@@ -31,11 +31,11 @@
     implicit none
 
     interface 
-      subroutine myRegistrationInc(gcomp, rc)
+      subroutine my_RegistrationInc(gcomp, rc)
          use ESMF_Mod
          type(ESMF_GridComp) :: gcomp
          integer, intent(out) :: rc
-      end subroutine myRegistrationInc
+      end subroutine my_RegistrationInc
     end interface
     
 !   Local variables
@@ -113,7 +113,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "CompInFortran Register finished, rc= ", rc
 
-      call ESMF_GridCompSetServices(compInC, myRegistrationInC, rc)
+      call ESMF_GridCompSetServices(compInC, my_RegistrationInC, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "CompInC Register finished, rc= ", rc
 

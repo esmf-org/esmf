@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.3 2008/09/03 04:24:01 theurich Exp $
+// $Id: user_CComponent.C,v 1.4 2008/09/03 21:48:27 theurich Exp $
 //==============================================================================
 
 #include <stdio.h>
@@ -57,7 +57,7 @@ void myFinalInC(ESMC_GridComp gcomp, ESMC_State importState,
 }
 
 extern "C" {
-void FTN(myregistrationinc)(ESMC_GridComp gcomp, int *rc){
+void FTN(my_registrationinc)(ESMC_GridComp gcomp, int *rc){
   // register Init(), Run(), Finalize()
   printf("I am in myRegistrationInC()\n");
   ESMC_GridCompPrint(gcomp, "");
