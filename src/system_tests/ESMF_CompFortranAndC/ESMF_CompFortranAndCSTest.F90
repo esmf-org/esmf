@@ -1,0 +1,280 @@
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.1 2008/09/03 01:19:59 rosalind Exp $
+!
+! System test CompFortranAndC
+!  Description on Sourceforge under System Test #63029
+
+!-------------------------------------------------------------------------
+!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!=========================================================================
+
+!BOP
+!
+! !DESCRIPTION:
+! System test CompFortranAndC.
+!
+!
+!\begin{verbatim}
+
+    program CompFortranAndC
+#define ESMF_METHOD "program CompFortranAndC"
+
+#include "ESMF.h"
+#include <ESMF_Macros.inc>
+
+    ! ESMF Framework module
+    use ESMF_Mod
+    use ESMF_TestMod
+    use ESMF_CompMod
+    
+    use user_FortranComponent
+
+    interface 
+      subroutine myRegistrationInc(gcomp, rc)
+         use ESMF_Mod
+         type(ESMF_GridComp) :: gcomp
+         integer :: rc
+      end subroutine myRegistrationInc
+   end interface
+
+    implicit none
+    
+!   Local variables
+    integer :: my_pet, rc, localrc, i, stat
+    type(ESMF_VM):: vm
+    type(ESMF_GridComp) :: compInFortran
+    type(ESMF_GridComp) :: compInC
+    type(ESMF_State) :: imp, exp
+    character(len=ESMF_MAXSTR) :: cname
+        
+   ! Variables related to the Clock
+    type(ESMF_Clock) :: clock
+    type(ESMF_TimeInterval) :: timeStep
+    type(ESMF_Time) :: startTime
+    type(ESMF_Time) :: stopTime
+
+    type(ESMF_Array) :: array
+    integer :: localDeCount
+    integer, allocatable :: localDeList(:)
+    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
+
+    ! cumulative result: count failures; no failures equals "all pass"
+    integer :: testresult = 0
+
+    ! individual test name
+    character(ESMF_MAXSTR) :: testname
+
+    ! individual test failure message and status msg
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    print *, "System Test CompFortranAndC:"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!    Create section
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!
+
+    call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    ! Get the default global VM
+    call ESMF_VMGetGlobal(vm, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    ! Get our pet number for output print statements
+    call ESMF_VMGet(vm, localPet=my_pet, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    cname = "System Test CompInFortran"
+    compInFortran = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+!   call ESMF_GridCompPrint(compInFortran)
+
+    print *, "Comp Create (Fortran) finished, name = ", trim(cname)
+
+
+    cname = "System Test CompInC"
+    compInC = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+!   call ESMF_GridCompPrint(compInC)
+
+    print *, "Comp Create (C) finished, name = ", trim(cname)
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!  Register section
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+      call ESMF_GridCompSetServices(compInFortran, user_register, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "CompInFortran Register finished, rc= ", rc
+
+      call ESMF_GridCompSetServices(compInC, myRegistrationInC, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "CompInC Register finished, rc= ", rc
+
+!------------------------------------------------------------------------------
+!  Create and initialize a Clock.
+!------------------------------------------------------------------------------
+
+      call ESMF_TimeIntervalSet(timeStep, s=2, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) &
+            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+      print *, "Time Interval set"
+
+      call ESMF_TimeSet(startTime, yy=2004, mm=9, dd=25, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) &
+            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+      print *, "Start Time set"
+
+      call ESMF_TimeSet(stopTime, yy=2004, mm=9, dd=26, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) &
+            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+      print *, "Stop Time set"
+
+      clock = ESMF_ClockCreate("Application Clock", timeStep, startTime, &
+                                stopTime, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) &
+            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+      print *, "Clock created"
+!     call ESMF_ClockPrint(clock,rc=rc)
+
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!  Init section
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+ 
+      imp = ESMF_StateCreate("igrid import state", ESMF_STATE_IMPORT, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      exp = ESMF_StateCreate("igrid export state", ESMF_STATE_EXPORT, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+
+      call ESMF_GridCompInitialize(compInFortran, imp, exp, clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "Comp Initialize 1 finished"
+ 
+      ! extract and print the Array in exp
+      call ESMF_StateGet(exp,"array1", array=array, rc=rc)
+      call ESMF_ArrayPrint(array)
+
+      call ESMF_GridCompInitialize(compInC, exp, exp, clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "Comp Initialize 2 finished"
+
+      !Debug
+     !go to 10
+ 
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!     Run section
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+      call ESMF_GridCompRun(compInFortran, imp, exp, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "CompInFortran Run returned"
+
+     !call ESMF_GridCompRun(compInC, imp, exp, rc=rc)
+     !if (rc .ne. ESMF_SUCCESS) goto 10
+     !print *, "CompInC Run returned"
+ 
+     !call ESMF_GridCompRun(compInFortran, imp, exp, rc=rc)
+     !if (rc .ne. ESMF_SUCCESS) goto 10
+     !print *, "CompInFortran Run returned second time"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!     Finalize section
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!     Print result
+
+      call ESMF_GridCompFinalize(compInFortran, imp, exp, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+
+
+      print *, "-----------------------------------------------------------------"
+      print *, "-----------------------------------------------------------------"
+      print *, "Test finished, my_pet = ", my_pet
+      print *, "-----------------------------------------------------------------"
+      print *, "-----------------------------------------------------------------"
+
+      print *, "Comp Finalize returned"
+
+!
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!     Destroy section
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!     Clean up
+
+      call ESMF_GridCompDestroy(compInFortran, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      call ESMF_GridCompDestroy(compInC, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      call ESMF_StateDestroy(imp, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      call ESMF_StateDestroy(exp, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+
+      !Deallocate fortran array in all De's
+      call ESMF_ArrayGet(array, localDeCount=localDeCount,rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "THE VALUE OF localDeCount is ",localDeCount, " in PET ", my_pet
+      allocate (localDeList(localDeCount))
+      call ESMF_ArrayGet(array, localDeList=localDeList, rc=rc)
+            if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "THE VALUE OF localDeList is", localDeList," in PET ", my_pet
+     !do i=1,localDeCount
+     !  call ESMF_ArrayGet(array, localDe=localDeList(i), farrayPtr=farrayPtr, &
+     !                     rc=rc)
+     !  deallocate (farrayPtr, stat=stat)
+     !  if (stat.ne.0) print* , "deallocation of farrayPtr failed, stat = ",stat
+     !end do
+     !deallocate (localDeList)
+
+      print *, "All Destroy routines done"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+ 
+ 10   print *, "System Test CompFortranAndC complete"
+
+      ! Standard ESMF Test output to log file
+      write(failMsg, *) "System Test failure"
+      write(testname, *) "System Test CompFortranAndC: Component Create Test"
+  
+      call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), &
+        testname, failMsg, testresult, ESMF_SRCLINE)
+
+      if ((my_pet .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+        ! Separate message to console, for quick confirmation of success/failure
+        if (rc .eq. ESMF_SUCCESS) then
+          write(finalMsg, *) "SUCCESS: Component Create complete."
+        else
+          write(finalMsg, *) "System Test did not succeed.  Error code ", rc
+        endif
+        write(0, *) ""
+        write(0, *) trim(testname)
+        write(0, *) trim(finalMsg)
+        write(0, *) ""
+
+      endif
+
+      call ESMF_Finalize(rc=rc)
+
+      end program CompFortranAndC
+    
+!\end{verbatim}
+    
