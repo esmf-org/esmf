@@ -333,7 +333,7 @@ void Search(const Mesh &src, const Mesh &dest, UInt dst_obj_type, SearchResult &
     }
     delete *si;
   }
-  std::cout << "Search, found " << nbad << " bad cases, but resolved " << nres << " of these." << std::endl;
+  //std::cout << "Search, found " << nbad << " bad cases, but resolved " << nres << " of these." << std::endl;
 
   // Remove storage for dest_nlist.
   std::vector<const MeshObj*>().swap(dest_nlist);

@@ -757,11 +757,11 @@ dstmesh(dest)
        //std::cout << "Building rendezvous..." << std::endl;
     grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0]);
     
-//#define MYSEARCH
+#define MYSEARCH
 #ifdef MYSEARCH
-    if (Par::Rank() == 0) std::cout << "Start search" << std::endl;
+//    if (Par::Rank() == 0) std::cout << "Start search" << std::endl;
     Search(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), sres);
-    if (Par::Rank() == 0) std::cout << "end search" << std::endl;
+//    if (Par::Rank() == 0) std::cout << "end search" << std::endl;
 #else
 /*
      if (Par::Rank() == 0)
@@ -780,9 +780,9 @@ dstmesh(dest)
     // Serial track.  Meshes already in geometric rendezvous.  (Perhaps get
     // the subset of the mesh for interpolating??)
 #ifdef MYSEARCH
-    if (Par::Rank() == 0) std::cout << "Start search" << std::endl;
+//    if (Par::Rank() == 0) std::cout << "Start search" << std::endl;
     Search(src, dest, search_obj_type, sres);
-    if (Par::Rank() == 0) std::cout << "end search" << std::endl;
+//    if (Par::Rank() == 0) std::cout << "end search" << std::endl;
 #else
 /*
      if (Par::Rank() == 0)
