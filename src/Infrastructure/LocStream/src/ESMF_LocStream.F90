@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.6 2008/09/02 23:08:11 theurich Exp $
+! $Id: ESMF_LocStream.F90,v 1.7 2008/09/03 04:13:55 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.6 2008/09/02 23:08:11 theurich Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.7 2008/09/03 04:13:55 oehmke Exp $'
 
 !==============================================================================
 !
@@ -2495,7 +2495,7 @@ end subroutine ESMF_LocStreamGetBounds
         end subroutine ESMF_LocStreamPrint
 
 
-#ifdef FINISH_TOMORROW
+#ifdef FINISH_LATER
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamSerialize"
@@ -2538,7 +2538,7 @@ end subroutine ESMF_LocStreamGetBounds
 !
 !EOPI
       type(ESMF_LocStreamType),pointer :: lstypep
-      integer :: localrc
+      integer :: i,localrc
 
 
       ! Initialize
@@ -2551,12 +2551,21 @@ end subroutine ESMF_LocStreamGetBounds
       ! Get internal pointer to locstream type
       lstypep => locstream%lstypep
 
-
-
-      call c_ESMC_GridSerialize(grid, buffer(1), length, offset, localrc)
+     ! Serialize locstream items
+      call c_ESMC_LocStreamSerialize(lstypep%base, lstypep%distgrid, lstypep%indexflag, &
+               lstypep%keyCount, buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
+
+      ! Serialize locstream key info
+      do i=1,lstypep%keyCount
+         call c_ESMC_LocStreamKeySerialize(lstypep%keyNames(i), lstypep%keyUnits(i), &
+                 lstypep%keyLongNames(i), lstypep%keys(i), buffer(1), length, offset, localrc)
+         if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+      enddo
 
       ! return success
       if (present(rc)) rc = ESMF_SUCCESS
@@ -2605,20 +2614,27 @@ end subroutine ESMF_LocStreamGetBounds
 !EOPI
 
       integer :: localrc
-      type(ESMF_LocStream) :: locstream
+      type(ESMF_LocStreamType),pointer :: lstypep
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if  (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      ! Call into C++ to Deserialize the LocStream
-      call c_ESMC_GridDeserialize(grid%this, buffer(1), offset, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+      ! allocate LocStream type
+      allocate(lstypep, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating LocStream type object", &
+                                     ESMF_CONTEXT, rc)) return
 
-      ! Set return value
-      ESMF_LocStreamDeserialize = locstream
+
+
+     ! Set to destroy proxy objects
+     lstypep%destroyDistgrid=.true.
+
+     ! Set to destroy proxy objects
+     lstypep%destroyKeys=.true.
+
+     ! Set pointer to locstream
+     ESMF_LocStreamDeserialize%lstypep=>lstypep
 
      ! Set init status
       ESMF_INIT_SET_CREATED(ESMF_LocStreamDeserialize)

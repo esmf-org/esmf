@@ -36,8 +36,8 @@ program ESMF_LocStreamEx
       real(ESMF_KIND_R8), pointer :: cornerX(:), cornerY(:), cornerZ(:)
       real(ESMF_KIND_R8), pointer :: coordX2D(:,:), coordY2D(:,:)
       real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
-      real(ESMF_KIND_R8), pointer :: lat(:), lon(:), temp(:)
-      type(ESMF_Field)            :: fieldTemp
+      real(ESMF_KIND_R8), pointer :: lat(:), lon(:), temperature(:)
+      type(ESMF_Field)            :: field_temperature
     
       type(ESMF_Array) :: arrayCoordX, arrayCoordY,array
 
@@ -59,8 +59,8 @@ program ESMF_LocStreamEx
 !\subsubsection{Creating A LocStream Employing User Allocated Memory}
 !
 ! The following is an example of creating a LocStream object.
-! After creation, key data is added, and a Field is created 
-! (Note that this last has not yet been implemented). 
+! After creation, key data is added, and a Field is created to hold data
+! (temperature) at each location. 
 !
 !EOE
 
@@ -80,10 +80,10 @@ program ESMF_LocStreamEx
    !-------------------------------------------------------------------
    ! Allocate and set example Field data
    !-------------------------------------------------------------------
-   allocate(temp(numLocationsOnThisPet))
+   allocate(temperature(numLocationsOnThisPet))
 
    do i=1,numLocationsOnThisPet
-      temp(i)=90.0
+      temperature(i)=90.0
    enddo
 
 
@@ -118,22 +118,22 @@ program ESMF_LocStreamEx
    ! Create a Field on the Location Stream. In this case the 
    ! Field is created from a user array, but any of the other
    ! Field create methods (e.g. from ArraySpec) would also apply.
-   !------------------------------------------------------------------- 
-      
-   !  field_temp=ESMF_FieldCreate(locstream,   &
-   !                              farray=temp, &
-   !                              name="temp", &
-   !                              rc=rc)
+   !-------------------------------------------------------------------       
+   field_temperature=ESMF_FieldCreate(locstream,   &
+                                   farray=temperature, &
+                                   name="temperature", &
+                                   rc=rc)
 
 
 !EOC
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
-   call ESMF_LocStreamDestroy(locstream, rc=rc)
+   call ESMF_FieldDestroy(field_temperature, rc=rc)
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-
+   call ESMF_LocStreamDestroy(locstream, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
 !\subsubsection{Creating A LocStream Employing Internally Allocated Memory}
@@ -141,8 +141,8 @@ program ESMF_LocStreamEx
 ! The following is an example of creating a LocStream object.
 ! After creation, key data is internally allocated,
 ! the pointer is retrieved, and the data is set.
-! A Field is also created on the LocStream (Note that this last has not yet 
-! been implemented). 
+! A Field is also created on the LocStream to hold data
+! (temperature) at each location. 
 !
 !EOE
 
@@ -151,10 +151,10 @@ program ESMF_LocStreamEx
    !-------------------------------------------------------------------
    ! Allocate and set example Field data
    !-------------------------------------------------------------------
-   allocate(temp(numLocationsOnThisPet))
+   allocate(temperature(numLocationsOnThisPet))
 
    do i=1,numLocationsOnThisPet
-      temp(i)=90.0
+      temperature(i)=80.0
    enddo
 
 
@@ -210,20 +210,24 @@ program ESMF_LocStreamEx
    ! Create a Field on the Location Stream. In this case the 
    ! Field is created from a user array, but any of the other
    ! Field create methods (e.g. from ArraySpec) would also apply.
-   !------------------------------------------------------------------- 
-      
-   !  field_temp=ESMF_FieldCreate(locstream,   &
-   !                              farray=temp, &
-   !                              name="temp", &
-   !                              rc=rc)
+   !-------------------------------------------------------------------    
+   field_temperature=ESMF_FieldCreate(locstream,   &
+                                 farray=temperature, &
+                                 name="temperature", &
+                                 rc=rc)
 
 
 !EOC
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
+   call ESMF_FieldDestroy(field_temperature, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
    call ESMF_LocStreamDestroy(locstream, rc=rc)
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
 
 #endif
 
