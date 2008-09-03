@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.1 2008/09/03 01:20:00 rosalind Exp $
+// $Id: user_CComponent.C,v 1.2 2008/09/03 03:58:22 theurich Exp $
 //==============================================================================
 
 #include <stdio.h>
@@ -19,7 +19,7 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   ESMC_StatePrint(importState);
   ESMC_ClockPrint(*clock);
 
-  localrc=ESMC_StateGetArray(importState, "array1\0", &retrievedArray);
+  localrc=ESMC_StateGetArray(importState, "array1", &retrievedArray);
   localrc=ESMC_ArrayPrint(retrievedArray);
 
   printf("Leaving myInitInC()\n");

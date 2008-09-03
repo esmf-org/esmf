@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.1 2008/09/03 01:19:59 rosalind Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.2 2008/09/03 03:58:22 theurich Exp $
 !
 ! System test CompFortranAndC
 !  Description on Sourceforge under System Test #63029
@@ -28,15 +28,15 @@
     
     use user_FortranComponent
 
+    implicit none
+
     interface 
       subroutine myRegistrationInc(gcomp, rc)
          use ESMF_Mod
          type(ESMF_GridComp) :: gcomp
-         integer :: rc
+         integer, intent(out) :: rc
       end subroutine myRegistrationInc
-   end interface
-
-    implicit none
+    end interface
     
 !   Local variables
     integer :: my_pet, rc, localrc, i, stat
