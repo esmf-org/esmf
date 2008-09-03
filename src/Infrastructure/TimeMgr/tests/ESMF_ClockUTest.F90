@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.105 2008/04/07 06:46:00 theurich Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.106 2008/09/03 05:57:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.105 2008/04/07 06:46:00 theurich Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.106 2008/09/03 05:57:34 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -78,7 +78,7 @@
 
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep
-      type(ESMF_Time) :: startTime, stopTime, startTime2, stopTime2, stopTime3
+      type(ESMF_Time) :: startTime, stopTime, startTime2, stopTime3
       type(ESMF_Time) :: currentTime, current_time, &
                          previousTime, syncTime, stopTime4
       type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
