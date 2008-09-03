@@ -1,4 +1,4 @@
-% $Id: Calendar_options.tex,v 1.5 2006/11/30 19:30:18 theurich Exp $
+% $Id: Calendar_options.tex,v 1.6 2008/09/03 05:56:36 eschwab Exp $
 
 \label{subsec:Calendar_options}
 
@@ -46,6 +46,15 @@ begin at midnight.
 have elapsed since the start of the Julian era, defined as beginning at noon 
 on Monday, 1st January of year 4713 B.C. in the Julian calendar.  Julian days, 
 unlike the dates in the Julian and Gregorian calendars, begin at noon.
+
+\item [ESMF\_CAL\_MODJULIANDAY]
+{\it Valid range:  +/- 1x10$^{14}$}
+\newline The Modified Julian Day (MJD) was introduced by space scientists in
+ the late 1950's.  It is defined as an offset from the Julian Day (JD):
+
+MJD = JD - 2400000.5
+
+The half day is subtracted so that the day starts at midnight.
 
 \item [ESMF\_CAL\_NOCALENDAR] 
 {\it Valid range: machine limits}

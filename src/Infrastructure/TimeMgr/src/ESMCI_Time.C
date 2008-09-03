@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.C,v 1.7 2008/07/29 01:34:55 rosalind Exp $"
+// $Id: ESMCI_Time.C,v 1.8 2008/09/03 05:56:37 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Time.C,v 1.7 2008/07/29 01:34:55 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_Time.C,v 1.8 2008/09/03 05:56:37 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -760,9 +760,11 @@ namespace ESMCI{
     }
 
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
+        this->calendar->calendarType == ESMC_CAL_MODJULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-                           "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
+                           "; calendarType is JULIANDAY, "
+                           "MODJULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
 
@@ -1303,9 +1305,11 @@ namespace ESMCI{
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
+        this->calendar->calendarType == ESMC_CAL_MODJULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
-                           "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
+                           "; calendarType is JULIANDAY, "
+                           "MODJULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
 
@@ -1418,6 +1422,7 @@ namespace ESMCI{
 
         case ESMC_CAL_JULIAN:
         case ESMC_CAL_JULIANDAY:
+        case ESMC_CAL_MODJULIANDAY:
           //  Can be any Monday before the Julian end of 10/4/1582
           yy_i8=1492; mm=10; dd=29;  // Columbus landed in Cuba on a Monday !
           break;
@@ -1514,9 +1519,11 @@ namespace ESMCI{
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
+        this->calendar->calendarType == ESMC_CAL_MODJULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
-                           "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
+                           "; calendarType is JULIANDAY, "
+                           "MODJULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
 
@@ -1628,9 +1635,11 @@ namespace ESMCI{
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
+        this->calendar->calendarType == ESMC_CAL_MODJULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
-                           "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
+                           "; calendarType is JULIANDAY, "
+                           "MODJULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
     
@@ -1697,9 +1706,11 @@ namespace ESMCI{
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
+        this->calendar->calendarType == ESMC_CAL_MODJULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
-                           "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
+                           "; calendarType is JULIANDAY, "
+                           "MODJULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
 
@@ -1767,9 +1778,11 @@ namespace ESMCI{
       return(rc);
     }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
+        this->calendar->calendarType == ESMC_CAL_MODJULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
-                           "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
+                           "; calendarType is JULIANDAY, "
+                           "MODJULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
 

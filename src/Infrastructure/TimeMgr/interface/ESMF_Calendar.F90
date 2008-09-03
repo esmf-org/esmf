@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.93 2008/07/03 23:07:53 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.94 2008/09/03 05:56:37 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -67,17 +67,18 @@
       end type
 
       type(ESMF_CalendarType), parameter :: &
-                               ESMF_CAL_GREGORIAN =  ESMF_CalendarType(1), &
-                               ESMF_CAL_JULIAN =     ESMF_CalendarType(2), &
-                               ESMF_CAL_JULIANDAY =  ESMF_CalendarType(3), &
+                               ESMF_CAL_GREGORIAN =    ESMF_CalendarType(1), &
+                               ESMF_CAL_JULIAN =       ESMF_CalendarType(2), &
+                               ESMF_CAL_JULIANDAY =    ESMF_CalendarType(3), &
+                               ESMF_CAL_MODJULIANDAY = ESMF_CalendarType(4), &
                            ! like Gregorian, except Feb always has 28 days
-                               ESMF_CAL_NOLEAP =     ESMF_CalendarType(4), & 
+                               ESMF_CAL_NOLEAP =       ESMF_CalendarType(5), & 
                            ! 12 months, 30 days each
-                               ESMF_CAL_360DAY =     ESMF_CalendarType(5), & 
+                               ESMF_CAL_360DAY =       ESMF_CalendarType(6), & 
                            ! user defined
-                               ESMF_CAL_CUSTOM =     ESMF_CalendarType(6), &
+                               ESMF_CAL_CUSTOM =       ESMF_CalendarType(7), &
                            ! track base time seconds only
-                               ESMF_CAL_NOCALENDAR = ESMF_CalendarType(7)
+                               ESMF_CAL_NOCALENDAR =   ESMF_CalendarType(8)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Calendar
@@ -93,9 +94,9 @@
 ! !PUBLIC TYPES:
       public MONTHS_PER_YEAR
       public ESMF_CalendarType
-      public ESMF_CAL_GREGORIAN, ESMF_CAL_JULIAN, ESMF_CAL_JULIANDAY, &
-             ESMF_CAL_NOLEAP,    ESMF_CAL_360DAY, ESMF_CAL_CUSTOM, &
-             ESMF_CAL_NOCALENDAR
+      public ESMF_CAL_GREGORIAN,    ESMF_CAL_JULIAN, ESMF_CAL_JULIANDAY, &
+             ESMF_CAL_MODJULIANDAY, ESMF_CAL_NOLEAP, ESMF_CAL_360DAY, &
+             ESMF_CAL_CUSTOM,       ESMF_CAL_NOCALENDAR
       public ESMF_Calendar
 !------------------------------------------------------------------------------
 !
@@ -140,7 +141,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.93 2008/07/03 23:07:53 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.94 2008/09/03 05:56:37 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -606,7 +607,8 @@
 !          The built-in {\tt ESMF\_CalendarType}.  Valid values are:
 !            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GREGORIAN},
 !            {\tt ESMF\_CAL\_JULIAN}, {\tt ESMF\_CAL\_JULIANDAY},
-!            {\tt ESMF\_CAL\_NOCALENDAR}, and {\tt ESMF\_CAL\_NOLEAP}.
+!            {\tt ESMF\_CAL\_MODJULIANDAY}, {\tt ESMF\_CAL\_NOCALENDAR},
+!            and {\tt ESMF\_CAL\_NOLEAP}.
 !          See Section ~\ref{subsec:Calendar_options} for a description of each
 !          calendar type.
 !     \item[{[rc]}]
@@ -1296,7 +1298,8 @@
 !          The built-in {\tt CalendarType}.  Valid values are:
 !            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GREGORIAN},
 !            {\tt ESMF\_CAL\_JULIAN}, {\tt ESMF\_CAL\_JULIANDAY},
-!            {\tt ESMF\_CAL\_NOCALENDAR}, and {\tt ESMF\_CAL\_NOLEAP}.
+!            {\tt ESMF\_CAL\_MODJULIANDAY}, {\tt ESMF\_CAL\_NOCALENDAR},
+!            and {\tt ESMF\_CAL\_NOLEAP}.
 !          See Section ~\ref{subsec:Calendar_options} for a description of each
 !          calendar type.
 !     \item[{[rc]}]

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.h,v 1.5 2008/07/29 19:28:00 feiliu Exp $
+// $Id: ESMCI_Calendar.h,v 1.6 2008/09/03 05:56:37 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //
 // The {\tt Calendar} class encapsulates the knowledge (attributes and
 // behavior) of all required calendar types:  Gregorian, Julian, Julian Day,
-// no-leap, 360-day, custom, and no-calendar.
+// Modified Julian Day, no-leap, 360-day, custom, and no-calendar.
 //
 // The {\tt Calendar} class encapsulates the definition of all required
 // calendar types. For each calendar type, it contains the number of months

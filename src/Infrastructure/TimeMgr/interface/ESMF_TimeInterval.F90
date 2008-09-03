@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.85 2008/07/03 23:07:55 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.86 2008/09/03 05:56:37 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.85 2008/07/03 23:07:55 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.86 2008/09/03 05:56:37 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1061,9 +1061,9 @@
 !     \item[{[mm\_i8]}]
 !          Integer months (large, >= 64-bit).
 !     \item[{[d]}]
-!          Integer Julian days (>= 32-bit).
+!          Integer Julian, or Modified Julian, days (>= 32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian days (large, >= 64-bit).
+!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
 !     \item[{[h]}]
 !          Integer hours.
 !     \item[{[m]}]
@@ -1276,9 +1276,9 @@
 !     \item[{[mm\_i8]}]
 !          Integer months (large, >= 64-bit).
 !     \item[{[d]}]
-!          Integer Julian days (>= 32-bit).
+!          Integer Julian, or Modified Julian, days (>= 32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian days (large, >= 64-bit).
+!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
 !     \item[{[h]}]
 !          Integer hours.
 !     \item[{[m]}]
@@ -1497,9 +1497,9 @@
 !     \item[{[mm\_i8]}]
 !          Integer months (large, >= 64-bit).
 !     \item[{[d]}]
-!          Integer Julian days (>= 32-bit).
+!          Integer Julian, or Modified Julian, days (>= 32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian days (large, >= 64-bit).
+!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
 !     \item[{[h]}]
 !          Integer hours.
 !     \item[{[m]}]
@@ -1719,9 +1719,9 @@
 !     \item[{[mm\_i8]}]
 !          Integer months (large, >= 64-bit).
 !     \item[{[d]}]
-!          Integer Julian days (>= 32-bit).
+!          Integer Julian, or Modified Julian, days (>= 32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian days (large, >= 64-bit).
+!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
 !     \item[{[h]}]
 !          Integer hours.
 !     \item[{[m]}]
@@ -2075,9 +2075,10 @@
 !     \item[{[mm\_i8]}]
 !          Integer months (large, >= 64-bit).  Default = 0
 !     \item[{[d]}]
-!          Integer Julian days (>= 32-bit).  Default = 0
+!          Integer Julian, or Modified Julian, days (>= 32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian days (large, >= 64-bit).  Default = 0
+!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
+!          Default = 0
 !     \item[{[h]}]
 !          Integer hours.  Default = 0
 !     \item[{[m]}]
@@ -2211,9 +2212,10 @@
 !     \item[{[mm\_i8]}]
 !          Integer months (large, >= 64-bit).  Default = 0
 !     \item[{[d]}]
-!          Integer Julian days (>= 32-bit).  Default = 0
+!          Integer Julian, or Modified Julian, days (>= 32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian days (large, >= 64-bit).  Default = 0
+!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
+!          Default = 0
 !     \item[{[h]}]
 !          Integer hours.  Default = 0
 !     \item[{[m]}]
@@ -2353,9 +2355,10 @@
 !     \item[{[mm\_i8]}]
 !          Integer months (large, >= 64-bit).  Default = 0
 !     \item[{[d]}]
-!          Integer Julian days (>= 32-bit).  Default = 0
+!          Integer Julian, or Modified Julian, days (>= 32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian days (large, >= 64-bit).  Default = 0
+!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
+!          Default = 0
 !     \item[{[h]}]
 !          Integer hours.  Default = 0
 !     \item[{[m]}]
@@ -2501,9 +2504,10 @@
 !     \item[{[mm\_i8]}]
 !          Integer months (large, >= 64-bit).  Default = 0
 !     \item[{[d]}]
-!          Integer Julian days (>= 32-bit).  Default = 0
+!          Integer Julian, or Modified Julian, days (>= 32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian days (large, >= 64-bit).  Default = 0
+!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
+!          Default = 0
 !     \item[{[h]}]
 !          Integer hours.  Default = 0
 !     \item[{[m]}]

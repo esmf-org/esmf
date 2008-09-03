@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.45 2008/08/09 05:57:52 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.46 2008/09/03 05:56:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.45 2008/08/09 05:57:52 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.46 2008/09/03 05:56:38 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -48,7 +48,7 @@
 
       ! individual test result code
       integer :: rc, MM, DD, YY, days, totalDays, dayOfWeek
-      integer(ESMF_KIND_I8) :: year
+      integer(ESMF_KIND_I8) :: days_i8, year
       integer(ESMF_KIND_I8) :: julianDay, advanceCounts
 
       ! individual test name
@@ -67,7 +67,7 @@
       ! instantiate a calendar
       type(ESMF_Calendar) :: gregorianCalendar, gregorianCalendar1, &
                              gregorianCalendar2, julianCalendar, &
-                             julianDayCalendar, &
+                             julianDayCalendar, modifiedJulianDayCalendar, &
                              no_leapCalendar, esmf_360dayCalendar
       type(ESMF_Calendar) :: customCalendar
       type(ESMF_CalendarType) :: cal_type, cal_type1, cal_type2
@@ -1349,6 +1349,73 @@
       print *, "4/15/-424 Julian = ", days, " Julian days."
 
       ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! initialize calendar to be Modified Julian Day type
+      write(name, *) "Initialize Modified Julian Day Type Calendar Test"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      modifiedJulianDayCalendar = ESMF_CalendarCreate("ModifiedJulianDay", &
+                                                      ESMF_CAL_MODJULIANDAY, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Gregorian date to Modified Julian Day
+      !   from http://tycho.usno.navy.mil/mjd.html
+      write(failMsg, *) " Did not return days = 49987 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=1995, mm=9, dd=27, & 
+                                  calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, calendar=modifiedJulianDayCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, d=days, rc=rc)
+      write(name, *) "Convert Gregorian to Modified Julian Day Test 1"
+      call ESMF_Test((days.eq.49987).and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "9/27/1995 Gregorian = ", days, " Modified Julian days."
+      
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test day of the week from Modified Julian Day to Gregorian date
+      !   from http://tycho.usno.navy.mil/mjd.html
+      !  MJD 49987 = Wed., 27 Sept 1995
+      write(failMsg, *) " Did not return dayOfWeek = 3 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, d=49987, &
+                        calendar=modifiedJulianDayCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, dayOfWeek=dayOfWeek, rc=rc)
+      write(name, *) "Convert Modified Julian Day to Gregorian day-of-week Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(dayOfWeek.eq.3), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Gregorian date to Modified Julian Day
+      !   from http://tycho.usno.navy.mil/mjd.html
+      write(failMsg, *) " Did not return days = 49352 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=1993, mm=12, dd=31, & 
+                                  calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, calendar=modifiedJulianDayCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, d_i8=days_i8, rc=rc)
+      write(name, *) "Convert Gregorian to Modified Julian Day Test 2 (i8)"
+      call ESMF_Test((days_i8.eq.49352).and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "12/31/1993 Gregorian = ", days_i8, " Modified Julian days."
+      
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Modified Julian Day to Gregorian date
+      !   from http://tycho.usno.navy.mil/mjd.html
+      write(failMsg, *) " Did not return 12/31/1992 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, d=48987, &
+                        calendar=modifiedJulianDayCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, mm=MM, dd=DD, yy=YY, rc=rc)
+      write(name, *) "Convert Modified Julian Day to Gregorian Test 1"
+      call ESMF_Test((MM.eq.12).and.(DD.eq.31).and.(YY.eq.1992).and. &
+                     (rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, "48987 MJD = ", MM, "/", DD, "/", YY, " Gregorian"
+      
+      ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Leap Year method I4 test 1
       write(failMsg, *) " Did not return true and ESMF_SUCCESS"
@@ -1430,6 +1497,7 @@
       call ESMF_CalendarDestroy(esmf_360dayCalendar, rc)
       call ESMF_CalendarDestroy(no_leapCalendar, rc)
       call ESMF_CalendarDestroy(julianDayCalendar, rc)
+      call ESMF_CalendarDestroy(modifiedJulianDayCalendar, rc)
       call ESMF_CalendarDestroy(gregorianCalendar, rc)
 #endif 
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.C,v 1.6 2008/08/01 23:36:57 rosalind Exp $
+// $Id: ESMCI_Calendar.C,v 1.7 2008/09/03 05:56:37 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Calendar.C,v 1.6 2008/08/01 23:36:57 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_Calendar.C,v 1.7 2008/09/03 05:56:37 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -49,16 +49,17 @@ namespace ESMCI{
 // initialize static array of calendar type names
 const char *const Calendar::calendarTypeName[CALENDAR_TYPE_COUNT] =
                                                   { "Gregorian", "Julian",
-                                                    "Julian Day", "No Leap",
-                                                    "360 Day", "Custom",
-                                                    "No Calendar" };
+                                                    "Julian Day", 
+                                                    "Modified Julian Day", 
+                                                    "No Leap", "360 Day",
+                                                    "Custom", "No Calendar" };
 
 // initialize static internal calendar pointer array
 Calendar *Calendar::internalCalendar[CALENDAR_TYPE_COUNT] =
                                       { ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                        ESMC_NULL_POINTER };
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER };
 
 // initialize default calendar
 Calendar *Calendar::defaultCalendar = ESMC_NULL_POINTER;
@@ -622,6 +623,7 @@ int Calendar::count=0;
             break;
 
         case ESMC_CAL_JULIANDAY:
+        case ESMC_CAL_MODJULIANDAY:
             // Days is the highest resolution of time, i.e. there is no
             //   concept of months or years ??
             for (int i=0; i<monthsPerYear; i++) daysPerMonth[i] = 0;
@@ -1161,8 +1163,26 @@ int Calendar::count=0;
             // TODO: lower/upper bounds date range check dependent on machine
             //  word size
 
+            // TODO: implement official 0.5 day offset in Julian day -- day
+            //       officially begins at noon rather than midnight
+
             // convert Julian days to basetime seconds (>= 64 bit)
             t->ESMC_FractionSetw(d * secondsPerDay);
+
+            break;
+        }
+        case ESMC_CAL_MODJULIANDAY:
+        {
+            // MJD = JD - 2400000.5
+
+            // TODO: implement official 0.5 day offset in Julian day
+            //       (should use 240000.5 instead of 2400001 for MJD)
+
+            // TODO: lower/upper bounds date range check dependent on machine
+            //  word size
+
+            // convert Modified Julian days to basetime seconds (>= 64 bit)
+            t->ESMC_FractionSetw((d + 2400001) * secondsPerDay);
 
             break;
         }
@@ -1675,12 +1695,19 @@ int Calendar::count=0;
 
             break;
         }
-        // convert Time => Julian Date
+        // convert Time => Julian Day or Modified Julian Day
         case ESMC_CAL_JULIANDAY:
+        case ESMC_CAL_MODJULIANDAY:
         {
+            // MJD = JD - 2400000.5
+
+            // TODO: implement official 0.5 day offset in Julian day
+            //       (should use 240000.5 instead of 2400001 for MJD)
+
             // convert basetime seconds to Julian days
             if (d != ESMC_NULL_POINTER) {
               ESMC_I8 day = t->ESMC_FractionGetw() / secondsPerDay;
+              if (this->calendarType == ESMC_CAL_MODJULIANDAY) day -= 2400001;
               if (day > INT_MIN && day <= INT_MAX) {
                 *d = (ESMC_I4) day;    // >= 32-bit
                 // adjust for negative time (reverse integer division)
@@ -1696,12 +1723,14 @@ int Calendar::count=0;
             }
             if (d_i8 != ESMC_NULL_POINTER) {
               *d_i8 = t->ESMC_FractionGetw() / secondsPerDay;  // >= 64-bit
-                // adjust for negative time (reverse integer division)
-                if (t->ESMC_FractionGetw() % secondsPerDay < 0) (*d_i8)--;
+              if (this->calendarType == ESMC_CAL_MODJULIANDAY) *d_i8 -= 2400001;
+              // adjust for negative time (reverse integer division)
+              if (t->ESMC_FractionGetw() % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
               *d_r8 = (ESMC_R8) t->ESMC_FractionGetw() /
                                      (ESMC_R8) secondsPerDay;
+              if (this->calendarType == ESMC_CAL_MODJULIANDAY) *d_r8 -= 2400001;
             }
 
             // if days specified, remove them from given time for

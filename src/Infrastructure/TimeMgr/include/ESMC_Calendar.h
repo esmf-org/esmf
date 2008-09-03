@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.60 2008/08/29 22:07:38 theurich Exp $
+// $Id: ESMC_Calendar.h,v 1.61 2008/09/03 05:56:37 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,10 +37,11 @@
 //-----------------------------------------------------------------------------
 
 // (TMG 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5)
-#define CALENDAR_TYPE_COUNT 7
+#define CALENDAR_TYPE_COUNT 8
 enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
                         ESMC_CAL_JULIAN,
                         ESMC_CAL_JULIANDAY,   
+                        ESMC_CAL_MODJULIANDAY,   
                         ESMC_CAL_NOLEAP,      // like Gregorian, except
                                               //   Feb always has 28 days
                         ESMC_CAL_360DAY,      // 12 months, 30 days each

@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.C,v 1.8 2008/08/01 23:36:57 rosalind Exp $
+// $Id: ESMCI_TimeInterval.C,v 1.9 2008/09/03 05:56:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.8 2008/08/01 23:36:57 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.9 2008/09/03 05:56:38 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -486,10 +486,11 @@ namespace ESMCI{
                                         tiToConvert.calendar->secondsPerYear);
           break;
         case ESMC_CAL_JULIANDAY:
+        case ESMC_CAL_MODJULIANDAY:
           // years not defined!
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
                   ", years (yy or yy_i8) not defined for ESMC_CAL_JULIANDAY "
-                  "calendar.", &rc);
+                  "or ESMC_CAL_MODJULIANDAY calendars.", &rc);
           return(rc);
         case ESMC_CAL_NOCALENDAR:
           // years not defined, but allow for requesting what was set
@@ -592,10 +593,11 @@ namespace ESMCI{
                                     (30 * tiToConvert.calendar->secondsPerDay));
           break;
         case ESMC_CAL_JULIANDAY:
+        case ESMC_CAL_MODJULIANDAY:
           // months not defined!
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
                   ", months (mm or mm_i8) not defined for ESMC_CAL_JULIANDAY "
-                  "calendar.", &rc);
+                  "or ESMC_MODJULIANDAY calendar.", &rc);
           return(rc);
         case ESMC_CAL_NOCALENDAR:
           // months not defined, but allow for requesting what was set
@@ -689,14 +691,16 @@ namespace ESMCI{
           // nothing to do: 360Day => months already reduced to seconds;
           break;
         case ESMC_CAL_JULIANDAY:
+        case ESMC_CAL_MODJULIANDAY:
         case ESMC_CAL_NOCALENDAR:
-          //   JulianDay and NoCalendar => months don't apply
+          //   JulianDay, Modified JulianDay and NoCalendar =>
+          //      months don't apply
           if (tiToConvert.mm != 0) {
             // can't convert months to days without appropriate calendar!
             char logMsg[ESMF_MAXSTR];
             sprintf(logMsg, ", can't convert %lld months to days "
-                            "on ESMC_CAL_JULIANDAY or ESMC_CAL_NOCALENDAR "
-                            "calendars.", tiToConvert.mm);
+                            "on ESMC_CAL_JULIANDAY, ESMC_CAL_MODJULIANDAY or "
+                            "ESMC_CAL_NOCALENDAR calendars.", tiToConvert.mm);
             ESMC_LogDefault.MsgFoundError(ESMC_RC_CANNOT_GET, logMsg,
                                                     &rc);
             return(rc);
@@ -748,7 +752,7 @@ namespace ESMCI{
           sprintf(logMsg, "; can't get d_r8; must specify a calendar or "
              "calendarType which defines days (non-zero seconds per day), "
              "e.g. ESMC_CAL_GREGORIAN, ESMC_CAL_JULIAN, ESMC_CAL_JULIANDAY, "
-             "ESMC_CAL_NOLEAP, ESMC_CAL_360DAY");
+             "ESMC_MODJULIANDAY, ESMC_CAL_NOLEAP, ESMC_CAL_360DAY");
           ESMC_LogDefault.MsgFoundError(ESMC_RC_DIV_ZERO, logMsg, &rc);
           return(rc);
         }
@@ -1117,10 +1121,12 @@ namespace ESMCI{
         return(errorResult);
         break;
       case ESMC_CAL_JULIANDAY:
+      case ESMC_CAL_MODJULIANDAY:
         if (absValue.yy != 0 || absValue.mm != 0) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_CANNOT_GET,
                                   ", years and months not defined for "
-                                  "ESMC_CAL_JULIANDAY calendar.",
+                                  "ESMC_CAL_JULIANDAY or "
+                                  "ESMC_CAL_MODJULIANDAY calendars.",
                                   ESMC_NULL_POINTER);
           return(errorResult);
         }
@@ -1300,11 +1306,13 @@ namespace ESMCI{
         return(0.0);
         break;
       case ESMC_CAL_JULIANDAY:
+      case ESMC_CAL_MODJULIANDAY:
         if (ti1.yy != 0 || ti2.yy != 0 ||
             ti1.mm != 0 || ti2.mm != 0) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                                   ", years and months not defined for "
-                                  "ESMC_CAL_JULIANDAY calendar.",
+                                  "ESMC_CAL_JULIANDAY or "
+                                  "ESMC_CAL_MODJULIANDAY calendars.",
                                   ESMC_NULL_POINTER);
           return(0.0);
         }
@@ -1695,11 +1703,13 @@ namespace ESMCI{
         return(remainder);
         break;
       case ESMC_CAL_JULIANDAY:
+      case ESMC_CAL_MODJULIANDAY:
         if (ti1.yy != 0 || ti2.yy != 0 ||
             ti1.mm != 0 || ti2.mm != 0) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                                   ", years and months not defined for "
-                                  "ESMC_CAL_JULIANDAY calendar.",
+                                  "ESMC_CAL_JULIANDAY or "
+                                  "ESMC_CAL_MODJULIANDAY calendars.",
                                   ESMC_NULL_POINTER);
           return(remainder);
         }
@@ -2491,11 +2501,13 @@ namespace ESMCI{
         return(false);
         break;
       case ESMC_CAL_JULIANDAY:
+      case ESMC_CAL_MODJULIANDAY:
         if (ti1.yy != 0 || ti2.yy != 0 ||
             ti1.mm != 0 || ti2.mm != 0) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                                   ", years and months not defined for "
-                                  "ESMC_CAL_JULIANDAY calendar.",
+                                  "ESMC_CAL_JULIANDAY or "
+                                  "ESMC_CAL_MODJULIANDAY calendars.",
                                   ESMC_NULL_POINTER);
           return(false);
         }
@@ -3101,6 +3113,7 @@ namespace ESMCI{
         // yy, mm, d all reduced to base seconds
         break;
       case ESMC_CAL_JULIANDAY:
+      case ESMC_CAL_MODJULIANDAY:
         // ignore years and months
 
         // reduce days to seconds
