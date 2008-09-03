@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.7 2008/09/03 04:13:55 oehmke Exp $
+! $Id: ESMF_LocStream.F90,v 1.8 2008/09/03 22:22:32 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.7 2008/09/03 04:13:55 oehmke Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.8 2008/09/03 22:22:32 oehmke Exp $'
 
 !==============================================================================
 !
@@ -225,7 +225,7 @@ contains
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamAddKeyAlloc"
 !BOP
-! !IROUTINE: ESMF_LocStreamAddKeyAlloc - Add a key Array and allocate the internal memory
+! !IROUTINE: ESMF_LocStreamAddKey - Add a key Array and allocate the internal memory
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
@@ -319,7 +319,7 @@ contains
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamAddKeyArray"
 !BOP
-! !IROUTINE: ESMF_LocStreamAddKeyArray - Add a key Array 
+! !IROUTINE: ESMF_LocStreamAddKey - Add a key ESMF Array 
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
@@ -474,7 +474,7 @@ contains
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamAddKeyI4"
 !BOP
-! !IROUTINE: ESMF_LocStreamAddKey - Add a key Array created around user memory
+! !IROUTINE: ESMF_LocStreamAddKey - Add a key Array created around user memory 
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
@@ -1142,7 +1142,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreate"
 !BOP
-! !IROUTINE: ESMF_LocStreamCreate - Create a new location stream using a Regular distribution.
+! !IROUTINE: ESMF_LocStreamCreate - Create a new location stream using a regular distribution.
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
@@ -1485,7 +1485,7 @@ contains
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyArray"
 !BOP
-! !IROUTINE: ESMF_LocStreamGetKeyArray - Get Array associated with key
+! !IROUTINE: ESMF_LocStreamGetKey - Get ESMF Array associated with key
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
@@ -1555,8 +1555,8 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyBounds"
-!BOPI
-! !IROUTINE: ESMF_LocStreamGetKeyBounds - get the bounds of a key Array
+!BOP
+! !IROUTINE: ESMF_LocStreamGetKey - Get the bounds of a key Array
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
@@ -1615,7 +1615,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 
  integer :: localrc
  type(ESMF_Array) :: array
@@ -1680,7 +1680,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyInfo"
 !BOP
-! !IROUTINE: ESMF_LocStreamGetKeyInfo - Get Info associated with key
+! !IROUTINE: ESMF_LocStreamGetKey - Get Info associated with key
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
@@ -2261,8 +2261,8 @@ end subroutine ESMF_LocStreamGetKeyR8
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetBounds"
-!BOPI
-! !IROUTINE: ESMF_LocStreamGetBounds - get the local bounds of a location stream
+!BOP
+! !IROUTINE: ESMF_LocStreamGet - Get the local bounds of a location stream
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGet()
@@ -2309,7 +2309,7 @@ end subroutine ESMF_LocStreamGetKeyR8
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 
  integer :: localrc
  integer :: tmpLBnd, tmpUBnd
@@ -2841,7 +2841,7 @@ end subroutine ESMF_LocStreamGetBounds
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreateCopy"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocStreamCreate - Create a loc stream from an existing one
 
 ! !INTERFACE:
@@ -2876,7 +2876,7 @@ end subroutine ESMF_LocStreamGetBounds
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
       type(ESMF_LocStreamClass), pointer      :: igrid       ! Pointer to new grid
       type(ESMF_LocStreamSpecific), pointer   :: igridSpecific
@@ -2996,7 +2996,7 @@ end subroutine ESMF_LocStreamGetBounds
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreateSubset"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocStreamCreate - Create a subset of an existing LocStream
 
 ! !INTERFACE:
@@ -3096,7 +3096,7 @@ end subroutine ESMF_LocStreamGetBounds
 !      be \verb|nsel=0, rc=0|
 !\end{itemize}
 !
-!EOP
+!EOPI
 
       type(ESMF_LocStreamClass), pointer      :: igrid       ! Pointer to new grid
       type(ESMF_LocStreamSpecific), pointer   :: igridSpecific
@@ -3369,7 +3369,7 @@ end subroutine ESMF_LocStreamGetBounds
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreateMerge"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocStreamCreate - Create a new stream by merging other LocStreams
 
 ! !INTERFACE:
@@ -3401,7 +3401,7 @@ end subroutine ESMF_LocStreamGetBounds
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 
       type(ESMF_LocStreamClass), pointer   :: igrid         ! Pointer to new grid
       type(ESMF_LocStream), pointer    :: ls            ! Pointer to new LS
@@ -3612,7 +3612,7 @@ end subroutine ESMF_LocStreamGetBounds
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreateByKeys"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocStreamCreate - Revised LocStream based on sort criteria
 
 ! !INTERFACE:
@@ -3691,7 +3691,7 @@ end subroutine ESMF_LocStreamGetBounds
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       type(ESMF_LocStreamClass), pointer   :: igrid         ! Pointer to new grid
       type(ESMF_LocStream), pointer    :: lsIn          ! Pointer to LS
@@ -4045,7 +4045,7 @@ end subroutine ESMF_LocStreamGetBounds
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreateByBkg"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream by projecting onto a Grid
 
 ! !INTERFACE:
@@ -4089,7 +4089,7 @@ end subroutine ESMF_LocStreamGetBounds
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
      type(ESMF_LocStreamClass), pointer:: igrid         ! Pointer to new igrid
      type(ESMF_LocStream), pointer :: lsIn          ! Pointer to LS
