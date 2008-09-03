@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.58 2008/08/29 22:07:38 theurich Exp $
+// $Id: ESMC_Clock.h,v 1.59 2008/09/03 23:32:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -40,7 +40,9 @@
 //-----------------------------------------------------------------------------
 
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 // Class declaration type
 typedef struct{
@@ -61,7 +63,8 @@ int ESMC_ClockGet(ESMC_Clock, ESMC_TimeInterval* currSimTime,
 
 int ESMC_ClockDestroy(ESMC_Clock*);
 
-}; //extern "C"
-
+#ifdef __cplusplus
+} //extern "C"
+#endif
 
 #endif // ESMC_Clock_H

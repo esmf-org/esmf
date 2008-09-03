@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.42 2008/08/29 22:07:38 theurich Exp $
+// $Id: ESMC_Comp.h,v 1.43 2008/09/03 23:32:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -39,7 +39,9 @@
 #include "ESMC_Clock.h"
 #include "ESMC_State.h"
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 enum ESMC_GridCompType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE, 
   ESMF_RIVER, ESMF_GRIDCOMPTYPE_UNKNOWN };
@@ -99,7 +101,8 @@ void *ESMC_CplCompGetInternalState(ESMC_CplComp comp, int *rc);
 int ESMC_CplCompSetInternalState(ESMC_CplComp comp, void *data);
 int ESMC_CplCompPrint(ESMC_CplComp comp, const char *options);
 
-
-}; // extern "C"
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif  // ESMC_Comp_H

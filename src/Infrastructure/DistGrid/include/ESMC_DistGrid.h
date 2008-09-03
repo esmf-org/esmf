@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.38 2008/08/29 22:07:37 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.39 2008/09/03 23:32:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -39,7 +39,9 @@
 
 #include "ESMC_Interface.h"
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 // Class declaration type
 typedef struct{
@@ -52,8 +54,8 @@ ESMC_DistGrid ESMC_DistGridCreate(ESMC_InterfaceInt minIndexInterfaceArg,
 int ESMC_DistGridPrint(ESMC_DistGrid distgrid);
 int ESMC_DistGridDestroy(ESMC_DistGrid *distgrid);
 
-
-}; // extern "C"
-
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif  // ESMC_DistGrid_H

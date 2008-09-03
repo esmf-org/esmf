@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.67 2008/08/31 03:09:08 theurich Exp $
+// $Id: ESMC_LogErr.h,v 1.68 2008/09/03 23:32:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -32,7 +32,9 @@
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrReturnCodes.inc"
 
+#ifdef __cplusplus
 extern "C"{
+#endif
 
 // Class declaration type
 typedef struct{
@@ -42,8 +44,9 @@ void *ptr;
 // Class API
 int ESMC_LogWrite(char msg[], int msgtype);
 
-}; // extern "C"
-
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 enum ESMC_MsgType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
 enum ESMC_LogType{ESMC_LOG_SINGLE=1,ESMC_LOG_MULTI=2,ESMC_LOG_NONE=3};

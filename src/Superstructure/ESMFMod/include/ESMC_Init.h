@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.16 2008/08/29 22:07:38 theurich Exp $
+// $Id: ESMC_Init.h,v 1.17 2008/09/03 23:32:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,7 +37,9 @@ enum {
 
 // prototypes for C routines
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_Initialize - Initialize the ESMF Framework
@@ -82,12 +84,17 @@ ESMCI_Arg(ESMCI_InitArgDefaultConfigFilenameID,ARG)
 //  \end{description}
 //EOP
 //-----------------------------------------------------------------------------
-};
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
   
+#ifdef __cplusplus
 extern "C" {
+#endif
   int ESMC_Finalize(void);
-};
-
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif  // ESMC_Init_H

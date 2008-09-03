@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.h,v 1.12 2008/04/05 03:38:25 cdeluca Exp $
+// $Id: ESMC_Grid.h,v 1.13 2008/09/03 23:32:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@ typedef struct {
 // prototypes for the ESMC_Grid API
 
 
-}; // end extern "C"
+} // extern "C"
 
 
 #endif  // ESMC_Grid_H

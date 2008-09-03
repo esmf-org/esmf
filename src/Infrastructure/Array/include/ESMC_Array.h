@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.107 2008/09/03 04:24:01 theurich Exp $
+// $Id: ESMC_Array.h,v 1.108 2008/09/03 23:32:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -41,7 +41,9 @@
 #include "ESMC_DistGrid.h"
 #include "ESMC_Interface.h"
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 // Class declaration type
 typedef struct{
@@ -58,7 +60,8 @@ void *ESMC_ArrayGetPtr(ESMC_Array array, int localDe, int *rc);
 int ESMC_ArraySetLWidth(ESMC_Array array,
    ESMC_InterfaceInt computationalLWidthArg);
 
-}; // extern "C"
-
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif  // ESMC_Array_H

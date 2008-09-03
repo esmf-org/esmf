@@ -1,4 +1,4 @@
-// $Id: ESMC_Interface.h,v 1.3 2008/08/29 22:07:38 theurich Exp $
+// $Id: ESMC_Interface.h,v 1.4 2008/09/03 23:32:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,9 @@
 //-----------------------------------------------------------------------------
 
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 // Class declaration type
 typedef struct{
@@ -46,8 +48,8 @@ typedef struct{
 ESMC_InterfaceInt ESMC_InterfaceIntCreate(int *arrayArg, int lenArg, int *rc);
 int ESMC_InterfaceIntDestroy(ESMC_InterfaceInt *interfaceIntArg);
 
-
-}; // extern "C"
-
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif  // ESMC_Interface_H

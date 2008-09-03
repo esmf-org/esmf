@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.47 2008/08/29 22:07:38 theurich Exp $
+// $Id: ESMC_VM.h,v 1.48 2008/09/03 23:32:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -41,7 +41,9 @@
 #endif
 #include <mpi.h>
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 // Class declaration type
 typedef struct{
@@ -55,7 +57,8 @@ ESMC_VM ESMC_VMGetCurrent(int *rc);
 int ESMC_VMGet(ESMC_VM vm, int *localPet, int *petCount, int *peCount,
   MPI_Comm *mpiCommunicator, int *supportPthreadsFlag, int *supportOpenMPFlag);
 
-}; // extern "C"
-
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif  // ESMC_VM_H

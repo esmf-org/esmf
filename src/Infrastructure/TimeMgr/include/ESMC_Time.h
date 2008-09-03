@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.52 2008/08/29 22:07:38 theurich Exp $
+// $Id: ESMC_Time.h,v 1.53 2008/09/03 23:32:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,9 @@
 //EOPI
 //-----------------------------------------------------------------------------
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 // Class declaration type
 typedef struct{
@@ -49,13 +51,15 @@ typedef struct{
 // Class API
 
 int ESMC_TimeSet(ESMC_Time*, ESMC_I4, ESMC_I4, ESMC_Calendar,
-                       ESMC_CalendarType, int);
+                       enum ESMC_CalendarType, int);
 
 int ESMC_TimeGet(ESMC_Time, ESMC_I4*, ESMC_I4*, ESMC_Calendar*,
-                       ESMC_CalendarType*, int*);
+                       enum ESMC_CalendarType*, int*);
 
 int ESMC_TimePrint(ESMC_Time);
-}; //extern "C"
 
+#ifdef __cplusplus
+} //extern "C"
+#endif
 
 #endif // ESMC_Time_H

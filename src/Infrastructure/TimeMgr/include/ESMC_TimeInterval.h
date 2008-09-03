@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.52 2008/08/29 22:07:38 theurich Exp $
+// $Id: ESMC_TimeInterval.h,v 1.53 2008/09/03 23:32:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -44,7 +44,9 @@ enum ESMC_AbsValueType {ESMC_POSITIVE_ABS, ESMC_NEGATIVE_ABS};
 //EOPI
 //-----------------------------------------------------------------------------
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 // Class declaration type
 typedef struct{
@@ -58,7 +60,9 @@ int ESMC_TimeIntervalSet(ESMC_TimeInterval*, ESMC_I4);
 int ESMC_TimeIntervalGet(ESMC_TimeInterval, ESMC_I8*, ESMC_R8*);
 
 int ESMC_TimeIntervalPrint(ESMC_TimeInterval);
-}; //extern "C"
 
+#ifdef __cplusplus
+} //extern "C"
+#endif
 
 #endif // ESMC_TimeInterval_H

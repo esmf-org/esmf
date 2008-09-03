@@ -1,4 +1,4 @@
-// $Id: ESMC_Test.h,v 1.7 2008/04/05 03:39:21 cdeluca Exp $
+// $Id: ESMC_Test.h,v 1.8 2008/09/03 23:32:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -33,7 +33,9 @@
 //
 // !PUBLIC MEMBER FUNCTIONS:
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 // TODO: These need an optional Log argument.
 int ESMC_TestStart(char *file, int line, int only);
@@ -42,6 +44,8 @@ int ESMC_TestEnd(int result, char *file, int line, int only);
 int ESMC_Test(int condition, char *name, char *failMsg, int *result,
   char *file, int line, int only);
 
-};  // extern "C"
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif // ESMC_Test_H

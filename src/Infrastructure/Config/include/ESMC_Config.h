@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.13 2008/08/31 03:09:07 theurich Exp $
+// $Id: ESMC_Config.h,v 1.14 2008/09/03 23:32:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -59,7 +59,9 @@ enum {
 #define ESMC_ConfigArgOptions(ARG)    ESMCI_Arg(ESMCI_ConfigArgOptionsID,ARG)
 
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 // class declaration type
 typedef struct {
@@ -88,14 +90,14 @@ int ESMC_ConfigGetDim(ESMC_Config config, int* lineCount, int* columnCount,
 
 int ESMC_ConfigValidate(ESMC_Config config, ...);
 
-int ESMC_ConfigGetAttribute(ESMC_Config config, void* value, ESMC_TypeKind tk,
+int ESMC_ConfigGetAttribute(ESMC_Config config, void* value, enum ESMC_TypeKind tk,
   ...);
 
-int ESMC_ConfigSetAttribute(ESMC_Config config, void* value, ESMC_TypeKind tk, ...);
+int ESMC_ConfigSetAttribute(ESMC_Config config, void* value, enum ESMC_TypeKind tk, ...);
 
-
-}; // end extern "C"
-
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif  // ESMC_Config_H
 

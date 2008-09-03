@@ -1,4 +1,4 @@
-// $Id: ESMC_ArraySpec.h,v 1.12 2008/08/29 22:07:37 theurich Exp $
+// $Id: ESMC_ArraySpec.h,v 1.13 2008/09/03 23:32:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,9 @@
 
 #include "ESMC_Util.h"
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 // Class declaration type
 typedef struct{
@@ -49,10 +51,12 @@ typedef struct{
 
 // Class API
 int ESMC_ArraySpecSet(ESMC_ArraySpec *arrayspec, int rank,
-  ESMC_TypeKind typekind);
+  enum ESMC_TypeKind typekind);
 int ESMC_ArraySpecGet(ESMC_ArraySpec arrayspec, int *rank,
-  ESMC_TypeKind *typekind);
+  enum ESMC_TypeKind *typekind);
 
-}; // extern "C"
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif  // ESMC_ArraySpec_H
