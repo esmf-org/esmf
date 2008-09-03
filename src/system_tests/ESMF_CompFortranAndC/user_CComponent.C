@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.2 2008/09/03 03:58:22 theurich Exp $
+// $Id: user_CComponent.C,v 1.3 2008/09/03 04:24:01 theurich Exp $
 //==============================================================================
 
 #include <stdio.h>
@@ -21,6 +21,10 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
 
   localrc=ESMC_StateGetArray(importState, "array1", &retrievedArray);
   localrc=ESMC_ArrayPrint(retrievedArray);
+  
+  double *ptr = (double *)ESMC_ArrayGetPtr(retrievedArray, 0, &localrc);
+  
+  printf("local ptr[0] = %g\n", ptr[0]);
 
   printf("Leaving myInitInC()\n");
 
