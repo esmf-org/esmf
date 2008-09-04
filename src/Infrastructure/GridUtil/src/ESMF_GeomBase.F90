@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.4 2008/08/31 04:55:04 oehmke Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.5 2008/09/04 05:54:29 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -316,8 +316,12 @@ end interface
             distgridToArrayMap = 1
           endif
 
-          if (present(ungriddedLBound)) undistLBound = ungriddedLBound
-          if (present(ungriddedUBound)) undistUBound = ungriddedUBound
+          if (present(ungriddedLBound)) then
+              if (size(ungriddedLBound) .gt. 0) undistLBound = ungriddedLBound
+          endif
+          if (present(ungriddedUBound)) then
+              if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
+          endif
 
           computationalEdgeLWidth = 0
           computationalEdgeUWidth = 0
@@ -329,8 +333,12 @@ end interface
              distgridToArrayMap = 1
           endif
 
-          if (present(ungriddedLBound)) undistLBound = ungriddedLBound
-          if (present(ungriddedUBound)) undistUBound = ungriddedUBound
+          if (present(ungriddedLBound)) then
+              if (size(ungriddedLBound) .gt. 0) undistLBound = ungriddedLBound
+          endif
+          if (present(ungriddedUBound)) then
+              if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
+          endif
 
           computationalEdgeLWidth = 0
           computationalEdgeUWidth = 0
