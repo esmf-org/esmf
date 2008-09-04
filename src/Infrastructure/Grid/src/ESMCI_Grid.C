@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.36.2.19 2008/08/12 20:34:15 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.36.2.20 2008/09/04 20:27:08 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.19 2008/08/12 20:34:15 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.20 2008/09/04 20:27:08 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2089,6 +2089,7 @@ int Grid::constructInternal(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  int rc,localrc;
 
   // Copy values into the grid object
   typekind = typekindArg;
@@ -2244,7 +2245,9 @@ int Grid::constructInternal(
   // allocate and fill isDELBnd and isDEUbnd
   // These record if the local de is on the top or bottom
   // boundary in each dimension
-  _createIsDEBnd(&isDELBnd,&isDEUBnd, distgrid, distgridToGridMap);
+  localrc=_createIsDEBnd(&isDELBnd,&isDEUBnd, distgrid, distgridToGridMap);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
 
   // Set the name for this Grid object in the Base class
   ESMC_BaseSetName(nameArg, "Grid");
@@ -2826,6 +2829,7 @@ int Grid::serialize(
 
     // First, serialize the base class,
     localrc = ESMC_Base::ESMC_Serialize(buffer, length, &loffset);
+
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
     
@@ -3294,53 +3298,59 @@ static  void _free3D(Type ****array)
       //// get patch
       int patch=DEPatchList[gDE];
 
-      //// get the extents for this de
-      const int *deExtent=deIndexListExtentList+gDE*dimCount;
-
-      //// get patch min/max
-      const int *patchMin=distgrid->getMinIndexPDimPPatch(patch, &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                              ESMF_ERR_PASSTHRU, &rc)) return rc;
-      const int *patchMax=distgrid->getMaxIndexPDimPPatch(patch, &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                              ESMF_ERR_PASSTHRU, &rc)) return rc;
-
-      //// Init flags
-      isDELBnd[lDE]=0xff;
-      isDEUBnd[lDE]=0xff;
-
-      //// loop setting flags
-      for (int d=0; d<dimCount; d++) {
-
-        ////// make sure is contiguous         
-        const int contig=distgrid->getContigFlagPDimPDe(gDE, d+1, &localrc);
+      //// Avoid patch 0 because they're 0 sized
+      if (patch != 0) {
+        //// get the extents for this de
+        const int *deExtent=deIndexListExtentList+gDE*dimCount;
+        
+        //// get patch min/max
+        const int *patchMin=distgrid->getMinIndexPDimPPatch(patch, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                              ESMF_ERR_PASSTHRU, &rc)) return rc;
-        if (!contig) {
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
-                     "- doesn't handle non-contiguous DEs yet ", &rc);
-          return rc;
-        }
-
-        // get indices of DE
-        const int *indexList=distgrid->getIndexListPDimPLocalDe(lDE, d+1,
-          &localrc);
+                                                  ESMF_ERR_PASSTHRU, &rc)) return rc;
+        const int *patchMax=distgrid->getMaxIndexPDimPPatch(patch, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                              ESMF_ERR_PASSTHRU, &rc)) return rc;
-
-        // if we're not at the min then we're not a lower bound 
-        // so turn off the bit
-        if (indexList[0] != patchMin[d]) {
-          isDELBnd[lDE] &= ~(0x1<<distgridToGridMap[d]);
-        } 
-
-        // if we're at the min then we're a lower bound
-        if (indexList[deExtent[d]-1]!=patchMax[d]) {
-          isDEUBnd[lDE] &= ~(0x1<<distgridToGridMap[d]);
+                                                  ESMF_ERR_PASSTHRU, &rc)) return rc;
+        
+        //// Init flags
+        isDELBnd[lDE]=0xff;
+        isDEUBnd[lDE]=0xff;
+        
+        //// loop setting flags
+        for (int d=0; d<dimCount; d++) {
+          
+          ////// make sure is contiguous         
+          const int contig=distgrid->getContigFlagPDimPDe(gDE, d+1, &localrc);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+                                                    ESMF_ERR_PASSTHRU, &rc)) return rc;
+          if (!contig) {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+                                                  "- doesn't handle non-contiguous DEs yet ", &rc);
+            return rc;
+          }
+          
+          // get indices of DE
+          const int *indexList=distgrid->getIndexListPDimPLocalDe(lDE, d+1,
+                                                                  &localrc);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+                                                    ESMF_ERR_PASSTHRU, &rc)) return rc;
+          
+          // if we're not at the min then we're not a lower bound 
+          // so turn off the bit
+          if (indexList[0] != patchMin[d]) {
+            isDELBnd[lDE] &= ~(0x1<<distgridToGridMap[d]);
+          } 
+          
+          // if we're at the min then we're a lower bound
+          if (indexList[deExtent[d]-1]!=patchMax[d]) {
+            isDEUBnd[lDE] &= ~(0x1<<distgridToGridMap[d]);
+          }
         }
+      } else { // If we're empty then we're not on a boundary
+        isDELBnd[lDE]=0x0;
+        isDEUBnd[lDE]=0x0;
       }
     }
-
+    
     // set output variables
     *_isDELBnd=isDELBnd;
     *_isDEUBnd=isDEUBnd;
