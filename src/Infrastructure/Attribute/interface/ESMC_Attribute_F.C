@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.19 2008/08/29 23:04:40 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.20 2008/09/04 16:07:14 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.19 2008/08/29 23:04:40 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.20 2008/09/04 16:07:14 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -359,6 +359,7 @@ extern "C" {
   ESMC_TypeKind attrTypeKind;
   char *cname, *cvalue, *cconv, *cpurp, *cobj;
   int slen;              // actual attribute string length
+  int *llens;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -444,6 +445,7 @@ extern "C" {
     return;
   }
 
+/*
   // get the length and type of the Attribute from the attpack 
   status = ((**base).root.ESMC_AttPackGet(cconv, cpurp, cobj))->\
     ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
@@ -458,6 +460,26 @@ extern "C" {
     if (rc) *rc = status;
     return;
   }
+*/
+
+  //   use the count to allocate llens
+  llens = new int[1];
+  
+  //  use llens to get the lengths of all items on this attribute
+  status = (**base).root.ESMC_AttPackGet(cconv, cpurp, cobj)->\
+    ESMC_AttributeGet(cname, llens, 1);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed getting item char* lengths", &status);
+    delete [] cname;
+    delete [] cconv;
+    delete [] cpurp;
+    delete [] cobj;
+    delete [] llens;
+    if (rc) *rc = status;
+    return;
+  }
+  slen = llens[1];
 
   // make sure destination will be long enough
   if (slen > vlen) {
@@ -469,6 +491,7 @@ extern "C" {
     delete [] cconv;
     delete [] cpurp;
     delete [] cobj;
+    delete [] llens;
     if (rc) *rc = status;
     return; 
   }
@@ -481,6 +504,7 @@ extern "C" {
     delete [] cconv;
     delete [] cpurp;
     delete [] cobj;
+    delete [] llens;
     if (rc) *rc = status;
     return;
   }
@@ -495,6 +519,7 @@ extern "C" {
     delete [] cconv;
     delete [] cpurp;
     delete [] cobj;
+    delete [] llens;
     if (rc) *rc = status;
     return;
   }
@@ -510,6 +535,7 @@ extern "C" {
   delete [] cconv;
   delete [] cpurp;
   delete [] cobj;
+  delete [] llens;
   
   if (rc) *rc = status;
   return;
@@ -1986,6 +2012,7 @@ extern "C" {
   ESMC_TypeKind attrTypeKind;
   char *cname, *cvalue;
   int slen;              // actual attribute string length
+  int *llens;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -2014,6 +2041,7 @@ extern "C" {
       return;
   }
 
+/*
   status = (**base).root.ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.Write(
@@ -2023,6 +2051,22 @@ extern "C" {
     if (rc) *rc = status;
     return;
   }
+*/
+
+  //   use the count to allocate llens
+  llens = new int[1];
+  
+  //  use llens to get the lengths of all items on this attribute
+  status = (**base).root.ESMC_AttributeGet(cname, llens, 1);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed getting item char* lengths", &status);
+    delete [] cname;
+    delete [] llens;
+    if (rc) *rc = status;
+    return;
+  }
+  slen = llens[1];
 
   // make sure destination will be long enough
   if (slen > vlen) {
@@ -2031,6 +2075,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          msgbuf, &status);
     delete [] cname;
+    delete [] llens;
     if (rc) *rc = status;
     return; 
   }
@@ -2040,6 +2085,7 @@ extern "C" {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value allocation", &status);
       delete [] cname;
+      delete [] llens;
       if (rc) *rc = status;
       return;
   }
@@ -2050,6 +2096,7 @@ extern "C" {
                          "failed getting attribute value", &status);
     delete [] cname;
     delete [] cvalue;
+    delete [] llens;
     if (rc) *rc = status;
     return;
   }
@@ -2062,6 +2109,7 @@ extern "C" {
   
   delete [] cname;
   delete [] cvalue;
+  delete [] llens;
   
   if (rc) *rc = status;
   return;

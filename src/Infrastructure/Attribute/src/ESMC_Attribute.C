@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.27 2008/08/29 23:04:40 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.28 2008/09/04 16:07:14 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.27 2008/08/29 23:04:40 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.28 2008/09/04 16:07:14 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -2365,8 +2365,14 @@
   }
   
   // find the lengths of the char*s on this Attribute
-  for (i = 0; i < count; i++)
-    lens[i] = strlen(attr->vcpp[i]);
+  for (i = 0; i < count; i++) {
+    if (attr->items == 1)
+      lens[i] = strlen(attr->vcp);
+    else if (attr->items > 1) {
+      lens[i] = strlen(attr->vcpp[i]);
+    }
+  }
+    
 
   return ESMF_SUCCESS;
 
