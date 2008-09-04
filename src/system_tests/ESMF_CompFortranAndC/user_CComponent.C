@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.5 2008/09/03 23:39:23 rosalind Exp $
+// $Id: user_CComponent.C,v 1.6 2008/09/04 03:42:01 theurich Exp $
 //==============================================================================
 
 
@@ -9,6 +9,7 @@
 
 // ESMF header
 #include "ESMC.h"
+
 void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   ESMC_State exportState, ESMC_Clock *clock, int *rc){
 

@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.2 2008/09/03 23:39:23 rosalind Exp $
+! $Id: user_FortranComponent.F90,v 1.3 2008/09/04 03:42:02 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -88,6 +88,8 @@
         type(ESMF_Array) :: array0
         type(ESMF_ArraySpec) :: arrayspec
         type (ESMF_DistGrid) :: distgrid
+        type (ESMF_VM) :: vm
+        integer:: petCount
         character(ESMF_MAXSTR) :: name
         integer, intent(out) :: rc
 
@@ -100,8 +102,11 @@
 
         ! This is where the model specific setup code goes.  
 
-        call ESMF_GridCompPrint(comp, "", rc)
-        call ESMF_StatePrint(exportState, "", rc)
+        call ESMF_GridCompPrint(comp, "", rc=rc)
+        call ESMF_StatePrint(exportState, "", rc=rc)
+        
+        call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+        call ESMF_VMGet(vm, petCount=petCount, rc=rc)
 
 
         ! Add an array state to the export state.
@@ -109,8 +114,8 @@
           rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-        distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,2/), &
-           rc=rc)
+        distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), &
+          maxIndex=(/5*petCount,2/), rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
         do i=1,5
