@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.35.2.5 2008/06/24 21:53:55 eschwab Exp $
+! $Id: ESMF_DistGrid.F90,v 1.35.2.6 2008/09/05 04:20:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.35.2.5 2008/06/24 21:53:55 eschwab Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.35.2.6 2008/09/05 04:20:32 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2162,12 +2162,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridGet()
-  subroutine ESMF_DistGridGetPLocalDe(distgrid, localDe, seqIndexList, rc)
+  subroutine ESMF_DistGridGetPLocalDe(distgrid, localDe, seqIndexList, &
+    elementCount, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid
     integer,                intent(in)            :: localDe
     integer,                intent(out), optional :: seqIndexList(:)
+    integer,                intent(out), optional :: elementCount  
     integer,                intent(out), optional :: rc
 !         
 !
@@ -2183,6 +2185,9 @@ contains
 !   \item[{[seqIndexList]}]
 !     List of DistGrid patch-local sequence indices for {\tt localDe}, with
 !     {\tt size(seqIndexList) == (/elementCountPDe(localDe)/)}.
+!   \item[{[elementCount]}]
+!     Number of elements in the localDe, i.e. identical to
+!     elementCountPDe(localDe).
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2205,7 +2210,8 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridGetPLocalDe(distgrid, localDe, seqIndexListArg, localrc)
+    call c_ESMC_DistGridGetPLocalDe(distgrid, localDe, seqIndexListArg, &
+      elementCount, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     

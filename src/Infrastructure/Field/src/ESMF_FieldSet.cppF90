@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.18 2008/08/13 17:36:38 feiliu Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.19 2008/09/05 04:20:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.18 2008/08/13 17:36:38 feiliu Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.19 2008/09/05 04:20:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -632,6 +632,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     integer                        :: localrc, i, count @\
     integer                        :: fieldDimCount, fieldUngriddedDimCount @\
     integer                        :: gridDimCount  @\
+    integer                        :: elementCount  @\
     integer                        :: ungriddedIndex(ESMF_MAXDIM) @\
     integer                        :: distgridToArrayMap (ESMF_MAXDIM) @\
     integer                        :: undistLBound(ESMF_MAXDIM), undistUBound(ESMF_MAXDIM) @\
@@ -657,28 +658,6 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     ! make sure field, grid, farray are properly initialized @\
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc) @\
-    ! The following use of fptr is a bit of trickery to get all F90 @\
-    ! compilers to cooperate. For some compilers the associated() test @\
-    ! will return .false. for farray of size 0. Some of those compilers @\
-    ! will produce a run-time error in size(fptr). Other compilers will @\
-    ! return .true. for the associated() test but return 0 in size(). @\
-    fpointer => farray @\
-    if(.not. associated(fpointer,farray)) then @\
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
-        "- farray is not associated with memory allocation)", & @\
-        ESMF_CONTEXT, rc)  @\
-      return @\
-    endif @\
-@\
-    if (size(fpointer)==0) then @\
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
-        "- farray is not associated with memory allocation)", & @\
-        ESMF_CONTEXT, rc)  @\
-      return @\
-    endif @\
-@\
-    ! Check the size of the native array. @\
-    fieldDimCount = mrank @\
 @\
     ! Get number of grid dimensions, number @\
     ! of distributed grid dimensions, distgrid, @\
@@ -690,6 +669,37 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
+@\
+    call ESMF_DistGridGet(distgrid, localDe=0, elementCount=elementCount, & @\
+      rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+@\
+    if (elementCount > 0) then @\
+      ! The following use of fptr is a bit of trickery to get all F90 @\
+      ! compilers to cooperate. For some compilers the associated() test @\
+      ! will return .false. for farray of size 0. Some of those compilers @\
+      ! will produce a run-time error in size(fptr). Other compilers will @\
+      ! return .true. for the associated() test but return 0 in size(). @\
+      fpointer => farray @\
+      if(.not. associated(fpointer,farray)) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &  @\
+          "- farray is not associated with memory allocation)", & @\
+          ESMF_CONTEXT, rc)  @\ 
+        return @\
+      endif @\
+@\
+      if (size(fpointer)==0) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &  @\
+          "- farray is not associated with memory allocation)", & @\
+          ESMF_CONTEXT, rc)  @\
+        return @\
+      endif @\
+    endif @\
+@\
+    ! Check the size of the native array. @\
+    fieldDimCount = mrank @\
 @\
     if(fieldDimCount .lt. gridDimCount) then @\
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
@@ -1051,6 +1061,7 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
     integer                        :: localrc, i @\
     integer                        :: fieldDimCount @\
     integer                        :: gridDimCount  @\
+    integer                        :: elementCount  @\
     integer                        :: distgridToArrayMap (ESMF_MAXDIM) @\
     integer                        :: undistLBound(ESMF_MAXDIM), undistUBound(ESMF_MAXDIM) @\
     integer                        :: localGridToFieldMap (ESMF_MAXDIM) @\
@@ -1072,28 +1083,6 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
     ! make sure field, grid, farray are properly initialized @\
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc) @\
-    ! The following use of fptr is a bit of trickery to get all F90 @\
-    ! compilers to cooperate. For some compilers the associated() test @\
-    ! will return .false. for farray of size 0. Some of those compilers @\
-    ! will produce a run-time error in size(fptr). Other compilers will @\
-    ! return .true. for the associated() test but return 0 in size(). @\
-    fpointer => farrayPtr @\
-    if(.not. associated(fpointer,farrayPtr)) then @\
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
-        "- farrayPtr is not associated with memory allocation)", & @\
-        ESMF_CONTEXT, rc)  @\
-      return @\
-    endif @\
-@\
-    if (size(fpointer)==0) then @\
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_INIT, &  @\
-        "- farrayPtr is not associated with memory allocation)", & @\
-        ESMF_CONTEXT, rc)  @\
-      return @\
-    endif @\
-@\
-    ! Check the size of the native array. @\
-    fieldDimCount = mrank @\
 @\
     ! Get number of grid dimensions, number @\
     ! of distributed grid dimensions, distgrid, @\
@@ -1105,6 +1094,37 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
+@\    
+    call ESMF_DistGridGet(distgrid, localDe=0, elementCount=elementCount, & @\
+      rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, & @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rc)) return @\
+@\
+    if (elementCount > 0) then @\
+      ! The following use of fptr is a bit of trickery to get all F90 @\
+      ! compilers to cooperate. For some compilers the associated() test @\
+      ! will return .false. for farray of size 0. Some of those compilers @\
+      ! will produce a run-time error in size(fptr). Other compilers will @\
+      ! return .true. for the associated() test but return 0 in size(). @\
+      fpointer => farrayPtr @\
+      if(.not. associated(fpointer,farrayPtr)) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &  @\
+          "- farray is not associated with memory allocation)", & @\
+          ESMF_CONTEXT, rc)  @\ 
+        return @\
+      endif @\
+@\
+      if (size(fpointer)==0) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &  @\
+          "- farray is not associated with memory allocation)", & @\
+          ESMF_CONTEXT, rc)  @\
+        return @\
+      endif @\
+    endif @\
+@\
+    ! Check the size of the native array. @\
+    fieldDimCount = mrank @\
 @\
     if(fieldDimCount .ne. gridDimCount) then @\
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
