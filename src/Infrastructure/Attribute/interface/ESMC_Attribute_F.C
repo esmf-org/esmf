@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.20 2008/09/04 16:07:14 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.21 2008/09/05 04:41:38 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.20 2008/09/04 16:07:14 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.21 2008/09/05 04:41:38 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -469,8 +469,8 @@ extern "C" {
   status = (**base).root.ESMC_AttPackGet(cconv, cpurp, cobj)->\
     ESMC_AttributeGet(cname, llens, 1);
   if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting item char* lengths", &status);
+    ESMC_LogDefault.Write(
+                         "failed getting item char* lengths", ESMC_LOG_INFO);
     delete [] cname;
     delete [] cconv;
     delete [] cpurp;
@@ -2059,8 +2059,8 @@ extern "C" {
   //  use llens to get the lengths of all items on this attribute
   status = (**base).root.ESMC_AttributeGet(cname, llens, 1);
   if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting item char* lengths", &status);
+    ESMC_LogDefault.Write(
+                         "failed getting item char* lengths", ESMC_LOG_INFO);
     delete [] cname;
     delete [] llens;
     if (rc) *rc = status;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.28 2008/09/04 16:07:14 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.29 2008/09/05 04:41:38 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.28 2008/09/04 16:07:14 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.29 2008/09/05 04:41:38 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -636,7 +636,7 @@
         }
         fprintf(tab,msgbuf);
       }
-      else { 
+      else if (items > 1) { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
         fprintf(tab,msgbuf);
       }
@@ -947,7 +947,7 @@
           fprintf(xml,msgbuf);
         }
       }
-      else { 
+      else if (attrList[i]->items == 1) { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
         ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
       }
@@ -1142,40 +1142,20 @@
       strcmp(object,attrObject) == 0 &&
       attrPack == ESMF_TRUE) {
     for(unsigned int i=0; i<attrCount; i++) {
-      // add length
-      if (items != 1) {
-        ESMC_LogDefault.Write("Write items > 1 - Not yet implemented\n",
-          ESMC_LOG_INFO);
-        attrLens[i] = 0;
+      // add name
+      if (attrLens[i] == 0) {
+        len = strlen(attrList[i]->attrName);
+        attrNames[i] = new char[len+1];
+        strcpy(attrNames[i], attrList[i]->attrName);
       }
-      else {
-        if (tk == ESMC_TYPEKIND_LOGICAL) {
-          attrLens[i] = 6;
-        }
-        else if (tk == ESMC_TYPEKIND_CHARACTER) {
-          attrLens[i] = strlen(vcp);
-        }
-        else {
-          ESMC_LogDefault.Write("working on counting digits",
-            ESMC_LOG_INFO);
-          attrLens[i] = 0;
-        }
-      }
-      
       // check name
-      if (attrLens[i] > 0) {
-        if (strcmp(attrNames[i],attrName) != 0) {
+      else if (attrLens[i] > 0) {
+        if (strcmp(attrNames[i],attrList[i]->attrName) != 0) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              "Attribute package name out of order", 
                              &localrc);
           return ESMF_FAILURE;
         }
-      }
-      // or add it
-      else if (attrLens[i] == 0) {
-        len = strlen(attrName);
-        attrNames[i] = new char[len+1];
-        strncpy(attrNames[i], attrName, len+1);
       }
       else {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
@@ -1183,6 +1163,29 @@
                              &localrc);
           return ESMF_FAILURE;
       }
+
+      // add length
+      if (attrList[i]->items > 1) {
+        ESMC_LogDefault.Write("Write items > 1 - Not yet implemented\n",
+          ESMC_LOG_INFO);
+        attrLens[i] = 0;
+      }
+      else if (attrList[i]->items == 1) {
+        if (attrList[i]->tk == ESMC_TYPEKIND_LOGICAL) {
+          attrLens[i] = 8;
+        }
+        else if (attrList[i]->tk == ESMC_TYPEKIND_CHARACTER) {
+          if (strlen(attrList[i]->vcp)+3 > attrLens[i])
+            attrLens[i] = strlen(attrList[i]->vcp)+3;
+        }
+        else {
+          ESMC_LogDefault.Write("working on counting digits",
+            ESMC_LOG_INFO);
+          //***FIXME*** here we do log10(number) + 4
+          attrLens[i] = 10;
+        }
+      }
+      
     }
   }
   
