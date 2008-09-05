@@ -393,8 +393,6 @@ static int num_intersecting_elems(const Mesh &src, const BBox &dstBBox, double b
 static void populate_box(BOX3D *box, const Mesh &src, const BBox &dstBBox, double btol, double nexp) {
 
   MEField<> &coord_field = *src.GetCoordField();
-
-  UInt sdim = src.spatial_dim();
   
   KernelList::const_iterator ki = src.set_begin(), ke = src.set_end();
   
@@ -422,11 +420,11 @@ static void populate_box(BOX3D *box, const Mesh &src, const BBox &dstBBox, doubl
        
        min[0] = bounding_box.getMin()[0] - btol;
        min[1] = bounding_box.getMin()[1] - btol;
-       min[2] = (sdim == 3 ? bounding_box.getMin()[2] : 0) - btol;
+       min[2] = bounding_box.getMin()[2] - btol;
        
        max[0] = bounding_box.getMax()[0] + btol;
        max[1] = bounding_box.getMax()[1] + btol;
-       max[2] = (sdim == 3 ? bounding_box.getMax()[2] : 0) + btol;
+       max[2] = bounding_box.getMax()[2] + btol;
     
        /*
        if (elem.get_id() == 2426) {

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2008/09/05 16:39:11 donstark Exp $ 
+# $Id: makefile,v 1.28 2008/09/05 22:03:34 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -14,20 +14,12 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayRedistUTest \
                 $(ESMF_TESTDIR)/ESMC_ArrayUTest 
 
-ifeq ($(ESMF_TESTEXHAUSTIVE), ON)
-TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
-                RUN_ESMF_ArrayDataUTest \
-                RUN_ESMF_ArrayScatterUTest \
-                RUN_ESMF_ArrayGatherUTest \
-                RUN_ESMF_ArrayArbIdxSMMUTest \
-                RUN_ESMF_ArrayRedistUTest \
-                RUN_ESMC_ArrayUTest  \
-                RUN_ESMF_ArrayHarness1UTest   \
-                RUN_ESMF_ArrayHarness2UTest  \
-                RUN_ESMF_ArrayHarness4UTest  \
-                RUN_ESMF_ArrayHarness8UTest
 
-else
+#TESTS_RUN     = RUN_ESMF_ArrayHarness1UTest \
+#                RUN_ESMF_ArrayHarness2UTest  \
+#                RUN_ESMF_ArrayHarness4UTest  \
+#                RUN_ESMF_ArrayHarness8UTest
+
 TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayDataUTest \
                 RUN_ESMF_ArrayScatterUTest \
@@ -35,8 +27,7 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayArbIdxSMMUTest \
                 RUN_ESMF_ArrayRedistUTest \
                 RUN_ESMC_ArrayUTest  \
-                RUN_ESMF_ArrayHarness2UTest
-endif
+                RUN_ESMF_ArrayHarness2UTest   
 
 TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \
                 RUN_ESMC_ArrayUTestUNI

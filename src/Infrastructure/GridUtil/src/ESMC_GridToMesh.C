@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.26 2008/09/04 22:41:47 dneckels Exp $
+// $Id: ESMC_GridToMesh.C,v 1.27 2008/09/05 22:03:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -84,18 +84,17 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh, const std::
   Trace __trace("GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh)");
 
   // Initialize the parallel environment for mesh (if not already done)
-  //ESMC::Par::Init("MESHLOG", true /* use log */);
+  ESMC::Par::Init("MESHLOG", true /* use log */);
 
   Grid &grid = const_cast<Grid&>(grid_);
 
 
  bool is_sphere = grid.isSphere();
 
- {
+ try {
 
    // *** Grid error checking here ***
-   if (!grid.hasStaggerLoc(staggerLoc)) 
-     Throw() << "Grid does not have stagger location:" << staggerLoc;
+
 
  
    // *** Set some meta-data ***
@@ -463,7 +462,17 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 */
    }
 
- } 
+ } // try catch block
+  catch (std::exception &x) {
+
+  // Set any ESMF error codes/messages
+
+ } // catch
+  catch(...) {
+
+  // Set any ESMF error codes/messages
+
+ }
 
 }
 

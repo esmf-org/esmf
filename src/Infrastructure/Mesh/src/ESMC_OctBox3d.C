@@ -166,7 +166,7 @@ int Finalize_BOX3D(BOX3D *tree)
 
   /* Scramble nodes (Add a pseudorandom element to guard against pathological orderings) */
   /* (In the future I will come up with a cleaner way to do this) */
-  max=RAND_MAX+1;
+  max=0x1<<31;
   maxf=max;
   for (i=0; i<tree->curr_node; i++)
     {
