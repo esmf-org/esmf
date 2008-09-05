@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.41 2008/09/05 05:32:15 theurich Exp $
+// $Id: ESMC_Comp.C,v 1.42 2008/09/05 05:48:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Comp.C,v 1.41 2008/09/05 05:32:15 theurich Exp $";
+static const char *const version = "$Id: ESMC_Comp.C,v 1.42 2008/09/05 05:48:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -65,7 +65,7 @@ ESMC_GridComp ESMC_GridCompCreate(char *name, enum ESMC_GridCompType mtype,
   
   // typecast into ESMCI types
   enum ESMCI::GridCompType mtypeArg = (enum ESMCI::GridCompType)mtype;
-  ESMCI::Clock *clockp = (ESMCI::Clock *)clock.ptr;
+  ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
   
   comp = (void *)
     ESMCI::GridComp::create(name, mtypeArg, configFile, clockp, &localrc);
@@ -171,8 +171,8 @@ int ESMC_GridCompInitialize(ESMC_GridComp comp, ESMC_State importState,
   
   // typecast into ESMCI type
   ESMCI::GridComp *compp = (ESMCI::GridComp *)comp;
-  ESMCI::State *importStatep = (ESMCI::State *)(importState.ptr);
-  ESMCI::State *exportStatep = (ESMCI::State *)(exportState.ptr);
+  ESMCI::State *importStatep = (ESMCI::State *)importState;
+  ESMCI::State *exportStatep = (ESMCI::State *)exportState;
   ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
 
   // call into ESMCI method  
@@ -199,8 +199,8 @@ int ESMC_GridCompRun(ESMC_GridComp comp, ESMC_State importState,
   
   // typecast into ESMCI type
   ESMCI::GridComp *compp = (ESMCI::GridComp *)comp;
-  ESMCI::State *importStatep = (ESMCI::State *)(importState.ptr);
-  ESMCI::State *exportStatep = (ESMCI::State *)(exportState.ptr);
+  ESMCI::State *importStatep = (ESMCI::State *)importState;
+  ESMCI::State *exportStatep = (ESMCI::State *)exportState;
   ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
 
   // call into ESMCI method  
@@ -227,8 +227,8 @@ int ESMC_GridCompFinalize(ESMC_GridComp comp, ESMC_State importState,
   
   // typecast into ESMCI type
   ESMCI::GridComp *compp = (ESMCI::GridComp *)comp;
-  ESMCI::State *importStatep = (ESMCI::State *)(importState.ptr);
-  ESMCI::State *exportStatep = (ESMCI::State *)(exportState.ptr);
+  ESMCI::State *importStatep = (ESMCI::State *)importState;
+  ESMCI::State *exportStatep = (ESMCI::State *)exportState;
   ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
 
   // call into ESMCI method  
@@ -328,7 +328,7 @@ ESMC_CplComp ESMC_CplCompCreate(char *name, char *configFile, ESMC_Clock clock,
   ESMC_CplComp comp = NULL;  // initialize
   
   // typecast into ESMCI types
-  ESMCI::Clock *clockp = (ESMCI::Clock *)clock.ptr;
+  ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
   
   comp = (void *)
     ESMCI::CplComp::create(name, configFile, clockp, &localrc);
@@ -434,8 +434,8 @@ int ESMC_CplCompInitialize(ESMC_CplComp comp, ESMC_State importState,
   
   // typecast into ESMCI type
   ESMCI::CplComp *compp = (ESMCI::CplComp *)comp;
-  ESMCI::State *importStatep = (ESMCI::State *)(importState.ptr);
-  ESMCI::State *exportStatep = (ESMCI::State *)(exportState.ptr);
+  ESMCI::State *importStatep = (ESMCI::State *)importState;
+  ESMCI::State *exportStatep = (ESMCI::State *)exportState;
   ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
 
   // call into ESMCI method  
@@ -462,8 +462,8 @@ int ESMC_CplCompRun(ESMC_CplComp comp, ESMC_State importState,
   
   // typecast into ESMCI type
   ESMCI::CplComp *compp = (ESMCI::CplComp *)comp;
-  ESMCI::State *importStatep = (ESMCI::State *)(importState.ptr);
-  ESMCI::State *exportStatep = (ESMCI::State *)(exportState.ptr);
+  ESMCI::State *importStatep = (ESMCI::State *)importState;
+  ESMCI::State *exportStatep = (ESMCI::State *)exportState;
   ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
 
   // call into ESMCI method  
@@ -490,8 +490,8 @@ int ESMC_CplCompFinalize(ESMC_CplComp comp, ESMC_State importState,
   
   // typecast into ESMCI type
   ESMCI::CplComp *compp = (ESMCI::CplComp *)comp;
-  ESMCI::State *importStatep = (ESMCI::State *)(importState.ptr);
-  ESMCI::State *exportStatep = (ESMCI::State *)(exportState.ptr);
+  ESMCI::State *importStatep = (ESMCI::State *)importState;
+  ESMCI::State *exportStatep = (ESMCI::State *)exportState;
   ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
 
   // call into ESMCI method  
