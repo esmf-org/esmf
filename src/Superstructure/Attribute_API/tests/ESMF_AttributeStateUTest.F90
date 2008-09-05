@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeStateUTest.F90,v 1.4 2008/09/02 22:28:06 rokuingh Exp $
+! $Id: ESMF_AttributeStateUTest.F90,v 1.5 2008/09/05 22:07:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeStateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeStateUTest.F90,v 1.4 2008/09/02 22:28:06 rokuingh Exp $'
+      '$Id: ESMF_AttributeStateUTest.F90,v 1.5 2008/09/05 22:07:18 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -115,7 +115,7 @@ program ESMF_AttributeStateUTest
     !  ESMF_I4
     !-------------------------------------------------------------------------
       inI4 = 4
-      !EX_UTest
+      !EX_disable_UTest
       ! Add an ESMF_I4 Attribute to a State Test
       call ESMF_AttributeSet(state, name="AttrI4", value=inI4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -123,7 +123,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_I4 Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrI4", value=outI4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -132,7 +132,7 @@ program ESMF_AttributeStateUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute on a State Test
       call ESMF_AttributeRemove(state, name="AttrI4", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -141,7 +141,7 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
       
       defaultI4 = 7
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_I4 Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrI4", value=dfltoutI4, &
         defaultvalue=defaultI4, rc=rc)
@@ -155,7 +155,7 @@ program ESMF_AttributeStateUTest
     !  ESMF_I4 list
     !-------------------------------------------------------------------------
       inI4l = (/1,2,3/)
-      !EX_UTest
+      !EX_disable_UTest
       ! Add an ESMF_I4 list Attribute to a State Test
       call ESMF_AttributeSet(state, name="AttrI4l", &
         valueList=inI4l, rc=rc)
@@ -164,7 +164,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_I4 list Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrI4l", &
         valueList=outI4l, rc=rc)
@@ -174,7 +174,7 @@ program ESMF_AttributeStateUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute on a State Test
       call ESMF_AttributeRemove(state, name="AttrI4l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -183,7 +183,7 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
       
       defaultI4l = (/4,2,7/)
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_I4 list Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrI4l", &
         valueList=dfltoutI4l, defaultvalueList=defaultI4l, rc=rc)
@@ -197,7 +197,7 @@ program ESMF_AttributeStateUTest
     !  ESMF_I8
     !-------------------------------------------------------------------------
       inI8 = 4
-      !EX_UTest
+      !EX_disable_UTest
       ! Add an ESMF_I8 Attribute to a State Test
       call ESMF_AttributeSet(state, name="AttrI8", value=inI8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -205,7 +205,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_I8 Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrI8", value=outI8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -214,7 +214,7 @@ program ESMF_AttributeStateUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute on a State Test
       call ESMF_AttributeRemove(state, name="AttrI8", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -223,7 +223,7 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
       
       defaultI8 = 7
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_I8 Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrI8", value=dfltoutI8, &
         defaultvalue=defaultI8, rc=rc)
@@ -237,7 +237,7 @@ program ESMF_AttributeStateUTest
     !  ESMF_I8 list
     !-------------------------------------------------------------------------
       inI8l = (/1,2,3/)
-      !EX_UTest
+      !EX_disable_UTest
       ! Add an ESMF_I8 list Attribute to a State Test
       call ESMF_AttributeSet(state, name="AttrI8l", &
         valueList=inI8l, rc=rc)
@@ -246,7 +246,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_I8 list Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrI8l", &
         valueList=outI8l, rc=rc)
@@ -256,7 +256,7 @@ program ESMF_AttributeStateUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute on a State Test
       call ESMF_AttributeRemove(state, name="AttrI8l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -265,7 +265,7 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
       
       defaultI8l = (/4,2,7/)
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_I8 list Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrI8l", &
         valueList=dfltoutI8l, defaultvalueList=defaultI8l, rc=rc)
@@ -279,7 +279,7 @@ program ESMF_AttributeStateUTest
     !  ESMF_R4
     !-------------------------------------------------------------------------
       inR4 = 4
-      !EX_UTest
+      !EX_disable_UTest
       ! Add an ESMF_R4 Attribute to a State Test
       call ESMF_AttributeSet(state, name="AttrR4", value=inR4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -287,7 +287,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_R4 Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrR4", value=outR4, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -296,7 +296,7 @@ program ESMF_AttributeStateUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute on a State Test
       call ESMF_AttributeRemove(state, name="AttrR4", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -305,7 +305,7 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
       
       defaultR4 = 7
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_R4 Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrR4", value=dfltoutR4, &
         defaultvalue=defaultR4, rc=rc)
@@ -319,7 +319,7 @@ program ESMF_AttributeStateUTest
     !  ESMF_R4 list
     !-------------------------------------------------------------------------
       inR4l = (/1,2,3/)
-      !EX_UTest
+      !EX_disable_UTest
       ! Add an ESMF_R4 list Attribute to a State Test
       call ESMF_AttributeSet(state, name="AttrR4l", &
         valueList=inR4l, rc=rc)
@@ -328,7 +328,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_R4 list Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrR4l", &
         valueList=outR4l, rc=rc)
@@ -338,7 +338,7 @@ program ESMF_AttributeStateUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute on a State Test
       call ESMF_AttributeRemove(state, name="AttrR4l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -347,7 +347,7 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
       
       defaultR4l = (/7,8,9/)
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_R4 list Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrR4l", &
         valueList=dfltoutR4l, defaultvalueList=defaultR4l, rc=rc)
@@ -361,7 +361,7 @@ program ESMF_AttributeStateUTest
     !  ESMF_R8
     !-------------------------------------------------------------------------
       inR8 = 4
-      !EX_UTest
+      !EX_disable_UTest
       ! Add an ESMF_R8 Attribute to a State Test
       call ESMF_AttributeSet(state, name="AttrR8", value=inR8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -369,7 +369,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_R8 Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrR8", value=outR8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -378,7 +378,7 @@ program ESMF_AttributeStateUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute on a State Test
       call ESMF_AttributeRemove(state, name="AttrR8", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -387,7 +387,7 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
       
       defaultR8 = 7
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_R8 Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrR8", value=dfltoutR8, &
         defaultvalue=defaultR8, rc=rc)
@@ -401,7 +401,7 @@ program ESMF_AttributeStateUTest
     !  ESMF_R8 list
     !-------------------------------------------------------------------------
       inR8l = (/1,2,3/)
-      !EX_UTest
+      !EX_disable_UTest
       ! Add an ESMF_R8 list Attribute to a State Test
       call ESMF_AttributeSet(state, name="AttrR8l", &
         valueList=inR8l, rc=rc)
@@ -410,7 +410,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_R8 list Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrR8l", &
         valueList=outR8l, rc=rc)
@@ -420,7 +420,7 @@ program ESMF_AttributeStateUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute on a State Test
       call ESMF_AttributeRemove(state, name="AttrR8l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -429,7 +429,7 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
       
       defaultR8l = (/7,8,9/)
-      !EX_UTest
+      !EX_disable_UTest
       ! Get an ESMF_R8 list Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrR8l", &
         valueList=dfltoutR8l, defaultvalueList=defaultR8l, rc=rc)
@@ -444,7 +444,7 @@ program ESMF_AttributeStateUTest
     !-------------------------------------------------------------------------
       inChar = "charAttribute"
       attrName = "char_"
-      !EX_UTest
+      !EX_disable_UTest
       ! Add a char Attribute to a State Test
       call ESMF_AttributeSet(state, name=attrname, value=inChar, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -452,7 +452,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get a char Attribute from a State Test
       call ESMF_AttributeGet(state, name=attrname, value=outChar, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -461,7 +461,7 @@ program ESMF_AttributeStateUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute on a State Test
       call ESMF_AttributeRemove(state, name=attrname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -470,7 +470,7 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
       
       defaultChar = "charAttributeDefault"
-      !EX_UTest
+      !EX_disable_UTest
       ! Get a default char Attribute from a State Test
       call ESMF_AttributeGet(state, name=attrname, value=dfltoutChar, &
         defaultvalue=defaultChar, rc=rc)
@@ -490,7 +490,7 @@ program ESMF_AttributeStateUTest
       defaultCharl(2) = "Character String 6"
       defaultCharl(3) = "Character String 7"
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Set a char list Attribute on a State Test
       call ESMF_AttributeSet(state, name="Charl", &
         valueList=InCharl, rc=rc)
@@ -499,7 +499,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
   
-      !EX_UTest
+      !EX_disable_UTest
       ! Get a char list Attribute on a State Test
       call ESMF_AttributeGet(state, name="Charl", &
         valueList=OutCharl, rc=rc)
@@ -509,7 +509,7 @@ program ESMF_AttributeStateUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute on a State Test
       call ESMF_AttributeRemove(state, name="Charl", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -517,7 +517,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute on a State Test, again
       call ESMF_AttributeRemove(state, name="Charl", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -525,7 +525,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get a char list default Attribute on a State Test
       call ESMF_AttributeGet(state, name="Charl", &
         valueList=DfltOutCharl, defaultvalueList=defaultCharl, rc=rc)
@@ -541,7 +541,7 @@ program ESMF_AttributeStateUTest
       attrname = "flag"
       inLog = .true.
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Set a logical attribute - scalar version
       call ESMF_AttributeSet(state, name=attrname, value=inLog, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCESS"
@@ -550,7 +550,7 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
 
       outLog = .false.
-      !EX_UTest
+      !EX_disable_UTest
       ! Get a logical attribute - scalar version
       call ESMF_AttributeGet(state, name=attrname, value=outLog, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
@@ -559,7 +559,7 @@ program ESMF_AttributeStateUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute on a State Test
       call ESMF_AttributeRemove(state, name=attrname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -569,7 +569,7 @@ program ESMF_AttributeStateUTest
 
       dfltoutLog = .false.
       defaultLog = .true.
-      !EX_UTest
+      !EX_disable_UTest
       ! Get a logical attribute - scalar version
       call ESMF_AttributeGet(state, name=attrname, value=dfltoutLog, &
         defaultvalue=defaultLog, rc=rc)
@@ -585,7 +585,7 @@ program ESMF_AttributeStateUTest
       attrname = "flag state"
       inLogl = (/ .true., .false., .true. /)
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Set a logical attribute - state version
       call ESMF_AttributeSet(state, name=attrname, &
         valueList=inLogl, rc=rc)
@@ -595,7 +595,7 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
 
       outLogl = .false.
-      !EX_UTest
+      !EX_disable_UTest
       ! Get a logical attribute - state version
       call ESMF_AttributeGet(state, name=attrname,  &
         valueList=outLogl, rc=rc)
@@ -605,7 +605,7 @@ program ESMF_AttributeStateUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute on a State Test
       call ESMF_AttributeRemove(state, name=attrname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -615,7 +615,7 @@ program ESMF_AttributeStateUTest
   
       dfltoutLogl = .false.
       defaultLogl = .true.
-      !EX_UTest
+      !EX_disable_UTest
       ! Get a logical attribute - state version
       call ESMF_AttributeGet(state, name=attrname, &
         valueList=dfltoutLogl, defaultvalueList=defaultLogl, rc=rc)
@@ -634,7 +634,7 @@ program ESMF_AttributeStateUTest
       conv = "customconvention"
       purp = "custompurpose"
       
-      !EX_UTest
+      !EX_disable_UTest
       ! Create a custom Attribute package on a State Test
       call ESMF_AttributeAdd(state, convention=conv, &
         purpose=purp, attrList=attpackList, rc=rc)
@@ -646,7 +646,7 @@ program ESMF_AttributeStateUTest
       attrname = "Custom1"
       attrvalue = "m/s"
       
-      !EX_UTest
+      !EX_disable_UTest
       ! Set an Attribute in an Attribute package on a State Test
       call ESMF_AttributeSet(state, name=attrname, value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
@@ -657,7 +657,7 @@ program ESMF_AttributeStateUTest
 
       attrname = "Custom2"
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Set a char list Attribute in an Attribute package on a State Test
       call ESMF_AttributeSet(state, name=attrname, &
         valueList=attpackList, convention=conv, purpose=purp, rc=rc)
@@ -666,7 +666,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get a char list Attribute in an Attribute package on a State Test
       call ESMF_AttributeGet(state, name=attrname, &
         valueList=attpackListOut, convention=conv, purpose=purp, rc=rc)
@@ -676,7 +676,7 @@ program ESMF_AttributeStateUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute in an Attribute package on a State Test
       call ESMF_AttributeRemove(state, name=attrname, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -688,7 +688,7 @@ program ESMF_AttributeStateUTest
       attpackDfltList(2) = "Custom5"
       attpackDfltList(3) = "Custom6"
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get a char list default Attribute in an Attribute package on a State Test
       call ESMF_AttributeGet(state, name=attrname, &
         valueList=attpackListOut2, defaultvalueList=attpackDfltList, &
@@ -699,7 +699,7 @@ program ESMF_AttributeStateUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Write the Attribute package from a State Test
       call ESMF_AttributeWrite(state, convention=conv, purpose=purp, &
         attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
@@ -714,7 +714,7 @@ program ESMF_AttributeStateUTest
       conv = 'CF'
       purp = 'general'
       
-      !EX_UTest
+      !EX_disable_UTest
       ! Create an Attribute package on a State Test
       call ESMF_AttributeAdd(state, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -725,7 +725,7 @@ program ESMF_AttributeStateUTest
       attrname = "import"
       attrvaluelogical = .true.
       
-      !EX_UTest
+      !EX_disable_UTest
       ! Set an Attribute in an Attribute package on a State Test
       call ESMF_AttributeSet(state, name=attrname, value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
@@ -747,7 +747,7 @@ program ESMF_AttributeStateUTest
       attpackListTNames(11) = "Character_name"
       attpackListTNames(12) = "Character_namelist"
     
-      !EX_UTest
+      !EX_disable_UTest
       ! Add multiple Attributes to an Attribute package on a State Test
       call ESMF_AttributeAdd(state, convention=conv, purpose=purp, &
         attrList=attpackListTNames, rc=rc)
@@ -756,7 +756,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Set an ESMF_I4name Attribute in an Attribute package on a State Test
       call ESMF_AttributeSet(state, name="ESMF_I4name", value=inI4, &
         convention=conv, purpose=purp, rc=rc)
@@ -765,7 +765,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Set an ESMF_I4namelist Attribute in an Attribute package on a State Test
       call ESMF_AttributeSet(state, name="ESMF_I4namelist", valueList=inI4l, &
         convention=conv, purpose=purp, rc=rc)
@@ -774,7 +774,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Set an ESMF_I8name Attribute in an Attribute package on a State Test
       call ESMF_AttributeSet(state, name="ESMF_I8name", value=inI8, &
         convention=conv, purpose=purp, rc=rc)
@@ -783,7 +783,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Set an ESMF_I8namelist Attribute in an Attribute package on a State Test
       call ESMF_AttributeSet(state, name="ESMF_I8namelist", valueList=inI8l, &
         convention=conv, purpose=purp, rc=rc)
@@ -792,7 +792,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Set an ESMF_R4name Attribute in an Attribute package on a State Test
       call ESMF_AttributeSet(state, name="ESMF_R4name", value=inR4, &
         convention=conv, purpose=purp, rc=rc)
@@ -801,7 +801,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Set an ESMF_R4namelist Attribute in an Attribute package on a State Test
       call ESMF_AttributeSet(state, name="ESMF_R4namelist", valueList=inR4l, &
         convention=conv, purpose=purp, rc=rc)
@@ -810,7 +810,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Set an ESMF_R8name Attribute in an Attribute package on a State Test
       call ESMF_AttributeSet(state, name="ESMF_R8name", value=inR8, &
         convention=conv, purpose=purp, rc=rc)
@@ -819,7 +819,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Set an ESMF_R8namelist Attribute in an Attribute package on a State Test
       call ESMF_AttributeSet(state, name="ESMF_R8namelist", valueList=inR8l, &
         convention=conv, purpose=purp, rc=rc)
@@ -828,7 +828,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Set a character Attribute in an Attribute package on a State Test
       call ESMF_AttributeSet(state, name="Character_name", value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
@@ -838,7 +838,7 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
 
       attrname = "Character_namelist"
-      !EX_UTest
+      !EX_disable_UTest
       ! Set a char list Attribute in an Attribute package on a State Test
       call ESMF_AttributeSet(state, name=attrname, &
         valueList=attpackList, convention=conv, purpose=purp, rc=rc)
@@ -847,7 +847,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get a char list attribute in an Attribute package on a State Test
       call ESMF_AttributeGet(state, name=attrname, &
         valueList=attpackListOut3, convention=conv, purpose=purp, rc=rc)
@@ -857,7 +857,7 @@ program ESMF_AttributeStateUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute in an Attribute package on a State Test
       call ESMF_AttributeRemove(state, name=attrname, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -865,7 +865,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Remove an Attribute in an Attribute package on a State Test, again
       call ESMF_AttributeRemove(state, name=attrname, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -877,7 +877,7 @@ program ESMF_AttributeStateUTest
       attpackDfltList(2) = "Custom5"
       attpackDfltList(3) = "Custom6"
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get a char list default Attribute in an Attribute package on a State Test
       call ESMF_AttributeGet(state, name=attrname, &
         valueList=attpackListOut4, defaultvalueList=attpackDfltList2, &
@@ -888,7 +888,7 @@ program ESMF_AttributeStateUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Write the Attribute package from a State Test
       call ESMF_AttributeWrite(state, convention=conv, purpose=purp, &
         attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
@@ -901,7 +901,7 @@ program ESMF_AttributeStateUTest
     !  Attribute hierarchy linking and AttributeCopy
     !-------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Link a State Attribute hierarchy to a State Attribute hierarchy State Test
       call ESMF_AttributeSet(state, sfs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -909,7 +909,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Link a State Attribute hierarchy to a Field Attribute hierarchy State Test
       call ESMF_AttributeSet(state, ffs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -917,7 +917,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Link a State Attribute hierarchy to a FieldBundle Attribute hierarchy State Test
       call ESMF_AttributeSet(state, fbfs, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -925,7 +925,7 @@ program ESMF_AttributeStateUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Copy an Attribute hierarchy from state1 to state2
       call ESMF_AttributeCopy(state, state2, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -942,7 +942,7 @@ program ESMF_AttributeStateUTest
       ! Set a Character Attribute on a State to test the get info calls
       call ESMF_AttributeSet(state, name=attrname, value=attrvalue, rc=rc)
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get the Attribute count from a State Test
       call ESMF_AttributeGet(state, count=count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -951,7 +951,7 @@ program ESMF_AttributeStateUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get Attribute info by name from a State Test
       call ESMF_AttributeGet(state, name=attrname, typekind=attrTK, &
         itemcount=items, rc=rc)
@@ -963,7 +963,7 @@ program ESMF_AttributeStateUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_disable_UTest
       ! Get Attribute info by num from a State Test
       call ESMF_AttributeGet(state, attributeIndex=count, name=attrnameOut, &
         typekind=attrTK, itemcount=items, rc=rc)
