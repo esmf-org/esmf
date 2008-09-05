@@ -45,7 +45,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_State.C,v 1.25 2008/09/02 20:07:58 theurich Exp $";
+static const char *const version = "$Id: ESMC_State.C,v 1.26 2008/09/05 05:32:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -80,18 +80,17 @@ extern "C" {
 //EOP
    //Local variables
     int localrc;
-    ESMC_State state;
 
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;
     localrc = ESMF_RC_NOT_IMPL;
 
+    ESMC_State state = NULL;  // initialize
+
     // Invoque the C++ interface
-    state.ptr = (void*)ESMCI::State::create(name, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
-      state.ptr = NULL;
-      return state;
-    }
+    state = (void *)ESMCI::State::create(name, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      return state; // bail out
 
     rc = &localrc;
     return state;
@@ -126,7 +125,7 @@ extern "C" {
       rc = ESMF_RC_NOT_IMPL;
       localrc = ESMF_RC_NOT_IMPL;
       
-      localrc = ((ESMCI::State*)state.ptr)->addArray((ESMCI::Array*)array.ptr);
+      localrc = ((ESMCI::State*)state)->addArray((ESMCI::Array*)array.ptr);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,&rc))
         return localrc;
 
@@ -164,7 +163,7 @@ extern "C" {
       rc = ESMF_RC_NOT_IMPL;
       localrc = ESMF_RC_NOT_IMPL;
 
-      localrc = ((ESMCI::State*)state.ptr)->getArray(arrayName,
+      localrc = ((ESMCI::State*)state)->getArray(arrayName,
         (ESMCI::Array**)&(array->ptr));
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,&rc))
         return localrc;
@@ -202,7 +201,7 @@ extern "C" {
     int rc, localrc;
 
     // Invoque the C++ interface
-    localrc = ((ESMCI::State*)state.ptr)->print();
+    localrc = ((ESMCI::State*)state)->print();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return localrc;
 
@@ -244,7 +243,7 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
     
     // typecase into ESMCI type
-    ESMCI::State *statep = (ESMCI::State *)(state->ptr);
+    ESMCI::State *statep = (ESMCI::State *)(*state);
 
     // Invoque the C++ interface
     localrc = ESMCI::State::destroy(statep);
@@ -252,7 +251,7 @@ extern "C" {
       return localrc;
 
     // invalidate pointer
-    state->ptr = NULL;
+    state = NULL;
 
   // return successfully
   rc = ESMF_SUCCESS;
