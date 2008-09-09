@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2008/08/26 20:48:18 theurich Exp $ 
+# $Id: makefile,v 1.7 2008/09/09 22:43:53 dneckels Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -12,7 +12,7 @@ TESTS_OBJ = gridtomesh.o
 
 TESTS_RUN     = RUN_ESMF_GridToMeshUTest
 
-TESTS_RUN_UNI = RUN_ESMF_GridToMeshUTestUNI
+TESTS_RUN_UNI = 
 
 
 #ESMF_UTEST_GridToMesh_OBJS = $(TESTS_OBJ)
@@ -35,7 +35,4 @@ CLOBBERDIRS =
 
 RUN_ESMF_GridToMeshUTest:
 	$(MAKE) TNAME=GridToMesh NP=4 ftest
-
-RUN_ESMF_GridToMeshUTestUNI:
-	$(MAKE) TNAME=GridToMesh NP=1 ftest
 

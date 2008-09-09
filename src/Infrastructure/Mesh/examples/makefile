@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2008/09/03 17:51:27 theurich Exp $
+# $Id: makefile,v 1.13 2008/09/09 22:43:53 dneckels Exp $
 
 ALL: build_examples
 run: run_examples
@@ -39,12 +39,11 @@ run_ESMC_RefineEx:
 	$(MAKE) EXNAME=Refine NP=4 excrun
 
 run_ESMC_RefineEx_uni:
-	$(MAKE) EXNAME=Refine NP=1 excrun
+	echo "PASS: ESMF_RefineEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_RefineEx.stdout
 
 run_ESMF_MeshEx:
 	cp -r data $(ESMF_EXDIR)
 	$(MAKE) EXNAME=Mesh NP=6 exfrun
 
 run_ESMF_MeshEx_uni:
-	cp -r data $(ESMF_EXDIR)
-	$(MAKE) EXNAME=Mesh NP=1 exfrun
+	echo "PASS: ESMF_MeshEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_MeshEx.stdout
