@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.34 2008/08/19 22:52:43 rosalind Exp $ 
+# $Id: makefile,v 1.35 2008/09/09 17:17:49 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -52,7 +52,6 @@ TESTS_RUN     = RUN_ESMC_VMUTest \
 TESTS_RUN_UNI = RUN_ESMC_VMUTestUNI \
 		RUN_ESMF_VMUTestUNI \
                 RUN_ESMF_VMUserMpiInitUTestUNI \
-                RUN_ESMF_VMSendVMRecvUTestUNI \
                 RUN_ESMF_VMSendNbVMRecvNbUTestUNI \
                 RUN_ESMF_VMSendRecvUTestUNI \
                 RUN_ESMF_VMSendRecvNbUTestUNI \
@@ -106,9 +105,6 @@ RUN_ESMF_VMUserMpiInitUTestUNI:
 #
 RUN_ESMF_VMSendVMRecvUTest:
 	$(MAKE) TNAME=VMSendVMRecv NP=4 ftest
-
-RUN_ESMF_VMSendVMRecvUTestUNI:
-	$(MAKE) TNAME=VMSendVMRecv NP=1 ftest
 
 #
 # VM SendNb VM RecvNb
