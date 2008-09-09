@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.19.2.1 2008/04/05 03:13:58 cdeluca Exp $
+! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.19.2.2 2008/09/09 17:08:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.19.2.1 2008/04/05 03:13:58 cdeluca Exp $'
+      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.19.2.2 2008/09/09 17:08:44 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -131,7 +131,7 @@
      !Test with integer arguments
      !===========================     
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Send local data to dst
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
@@ -141,7 +141,7 @@
       !------------------------------------------------------------------------
       print *, localPet," Before recv LocalData is ", localData(1),localData(2)
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! dst receives local data from src
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local data Test"
@@ -149,7 +149,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Verify localData after VM Receive
       isum=0
       write(failMsg, *) "Wrong Local Data"
@@ -161,7 +161,7 @@
      !Test with REAL_KIND_R4 arguments
      !================================
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Send local data to dst
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
@@ -171,7 +171,7 @@
       !------------------------------------------------------------------------
       print *, localPet,"Before recv: R4_LocalData is ", r4_localData(1),r4_localData(2)
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! dst receives local data from src
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local data Test"
@@ -179,7 +179,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Verify localData after VM Receive
       R4Sum=0.
       write(failMsg, *) "Wrong Local Data"
@@ -192,7 +192,7 @@
      !Test with ESMF_KIND_R8 arguments
      !================================
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Send local data to dst
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
@@ -202,7 +202,7 @@
       !------------------------------------------------------------------------
       print *, localPet,"Before recv: R8_LocalData is ", r8_localData(1),r8_localData(2)
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! dst receives local data from src
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local data Test"
@@ -210,7 +210,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Verify localData after VM Receive
       R8Sum=0.
       write(failMsg, *) "Wrong Local Data"
@@ -223,7 +223,7 @@
      !Test with logical arguments
      !===========================
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Send local data to dst
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
@@ -236,7 +236,7 @@
       call ESMF_LogicalString(local_logical(2), strvalue, rc)
       print *, localPet, "before recv: Local_Logical(2) is ", trim(strvalue)
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! dst receives local data from src
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local data Test"
@@ -244,7 +244,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Verify localData after VM Receive
       ISum=0.
       write(failMsg, *) "Wrong Local Data"
