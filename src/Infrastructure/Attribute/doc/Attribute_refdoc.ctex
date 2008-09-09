@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.7 2008/08/13 21:26:33 rokuingh Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.8 2008/09/09 20:03:05 rokuingh Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -80,12 +80,12 @@
 \input{../Infrastructure/Attribute/doc/Attribute_rest}
 #endif
 
-%\subsection{Design and Implementation Notes}
-%#ifdef STANDALONE
-%\input{Attribute_implnotes}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Attribute/doc/Attribute_implnotes}
-%#endif
+\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+\input{Attribute_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Attribute/doc/Attribute_implnotes}
+#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
