@@ -286,6 +286,24 @@ as a consistent way of setting configuration parameters.
 
 \section{Overall Rules and Behavior}
 
+\subsection{Local and Global Views and Associated Conventions}
+
+ESMF data objects such as Fields are distributed over
+DEs, with each DE getting a portion of the data.  Depending
+on the task, a local or global view of the object may be
+preferable.  In a local view, data indices start with the first
+element on the DE and end with the last element on the same DE.
+In a global view, there is an assumed or specified order to
+the set of DEs over which the object is distributed.  Data
+indices start with the first element on the first DE, and
+continue across all the elements in the sequence of DEs.
+The last data index represents the number of elements in the
+entire object.
+
+The convention in ESMF is that entities with a global view
+have no prefix.  Entities with a DE-local (and in some cases,
+PET-local) view have the prefix ``local.''
+
 \subsection{Allocation Rules}
 
 The basic rule of allocation and deallocation for the ESMF is:
