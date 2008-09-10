@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.51 2008/04/05 03:38:11 cdeluca Exp $
+! $Id: ESMF_Config.F90,v 1.52 2008/09/10 00:43:17 theurich Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -597,9 +597,8 @@
                                      ESMF_CONTEXT, rc)) return
       nullify(config%cptr)
 
-      if (present( rc )) then
-        rc = iret
-      endif
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
 
       ESMF_INIT_SET_DELETED(config)
       return
