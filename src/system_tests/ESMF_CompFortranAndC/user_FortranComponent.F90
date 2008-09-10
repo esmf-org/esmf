@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.3 2008/09/04 03:42:02 theurich Exp $
+! $Id: user_FortranComponent.F90,v 1.4 2008/09/10 18:27:15 rosalind Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -20,7 +20,7 @@
 
     implicit none
     
-    public user_register
+    public myRegistrationInFortran
         
     real(ESMF_KIND_R8), save, allocatable    :: farray(:,:)
     contains
@@ -30,7 +30,7 @@
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
  
-    subroutine user_register(comp, rc)
+    subroutine myRegistrationInFortran(comp, rc)
         type(ESMF_GridComp) :: comp
         integer, intent(out) :: rc
 
@@ -39,16 +39,16 @@
         logical :: supportPthreads
 #endif
 
-        print *, "In user register routine"
+        print *, "In myRegistrationInFortran routine"
 
         ! Register the callback routines.
 
 
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, myInitInFortran, &
                                                           ESMF_SINGLEPHASE, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, myRunInFortran, &
                                                           ESMF_SINGLEPHASE, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, myFinalInFortran, &
                                                           ESMF_SINGLEPHASE, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
@@ -76,11 +76,11 @@
 
 !-------------------------------------------------------------------------
 !   !  User Comp Component created by higher level calls, here is the
-!   !   second and main Initialization routine.
+!   !  Initialization routine.
  
     
 
-    subroutine user_init(comp, importState, exportState, clock, rc)
+    subroutine myInitInFortran(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
@@ -137,18 +137,18 @@
 
         call ESMF_StatePrint(exportState, rc=rc)
 
-        print *, "User Comp Init returning"
+        print *, "User routine myInitInFortran returning"
    
         rc = ESMF_SUCCESS
 
-    end subroutine user_init
+    end subroutine myInitInFortran
 
 
 !-------------------------------------------------------------------------
 !   !  The Run routine where data is computed.
 !   !
  
-    subroutine user_run(comp, importState, exportState, clock, rc)
+    subroutine myRunInFortran(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
@@ -182,7 +182,7 @@
             end do
           end do 
 
-       print *,"data in exp state successfully transmitted to user_run in", &
+       print *,"data in exp state successfully transmitted to myRunInFortran in", &
                " Fortran Component"
 
        ! modify the data again 
@@ -192,40 +192,48 @@
          end do
        end do 
 
-       print *," data in exp state data modified in user_run in Fortran", &
+       print *," data in exp state data modified in myRunInFortran in Fortran", &
                " component"
 
        call ESMF_ArrayPrint(array0)
 
        !call ESMF_StatePrint(exportState, rc=status)
  
-        print *, "User Comp Run returning"
+        print *, "User routine myRunInFortran returning"
 
         rc = ESMF_SUCCESS
 
-    end subroutine user_run
+    end subroutine myRunInFortran
 
 
 !-------------------------------------------------------------------------
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine user_final(comp, importState, exportState, clock, rc)
+    subroutine myFinalInFortran(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer, intent(out) :: rc
 
+        ! Internal data
+        type(ESMF_Array) :: array
 
         print *, "User Comp Final starting"
     
+        ! Extract the exportState array so it can be destroyed
+        call ESMF_StateGet(exportState,"array1", array=array, rc=rc)
+
+        ! Free up memory
+        call ESMF_ArrayDestroy(array, rc)
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
         deallocate (farray)    
  
-        print *, "User Comp Final returning"
+        print *, "User routine myFinalInFortran returning"
    
         rc = ESMF_SUCCESS
 
-    end subroutine user_final
+    end subroutine myFinalInFortran
 
 
     end module user_FortranComponent

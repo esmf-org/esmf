@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.6 2008/09/04 03:42:01 theurich Exp $
+// $Id: user_CComponent.C,v 1.7 2008/09/10 18:27:15 rosalind Exp $
 //==============================================================================
 
 
@@ -18,10 +18,7 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
 
   printf("I am in myInitInC()\n");
 
-//  ESMC_ClockPrint(*clock);
-
   localrc=ESMC_StateGetArray(exportState, "array1", &retrievedArray);
-//  localrc=ESMC_ArrayPrint(retrievedArray);
   
   double *ptr = (double *)ESMC_ArrayGetPtr(retrievedArray, 0, &localrc);
   
@@ -53,8 +50,6 @@ void myRunInC(ESMC_GridComp gcomp, ESMC_State importState,
   int localrc;
   printf("I am in myRunInC()\n");
 
-//ESMC_StatePrint(importState);
-//ESMC_ClockPrint(*clock);
 
     localrc=ESMC_StateGetArray(exportState, "array1", &retrievedArray);
     double *ptr = (double *)ESMC_ArrayGetPtr(retrievedArray, 0, &localrc);

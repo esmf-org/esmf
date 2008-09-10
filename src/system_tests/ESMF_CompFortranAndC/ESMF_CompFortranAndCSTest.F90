@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.4 2008/09/03 23:39:23 rosalind Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.5 2008/09/10 18:27:15 rosalind Exp $
 !
 ! System test CompFortranAndC
 !  Description on Sourceforge under System Test #63029
@@ -11,7 +11,29 @@
 !
 ! !DESCRIPTION:
 ! System test CompFortranAndC.
-!
+! This system test checks that states are transfered accurately between
+! components that are implemented in different languages (Fortran and C).
+! Two components are created by the driver code and their SetServices()
+! are invoked.
+!  The rest of the code works on an array within a specific state that is 
+!  on turns modified by one component followed by the other component 
+!  verifying those changes. Specifically on,
+
+!  "Init section":
+!  --The Fortran component adds an array to the export state and initializes 
+!    its data.
+!  --The C component re-initializes the data values of the same state array.
+
+!  "Run section":
+!  --The Fortran side first verifies the array values just initialized by the C
+!    component, and then modifies it again before returning.
+!  --The C component verifies the array values just modifed by the Fortran 
+!    component and returns.
+
+!  "Finalize section":
+!  --The Fortran component cleans up the state contents (i.e. it Destroys the
+!    Array object and deallocates the Fortran array it points to).
+
 !
 !\begin{verbatim}
 
@@ -31,15 +53,15 @@
     implicit none
 
     interface 
-      subroutine my_RegistrationInc(gcomp, rc)
+      subroutine my_RegistrationInC(gcomp, rc)
          use ESMF_Mod
          type(ESMF_GridComp) :: gcomp
          integer, intent(out) :: rc
-      end subroutine my_RegistrationInc
+      end subroutine my_RegistrationInC
     end interface
     
 !   Local variables
-    integer :: my_pet, rc, localrc, i, stat
+    integer :: my_pet, rc, localrc
     type(ESMF_VM):: vm
     type(ESMF_GridComp) :: compInFortran
     type(ESMF_GridComp) :: compInC
@@ -92,7 +114,6 @@
     cname = "System Test CompInFortran"
     compInFortran = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-!   call ESMF_GridCompPrint(compInFortran)
 
     print *, "Comp Create (Fortran) finished, name = ", trim(cname)
 
@@ -100,7 +121,6 @@
     cname = "System Test CompInC"
     compInC = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-!   call ESMF_GridCompPrint(compInC)
 
     print *, "Comp Create (C) finished, name = ", trim(cname)
 
@@ -109,7 +129,7 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-      call ESMF_GridCompSetServices(compInFortran, user_register, rc)
+      call ESMF_GridCompSetServices(compInFortran, myRegistrationInFortran, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "CompInFortran Register finished, rc= ", rc
 
@@ -145,7 +165,6 @@
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
       print *, "Clock created"
-!     call ESMF_ClockPrint(clock,rc=rc)
 
 
 !-------------------------------------------------------------------------
@@ -163,10 +182,6 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Initialize Fortran component finished"
  
-    ! ! extract and print the Array in exp
-    ! call ESMF_StateGet(exp,"array1", array=array, rc=rc)
-    ! call ESMF_ArrayPrint(array)
-
       call ESMF_GridCompInitialize(compInC, imp, exp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Initialize C component finished"
