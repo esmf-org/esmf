@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2008/09/05 22:03:34 theurich Exp $ 
+# $Id: makefile,v 1.29 2008/09/10 15:56:42 donstark Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -84,25 +84,30 @@ RUN_ESMC_ArrayUTestUNI:
 
 RUN_ESMF_ArrayHarness1UTest:
 	echo "ESMF_ArrayHarness1UTest" > $(ESMF_TESTDIR)/test_harness.list
+	cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest  $(ESMF_TESTDIR)/ESMF_ArrayHarness1UTest
 	cp -f test_harness.rc $(ESMF_TESTDIR)
 	cp -f harness_config/*.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness1 NP=1 htest
+	cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout $(ESMF_TESTDIR)/ESMF_ArrayHarness1UTest.stdout
 
 RUN_ESMF_ArrayHarness2UTest:
 	echo "ESMF_ArrayHarness2UTest" >> $(ESMF_TESTDIR)/test_harness.list
 	cp -f test_harness.rc $(ESMF_TESTDIR)
 	cp -f harness_config/*.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness2 NP=2 htest
+	cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout $(ESMF_TESTDIR)/ESMF_ArrayHarness2UTest.stdout
 
 RUN_ESMF_ArrayHarness4UTest:
 	echo "ESMF_ArrayHarness4UTest" >> $(ESMF_TESTDIR)/test_harness.list
 	cp -f test_harness.rc $(ESMF_TESTDIR)
 	cp -f harness_config/*.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness4 NP=4 htest
+	cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout $(ESMF_TESTDIR)/ESMF_ArrayHarness4UTest.stdout
 
 RUN_ESMF_ArrayHarness8UTest:
 	echo "ESMF_ArrayHarness8UTest" >> $(ESMF_TESTDIR)/test_harness.list
 	cp -f test_harness.rc $(ESMF_TESTDIR)
 	cp -f harness_config/*.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness8 NP=8 htest
+	cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout $(ESMF_TESTDIR)/ESMF_ArrayHarness8UTest.stdout
 
