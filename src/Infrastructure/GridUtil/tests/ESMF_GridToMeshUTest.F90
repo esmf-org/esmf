@@ -1,4 +1,4 @@
-! $Id: ESMF_GridToMeshUTest.F90,v 1.10 2008/07/11 20:17:24 dneckels Exp $
+! $Id: ESMF_GridToMeshUTest.F90,v 1.11 2008/09/10 17:43:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridToMeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridToMeshUTest.F90,v 1.10 2008/07/11 20:17:24 dneckels Exp $'
+    '$Id: ESMF_GridToMeshUTest.F90,v 1.11 2008/09/10 17:43:18 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -68,7 +68,7 @@ program ESMF_GridToMeshUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Test GridToMesh"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
