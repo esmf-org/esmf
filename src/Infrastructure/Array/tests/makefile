@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2008/09/10 21:46:39 theurich Exp $ 
+# $Id: makefile,v 1.31 2008/09/10 21:48:40 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -125,7 +125,7 @@ RUN_ESMF_ArrayHarness4UTest:
 	cp -f test_harness.rc $(ESMF_TESTDIR)
 	cp -f harness_config/*.rc $(ESMF_TESTDIR)
 	rm -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout
-	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness2 NP=2 htest
+	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness4 NP=4 htest
 	@if [ -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout ] ; then \
 	  cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout $(ESMF_TESTDIR)/ESMF_ArrayHarness4UTest.stdout ; \
 	fi
@@ -141,7 +141,7 @@ RUN_ESMF_ArrayHarness8UTest:
 	cp -f test_harness.rc $(ESMF_TESTDIR)
 	cp -f harness_config/*.rc $(ESMF_TESTDIR)
 	rm -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout
-	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness2 NP=2 htest
+	$(MAKE) TNAME=TestHarness HNAME=ArrayHarness8 NP=8 htest
 	@if [ -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout ] ; then \
 	  cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout $(ESMF_TESTDIR)/ESMF_ArrayHarness8UTest.stdout ; \
 	fi
