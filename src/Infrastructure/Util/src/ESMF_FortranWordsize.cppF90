@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsize.cppF90,v 1.4 2008/05/12 21:56:37 theurich Exp $
+! $Id: ESMF_FortranWordsize.cppF90,v 1.5 2008/09/11 18:14:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -82,17 +82,14 @@ contains
       real :: a, b, c
       integer :: i, j, k
     end type
-    type(simple_udt), pointer :: udt_ptr
-    character :: udt_endchar
-    common /udtcom/ udt_ptr, udt_endchar
+    type(simple_udt), pointer :: udt_ptr1, udt_ptr2
+    common /udtcom/ udt_ptr1, udt_ptr2
     
-    call ESMF_FortranUDTPointerSizeInit()
-    
-    size = ichar(udt_endchar)
-    
+    call ESMF_PointerDifference(ESMC_POINTER_SIZE, udt_ptr1, udt_ptr2, size)
     ! because of compiler introduced padding size may actually overestimate the
-    ! size of the (UDT, pointer) structure
-    
+    ! size of the (UDT, pointer) structure, but all we need is an estimate of
+    ! the upper limit
+
     if (size<4) then
       ! A size smaller than 4 bytes is suspicious and may indicate that the
       ! size was not determined correctly by the above code!

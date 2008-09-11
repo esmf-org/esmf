@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2008/09/02 22:35:25 theurich Exp $ 
+# $Id: makefile,v 1.25 2008/09/11 18:14:08 theurich Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
@@ -9,7 +9,6 @@ AUTOGEN   = ESMF_FortranWordsize.F90 ESMF_TypeKindGet.F90
 SOURCEC	  = ESMC_Util.C ESMC_Fraction.C ESMCI_F90Interface.C
 SOURCEF	  = ESMF_UtilTypes.F90 \
             ESMF_LogErr.F90  \
-            ESMF_FortranWordsizeHelper.F90 \
             $(AUTOGEN) \
             ESMF_InitMacros.F90
             
