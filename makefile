@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.94 2008/09/02 20:30:21 theurich Exp $
+# $Id: makefile,v 1.95 2008/09/11 20:07:37 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -343,6 +343,7 @@ install:
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
 	cp -f $(ESMF_LIBDIR)/lib*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
+	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/lib*.a
 	mkdir -p $(ESMF_INSTALL_DOCDIR_ABSPATH)
 	@if [ -d $(ESMF_DOCDIR) ]; then \
         cp -rf $(ESMF_DOCDIR)/* $(ESMF_INSTALL_DOCDIR_ABSPATH); \
