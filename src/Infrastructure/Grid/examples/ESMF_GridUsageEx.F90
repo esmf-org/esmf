@@ -82,6 +82,10 @@ program ESMF_GridCreateEx
 ! Section~\ref{sec:desc:dist}. It currently supports 
 ! two of these types: regular and irregular.
 !
+! The ESMF Grid is cell center based and so for all distribution 
+! options the methods take as input the number of cells to describe
+! the total index space and the number of cells to specify distribution. 
+!
 ! To create a Grid 
 ! with a regular distribution the user specifies the global
 ! maximum and minimum ranges of the Grid cell index space ({\tt maxIndex} and

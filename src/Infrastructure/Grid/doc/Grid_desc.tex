@@ -135,18 +135,19 @@ into a Grid create call.
 
 \subsubsection{Grid Distribution}
 \label{sec:desc:dist}
+
 ESMF Grids have several options for data distribution (also referred to
-as decomposition).  The user specifies which dimensions 
-are to be distributed through a coordinate dependency (coordDep)
-argument.
+as decomposition).  As ESMF Grids are cell center based these 
+options are all specified  in terms of how the cells in the Grid
+are are broken up between DEs. 
 
 The main distribution options are regular, irregular, and arbitrary.
 A {\bf regular} distribution is one in which the same number of
-contiguous grid points are assigned to each DE in the
+contiguous grid cells are assigned to each DE in the
 distributed dimension.  A {\bf irregular} distribution is one in which
-unequal numbers of contiguous gridpoints are assigned to each
+unequal numbers of contiguous grid cells are assigned to each
 DE in the distributed dimension.  An {\bf arbitrary} distribution is
-one in which any gridpoint can be assigned to any DE.  Any of these
+one in which any grid cell can be assigned to any DE.  Any of these
 distribution options can be applied to any of the grid shapes (i.e.,
 rectangle) or types (i.e., rectilinear).  Arbitrary distributions
 have not been implemented as of v3.1.0.
