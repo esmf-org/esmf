@@ -5,3 +5,20 @@ Requires the following environment settings:
 
 ESMF_COMPILER g95
 
+Notes:
+
+The internal sizes of F90 pointers changed in some g95 compiler
+versions built after may 4th, 2008.  To find out which compiler
+version you are using, type:
+
+  g95 --version
+
+ESMC_Conf.h is currently using values for ESMF_F90_PTR_BASE_SIZE
+and ESMF_F90_PTR_PLUS_RANK appropriate for compilers prior to this
+change.
+
+If you are using a newer version of g95, and are getting unit
+test errors from ESMF_F95PtrUTest in particular, the settings
+in ESMC_Conf.h need to be modified accordingly.  The stdout file
+from ESMF_F95PtrUTest can provide guidance for the correct values
+for your system.
