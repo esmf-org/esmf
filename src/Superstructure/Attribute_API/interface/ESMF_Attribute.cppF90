@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.8 2008/09/11 12:44:40 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.9 2008/09/11 18:19:30 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.8 2008/09/11 12:44:40 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.9 2008/09/11 18:19:30 w6ws Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -552,22 +552,22 @@ contains
 !     \item logical, intent(out) :: value
 !     \item logical, dimension(:), intent(out) :: valueList
 !     \item character (len = *), intent(out), value
-!     \item character (ESMF\_MAXSTR), dimension(count), intent(out), valueList
+!     \item character (len = *), dimension(count), intent(out), valueList
 !     \end{description}
 !     Supported values for <defaultvalue argument> are:
 !     \begin{description}
 !     \item integer(ESMF\_KIND\_I4), intent(out) :: defaultvalue
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: defaultdefaultvalueList
+!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: defaultvalueList
 !     \item integer(ESMF\_KIND\_I8), intent(out) :: defaultvalue
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: defaultdefaultvalueList
+!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: defaultvalueList
 !     \item real (ESMF\_KIND\_R4), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: defaultdefaultvalueList
+!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: defaultvalueList
 !     \item real (ESMF\_KIND\_R8), intent(out) :: defaultvalue
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: defaultdefaultvalueList
+!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: defaultvalueList
 !     \item logical, intent(out) :: defaultvalue
-!     \item logical, dimension(:), intent(out) :: defaultdefaultvalueList
+!     \item logical, dimension(:), intent(out) :: defaultvalueList
 !     \item character (len = *), intent(out), defaultvalue
-!     \item character (ESMF\_MAXSTR), dimension(count), intent(out), defaultdefaultvalueList
+!     \item character (len = *), dimension(count), intent(out), defaultvalueList
 !     \end{description}
 !
 !     The arguments are:
