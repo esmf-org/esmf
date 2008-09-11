@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedist3DSTest.F90,v 1.1 2008/07/14 17:33:01 feiliu Exp $
+! $Id: ESMF_ArrayRedist3DSTest.F90,v 1.2 2008/09/11 17:19:55 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -15,7 +15,7 @@
 !    100x150x4 but runs on only 2 PETs. Both gridded components use DELayouts 
 !    with 1 DE per PET. The decomposition of the source Array is defined as 
 !    (2 x 2 x 2) while the destination Array is decomposed as 
-!    (1 x petCount) = (1 x 2).
+!    (1 x 1 x petCount) = (1 x 1 x 2).
 !
 !    The first component initializes the source Array to a geometric function:
 !
