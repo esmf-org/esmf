@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface.h,v 1.6 2008/08/31 03:09:08 theurich Exp $
+// $Id: ESMCI_F90Interface.h,v 1.7 2008/09/12 22:34:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -73,7 +73,7 @@ class InterfaceInt{
 // method invocations and member dereferences on non-existent objects,
 // thereby preventing crashing or other corruptive behavior.
 
-#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
+#if !defined(ESMF_NO_INITIALIZERS)
   #define ESMF_CHECK_POINTER(ptr, status) \
             if ((ptr) == ESMC_NULL_POINTER) { \
               if (ESMC_PRESENT(status)) *(status) = ESMF_FAILURE; \
@@ -87,6 +87,9 @@ class InterfaceInt{
           }
 #else
   // TODO: delete this else clause when F95 initializers universally supported
+  // TODOgjt: actually I think with the initializer macros it's o.k. to remove
+  // TODOgjt: on the other hand I wonder how useful these macros are anyway
+  // TODOgjt: especially because they don't do correct LogErr handling!
   #define ESMF_CHECK_POINTER(ptr, status)
   #define ESMF_CHECK_BINARY_OPERATOR_POINTERS(ptr1, ptr2, result)
 #endif
