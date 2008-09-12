@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.103 2008/09/11 21:06:32 oehmke Exp $
+! $Id: ESMF_GridComp.F90,v 1.104 2008/09/12 21:24:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.103 2008/09/11 21:06:32 oehmke Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.104 2008/09/12 21:24:14 oehmke Exp $'
 
 !==============================================================================
 !
@@ -256,9 +256,10 @@
 !    annotation for user code to query.
 !   \item[{[grid]}]
 !    Default {\tt ESMF\_Grid} associated with this {\tt gridcomp}. Note that
-!    it is perfectly ok to not specify a Grid. This option is 
+!    it is perfectly ok to not pass a Grid in for this argument. This argument is 
 !    simply a convenience for the user to allow them to associate a Grid
-!    with a component for their later use.  
+!    with a component for their later use. The grid isn't actually used
+!    in the component code. 
 !   \item[{[config]}]
 !    An already-created {\tt ESMF\_Config} configuration object
 !    from which the new component
