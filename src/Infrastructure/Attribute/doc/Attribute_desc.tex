@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.8 2008/09/09 20:03:04 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.9 2008/09/12 18:29:31 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ Of these ESMF objects with Attributes, only some can link their Attributes toget
 
 The most common use for this capability if for linking the Attributes of a Field to the Field Bundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are done automatically by ESMF.  
 
-Attribute hierarchies are linked with "shallow" copies, meaning that the Attributes belonging to an external object are not recreated, they are only referenced by a pointer.  On this note, the function used to copy an Attribute hierarchy follows a similar practice of "shallow" copying.  In this case the Attributes which {\it belong} to the object being copied are actually copied in full, while the Attributes which are linked to the object being copied are referenced by a pointer.  This means that after copying an Attribute hierarchy from ESMF object A to ESMF object B, the changes made to the lower portion of either A or B's Attribute hierarchy will be reflected on {\it both} object A and object B.
+Attribute hierarchies are linked with "shallow" copies, meaning that the Attributes belonging to an external object are not recreated, they are only referenced by a pointer.  On this note, the function used to copy an Attribute hierarchy follows a similar practice of local "shallow" copying.  In this case the Attributes which {\it belong} to the object being copied are actually copied in full, while the Attributes which are linked to the object being copied are referenced by a pointer.  This means that after copying an Attribute hierarchy from ESMF object A to ESMF object B, the changes made to the lower portion of either A or B's Attribute hierarchy will be reflected on {\it both} object A and object B.
 
 \subsubsection{Attribute Packages}
 
