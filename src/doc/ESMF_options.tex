@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.30 2008/05/21 22:15:01 theurich Exp $
+% $Id: ESMF_options.tex,v 1.31 2008/09/12 22:35:44 w6ws Exp $
 
 \section{Global Options and Parameters}
 
@@ -381,9 +381,23 @@ Valid values are:
       16 byte character.
 \end{description}
 
+\subsubsection{ESMF Version}
 
-
-
+{\sf DESCRIPTION:\\}
+The following parameters are available to allow detection of the
+version of ESMF in use.
+\begin{description}
+\item [ESMF\_MAJOR\_VERSION]
+      Integer parameter with the major version number (e.g., 3 for v3.1.0)
+\item [ESMF\_MINOR\_VERSION]
+      Integer parameter with the minor version number (e.g., 1 for v3.1.0)
+\item [ESMF\_REVISION]
+      Integer parameter with the revision number (e.g., 0 for v3.1.0)
+\item [ESMF\_PATCHLEVEL]
+      Integer parameter with the patch level of a specific revision (e.g., 2 for v3.1.0rp2)
+\item [ESMF\_VERSION\_STRING]
+      Character string parameter describing the release (e.g., "3.1.0rp2")
+\end{description}
 
 
 
