@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.240 2008/08/26 20:48:17 theurich Exp $
+#  $Id: common.mk,v 1.241 2008/09/12 17:06:49 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1448,6 +1448,7 @@ tree_build_system_tests: $(SYSTEM_TESTS_BUILD)
 #  Link rule for Fortran system tests.
 #
 $(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
+	$(MAKE) chkdir_tests
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(SYSTEM_TESTS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
 	$(ESMF_RM) -f *.o *.mod
 
