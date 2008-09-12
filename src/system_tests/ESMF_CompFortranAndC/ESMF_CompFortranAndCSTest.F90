@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.5 2008/09/10 18:27:15 rosalind Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.6 2008/09/12 18:36:32 rosalind Exp $
 !
 ! System test CompFortranAndC
 !  Description on Sourceforge under System Test #63029
@@ -20,12 +20,12 @@
 !  verifying those changes. Specifically on,
 
 !  "Init section":
-!  --The Fortran component adds an array to the export state and initializes 
+!  --The Fortran Component adds an array to the export state and initializes 
 !    its data.
-!  --The C component re-initializes the data values of the same state array.
+!  --The C Component re-initializes the data values of the same state array.
 
 !  "Run section":
-!  --The Fortran side first verifies the array values just initialized by the C
+!  --The Fortran Component first verifies the array values just initialized by the C
 !    component, and then modifies it again before returning.
 !  --The C component verifies the array values just modifed by the Fortran 
 !    component and returns.
@@ -34,7 +34,8 @@
 !  --The Fortran component cleans up the state contents (i.e. it Destroys the
 !    Array object and deallocates the Fortran array it points to).
 
-!
+eans up the state contents (i.e. it Destroys the
+!    Array object and deallocates the Fortran array it points to).
 !\begin{verbatim}
 
     program CompFortranAndC
@@ -111,14 +112,14 @@
     call ESMF_VMGet(vm, localPet=my_pet, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    cname = "System Test CompInFortran"
+    cname = "Fortran Component"
     compInFortran = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Create (Fortran) finished, name = ", trim(cname)
 
 
-    cname = "System Test CompInC"
+    cname = "C Component"
     compInC = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
