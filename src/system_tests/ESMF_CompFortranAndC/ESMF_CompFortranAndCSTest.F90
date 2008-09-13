@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.6 2008/09/12 18:36:32 rosalind Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.7 2008/09/13 05:02:00 theurich Exp $
 !
 ! System test CompFortranAndC
 !  Description on Sourceforge under System Test #63029
@@ -7,8 +7,7 @@
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
-!BOP
-!
+!-------------------------------------------------------------------------
 ! !DESCRIPTION:
 ! System test CompFortranAndC.
 ! This system test checks that states are transfered accurately between
@@ -18,24 +17,22 @@
 !  The rest of the code works on an array within a specific state that is 
 !  on turns modified by one component followed by the other component 
 !  verifying those changes. Specifically on,
-
+!
 !  "Init section":
 !  --The Fortran Component adds an array to the export state and initializes 
 !    its data.
 !  --The C Component re-initializes the data values of the same state array.
-
+!
 !  "Run section":
 !  --The Fortran Component first verifies the array values just initialized by the C
 !    component, and then modifies it again before returning.
 !  --The C component verifies the array values just modifed by the Fortran 
 !    component and returns.
-
+!
 !  "Finalize section":
 !  --The Fortran component cleans up the state contents (i.e. it Destroys the
 !    Array object and deallocates the Fortran array it points to).
-
-eans up the state contents (i.e. it Destroys the
-!    Array object and deallocates the Fortran array it points to).
+!
 !\begin{verbatim}
 
     program CompFortranAndC
