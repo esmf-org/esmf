@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.35.2.2 2008/08/28 22:17:42 theurich Exp $
+// $Id: ESMC_Alarm.h,v 1.35.2.3 2008/09/15 05:48:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -131,6 +131,11 @@ class ESMC_Alarm {
                                              //  non-sticky alarm expiration).
     bool              ringingOnPrevTimeStep; // was ringing immediately after
                                              // previous clock timestep.
+    bool              userChangedRingTime;       // true if changed via Set(),
+    bool              userChangedRingInterval;   // used to determine whether
+                                                 // to adjust alarm on timeStep
+                                                 // direction (sign) change
+
     bool              enabled;    // able to ring (TMG 4.5.3)
     bool              sticky;     // must be turned off via
                                   //   ESMC_AlarmRingerOff(),
