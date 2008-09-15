@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.h,v 1.2 2008/08/28 21:33:15 theurich Exp $
+// $Id: ESMCI_VMKernel.h,v 1.3 2008/09/15 20:53:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -20,6 +20,9 @@
 
 #ifdef VMK_STANDALONE
 #include <pthread.h>
+typedef pthread_mutex_t esmf_pthread_mutex_t;
+typedef pthread_cond_t  esmf_pthread_cond_t;
+typedef pthread_t       esmf_pthread_t;
 #else
 #include "ESMF_Pthread.h"
 #endif
@@ -102,7 +105,7 @@ class VMK{
 
   struct ipmutex{
     // mutex variable for intraProcess sync
-    pthread_mutex_t pth_mutex;
+    esmf_pthread_mutex_t pth_mutex;
     int lastFlag;
   };
 
@@ -136,10 +139,10 @@ class VMK{
     // buffer for small messages
     char buffer[SHARED_BUFFER];
     // Pthread sync variables
-    pthread_mutex_t mutex1;
-    pthread_cond_t cond1;
-    pthread_mutex_t mutex2;
-    pthread_cond_t cond2;
+    esmf_pthread_mutex_t mutex1;
+    esmf_pthread_cond_t cond1;
+    esmf_pthread_mutex_t mutex2;
+    esmf_pthread_cond_t cond2;
     volatile int tcounter;
   };
 
@@ -162,7 +165,7 @@ class VMK{
   // members
   protected:
     int mypet;          // PET id of this instance
-    pthread_t mypthid;  // my pthread id
+    esmf_pthread_t mypthid;  // my pthread id
     // pet -> core mapping
     int npets;      // number of PETs in this VMK
     int *lpid;      // local pid (equal to rank in local MPI context)
@@ -179,8 +182,8 @@ class VMK{
     // Shared mutex and thread_finish variables. These are pointers that will be
     // pointing to shared memory variables between different thread-instances of
     // the VMK object.
-    pthread_mutex_t *pth_mutex2;
-    pthread_mutex_t *pth_mutex;
+    esmf_pthread_mutex_t *pth_mutex2;
+    esmf_pthread_mutex_t *pth_mutex;
     int *pth_finish_count;
     // Mutex flag used to indicate that this PET must use muteces for MPI comms
     int mpi_mutex_flag;
@@ -190,9 +193,9 @@ class VMK{
     // IntraProcessSharedMemoryAllocation List
     ipshmAlloc **ipshmTop;      // top of shared alloc list (shared)
     ipshmAlloc *ipshmLocalTop;  // local top of shared alloc list
-    pthread_mutex_t *ipshmMutex;  // mutex to operate (shared)
+    esmf_pthread_mutex_t *ipshmMutex;  // mutex to operate (shared)
     // IntraProcessMutex setup mutex
-    pthread_mutex_t *ipSetupMutex;  // mutex used to init and destroy (shared)
+    esmf_pthread_mutex_t *ipSetupMutex;  // mutex used to init and destroy (shared)
     // Communication requests queue
     int nhandles;
     commhandle *firsthandle;
@@ -260,7 +263,7 @@ class VMK{
     // get() calls    <-- to be replaced by following new inlined section
     int getNpets();                // return npets
     int getMypet();                // return mypet
-    pthread_t getMypthid();        // return mypthid
+    esmf_pthread_t getMypthid();   // return mypthid
     int getNcpet(int i);           // return ncpet
     int getSsiid(int i);           // return ssiid
     MPI_Comm getMpi_c();           // return mpi_c
@@ -272,7 +275,7 @@ class VMK{
     // get() calls
     int getLocalPet() const {return mypet;}
     int getPetCount() const {return npets;}
-    pthread_t getLocalPthreadId() const {return mypthid;}
+    esmf_pthread_t getLocalPthreadId() const {return mypthid;}
     bool getSupportPthreads() const{
 #ifdef ESMF_NO_PTHREADS
       return false;

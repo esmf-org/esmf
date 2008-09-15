@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.2 2008/08/28 21:33:16 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.3 2008/09/15 20:53:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -53,18 +53,6 @@
 
 #include <fcntl.h>
 
-#ifndef MPICH_IGNORE_CXX_SEEK
-#define MPICH_IGNORE_CXX_SEEK
-#endif
-#include <mpi.h>
-
-// VMKernel can be compiled stand-alone outside of ESMF
-#ifdef VMK_STANDALONE
-#include <pthread.h>
-#else
-#include "ESMF_Pthread.h"
-#endif
-
 // macros used within this source file
 #define VERBOSITY             (0)       // 0: off, 10: max
 #define VM_TID_MPI_TAG        (10)      // mpi tag used to send/recv TID
@@ -104,20 +92,21 @@ char **VMK::argv_mpich = &(argv_mpich_store[0]);
 // vmkt encapsulation: begin
 typedef struct{
   volatile int flag;
-  pthread_t tid;
-  pthread_mutex_t mut0;
-  pthread_cond_t cond0;
-  pthread_mutex_t mut1;
-  pthread_cond_t cond1;
-  pthread_mutex_t mut_extra1;
-  pthread_cond_t cond_extra1;
-  pthread_mutex_t mut_extra2;
-  pthread_cond_t cond_extra2;
+  esmf_pthread_t tid;
+  esmf_pthread_mutex_t mut0;
+  esmf_pthread_cond_t cond0;
+  esmf_pthread_mutex_t mut1;
+  esmf_pthread_cond_t cond1;
+  esmf_pthread_mutex_t mut_extra1;
+  esmf_pthread_cond_t cond_extra1;
+  esmf_pthread_mutex_t mut_extra2;
+  esmf_pthread_cond_t cond_extra2;
   void *arg;
 }vmkt_t;
 
 int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg){
   vmkt->flag = 0;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_init(&(vmkt->mut0), NULL);
   pthread_mutex_lock(&(vmkt->mut0));
   pthread_cond_init(&(vmkt->cond0), NULL);
@@ -136,27 +125,36 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg){
     pthread_cond_wait(&(vmkt->cond_extra2), &(vmkt->mut_extra2)); // back-s. #2
   }
   return error;
+#else
+  return 0;
+#endif
 }
 
 int vmkt_release(vmkt_t *vmkt, void *arg){
   vmkt->arg = arg;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(&(vmkt->mut1));  
   pthread_cond_signal(&(vmkt->cond1));
   pthread_mutex_unlock(&(vmkt->mut1));
+#endif
   return 0;
 }
 
 int vmkt_catch(vmkt_t *vmkt){
+#ifndef ESMF_NO_PTHREADS
   pthread_cond_wait(&(vmkt->cond0), &(vmkt->mut0)); //wait for the child
+#endif
   return 0;
 }
 
 int vmkt_join(vmkt_t *vmkt){
   vmkt->flag = 1;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(&(vmkt->mut1));  
   pthread_cond_signal(&(vmkt->cond1));
   pthread_mutex_unlock(&(vmkt->mut1));
   pthread_join(vmkt->tid, NULL); //wait for the child
+#endif
   return 0;
 }
 // vmkt encapsulation: end
@@ -283,7 +281,11 @@ void VMK::init(MPI_Comm mpiCommunicator){
   // and the main_vmachine is all MPI pets we can do the following:
   npets=size;           // user is required to start with #processes=#cores!!!!
   mypet=rank;
+#ifndef ESMF_NO_PTHREADS
   mypthid=pthread_self();
+#else
+  mypthid=0;
+#endif
 #ifdef ESMF_MPIUNI
   mpionly = 0;          // this way the commtype will be checked in comm calls
 #else
@@ -299,10 +301,14 @@ void VMK::init(MPI_Comm mpiCommunicator){
   default_mpi_c = mpi_c;
   // initialize the shared memory variables
   pth_finish_count = NULL;
-  pth_mutex = new pthread_mutex_t;
+  pth_mutex = new esmf_pthread_mutex_t;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_init(pth_mutex, NULL);
-  pth_mutex2 = new pthread_mutex_t;
+#endif
+  pth_mutex2 = new esmf_pthread_mutex_t;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_init(pth_mutex2, NULL);
+#endif
   // the mutex flag must be reset
   if (mpi_thread_level<MPI_THREAD_MULTIPLE)
     mpi_mutex_flag = 1; // must use muteces around mpi comms
@@ -328,10 +334,14 @@ void VMK::init(MPI_Comm mpiCommunicator){
   ipshmTop = new ipshmAlloc*;
   *ipshmTop = NULL;      // reset
   ipshmLocalTop = NULL;   // reset
-  ipshmMutex = new pthread_mutex_t;
+  ipshmMutex = new esmf_pthread_mutex_t;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_init(ipshmMutex, NULL);
-  ipSetupMutex = new pthread_mutex_t;
+#endif
+  ipSetupMutex = new esmf_pthread_mutex_t;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_init(ipSetupMutex, NULL);
+#endif
   // set up the request queue
   nhandles=0;
   firsthandle=NULL;
@@ -391,9 +401,13 @@ void VMK::finalize(int finalizeMpi){
   // finalize default (all MPI) virtual machine, deleting all its allocations
   for (int k=0; k<100; k++)
     delete [] argv[k];
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_destroy(pth_mutex);
+#endif
   delete pth_mutex;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_destroy(pth_mutex2);
+#endif
   delete pth_mutex2;
 #ifdef ESMF_MPIUNI
   delete sendChannel[0].shmp;
@@ -408,9 +422,13 @@ void VMK::finalize(int finalizeMpi){
     delete ipshmPrev;
   }
   delete ipshmTop;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_destroy(ipshmMutex);
+#endif
   delete ipshmMutex;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_destroy(ipSetupMutex);
+#endif
   delete ipSetupMutex;
   delete [] cpuid;
   delete [] ssiid;
@@ -434,18 +452,18 @@ void VMK::finalize(int finalizeMpi){
 
 
 struct contrib_id{
-  pthread_t blocker_tid;    // POSIX thread id of blocker thread
-  vmkt_t *blocker_vmkt;     // pointer to blocker's vmkt structure
-  int mpi_pid;              // MPI rank in the context of the default VMK
-  pid_t pid;                // POSIX process id
-  pthread_t tid;            // POSIX thread id
+  esmf_pthread_t blocker_tid; // POSIX thread id of blocker thread
+  vmkt_t *blocker_vmkt;       // pointer to blocker's vmkt structure
+  int mpi_pid;                // MPI rank in the context of the default VMK
+  pid_t pid;                  // POSIX process id
+  esmf_pthread_t tid;         // POSIX thread id
 };
 
 
 struct SpawnArg{
   // members which are different for each new pet
   VMK *myvm;                  // pointer to vm instance on heap
-  pthread_t pthid;            // pthread id of the spawned thread
+  esmf_pthread_t pthid;       // pthread id of the spawned thread
   int mypet;                  // new mypet 
   int *ncontributors;         // number of pets that contributed cores 
   contrib_id **contributors;  // array of contributors
@@ -465,14 +483,14 @@ struct SpawnArg{
   MPI_Comm mpi_c;
   int nothreadsflag;
   // shared memory variables
-  pthread_mutex_t *pth_mutex2;
-  pthread_mutex_t *pth_mutex;
+  esmf_pthread_mutex_t *pth_mutex2;
+  esmf_pthread_mutex_t *pth_mutex;
   int *pth_finish_count;
   VMK::comminfo *sendChannel;
   VMK::comminfo *recvChannel;
   VMK::ipshmAlloc **ipshmTop;
-  pthread_mutex_t *ipshmMutex;
-  pthread_mutex_t *ipSetupMutex;
+  esmf_pthread_mutex_t *ipshmMutex;
+  esmf_pthread_mutex_t *ipSetupMutex;
   int pref_intra_ssi;
   // cargo
   void *cargo;
@@ -619,14 +637,18 @@ void VMK::destruct(){
       ++num_same_pid;
   // check with the other pets under this pid where we are in wrap-up
   int last_flag=0;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(pth_mutex);
+#endif
   ++(*pth_finish_count);          // increment counter
 #if (VERBOSITY > 9)
   printf("wrap-up counts: %d %d\n", *pth_finish_count, num_same_pid);
 #endif
   if (*pth_finish_count == num_same_pid)
     last_flag=1; // indicate that I am the last pet for this pid to wrap up...
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_unlock(pth_mutex);
+#endif
   // now we know if we are the last pet for this pid
   if (last_flag){
     // mypet is the last pet of this pid to wrap up:
@@ -637,9 +659,13 @@ void VMK::destruct(){
     MPI_Comm_free(&mpi_c);
     MPI_Group_free(&mpi_g);  // this might have to be called from higher up...
     //  - free the shared memory variables
+#ifndef ESMF_NO_PTHREADS
     pthread_mutex_destroy(pth_mutex2);
+#endif
     delete pth_mutex2;
+#ifndef ESMF_NO_PTHREADS
     pthread_mutex_destroy(pth_mutex);
+#endif
     delete pth_mutex;
     delete pth_finish_count;
     // free - the IntraProcessSharedMemoryAllocation List
@@ -651,9 +677,13 @@ void VMK::destruct(){
       delete ipshmPrev;
     }
     delete ipshmTop;
+#ifndef ESMF_NO_PTHREADS
     pthread_mutex_destroy(ipshmMutex);
+#endif
     delete ipshmMutex;
+#ifndef ESMF_NO_PTHREADS
     pthread_mutex_destroy(ipSetupMutex);
+#endif
     delete ipSetupMutex;
     for (int i=0; i<npets; i++){
       if(sendChannel[i].comm_type==VM_COMM_TYPE_SHMHACK
@@ -661,12 +691,14 @@ void VMK::destruct(){
         ||sendChannel[i].comm_type==VM_COMM_TYPE_MPIUNI){
         // intra-process shared memory structure to be deleted
         shared_mp *shmp=sendChannel[i].shmp;
+#ifndef ESMF_NO_PTHREADS
         if(sendChannel[i].comm_type==VM_COMM_TYPE_PTHREAD){
           pthread_mutex_destroy(&(shmp->mutex1));
           pthread_cond_destroy(&(shmp->cond1));
           pthread_mutex_destroy(&(shmp->mutex2));
           pthread_cond_destroy(&(shmp->cond2));
         }
+#endif
 #if (VERBOSITY > 9)
         printf("deleting shmp=%p for sendChannel[%d], mypet=%d\n", 
           shmp, i, mypet);
@@ -693,12 +725,14 @@ void VMK::destruct(){
           ||recvChannel[i].comm_type==VM_COMM_TYPE_MPIUNI){
           // intra-process shared memory structure to be deleted
           shared_mp *shmp=recvChannel[i].shmp;
+#ifndef ESMF_NO_PTHREADS
           if(recvChannel[i].comm_type==VM_COMM_TYPE_PTHREAD){
             pthread_mutex_destroy(&(shmp->mutex1));
             pthread_cond_destroy(&(shmp->cond1));
             pthread_mutex_destroy(&(shmp->mutex2));
             pthread_cond_destroy(&(shmp->cond2));
           }
+#endif
 #if (VERBOSITY > 9)
           printf("deleting shmp=%p for recvChannel[%d], mypet=%d\n", 
             shmp, i, mypet);
@@ -743,13 +777,17 @@ static void *vmk_spawn(void *arg){
   // now use vmkt features to prepare for catch/release loop (back-sync)
   // - part 1
   vmkt_t *vmkt = &(sarg->vmkt);
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(&(vmkt->mut0));        // back-sync #1 ...
   pthread_cond_signal(&(vmkt->cond0));      // . back-sync #1 .
   pthread_mutex_unlock(&(vmkt->mut0));      // ... back-sync #1
+#endif
   // now we know that vmkt_create is past pthread_create()
   // ... and we are between back-sync #1 and #2
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(&(vmkt->mut1));        // prepare this thread's mutex
   pthread_mutex_lock(&(vmkt->mut_extra1));  // prepare this thread's mutex
+#endif
   // fill in the tid for this thread
   sarg->pthid = sarg->vmkt.tid;
   // obtain reference to the vm instance on heap
@@ -760,9 +798,11 @@ static void *vmk_spawn(void *arg){
   //       vmkt_create in order to assure that the entries in the VM are valid!
   // now use vmkt features to prepare for catch/release loop (back-sync)
   // - part 2
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(&(vmkt->mut_extra2));    // back-sync #2 ...
   pthread_cond_signal(&(vmkt->cond_extra2));  // . back-sync #2 .
   pthread_mutex_unlock(&(vmkt->mut_extra2));  // ... back-sync #2
+#endif
   volatile int *f = &(vmkt->flag);
   // now enter the catch/release loop
   for(;;){
@@ -772,7 +812,9 @@ static void *vmk_spawn(void *arg){
     fprintf(stderr,"thread %d: %d going to wait for release, pid: %d\n",
       vmkt->tid, pthread_self(), getpid());
 #endif
+#ifndef ESMF_NO_PTHREADS
     pthread_cond_wait(&(vmkt->cond1), &(vmkt->mut1));
+#endif
 #if (VERBOSITY > 1)
     fprintf(stderr,"thread %d: %d was released, pid: %d, vm: %p\n", 
       vmkt->tid, pthread_self(), getpid(), vm);
@@ -789,27 +831,29 @@ static void *vmk_spawn(void *arg){
       sarg->fctp((void *)vm, vmkt->arg);
     //vmkt->routine(vmkt->arg);
     
-  // before pet terminates it must send a signal indicating that core is free
-  for (int i=0; i<sarg->ncontributors[sarg->mypet]; i++){
+    // before pet terminates it must send a signal indicating that core is free
+    for (int i=0; i<sarg->ncontributors[sarg->mypet]; i++){
 #if (VERBOSITY > 5)
-    fprintf(stderr, " send wake-up signal to : %d %d\n",
-      sarg->contributors[sarg->mypet][i].pid, 
-      sarg->contributors[sarg->mypet][i].blocker_tid);
+      fprintf(stderr, " send wake-up signal to : %d %d\n",
+        sarg->contributors[sarg->mypet][i].pid, 
+        sarg->contributors[sarg->mypet][i].blocker_tid);
 #endif
-    // send signal to the _other_ process
-    kill(sarg->contributors[sarg->mypet][i].pid, VM_SIG1);
-    // which ever thread of the other process woke up will try to receive tid
-//    MPI_Send(&(sarg->contributors[sarg->mypet][i].blocker_tid),
+      // send signal to the _other_ process
+      kill(sarg->contributors[sarg->mypet][i].pid, VM_SIG1);
+      // which ever thread of the other process woke up will try to receive tid
+//      MPI_Send(&(sarg->contributors[sarg->mypet][i].blocker_tid),
 //      sizeof(pthread_t), MPI_BYTE, sarg->contributors[sarg->mypet][i].mpi_pid,
 //      VM_TID_MPI_TAG, vm.default_mpi_c);
-    MPI_Send(&(sarg->contributors[sarg->mypet][i].blocker_vmkt),
-      sizeof(vmkt_t *), MPI_BYTE, sarg->contributors[sarg->mypet][i].mpi_pid,
-      VM_TID_MPI_TAG, vm->default_mpi_c);
-  }
+      MPI_Send(&(sarg->contributors[sarg->mypet][i].blocker_vmkt),
+        sizeof(vmkt_t *), MPI_BYTE, sarg->contributors[sarg->mypet][i].mpi_pid,
+        VM_TID_MPI_TAG, vm->default_mpi_c);
+    }
     // now signal to parent thread that child is done with its work
+#ifndef ESMF_NO_PTHREADS
     pthread_mutex_lock(&(vmkt->mut0)); // wait until parent has reached "catch"
     pthread_cond_signal(&(vmkt->cond0)); // then signal that child is done
     pthread_mutex_unlock(&(vmkt->mut0)); // release the mutex lock for parent
+#endif
   }
   // wrap-up...
   vm->destruct();
@@ -830,13 +874,17 @@ static void *vmk_sigcatcher(void *arg){
   // now use vmkt features to prepare for catch/release loop (back-sync)
   // - part 1
   vmkt_t *vmkt = &(sarg->vmkt_extra);
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(&(vmkt->mut0));        // back-sync #1 ...
   pthread_cond_signal(&(vmkt->cond0));      // . back-sync #1 .
   pthread_mutex_unlock(&(vmkt->mut0));      // ... back-sync #1
+#endif
   // now we know that vmkt_create is past pthread_create()
   // ... and we are between back-sync #1 and #2
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(&(vmkt->mut1));        // prepare this thread's mutex
   pthread_mutex_lock(&(vmkt->mut_extra1));  // prepare this thread's mutex
+#endif
   volatile int *f = &(vmkt->flag);
   // since LinuxThreads (pre NPTL) have the problem that each thread reports
   // its own PID instead the same for each thread, which would be the posix
@@ -853,9 +901,11 @@ static void *vmk_sigcatcher(void *arg){
   VMK vm;  // need a handle to access the MPI_Comm of default VMK
   // now use vmkt features to prepare for catch/release loop (back-sync)
   // - part 2
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(&(vmkt->mut_extra2));    // back-sync #2 ...
   pthread_cond_signal(&(vmkt->cond_extra2));  // . back-sync #2 .
   pthread_mutex_unlock(&(vmkt->mut_extra2));  // ... back-sync #2
+#endif
   // now enter the catch/release loop
   for(;;){
     //sleep(2); // put this in the code to verify that earlier received signals
@@ -864,7 +914,9 @@ static void *vmk_sigcatcher(void *arg){
     fprintf(stderr,"vmk_sigcatcher: thread %d: %d going to wait for release, pid: %d\n",
       vmkt->tid, pthread_self(), getpid());
 #endif
+#ifndef ESMF_NO_PTHREADS
     pthread_cond_wait(&(vmkt->cond1), &(vmkt->mut1));
+#endif
 #if (VERBOSITY > 5)
     fprintf(stderr,"vmk_sigcatcher: thread %d: %d was released, pid:%d\n", vmkt->tid,
       pthread_self(), getpid());
@@ -912,16 +964,20 @@ static void *vmk_sigcatcher(void *arg){
     blocker_vmkt);
 #endif
   
-  pthread_mutex_lock(&(blocker_vmkt->mut_extra1));
-  pthread_cond_signal(&(blocker_vmkt->cond_extra1));
-  pthread_mutex_unlock(&(blocker_vmkt->mut_extra1));
-  
-  // this sigcatcher has done its job and is allowed to recycle to be caught...
+#ifndef ESMF_NO_PTHREADS
+    pthread_mutex_lock(&(blocker_vmkt->mut_extra1));
+    pthread_cond_signal(&(blocker_vmkt->cond_extra1));
+    pthread_mutex_unlock(&(blocker_vmkt->mut_extra1));
+#endif
+      
+    // this sigcatcher has done its job and is allowed to recycle to be caught..
   
     // now signal to parent thread that child is done with its work
+#ifndef ESMF_NO_PTHREADS
     pthread_mutex_lock(&(vmkt->mut0)); // wait until parent has reached "catch"
     pthread_cond_signal(&(vmkt->cond0)); // then signal that child is done
     pthread_mutex_unlock(&(vmkt->mut0)); // release the mutex lock for parent
+#endif
   }
   return NULL;
 }
@@ -937,20 +993,26 @@ static void *vmk_block(void *arg){
   // now use vmkt features to prepare for catch/release loop (back-sync)
   // - part 1
   vmkt_t *vmkt = &(sarg->vmkt);
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(&(vmkt->mut0));        // back-sync #1 ...
   pthread_cond_signal(&(vmkt->cond0));      // . back-sync #1 .
   pthread_mutex_unlock(&(vmkt->mut0));      // ... back-sync #1
+#endif
   // now we know that vmkt_create is past pthread_create()
   // ... and we are between back-sync #1 and #2
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(&(vmkt->mut1));        // prepare this thread's mutex
   pthread_mutex_lock(&(vmkt->mut_extra1));  // prepare this thread's mutex
+#endif
   // fill in the tid for this thread
   sarg->pthid = sarg->vmkt.tid;
   // now use vmkt features to prepare for catch/release loop (back-sync)
   // - part 2
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(&(vmkt->mut_extra2));    // back-sync #2 ...
   pthread_cond_signal(&(vmkt->cond_extra2));  // . back-sync #2 .
   pthread_mutex_unlock(&(vmkt->mut_extra2));  // ... back-sync #2
+#endif
 #if (VERBOSITY > 5)
   fprintf(stderr, "blocker is past back-sync #2\n");  
 #endif  
@@ -963,7 +1025,9 @@ static void *vmk_block(void *arg){
     fprintf(stderr,"vmk_block: thread %d: %d going to wait for release, pid: %d\n",
       vmkt->tid, pthread_self(), getpid());
 #endif
+#ifndef ESMF_NO_PTHREADS
     pthread_cond_wait(&(vmkt->cond1), &(vmkt->mut1));
+#endif
 #if (VERBOSITY > 5)
     fprintf(stderr,"vmk_block: thread %d: %d was released, pid:%d\n", vmkt->tid,
       pthread_self(), getpid());
@@ -972,32 +1036,36 @@ static void *vmk_block(void *arg){
     if (*f==1) break; // check whether this was a wrap up call
 
 
-  // This blocker thread is responsible for staying alive until resources,
-  // i.e. cores, become available to the contributing pet. The contributing
-  // pet is blocked (asynchonously) via pthread_cond_wait().
+    // This blocker thread is responsible for staying alive until resources,
+    // i.e. cores, become available to the contributing pet. The contributing
+    // pet is blocked (asynchonously) via pthread_cond_wait().
 #if (VERBOSITY > 5)
-  fprintf(stderr, "I am a blocker for pid %d, my tid is %d and going to sleep...\n",
-    getpid(), pthread_self());
+    fprintf(stderr, "I am a blocker for pid %d, my tid is %d and going "
+      "to sleep...\n", getpid(), pthread_self());
 #endif
 
-  // suspend this thread until awoken by one of the sigcatcher threads  
-  pthread_cond_wait(&(vmkt->cond_extra1), &(vmkt->mut_extra1));
+    // suspend this thread until awoken by one of the sigcatcher threads  
+#ifndef ESMF_NO_PTHREADS
+    pthread_cond_wait(&(vmkt->cond_extra1), &(vmkt->mut_extra1));
+#endif
 
 #if (VERBOSITY > 5)
-//  fprintf(stderr, "I am a blocker for pid %d, my tid is %d and\n"
+//    fprintf(stderr, "I am a blocker for pid %d, my tid is %d and\n"
 //    "woke up with signal: %d. I'll exit and therefore free block on my pet\n",
 //    getpid(), pthread_self(), caught);
-  fprintf(stderr, "I am a blocker for pid %d, my tid is %d and\n"
-    "woke up because of condition. I'll exit and therefore free block on my"
-    "pet\n", getpid(), pthread_self());
+    fprintf(stderr, "I am a blocker for pid %d, my tid is %d and\n"
+      "woke up because of condition. I'll exit and therefore free block on my"
+      "pet\n", getpid(), pthread_self());
 #endif
-  // once the signal has been received from a sigcatcher the blocker can 
-  // go into the catch section before returning to wait for release
+    // once the signal has been received from a sigcatcher the blocker can 
+    // go into the catch section before returning to wait for release
 
     // now signal to parent thread that child is done with its work
+#ifndef ESMF_NO_PTHREADS
     pthread_mutex_lock(&(vmkt->mut0)); // wait until parent has reached "catch"
     pthread_cond_signal(&(vmkt->cond0)); // then signal that child is done
     pthread_mutex_unlock(&(vmkt->mut0)); // release the mutex lock for parent
+#endif
   }
   return NULL;
 }
@@ -1060,12 +1128,12 @@ void *VMK::startup(class VMKPlan *vmp,
   int **new_cid = new int*[new_npets];
   contrib_id **new_contributors = new contrib_id*[new_npets];
   // local variables, unallocated yet...
-  pthread_mutex_t *new_pth_mutex2;
-  pthread_mutex_t *new_pth_mutex;
+  esmf_pthread_mutex_t *new_pth_mutex2;
+  esmf_pthread_mutex_t *new_pth_mutex;
   int *new_pth_finish_count;
   ipshmAlloc **new_ipshmTop;
-  pthread_mutex_t *new_ipshmMutex;
-  pthread_mutex_t *new_ipSetupMutex;
+  esmf_pthread_mutex_t *new_ipshmMutex;
+  esmf_pthread_mutex_t *new_ipSetupMutex;
   // utility variables that will be used beyond the next i-loop
   int num_diff_pids=0;  // total number of different pids/lpids in new VMK
   // utility arrays and variables used only during the next i-loop
@@ -1162,8 +1230,12 @@ void *VMK::startup(class VMKPlan *vmp,
               new_contributors[new_petid][ncontrib_counter].mpi_pid =
                 pid[mypet];
               new_contributors[new_petid][ncontrib_counter].pid = getpid();
+#ifndef ESMF_NO_PTHREADS
               new_contributors[new_petid][ncontrib_counter].tid =
-                 pthread_self();
+                pthread_self();
+#else
+              new_contributors[new_petid][ncontrib_counter].tid = 0;
+#endif
               // LinuxThreads (pre-NPTL) have the problem that each thread
               // comes with a different PID. Thus the stored PID must be that
               // of the sigcatcher in order to work. For correct posix behavior
@@ -1384,19 +1456,27 @@ void *VMK::startup(class VMKPlan *vmp,
         printf("mypet is first one for lpid -> allocating shared memory\n");
 #endif
         // initialize shared variables
-        new_pth_mutex2 = new pthread_mutex_t;
+        new_pth_mutex2 = new esmf_pthread_mutex_t;
+#ifndef ESMF_NO_PTHREADS
         pthread_mutex_init(new_pth_mutex2, NULL);
-        new_pth_mutex = new pthread_mutex_t;
+#endif
+        new_pth_mutex = new esmf_pthread_mutex_t;
+#ifndef ESMF_NO_PTHREADS
         pthread_mutex_init(new_pth_mutex, NULL);
+#endif
         new_pth_finish_count = new int;
         *new_pth_finish_count = 0;
         // initialize the IntraProcessSharedMemoryAllocation Table
         new_ipshmTop = new ipshmAlloc*;
         *new_ipshmTop = NULL;  // reset
-        new_ipshmMutex = new pthread_mutex_t;
+        new_ipshmMutex = new esmf_pthread_mutex_t;
+#ifndef ESMF_NO_PTHREADS
         pthread_mutex_init(new_ipshmMutex, NULL);
-        new_ipSetupMutex = new pthread_mutex_t;
+#endif
+        new_ipSetupMutex = new esmf_pthread_mutex_t;
+#ifndef ESMF_NO_PTHREADS
         pthread_mutex_init(new_ipSetupMutex, NULL);
+#endif
         // set up the shared_mp structure within the new_commarray
         int pet1Index = 0;  // reset
         for (int pet1=0; pet1<new_npets; pet1++){
@@ -1427,6 +1507,7 @@ void *VMK::startup(class VMKPlan *vmp,
                     new_commarray[pet1Index][pet2Index].comm_type =
                       VM_COMM_TYPE_PTHREAD;
                     // initialize pthread variables in shared_mp
+#ifndef ESMF_NO_PTHREADS
                     pthread_mutex_init(
                       &(new_commarray[pet1Index][pet2Index].shmp->mutex1),
                       NULL);
@@ -1439,6 +1520,7 @@ void *VMK::startup(class VMKPlan *vmp,
                     pthread_cond_init(
                       &(new_commarray[pet1Index][pet2Index].shmp->cond2),
                       NULL);
+#endif
                     new_commarray[pet1Index][pet2Index].shmp->tcounter = 0;
                   }
                 }else{
@@ -1459,12 +1541,12 @@ void *VMK::startup(class VMKPlan *vmp,
         int pet_src = pet_list[i][0];
         if (mypet==pet_src){
           // mypet is the first pet in the list -> mypet allocated -> must send
-          send(&new_pth_mutex2, sizeof(pthread_mutex_t*), pet_dest);
-          send(&new_pth_mutex, sizeof(pthread_mutex_t*), pet_dest);
+          send(&new_pth_mutex2, sizeof(esmf_pthread_mutex_t*), pet_dest);
+          send(&new_pth_mutex, sizeof(esmf_pthread_mutex_t*), pet_dest);
           send(&new_pth_finish_count, sizeof(int*), pet_dest);
           send(&new_ipshmTop, sizeof(ipshmAlloc*), pet_dest);
-          send(&new_ipshmMutex, sizeof(pthread_mutex_t*), pet_dest);
-          send(&new_ipSetupMutex, sizeof(pthread_mutex_t*), pet_dest);
+          send(&new_ipshmMutex, sizeof(esmf_pthread_mutex_t*), pet_dest);
+          send(&new_ipSetupMutex, sizeof(esmf_pthread_mutex_t*), pet_dest);
           send(&new_commarray, sizeof(comminfo**), pet_dest);
         }else if(mypet==pet_dest){
           // mypet is one of the pets that also spawn for this lpid -> receive
@@ -1474,12 +1556,12 @@ void *VMK::startup(class VMKPlan *vmp,
           delete [] new_commarray;
           new_commarray_delete_flag = false;  // mypet doesn't delete again
           // now this PET is ready to receive the pointers for shared variables
-          recv(&new_pth_mutex2, sizeof(pthread_mutex_t*), pet_src);
-          recv(&new_pth_mutex, sizeof(pthread_mutex_t*), pet_src);
+          recv(&new_pth_mutex2, sizeof(esmf_pthread_mutex_t*), pet_src);
+          recv(&new_pth_mutex, sizeof(esmf_pthread_mutex_t*), pet_src);
           recv(&new_pth_finish_count, sizeof(int*), pet_src);
           recv(&new_ipshmTop, sizeof(ipshmAlloc*), pet_src);
-          recv(&new_ipshmMutex, sizeof(pthread_mutex_t*), pet_src);
-          recv(&new_ipSetupMutex, sizeof(pthread_mutex_t*), pet_src);
+          recv(&new_ipshmMutex, sizeof(esmf_pthread_mutex_t*), pet_src);
+          recv(&new_ipSetupMutex, sizeof(esmf_pthread_mutex_t*), pet_src);
           recv(&new_commarray, sizeof(comminfo**), pet_src);
         }
       }
@@ -1556,7 +1638,11 @@ void *VMK::startup(class VMKPlan *vmp,
       // obtain reference to the vm instance on heap
       VMK &vm = *(sarg[0].myvm);
       // setup the pet section in this vm instance
+#ifndef ESMF_NO_PTHREADS
       sarg[0].pthid = pthread_self();
+#else
+      sarg[0].pthid = 0;
+#endif
       vm.construct((void *)&sarg[0]);
     }else{
       // if this is a thread-based VM then...
@@ -1774,7 +1860,7 @@ int VMK::getMypet(){
 }
 
 
-pthread_t VMK::getMypthid(){
+esmf_pthread_t VMK::getMypthid(){
   return mypthid;
 }
 
@@ -2351,7 +2437,9 @@ void VMKPlan::vmkplan_print(){
 
 void VMK::commqueueitem_link(commhandle *ch){
   commhandle *handle;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(pth_mutex2);
+#endif
   if (nhandles==0){
     firsthandle=ch;
     ch->prev_handle=NULL;
@@ -2365,13 +2453,17 @@ void VMK::commqueueitem_link(commhandle *ch){
     ch->next_handle=NULL;
   }
   ++nhandles;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_unlock(pth_mutex2);
+#endif
 }
 
 int VMK::commqueueitem_unlink(commhandle *ch){
   commhandle *handle;
   int found = 0; // reset
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(pth_mutex2);
+#endif
   if(nhandles >= 1){
     handle=firsthandle;
     while (handle->next_handle!=NULL){
@@ -2395,7 +2487,9 @@ int VMK::commqueueitem_unlink(commhandle *ch){
         handle->next_handle->prev_handle=handle->prev_handle;
     }
   }
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_unlock(pth_mutex2);
+#endif
   return found;
 }
 
@@ -2431,12 +2525,14 @@ int VMK::commtest(commhandle **ch, int *completeFlag, status *status){
       // TODO: status will only reflect the last communiction in the i-loop!
       for (int i=0; i<(*ch)->nelements; i++){
 //fprintf(stderr, "MPI_Wait: ch=%p\n", &((*ch)->mpireq[i]));
-        if (mpi_mutex_flag)
-          pthread_mutex_lock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+        if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
+#endif
         localrc = MPI_Test(&((*ch)->mpireq[i]), &localCompleteFlag,
           mpi_s);
-        if (mpi_mutex_flag)
-          pthread_mutex_unlock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+        if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
+#endif
         if (status){
           if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
             status->srcPet = mpi_s->MPI_SOURCE;
@@ -2510,12 +2606,14 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
 #endif
           int completeFlag = 0;
           for(;;){
-            if (mpi_mutex_flag)
-              pthread_mutex_lock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+            if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
+#endif
             localrc = MPI_Test(&((*ch)->mpireq[i]), &completeFlag,
               mpi_s);
-            if (mpi_mutex_flag)
-              pthread_mutex_unlock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+            if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
+#endif
             if (completeFlag) break;
 #ifdef ESMF_NO_NANOSLEEP
 #else
@@ -2534,11 +2632,13 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
             status->error   = mpi_s->MPI_ERROR;
           }
         }else{
-          if (mpi_mutex_flag)
-            pthread_mutex_lock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+          if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
+#endif
           localrc = MPI_Wait(&((*ch)->mpireq[i]), mpi_s);
-          if (mpi_mutex_flag)
-            pthread_mutex_unlock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+          if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
+#endif
           if (status){
             if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
               status->srcPet = mpi_s->MPI_SOURCE;
@@ -2595,11 +2695,13 @@ void VMK::commcancel(commhandle **commh){
       // this commhandle contains MPI_Requests
       for (int i=0; i<(*commh)->nelements; i++){
 //fprintf(stderr, "MPI_Cancel: commh=%p\n", &((*commh)->mpireq[i]));
-        if (mpi_mutex_flag)
-          pthread_mutex_lock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+        if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
+#endif
         MPI_Cancel(&((*commh)->mpireq[i]));
-        if (mpi_mutex_flag)
-          pthread_mutex_unlock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+        if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
+#endif
       }
     }else{
       printf("VMK: only MPI non-blocking implemented\n");
@@ -2635,18 +2737,21 @@ int VMK::send(const void *message, int size, int dest, int tag){
     void *messageC; // for MPI C interface convert (const void *) -> (void *)
     memcpy(&messageC, &message, sizeof(void *));
     // use mutex to serialize mpi comm calls if mpi thread support requires it
-    if (mpi_mutex_flag)
-      pthread_mutex_lock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+    if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
+#endif
     if (tag == -1) tag = 1000*mypet+dest;   // default tag to simplify debugging
     localrc = MPI_Send(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c);
-    if (mpi_mutex_flag)
-      pthread_mutex_unlock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+    if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
+#endif
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
     shmp = sendChannel[dest].shmp;  // shared memory mp channel
     shmp->ptr_src = message;                        // set the source pointer
     // synchronize with recv()
+#ifndef ESMF_NO_PTHREADS
     pthread_mutex_lock(&(shmp->mutex1));
     shmp->tcounter++;
     if (shmp->tcounter < 2){
@@ -2658,6 +2763,7 @@ int VMK::send(const void *message, int size, int dest, int tag){
       pthread_cond_broadcast(&(shmp->cond1));
     }
     pthread_mutex_unlock(&(shmp->mutex1));
+#endif
     // now ptr_src and ptr_dest are valid for this message
     scpsize = size/2;   // send takes the lower half
     pdest = (char *)shmp->ptr_dest;
@@ -2665,6 +2771,7 @@ int VMK::send(const void *message, int size, int dest, int tag){
     // do the actual memcpy
     memcpy(pdest, psrc, scpsize);
     // synchronize with recv()
+#ifndef ESMF_NO_PTHREADS
     pthread_mutex_lock(&(shmp->mutex2));
     shmp->tcounter++;
     if (shmp->tcounter < 2){
@@ -2676,6 +2783,7 @@ int VMK::send(const void *message, int size, int dest, int tag){
       pthread_cond_broadcast(&(shmp->cond2));
     }
     pthread_mutex_unlock(&(shmp->mutex2));
+#endif
     break;
   case VM_COMM_TYPE_SHMHACK:
     // Shared memory hack sync with spin-lock
@@ -2786,14 +2894,16 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
     void *messageC; // for MPI C interface convert (const void *) -> (void *)
     memcpy(&messageC, &message, sizeof(void *));
     // use mutex to serialize mpi comm calls if mpi thread support requires it
-    if (mpi_mutex_flag)
-      pthread_mutex_lock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+    if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
+#endif
 //fprintf(stderr, "MPI_Isend: ch=%p\n", (*ch)->mpireq);
     if (tag == -1) tag = 1000*mypet+dest;   // default tag to simplify debugging
     localrc = MPI_Isend(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c, 
       (*ch)->mpireq);
-    if (mpi_mutex_flag)
-      pthread_mutex_unlock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+    if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
+#endif
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
@@ -2864,8 +2974,9 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
   case VM_COMM_TYPE_MPI1:
     // MPI-1 implementation
     // use mutex to serialize mpi comm calls if mpi thread support requires it
-    if (mpi_mutex_flag)
-      pthread_mutex_lock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+    if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
+#endif
     if (tag == -1) tag = 1000*source+mypet; // default tag to simplify debugging
     else if (tag == VM_ANY_TAG) tag = MPI_ANY_TAG;
     int mpiSource;
@@ -2877,8 +2988,9 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
     else
       mpi_s = MPI_STATUS_IGNORE;
     localrc = MPI_Recv(message, size, MPI_BYTE, mpiSource, tag, mpi_c, mpi_s);
-    if (mpi_mutex_flag)
-      pthread_mutex_unlock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+    if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
+#endif
     if (status){
       if (lpid[mpi_s->MPI_SOURCE] == mpi_s->MPI_SOURCE)
         status->srcPet = mpi_s->MPI_SOURCE;
@@ -2896,6 +3008,7 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
     shmp = recvChannel[source].shmp;   // shared memory mp channel
     shmp->ptr_dest = message;               // set the destination pointer
     // synchronize with send()
+#ifndef ESMF_NO_PTHREADS
     pthread_mutex_lock(&(shmp->mutex1));
     shmp->tcounter++;
     if (shmp->tcounter < 2){
@@ -2907,6 +3020,7 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
       pthread_cond_broadcast(&(shmp->cond1));
     }
     pthread_mutex_unlock(&(shmp->mutex1));
+#endif
     // now ptr_src and ptr_dest are valid for this message
     scpsize = size/2;           // send takes the lower half
     rcpsize = size - scpsize;   // recv takes the upper half
@@ -2915,6 +3029,7 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
     // do actual memcpy
     memcpy(pdest + scpsize, psrc + scpsize, rcpsize);
     // synchronize with send()
+#ifndef ESMF_NO_PTHREADS
     pthread_mutex_lock(&(shmp->mutex2));
     shmp->tcounter++;
     if (shmp->tcounter < 2){
@@ -2926,6 +3041,7 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
       pthread_cond_broadcast(&(shmp->cond2));
     }
     pthread_mutex_unlock(&(shmp->mutex2));
+#endif
     break;
   case VM_COMM_TYPE_SHMHACK:
     // Shared memory hack sync with spin-lock
@@ -3042,8 +3158,9 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
     (*ch)->mpireq = new MPI_Request[1];
     // MPI-1 implementation
     // use mutex to serialize mpi comm calls if mpi thread support requires it
-    if (mpi_mutex_flag)
-      pthread_mutex_lock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+    if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
+#endif
 //fprintf(stderr, "MPI_Irecv: ch=%p\n", (*ch)->mpireq);
     if (tag == -1) tag = 1000*source+mypet; // default tag to simplify debugging
     else if (tag == VM_ANY_TAG) tag = MPI_ANY_TAG;
@@ -3052,8 +3169,9 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
     else mpiSource = lpid[source];
     localrc = MPI_Irecv(message, size, MPI_BYTE, mpiSource, tag, mpi_c,
       (*ch)->mpireq);
-    if (mpi_mutex_flag)
-      pthread_mutex_unlock(pth_mutex);
+#ifndef ESMF_NO_PTHREADS
+    if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
+#endif
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
@@ -4508,7 +4626,9 @@ void VMK::wtimedelay(double delay){
 
 void *VMK::ipshmallocate(int bytes, int *firstFlag){
   if (firstFlag != NULL) *firstFlag = 0; // reset
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(ipshmMutex);
+#endif
   if (ipshmLocalTop == *ipshmTop){
     // this is the first thread for this new request: add element + allocate
     *ipshmTop = new ipshmAlloc;  // new top element in shared allocation list
@@ -4535,7 +4655,9 @@ void *VMK::ipshmallocate(int bytes, int *firstFlag){
         ipshmLocalTop = ipshmTemp;  // new local top element
     }
   }
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_unlock(ipshmMutex);
+#endif
   return ipshmLocalTop->allocation;  // return allocation of local top
 }
 
@@ -4543,7 +4665,9 @@ void *VMK::ipshmallocate(int bytes, int *firstFlag){
 void VMK::ipshmdeallocate(void *pointer){
   // this call has undefined behavior if called multiple times from the same
   // thread with identical pointer argument
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(ipshmMutex);
+#endif
   ipshmAlloc *ipshmTemp = *ipshmTop; // start at the current top of the list
   while (ipshmTemp != NULL){
     if (ipshmTemp->allocation == pointer) break;
@@ -4564,7 +4688,9 @@ void VMK::ipshmdeallocate(void *pointer){
       // because of improper user code.
     }
   }
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_unlock(ipshmMutex);
+#endif
 }
 
 
@@ -4576,29 +4702,49 @@ void VMK::ipshmdeallocate(void *pointer){
 
 VMK::ipmutex *VMK::ipmutexallocate(){
   int firstFlag;
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(ipSetupMutex);
+#endif
   ipmutex *ipm = (ipmutex *)
     ipshmallocate(sizeof(ipmutex), &firstFlag);
+#ifndef ESMF_NO_PTHREADS
   if (firstFlag) pthread_mutex_init(&(ipm->pth_mutex), NULL);
+#endif
   ipm->lastFlag = getNthreads(getMypet()); //reset
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_unlock(ipSetupMutex);
+#endif
   return ipm;
 }
 
 void VMK::ipmutexdeallocate(ipmutex *ipm){
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(ipSetupMutex);
+#endif
   --(ipm->lastFlag);  // register this thread
+#ifndef ESMF_NO_PTHREADS
   if (ipm->lastFlag == 0) pthread_mutex_destroy(&(ipm->pth_mutex));
+#endif
   ipshmdeallocate(ipm);
+#ifndef ESMF_NO_PTHREADS
   pthread_mutex_unlock(ipSetupMutex);
+#endif
 }
 
 int VMK::ipmutexlock(ipmutex *ipm){
+#ifndef ESMF_NO_PTHREADS
   return pthread_mutex_lock(&(ipm->pth_mutex));
+#else
+  return 0;
+#endif
 }
 
 int VMK::ipmutexunlock(ipmutex *ipm){
+#ifndef ESMF_NO_PTHREADS
   return pthread_mutex_unlock(&(ipm->pth_mutex));
+#else
+  return 0;
+#endif
 }
 
 

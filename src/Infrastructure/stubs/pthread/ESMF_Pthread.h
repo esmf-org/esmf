@@ -1,4 +1,4 @@
-// $Id: ESMF_Pthread.h,v 1.4 2008/04/05 03:39:10 cdeluca Exp $
+// $Id: ESMF_Pthread.h,v 1.5 2008/09/15 20:53:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -20,10 +20,15 @@
 #ifndef ESMF_PTHREAD_H
 #define ESMF_PTHREAD_H
 
-#ifdef ESMF_NO_PTHREADS
-#include "pthread_stubs.h"    // use pthread_stubs
+#ifndef ESMF_NO_PTHREADS
+#include <pthread.h>    // use a real pthread library implementation
+typedef pthread_mutex_t esmf_pthread_mutex_t;
+typedef pthread_cond_t  esmf_pthread_cond_t;
+typedef pthread_t       esmf_pthread_t;
 #else
-#include <pthread.h>          // use a real pthread library implementation
+typedef struct{}        esmf_pthread_mutex_t;
+typedef struct{}        esmf_pthread_cond_t;
+typedef int             esmf_pthread_t;
 #endif
 
 #endif  // ESMF_PTHREAD_H

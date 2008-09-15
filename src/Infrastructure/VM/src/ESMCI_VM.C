@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.2 2008/07/29 01:34:56 rosalind Exp $
+// $Id: ESMCI_VM.C,v 1.3 2008/09/15 20:53:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.2 2008/07/29 01:34:56 rosalind Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.3 2008/09/15 20:53:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -67,10 +67,10 @@ static VM *GlobalVM = NULL;
 //-----------------------------------------------------------------------------
 // Module arrays to hold association table between tid <-> vm <-> vmID
 #define ESMC_VM_MATCHTABLEMAX 10000  // maximum number of entries in table
-static pthread_t matchTable_tid[ESMC_VM_MATCHTABLEMAX];
+static esmf_pthread_t matchTable_tid[ESMC_VM_MATCHTABLEMAX];
 static VM *matchTable_vm[ESMC_VM_MATCHTABLEMAX];
 static VMId matchTable_vmID[ESMC_VM_MATCHTABLEMAX];
-//gjtNotYet static pthread_t *matchTable_tid;
+//gjtNotYet static esmf_pthread_t *matchTable_tid;
 //gjtNotYet static ESMC_VM **matchTable_vm;
 //gjtNotYet static VMId *matchTable_vmID;
 static int vmKeyWidth = 0;      // width in units of 8-bit chars
@@ -672,7 +672,7 @@ VMId *VM::getVMId(
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  pthread_t mytid = getLocalPthreadId();
+  esmf_pthread_t mytid = getLocalPthreadId();
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
@@ -963,7 +963,12 @@ VM *VM::getCurrent(
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  pthread_t mytid = pthread_self();
+  esmf_pthread_t mytid;
+#ifndef ESMF_NO_PTHREADS
+  mytid = pthread_self();
+#else
+  mytid = 0;
+#endif
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
@@ -1007,7 +1012,12 @@ VMId *VM::getCurrentID(
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  pthread_t mytid = pthread_self();
+  esmf_pthread_t mytid;
+#ifndef ESMF_NO_PTHREADS
+  mytid = pthread_self();
+#else
+  mytid = 0;
+#endif
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
@@ -1062,12 +1072,16 @@ VM *VM::initialize(
   GlobalVM->VMK::init(mpiCommunicator);  // set up default VMK (all MPI)
   
   // allocate the VM association table
-//gjtNotYet  matchTable_tid = new pthread_t[ESMC_VM_MATCHTABLEMAX];
+//gjtNotYet  matchTable_tid = new esmf_pthread_t[ESMC_VM_MATCHTABLEMAX];
 //gjtNotYet  matchTable_vm = new ESMCI::VM*[ESMC_VM_MATCHTABLEMAX];
 //gjtNotYet  matchTable_vmID = new ESMCI::VMId[ESMC_VM_MATCHTABLEMAX];
 
   matchTableBound = 0;       // reset
+#ifndef ESMF_NO_PTHREADS
   matchTable_tid[matchTableBound]  = pthread_self();
+#else
+  matchTable_tid[matchTableBound]  = 0;
+#endif
   matchTable_vm[matchTableBound]   = GlobalVM;
   
   // set vmID
