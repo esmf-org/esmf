@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.9 2008/09/11 18:19:30 w6ws Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.10 2008/09/15 23:08:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.9 2008/09/11 18:19:30 w6ws Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.10 2008/09/15 23:08:43 theurich Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1823,7 +1823,7 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
- @\ 
+ @\
       directional = 0 ! neither convention nor purpose @\
  @\
     if (present(convention) .OR. present(purpose)) then @\
@@ -2763,7 +2763,7 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
- @\ 
+ @\
       if (present(itemCount)) then @\
 	litemCount = itemCount @\
       else @\
@@ -2909,7 +2909,7 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
- @\ 
+ @\
       directional = 0 ! neither convention nor purpose @\
  @\
     if (present(convention) .OR. present(purpose)) then @\
