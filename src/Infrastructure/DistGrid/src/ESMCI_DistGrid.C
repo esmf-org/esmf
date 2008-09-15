@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.14 2008/08/21 23:12:03 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.15 2008/09/15 22:57:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.14 2008/08/21 23:12:03 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.15 2008/09/15 22:57:44 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2352,12 +2352,12 @@ int DistGrid::getContigFlagPDimPDe(
   if (de < 0 || de > deCount-1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified DE out of bounds", rc);
-    return NULL;
+    return -1; // bail out
   }
   if (dim < 1 || dim > dimCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified dim out of bounds", rc);
-    return NULL;
+    return -1; // bail out
   }
 
   // return successfully
@@ -2398,7 +2398,7 @@ int DistGrid::getElementCountPDe(
   if (de < 0 || de > deCount-1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Specified DE out of bounds", rc);
-    return NULL;
+    return -1; // bail out
   }
 
   // return successfully
