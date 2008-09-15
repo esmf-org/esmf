@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.14 2008/08/01 23:36:45 rosalind Exp $
+// $Id: ESMCI_Array_F.C,v 1.15 2008/09/15 17:10:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -972,14 +972,12 @@ extern "C" {
       if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
       return; // bail out
     }
-#ifndef ESMF_NO_INITIALIZERS
     if (*commh != ESMC_NULL_POINTER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       " - a previously used commhandle has not been deleted",
       ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
-#endif
     // Allocate a new commhandle
     *commh = new ESMC_newArrayCommHandle;
     (*commh)->commhandleCount = 0;  // reset
@@ -1048,14 +1046,12 @@ extern "C" {
       if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
       return; // bail out
     }
-#ifndef ESMF_NO_INITIALIZERS
     if (*commh != ESMC_NULL_POINTER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       " - a previously used commhandle has not been deleted",
       ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
-#endif
     // Allocate a new commhandle
     *commh = new ESMC_newArrayCommHandle;
     (*commh)->commhandleCount = 0;  // reset

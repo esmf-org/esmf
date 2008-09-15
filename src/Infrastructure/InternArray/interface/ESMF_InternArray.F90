@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArray.F90,v 1.25 2008/07/03 23:07:49 eschwab Exp $
+! $Id: ESMF_InternArray.F90,v 1.26 2008/09/15 17:10:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -79,11 +79,7 @@ module ESMF_InternArrayMod
   type ESMF_Mask
   sequence
   private
-#ifndef ESMF_NO_INITIALIZERS
-    type (ESMF_LocalArray), pointer :: maskvals => NULL()
-#else
     type (ESMF_LocalArray), pointer :: maskvals 
-#endif
     ESMF_INIT_DECLARE
   end type
 
@@ -143,7 +139,7 @@ module ESMF_InternArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_InternArray.F90,v 1.25 2008/07/03 23:07:49 eschwab Exp $'
+    '$Id: ESMF_InternArray.F90,v 1.26 2008/09/15 17:10:25 theurich Exp $'
 !
 !==============================================================================
 !

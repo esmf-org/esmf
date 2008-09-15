@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.171 2008/07/03 23:07:56 eschwab Exp $
+! $Id: ESMF_Comp.F90,v 1.172 2008/09/15 17:10:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -108,11 +108,7 @@
       sequence
 #endif
       !private
-#ifndef ESMF_NO_INITIALIZERS
-         type(ESMF_CompClass), pointer :: compp => NULL()
-#else
          type(ESMF_CompClass), pointer :: compp
-#endif
          ESMF_INIT_DECLARE
       end type
 
@@ -128,11 +124,7 @@
       !private
          type(ESMF_Pointer) :: this       ! C++ ftable pointer - MUST BE FIRST
          type(ESMF_Base) :: base                  ! base class
-#ifndef ESMF_NO_INITIALIZERS
-         type(ESMF_Status) :: compstatus = ESMF_STATUS_INVALID  ! object ok?
-#else
          type(ESMF_Status) :: compstatus          ! valid object or not?
-#endif
          type(ESMF_CompType) :: ctype             ! component type
          type(ESMF_Config) :: config              ! configuration object
          type(ESMF_Clock) :: clock                ! private component clock
@@ -194,11 +186,7 @@
       sequence
 #endif
       !private
-#ifndef ESMF_NO_INITIALIZERS
-         type(ESMF_CompClass), pointer :: compp => NULL()
-#else
          type(ESMF_CompClass), pointer :: compp
-#endif
          ESMF_INIT_DECLARE
       end type
 
@@ -213,11 +201,7 @@
       sequence
 #endif
       !private
-#ifndef ESMF_NO_INITIALIZERS
-         type(ESMF_CompClass), pointer :: compp => NULL()
-#else
          type(ESMF_CompClass), pointer :: compp
-#endif
          ESMF_INIT_DECLARE
       end type
 
@@ -270,7 +254,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.171 2008/07/03 23:07:56 eschwab Exp $'
+      '$Id: ESMF_Comp.F90,v 1.172 2008/09/15 17:10:25 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -584,7 +568,7 @@ end function
 	compp%npetlist = 0
         ! type(ESMF_GridCompType) compp%gridcomptype
         nullify(compp%parent)
-        ! type(ESMF_CWrap)   compp%compw
+        nullify(compp%compw%compp)
         ! type(ESMF_VM)      compp%vm
         ! type(ESMF_VM)      compp%vm_parent
         nullify(compp%petlist)

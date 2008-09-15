@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.52 2008/09/10 00:43:17 theurich Exp $
+! $Id: ESMF_Config.F90,v 1.53 2008/09/15 17:10:25 theurich Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -188,28 +188,15 @@
           sequence
 #endif
           !private              
-#ifndef ESMF_NO_INITIALIZERS
-          character(len=NBUF_MAX),pointer :: buffer => Null()
-                                                       ! hold the whole file
-          character(len=LSZ),     pointer :: this_line => Null()
-                                                       ! the current line
-#else
           character(len=NBUF_MAX),pointer :: buffer    ! hold the whole file
           character(len=LSZ),     pointer :: this_line ! the current line
-#endif
           integer :: nbuf                              ! actual size of buffer 
           integer :: next_line                         ! index_ for next line 
                                                        !   on buffer
           integer :: value_begin                       ! index of beginning of
                                                        !   value
-#ifndef ESMF_NO_INITIALIZERS
-          type(ESMF_ConfigAttrUsed), dimension(:), &
-                                  pointer :: attr_used => Null()
-                                                       ! used attributes table
-#else
           type(ESMF_ConfigAttrUsed), dimension(:), &
                                   pointer :: attr_used ! used attributes table
-#endif
           integer :: nattr                             ! number of attributes
                                                        !   in the "used" table
           character(len=LSZ)          :: current_attr  ! the current attr label
@@ -222,11 +209,7 @@
           sequence
 #endif
           !private       
-#ifndef ESMF_NO_INITIALIZERS
-          type (ESMF_ConfigClass), pointer :: cptr => NULL()
-#else
           type (ESMF_ConfigClass), pointer :: cptr
-#endif
           ESMF_INIT_DECLARE
        end type ESMF_Config
 
