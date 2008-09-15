@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.46.2.2 2008/08/28 22:17:43 theurich Exp $
+// $Id: ESMC_Clock.h,v 1.46.2.3 2008/09/15 05:52:30 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -84,6 +84,10 @@
   private:   // corresponds to F90 module 'type ESMF_Clock' members
     char              name[ESMF_MAXSTR];  // name of clock
     ESMC_TimeInterval timeStep;
+    ESMC_TimeInterval currAdvanceTimeStep; // timeStep used in current
+                                           // ClockAdvance()
+    ESMC_TimeInterval prevAdvanceTimeStep; // timeStep used in previous
+                                           // ClockAdvance()
     ESMC_Time         startTime;
     ESMC_Time         stopTime;
     ESMC_Time         refTime;   // reference time
