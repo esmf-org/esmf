@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.64 2008/09/10 01:31:44 w6ws Exp $
+% $Id: ESMF_install.tex,v 1.65 2008/09/15 23:48:02 w6ws Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -80,7 +80,10 @@ Specifies the path where the NETCDF library is located.
 
 \item[ESMF\_NETCDF\_LIBS] Typical value: -lnetcdf (default none)
 Specifies the linker directives needed to link the NETCDF library to the
-application.  For example, ESMF\_NETCDF\_LIBS=-lnetcdf.
+application.  For example, ESMF\_NETCDF\_LIBS=-lnetcdf.  On some systems,
+seperate libraries are used for Fortran and C bindings.  In this case,
+one can set the environment variable, for example, as
+ESMF\_NETCDF\_LIBS="-lnetcdff -lnetcdf".
 \end{description}
 
 \item[PNETCDF]
