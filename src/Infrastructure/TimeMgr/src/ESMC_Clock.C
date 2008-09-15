@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.82.2.2 2008/08/29 05:51:40 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.82.2.3 2008/09/15 05:56:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.82.2.2 2008/08/29 05:51:40 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.82.2.3 2008/09/15 05:56:54 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -117,7 +117,10 @@ int ESMC_Clock::count=0;
       sprintf(clock->name, "Clock%3.3d\0", clock->id);
     }
 
-    if (timeStep  != ESMC_NULL_POINTER) clock->timeStep  = *timeStep;
+    if (timeStep  != ESMC_NULL_POINTER) {
+      clock->timeStep  = *timeStep;
+      clock->currAdvanceTimeStep = clock->prevAdvanceTimeStep = clock->timeStep;
+    }
     if (startTime != ESMC_NULL_POINTER) clock->startTime = *startTime;
     if (stopTime  != ESMC_NULL_POINTER) {
       clock->stopTime  = *stopTime;
@@ -545,8 +548,13 @@ int ESMC_Clock::count=0;
       // save current time, then advance it
       prevTime = currTime;
 
-      // use passed-in timestep if specified, otherwise use the clock's
-      currTime += (timeStep != ESMC_NULL_POINTER) ? *timeStep : this->timeStep;
+      // use passed-in timestep if specified, otherwise use the clock's;
+      // keep track of timeStep previously used in advance, to detect
+      // direction (sign) change -- used for alarm consistency
+      prevAdvanceTimeStep = currAdvanceTimeStep;
+      currAdvanceTimeStep = (timeStep != ESMC_NULL_POINTER) ?
+                            *timeStep : this->timeStep;
+      currTime += currAdvanceTimeStep;
 
       // count number of timesteps
       advanceCount++;
