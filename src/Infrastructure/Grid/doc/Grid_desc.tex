@@ -227,11 +227,12 @@ of different physical quantities are placed at different locations
 within a grid cell. 
 
 The ESMF Grid class supports a variety of stagger locations, including
-cell centers, corners, and edge centers.  Combinations of these are
-sufficient to specify any of the Arakawa staggers.  ESMF also supports
-staggering in 3D and higher dimensions.  There are shortcuts for 
-standard staggers, and interfaces through which users can create custom
-staggers.
+cell centers, corners, and edge centers. The default stagger location in 
+ESMF is the cell center, and cell counts in Grid are based on this assumption.
+Combinations of the 2D ESMF stagger locations are sufficient to specify any of the
+Arakawa staggers.  ESMF also supports staggering in 3D and higher dimensions.
+There are shortcuts for standard staggers, and interfaces through which users 
+can create custom staggers.  
 
 As a default the ESMF Grid class provides symmetric staggering, so
 that cell centers are enclosed by cell perimeter (e.g. corner) 
