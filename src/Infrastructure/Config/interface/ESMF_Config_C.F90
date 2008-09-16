@@ -1,4 +1,4 @@
-!  $Id: ESMF_Config_C.F90,v 1.11 2008/09/10 00:58:03 theurich Exp $
+!  $Id: ESMF_Config_C.F90,v 1.12 2008/09/16 20:09:45 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Config_C.F90,v 1.11 2008/09/10 00:58:03 theurich Exp $'
+!      '$Id: ESMF_Config_C.F90,v 1.12 2008/09/16 20:09:45 rosalind Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -100,10 +100,10 @@
 
      type(ESMF_Config)               :: config
      character(len=*), intent(in)    :: label
-     integer, intent(out), optional  :: rc     
+     integer, intent(out)            :: rc     
 
      ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+     rc = ESMF_RC_NOT_IMPL
 
      call ESMF_ConfigFindLabel(config, label, rc=rc)
 
@@ -118,23 +118,19 @@
      use ESMF_ConfigMod
 
      type(ESMF_Config), intent(inout)  :: config      
-     integer, intent(out), optional    :: tableEnd
-     integer, intent(out), optional    :: rc   
+     integer, intent(out)              :: tableEnd
+     integer, intent(out)              :: rc   
 
      logical :: ltableEnd
 
      ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+     rc = ESMF_RC_NOT_IMPL
 
-     if (present(tableEnd)) then
-       call ESMF_ConfigNextLine(config, tableEnd=ltableEnd, rc=rc)
-       if (ltableEnd) then
-         tableEnd = 1
-       else
-         tableEnd = 0
-       endif
+     call ESMF_ConfigNextLine(config, tableEnd=ltableEnd, rc=rc)
+     if (ltableEnd) then
+       tableEnd = 1
      else
-       call ESMF_ConfigNextLine(config, rc=rc)
+       tableEnd = 0
      endif
 
    end subroutine f_esmf_confignextline
@@ -142,23 +138,23 @@
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetchar(config, value, label, dvalue, rc)
-     use ESMF_UtilTypesMod    ! ESMF base class
-     use ESMF_BaseMod    ! ESMF base class
-     use ESMF_ConfigMod
+!  subroutine f_esmf_configgetchar(config, value, label, dvalue, rc)
+!    use ESMF_UtilTypesMod    ! ESMF base class
+!    use ESMF_BaseMod    ! ESMF base class
+!    use ESMF_ConfigMod
 
-     type(ESMF_Config), intent(inout)       :: config 
-     character, intent(inout)               :: value
-     character(len=*), intent(in), optional :: label   
-     character, intent(in), optional        :: dvalue
-     integer, intent(out), optional         :: rc  
+!    type(ESMF_Config), intent(inout)       :: config 
+!    character, intent(inout)               :: value
+!    character(len=*), intent(in)           :: label   
+!    character(len=*), intent(in)           :: dvalue
+!    integer, intent(out)                   :: rc  
 
-     ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!    ! Initialize return code; assume routine not implemented
+!    rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_ConfigGetChar( config, value, label=label, default=dvalue, rc=rc)
+!    call ESMF_ConfigGetChar( config, value, label=label, default=dvalue, rc=rc)
 
-   end subroutine f_esmf_configgetchar
+!  end subroutine f_esmf_configgetchar
 !------------------------------------------------------------------------------
 
 
@@ -170,15 +166,33 @@
 
      type(ESMF_Config), intent(inout)       :: config
      integer, intent(out)                   :: wordCount
-     character(len=*), intent(in), optional :: label
-     integer, intent(out), optional         :: rc
+     character(len=*), intent(in)           :: label
+     integer, intent(out)                   :: rc
 
      ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+     rc = ESMF_RC_NOT_IMPL
 
      wordCount = ESMF_ConfigGetLen(config, label=label,  rc=rc)
 
    end subroutine f_esmf_configgetlen
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+   subroutine f_esmf_configgetlennolabel(config, wordCount, rc)
+     use ESMF_UtilTypesMod    ! ESMF base class
+     use ESMF_BaseMod    ! ESMF base class
+     use ESMF_ConfigMod
+
+     type(ESMF_Config), intent(inout)       :: config
+     integer, intent(out)                   :: wordCount
+     integer, intent(out)                   :: rc
+
+     ! Initialize return code; assume routine not implemented
+     rc = ESMF_RC_NOT_IMPL
+
+     wordCount = ESMF_ConfigGetLen(config,  rc=rc)
+
+   end subroutine f_esmf_configgetlennolabel
 !------------------------------------------------------------------------------
 
 
@@ -191,15 +205,34 @@
      type(ESMF_Config), intent(inout)       :: config
      integer, intent(out)                   :: lineCount
      integer, intent(out)                   :: columnCount
-     character(len=*), intent(in), optional :: label
-     integer, intent(out), optional         :: rc
+     character(len=*), intent(in)           :: label
+     integer, intent(out)                   :: rc
 
      ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+     rc = ESMF_RC_NOT_IMPL
 
      call ESMF_ConfigGetDim(config, lineCount, columnCount, label,  rc=rc)
 
    end subroutine f_esmf_configgetdim
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+   subroutine f_esmf_configgetdimnolabel(config, lineCount, columnCount, rc)
+     use ESMF_UtilTypesMod    ! ESMF base class
+     use ESMF_BaseMod    ! ESMF base class
+     use ESMF_ConfigMod
+
+     type(ESMF_Config), intent(inout)       :: config
+     integer, intent(out)                   :: lineCount
+     integer, intent(out)                   :: columnCount
+     integer, intent(out)                   :: rc
+
+     ! Initialize return code; assume routine not implemented
+     rc = ESMF_RC_NOT_IMPL
+
+     call ESMF_ConfigGetDim(config, lineCount, columnCount, rc=rc)
+
+   end subroutine f_esmf_configgetdimnolabel
 !------------------------------------------------------------------------------
 
 
@@ -210,288 +243,309 @@
      use ESMF_ConfigMod
 
       type(ESMF_Config), intent(inout)         :: config
-      character (len=*), intent(in),  optional :: options
-      integer, intent(out), optional           :: rc
+      character (len=*), intent(in)            :: options
+      integer, intent(out)                     :: rc
 
      ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+     rc = ESMF_RC_NOT_IMPL
 
      call ESMF_ConfigValidate(config, options=options, rc=rc)
 
    end subroutine f_esmf_configvalidate
 !------------------------------------------------------------------------------
 
-
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetstring(config, value, label, dvalue, rc)
+   subroutine f_esmf_configvalidatenooptions(config, rc)
      use ESMF_UtilTypesMod    ! ESMF base class
      use ESMF_BaseMod    ! ESMF base class
      use ESMF_ConfigMod
 
-     type(ESMF_Config)                      :: config
-     character(len=*), intent(out)          :: value
-     character(len=*), intent(in), optional :: label
-     character(len=*), intent(in), optional :: dvalue
-     integer, intent(out), optional         :: rc
+      type(ESMF_Config), intent(inout)         :: config
+      integer, intent(out)                     :: rc
 
      ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+     rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
+     call ESMF_ConfigValidate(config, rc=rc)
 
-   end subroutine f_esmf_configgetstring
+   end subroutine f_esmf_configvalidatenooptions
+!------------------------------------------------------------------------------
+
+!======================================================================
+!  Subroutines with (more than 1) optional arguments are commented out.
+!  "Glue" f77 code must not contain optional arguments.
+!======================================================================
+
+!------------------------------------------------------------------------------
+!  subroutine f_esmf_configgetstring(config, value, label, dvalue, rc)
+!    use ESMF_UtilTypesMod    ! ESMF base class
+!    use ESMF_BaseMod    ! ESMF base class
+!    use ESMF_ConfigMod
+
+!    type(ESMF_Config)                      :: config
+!    character(len=*), intent(out)          :: value
+!    character(len=*), intent(in), optional :: label
+!    character(len=*), intent(in), optional :: dvalue
+!    integer, intent(out), optional         :: rc
+
+!    ! Initialize return code; assume routine not implemented
+!    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+!    call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
+
+!  end subroutine f_esmf_configgetstring
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetinti4(config, value, label, dvalue, rc)
-     use ESMF_UtilTypesMod    ! ESMF base class
-     use ESMF_BaseMod    ! ESMF base class
-     use ESMF_ConfigMod
+!  subroutine f_esmf_configgetinti4(config, value, label, dvalue, rc)
+!    use ESMF_UtilTypesMod    ! ESMF base class
+!    use ESMF_BaseMod    ! ESMF base class
+!    use ESMF_ConfigMod
 
-     type(ESMF_Config)                            :: config
-     integer(ESMF_KIND_I4), intent(out)           :: value
-     character(len=*), intent(in), optional       :: label
-     integer(ESMF_KIND_I4), intent(in), optional  :: dvalue
-     integer, intent(out), optional               :: rc     
+!    type(ESMF_Config)                            :: config
+!    integer(ESMF_KIND_I4), intent(out)           :: value
+!    character(len=*), intent(in), optional       :: label
+!    integer(ESMF_KIND_I4), intent(in), optional  :: dvalue
+!    integer, intent(out), optional               :: rc     
 
-     ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!    ! Initialize return code; assume routine not implemented
+!    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
+!    call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
 
-   end subroutine f_esmf_configgetinti4
+!  end subroutine f_esmf_configgetinti4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetinti8(config, value, label, dvalue, rc)
-     use ESMF_UtilTypesMod    ! ESMF base class
-     use ESMF_BaseMod    ! ESMF base class
-     use ESMF_ConfigMod
+!  subroutine f_esmf_configgetinti8(config, value, label, dvalue, rc)
+!    use ESMF_UtilTypesMod    ! ESMF base class
+!    use ESMF_BaseMod    ! ESMF base class
+!    use ESMF_ConfigMod
 
-     type(ESMF_Config)                            :: config
-     integer(ESMF_KIND_I8), intent(out)           :: value
-     character(len=*), intent(in), optional       :: label
-     integer(ESMF_KIND_I8), intent(in), optional  :: dvalue
-     integer, intent(out), optional               :: rc     
+!    type(ESMF_Config)                            :: config
+!    integer(ESMF_KIND_I8), intent(out)           :: value
+!    character(len=*), intent(in), optional       :: label
+!    integer(ESMF_KIND_I8), intent(in), optional  :: dvalue
+!    integer, intent(out), optional               :: rc     
 
-     ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!    ! Initialize return code; assume routine not implemented
+!    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
+!    call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
 
-   end subroutine f_esmf_configgetinti8
+!  end subroutine f_esmf_configgetinti8
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetfloatr4(config, value, label, dvalue, rc)
-     use ESMF_UtilTypesMod    ! ESMF base class
-     use ESMF_BaseMod    ! ESMF base class
-     use ESMF_ConfigMod
+!  subroutine f_esmf_configgetfloatr4(config, value, label, dvalue, rc)
+!    use ESMF_UtilTypesMod    ! ESMF base class
+!    use ESMF_BaseMod    ! ESMF base class
+!    use ESMF_ConfigMod
 
-     type(ESMF_Config)                         :: config
-     real(ESMF_KIND_R4), intent(out)           :: value
-     character(len=*), intent(in), optional    :: label
-     real(ESMF_KIND_R4), intent(in), optional  :: dvalue
-     integer, intent(out), optional            :: rc     
+!    type(ESMF_Config)                         :: config
+!    real(ESMF_KIND_R4), intent(out)           :: value
+!    character(len=*), intent(in), optional    :: label
+!    real(ESMF_KIND_R4), intent(in), optional  :: dvalue
+!    integer, intent(out), optional            :: rc     
 
-     ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!    ! Initialize return code; assume routine not implemented
+!    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
+!    call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
 
-   end subroutine f_esmf_configgetfloatr4
+!  end subroutine f_esmf_configgetfloatr4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetfloatr8(config, value, label, dvalue, rc)
-     use ESMF_UtilTypesMod    ! ESMF base class
-     use ESMF_BaseMod    ! ESMF base class
-     use ESMF_ConfigMod
+!  subroutine f_esmf_configgetfloatr8(config, value, label, dvalue, rc)
+!    use ESMF_UtilTypesMod    ! ESMF base class
+!    use ESMF_BaseMod    ! ESMF base class
+!    use ESMF_ConfigMod
 
-     type(ESMF_Config)                         :: config
-     real(ESMF_KIND_R8), intent(out)           :: value
-     character(len=*), intent(in), optional    :: label
-     real(ESMF_KIND_R8), intent(in), optional  :: dvalue
-     integer, intent(out), optional            :: rc     
+!    type(ESMF_Config)                         :: config
+!    real(ESMF_KIND_R8), intent(out)           :: value
+!    character(len=*), intent(in), optional    :: label
+!    real(ESMF_KIND_R8), intent(in), optional  :: dvalue
+!    integer, intent(out), optional            :: rc     
 
-     ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!    ! Initialize return code; assume routine not implemented
+!    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
+!    call ESMF_ConfigGetAttribute(config, value, label=label, default=dvalue, rc=rc)
 
-   end subroutine f_esmf_configgetfloatr8
+!  end subroutine f_esmf_configgetfloatr8
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetlogical(config, value, label, dvalue, rc)
-     use ESMF_UtilTypesMod    ! ESMF base class
-     use ESMF_BaseMod    ! ESMF base class
-     use ESMF_ConfigMod
+!  subroutine f_esmf_configgetlogical(config, value, label, dvalue, rc)
+!    use ESMF_UtilTypesMod    ! ESMF base class
+!    use ESMF_BaseMod    ! ESMF base class
+!    use ESMF_ConfigMod
 
-     type(ESMF_Config), intent(inout)             :: config
-     integer, intent(inout)                       :: value
-     character(len=*), intent(in), optional       :: label
-     integer, intent(in), optional                :: dvalue
-     integer, intent(out), optional               :: rc
+!    type(ESMF_Config), intent(inout)             :: config
+!    integer, intent(inout)                       :: value
+!    character(len=*), intent(in), optional       :: label
+!    integer, intent(in), optional                :: dvalue
+!    integer, intent(out), optional               :: rc
 
-     logical :: lvalue, ldvalue
-      
-     ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!    logical :: lvalue, ldvalue
+!     
+!    ! Initialize return code; assume routine not implemented
+!    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     if (present(dvalue)) then
-       if (dvalue /= 0) then
-         ldvalue = .true. 
-       else 
-         ldvalue = .false.
-       endif
-       call ESMF_ConfigGetAttribute(config, lvalue, label=label, default=ldvalue, rc=rc)
-     else
-       call ESMF_ConfigGetAttribute(config, lvalue, label=label, rc=rc)
-     endif
+!    if (present(dvalue)) then
+!      if (dvalue /= 0) then
+!        ldvalue = .true. 
+!      else 
+!        ldvalue = .false.
+!      endif
+!      call ESMF_ConfigGetAttribute(config, lvalue, label=label, default=ldvalue, rc=rc)
+!    else
+!      call ESMF_ConfigGetAttribute(config, lvalue, label=label, rc=rc)
+!    endif
 
-     if (lvalue) then
-       value = 1
-     else 
-       value = 0
-     endif
+!    if (lvalue) then
+!      value = 1
+!    else 
+!      value = 0
+!    endif
 
-   end subroutine f_esmf_configgetlogical
+!  end subroutine f_esmf_configgetlogical
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetintsi4(config, count, valueList, label, dvalue, rc)
-     use ESMF_UtilTypesMod    ! ESMF base class
-     use ESMF_BaseMod    ! ESMF base class
-     use ESMF_ConfigMod
+!  subroutine f_esmf_configgetintsi4(config, count, valueList, label, dvalue, rc)
+!    use ESMF_UtilTypesMod    ! ESMF base class
+!    use ESMF_BaseMod    ! ESMF base class
+!    use ESMF_ConfigMod
 
-     type(ESMF_Config)                               :: config
-     integer, intent(in)                             :: count   
-     integer(ESMF_KIND_I4), intent(inout)            :: valueList(count) 
-     character(len=*), intent(in), optional          :: label
-     integer(ESMF_KIND_I4), intent(in), optional     :: dvalue
-     integer, intent(out), optional                  :: rc     
+!    type(ESMF_Config)                               :: config
+!    integer, intent(in)                             :: count   
+!    integer(ESMF_KIND_I4), intent(inout)            :: valueList(count) 
+!    character(len=*), intent(in), optional          :: label
+!    integer(ESMF_KIND_I4), intent(in), optional     :: dvalue
+!    integer, intent(out), optional                  :: rc     
 
-     ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!    ! Initialize return code; assume routine not implemented
+!    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_ConfigGetAttribute(config, valueList, count, label=label, default=dvalue, rc=rc)
+!    call ESMF_ConfigGetAttribute(config, valueList, count, label=label, default=dvalue, rc=rc)
 
-   end subroutine f_esmf_configgetintsi4
+!  end subroutine f_esmf_configgetintsi4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetintsi8(config, count, valueList, label, dvalue, rc)
-     use ESMF_UtilTypesMod    ! ESMF base class
-     use ESMF_BaseMod    ! ESMF base class
-     use ESMF_ConfigMod
+!  subroutine f_esmf_configgetintsi8(config, count, valueList, label, dvalue, rc)
+!    use ESMF_UtilTypesMod    ! ESMF base class
+!    use ESMF_BaseMod    ! ESMF base class
+!    use ESMF_ConfigMod
 
-     type(ESMF_Config)                               :: config
-     integer, intent(in)                             :: count   
-     integer(ESMF_KIND_I8), intent(inout)            :: valueList(count) 
-     character(len=*), intent(in), optional          :: label
-     integer(ESMF_KIND_I8), intent(in), optional     :: dvalue
-     integer, intent(out), optional                  :: rc     
+!    type(ESMF_Config)                               :: config
+!    integer, intent(in)                             :: count   
+!    integer(ESMF_KIND_I8), intent(inout)            :: valueList(count) 
+!    character(len=*), intent(in), optional          :: label
+!    integer(ESMF_KIND_I8), intent(in), optional     :: dvalue
+!    integer, intent(out), optional                  :: rc     
 
-     ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!    ! Initialize return code; assume routine not implemented
+!    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_ConfigGetAttribute(config, valueList, count, label=label, default=dvalue, rc=rc)
+!    call ESMF_ConfigGetAttribute(config, valueList, count, label=label, default=dvalue, rc=rc)
 
-   end subroutine f_esmf_configgetintsi8
+!  end subroutine f_esmf_configgetintsi8
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetfloatsr4(config, count, valueList, label, dvalue, rc)
-     use ESMF_UtilTypesMod    ! ESMF base class
-     use ESMF_BaseMod    ! ESMF base class
-     use ESMF_ConfigMod
+!  subroutine f_esmf_configgetfloatsr4(config, count, valueList, label, dvalue, rc)
+!    use ESMF_UtilTypesMod    ! ESMF base class
+!    use ESMF_BaseMod    ! ESMF base class
+!    use ESMF_ConfigMod
 
-     type(ESMF_Config)                            :: config
-     integer, intent(in)                          :: count   
-     real(ESMF_KIND_R4), intent(inout)            :: valueList(count) 
-     character(len=*), intent(in), optional       :: label
-     real(ESMF_KIND_R4), intent(in), optional     :: dvalue
-     integer, intent(out), optional               :: rc     
+!    type(ESMF_Config)                            :: config
+!    integer, intent(in)                          :: count   
+!    real(ESMF_KIND_R4), intent(inout)            :: valueList(count) 
+!    character(len=*), intent(in), optional       :: label
+!    real(ESMF_KIND_R4), intent(in), optional     :: dvalue
+!    integer, intent(out), optional               :: rc     
 
-     ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!    ! Initialize return code; assume routine not implemented
+!    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_ConfigGetAttribute(config, valueList, count, label=label, default=dvalue, rc=rc)
+!    call ESMF_ConfigGetAttribute(config, valueList, count, label=label, default=dvalue, rc=rc)
 
-   end subroutine f_esmf_configgetfloatsr4
+!  end subroutine f_esmf_configgetfloatsr4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetfloatsr8(config, count, valueList, label, dvalue, rc)
-     use ESMF_UtilTypesMod    ! ESMF base class
-     use ESMF_BaseMod    ! ESMF base class
-     use ESMF_ConfigMod
+!  subroutine f_esmf_configgetfloatsr8(config, count, valueList, label, dvalue, rc)
+!    use ESMF_UtilTypesMod    ! ESMF base class
+!    use ESMF_BaseMod    ! ESMF base class
+!    use ESMF_ConfigMod
 
-     type(ESMF_Config)                            :: config
-     integer, intent(in)                          :: count   
-     real(ESMF_KIND_R8), intent(inout)            :: valueList(count) 
-     character(len=*), intent(in), optional       :: label
-     real(ESMF_KIND_R8), intent(in), optional     :: dvalue
-     integer, intent(out), optional               :: rc     
+!    type(ESMF_Config)                            :: config
+!    integer, intent(in)                          :: count   
+!    real(ESMF_KIND_R8), intent(inout)            :: valueList(count) 
+!    character(len=*), intent(in), optional       :: label
+!    real(ESMF_KIND_R8), intent(in), optional     :: dvalue
+!    integer, intent(out), optional               :: rc     
 
-     ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!    ! Initialize return code; assume routine not implemented
+!    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_ConfigGetAttribute(config, valueList, count, label=label, default=dvalue, rc=rc)
+!    call ESMF_ConfigGetAttribute(config, valueList, count, label=label, default=dvalue, rc=rc)
 
-   end subroutine f_esmf_configgetfloatsr8
+!  end subroutine f_esmf_configgetfloatsr8
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configgetlogicals(config, count, valuelist, label, dvalue, rc)
-     use ESMF_UtilTypesMod    ! ESMF base class
-     use ESMF_BaseMod    ! ESMF base class
-     use ESMF_ConfigMod
+!  subroutine f_esmf_configgetlogicals(config, count, valuelist, label, dvalue, rc)
+!    use ESMF_UtilTypesMod    ! ESMF base class
+!    use ESMF_BaseMod    ! ESMF base class
+!    use ESMF_ConfigMod
 
-     type(ESMF_Config), intent(inout)             :: config
-     integer, intent(in)                          :: count
-     integer, intent(inout)                       :: valueList(count)
-     character(len=*), intent(in), optional       :: label
-     integer, intent(in), optional                :: dvalue
-     integer, intent(out), optional               :: rc
+!    type(ESMF_Config), intent(inout)             :: config
+!    integer, intent(in)                          :: count
+!    integer, intent(inout)                       :: valueList(count)
+!    character(len=*), intent(in), optional       :: label
+!    integer, intent(in), optional                :: dvalue
+!    integer, intent(out), optional               :: rc
 
-     logical :: lvalueList(count), ldvalue
-     integer :: i
+!    logical :: lvalueList(count), ldvalue
+!    integer :: i
 
-     ! Initialize return code; assume routine not implemented
-     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!    ! Initialize return code; assume routine not implemented
+!    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     if (present(dvalue)) then
-       if (dvalue /= 0) then
-         ldvalue = .true. 
-       else 
-         ldvalue = .false.
-       endif
-       call ESMF_ConfigGetAttribute(config, lvalueList, count, label=label, &
-                                    default=ldvalue, rc=rc)
-     else
-       call ESMF_ConfigGetAttribute(config, lvalueList, count, label=label, rc=rc)
-     endif
+!    if (present(dvalue)) then
+!      if (dvalue /= 0) then
+!        ldvalue = .true. 
+!      else 
+!        ldvalue = .false.
+!      endif
+!      call ESMF_ConfigGetAttribute(config, lvalueList, count, label=label, &
+!                                   default=ldvalue, rc=rc)
+!    else
+!      call ESMF_ConfigGetAttribute(config, lvalueList, count, label=label, rc=rc)
+!    endif
 
-     do i = 1, count
-       if (lvalueList(i)) then
-         valueList(i) = 1
-       else 
-         valueList(i) = 0
-       endif
-     enddo
+!    do i = 1, count
+!      if (lvalueList(i)) then
+!        valueList(i) = 1
+!      else 
+!        valueList(i) = 0
+!      endif
+!    enddo
 
-   end subroutine f_esmf_configgetlogicals
+!  end subroutine f_esmf_configgetlogicals
 !------------------------------------------------------------------------------
 
