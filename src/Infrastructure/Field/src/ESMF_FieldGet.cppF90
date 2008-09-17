@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.27 2008/09/02 20:12:55 cdeluca Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.28 2008/09/17 16:12:11 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.27 2008/09/02 20:12:55 cdeluca Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.28 2008/09/17 16:12:11 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -80,7 +80,7 @@ module ESMF_FieldGetMod
     module procedure ESMF_FieldGetGridAllocBounds
     module procedure ESMF_FieldGetMeshAllocBounds
     module procedure ESMF_FieldGetLSAllocBounds
-    !module procedure ESMF_FieldGetDataBounds
+    module procedure ESMF_FieldGetDataBounds
     !module procedure ESMF_FieldGetLocalArray !TODO: FIELDINTEGRATION
     TypeKindRankInterfaceMacro(FieldGetDataPtr)
 
@@ -577,7 +577,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldGetDataBounds"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldGetDataBounds -  Get Field data bounds
 
 ! !INTERFACE:
