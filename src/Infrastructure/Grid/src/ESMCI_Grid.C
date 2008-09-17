@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.72 2008/08/01 23:36:52 rosalind Exp $
+// $Id: ESMCI_Grid.C,v 1.73 2008/09/17 22:12:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.72 2008/08/01 23:36:52 rosalind Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.73 2008/09/17 22:12:56 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -378,7 +378,7 @@ int Grid::addCoordArray(
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
-                          &indexflag, &staggerloc, ESMC_NULL_POINTER, 
+                          &indexflag, NULL, &staggerloc, ESMC_NULL_POINTER, 
                           undistLBoundIntInt, undistUBoundIntInt, &localrc);
     } else {
       // ...otherwise pass in NUll
@@ -389,7 +389,7 @@ int Grid::addCoordArray(
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
-                          &indexflag, &staggerloc, ESMC_NULL_POINTER,
+                          &indexflag, NULL, &staggerloc, ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER, 
                           &localrc);
