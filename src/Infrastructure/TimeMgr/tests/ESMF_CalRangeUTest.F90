@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.32 2008/08/09 05:57:52 eschwab Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.33 2008/09/17 14:43:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.32 2008/08/09 05:57:52 eschwab Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.33 2008/09/17 14:43:33 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       integer, parameter :: CONVERT_TO_TIME = 1, CONVERT_TO_DATE = 2, &
@@ -48,6 +48,7 @@
       type(ESMF_Calendar) :: gregorianCalendar
       type(ESMF_Calendar) :: julianCalendar
       type(ESMF_Calendar) :: julianDayCalendar
+      type(ESMF_Calendar) :: modifiedJulianDayCalendar
 
       ! instantiate time instant
       type(ESMF_Time) :: Time
@@ -58,6 +59,7 @@
       integer(ESMF_KIND_I8) :: YYl, rYYl, Dl, rDl, endYYl, endDl
       integer :: MM, rMM, DD, rDD
       integer :: rc
+      logical :: broken 
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -87,6 +89,12 @@
       ! initialize calendar to be Julian Day type
       julianDayCalendar = ESMF_CalendarCreate("JulianDay", &
                                               ESMF_CAL_JULIANDAY, rc)
+
+      ! Modified Julian Day Calendar
+
+      ! initialize calendar to be Modified Julian Day type
+      modifiedJulianDayCalendar = ESMF_CalendarCreate("ModifiedJulianDay", &
+                                              ESMF_CAL_MODJULIANDAY, rc)
 
       ! Gregorian Calendar
 
@@ -196,12 +204,8 @@
       call ESMF_RunTestForwards(YYl, MM, DD, Dl, gregorianCalendar)
 
       ! test section ended, check expected endpoint year and julian day
-      endYYl = 292277019
-      endYYl = endYYl * 1000
-      endYYl = endYYl + 914
-      endDl  = 1067519911
-      endDl  = endDl * 100000
-      endDl  = endDl + 67301
+      endYYl = 292277019914_ESMF_KIND_I8
+      endDl  = 106751991167301_ESMF_KIND_I8
           
       !EX_UTest
       write(failMsg, *) &
@@ -293,12 +297,8 @@
       call ESMF_RunTestForwards(YYl, MM, DD, Dl, julianCalendar)
 
       ! test section ended, check expected endpoint year and julian day
-      endYYl = 292271018
-      endYYl = endYYl * 1000
-      endYYl = endYYl + 333
-      endDl  = 1067519911
-      endDl  = endDl * 100000
-      endDl  = endDl + 67301
+      endYYl = 292271018333_ESMF_KIND_I8
+      endDl  = 106751991167301_ESMF_KIND_I8
           
       !EX_UTest
       write(failMsg, *) &
@@ -308,10 +308,225 @@
                       .and. Dl.eq.endDl .and. rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      ! destroy calendars
+      !-----------------------------------!
+      ! Test range of Julian day calendar !
+      !-----------------------------------!
+
+      !------------------------------------------------------------------!
+      !                   Julian Day Low Range Test                      !
+      ! Start 10 days above the bottom and move backward one day at a    !
+      ! time until it breaks.  The lowest valid signed 64-bit Julian day !
+      ! is -2^63/86400 = -106,751,991,167,300.                           !
+      !------------------------------------------------------------------!
+
+      ! set days to lowest value representable with signed 64-bits:
+      ! -(2**63)/86400 = -106,751,991,167,300 days
+      Dl = -106751991167300_ESMF_KIND_I8
+      endDl = Dl - 1
+
+      ! start 10 days above bottom, then come back until it breaks
+      Dl = Dl + 10
+
+      call ESMF_TimeSet(Time, d_i8=Dl, calendar=julianDayCalendar, rc=rc)
+      call ESMF_TimeGet(Time, d_i8=rDl, rc=rc)
+      print *
+      print *, "Low range test"
+      print *, "  Start Julian Days = ", rDl
+      print *
+
+      broken = .false.
+      do while (.not.broken)
+        ! calculate what previous Julian Day number should be
+        Dl = Dl - 1
+        !print *, Dl
+
+        ! set date via ESMF Julian Day calendar
+        call ESMF_TimeSet(Time, d_i8=Dl, calendar=julianDayCalendar, rc=rc)
+
+        ! see what we get back
+        call ESMF_TimeGet(time, d_i8=rDl, rc=rc)
+
+        if (.not.(rDl.eq.Dl)) then
+          broken = .true.
+          print *, "Julian Day Set/Get breaks,"
+          print *, " should be = ", Dl
+          print *, " returned  = ", rDl
+          print *
+        end if
+      end do
+  
+      !EX_UTest
+      write(failMsg, *) &
+        "Low range not -106,751,991,167,301 or rc=ESMF_SUCCESS"
+      write(name, *) "Julian Day Low Range Test"
+      call ESMF_Test((Dl.eq.endDl .and. rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------------------------------------------------------!
+      !                   Julian Day High Range Test                      !
+      ! Start 10 days below the top and move forward one day at a         !
+      ! time until it breaks.  The highest valid signed 64-bit Julian day !
+      ! is (2^63-1)/86400 = 106,751,991,167,300.                          !
+      !-------------------------------------------------------------------!
+
+      ! set days to highest value representable with signed 64-bits:
+      ! ((2**63)-1)/86400 = 106,751,991,167,300 days
+      Dl = 106751991167300_ESMF_KIND_I8
+      endDl = Dl + 1
+
+      ! start 10 days below top, then go forward until it breaks
+      Dl = Dl - 10
+
+      call ESMF_TimeSet(Time, d_i8=Dl, calendar=julianDayCalendar, rc=rc)
+      call ESMF_TimeGet(Time, d_i8=rDl, rc=rc)
+      print *
+      print *, "High range test"
+      print *, "  Start Julian Days = ", rDl
+      print *
+
+      broken = .false.
+      do while (.not.broken)
+        ! calculate what next Julian Day number should be
+        Dl = Dl + 1
+        !print *, Dl
+
+        ! set date via ESMF Julian Day calendar
+        call ESMF_TimeSet(Time, d_i8=Dl, calendar=julianDayCalendar, rc=rc)
+
+        ! see what we get back
+        call ESMF_TimeGet(time, d_i8=rDl, rc=rc)
+
+        if (.not.(rDl.eq.Dl)) then
+          broken = .true.
+          print *, "Julian Day Set/Get breaks,"
+          print *, " should be = ", Dl
+          print *, " returned  = ", rDl
+          print *
+        end if
+      end do
+  
+      !EX_UTest
+      write(failMsg, *) &
+        "High range not 106,751,991,167,301 or rc=ESMF_SUCCESS"
+      write(name, *) "Julian Day High Range Test"
+      call ESMF_Test((Dl.eq.endDl .and. rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !--------------------------------------------!
+      ! Test range of Modified Julian day calendar !
+      !--------------------------------------------!
+
+      !------------------------------------------------------------------!
+      !               Modified Julian Day Low Range Test                 !
+      ! Start 10 days above the bottom and move backward one day at a    !
+      ! time until it breaks.  The lowest valid signed 64-bit Modified   !
+      ! Julian day is -2^63/86400 - 2,400,001 = -106,751,993,567,301.    !
+      !------------------------------------------------------------------!
+
+      ! set days to lowest value representable with signed 64-bits:
+      ! -(2**63)/86400 - 2,400,001 = -106,751,993,567,300 days
+      Dl = -106751993567301_ESMF_KIND_I8
+      endDl = Dl - 1
+
+      ! start 10 days above bottom, then come back until it breaks
+      Dl = Dl + 10
+
+      call ESMF_TimeSet(Time, d_i8=Dl, calendar=modifiedJulianDayCalendar, &
+                        rc=rc)
+      call ESMF_TimeGet(Time, d_i8=rDl, rc=rc)
+      print *
+      print *, "Low range test"
+      print *, "  Start Modified Julian Days = ", rDl
+      print *
+
+      broken = .false.
+      do while (.not.broken)
+        ! calculate what previous Modified Julian Day number should be
+        Dl = Dl - 1
+        !print *, Dl
+
+        ! set date via ESMF Modified Julian Day calendar
+        call ESMF_TimeSet(Time, d_i8=Dl, calendar=modifiedJulianDayCalendar, &
+                          rc=rc)
+
+        ! see what we get back
+        call ESMF_TimeGet(time, d_i8=rDl, rc=rc)
+
+        if (.not.(rDl.eq.Dl)) then
+          broken = .true.
+          print *, "Modified Julian Day Set/Get breaks,"
+          print *, " should be = ", Dl
+          print *, " returned  = ", rDl
+          print *
+        end if
+      end do
+  
+      !EX_UTest
+      write(failMsg, *) &
+        "Low range not -106,751,993,567,301 or rc=ESMF_SUCCESS"
+      write(name, *) "Modified Julian Day Low Range Test"
+      call ESMF_Test((Dl.eq.endDl .and. rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------------------------------------------------------!
+      !               Modified Julian Day High Range Test                 !
+      ! Start 10 days below the top and move forward one day at a         !
+      ! time until it breaks.  The highest valid signed 64-bit Modified   !
+      ! Julian day is (2^63-1)/86400 - 2,400,001 = 106,751,988,767,299.   !
+      !-------------------------------------------------------------------!
+
+      ! set days to highest value representable with signed 64-bits:
+      ! ((2**63)-1)/86400 - 2,400,001 = 106,751,988,767,299 days
+      Dl = 106751988767299_ESMF_KIND_I8
+      endDl = Dl + 1
+
+      ! start 10 days below top, then go forward until it breaks
+      Dl = Dl - 10
+
+      call ESMF_TimeSet(Time, d_i8=Dl, calendar=modifiedJulianDayCalendar, &
+                        rc=rc)
+      call ESMF_TimeGet(Time, d_i8=rDl, rc=rc)
+      print *
+      print *, "High range test"
+      print *, "  Start Modified Julian Days = ", rDl
+      print *
+
+      broken = .false.
+      do while (.not.broken)
+        ! calculate what next Modified Julian Day number should be
+        Dl = Dl + 1
+        !print *, Dl
+
+        ! set date via ESMF Modified Julian Day calendar
+        call ESMF_TimeSet(Time, d_i8=Dl, calendar=modifiedJulianDayCalendar, &
+                          rc=rc)
+
+        ! see what we get back
+        call ESMF_TimeGet(time, d_i8=rDl, rc=rc)
+
+        if (.not.(rDl.eq.Dl)) then
+          broken = .true.
+          print *, "Modified Julian Day Set/Get breaks,"
+          print *, " should be = ", Dl
+          print *, " returned  = ", rDl
+          print *
+        end if
+      end do
+  
+      !EX_UTest
+      write(failMsg, *) &
+        "High range not 106,751,988,767,300 or rc=ESMF_SUCCESS"
+      write(name, *) "Modified Julian Day High Range Test"
+      call ESMF_Test((Dl.eq.endDl .and. rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------!
+      ! destroy calendars !
+      !-------------------!
       call ESMF_CalendarDestroy(julianCalendar, rc)
       call ESMF_CalendarDestroy(gregorianCalendar, rc)
       call ESMF_CalendarDestroy(julianDayCalendar, rc)
+      call ESMF_CalendarDestroy(modifiedJulianDayCalendar, rc)
 #endif
 
       ! finalize ESMF framework
