@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.6 2008/04/07 06:46:02 theurich Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.7 2008/09/17 13:20:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.6 2008/04/07 06:46:02 theurich Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.7 2008/09/17 13:20:24 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -43,10 +43,10 @@
       integer :: rc
 
       ! individual test name
-      !character(ESMF_MAXSTR) :: name
+      character(ESMF_MAXSTR) :: name
 
       ! individual test failure messages
-      !character(ESMF_MAXSTR*2) :: failMsg
+      character(ESMF_MAXSTR*2) :: failMsg
 
       ! local variables needed to pass into function/subroutine calls
       !character(ESMF_MAXSTR) :: validate_options
@@ -55,6 +55,11 @@
       !type(ESMF_UtilConfig) :: config_get
       !character(ESMF_MAXSTR) :: name_set, name_get
 
+      ! misc local variables
+      character(2) :: major_version, minor_version, revision
+      character(len (ESMF_VERSION_STRING)) :: evs
+      integer :: evs_dotpos
+      integer :: i
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -69,6 +74,56 @@
 
 
       ! add tests here
+
+!Test version numbers
+!====================
+
+    ! Print all the constants, just for the record.
+
+      print *
+      print *, ' ESMF_MAJOR_VERSION =', ESMF_MAJOR_VERSION
+      print *, ' ESMF_MINOR_VERSION =', ESMF_MINOR_VERSION
+      print *, ' ESMF_REVISION      =', ESMF_REVISION
+      print *, ' ESMF_PATCHLEVEL    =', ESMF_PATCHLEVEL
+      print *, ' ESMF_VERSION_STRING=', trim (ESMF_VERSION_STRING)
+
+    !NEX_UTest
+    ! Compare numeric major version to the string
+    write (major_version,'(i2)') ESMF_MAJOR_VERSION
+    evs = ESMF_VERSION_STRING
+    evs_dotpos = index (evs, '.')
+    write(failMsg, *) "Numeric and character major_version mismatch"
+    write(name, *) "Comparing numeric and character major version"
+    call ESMF_Test(evs(:evs_dotpos-1) == adjustl (major_version),  &
+      name, failMsg, result, ESMF_SRCLINE)
+    !
+    !NEX_UTest
+    ! Compare numeric minor version to the string
+    write (minor_version,'(i2)') ESMF_MINOR_VERSION
+    evs = evs(evs_dotpos+1:)
+    evs_dotpos = index (evs, '.')
+    write(failMsg, *) "Numeric and character minor_version mismatch"
+    write(name, *) "Comparing numeric and character minor version"
+    call ESMF_Test(evs(:evs_dotpos-1) == adjustl (minor_version),  &
+      name, failMsg, result, ESMF_SRCLINE)
+    !
+    !NEX_UTest
+    ! Compare numeric revision to the string
+    write (revision,'(i2)') ESMF_REVISION
+    evs = evs(evs_dotpos+1:)
+    do, i=1, len (evs)
+      if (scan (evs(i:i), '0123456789') /= 1) exit
+    end do
+    write(failMsg, *) "Numeric and character revision mismatch"
+    write(name, *) "Comparing numeric and character revision"
+    if (i >= 2) then
+      evs_dotpos = i
+      call ESMF_Test(evs(:evs_dotpos-1) == adjustl (revision),  &
+        name, failMsg, result, ESMF_SRCLINE)
+    else
+      write (failMsg, *) 'Could not find revision number in string'
+      call ESMF_Test(i >= 2, name, failMsg, result, ESMF_SRCLINE)      
+    end if
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
