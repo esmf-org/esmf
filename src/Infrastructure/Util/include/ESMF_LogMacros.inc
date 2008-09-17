@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.7 2008/08/01 23:36:58 rosalind Exp $
+ $Id: ESMF_LogMacros.inc,v 1.8 2008/09/17 22:10:25 theurich Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,8 +32,23 @@
 #define ESMC_FILENAME __FILE__
 #endif
 
+#if 0
+ TODO: Remove dependencies on the following macros and remove them! *gjt*
+#endif
+
+#define ESMC_LogAllocError(rc) \
+AllocError(ESMC_CONTEXT,rc)
+
+#define ESMC_LogMsgAllocError(msg,rc) \
+MsgAllocError(msg,ESMC_CONTEXT,rc)
 
 #define MsgFoundError(status,msg,rc) \
 MsgFoundError(status,msg,ESMC_CONTEXT,rc)
+
+#define ESMC_LogMsgFoundError \
+MsgFoundError
+
+#define ESMC_LogWrite(msg,logtype) \
+Write(msg,logtype,ESMC_CONTEXT)
 
 #endif
