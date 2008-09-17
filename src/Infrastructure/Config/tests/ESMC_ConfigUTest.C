@@ -1,4 +1,4 @@
-// $Id: ESMC_ConfigUTest.C,v 1.7 2008/09/02 20:07:57 theurich Exp $
+// $Id: ESMC_ConfigUTest.C,v 1.8 2008/09/17 16:36:28 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -93,6 +93,39 @@ int main(void){
     __LINE__, 0);
   //----------------------------------------------------------------------------
 #endif
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //Find a label in the loaded resource file
+  char* label="Number_of_Members:";
+  strcpy(name, "ConfigFindLabel Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ConfigFindLabel(cf, label);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //Find the next line
+  int tableEnd = 1;           //true
+  strcpy(name, "ConfigNextLine Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ConfigNextLine(cf, tableEnd);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //Get the length of the line in words (w/o label optional argument)
+  strcpy(name, "ConfigGetLen Unit test - no optional arguments");
+  int  wordCount=0;
+  int* wordCountp=NULL;
+  wordCountp = &wordCount;
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ConfigGetLen(cf, wordCountp, ESMC_ArgLast);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
 
   //----------------------------------------------------------------------------
   //NEX_UTest
