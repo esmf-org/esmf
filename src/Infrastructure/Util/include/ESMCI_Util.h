@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.9 2008/08/31 03:09:08 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.10 2008/09/17 22:15:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -78,7 +78,8 @@ enum ESMC_Direction { ESMF_MODE_FORWARD=1,
 
 // indexflag type
 enum ESMC_IndexFlag { ESMF_INDEX_DELOCAL=0,
-                      ESMF_INDEX_GLOBAL};
+                      ESMF_INDEX_GLOBAL,
+                      ESMF_INDEX_USER};
 
 // regionflag type
 enum ESMC_RegionFlag { ESMF_REGION_TOTAL=0,

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.10 2008/08/08 08:39:05 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.11 2008/09/17 22:15:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.10 2008/08/08 08:39:05 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.11 2008/09/17 22:15:23 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -88,14 +88,14 @@ DELayout *DELayout::create(
   try{
     delayout = new DELayout;
     localrc = delayout->construct(vm, dePinFlag, petMap, petMapCount);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
       delete delayout;
       delayout = ESMC_NULL_POINTER;
       return ESMC_NULL_POINTER;
     }
   }catch(...){
      // allocation error
-     ESMC_LogDefault.MsgAllocError("for new DELayout.", ESMC_CONTEXT, rc);  
+     ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayout.", rc);  
      return ESMC_NULL_POINTER;
   }
   
@@ -144,7 +144,7 @@ DELayout *DELayout::create(
   // by default use the currentVM for vm
   if (vm == ESMC_NULL_POINTER){
     vm = VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
   }
 
@@ -167,7 +167,7 @@ DELayout *DELayout::create(
     deGroupingCount = deGrouping->extent[0];
     deGroupingFlag = 1;   // set
     if (deGroupingCount != deCount){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
                 "- Size of deGrouping does not match deCount", rc);
       return ESMC_NULL_POINTER;
     }
@@ -245,7 +245,7 @@ DELayout *DELayout::create(
   try{
     delayout = new DELayout;
     localrc = delayout->construct(vm, dePinFlag, petMap, petMapCount);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
       if (petMapDeleteFlag) delete [] petMap;
       delete delayout;
       delayout = ESMC_NULL_POINTER;
@@ -253,7 +253,7 @@ DELayout *DELayout::create(
     }
   }catch(...){
      // allocation error
-     ESMC_LogDefault.MsgAllocError("for new DELayout.", ESMC_CONTEXT, rc);
+     ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayout.", rc);
      if (petMapDeleteFlag) delete [] petMap;
      return ESMC_NULL_POINTER;
   }
@@ -307,16 +307,16 @@ DELayout *DELayout::create(
   // that rely on DELayout to be _always 2D! Here I promote a 1D layout request
   // to 2D: N x 1. I write a message to LogErr to make people aware of this!!!
   if (ndim==0){
-    // ESMC_LogDefault.Write("Promoting 1D DELayout to 2D",
-    //   ESMC_LOG_WARN, ESMC_CONTEXT);
+    // ESMC_LogDefault.ESMC_LogWrite("Promoting 1D DELayout to 2D",
+    //   ESMC_LOG_WARN);
     ndim = 2;
     deCountArg = new int[2];  // TODO: this will leave a memory leak
     deCountArg[0] = vm.getNpets();
     deCountArg[1] = 1;
   }
   if (ndim==1){
-    // ESMC_LogDefault.Write("Promoting 1D DELayout to 2D",
-    //  ESMC_LOG_WARN, ESMC_CONTEXT);
+    // ESMC_LogDefault.ESMC_LogWrite("Promoting 1D DELayout to 2D",
+    //  ESMC_LOG_WARN);
     ndim = 2;
     int firstDEdim = deCountArg[0];
     deCountArg = new int[2];  // TODO: this will leave a memory leak
@@ -331,7 +331,7 @@ DELayout *DELayout::create(
     try {
       layout = new DELayout;
       localrc = layout->construct1D(vm, 0, DEtoPET, len, cyclic);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return ESMC_NULL_POINTER;
       // return successfully
       if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -339,14 +339,14 @@ DELayout *DELayout::create(
     }
     catch (...) {
       // LogErr catches the allocation error
-      ESMC_LogDefault.MsgAllocError("for new DELayout.", ESMC_CONTEXT, rc);  
+      ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayout.", rc);  
       return ESMC_NULL_POINTER;
     }
   }else if(ndim==1){
     try {
       layout = new DELayout;
       localrc = layout->construct1D(vm, *deCountArg, DEtoPET, len, cyclic);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return ESMC_NULL_POINTER;
       // return successfully
       if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -354,14 +354,14 @@ DELayout *DELayout::create(
     }
     catch (...) {
       // LogErr catches the allocation error
-      ESMC_LogDefault.MsgAllocError("for new DELayout.", ESMC_CONTEXT, rc);  
+      ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayout.", rc);  
       return ESMC_NULL_POINTER;
     }
   }else{
     try {
       layout = new DELayout;
       localrc = layout->constructND(vm, deCountArg, ndim, DEtoPET, len, cyclic);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return ESMC_NULL_POINTER;
       // return successfully
       if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -369,7 +369,7 @@ DELayout *DELayout::create(
     }
     catch (...) {
       // LogErr catches the allocation error
-      ESMC_LogDefault.MsgAllocError("for new DELayout.", ESMC_CONTEXT, rc);  
+      ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayout.", rc);  
       return ESMC_NULL_POINTER;
     }
   }
@@ -404,14 +404,14 @@ int DELayout::destroy(
 
   // return with errors for NULL pointer
   if (delayout == ESMC_NULL_POINTER || *delayout == ESMC_NULL_POINTER){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to DELayout", &rc);
     return rc;
   }
 
   // destruct and delete DELayout object
   localrc = (*delayout)->destruct();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   delete *delayout;
   *delayout = ESMC_NULL_POINTER;
@@ -460,7 +460,7 @@ int DELayout::construct(
   // by default use the currentVM for vm
   if (vmArg == ESMC_NULL_POINTER){
     vmArg = VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   }
 
@@ -508,7 +508,7 @@ int DELayout::construct(
     int pet = deInfoList[i].pet;
     // the following works because PETs in VM must be contiguous & start at zero
     if (pet < 0 || pet >= petCount){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_VALID,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
         "- DE to PET mapping is invalid", &rc);
       delete [] deInfoList;
       delete [] petFlag;
@@ -697,16 +697,16 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
   // TODO: remove this warning once all of ESMF accepts the more general case
   // of multiple DEs per PET.
   if (oneToOneFlag == ESMF_FALSE){
-    ESMC_LogDefault.Write("A layout without 1:1 DE:PET mapping was"
+    ESMC_LogDefault.ESMC_LogWrite("A layout without 1:1 DE:PET mapping was"
       " created! This may cause problems in higher layers of ESMF!", 
-      ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LOG_WARN);
   }
   // Issue warning if this is not logically rectangular
   // TODO: remove this warning when non logRect layouts o.k.
   if (logRectFlag == ESMF_FALSE){
-    ESMC_LogDefault.Write("A non logRect layout was"
+    ESMC_LogDefault.ESMC_LogWrite("A non logRect layout was"
       " created! This may cause problems in higher layers of ESMF!", 
-      ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LOG_WARN);
   }
   // Fill local part of layout object
   int mypet = vm->getMypet();    // get my PET id
@@ -814,16 +814,16 @@ int DELayout::constructND(VM &vmArg, int *deCountArg, int nndim,
   // TODO: remove this warning once all of ESMF accepts the more general case
   // of multiple DEs per PET.
   if (oneToOneFlag == ESMF_FALSE){
-    ESMC_LogDefault.Write("A layout without 1:1 DE:PET mapping was"
+    ESMC_LogDefault.ESMC_LogWrite("A layout without 1:1 DE:PET mapping was"
       " created! This may cause problems in higher layers of ESMF!", 
-      ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LOG_WARN);
   }
   // Issue warning if this is not logically rectangular
   // TODO: remove this warning when non logRect layouts o.k.
   if (logRectFlag == ESMF_FALSE){
-    ESMC_LogDefault.Write("A non logRect layout was"
+    ESMC_LogDefault.ESMC_LogWrite("A non logRect layout was"
       " created! This may cause problems in higher layers of ESMF!", 
-      ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LOG_WARN);
   }
   // Fill local part of layout object
   int mypet = vm->getMypet();    // get my PET id
@@ -998,7 +998,7 @@ int DELayout::getDEMatchDE(
       deMatchList[i] = tempMatchList[i];
   else if (len_deMatchList != -1){
     // deMatchList argument was specified but its size is insufficient
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
       "- deMatchList must be of size 'deMatchCount'", &rc);
     return rc;
   }
@@ -1064,7 +1064,7 @@ int DELayout::getDEMatchPET(
       petMatchList[i] = tempMatchList[i];
   else if (len_petMatchList != -1){
     // petMatchList argument was specified but its size is insufficient
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
       "- petMatchList must be of size 'petMatchCount'", &rc);
     return rc;
   }
@@ -1118,7 +1118,7 @@ int DELayout::getDeprecated(
   
   if (ndim != ESMC_NULL_POINTER){
     if (!oldstyle){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- only OLDSTYLE DELayouts support this query", &rc);
       return rc;
     }else
@@ -1134,7 +1134,7 @@ int DELayout::getDeprecated(
   
   if (localDe != ESMC_NULL_POINTER){
     if (!oldstyle){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- only OLDSTYLE DELayouts support this query", &rc);
       return rc;
     }else{
@@ -1152,7 +1152,7 @@ int DELayout::getDeprecated(
   
   if (logRectFlag != ESMC_NULL_POINTER){
     if (!oldstyle){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- only OLDSTYLE DELayouts support this query", &rc);
       return rc;
     }else
@@ -1161,7 +1161,7 @@ int DELayout::getDeprecated(
   
   if (len_deCountPerDim >= this->ndim){
     if (!oldstyle){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- only OLDSTYLE DELayouts support this query", &rc);
       return rc;
     }else{
@@ -1282,7 +1282,7 @@ int DELayout::print()const{
 
   // return with errors for NULL pointer
   if (this == NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       " - 'this' pointer is NULL.", &rc);
     return rc;
   }
@@ -1380,7 +1380,7 @@ int DELayout::validate()const{
 
   // check against NULL pointer
   if (this == ESMC_NULL_POINTER){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
       " - 'this' pointer is NULL.", &rc);
     return rc;
   }
@@ -1435,7 +1435,7 @@ int DELayout::serialize(
 
   // Check if buffer has enough free memory to hold object
   if ((*length - *offset) < sizeof(DELayout)) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
     "- Buffer too short to add a DELayout object", &rc);
     return rc;
   }
@@ -1444,7 +1444,7 @@ int DELayout::serialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   localrc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
   // Serialize the DELayout internal data members
@@ -1544,7 +1544,7 @@ DELayout *DELayout::deserialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   localrc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return NULL;
 
   // Deserialize the DELayout internal data members
@@ -1666,7 +1666,7 @@ DELayoutServiceReply DELayout::serviceOffer(
     if (i==localDeCount){
 //TODO: enable LogErr once it is thread-safe
 *rc=ESMC_RC_ARG_WRONG;
-//      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+//      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
 //        "- Specified DE is not in localDeList", rc);
       return reply;
     }
@@ -1678,7 +1678,7 @@ DELayoutServiceReply DELayout::serviceOffer(
   if (ii==vasLocalDeCount){
 //TODO: enable LogErr once it is thread-safe
 *rc=ESMC_RC_ARG_WRONG;
-//    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+//    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
 //      "- Specified DE is not in vasLocalDeList", rc);
     return reply;
   }
@@ -1750,7 +1750,7 @@ int DELayout::serviceComplete(
     if (i==localDeCount){
 //TODO: enable LogErr once it is thread-safe
 rc=ESMC_RC_ARG_WRONG;
-//      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+//      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
 //        "- Specified DE is not in localDeList", &rc);
       return rc;
     }
@@ -1762,7 +1762,7 @@ rc=ESMC_RC_ARG_WRONG;
   if (ii==vasLocalDeCount){
 //TODO: enable LogErr once it is thread-safe
 rc=ESMC_RC_ARG_WRONG;
-//    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+//    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
 //      "- Specified DE is not in vasLocalDeList", &rc);
     return rc;
   }
@@ -1771,7 +1771,7 @@ rc=ESMC_RC_ARG_WRONG;
   if (!serviceMutexFlag[ii]){
 //TODO: enable LogErr once it is thread-safe
 rc=ESMC_RC_NOT_VALID;
-//    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_VALID,
+//    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID,
 //      "- PET does not hold service mutex for specified", &rc);
     return rc;
   }
@@ -1825,7 +1825,7 @@ int DELayout::ESMC_DELayoutCopy(
 
   // ensure this is a 1-to-1 delayout, if not bail out
   if (oneToOneFlag != ESMF_TRUE){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
       "- Can only handle 1-to-1 DELayouts", &rc);
     return rc; // bail out
   }
@@ -1881,7 +1881,7 @@ int DELayout::ESMC_DELayoutCopy(
 
   int blen = len * ESMC_TypeKindSize(dtk);
   localrc = ESMC_DELayoutCopy(srcdata, destdata, blen, srcDE, destDE);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
   // return successfully
@@ -2439,12 +2439,12 @@ int XXE::exec(
   
   // check index range
   if (count > 0 && indexRangeStart > count-1){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- indexStart out of range", &rc);
     return rc;
   }
   if (indexRangeStop > count-1){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- indexStop out of range", &rc);
     return rc;
   }
@@ -3369,12 +3369,12 @@ int XXE::print(
   
   // check index range
   if (count > 0 && indexRangeStart > count-1){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- indexStart out of range", &rc);
     return rc;
   }
   if (indexRangeStop > count-1){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- indexStop out of range", &rc);
     return rc;
   }
@@ -3613,6 +3613,7 @@ int XXE::printProfile(
   XxeSubInfo *xxeSubInfo;
   XxeSubMultiInfo *xxeSubMultiInfo;
   WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
+  ProfileMessageInfo *xxeProfileMessageInfo;
   
   for (int i=0; i<count; i++){
     xxeElement = &(stream[i]);
@@ -3638,13 +3639,20 @@ int XXE::printProfile(
         int index = xxeWtimerInfo->actualWtimerIndex;
         if (index == i){
           // this is an actual wtimer element -> print
-          printf("localPet %d - XXE profile wtimer: %s\t"
-            "  id: %d\telement: %d\twtime = %gs\t wtimeSum = %gs\t"
+          printf("localPet %d - XXE profile wtimer - id: %04d  "
+            "element: %04d\t%s\t wtime = %gs\t wtimeSum = %gs\t"
             "sumTermCount: %d\n", 
-            localPet, xxeWtimerInfo->timerString, xxeWtimerInfo->timerId, i,
+            localPet, xxeWtimerInfo->timerId, i, xxeWtimerInfo->timerString,
             xxeWtimerInfo->wtime, xxeWtimerInfo->wtimeSum,
             xxeWtimerInfo->sumTermCount);
         }
+      }
+      break;
+    case profileMessage:
+      {
+        xxeProfileMessageInfo = (ProfileMessageInfo *)xxeElement;
+        printf("localPet %d - XXE profileMessage: %s\n",
+          localPet, xxeProfileMessageInfo->messageString);
       }
       break;
     default:
@@ -3688,7 +3696,7 @@ int XXE::optimizeElement(
 #endif
   
   if (index < 0 || index >= count){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- index out of range", &rc);
     return rc;
   }
@@ -3832,14 +3840,14 @@ int XXE::execReady(
       case xxeSub:
         xxeSubInfo = (XxeSubInfo *)xxeElement;
         localrc = xxeSubInfo->xxe->execReady(); // recursive call
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &rc)) return rc;
         break;
       case xxeSubMulti:
         xxeSubMultiInfo = (XxeSubMultiInfo *)xxeElement;
         for (int k=0; k<xxeSubMultiInfo->count; k++){
           localrc = xxeSubMultiInfo->xxe[k]->execReady(); // recursive call
-          if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
         break;
@@ -3847,7 +3855,7 @@ int XXE::execReady(
         xxeWaitOnAnyIndexSubInfo = (WaitOnAnyIndexSubInfo *)xxeElement;
         for (int k=0; k<xxeWaitOnAnyIndexSubInfo->count; k++){
           localrc = xxeWaitOnAnyIndexSubInfo->xxe[k]->execReady(); // recu. call
-          if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &rc)) return rc;
         }
         break;
@@ -3860,7 +3868,7 @@ int XXE::execReady(
           sendnbIndexList[sendnbCount] = i;
           ++sendnbCount;
           if (sendnbCount >= sendnbMax){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
               "- sendnbCount out of range", &rc);
             return rc;
           }
@@ -3871,7 +3879,7 @@ int XXE::execReady(
           recvnbIndexList[recvnbCount] = i;
           ++recvnbCount;
           if (recvnbCount >= recvnbMax){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
               "- recvnbCount out of range", &rc);
             return rc;
           }
@@ -3882,7 +3890,7 @@ int XXE::execReady(
           sendnbIndexList[sendnbCount] = i;
           ++sendnbCount;
           if (sendnbCount >= sendnbMax){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
               "- sendnbCount out of range", &rc);
             return rc;
           }
@@ -3893,7 +3901,7 @@ int XXE::execReady(
           recvnbIndexList[recvnbCount] = i;
           ++recvnbCount;
           if (recvnbCount >= recvnbMax){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
               "- recvnbCount out of range", &rc);
             return rc;
           }
@@ -3925,7 +3933,7 @@ int XXE::execReady(
             ++count;
             if (count >= max){
               localrc = growStream(1000);
-              if (ESMC_LogDefault.MsgFoundError(localrc, 
+              if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
                 ESMF_ERR_PASSTHRU, &rc)) return rc;
             }
           }
@@ -3933,7 +3941,7 @@ int XXE::execReady(
           // (excluding this StreamElement)
           if (sendnbCount+oldCount-1 >= max){
             localrc = growStream(sendnbCount+oldCount-max);
-            if (ESMC_LogDefault.MsgFoundError(localrc, 
+            if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
               ESMF_ERR_PASSTHRU, &rc)) return rc;
           }
           memcpy(stream+count, oldStream+i+1, (oldCount-i-1)
@@ -3968,7 +3976,7 @@ int XXE::execReady(
             ++count;
             if (count >= max){
               localrc = growStream(1000);
-              if (ESMC_LogDefault.MsgFoundError(localrc, 
+              if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
                 ESMF_ERR_PASSTHRU, &rc)) return rc;
             }
           }
@@ -3976,7 +3984,7 @@ int XXE::execReady(
           // (excluding this StreamElement)
           if (recvnbCount+count-1 >= max){
             localrc = growStream(recvnbCount+oldCount-max);
-            if (ESMC_LogDefault.MsgFoundError(localrc, 
+            if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
               ESMF_ERR_PASSTHRU, &rc)) return rc;
           }
           memcpy(stream+count, oldStream+i+1, (oldCount-i-1)
@@ -4050,7 +4058,7 @@ int XXE::execReady(
         if (resolveCounter==2) break; // resolved both Ids
       }
       if (j==iCount){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
           "- unable to resolve XXE WTimer Id", &rc);
         return rc;
       }
@@ -4352,7 +4360,7 @@ int XXE::optimize(
               xxeSendnbInfo->size = bufferSize;
               // slip in the associated memcpy()s _before_ the first Sendnb
               if (xxeCount+count > max){
-                ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
                   "- count out of range", &rc);
                 return rc;
               }
@@ -4457,7 +4465,7 @@ int XXE::optimize(
               xxeRecvnbInfo->size = bufferSize;
               // slip in the associated memcpy()s _after_ the waitOnAllRecvnb
               if (xxeCount+count > max){
-                ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
                   "- count out of range", &rc);
                 return rc;
               }
@@ -4550,7 +4558,7 @@ int XXE::growStream(
   }
 
   if (increase < 0){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- increase must be positive", &rc);
     return rc;
   }
@@ -4560,7 +4568,7 @@ int XXE::growStream(
   try{
     streamNew = new StreamElement[maxNew];
   }catch (...){
-    ESMC_LogDefault.AllocError(ESMC_CONTEXT,&rc);
+    ESMC_LogDefault.ESMC_LogAllocError(&rc);
     return rc;
   }
   memcpy(streamNew, stream, count*sizeof(StreamElement)); // copy prev. elements
@@ -4606,7 +4614,7 @@ int XXE::growStorage(
   }
 
   if (increase < 0){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- increase must be positive", &rc);
     return rc;
   }
@@ -4616,7 +4624,7 @@ int XXE::growStorage(
   try{
     storageNew = new char*[storageMaxCountNew];
   }catch (...){
-    ESMC_LogDefault.AllocError(ESMC_CONTEXT,&rc);
+    ESMC_LogDefault.ESMC_LogAllocError(&rc);
     return rc;
   }
   memcpy(storageNew, storage, storageCount*sizeof(char *)); //copy prev elements
@@ -4662,7 +4670,7 @@ int XXE::growCommhandle(
   }
 
   if (increase < 0){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- increase must be positive", &rc);
     return rc;
   }
@@ -4672,7 +4680,7 @@ int XXE::growCommhandle(
   try{
     commhandleNew = new VMK::commhandle**[commhandleMaxCountNew];
   }catch (...){
-    ESMC_LogDefault.AllocError(ESMC_CONTEXT,&rc);
+    ESMC_LogDefault.ESMC_LogAllocError(&rc);
     return rc;
   }
   memcpy(commhandleNew, commhandle, commhandleCount*sizeof(VMK::commhandle **));
@@ -4718,7 +4726,7 @@ int XXE::growXxeSub(
   }
 
   if (increase < 0){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "- increase must be positive", &rc);
     return rc;
   }
@@ -4728,7 +4736,7 @@ int XXE::growXxeSub(
   try{
     xxeSubListNew = new XXE*[xxeSubMaxCountNew];
   }catch (...){
-    ESMC_LogDefault.AllocError(ESMC_CONTEXT,&rc);
+    ESMC_LogDefault.ESMC_LogAllocError(&rc);
     return rc;
   }
   memcpy(xxeSubListNew, xxeSubList, xxeSubCount*sizeof(XXE *));
@@ -4768,7 +4776,7 @@ int XXE::incCount(
   
   ++count;
   if (count >= max)
-    if (ESMC_LogDefault.MsgFoundError(growStream(1000), 
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(growStream(1000), 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
   
   // return successfully
@@ -4803,7 +4811,7 @@ int XXE::incStorageCount(
   
   ++storageCount;
   if (storageCount >= storageMaxCount)
-    if (ESMC_LogDefault.MsgFoundError(growStorage(10000), 
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(growStorage(10000), 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
   
   // return successfully
@@ -4838,7 +4846,7 @@ int XXE::incCommhandleCount(
   
   ++commhandleCount;
   if (commhandleCount >= commhandleMaxCount)
-    if (ESMC_LogDefault.MsgFoundError(growCommhandle(1000), 
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(growCommhandle(1000), 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
   
   // return successfully
@@ -4873,7 +4881,7 @@ int XXE::incXxeSubCount(
   
   ++xxeSubCount;
   if (xxeSubCount >= xxeSubMaxCount)
-    if (ESMC_LogDefault.MsgFoundError(growXxeSub(1000), 
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(growXxeSub(1000), 
       ESMF_ERR_PASSTHRU, &rc)) return rc;
   
   // return successfully
@@ -4881,5 +4889,756 @@ int XXE::incXxeSubCount(
   return rc;
 }
 //-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendStorage()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendStorage
+//
+// !INTERFACE:
+int XXE::appendStorage(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  char *storageArg
+  ){
+//
+// !DESCRIPTION:
+//  Append a storage at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  storage[storageCount] = storageArg;
+  localrc = incStorageCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendCommhandle()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendCommhandle
+//
+// !INTERFACE:
+int XXE::appendCommhandle(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  VMK::commhandle **commhandleArg
+  ){
+//
+// !DESCRIPTION:
+//  Append a commhandle at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  commhandle[commhandleCount] = commhandleArg;
+  localrc = incCommhandleCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendXxeSub()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendXxeSub
+//
+// !INTERFACE:
+int XXE::appendXxeSub(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  XXE *xxeSub
+  ){
+//
+// !DESCRIPTION:
+//  Append an xxeSub at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  xxeSubList[xxeSubCount] = xxeSub;
+  localrc = incXxeSubCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendWtimer()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendWtimer
+//
+// !INTERFACE:
+int XXE::appendWtimer(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  char *string,
+  int id,
+  int actualId,
+  int relativeId,
+  XXE *relativeXXE
+  ){
+//
+// !DESCRIPTION:
+//  Append a wtimer element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = wtimer;
+  stream[count].predicateBitField = predicateBitField;
+  WtimerInfo *xxeWtimerInfo = (WtimerInfo *)&(stream[count]);
+  xxeWtimerInfo->timerId = id;
+  int stringLen = strlen(string);
+  xxeWtimerInfo->timerString = new char[stringLen+1];
+  strcpy(xxeWtimerInfo->timerString, string);
+  xxeWtimerInfo->actualWtimerId = actualId;
+  xxeWtimerInfo->relativeWtimerId = relativeId;
+  xxeWtimerInfo->relativeWtimerXXE = relativeXXE;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of strings for xxe garbage collection
+  localrc = appendStorage(xxeWtimerInfo->timerString);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendRecvnb()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendRecvnb
+//
+// !INTERFACE:
+int XXE::appendRecvnb(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  void *buffer,
+  int size,
+  int srcPet,
+  int tag
+  ){
+//
+// !DESCRIPTION:
+//  Append a recvnb element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = recvnb;
+  stream[count].predicateBitField = predicateBitField;
+  RecvnbInfo *xxeRecvnbInfo = (RecvnbInfo *)&(stream[count]);
+  xxeRecvnbInfo->buffer = buffer;
+  xxeRecvnbInfo->size = size;
+  xxeRecvnbInfo->srcPet = srcPet;
+  xxeRecvnbInfo->tag = tag;
+  xxeRecvnbInfo->commhandle = new VMK::commhandle*;
+  *(xxeRecvnbInfo->commhandle) = new VMK::commhandle;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of commhandles for xxe garbage collection
+  localrc = appendCommhandle(xxeRecvnbInfo->commhandle);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendSendnb()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendSendnb
+//
+// !INTERFACE:
+int XXE::appendSendnb(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  void *buffer,
+  int size,
+  int dstPet,
+  int tag
+  ){
+//
+// !DESCRIPTION:
+//  Append a sendnb element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = sendnb;
+  stream[count].predicateBitField = predicateBitField;
+  SendnbInfo *xxeSendnbInfo = (SendnbInfo *)&(stream[count]);
+  xxeSendnbInfo->buffer = buffer;
+  xxeSendnbInfo->size = size;
+  xxeSendnbInfo->dstPet = dstPet;
+  xxeSendnbInfo->tag = tag;
+  xxeSendnbInfo->commhandle = new VMK::commhandle*;
+  *(xxeSendnbInfo->commhandle) = new VMK::commhandle;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of commhandles for xxe garbage collection
+  localrc = appendCommhandle(xxeSendnbInfo->commhandle);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendSendnbRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendSendnbRRA
+//
+// !INTERFACE:
+int XXE::appendSendnbRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  int rraOffset,
+  int size,
+  int dstPet,
+  int rraIndex,
+  int tag
+  ){
+//
+// !DESCRIPTION:
+//  Append a sendnbRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = sendnbRRA;
+  stream[count].predicateBitField = predicateBitField;
+  SendnbRRAInfo *xxeSendnbRRAInfo = (SendnbRRAInfo *)&(stream[count]);
+  xxeSendnbRRAInfo->rraOffset = rraOffset;
+  xxeSendnbRRAInfo->size = size;
+  xxeSendnbRRAInfo->dstPet = dstPet;
+  xxeSendnbRRAInfo->rraIndex = rraIndex;
+  xxeSendnbRRAInfo->tag = tag;
+  xxeSendnbRRAInfo->commhandle = new VMK::commhandle*;
+  *(xxeSendnbRRAInfo->commhandle) = new VMK::commhandle;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of commhandles for xxe garbage collection
+  localrc = appendCommhandle(xxeSendnbRRAInfo->commhandle);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendMemCpySrcRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendMemCpySrcRRA
+//
+// !INTERFACE:
+int XXE::appendMemCpySrcRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  int rraOffset,
+  int size,
+  void *dstMem,
+  int rraIndex
+  ){
+//
+// !DESCRIPTION:
+//  Append a memCpySrcRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = memCpySrcRRA;
+  stream[count].predicateBitField = predicateBitField;
+  MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo = (MemCpySrcRRAInfo *)&(stream[count]);
+  xxeMemCpySrcRRAInfo->rraOffset = rraOffset;
+  xxeMemCpySrcRRAInfo->size = size;
+  xxeMemCpySrcRRAInfo->dstMem = dstMem;
+  xxeMemCpySrcRRAInfo->rraIndex = rraIndex;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendMemGatherSrcRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendMemGatherSrcRRA
+//
+// !INTERFACE:
+int XXE::appendMemGatherSrcRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  void *dstBase,
+  TKId dstBaseTK,
+  int rraIndex,
+  int chunkCount
+  ){
+//
+// !DESCRIPTION:
+//  Append a memGatherSrcRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = memGatherSrcRRA;
+  stream[count].predicateBitField = predicateBitField;
+  MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo =
+    (MemGatherSrcRRAInfo *)&(stream[count]);
+  xxeMemGatherSrcRRAInfo->dstBase = dstBase;
+  xxeMemGatherSrcRRAInfo->dstBaseTK = dstBaseTK;
+  xxeMemGatherSrcRRAInfo->rraIndex = rraIndex;
+  xxeMemGatherSrcRRAInfo->chunkCount = chunkCount;
+  char *rraOffsetListChar = new char[chunkCount*sizeof(int)];
+  xxeMemGatherSrcRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
+  char *countListChar = new char[chunkCount*sizeof(int)];
+  xxeMemGatherSrcRRAInfo->countList = (int *)countListChar;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of allocations for xxe garbage collection
+  localrc = appendStorage(rraOffsetListChar);  // for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  localrc = appendStorage(countListChar);  // for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendZeroSuperScalarRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendZeroSuperScalarRRA
+//
+// !INTERFACE:
+int XXE::appendZeroSuperScalarRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  TKId elementTK,
+  int termCount,
+  int rraIndex
+  ){
+//
+// !DESCRIPTION:
+//  Append a zeroSuperScalarRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = zeroSuperScalarRRA;
+  stream[count].predicateBitField = predicateBitField;
+  ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo =
+    (ZeroSuperScalarRRAInfo *)&(stream[count]);
+  xxeZeroSuperScalarRRAInfo->elementTK = elementTK;
+  char *rraOffsetListChar = new char[termCount*sizeof(int)];
+  xxeZeroSuperScalarRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
+  xxeZeroSuperScalarRRAInfo->rraIndex = rraIndex;
+  xxeZeroSuperScalarRRAInfo->termCount = termCount;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of allocations for xxe garbage collection
+  localrc = appendStorage(rraOffsetListChar);  // for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendProductSumScalarRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendProductSumScalarRRA
+//
+// !INTERFACE:
+int XXE::appendProductSumScalarRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  TKId elementTK,
+  TKId valueTK,
+  TKId factorTK,
+  int rraOffset,
+  void *factor,
+  void *value,
+  int rraIndex
+  ){
+//
+// !DESCRIPTION:
+//  Append a productSumScalarRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = productSumScalarRRA;
+  stream[count].predicateBitField = predicateBitField;
+  ProductSumScalarRRAInfo *xxeProductSumScalarRRAInfo =
+    (ProductSumScalarRRAInfo *)&(stream[count]);
+  xxeProductSumScalarRRAInfo->elementTK = elementTK;
+  xxeProductSumScalarRRAInfo->valueTK = valueTK;
+  xxeProductSumScalarRRAInfo->factorTK = factorTK;
+  xxeProductSumScalarRRAInfo->rraOffset = rraOffset;
+  xxeProductSumScalarRRAInfo->factor = factor;
+  xxeProductSumScalarRRAInfo->value = value;
+  xxeProductSumScalarRRAInfo->rraIndex = rraIndex;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendProductSumSuperScalarRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendProductSumSuperScalarRRA
+//
+// !INTERFACE:
+int XXE::appendProductSumSuperScalarRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  TKId elementTK,
+  TKId valueTK,
+  TKId factorTK,
+  int rraIndex,
+  int termCount
+  ){
+//
+// !DESCRIPTION:
+//  Append a productSumSuperScalarRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = productSumSuperScalarRRA;
+  stream[count].predicateBitField = predicateBitField;
+  ProductSumSuperScalarRRAInfo *xxeProductSumSuperScalarRRAInfo =
+    (ProductSumSuperScalarRRAInfo *)&(stream[count]);
+  xxeProductSumSuperScalarRRAInfo->elementTK = elementTK;
+  xxeProductSumSuperScalarRRAInfo->valueTK = valueTK;
+  xxeProductSumSuperScalarRRAInfo->factorTK = factorTK;
+  xxeProductSumSuperScalarRRAInfo->rraIndex = rraIndex;
+  xxeProductSumSuperScalarRRAInfo->termCount = termCount;
+  char *rraOffsetListChar = new char[termCount*sizeof(int)];
+  xxeProductSumSuperScalarRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
+  char *factorListChar = new char[termCount*sizeof(void *)];
+  xxeProductSumSuperScalarRRAInfo->factorList = (void **)factorListChar;
+  char *valueListChar = new char[termCount*sizeof(void *)];
+  xxeProductSumSuperScalarRRAInfo->valueList = (void **)valueListChar;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of allocations for xxe garbage collection
+  localrc = appendStorage(rraOffsetListChar);// for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  localrc = appendStorage(factorListChar);// for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  localrc = appendStorage(valueListChar);// for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendWaitOnAnyIndexSub()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendWaitOnAnyIndexSub
+//
+// !INTERFACE:
+int XXE::appendWaitOnAnyIndexSub(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  int countArg
+  ){
+//
+// !DESCRIPTION:
+//  Append a waitOnAnyIndexSub element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = waitOnAnyIndexSub;
+  stream[count].predicateBitField = predicateBitField;
+  WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo =
+    (WaitOnAnyIndexSubInfo *)&(stream[count]);
+  xxeWaitOnAnyIndexSubInfo->count = countArg;
+  char *xxeChar = new char[countArg*sizeof(XXE *)];
+  xxeWaitOnAnyIndexSubInfo->xxe = (XXE **)xxeChar;
+  char *indexChar = new char[countArg*sizeof(int)];
+  xxeWaitOnAnyIndexSubInfo->index = (int *)indexChar;
+  char *completeFlagChar = new char[countArg*sizeof(int)];
+  xxeWaitOnAnyIndexSubInfo->completeFlag = (int *)completeFlagChar;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of allocations for xxe garbage collection
+  localrc = appendStorage(xxeChar);  // for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  localrc = appendStorage(indexChar);  // for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  localrc = appendStorage(completeFlagChar);  // for xxe garb. coll.
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendWaitOnAllSendnb()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendWaitOnAllSendnb
+//
+// !INTERFACE:
+int XXE::appendWaitOnAllSendnb(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField
+  ){
+//
+// !DESCRIPTION:
+//  Append a waitOnAllSendnb element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = waitOnAllSendnb;
+  stream[count].predicateBitField = predicateBitField;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendProfileMessage()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendProfileMessage
+//
+// !INTERFACE:
+int XXE::appendProfileMessage(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  char *messageString
+  ){
+//
+// !DESCRIPTION:
+//  Append a profileMessage element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = profileMessage;
+  stream[count].predicateBitField = predicateBitField;
+  ProfileMessageInfo *xxeProfileMessageInfo =
+    (ProfileMessageInfo *)&(stream[count]);
+  int stringLen = strlen(messageString);
+  xxeProfileMessageInfo->messageString = new char[stringLen+1];
+  strcpy(xxeProfileMessageInfo->messageString, messageString);
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  // keep track of strings for xxe garbage collection
+  localrc = appendStorage(xxeProfileMessageInfo->messageString);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
 
 } // namespace ESMCI
