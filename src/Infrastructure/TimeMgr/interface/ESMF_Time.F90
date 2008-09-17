@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.98 2008/09/03 05:56:37 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.99 2008/09/17 05:23:25 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.98 2008/09/03 05:56:37 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.99 2008/09/17 05:23:25 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1030,7 +1030,7 @@
 !     ~\cite{JDNcalculator}.
 !
 !     The Modified Julian Day, introduced by space scientists in the late
-!     1950's, is defined as Julian-day - 2400000.5.  See ~\cite{MJD}.
+!     1950's, is defined as Julian-day - 2400000.5.  See~\cite{MJD}.
 !
 !     Note that d and d\_i8 are not valid for the No-Calendar.  To remain
 !     consistent with non-Earth calendars added to ESMF in the future, ESMF
