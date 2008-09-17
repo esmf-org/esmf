@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedist3DSTest.F90,v 1.2 2008/09/11 17:19:55 feiliu Exp $
+! $Id: ESMF_ArrayRedist3DSTest.F90,v 1.3 2008/09/17 15:49:52 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -23,7 +23,7 @@
 !
 !    The coupler component runs on all 8 PETs and reconciles import and export
 !    states which contain source and destination Array, respectively. The 
-!    coupler component then calls ArrayRedist() to a redistribute he source
+!    coupler component then calls ArrayRedist() to redistribute the source
 !    Array data onto the destination Array.
 !    
 !    Finally the second gridded component compares the data stored in the
