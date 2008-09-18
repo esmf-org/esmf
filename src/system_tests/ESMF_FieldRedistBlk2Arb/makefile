@@ -24,7 +24,7 @@ SYSTEM_TESTS_OBJ     =
 
 SYSTEM_TESTS_RUN     = RUN_FieldRedistBlk2Arb
 
-SYSTEM_TESTS_RUN_UNI = RUN_FieldRedistBlk2ArbUNI
+SYSTEM_TESTS_RUN_UNI = 
 
 
 include $(ESMF_DIR)/makefile
@@ -37,9 +37,3 @@ CLOBBERDIRS =
 
 RUN_FieldRedistBlk2Arb:
 	$(MAKE) TNAME=FieldRedistBlk2Arb NP=6 stest
-
-RUN_FieldRedistBlk2ArbUNI:
-	$(MAKE) TNAME=FieldRedistBlk2Arb NP=1 stest
-
-
-
