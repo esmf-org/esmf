@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.11 2008/09/16 18:43:30 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.12 2008/09/18 03:45:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.11 2008/09/16 18:43:30 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.12 2008/09/18 03:45:52 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -723,6 +723,49 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeRemove(<object>, name, convention, purpose, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character (len = *), intent(in) :: name
+!     character (len = *), intent(in), optional :: convention
+!     character (len = *), intent(in), optional :: purpose
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Removes an Attribute on <object>.
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to remove.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_AttributeSet - Set an Attribute
 !
 ! !INTERFACE:
@@ -779,49 +822,6 @@ contains
 !           The number of items in a multi-valued Attribute.
 !     \item [<value argument>]
 !           The value of the Attribute to set.
-!     \item [convention]
-!           The convention of the Attribute package.
-!     \item [purpose]
-!           The purpose of the Attribute package.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute
-!
-! !INTERFACE:
-!     subroutine ESMF_AttributeRemove(<object>, name, convention, purpose, rc)
-!
-! !ARGUMENTS:
-!     <object>, see below for supported values  
-!     character (len = *), intent(in) :: name
-!     character (len = *), intent(in), optional :: convention
-!     character (len = *), intent(in), optional :: purpose
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Removes an Attribute on <object>.
-!     Supported values for <object> are:
-!     \begin{description}
-!     \item type(ESMF\_Array), intent(inout) :: array
-!     \item type(ESMF\_CplComp), intent(inout) :: comp  
-!     \item type(ESMF\_GridComp), intent(inout) :: comp  
-!     \item type(ESMF\_Field), intent(inout) :: field  
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
-!     \item type(ESMF\_Grid), intent(inout) :: grid
-!     \item type(ESMF\_State), intent(inout) :: state
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [<object>]
-!           An {\tt ESMF} object.
-!     \item [name]
-!           The name of the Attribute to remove.
 !     \item [convention]
 !           The convention of the Attribute package.
 !     \item [purpose]
