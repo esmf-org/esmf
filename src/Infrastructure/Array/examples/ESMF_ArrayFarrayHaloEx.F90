@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.7.2.3 2008/04/05 03:12:27 cdeluca Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.7.2.4 2008/09/18 21:04:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -15,10 +15,10 @@
 !==============================================================================
 
 !BOE
-! \subsubsection{Array from native Fortran90 array with elements for halo}
+! \subsubsection{Array from native Fortran array with elements for halo}
 ! 
 ! The example of the previous section showed how easy it is to create an Array
-! object from existing PET-local Fortran90 arrays. The example did, however, not
+! object from existing PET-local Fortran arrays. The example did, however, not
 ! define any halos around the DE-local regions. The following code demonstrates
 ! how an Array object with space for a halo can be set up.
 !EOE
@@ -32,12 +32,12 @@ program ESMF_ArrayFarrayHaloEx
 !EOC
 !BOE
 ! The allocatable array {\tt farrayA} will be used to provide the PET-local
-! Fortran90 array for this example.
+! Fortran array for this example.
 !EOE
 !BOC
   ! local variables
-  real(ESMF_KIND_R8), allocatable :: farrayA(:,:)   ! allocatable F90 array
-  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching F90 array pointer
+  real(ESMF_KIND_R8), allocatable :: farrayA(:,:)   ! allocatable Fortran array
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching Fortran array pointer
   type(ESMF_DistGrid)         :: distgrid           ! DistGrid object
   type(ESMF_Array)            :: array              ! Array object
   integer                     :: rc, i, j
@@ -90,13 +90,13 @@ program ESMF_ArrayFarrayHaloEx
 ! a halo of 2 elements in each direction the following allocation will suffice.
 !EOE
 !BOC
-  allocate(farrayA(14,14))    ! Fortran90 array with halo: 14 = 10 + 2 * 2
+  allocate(farrayA(14,14))    ! Fortran array with halo: 14 = 10 + 2 * 2
 !EOC
   farrayA = 36.71d0 ! initialize
 !BOE
 ! The {\tt farrayA} can now be used to create an Array object with enough space
 ! for a two element halo in each direction. The Array creation method checks for 
-! each PET that the local Fortran90 array can accomodate the requested regions.
+! each PET that the local Fortran array can accomodate the requested regions.
 !
 ! The default behavior of ArrayCreate() is to center the exclusive region within
 ! the total region. Consequently the following call will provide the 2 extra 
@@ -110,7 +110,7 @@ program ESMF_ArrayFarrayHaloEx
 call ESMF_ArrayPrint(array)
 !BOE
 ! The exclusive Array region on each PET can be accessed through a suitable
-! Fortran90 array pointer. See section \ref{Array_regions_and_default_bounds}
+! Fortran array pointer. See section \ref{Array_regions_and_default_bounds}
 ! for more details on Array regions.
 !EOE
 !BOC

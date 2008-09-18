@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayPr.F90,v 1.1.2.2 2008/06/24 21:53:53 eschwab Exp $
+! $Id: ESMF_ArrayPr.F90,v 1.1.2.3 2008/09/18 21:04:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@ module ESMF_ArrayPrMod
 ! !MODULE: ESMF_ArrayMod
 !
 
-!   F90 API wrapper of C++ implemenation of Array
+!   Fortran API wrapper of C++ implemenation of Array
 !
 !------------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ module ESMF_ArrayPrMod
   use ESMF_DELayoutMod
   use ESMF_DistGridMod
   use ESMF_RHandleMod
-  use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+  use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
   
   ! class sub modules
   use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
@@ -71,7 +71,7 @@ module ESMF_ArrayPrMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayPr.F90,v 1.1.2.2 2008/06/24 21:53:53 eschwab Exp $'
+    '$Id: ESMF_ArrayPr.F90,v 1.1.2.3 2008/09/18 21:04:22 theurich Exp $'
 
 !==============================================================================
 ! 

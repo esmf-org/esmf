@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGather.cppF90,v 1.8.2.7 2008/04/05 03:12:29 cdeluca Exp $
+! $Id: ESMF_ArrayGather.cppF90,v 1.8.2.8 2008/09/18 21:04:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@ module ESMF_ArrayGatherMod
 !
 ! !DESCRIPTION:
 !
-! The code in this file is part of the {\tt ESMF\_Array} class F90 API.
+! The code in this file is part of the {\tt ESMF\_Array} class Fortran API.
 !
 !
 !------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ module ESMF_ArrayGatherMod
   use ESMF_DELayoutMod
   use ESMF_DistGridMod
   use ESMF_RHandleMod
-  use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+  use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
 
   ! class sub modules
   use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
@@ -69,7 +69,7 @@ module ESMF_ArrayGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGather.cppF90,v 1.8.2.7 2008/04/05 03:12:29 cdeluca Exp $'
+    '$Id: ESMF_ArrayGather.cppF90,v 1.8.2.8 2008/09/18 21:04:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -114,7 +114,7 @@ contains
 ! -------------------------- ESMF-public method ----------------------------- @\
 !BOP @\
 ! @\
-! !IROUTINE: ESMF_ArrayGather - Gather a Fortran90 array from an ESMF_Array @\
+! !IROUTINE: ESMF_ArrayGather - Gather a Fortran array from an ESMF_Array @\
 ! @\
 ! !INTERFACE: @\
 ! subroutine ESMF_ArrayGather<rank><type><kind>(array, farray, patch, & @\
@@ -150,7 +150,7 @@ contains
 !   \item[array] @\
 !     The {\tt ESMF\_Array} object from which data will be gathered. @\
 !   \item[{[farray]}] @\
-!     The Fortran90 array into which to gather data. Only root @\
+!     The Fortran array into which to gather data. Only root @\
 !     must provide a valid {\tt farray}. @\
 !   \item[{[patch]}] @\
 !     The DistGrid patch in {\tt array} from which to gather {\tt farray}. @\
@@ -213,7 +213,7 @@ contains
 @\
     if (localPet==rootPet) then @\
       ! rootPet -> prepare counts vector @\
-      ! The following use of fptr is a bit of trickery to get all F90 @\
+      ! The following use of fptr is a bit of trickery to get all Fortran @\
       ! compilers to cooperate. For some compilers the associated() test @\
       ! will return .false. for farray of size 0. Some of those compilers @\
       ! will produce a run-time error in size(fptr). Other compilers will @\

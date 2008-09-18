@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.6.2.3 2008/04/05 03:12:27 cdeluca Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.6.2.4 2008/09/18 21:04:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -15,12 +15,12 @@
 !==============================================================================
 
 !BOE
-! \subsubsection{Array from native Fortran90 array with 1 DE per PET}
+! \subsubsection{Array from native Fortran array with 1 DE per PET}
 ! 
 ! The create call of the {\tt ESMF\_Array} class has been overloaded
 ! extensively to facilitate the need for generality while keeping simple
 ! cases simple. The following program demonstrates one of the simpler
-! cases, where existing local Fortran90 arrays are to be used to provide
+! cases, where existing local Fortran arrays are to be used to provide
 ! the PET-local memory allocations for the Array object.
 !
 !EOE
@@ -33,8 +33,8 @@ program ESMF_ArrayFarrayEx
   
 !EOC
 !BOE
-! The Fortran90 language provides a variety of ways to define and allocate
-! an array. Actual Fortran90 array objects must either be explicit-shape or
+! The Fortran language provides a variety of ways to define and allocate
+! an array. Actual Fortran array objects must either be explicit-shape or
 ! deferred-shape. In the first case the memory allocation and deallocation is 
 ! automatic from the user's perspective and the details of the allocation 
 ! (static or dynamic, heap or stack) are left to the compiler. (Compiler flags
@@ -47,9 +47,9 @@ program ESMF_ArrayFarrayEx
 ! standard.
 !
 ! The {\tt ESMF\_ArrayCreate()} interface has been written to accept native
-! Fortran90 arrays of any flavor as a means to allow user-contolled memory
+! Fortran arrays of any flavor as a means to allow user-contolled memory
 ! management. The Array create call will check on each PET if sufficient 
-! memory has been provided by the specified Fortran90 arrays and will indicate 
+! memory has been provided by the specified Fortran arrays and will indicate 
 ! an error if a problem is detected. However, the Array create call cannot
 ! validate the lifetime of the provided memory allocations. If, for instance,
 ! an Array object was created in a subroutine from an automatic explicit-shape
@@ -60,43 +60,43 @@ program ESMF_ArrayFarrayEx
 ! during Array creation becomes deallocated, however, the Array will indicate
 ! an error if it's memory references have been invalidated. 
 
-! The easiest, portable way to provide safe native Fortran90 memory allocations
+! The easiest, portable way to provide safe native Fortran memory allocations
 ! to Array create is to use arrays with the pointer attribute. Memory allocated
 ! for an array pointer will not be deallocated automatically. However, in this
 ! case the possibility of memory leaks becomes an issue of concern. The 
-! deallocation of memory provided to an Array in form of a native Fortan90 
+! deallocation of memory provided to an Array in form of a native Fortran
 ! allocation will remain the users responsibility.
 ! 
 ! None of the concerns discussed above are an issue in this example where the
-! native Fortran90 array {\tt farray} is defined in the main program. All
+! native Fortran array {\tt farray} is defined in the main program. All
 ! different types of array memory allocation are demonstrated in this example.
 ! First {\tt farrayE} is defined as a 2D explicit-shape array on each PET which 
 ! will automatically provide memory for $10\times 10$ elements.
 !EOE
 !BOC
   ! local variables
-  real(ESMF_KIND_R8)          :: farrayE(10,10)     ! explicit shape F90 array
+  real(ESMF_KIND_R8)          :: farrayE(10,10)     ! explicit shape Fortran array
 !EOC
 !BOE
 ! Then an allocatable array {\tt farrayA} is declared which will be used
 ! to show user-controlled dynamic memory allocation.
 !EOE
 !BOC
-  real(ESMF_KIND_R8), allocatable :: farrayA(:,:)   ! allocatable F90 array
+  real(ESMF_KIND_R8), allocatable :: farrayA(:,:)   ! allocatable Fortran array
 !EOC
 !BOE
 ! Finally an array with pointer attribute {\tt farrayP} is declared, also used
 ! for user-controlled dynamic memory allocation.
 !EOE
 !BOC
-  real(ESMF_KIND_R8), pointer :: farrayP(:,:)       ! F90 array pointer 
+  real(ESMF_KIND_R8), pointer :: farrayP(:,:)       ! Fortran array pointer 
 !EOC
 !BOE
 ! A matching array pointer must also be available to gain access to the arrays
 ! held by an Array object.
 !EOE
 !BOC
-  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching F90 array pointer 
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching Fortran array pointer 
   type(ESMF_DistGrid)         :: distgrid           ! DistGrid object
   type(ESMF_Array)            :: array              ! Array object
   integer                     :: rc
@@ -194,7 +194,7 @@ program ESMF_ArrayFarrayEx
 !BOE
 !
 ! Another way of accessing the memory associated with an Array object is to 
-! use {\tt ArrayGet()} to obtain an Fortran90 pointer that references the
+! use {\tt ArrayGet()} to obtain an Fortran pointer that references the
 ! PET-local array.
 !EOE
 !BOC

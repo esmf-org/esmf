@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.35.2.5 2008/04/05 03:12:27 cdeluca Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.35.2.6 2008/09/18 21:04:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -73,14 +73,14 @@ program ESMF_ArrayEx
 !
 ! The examples of the previous sections made the user responsible for 
 ! providing memory allocations for the PET-local regions of the Array object.
-! The user was able to use any of the Fortran90 array methods or go through the
+! The user was able to use any of the Fortran array methods or go through the
 ! {\tt ESMF\_LocalArray} interfaces to obtain memory allocations before
 ! passing them into ArrayCreate(). Alternatively, users may wish for ESMF to
 ! handle memory allocation of an Array object directly. The following example
 ! shows the interfaces that are available to the user to do just this.
 ! 
 ! To create an {\tt ESMF\_Array} object without providing an existing
-! Fortran90 array or {\tt ESMF\_LocalArray} the {\em type, kind and rank}
+! Fortran array or {\tt ESMF\_LocalArray} the {\em type, kind and rank}
 ! (tkr) of the Array must be specified in form of an {\tt ESMF\_ArraySpec}
 ! argument. Here a 2D Array of double precision real numbers is to be created:
 !EOE
@@ -184,13 +184,13 @@ program ESMF_ArrayEx
 !EOC
 !BOE
 ! Now each PET can loop through its local list of DEs and access the associated
-! memory through a suitable Fortran90 pointer. In the current example the native
+! memory through a suitable Fortran pointer. In the current example the native
 ! pointer {\tt myF90Array} must be declared as\newline
 ! {\tt real(ESMF\_KIND\_R8), pointer:: myF90Array(:,:)}\newline
 ! in order to match the {\tt arrayspec} that was used to create the
 ! {\tt array} object. The following loop uses the native language access to
 ! initialize the entire memory chunks of all PET-local DEs to 0 using 
-! Fortran90 array syntax.
+! Fortran array syntax.
 !EOE
 !BOC
   do de=1, localDeCount
@@ -320,8 +320,8 @@ program ESMF_ArrayEx
 ! {\em computational region} when the Array is created, by default it will be
 ! set equal to the exclusive region. The {\em total region}, i.e. the actual
 ! memory allocation for each DE, is also determined during Array creation. When
-! creating the Array object from existing Fortran90 arrays the total region is
-! set equal to the memory provided by the Fortran90 arrays. Otherwise the 
+! creating the Array object from existing Fortran arrays the total region is
+! set equal to the memory provided by the Fortran arrays. Otherwise the 
 ! default is to allocate as much memory as is needed to accomodate the union
 ! of the DE-local exclusive and computational region. Finally it is also
 ! possible to use optional arguments to the ArrayCreate() call to specify the
@@ -761,7 +761,7 @@ program ESMF_ArrayEx
 ! \subsubsection{Interior region and Array's total element mask}
 ! \label{ArrayEx_interiorRegion}
 !
-! The {\em Array total element mask} is a native Fortran90 integer array of
+! The {\em Array total element mask} is a native Fortran integer array of
 ! the same rank as the ESMF Array object. The array must be allocated and 
 ! deallocated by the user and is filled by the ArrayGet() method with the
 ! mask information. (The Array object does not store the mask information
