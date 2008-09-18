@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.27 2008/09/17 22:15:22 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.28 2008/09/18 17:27:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.27 2008/09/17 22:15:22 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.28 2008/09/18 17:27:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4051,6 +4051,66 @@ int Array::redistRelease(
 //-----------------------------------------------------------------------------
 
 
+namespace ArrayHelper{
+  
+  // compare two integers
+  int cmpInt(const void *a, const void *b){
+    int aa = *(int *)a;
+    int bb = *(int *)b;
+    if (aa<bb)
+      return -1;
+    else if (aa>bb)
+      return +1;
+    // must be equal
+    return 0;
+  }
+  
+  // more efficient allocation scheme for many little pieces of memory
+  class MemHelper{
+    class MemHelper *next;
+    void *memAlloc;
+    char *memPtr;
+    int rest;
+  public:
+    MemHelper(){
+      next = NULL;
+      memAlloc = NULL;
+      memPtr = NULL;
+      rest = 0;
+    }
+    ~MemHelper(){
+      if (memAlloc)
+        std::free(memAlloc);
+      if (next)
+        delete next;
+    }
+    void *malloc(int bytes){
+      const int limit=1024;     // 1kByte
+      const int block=1048576;  // 1MByte
+      if (bytes > limit)
+        return std::malloc(bytes);
+      if (memPtr==NULL){
+        memAlloc = std::malloc(block);
+        memPtr = (char *)memAlloc;
+        rest = block;
+      }
+      if (rest >= bytes){
+        rest -= bytes;
+        void *mem = (void *)memPtr;
+        memPtr += bytes;
+        return mem;
+      }else if(next)
+        return next->malloc(bytes);
+      else{
+        next = new MemHelper();
+        return next->malloc(bytes);
+      }
+    }
+  };
+  
+} // ArrayHelper
+
+
 namespace DD{
   struct Interval{
     int min;
@@ -4085,6 +4145,7 @@ namespace DD{
     const Interval *seqIndexInterval;
     const SeqIndexFactorLookup *seqIndexFactorLookup;
     bool tensorMixFlag;
+    ArrayHelper::MemHelper *memHelper;
   };
   struct FillPartnerDeInfo{
     int localPet;
@@ -4339,6 +4400,7 @@ void localClientServerExchange(FillLinSeqListInfo *fillLinSeqListInfo){
   AssociationElement **linSeqList = fillLinSeqListInfo->linSeqList;
   const Interval *seqIndexInterval = fillLinSeqListInfo->seqIndexInterval;
   const bool tensorMixFlag = fillLinSeqListInfo->tensorMixFlag;
+  ArrayHelper::MemHelper *memHelper = fillLinSeqListInfo->memHelper;
   const SeqIndexFactorLookup *seqIndexFactorLookup =
     fillLinSeqListInfo->seqIndexFactorLookup;
   // localPet locally acts as server and client
@@ -4357,7 +4419,8 @@ void localClientServerExchange(FillLinSeqListInfo *fillLinSeqListInfo){
         int factorCount = seqIndexFactorLookup[kk].factorCount;
         if (factorCount){
           linSeqList[j][k].factorCount = factorCount;
-          linSeqList[j][k].factorList = new FactorElement[factorCount];
+          linSeqList[j][k].factorList = (FactorElement *)
+            memHelper->malloc(sizeof(FactorElement)*factorCount);
           memcpy(linSeqList[j][k].factorList, 
             seqIndexFactorLookup[kk].factorList,
             factorCount * sizeof(FactorElement));
@@ -4418,6 +4481,7 @@ void serverResponse(FillLinSeqListInfo *fillLinSeqListInfo, int count,
 void clientProcess(FillLinSeqListInfo *fillLinSeqListInfo,
   char *responseStream, int responseStreamSize){
   AssociationElement **linSeqList = fillLinSeqListInfo->linSeqList;
+  ArrayHelper::MemHelper *memHelper = fillLinSeqListInfo->memHelper;
   // process responseStream and complete linSeqList[][] info
   int *responseStreamInt;
   FactorElement *responseStreamFactorElement =
@@ -4430,7 +4494,8 @@ void clientProcess(FillLinSeqListInfo *fillLinSeqListInfo,
     int factorCount = *responseStreamInt++;
     responseStreamInt++;  // skip padding
     linSeqList[j][k].factorCount = factorCount;
-    linSeqList[j][k].factorList = new FactorElement[factorCount];
+    linSeqList[j][k].factorList = (FactorElement *)
+      memHelper->malloc(sizeof(FactorElement)*factorCount);
     responseStreamFactorElement = (FactorElement *)responseStreamInt;
     memcpy(linSeqList[j][k].factorList, responseStreamFactorElement,
       factorCount * sizeof(FactorElement));
@@ -4718,22 +4783,8 @@ void serverUpdate(FillSelfDeInfo *fillSelfDeInfo, int count,
         
 } // namespace DD
 
-namespace ArrayHelper{
-  int cmpInt(const void *a, const void *b){
-    int aa = *(int *)a;
-    int bb = *(int *)b;
-    if (aa<bb)
-      return -1;
-    else if (aa>bb)
-      return +1;
-    // must be equal
-    return 0;
-  }
-}
-
 
 #define ASMMSTORETIMING___disable
-#define ASMMSTORETIMING
 
 int sparseMatMulStoreEncodeXXE(VM *vm, DELayout *srcDelayout,
   DELayout *dstDelayout, bool tensorMixFlag, ESMC_TypeKind typekindFactors,
@@ -5506,6 +5557,7 @@ int Array::sparseMatMulStore(
   }
 
   // all Pets construct their local srcSeqIndexFactorLookup[]
+  ArrayHelper::MemHelper *memHelperFactorLookup = new ArrayHelper::MemHelper();
   int srcSeqIndexFactorCount = 0; // reset
   for (int factorPetIndex=0; factorPetIndex<factorPetCount; factorPetIndex++){
     // each Pet in factorPetList gets to be rootPet once and provide its factors
@@ -5548,14 +5600,13 @@ int Array::sparseMatMulStore(
               srcSeqIndexFactorCount += factorCount;  // add to the total count
               int prevFactorCount = srcSeqIndexFactorLookup[j].factorCount;
               // allocate new factorList
-              DD::FactorElement *factorList = 
-                new DD::FactorElement[prevFactorCount + factorCount];
+              DD::FactorElement *factorList =
+                (DD::FactorElement*)memHelperFactorLookup->
+                malloc(sizeof(DD::FactorElement)*(prevFactorCount+factorCount));
               if (prevFactorCount){
                 // copy previous factorList elements into new factorList
                 memcpy(factorList, srcSeqIndexFactorLookup[j].factorList,
                   prevFactorCount * sizeof(DD::FactorElement));
-                // delete previous factorList
-                delete [] srcSeqIndexFactorLookup[j].factorList;
               }
               // place new factorList into look-up table and set new count
               srcSeqIndexFactorLookup[j].factorList = factorList;
@@ -5911,14 +5962,13 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           srcSeqIndexFactorCount += factorCount;  // add to the total count
           int prevFactorCount = srcSeqIndexFactorLookup[j].factorCount;
           // allocate new factorList
-          DD::FactorElement *factorList = 
-            new DD::FactorElement[prevFactorCount + factorCount];
+          DD::FactorElement *factorList =
+            (DD::FactorElement*)memHelperFactorLookup->
+            malloc(sizeof(DD::FactorElement)*(prevFactorCount+factorCount));
           if (prevFactorCount){
             // copy previous factorList elements into new factorList
             memcpy(factorList, srcSeqIndexFactorLookup[j].factorList,
               prevFactorCount * sizeof(DD::FactorElement));
-            // delete previous factorList
-            delete [] srcSeqIndexFactorLookup[j].factorList;
           }
           // place new factorList into look-up table and set new count
           srcSeqIndexFactorLookup[j].factorList = factorList;
@@ -6162,14 +6212,13 @@ printf("srcArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
               dstSeqIndexFactorCount += factorCount;  // add to the total count
               int prevFactorCount = dstSeqIndexFactorLookup[j].factorCount;
               // allocate new factorList
-              DD::FactorElement *factorList = 
-                new DD::FactorElement[prevFactorCount + factorCount];
+              DD::FactorElement *factorList =
+                (DD::FactorElement*)memHelperFactorLookup->
+                malloc(sizeof(DD::FactorElement)*(prevFactorCount+factorCount));
               if (prevFactorCount){
                 // copy previous factorList elements into new factorList
                 memcpy(factorList, dstSeqIndexFactorLookup[j].factorList,
                   prevFactorCount * sizeof(DD::FactorElement));
-                // delete previous factorList
-                delete [] dstSeqIndexFactorLookup[j].factorList;
               }
               // place new factorList into look-up table and set new count
               dstSeqIndexFactorLookup[j].factorList = factorList;
@@ -6487,14 +6536,13 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
           dstSeqIndexFactorCount += factorCount;  // add to the total count
           int prevFactorCount = dstSeqIndexFactorLookup[j].factorCount;
           // allocate new factorList
-          DD::FactorElement *factorList = 
-            new DD::FactorElement[prevFactorCount + factorCount];
+          DD::FactorElement *factorList =
+            (DD::FactorElement*)memHelperFactorLookup->
+            malloc(sizeof(DD::FactorElement)*(prevFactorCount+factorCount));
           if (prevFactorCount){
             // copy previous factorList elements into new factorList
             memcpy(factorList, dstSeqIndexFactorLookup[j].factorList,
               prevFactorCount * sizeof(DD::FactorElement));
-            // delete previous factorList
-            delete [] dstSeqIndexFactorLookup[j].factorList;
           }
           // place new factorList into look-up table and set new count
           dstSeqIndexFactorLookup[j].factorList = factorList;
@@ -6738,6 +6786,8 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   VMK::wtime(&t6);   //gjt - profile
 #endif
   
+  ArrayHelper::MemHelper *memHelper = new ArrayHelper::MemHelper();
+
   // access srcSeqIndexFactorLookup to obtain complete srcLinSeqList
   {  
     DD::FillLinSeqListInfo *fillLinSeqListInfo = new DD::FillLinSeqListInfo;
@@ -6748,7 +6798,8 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     fillLinSeqListInfo->seqIndexInterval = srcSeqIndexInterval;
     fillLinSeqListInfo->seqIndexFactorLookup = srcSeqIndexFactorLookup;
     fillLinSeqListInfo->tensorMixFlag = tensorMixFlag;
-      
+    fillLinSeqListInfo->memHelper = memHelper;
+
     DD::accessLookup(vm, petCount, localPet, srcLocalIntervalPerPetCount,
       srcLocalElementsPerIntervalCount, fillLinSeqListInfo);
     delete fillLinSeqListInfo;
@@ -6764,6 +6815,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     fillLinSeqListInfo->seqIndexInterval = dstSeqIndexInterval;
     fillLinSeqListInfo->seqIndexFactorLookup = dstSeqIndexFactorLookup;
     fillLinSeqListInfo->tensorMixFlag = tensorMixFlag;
+    fillLinSeqListInfo->memHelper = memHelper;
 
     DD::accessLookup(vm, petCount, localPet, dstLocalIntervalPerPetCount,
       dstLocalElementsPerIntervalCount, fillLinSeqListInfo);
@@ -6809,17 +6861,12 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   delete [] srcLocalIntervalPerPetCount;
   delete [] dstLocalElementsPerIntervalCount;
   delete [] dstLocalIntervalPerPetCount;
-  for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++)
-    if (srcSeqIndexFactorLookup[i].factorCount)
-      delete [] srcSeqIndexFactorLookup[i].factorList;
   delete [] srcSeqIndexFactorLookup;
   delete [] srcSeqIndexInterval;
-  for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++)
-    if (dstSeqIndexFactorLookup[i].factorCount)
-      delete [] dstSeqIndexFactorLookup[i].factorList;
   delete [] dstSeqIndexFactorLookup;
   delete [] dstSeqIndexInterval;
-
+  delete memHelperFactorLookup;
+  
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t7);   //gjt - profile
 #endif
@@ -6858,23 +6905,16 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 
   // garbage collection
   delete [] rraList;
-  for (int i=0; i<srcLocalDeCount; i++){
-    for (int j=0; j<srcLocalDeElementCount[i]; j++)
-      if (srcLinSeqList[i][j].factorCount)
-        delete [] srcLinSeqList[i][j].factorList;
+  for (int i=0; i<srcLocalDeCount; i++)
     delete [] srcLinSeqList[i];
-  }
   delete [] srcLinSeqList;
   delete [] srcLocalDeElementCount;
-  for (int i=0; i<dstLocalDeCount; i++){
-    for (int j=0; j<dstLocalDeElementCount[i]; j++)
-      if (dstLinSeqList[i][j].factorCount)
-        delete [] dstLinSeqList[i][j].factorList;
+  for (int i=0; i<dstLocalDeCount; i++)
     delete [] dstLinSeqList[i];
-  }
   delete [] dstLinSeqList;
   delete [] dstLocalDeElementCount;
-    
+  delete memHelper;  
+
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t11);   //gjt - profile
   printf("gjt - profile for PET %d:\n"
@@ -7079,7 +7119,6 @@ int sparseMatMulStoreEncodeXXE(
 #endif
     
 #define ASMMPROFILE___disable
-#define ASMMPROFILE
 #ifdef ASMMPROFILE
   localrc = xxe->appendWtimer(0x0, "Wtimer 0", 0, 0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
