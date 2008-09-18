@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.12 2008/08/20 20:12:45 feiliu Exp $
+! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.13 2008/09/18 18:33:35 feiliu Exp $
 !
 ! System test FieldRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -12,15 +12,15 @@
 ! !DESCRIPTION:
 ! System test FieldRedistBlk2Blk.
 !
-! This system test checks the functionality of the igrid distribution
+! This system test checks the functionality of the grid distribution
 ! routines by redistributing data from one Field distributed in the normal
 ! block structure to another Field that has been distributed regularly
 ! and then back again.  The original data should exactly match the final
 ! data, which serves as the test for SUCCESS.  This program creates two
-! identical IGrids with different distributions, one with the normal block
+! identical Grids with different distributions, one with the normal block
 ! structure and the other with a different block distribution.  The first
-! IGrid has two Fields created from it, the first as the source for the test
-! and the second for the final results.  The second IGrid has a single Field
+! Grid has two Fields created from it, the first as the source for the test
+! and the second for the final results.  The second Grid has a single Field
 ! that serves as an intermediate result between the two redistributions.
 !
 !\begin{verbatim}
@@ -108,8 +108,8 @@
 !-------------------------------------------------------------------------
 !
 
-    !  Create the igrids and corresponding Fields
-    !  note that the IGrids are the same but decomposed differently
+    !  Create the grids and corresponding Fields
+    !  note that the Grids are the same but decomposed differently
     pi              = 3.14159
     counts(1)       = 60
     counts(2)       = 50
