@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.35 2008/04/05 03:38:01 cdeluca Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.36 2008/09/18 21:05:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@ module ESMF_ArrayGetMod
 !
 ! !DESCRIPTION:
 !
-! The code in this file is part of the {\tt ESMF\_Array} class F90 API.
+! The code in this file is part of the {\tt ESMF\_Array} class Fortran API.
 !
 !
 !------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ module ESMF_ArrayGetMod
   use ESMF_DELayoutMod
   use ESMF_DistGridMod
   use ESMF_RHandleMod
-  use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+  use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
 
   ! class sub modules
   use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
@@ -68,7 +68,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.35 2008/04/05 03:38:01 cdeluca Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.36 2008/09/18 21:05:20 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -608,7 +608,7 @@ contains
 #define ArrayGetFPtrDoc() \
 ! -------------------------- ESMF-public method ----------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayGet - Get access to PET-local Array patch via Fortran90 array pointer @\
+! !IROUTINE: ESMF_ArrayGet - Get access to PET-local Array patch via Fortran array pointer @\
 @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayGet() @\
@@ -621,7 +621,7 @@ contains
 !   integer,                    intent(out), optional   :: rc  @\
 ! @\
 ! !DESCRIPTION: @\
-!   Get Fortran90 pointer to the DE-local memory regions in Array object for @\
+!   Get Fortran pointer to the DE-local memory regions in Array object for @\
 !   the specified local DE. @\
 ! @\
 !   The arguments are: @\
@@ -683,7 +683,7 @@ contains
       return @\
     endif @\
 @\
-    ! Obtain the native F90 array pointer via the LocalArray interface @\
+    ! Obtain the native Fortran array pointer via the LocalArray interface @\
     call ESMF_ArrayGet(array, localDe=localDe, larray=larray, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -917,7 +917,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 !         
 !
 ! !DESCRIPTION:
-!     Get Fortran90 pointer to DE-local memory regions in Array object.
+!     Get Fortran pointer to DE-local memory regions in Array object.
 !
 ! This interface requires that exactly 1 DE is associated with the calling PET.
 ! An error will be returned if this condition is not met.

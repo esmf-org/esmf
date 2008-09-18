@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.99 2008/05/20 20:31:27 w6ws Exp $
+! $Id: ESMF_Array.F90,v 1.100 2008/09/18 21:05:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@ module ESMF_ArrayMod
 !
 !==============================================================================
 !
-! This file contains the F90 wrapper code for the C++ implementation of
+! This file contains the Fortran wrapper code for the C++ implementation of
 !  the Array class.
 !
 !------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ module ESMF_ArrayMod
 ! !MODULE: ESMF_ArrayMod
 !
 
-!   F90 API wrapper of C++ implemenation of Array
+!   Fortran API wrapper of C++ implemenation of Array
 !
 !------------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ module ESMF_ArrayMod
   use ESMF_DELayoutMod
   use ESMF_DistGridMod
   use ESMF_RHandleMod
-  use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+  use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
   
   ! class sub modules
   use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
@@ -107,7 +107,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.99 2008/05/20 20:31:27 w6ws Exp $'
+    '$Id: ESMF_Array.F90,v 1.100 2008/09/18 21:05:19 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -518,7 +518,7 @@ contains
 !     \item[array] 
 !        The {\tt ESMF\_Array} object across which data will be scattered.
 !     \item[{[farray]}]
-!        Fortran90 array into which to reduce the Array. Only root
+!        Fortran array into which to reduce the Array. Only root
 !        must provide a valid {\tt farray} argument.
 !     \item[reduceflag] 
 !        Reduction operation. See section \ref{opt:reduceflag} for a list of 

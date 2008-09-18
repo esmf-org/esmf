@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.33 2008/05/12 21:56:35 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.34 2008/09/18 21:05:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@ module ESMF_ArrayCreateMod
 !
 ! !DESCRIPTION:
 !
-! The code in this file is part of the {\tt ESMF\_Array} class F90 API.
+! The code in this file is part of the {\tt ESMF\_Array} class Fortran API.
 !
 !
 !------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ module ESMF_ArrayCreateMod
   use ESMF_DELayoutMod
   use ESMF_DistGridMod
   use ESMF_RHandleMod
-  use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+  use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
 
   implicit none
 
@@ -60,7 +60,7 @@ module ESMF_ArrayCreateMod
 !
 !------------------------------------------------------------------------------
 
-  ! F90 class type to hold pointer to C++ object
+  ! Fortran class type to hold pointer to C++ object
   type ESMF_Array
   sequence
   private
@@ -95,7 +95,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.33 2008/05/12 21:56:35 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.34 2008/09/18 21:05:19 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -143,7 +143,7 @@ contains
 #define ArrayCreateAssmdShapeDoc() \
 ! -------------------------- ESMF-public method ----------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayCreate - Create Array object from Fortran90 array @\
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from Fortran array @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayCreate() @\
@@ -177,7 +177,7 @@ contains
 !   type(ESMF_Array) :: ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind @\
 ! @\
 ! !DESCRIPTION: @\
-! Create an {\tt ESMF\_Array} object from an existing local native Fortran90 @\
+! Create an {\tt ESMF\_Array} object from an existing local native Fortran @\
 ! array according to distgrid. Besides {\tt farray} each PET must issue this @\
 ! call with identical arguments in order to create a consistent Array object. @\
 ! The local arrays provided must be dimensioned according to the DE-local @\
@@ -201,7 +201,7 @@ contains
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item[farray] @\
-!      Valid native Fortran90 array, i.e. memory must be associated with the @\
+!      Valid native Fortran array, i.e. memory must be associated with the @\
 !      actual argument. The type/kind/rank information of {\tt farray} will be @\
 !      used to set {\tt Array}|s properties accordingly. The shape of @\
 !      {\tt farray} will be checked against the information contained in the @\
@@ -583,7 +583,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     enddo
     
     ! Copy C++ pointers of deep objects into a simple ESMF_Pointer array
-    ! This is necessary in order to strip off the F90 init check members
+    ! This is necessary in order to strip off the Fortran init check members
     ! when passing into C++
     allocate(larrayPointerList(larrayCount))
     do i=1, larrayCount

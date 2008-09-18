@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.10 2008/04/05 03:37:56 cdeluca Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.11 2008/09/18 21:05:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@
 !BOE
 ! \subsubsection{Array from {\tt ESMF\_LocalArray}}
 ! 
-! Alternative to the direct usage of Fortran90 arrays during Array creation
+! Alternative to the direct usage of Fortran arrays during Array creation
 ! it is also possible to first create an {\tt ESMF\_LocalArray} and create the
 ! Array from it. While this may seem more burdensome for the 1 DE per PET cases
 ! discussed in the previous sections it allows a straight forward 
@@ -34,13 +34,13 @@ program ESMF_ArrayLarrayEx
   
 !EOC
 !BOE
-! The current {\tt ESMF\_LocalArray} interface requires Fortran90 arrays to be 
+! The current {\tt ESMF\_LocalArray} interface requires Fortran arrays to be 
 ! defined with pointer attribute.
 !EOE
 !BOC
   ! local variables
-  real(ESMF_KIND_R8), pointer :: farrayP(:,:)       ! F90 array pointer
-  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching F90 array pointer 
+  real(ESMF_KIND_R8), pointer :: farrayP(:,:)       ! Fortran array pointer
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching Fortran array pointer 
   type(ESMF_LocalArray)       :: larray             ! ESMF_LocalArray object
   type(ESMF_LocalArray)       :: larrayRef          ! ESMF_LocalArray object
   type(ESMF_DistGrid)         :: distgrid           ! DistGrid object
@@ -76,7 +76,7 @@ program ESMF_ArrayLarrayEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
-  allocate(farrayP(14,14))    ! allocate Fortran90 array on each PET with halo
+  allocate(farrayP(14,14))    ! allocate Fortran array on each PET with halo
 !EOC
 !BOE
 ! Now instead of directly creating an Array object using the PET-local 
@@ -98,7 +98,7 @@ program ESMF_ArrayLarrayEx
 !BOE
 ! Once created there is no difference in how the Array object can be used.
 ! The exclusive Array region on each PET can be accessed through a suitable
-! Fortran90 array pointer as before.
+! Fortran array pointer as before.
 !EOE
 !BOC
   call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
@@ -215,7 +215,7 @@ program ESMF_ArrayLarrayEx
 !EOC
 !BOE
 ! Notice that it is perfectly fine to {\em re}-use {\tt farrayP} for all
-! allocations of DE-local Fortran90 arrays. The allocated memory can be 
+! allocations of DE-local Fortran arrays. The allocated memory can be 
 ! deallocated at the end using the array pointer contained in the 
 ! {\tt larrayList}.
 !
@@ -229,7 +229,7 @@ program ESMF_ArrayLarrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! Usage of a LocalArray list is the only way to provide a list of variable 
-! length of Fortran90 array allocations to ArrayCreate() for each PET. The 
+! length of Fortran array allocations to ArrayCreate() for each PET. The 
 ! {\tt array} object created by the above call is an ESMF distributed 
 ! object. As such it must follow the ESMF convention that requires that 
 ! the call to {\tt ESMF\_ArrayCreate()} must be issued in unison by all 
@@ -244,7 +244,7 @@ program ESMF_ArrayLarrayEx
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
-! Finally, access to the actual Fortran90 pointers is done on a per DE basis.
+! Finally, access to the actual Fortran pointers is done on a per DE basis.
 ! Generally each PET will loop over its DEs.
 !EOE
 !BOC
@@ -264,7 +264,7 @@ program ESMF_ArrayLarrayEx
 ! may decide to use OpenMP loop parallelization on the {\tt de} loop.
 !
 ! Cleanup requires that the PET-local deallocations are done before the 
-! pointers to the actual Fortran90 arrays are lost. Notice that {\tt larrayList}
+! pointers to the actual Fortran arrays are lost. Notice that {\tt larrayList}
 ! is used to obtain the pointers used in the deallocate statement. Pointers
 ! obtained from the {\tt larrayRefList}, while pointing to the same data, 
 ! {\em cannot} be used to deallocated the array allocations!
