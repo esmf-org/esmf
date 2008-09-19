@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.47 2008/08/07 20:17:06 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.48 2008/09/19 16:10:30 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -586,6 +586,14 @@
         call test3a_fptr(rc)
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array pointer, 2d, both dimensions distributed"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran array pointer 2d one dimension distributed
+        call test3a2_fptr(rc)
+        write(failMsg, *) ""
+        write(name, *) "Creating a Field from a fortran array pointer, 2d, one dimension distributed"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -2819,6 +2827,108 @@ contains
         deallocate(farray1)
 
     end subroutine test3a_fptr
+
+    subroutine test3a2_fptr(rc)
+        integer, intent(out)  :: rc
+        integer                 :: localrc
+        type(ESMF_Field)        :: field
+        type(ESMF_Grid)         :: grid
+        type(ESMF_DistGrid)     :: distgrid
+        real, dimension(:,:), pointer  :: farray
+        real, dimension(:,:), pointer  :: farray1
+
+        integer, dimension(1)               :: tlb, tub
+        integer, dimension(1)               :: gelb, geub, gclb, gcub
+        integer, dimension(2)               :: felb, feub, fclb, fcub
+        logical                             :: t
+        integer                             :: i
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/20/), &
+                                  regDecomp=(/4/), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        grid = ESMF_GridCreate(distgrid=distgrid, &
+                                  name="testgrid", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(grid, localDe=0, totalLBound=tlb, totalUBound=tub, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        allocate(farray(tlb(1):tub(1), -3:3))
+
+        field = ESMF_FieldCreateFromPtr(grid, farrayPtr=farray, &
+            staggerloc=ESMF_STAGGERLOC_CENTER, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            exclusiveLBound=felb, exclusiveUBound=feub, &
+            computationalLBound=fclb, computationalUBound=fcub, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! test pointer equivalence
+        t = associated(farray, farray1)
+        do i = 1, 1
+            t = t .and. (lbound(farray, i) .eq. tlb(i))
+            t = t .and. (ubound(farray, i) .eq. tub(i))
+        enddo
+
+        if(.not. t) then
+          call ESMF_LogMsgSetError(ESMF_RC_PTR_BAD, &
+            "- pointer queried from object is not equivalent to the one passed in)", &
+            ESMF_CONTEXT, rc)
+          return
+        endif
+
+        ! test field and grid bounds
+        call ESMF_GridGet(grid, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
+            exclusiveLBound=gelb, exclusiveUBound=geub, &
+            computationalLBound=gclb, computationalUBound=gcub, &
+            rc=localrc) 
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        t = .true.
+        do i = 1, 1
+            t = t .and. (gelb(i) .eq. felb(i))
+            t = t .and. (geub(i) .eq. feub(i))
+            t = t .and. (gclb(i) .eq. fclb(i))
+            t = t .and. (gcub(i) .eq. fcub(i))
+        enddo
+        if(.not. t) then
+          call ESMF_LogMsgSetError(ESMF_RC_PTR_BAD, &
+            "- bounds queried from grid different from those queried from field)", &
+            ESMF_CONTEXT, rc)
+          return
+        endif
+        
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        deallocate(farray1)
+
+    end subroutine test3a2_fptr
 
     subroutine test3b(rc)
         integer, intent(out)  :: rc
