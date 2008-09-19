@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.8 2008/09/09 20:03:05 rokuingh Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.9 2008/09/19 03:31:18 rokuingh Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,12 +57,12 @@
 \input{../Infrastructure/Attribute/doc/Attribute_desc}
 #endif
 
-\subsection{Object Model}
-#ifdef STANDALONE
-\input{Attribute_obj}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Attribute/doc/Attribute_obj}
-#endif
+%\subsection{Object Model}
+%#ifdef STANDALONE
+%\input{Attribute_obj}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Attribute/doc/Attribute_obj}
+%#endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE

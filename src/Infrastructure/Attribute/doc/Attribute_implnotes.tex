@@ -1,4 +1,4 @@
-% $Id: Attribute_implnotes.tex,v 1.5 2008/09/12 18:29:31 rokuingh Exp $
+% $Id: Attribute_implnotes.tex,v 1.6 2008/09/19 03:31:18 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,9 +13,9 @@ This section covers the current development on Attribute consistency in a distri
 \subsubsection{Attributes in a Distributed Environment} 
 \label{sec:Att:Dist}
 
-The  {\tt ESMF\_Attribute} class is slightly different than other ESMF objects in the context of reconciling across exclusive sets of PETs.  The {\tt ESMF\_StateReconcile()} call is used to create a consistent view of ESMF objects on exclusive PETs in the initialization phase of a model run.  All Attributes that are attached to an ESMF object contained in the State, i.e. an object that is being reconciled, are also reconciled.  This is done by making a deep copy of the {\it entire} Attribute hierarchy below the point at which the reconcile is taking place.  This means that, at the conclusion of {\tt ESMF\_StateReconcile()} there are many partial duplicate copies of the Attribute hierarchy.
+The  {\tt ESMF\_Attribute} class is slightly different than other ESMF objects in the context of reconciling across exclusive sets of PETs.  The {\tt ESMF\_StateReconcile()} call is used to create a consistent view of ESMF objects over the entire VM in the initialization phase of a model run.  All Attributes that are attached to an ESMF object contained in the State, i.e. an object that is being reconciled, are also reconciled.  This is done by making a deep copy of the {\it entire} Attribute hierarchy below the point at which the reconcile is taking place.  This means that, at the conclusion of {\tt ESMF\_StateReconcile()} there are many partial duplicate copies of the Attribute hierarchy.
 
-These partial copies of the Attribute hierarchy present a problem with respect to resource management.  Unlike other ESMF objects created by {\tt ESMF\_StateReconcile()}, they are not considered proxy objects, and therefore are not fully deallocated when {\tt ESMF\_StateDestroy} is called.  Also of note is that these partial copies are permanent, after they are created they cannot be changed or updated.  These issues will be resolved with more development in the {\tt ESMF\_Attribute} class.
+These partial copies of the Attribute hierarchy present a problem with respect to resource management.  Unlike other ESMF objects created by {\tt ESMF\_StateReconcile()}, they are not considered proxy objects, and therefore are not fully deallocated when the corresponding destroy routine is called.  Also of note is that these partial copies are permanent, after they are created they cannot be changed or updated.  These issues will be resolved with more development in the {\tt ESMF\_Attribute} class.
 
 Another caveat with the current design is that Attributes which are attached directly to an {\tt ESMF\_State} are not included when the State is reconciled.  This is also an area of current development.  The complete construction of a consistent view of the Attribute hierarchy in the initialization phase of a model run, and the ability to update the Attribute hierarchy throughout the run phase are two main goals for the continued development of the {\tt ESMF\_Attribute} class.
 
