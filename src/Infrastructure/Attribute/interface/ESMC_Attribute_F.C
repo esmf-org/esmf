@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.21 2008/09/05 04:41:38 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.22 2008/09/19 21:29:14 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.21 2008/09/05 04:41:38 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.22 2008/09/19 21:29:14 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -479,7 +479,7 @@ extern "C" {
     if (rc) *rc = status;
     return;
   }
-  slen = llens[1];
+  slen = llens[0];
 
   // make sure destination will be long enough
   if (slen > vlen) {
@@ -2066,7 +2066,7 @@ extern "C" {
     if (rc) *rc = status;
     return;
   }
-  slen = llens[1];
+  slen = llens[0];
 
   // make sure destination will be long enough
   if (slen > vlen) {
