@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.37 2008/08/09 05:52:32 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.38 2008/09/19 05:56:11 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.37 2008/08/09 05:52:32 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.38 2008/09/19 05:56:11 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -59,7 +59,7 @@
       type(ESMF_Alarm) :: alarmList(201)
       type(ESMF_Direction) :: forwardDirection, reverseDirection
       logical :: enabled, isringing, sticky, alarmsEqual, alarmsNotEqual
-      logical :: willRingNext, testPass
+      logical :: willRingNext, testPass, alarmCountPass
       integer(ESMF_KIND_I8) :: forwardCount, reverseCount
       integer :: alarmCount, nclock, nstep, sstep, i, iteration
       integer :: expectedCount
@@ -1792,17 +1792,19 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      !Test Alarm ringTime increment, first forwards a fixed number of timesteps,
-      !stopping at an alarm ringing time step.  The step backwards to some time
-      !prior to the clocks startTime.  Count number of rings.
-      !See ticket #1531948
+      !Test Alarm ringTime increment, first forwards a fixed number of
+      !timesteps, stopping at an alarm ringing time step.
+      !Using ESMF_MODE_REVERSE, step backwards to some time prior to the
+      !clock's startTime.  Then go ESMF_MODE_FORWARD to one step past an
+      !alarm ringing time step, and then ESMF_MODE_REVERSE once more. 
+      ! Count number of rings.  See bug #1531948.
       write(failMsg, *) " Did not ring enough times during forward/backward march"
-      write(name, *) "Test forward to an alarm point, then step backward"
+      write(name, *) "Test ESMF_MODE_FORWARD to an alarm point, ESMF_MODE_REVERSE, ESMF_MODE_FORWARD, ESMF_MODE_REVERSE"
 
       testPass = .true.
       call ESMF_TimeSet (startTime, yy=2008, mm=1, dd=23, h=0,  &
           calendar=gregorianCalendar, rc=rc)
-      call ESMF_TimePrint (startTime, "string isofrac", rc=rc)
+      !call ESMF_TimePrint (startTime, "string isofrac", rc=rc)
       call ESMF_TimeIntervalSet (timeStep, h=3, rc=rc)
       clock = ESMF_ClockCreate (  &
           name = "clock 1",  &
@@ -1818,17 +1820,18 @@
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
 
       alarmCount = 0
-      expectedCount = 5
+      expectedCount = 11
       do, i=1,6
-	call ESMF_ClockAdvance (clock, rc=rc)
+        call ESMF_ClockAdvance (clock, rc=rc)
+        !call ESMF_ClockPrint (clock, options="currTime string")
         if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
-	if (ESMF_alarmIsRinging (alarm1)) then
+        if (ESMF_alarmIsRinging (alarm1)) then
           alarmCount = alarmCount + 1
-          print *, 'alarm IS ringing at forwards timestep', i
+          !print *, 'alarm IS ringing at forwards timestep', i
           call ESMF_AlarmRingerOff (alarm1, rc=rc)
         else
-          print *, 'alarm not ringing at forwards timestep', i
-	end if
+          !print *, 'alarm not ringing at forwards timestep', i
+        end if
       end do
 
       print *, 'SETTING CLOCK BACKWARDS'
@@ -1836,22 +1839,59 @@
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
 
       do, i=5, -5, -1
-	call ESMF_ClockAdvance (clock, rc=rc)
+        call ESMF_ClockAdvance (clock, rc=rc)
+        !call ESMF_ClockPrint (clock, options="currTime string")
         if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
-	if (ESMF_alarmIsRinging (alarm1)) then
+        if (ESMF_alarmIsRinging (alarm1)) then
           alarmCount = alarmCount + 1
-          print *, 'alarm IS ringing at backwards timestep', i, ', time:'
+          !print *, 'alarm IS ringing at backwards timestep', i
+          call ESMF_AlarmRingerOff (alarm1, rc=rc)
+          !call ESMF_AlarmPrint(alarm1, "ringTime string")
+        else
+          !print *, 'alarm not ringing at backwards timestep', i
           ! call ESMF_ClockPrint (clock, options="currTime string")
+        end if
+      end do
+
+      print *, 'SETTING CLOCK FORWARDS'
+      call ESMF_ClockSet (clock, direction=ESMF_MODE_FORWARD, rc=rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+
+      do, i=-4,7
+        call ESMF_ClockAdvance (clock, rc=rc)
+        !call ESMF_ClockPrint (clock, options="currTime string")
+        if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+        if (ESMF_alarmIsRinging (alarm1)) then
+          alarmCount = alarmCount + 1
+          !print *, 'alarm IS ringing at forwards timestep', i
           call ESMF_AlarmRingerOff (alarm1, rc=rc)
         else
-          print *, 'alarm not ringing at backwards timestep', i
+          !print *, 'alarm not ringing at forwards timestep', i
+        end if
+      end do
+
+      print *, 'SETTING CLOCK BACKWARDS'
+      call ESMF_ClockSet (clock, direction=ESMF_MODE_REVERSE, rc=rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+
+      do, i=6, -5, -1
+        call ESMF_ClockAdvance (clock, rc=rc)
+        !call ESMF_ClockPrint (clock, options="currTime string")
+        if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+        if (ESMF_alarmIsRinging (alarm1)) then
+          alarmCount = alarmCount + 1
+          !print *, 'alarm IS ringing at backwards timestep', i
+          call ESMF_AlarmRingerOff (alarm1, rc=rc)
+          !call ESMF_AlarmPrint(alarm1, "ringTime string")
+        else
+          !print *, 'alarm not ringing at backwards timestep', i
           ! call ESMF_ClockPrint (clock, options="currTime string")
-	end if
+        end if
       end do
 
       if (.not. testPass .or. alarmCount /= expectedCount) then
           if (.not. testPass) print *, 'bad return codes discovered'
-          write (name,*) trim (name), ' alarmCount =', alarmCount, ', expected =', expectedCount
+          write (failMsg,*) trim (failMsg), ', alarmCount = ', alarmCount, ', expected = ', expectedCount
           print *, 'The alarm ringTime may be stuck at:'
           call ESMF_AlarmPrint (alarm1, "ringTime string")
       end if
@@ -1864,17 +1904,16 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      !Test Alarm ringTime increment, first forwards a fixed number of timesteps,
-      !stopping at a non-alarm time step.  Then step backwards to some time prior
-      !to the clocks startTime.  Count number of rings.
-      !See ticket #1531948
+      !Test Alarm ringTime increment, first forwards a fixed number of
+      !timesteps, stopping at an alarm ringing time step.  Using a negative
+      !timestemp, step backwards to some time prior to the clock's startTime.
+      !Count number of rings.  See bugs #1531948, #1457135.
       write(failMsg, *) " Did not ring enough times during forward/backward march"
-      write(name, *) "Test forward to a non-ringing step, then step backward"
+      write(name, *) "Test forward to an alarm point, then step backward using a negative timeStep"
 
       testPass = .true.
       call ESMF_TimeSet (startTime, yy=2008, mm=1, dd=23, h=0,  &
           calendar=gregorianCalendar, rc=rc)
-      call ESMF_TimePrint (startTime, "string isofrac", rc=rc)
       call ESMF_TimeIntervalSet (timeStep, h=3, rc=rc)
       clock = ESMF_ClockCreate (  &
           name = "clock 1",  &
@@ -1890,45 +1929,281 @@
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
 
       alarmCount = 0
-      expectedCount = 6
-      do, i=1,7
-	call ESMF_ClockAdvance (clock, rc=rc)
+      expectedCount = 8
+      do, i=1,6
+        call ESMF_ClockAdvance (clock, rc=rc)
         if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
-	if (ESMF_alarmIsRinging (alarm1)) then
+        if (ESMF_alarmIsRinging (alarm1)) then
           alarmCount = alarmCount + 1
-          print *, 'alarm IS ringing at forwards timestep', i
+          !print *, 'alarm IS ringing at forwards timestep', i
           call ESMF_AlarmRingerOff (alarm1, rc=rc)
         else
-          print *, 'alarm not ringing at forwards timestep', i
-	end if
+          !print *, 'alarm not ringing at forwards timestep', i
+        end if
       end do
 
-      print *, 'SETTING CLOCK BACKWARDS'
-      call ESMF_ClockSet (clock, direction=ESMF_MODE_REVERSE, rc=rc)
+      print *, 'SETTING CLOCK BACKWARDS WITH NEGATIVE TIMESTEP'
+      timeStep = -timeStep
+      call ESMF_ClockSet (clock, timeStep=timeStep, rc=rc)
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
 
-      do, i=6, -5, -1
-	call ESMF_ClockAdvance (clock, rc=rc)
+      do, i=5, -5, -1
+        call ESMF_ClockAdvance (clock, rc=rc)
         if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
-	if (ESMF_alarmIsRinging (alarm1)) then
+        if (ESMF_alarmIsRinging (alarm1)) then
           alarmCount = alarmCount + 1
-          print *, 'alarm IS ringing at backwards timestep', i, ', time:'
+          !print *, 'alarm IS ringing at backwards timestep', i, ', time:'
           ! call ESMF_ClockPrint (clock, options="currTime string")
           call ESMF_AlarmRingerOff (alarm1, rc=rc)
         else
-          print *, 'alarm not ringing at backwards timestep', i
+          !print *, 'alarm not ringing at backwards timestep', i
           ! call ESMF_ClockPrint (clock, options="currTime string")
-	end if
+        end if
       end do
 
       if (.not. testPass .or. alarmCount /= expectedCount) then
           if (.not. testPass) print *, 'bad return codes discovered'
-          write (name,*) trim (name), ' alarmCount =', alarmCount, ', expected =', expectedCount
+          write (failMsg,*) trim (failMsg), ', alarmCount = ', alarmCount, ', expected = ', expectedCount
           print *, 'The alarm ringTime may be stuck at:'
           call ESMF_AlarmPrint (alarm1, "ringTime string")
       end if
 
       call ESMF_Test (testPass .and. alarmCount == expectedCount, &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy (alarm1, rc=rc)
+      call ESMF_ClockDestroy (clock, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Alarm ringTime increment, first forwards a fixed number of
+      !timesteps, stopping at a non-alarm ringing time step.  Using a negative
+      !timestemp, step backwards to some time prior to the clock's startTime.
+      !Count number of rings.  See bugs #1531948, #1457135.
+      write(failMsg, *) " Did not ring enough times during forward/backward march"
+      write(name, *) "Test forward to a non-ringing step, then step backward using a negative timeStep"
+
+      testPass = .true.
+      call ESMF_TimeSet (startTime, yy=2008, mm=1, dd=23, h=0,  &
+          calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet (timeStep, h=3, rc=rc)
+      clock = ESMF_ClockCreate (  &
+          name = "clock 1",  &
+          startTime = startTime, timeStep=timeStep, rc=rc)
+      if (rc /= ESMF_SUCCESS) testPass = .false.
+
+      call ESMF_TimeSet (alarmTime, yy=2008, mm=1, dd=23, h=6,  &
+          calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet (alarmStep, h=6, rc=rc)
+      alarm1 = ESMF_AlarmCreate (  &
+          name="Alarm 1", clock=clock,  &
+          ringTime=alarmTime, ringInterval=alarmStep, rc=rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+
+      alarmCount = 0
+      expectedCount = 9
+      do, i=1,7
+        call ESMF_ClockAdvance (clock, rc=rc)
+        if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+        if (ESMF_alarmIsRinging (alarm1)) then
+          alarmCount = alarmCount + 1
+          !print *, 'alarm IS ringing at forwards timestep', i
+          call ESMF_AlarmRingerOff (alarm1, rc=rc)
+        else
+          !print *, 'alarm not ringing at forwards timestep', i
+        end if
+      end do
+
+      print *, 'SETTING CLOCK BACKWARDS WITH NEGATIVE TIMESTEP'
+      timeStep = -timeStep
+      call ESMF_ClockSet (clock, timeStep=timeStep, rc=rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+
+      do, i=6, -5, -1
+        call ESMF_ClockAdvance (clock, rc=rc)
+        if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+        if (ESMF_alarmIsRinging (alarm1)) then
+          alarmCount = alarmCount + 1
+          !print *, 'alarm IS ringing at backwards timestep', i, ', time:'
+          ! call ESMF_ClockPrint (clock, options="currTime string")
+          call ESMF_AlarmRingerOff (alarm1, rc=rc)
+        else
+          !print *, 'alarm not ringing at backwards timestep', i
+          ! call ESMF_ClockPrint (clock, options="currTime string")
+        end if
+      end do
+
+      if (.not. testPass .or. alarmCount /= expectedCount) then
+          if (.not. testPass) print *, 'bad return codes discovered'
+          write (failMsg,*) trim (failMsg), ', alarmCount = ', alarmCount, ', expected = ', expectedCount
+          print *, 'The alarm ringTime may be stuck at:'
+          call ESMF_AlarmPrint (alarm1, "ringTime string")
+      end if
+
+      call ESMF_Test (testPass .and. alarmCount == expectedCount, &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy (alarm1, rc=rc)
+      call ESMF_ClockDestroy (clock, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Alarm ringTime increment, arbitrarily forwards and backwards using
+      ! positive and negative timesteps.  Alarm ringTime and ringInterval are
+      ! changed with each change in timestep direction.  The extent of the run
+      ! of each timestep value is different with each change in direction.
+      write(failMsg, *) " Did not ring enough times during arbitrary forward/backward march"
+      write(name, *) "Test arbitrary positive/negative timeStep runs with differing alarms"
+
+      testPass = .true.
+      alarmCountPass = .true.
+
+      call ESMF_TimeSet (startTime, yy=2008, mm=1, dd=23, h=0,  &
+          calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet (timeStep, h=1, rc=rc)
+      clock = ESMF_ClockCreate (  &
+          name = "clock 1",  &
+          startTime = startTime, timeStep=timeStep, rc=rc)
+      if (rc /= ESMF_SUCCESS) testPass = .false.
+
+      call ESMF_TimeSet (alarmTime, yy=2008, mm=1, dd=23, h=2,  &
+          calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet (alarmStep, h=2, rc=rc)
+      alarm1 = ESMF_AlarmCreate (  &
+          name="Alarm 1", clock=clock,  &
+          ringTime=alarmTime, ringInterval=alarmStep, rc=rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+
+      alarmCount = 0
+      expectedCount = 15
+
+      do, i=1,7
+        call ESMF_ClockAdvance (clock, rc=rc)
+        !call ESMF_ClockPrint (clock, options="currTime string")
+        if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+        if (ESMF_alarmIsRinging (alarm1)) then
+          alarmCount = alarmCount + 1
+          !print *, 'alarm IS ringing at forwards timestep', i
+          call ESMF_AlarmRingerOff (alarm1, rc=rc)
+        else
+          !print *, 'alarm not ringing at forwards timestep', i
+        end if
+      end do
+      if (alarmCountPass .and. alarmCount /= 3) then
+        alarmCountPass = .false.
+        print *, 'alarmCount = ', alarmCount, ' not 3 at 1st turnaround point'
+      end if
+
+      print *, 'SETTING CLOCK BACKWARDS WITH NEW NEGATIVE TIMESTEP AND RINGINTERVAL'
+      timeStep = -2 * timeStep
+      alarmStep = -2 * alarmStep
+      call ESMF_ClockSet (clock, timeStep=timeStep, rc=rc)
+      call ESMF_AlarmSet (alarm1, ringInterval=alarmStep, rc=rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+
+      do, i=6, -5, -1
+        call ESMF_ClockAdvance (clock, rc=rc)
+        !call ESMF_ClockPrint (clock, options="currTime string")
+        if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+        if (ESMF_alarmIsRinging (alarm1)) then
+          alarmCount = alarmCount + 1
+          !print *, 'alarm IS ringing at backwards timestep', i
+          call ESMF_AlarmRingerOff (alarm1, rc=rc)
+        else
+          !print *, 'alarm not ringing at backwards timestep', i
+        end if
+      end do
+      if (alarmCountPass .and. alarmCount /= 9) then
+        alarmCountPass = .false.
+        print *, 'alarmCount = ', alarmCount, ' not 9 at 2nd turnaround point'
+      end if
+
+      print *, 'SETTING CLOCK FORWARDS WITH NEW POSITIVE TIMESTEP, RINGINTERVAL, and RINGTIME'
+      call ESMF_TimeIntervalSet (timeStep, h=3, rc=rc)
+      call ESMF_TimeSet (alarmTime, yy=2008, mm=1, dd=22, h=11,  &
+          calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet (alarmStep, h=6, rc=rc)
+      call ESMF_ClockSet (clock, timeStep=timeStep, rc=rc)
+      call ESMF_AlarmSet (alarm1, ringTime=alarmTime, ringInterval=alarmStep, &
+                          rc=rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+
+      do, i=1,5
+        call ESMF_ClockAdvance (clock, rc=rc)
+        !call ESMF_ClockPrint (clock, options="currTime string")
+        if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+        if (ESMF_alarmIsRinging (alarm1)) then
+          alarmCount = alarmCount + 1
+          !print *, 'alarm IS ringing at forwards timestep', i
+          call ESMF_AlarmRingerOff (alarm1, rc=rc)
+        else
+          !print *, 'alarm not ringing at forwards timestep', i
+        end if
+      end do
+      if (alarmCountPass .and. alarmCount /= 11) then
+        alarmCountPass = .false.
+        print *, 'alarmCount = ', alarmCount, ' not 11 at 3rd turnaround point'
+      end if
+
+      print *, 'SETTING CLOCK BACKWARDS WITH NEW NEGATIVE TIMESTEP AND RINGTIME'
+      call ESMF_TimeIntervalSet (timeStep, h=-1, rc=rc)
+      call ESMF_TimeSet (alarmTime, yy=2008, mm=1, dd=22, h=21,  &
+          calendar=gregorianCalendar, rc=rc)
+      call ESMF_ClockSet (clock, timeStep=timeStep, rc=rc)
+      call ESMF_AlarmSet (alarm1, ringTime=alarmTime, rc=rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+
+      do, i=4,2,-1
+        call ESMF_ClockAdvance (clock, rc=rc)
+        !call ESMF_ClockPrint (clock, options="currTime string")
+        if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+        if (ESMF_alarmIsRinging (alarm1)) then
+          alarmCount = alarmCount + 1
+          !print *, 'alarm IS ringing at backwards timestep', i
+          call ESMF_AlarmRingerOff (alarm1, rc=rc)
+        else
+          !print *, 'alarm not ringing at backwards timestep', i
+        end if
+      end do
+      if (alarmCountPass .and. alarmCount /= 12) then
+        alarmCountPass = .false.
+        print *, 'alarmCount = ', alarmCount, ' not 12 at 4th turnaround point'
+      end if
+
+      print *, 'SETTING CLOCK FORWARDS WITH NEW POSITIVE TIMESTEP'
+      timeStep = -timeStep
+      call ESMF_ClockGet(clock, currTime=startTime, rc=rc)
+      call ESMF_ClockSet(clock, timeStep=timeStep, startTime=startTime, &
+                         runTimeStepCount=15, rc=rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+   
+      do while (.not. ESMF_ClockIsDone(clock, rc=rc))
+        call ESMF_ClockAdvance (clock, rc=rc)
+        !call ESMF_ClockPrint (clock, options="currTime string")
+        if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+        if (ESMF_alarmIsRinging (alarm1)) then
+          alarmCount = alarmCount + 1
+          !print *, 'alarm IS ringing'
+          call ESMF_AlarmRingerOff (alarm1, rc=rc)
+        else
+          !print *, 'alarm not ringing'
+        end if
+      end do
+      if (alarmCountPass .and. alarmCount /= expectedCount) then
+        alarmCountPass = .false.
+        print *, 'alarmCount = ', alarmCount, ', not ', expectedCount, ' at the end'
+      end if
+
+      if (.not. alarmCountPass) then
+          write(failMsg,*) trim(failMsg), ', alarmCount incorrect at one or more turnaround points'
+          print *, 'Final alarmCount = ', alarmCount, ', expected = ', expectedCount
+          print *, 'Final alarm ringTime:'
+          call ESMF_AlarmPrint (alarm1, "ringTime string")
+      end if
+
+      if (.not. testPass) print *, 'bad return codes discovered'
+
+      call ESMF_Test (testPass .and. alarmCountPass, &
                      name, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_AlarmDestroy (alarm1, rc=rc)

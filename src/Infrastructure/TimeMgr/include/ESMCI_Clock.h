@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.h,v 1.6 2008/08/28 21:33:15 theurich Exp $
+// $Id: ESMCI_Clock.h,v 1.7 2008/09/19 05:56:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -84,8 +84,12 @@ namespace ESMCI{
                                          // when fully aligned with F90 equiv
 
   private:   // corresponds to F90 module 'type ESMF_Clock' members
-    char              name[ESMF_MAXSTR];  // name of clock
+    char         name[ESMF_MAXSTR];  // name of clock
     TimeInterval timeStep;
+    TimeInterval currAdvanceTimeStep; // timeStep used in current
+                                      // ClockAdvance()
+    TimeInterval prevAdvanceTimeStep; // timeStep used in previous
+                                      // ClockAdvance()
     Time         startTime;
     Time         stopTime;
     Time         refTime;   // reference time
@@ -103,7 +107,7 @@ namespace ESMCI{
     int               alarmListCapacity;        // max number of defined alarms
                                                 //  before a reallocation is
                                                 //  necessary
-    Alarm      **alarmList;                // associated alarm array
+    Alarm           **alarmList;                // associated alarm array
 
     bool              stopTimeEnabled;  // true if optional property set
 
