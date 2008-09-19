@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.32 2008/09/18 22:47:57 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.33 2008/09/19 15:53:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.32 2008/09/18 22:47:57 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.33 2008/09/19 15:53:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4776,7 +4776,6 @@ void serverUpdate(FillSelfDeInfo *fillSelfDeInfo, int count,
 
 
 #define ASMMSTORETIMING___disable
-#define ASMMSTORETIMING
 
 int sparseMatMulStoreEncodeXXE(VM *vm, DELayout *srcDelayout,
   DELayout *dstDelayout, bool tensorMixFlag, ESMC_TypeKind typekindFactors,
@@ -7111,7 +7110,6 @@ int sparseMatMulStoreEncodeXXE(
 #endif
     
 #define ASMMPROFILE___disable
-#define ASMMPROFILE
 #ifdef ASMMPROFILE
   localrc = xxe->appendWtimer(0x0, "Wtimer 0", 0, 0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
