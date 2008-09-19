@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.21 2008/06/30 18:10:41 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.22 2008/09/19 19:32:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -73,6 +73,14 @@
         call test2a(rc)
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        ! Create a 2D field with global indices
+        call test_globalindex(rc)
+        write(failMsg, *) "Test unsuccessful"
+        write(name, *) "Creating a 2D Field with a global index"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -1633,6 +1641,7 @@ contains
             ESMF_CONTEXT, rc)) return
         deallocate(farray)
     end subroutine test2a
+
 
     subroutine test2a_get(rc)
         integer, intent(out)  :: rc
@@ -4303,5 +4312,108 @@ contains
             ESMF_CONTEXT, rc)) return
 
     end subroutine test_eric_klusek
+
+
+
+    subroutine test_globalindex(rc)
+        integer, intent(out)  :: rc
+        integer                 :: localrc
+        type(ESMF_Field)        :: field
+        type(ESMF_Grid)         :: grid
+        real (ESMF_KIND_R8), pointer   :: farray(:,:)
+        type(ESMF_VM)                               :: vm
+        integer                                     :: localPet, petCount
+        integer                                     :: compLBnd(2), compUBnd(2)
+        type(ESMF_ArraySpec)                        :: arrayspec
+        logical                   :: correct
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+        correct=.true.
+
+        call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! only do this if there is 4 Pets
+        if (petCount .eq. 4) then
+           ! create grid with global indices
+           grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+                                  regDecomp=(/2,2/), indexflag=ESMF_INDEX_GLOBAL , rc=localrc)
+           if (ESMF_LogMsgFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rc)) return
+
+            ! set arrayspec
+            call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+           if (ESMF_LogMsgFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rc)) return
+
+            ! create field on grid
+            field = ESMF_FieldCreate(grid, arrayspec, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+       
+            ! Get field bounds
+            call ESMF_FieldGet(field, localde=0, farray=farray, &
+                computationalLBound=compLBnd, computationalUBound=compUBnd, &
+                rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+           
+            ! check bounds
+            if (localpet .eq. 0) then
+               if (compLBnd(1) .ne. 1) correct=.false.
+               if (compLBnd(2) .ne. 1) correct=.false.
+               if (compUBnd(1) .ne. 8) correct=.false.
+               if (compUBnd(2) .ne. 10) correct=.false.
+            else if (localpet .eq. 1) then
+               if (compLBnd(1) .ne. 9) correct=.false.
+               if (compLBnd(2) .ne. 1) correct=.false.
+               if (compUBnd(1) .ne. 16) correct=.false.
+               if (compUBnd(2) .ne. 10) correct=.false.
+            else if (localpet .eq. 2) then
+               if (compLBnd(1) .ne. 1) correct=.false.
+               if (compLBnd(2) .ne. 11) correct=.false.
+               if (compUBnd(1) .ne. 8) correct=.false.
+               if (compUBnd(2) .ne. 20) correct=.false.
+            else if (localpet .eq. 3) then
+               if (compLBnd(1) .ne. 9) correct=.false.
+               if (compLBnd(2) .ne. 11) correct=.false.
+               if (compUBnd(1) .ne. 16) correct=.false.
+               if (compUBnd(2) .ne. 20) correct=.false.
+            endif   
+
+            call ESMF_FieldDestroy(field, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
+            call ESMF_GridDestroy(grid, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+       endif
+
+
+       ! return rc based on correct
+       if (correct) then
+         rc=ESMF_SUCCESS
+       else
+         rc=ESMF_FAILURE
+       endif
+
+
+    end subroutine test_globalindex
+
 
 end program ESMF_FieldCreateGetUTest
