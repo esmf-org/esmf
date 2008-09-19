@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.66 2008/09/18 21:55:07 w6ws Exp $
+% $Id: ESMF_install.tex,v 1.67 2008/09/19 19:19:34 w6ws Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -26,7 +26,6 @@ certain 3rd party libraries are available. This section describes
 these dependencies and the associated environment settings
 that allow the user to control them.
 
-
 \subsubsection{LAPACK}
 The LAPACK library is optionally used in the Mesh class to
 compute Patch Recovery regridding weights.  This regridding method requires
@@ -40,26 +39,26 @@ The following environment variables enable, and specify the name and location of
 the desired LAPACK library:
 \begin{description}
 
-\item[ESMF\_LAPACK] Possible value: "not set", ON, mkl, netlib, scsl (default depends on system)
+\item[ESMF\_LAPACK] Possible value: "not set", OFF, mkl, netlib, scsl (default depends on system)
 
-Possible values include:
+\begin{description}
+\item["not set"]: ESMF will be compiled with LAPACK LAPACK-dependent features
+on systems where the library is located in a vendor-defined location.  On
+other systems, the default is OFF.
 
-"not set" (default on most systems): ESMF will be compiled without
-LAPACK-dependent features.  The ESMF\_LAPACK\_LIBS and ESMF\_LAPACK\_LIBPATH
-environment variables will be ignored.
+\item[OFF] (default on most system): Disables LAPACK-dependent code, regardless of system.
 
-ON: Enables LAPACK-dependent code, but does not set a default for
-ESMF\_LAPACK\_LIBS.  ESMF\_LAPACK\_LIBS, and if required, ESMF\_LAPACK\_LIBPATH,
-must be set in the user environment.
-
-mkl: Use the Intel MKL library.  Sets ESMF\_LAPACK\_LIBS to "-lmkl\_lapack -lmkl",
+\item[mkl]: Use the Intel MKL library.  Sets ESMF\_LAPACK\_LIBS to "-lmkl\_lapack -lmkl",
 unless it is already defined in the user environment.
 
-netlib (default for PGI): Sets ESMF\_LAPACK\_LIBS to "-llapack -lblas", unless
+\item[netlib] (default for PGI): Sets ESMF\_LAPACK\_LIBS to "-llapack -lblas", unless
 it is already defined in the user environment.
 
-scsl (default for IRIX64): Sets ESMF\_LAPACK\_LIBS to "-lscs".
+\item[scsl] (default for IRIX64): Sets ESMF\_LAPACK\_LIBS to "-lscs".
 
+\item[<userstring>]: Enables LAPACK-dependent code, but does not set a default for
+ESMF\_LAPACK\_LIBS.  ESMF\_LAPACK\_LIBS, and if required, ESMF\_LAPACK\_LIBPATH,must be set in the user environment.
+\end{description}
 
 \item[ESMF\_LAPACK\_LIBPATH] Typical value: /usr/local/lib (no default)
 
@@ -80,16 +79,20 @@ of the desired NETCDF library and associated header files:
 
 \item[ESMF\_NETCDF] Possible value: "not set" (default), standard, <userstring>
 
-"not set" (default): ESMF will be compiled without NETCDF-dependent features.
+\begin{description}
+\item["not set"] (default): ESMF will be compiled without NETCDF-dependent features.
 The ESMF\_NETCDF\_INCLUDE, ESMF\_NETCDF\_LIBPATH, and ESMF\_NETCDF\_LIBS
 environment variables will be ignored.
 
-standard: ESMF\_NETCDF\_LIBS will be set to "-lnetcdf", unless it is already
-defined in the user environment.  The ESMF\_NETLIB\_INCLUDE and
-ESMF\_NETCDF\_LIBPATH will be also used.
+\item[split]: ESMF\_NETCDF\_LIBS will be set to "-lnetcdff -lnetcdf".  The
+ESMF\_NETLIB\_INCLUDE and ESMF\_NETCDF\_LIBPATH will be also used.
 
-<userstring>: If set, ESMF\_NETCDF\_INCLUDE, ESMF\_NETCDF\_LIBPATH, and
+\item[standard]: ESMF\_NETCDF\_LIBS will be set to "-lnetcdf".
+The ESMF\_NETLIB\_INCLUDE and ESMF\_NETCDF\_LIBPATH will be also used.
+
+\item[<userstring>]: If set, ESMF\_NETCDF\_INCLUDE, ESMF\_NETCDF\_LIBPATH, and
 ESMF\_NETCDF\_LIBS environment variables will be used.
+\end{description}
 
 \item[ESMF\_NETCDF\_INCLUDE] Typical value: /usr/local/include (no default)
 
@@ -117,10 +120,18 @@ following environment variables enable, and specify the name and location
 of the desired PNETCDF library and associated header files:
 
 \begin{description}
-
 \item[ESMF\_PNETCDF] Possible value: "not set" (default), ON
 
 When defined, enables the use of PNETCDF.
+
+\begin{description}
+\item["not set"] (default): ESMF will becompiled without PNETCDF-dependent features.
+The ESMF\_PNETCDF\_INCLUDE, ESMF\_PNETCDF\_LIBPATH, and ESMF\_PNETCDF\_LIBS
+environment variables will be ignored.
+
+\item[ON]: If set, ESMF\_PNETCDF\_INCLUDE, ESMF\_PNETCDF\_LIBPATH, and
+ESMF\_PNETCDF\_LIBS environment variables will be used.
+\end{description}
 
 \item[ESMF\_PNETCDF\_INCLUDE] Typical value: /usr/local/include (no default)
 
