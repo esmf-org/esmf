@@ -1,10 +1,10 @@
-! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.11 2008/09/18 20:40:29 feiliu Exp $
+! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.12 2008/09/19 17:41:38 feiliu Exp $
 !
 ! System test FieldRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
 
 !-------------------------------------------------------------------------
-!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_SYSTEM_removeTEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP
@@ -12,15 +12,15 @@
 ! !DESCRIPTION:
 ! System test FieldRedistArb2Arb.
 !
-! This system test checks the functionality of the grid distribution
+! This system test checks the functionality of the igrid distribution
 ! routines by redistributing data from one Field arbitrarily distributed 
 ! structure to another Field that has been distributed arbitrarily
 ! and then back again.  The original data should exactly match the final
 ! data, which serves as the test for SUCCESS.  This program creates two
-! identical Grids with different distributions, both with the semi-random
-! arbitrary distribution.  The first Grid has two Fields created from it,
+! identical IGrids with different distributions, both with the semi-random
+! arbitrary distribution.  The first IGrid has two Fields created from it,
 ! the first as the source for the test and the second for the final results.
-! The second Grid has a single Field that serves as an intermediate 
+! The second IGrid has a single Field that serves as an intermediate 
 ! result between the two redistributions.
 !
 !\begin{verbatim}
@@ -28,50 +28,45 @@
      program Arb2ArbFldReDist
 
 #include <ESMF_Macros.inc>
-#include <ESMF_Conf.inc>
-#include <ESMF.h>
-#define ESMF_METHOD "FieldRedistArb2ArbSTest"
 
      ! ESMF Framework module
      use ESMF_Mod
      use ESMF_TestMod
     
      implicit none
-    
-    ! Local variables
-    integer :: i, j, rc, localrc
-    integer :: npets, my_pet, is, ie, js, je
-    integer :: miscount
-    integer, dimension(2) :: counts
-    logical :: match
-    real(ESMF_KIND_R8) :: pi, compval
-    integer, dimension(1) :: gclbx, gcubx
-    integer, dimension(1) :: src_fclb, src_fcub, res_fclb, res_fcub
-    real(ESMF_KIND_R8), dimension(:), pointer :: coordX
-    real(ESMF_KIND_R8), dimension(:), pointer :: srcdata, resdata
-    integer, dimension(:), allocatable :: arbIndexList_i, arbIndexList_j
-    type(ESMF_ArraySpec) :: arrayspec, arrayspec2
-    type(ESMF_DistGrid)  ::  distgrid1, distgrid2
-    type(ESMF_Grid)  ::  grid1,  grid2
-    type(ESMF_Field) :: field1, field2, field3
-    type(ESMF_RouteHandle) :: rh12, rh23
-    type(ESMF_VM):: vm
 
-    ! cumulative result: count failures; no failures equals "all pass"
-    integer :: testresult = 0
+     ! Local variables
+     integer :: status
+     integer :: i, j, j1, i1, add
+     integer :: counts(2), localCounts(2), miscount
+     integer :: npets, myDE, myPet
+     integer, dimension(:,:), allocatable :: myIndices1, myIndices2
+     logical :: match
+     real(ESMF_KIND_R8) :: min(2), max(2), compval
+     real(ESMF_KIND_R8) :: pi = 3.1416d0
+     real(ESMF_KIND_R8), dimension(:), pointer :: coordX, coordY
+     real(ESMF_KIND_R8), dimension(:), pointer :: srcdata, resdata
+     type(ESMF_ArraySpec) :: arrayspec1, arrayspec2
+     type(ESMF_DELayout) :: delayout1, delayout2
+     type(ESMF_Field) :: humidity1, humidity2, humidity3
+     type(ESMF_IGrid) :: igrid1, igrid2
+     type(ESMF_IGridHorzStagger) :: horz_stagger
+     type(ESMF_RouteHandle) :: rh12, rh23
+     type(ESMF_VM) :: vm
 
-    ! individual test name
-    character(ESMF_MAXSTR) :: testname
+     ! cumulative result: count failures; no failures equals "all pass"
+     integer :: testresult = 0
 
-    ! individual test failure message and final rc msg
-    character(ESMF_MAXSTR) :: failMsg, finalMsg
+     ! individual test name
+     character(ESMF_MAXSTR) :: testname
+
+     ! individual test failure message and final rc msg
+     character(ESMF_MAXSTR) :: failMsg, finalMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "System Test FieldRedistArb2Arb:"
-    rc = ESMF_SUCCESS
-    localrc = ESMF_SUCCESS
+     print *, "System Test FieldRedistArb2Arb."
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -79,29 +74,17 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    ! Initialize the framework and get back the default global VM
-    call ESMF_Initialize(vm=vm, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+     ! Initialize the framework and get back the default global VM
+     call ESMF_Initialize(vm=vm, rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
 
-    ! Get the PET count and our PET number
-    call ESMF_VMGet(vm, localPet=my_pet, petCount=npets, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+     ! Get the PET count and our PET number
+     call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
 
-    miscount = 0
+     miscount = 0
 
-    if (2*(npets/2) .ne. npets .or. npets*(60/npets) .ne. 60) then
-        print *, "This test must run on an even number of processes divisible by 60"
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) &
-            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-    endif
-
-    print *, "Create section finished"
-
+     print *, "Create section finished"
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -109,131 +92,146 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
+     ! create two layouts, both are 1D layout 
+     ! for arbitrary distribution
+     delayout1 = ESMF_DELayoutCreate(vm, (/ 1, npets /), rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+     delayout2 = ESMF_DELayoutCreate(vm, (/ npets, 1 /), rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
 
-    !  Create the grids and corresponding Fields
-    !  note that the Grids are the same but decomposed differently
-    ! Perform a decomposition of arb-dist Fields equivalent in decomposing
-    ! in the first dimension and 2nd dimension respectively.
-    pi              = 3.14159
-    counts(1)       = 60
-    counts(2)       = 30
-    is = counts(1)/npets*my_pet+1
-    ie = is-1+counts(1)/npets
-    js = counts(2)/npets*my_pet+1
-    je = js-1+counts(2)/npets
+     ! and get our local DE number on the first layout
+     call ESMF_DELayoutGetDeprecated(delayout1, localDE=myDE, rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
 
-    allocate(arbIndexList_i((ie-is+1)*counts(2)))
-    allocate(arbIndexList_j((je-js+1)*counts(1)))
-    do i = is, ie
-        do j = 1, counts(2)
-            arbIndexList_i((i-is)*counts(2)+j) = (i-1)*counts(2)+j
-        enddo
-    enddo
-    do i = 1, counts(1)
-        do j = js, je
-            arbIndexList_j((i-1)*(je-js+1)+j-js+1) = (i-1)*counts(2)+j
-        enddo
-    enddo
-    ! create arrayspec
-    call ESMF_ArraySpecSet(arrayspec, rank=1, &
-                           typekind=ESMF_TYPEKIND_R8, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-    call ESMF_ArraySpecSet(arrayspec2, rank=1, &
-                           typekind=ESMF_TYPEKIND_R8, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-    
-    ! create src and dst grids
-    distgrid1 = ESMF_DistGridCreate(arbSeqIndexList=arbIndexList_i, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+     ! Create the igrids and corresponding Fields
+     counts(1) = 60
+     counts(2) = 40
+     min(1) = 0.0
+     max(1) = 60.0
+     min(2) = 0.0
+     max(2) = 50.0
+     horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
 
-    grid1 = ESMF_GridCreate(distgrid=distgrid1, &
-        gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
-        rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+     ! make two identical igrids, both are distributed arbitrarily
+     ! but with different styles
+     igrid1 = ESMF_IGridCreateHorzXYUni(counts=counts, &
+                             minGlobalCoordPerDim=min, &
+                             maxGlobalCoordPerDim=max, &
+                             horzStagger=horz_stagger, &
+                             name="source igrid", rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+     !
+     ! Arbitrary case
+     ! allocate myIndices to maximum number of points on any DE in the first
+     ! dimension and 2 in the second dimension.
+     j = int((counts(1)*counts(2) + npets -1)/npets)
+     allocate (myIndices1(j,2))
+     ! calculate myIndices based on DE number
+     ! for now, start at point (1,1+myDE) and go up in the j-direction first
+     ! to create a semi-regular distribution of points
+     i1  = 1 + myDE
+     add = 0
+     do j = 1,counts(2)
+       do i = i1,counts(1),npets
+         add = add + 1
+         myIndices1(add,1) = i
+         myIndices1(add,2) = j
+       enddo
+       i1 = i - counts(1)
+     enddo
 
-    distgrid2 = ESMF_DistGridCreate(arbSeqIndexList=arbIndexList_j, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+     ! the distribute call is similar to the block distribute but with
+     ! a couple of different arguments
+     call ESMF_IGridDistribute(igrid1, delayout=delayout1, myCount=add, &
+                              myIndices=myIndices1, rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
 
-    grid2 = ESMF_GridCreate(distgrid=distgrid2, &
-        gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
-        rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+     igrid2 = ESMF_IGridCreateHorzXYUni(counts=counts, &
+                             minGlobalCoordPerDim=min, &
+                             maxGlobalCoordPerDim=max, &
+                             horzStagger=horz_stagger, &
+                             name="source igrid", rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+     ! allocate myIndices to maximum number of points on any DE in the first
+     ! dimension and 2 in the second dimension.
+     i = int((counts(1)*counts(2) + npets -1)/npets)
+     allocate (myIndices2(i,2))
+     ! calculate myIndices based on DE number
+     ! for now, start at point (1,1+myDE) and go up in the j-direction first
+     ! to create a semi-regular distribution of points
+     j1  = 1 + myDE
+     add = 0
+     do i = 1,counts(1)
+       do j = j1,counts(2),npets
+         add = add + 1
+         myIndices2(add,1) = i
+         myIndices2(add,2) = j
+       enddo
+       j1 = j - counts(2)
+     enddo
+     ! the distribute call is similar to the block distribute but with
+     ! a couple of different arguments
+     call ESMF_IGridDistribute(igrid2, delayout=delayout2, myCount=add, &
+                              myIndices=myIndices2, rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
 
-    call ESMF_GridAddCoord(grid1, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+     ! Set up a 1D (for the arbitrarily distributed Field) and a 2D real array
+     call ESMF_ArraySpecSet(arrayspec1, rank=1, &
+                            typekind=ESMF_TYPEKIND_R8)
+     if (status .ne. ESMF_SUCCESS) goto 20
+     call ESMF_ArraySpecSet(arrayspec2, rank=1, &
+                            typekind=ESMF_TYPEKIND_R8)
+     if (status .ne. ESMF_SUCCESS) goto 20
 
-    ! create src and dst fields
-    field1 = ESMF_FieldCreate(grid1, arrayspec, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+     ! Create the field and have it create the array internally for each igrid
+     humidity1 = ESMF_FieldCreate(igrid1, arrayspec1, &
+                                  horzRelloc=ESMF_CELL_CENTER, &
+                                  haloWidth=0, name="humidity1", rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+     humidity2 = ESMF_FieldCreate(igrid2, arrayspec2, &
+                                  horzRelloc=ESMF_CELL_CENTER, &
+                                  haloWidth=0, name="humidity2", rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
+     humidity3 = ESMF_FieldCreate(igrid1, arrayspec1, &
+                                  horzRelloc=ESMF_CELL_CENTER, &
+                                  haloWidth=0, name="humidity3", rc=status)
+     if (status .ne. ESMF_SUCCESS) goto 20
 
-    field3 = ESMF_FieldCreate(grid1, arrayspec, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-    field2 = ESMF_FieldCreate(grid2, arrayspec2, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-    ! precompute communication patterns
-    call ESMF_FieldRedistStore(field1, field2, routehandle=rh12, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-    call ESMF_FieldRedistStore(field2, field3, routehandle=rh23, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+     ! precompute communication patterns, the first from the 1st arbitrarily
+     ! distributed Field to the 2nd arbitrarily distributed Field; and 
+     ! the second from the 2nd arbitrarily distributed Field back to
+     ! the 1st distributed Field
+     call ESMF_FieldRedistStore(humidity1, humidity2, vm, &
+                                routehandle=rh12, rc=status)
+     call ESMF_FieldRedistStore(humidity2, humidity3, vm, &
+                                routehandle=rh23, rc=status)
 
     ! get coordinate arrays available for setting the source data array
-    call ESMF_GridGetCoord(grid1, localDe=0, coordDim=1, &
-        computationalLBound=gclbx, computationalUBound=gcubx, &
-        fptr=coordX, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-    
+    call ESMF_IGridGetCoord(igrid1, dim=1, horzRelloc=ESMF_CELL_CENTER, &
+      centerCoord=coordX, localCounts=localCounts, rc=status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_IGridGetCoord(igrid1, dim=2, horzRelloc=ESMF_CELL_CENTER, &
+      centerCoord=coordY, rc=status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+
     ! Get pointers to the data and set it up
-    call ESMF_FieldGet(field1, localDe=0, farray=srcdata, &
-        computationalLBound=src_fclb, computationalUBound=src_fcub, & 
-        rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-    call ESMF_FieldGet(field3, localDe=0, farray=resdata, &
-        computationalLBound=res_fclb, computationalUBound=res_fcub, & 
-        rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    call ESMF_FieldGetDataPointer(humidity1, srcdata, ESMF_DATA_REF, rc=status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldGetDataPointer(humidity3, resdata, ESMF_DATA_REF, rc=status)
+    if (status .ne. ESMF_SUCCESS) goto 20
 
     ! initialize data arrays
     srcdata = 0.0
     resdata = 0.0
 
-    do i = gclbx(1), gcubx(1)
-        coordX(i) = i*0.5
-        srcdata(i) = 10.0 + 5.0*sin(coordX(i)/60.0*pi)
+    ! set data array to a function of coordinates (in the computational part
+    ! of the array only, not the halo region)
+    do i = 1,localCounts(1)
+      srcdata(i) = 10.0 + 5.0*sin(coordX(i)/60.0*pi) &
+                        + 2.0*sin(coordY(i)/50.0*pi)
     enddo
 
-    print *, "Initial data, before Transpose:"
+    print *, "Initial data, before Redistribution:"
 
     ! No deallocate() is needed for array data, it will be freed when the
     ! Array is destroyed. 
@@ -247,22 +245,18 @@
 !-------------------------------------------------------------------------
 !
 
-    !! Call transpose method here, output ends up in field2
-    call ESMF_FieldRedist(field1, field2, rh12, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    ! Call redistribution method here, output ends up in humidity2
+    call ESMF_FieldRedist(humidity1, humidity2, rh12, rc=status)
+    if (status .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after Transpose:"
 
-    !! Transpose back so we can compare contents
-    !! Call transpose method again here, output ends up in field3
-    call ESMF_FieldRedist(field2, field3, rh23, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    ! Redistribute back so we can compare contents
+    ! output ends up in humidity3
+    call ESMF_FieldRedist(humidity2, humidity3, rh23, rc=status)
+    if (status .ne. ESMF_SUCCESS) goto 20
 
-    print *, "Array contents after second Transpose, should match original:"
+    print *, "Array contents after second Redistribution, should match original:"
 
     print *, "Run section finished"
 
@@ -274,23 +268,25 @@
 !-------------------------------------------------------------------------
 !   Print result
 
-    print *, "-----------------------------------------------------------------"
-    print *, "-----------------------------------------------------------------"
-    print *, "Result from PET number ", my_pet
-    print *, "-----------------------------------------------------------------"
-    print *, "-----------------------------------------------------------------"
+    call ESMF_DELayoutGetDeprecated(delayout1, localDE=myDE, rc=status)
 
+    print *, "-----------------------------------------------------------------"
+    print *, "-----------------------------------------------------------------"
+    print *, "Result from DE number ", myDE
+    print *, "-----------------------------------------------------------------"
+    print *, "-----------------------------------------------------------------"
 
     ! check and make sure the original data and the data that has been 
     ! distributed to the 1D Field and back again are the same
     match    = .true.
     miscount = 0
-    do i = gclbx(1), gcubx(1)
-        compval = 10.0 + 5.0*sin(coordX(i)/60.0*pi)
+    do i = 1,localCounts(1)
+        compval = 10.0 + 5.0*sin(coordX(i)/60.0*pi) &
+                       + 2.0*sin(coordY(i)/50.0*pi)
         if ((srcdata(i) .ne. resdata(i)) .OR. &
             (abs(resdata(i)-compval).ge.1.0d-12)) then
-          print *, "array contents do not match at: (", i , ") on PET ", &
-                   my_pet, ".  src=", srcdata(i), "dst=", &
+          print *, "array contents do not match at: (", i , ") on DE ", &
+                   myDE, ".  src=", srcdata(i), "dst=", &
                    resdata(i), "realval=", compval
           match = .false.
           miscount = miscount + 1
@@ -300,10 +296,11 @@
           endif
         endif
     enddo
-    if (match) print *, "Array contents matched correctly!! PET = ", my_pet
+    if (match) print *, "Array contents matched correctly!! DE = ", myDE
 10  continue
 
     print *, "Finalize section finished"
+
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -312,54 +309,26 @@
 !-------------------------------------------------------------------------
 !   Clean up
 
-    call ESMF_FieldRedistRelease(rh12, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    deallocate(myIndices1, myIndices2)
 
-    call ESMF_FieldRedistRelease(rh23, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-    call ESMF_FieldDestroy(field1, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-    call ESMF_FieldDestroy(field2, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-    call ESMF_FieldDestroy(field3, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-    call ESMF_GridDestroy(grid1, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-    call ESMF_GridDestroy(grid2, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-    call ESMF_DistgridDestroy(distgrid2, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-    call ESMF_DistgridDestroy(distgrid1, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-    deallocate(arbIndexList_i)
-    deallocate(arbIndexList_j)
-
+    call ESMF_FieldRedistRelease(rh12, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldRedistRelease(rh23, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldDestroy(humidity1, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldDestroy(humidity2, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldDestroy(humidity3, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_IGridDestroy(igrid1, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_IGridDestroy(igrid2, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_DELayoutDestroy(delayout1, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_DELayoutDestroy(delayout2, status)
+    if (status .ne. ESMF_SUCCESS) goto 20
     print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
@@ -369,17 +338,17 @@
     write(failMsg, *)  "Redistribution back not same as original"
     write(testname, *) "System Test FieldRedistArb2Arb: Field Redistribute"
 
-    call ESMF_TestGlobal(((miscount.eq.0).and.(rc.eq.ESMF_SUCCESS)), &
+    call ESMF_TestGlobal(((miscount.eq.0).and.(status.eq.ESMF_SUCCESS)), &
       testname, failMsg, testresult, ESMF_SRCLINE)
 
-    if ((my_pet .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+    if ((myPet .eq. 0) .or. (status .ne. ESMF_SUCCESS)) then
       ! Separate message to console, for quick confirmation of success/failure
-      if ((miscount.eq.0) .and. (rc .eq. ESMF_SUCCESS)) then
+      if ((miscount.eq.0) .and. (status .eq. ESMF_SUCCESS)) then
         write(finalMsg, *) "SUCCESS: Data redistributed twice same as original."
       else
         write(finalMsg, *) "System Test did not succeed. ", &
         "Data redistribution does not match expected values, or error code", &
-        " set ",rc 
+        " set ",status 
       endif
       write(0, *) ""
       write(0, *) trim(testname)
@@ -388,7 +357,7 @@
 
     endif
     
-    call ESMF_Finalize(rc=rc)
+    call ESMF_Finalize(rc=status)
 
     end program Arb2ArbFldReDist
     
