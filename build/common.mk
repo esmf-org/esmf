@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.241 2008/09/12 17:06:49 theurich Exp $
+#  $Id: common.mk,v 1.242 2008/09/19 17:58:47 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -730,7 +730,8 @@ endif
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-# Set LAPACK default libs according to ESMF_LAPACK (if not set in user environment)
+# Set LAPACK default libs according to ESMF_LAPACK (if not set in user
+# environment)
 #-------------------------------------------------------------------------------
 ifneq ($(origin ESMF_LAPACK), environment)
 ifdef ESMF_LAPACKDEFAULT
@@ -760,12 +761,6 @@ ESMF_LAPACK_LIBS = -lscs
 endif
 endif
 
-ifeq ($(ESMF_LAPACK),essl)
-ifneq ($(origin ESMF_LAPACK_LIBS), environment)
-ESMF_LAPACK_LIBS = -lessl
-endif
-endif
-
 #-------------------------------------------------------------------------------
 # LAPACK is used by a few ESMF routines, when available.  The following links
 # them in.
@@ -789,6 +784,11 @@ endif
 ifeq ($(ESMF_NETCDF),standard)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
 ESMF_NETCDF_LIBS = -lnetcdf
+endif
+endif
+ifeq ($(ESMF_NETCDF),split)
+ifneq ($(origin ESMF_NETCDF_LIBS), environment)
+ESMF_NETCDF_LIBS = -lnetcdff -lnetcdf
 endif
 endif
 
