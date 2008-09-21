@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.23 2008/09/21 05:57:55 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.24 2008/09/21 05:59:32 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -4845,13 +4845,13 @@ contains
 
 
   ! Uncomment these calls to see some actual regrid results
-  spherical_grid = 0
-  call ESMF_MeshIO(vm, grid360, ESMF_STAGGERLOC_CENTER, &
-               "srcmesh", srcArray360, dstArray360, errorArray, rc=localrc, &
-               spherical=spherical_grid)
-  call ESMF_MeshIO(vm, grid180, ESMF_STAGGERLOC_CENTER, &
-               "dstmesh", array180, rc=localrc, &
-               spherical=spherical_grid)
+!  spherical_grid = 0
+!  call ESMF_MeshIO(vm, grid360, ESMF_STAGGERLOC_CENTER, &
+!               "srcmesh", srcArray360, dstArray360, errorArray, rc=localrc, &
+!               spherical=spherical_grid)
+!  call ESMF_MeshIO(vm, grid180, ESMF_STAGGERLOC_CENTER, &
+!               "dstmesh", array180, rc=localrc, &
+!               spherical=spherical_grid)
 
 
   ! Destroy the Fields
