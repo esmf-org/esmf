@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2008/09/19 19:38:28 donstark Exp $ 
+# $Id: makefile,v 1.33 2008/09/22 17:07:22 donstark Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -14,21 +14,24 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayRedistUTest \
                 $(ESMF_TESTDIR)/ESMC_ArrayUTest 
 
+#
+# this logic is commented out until the resolve how to deal with the amount of resources 
+# test harness requires to run in exhaustive mode.
+#
+#ifeq ($(ESMF_TESTEXHAUSTIVE), ON)
+#TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
+#                RUN_ESMF_ArrayDataUTest \
+#                RUN_ESMF_ArrayScatterUTest \
+#                RUN_ESMF_ArrayGatherUTest \
+#                RUN_ESMF_ArrayArbIdxSMMUTest \
+#                RUN_ESMF_ArrayRedistUTest \
+#                RUN_ESMC_ArrayUTest  \
+#                RUN_ESMF_ArrayHarness1UTest   \
+#                RUN_ESMF_ArrayHarness2UTest  \
+#                RUN_ESMF_ArrayHarness4UTest  \
+#                RUN_ESMF_ArrayHarness8UTest
 
-ifeq ($(ESMF_TESTEXHAUSTIVE), ON)
-TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
-                RUN_ESMF_ArrayDataUTest \
-                RUN_ESMF_ArrayScatterUTest \
-                RUN_ESMF_ArrayGatherUTest \
-                RUN_ESMF_ArrayArbIdxSMMUTest \
-                RUN_ESMF_ArrayRedistUTest \
-                RUN_ESMC_ArrayUTest  \
-                RUN_ESMF_ArrayHarness1UTest   \
-                RUN_ESMF_ArrayHarness2UTest  \
-                RUN_ESMF_ArrayHarness4UTest  \
-                RUN_ESMF_ArrayHarness8UTest
-
-else
+#else
 TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayDataUTest \
                 RUN_ESMF_ArrayScatterUTest \
@@ -37,7 +40,7 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayRedistUTest \
                 RUN_ESMC_ArrayUTest  \
                 RUN_ESMF_ArrayHarness2UTest
-endif
+#endif
 
 
 TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \
