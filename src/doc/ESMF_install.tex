@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.68 2008/09/19 19:39:37 w6ws Exp $
+% $Id: ESMF_install.tex,v 1.69 2008/09/22 19:34:53 w6ws Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -39,16 +39,16 @@ The following environment variables enable, and specify the name and location of
 the desired LAPACK library:
 \begin{description}
 
-\item[ESMF\_LAPACK] Possible value: "not set", OFF, mkl, netlib, scsl (default depends on system)
+\item[ESMF\_LAPACK] Possible value: "not set", OFF, mkl, netlib, scsl, <userstring> (default depends on system)
 
 \begin{description}
-\item["not set"]: ESMF will be compiled with LAPACK LAPACK-dependent features
+\item["not set"] ESMF will be compiled with LAPACK-dependent features
 on systems where the library is located in a vendor-defined location.  On
 other systems, the default is OFF.
 
 \item[OFF] (default on most system): Disables LAPACK-dependent code, regardless of system.
 
-\item[mkl]: Use the Intel MKL library.  Sets ESMF\_LAPACK\_LIBS to "-lmkl\_lapack -lmkl",
+\item[mkl] Use the Intel MKL library.  Sets ESMF\_LAPACK\_LIBS to "-lmkl\_lapack -lmkl",
 unless it is already defined in the user environment.
 
 \item[netlib] (default for PGI): Sets ESMF\_LAPACK\_LIBS to "-llapack -lblas", unless
@@ -56,7 +56,7 @@ it is already defined in the user environment.
 
 \item[scsl] (default for IRIX64): Sets ESMF\_LAPACK\_LIBS to "-lscs".
 
-\item[<userstring>]: Enables LAPACK-dependent code, but does not set a default for
+\item[<userstring>] Enables LAPACK-dependent code, but does not set a default for
 ESMF\_LAPACK\_LIBS.  ESMF\_LAPACK\_LIBS, and if required, ESMF\_LAPACK\_LIBPATH,must be set in the user environment.
 \end{description}
 
@@ -77,20 +77,20 @@ of the desired NETCDF library and associated header files:
 
 \begin{description}
 
-\item[ESMF\_NETCDF] Possible value: "not set" (default), standard, <userstring>
+\item[ESMF\_NETCDF] Possible value: "not set" (default), split, standard, <userstring>
 
 \begin{description}
 \item["not set"] (default): ESMF will be compiled without NETCDF-dependent features.
 The ESMF\_NETCDF\_INCLUDE, ESMF\_NETCDF\_LIBPATH, and ESMF\_NETCDF\_LIBS
 environment variables will be ignored.
 
-\item[split]: ESMF\_NETCDF\_LIBS will be set to "-lnetcdff -lnetcdf".  The
+\item[split] ESMF\_NETCDF\_LIBS will be set to "-lnetcdff -lnetcdf".  The
 ESMF\_NETLIB\_INCLUDE and ESMF\_NETCDF\_LIBPATH will be also used.
 
-\item[standard]: ESMF\_NETCDF\_LIBS will be set to "-lnetcdf".
+\item[standard] ESMF\_NETCDF\_LIBS will be set to "-lnetcdf".
 The ESMF\_NETLIB\_INCLUDE and ESMF\_NETCDF\_LIBPATH will be also used.
 
-\item[<userstring>]: If set, ESMF\_NETCDF\_INCLUDE, ESMF\_NETCDF\_LIBPATH, and
+\item[<userstring>] If set, ESMF\_NETCDF\_INCLUDE, ESMF\_NETCDF\_LIBPATH, and
 ESMF\_NETCDF\_LIBS environment variables will be used.
 \end{description}
 
@@ -120,7 +120,7 @@ following environment variables enable, and specify the name and location
 of the desired PNETCDF library and associated header files:
 
 \begin{description}
-\item[ESMF\_PNETCDF] Possible value: "not set" (default), ON
+\item[ESMF\_PNETCDF] Possible value: "not set" (default), <userstring>
 
 When defined, enables the use of PNETCDF.
 
@@ -129,7 +129,7 @@ When defined, enables the use of PNETCDF.
 The ESMF\_PNETCDF\_INCLUDE, ESMF\_PNETCDF\_LIBPATH, and ESMF\_PNETCDF\_LIBS
 environment variables will be ignored.
 
-\item[ON]: If set, ESMF\_PNETCDF\_INCLUDE, ESMF\_PNETCDF\_LIBPATH, and
+\item[<userstring>] If set, ESMF\_PNETCDF\_INCLUDE, ESMF\_PNETCDF\_LIBPATH, and
 ESMF\_PNETCDF\_LIBS environment variables will be used.
 \end{description}
 
@@ -286,6 +286,14 @@ overriding the location determined by default from the user's PATH variable.
 Possible value: {\em flag}
 
 This variable can be used to override the default C++ optimization flag.
+
+\item[ESMF\_DEFER\_LIB\_BUILD]
+Possible value: {\em NO}
+
+This variable can be used to override the deferring of the build of the
+ESMF library.  By default, the library is built after all of the source
+files have been compiled.  Setting this environment variable forces the library
+to be updated after each individual compilation.
 
 \item[ESMF\_DIR]
 Possible value: {\em absolute path}
