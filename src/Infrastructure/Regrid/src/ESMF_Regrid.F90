@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.131 2008/08/27 17:16:02 dneckels Exp $
+! $Id: ESMF_Regrid.F90,v 1.132 2008/09/22 19:07:40 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -102,26 +102,11 @@
     !  these routines must exist to be consistent with the other interfaces.  
     ! 
     public ESMF_RegridStore
+    public operator (.eq.)
 
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_RegridStore -- Generic interface
-
-! !INTERFACE:
-  interface ESMF_RegridStore
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-    module procedure ESMF_RegridStoreRH
-    module procedure ESMF_RegridStoreRHIW
-    module procedure ESMF_RegridStoreIW
-    module procedure ESMF_RegridStoreMeshRH
-    !module procedure ESMF_RegridStoreMeshRHIW
-    !module procedure ESMF_RegridStoreMeshIW
-!EOPI
-
-  end interface
 
 
 !
@@ -129,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.131 2008/08/27 17:16:02 dneckels Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.132 2008/09/22 19:07:40 dneckels Exp $'
 
 !==============================================================================
 !
@@ -180,360 +165,6 @@
 ! This section includes the Regrid Create, Run, and Destroy methods.
 ! 
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridStoreRH"
-!BOPI
-! !IROUTINE: ESMF_RegridStoreRH - Precomputes Regrid data
-
-! !INTERFACE:
-      subroutine ESMF_RegridStoreRH(srcGrid, srcArray, &
-                 dstGrid, dstArray, &
-                 regridMethod, regridScheme, &
-                 routehandle, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(inout)         :: srcGrid
-      type(ESMF_Array), intent(inout)        :: srcArray
-      type(ESMF_Grid), intent(inout)         :: dstGrid
-      type(ESMF_Array), intent(inout)        :: dstArray
-      type(ESMF_RegridMethod), intent(in)    :: regridMethod
-      integer, intent(in)                    :: regridScheme
-      type(ESMF_RouteHandle),  intent(inout) :: routehandle
-      integer,                  intent(  out), optional :: rc
-!
-! !DESCRIPTION:
-!     The arguments are:
-!     \begin{description}
-!     \item[srcGrid]
-!          The source grid.
-!     \item[srcArray]
-!          The source grid array.
-!     \item[dstGrid]
-!          The destination grid.
-!     \item[dstArray]
-!          The destination array.
-!     \item[regridMethod]
-!          The interpolation method to use.
-!     \item[regridScheme]
-!          Whether to use 3d or native coordinates
-!     \item[routeHandle]
-!          Handle to store the resulting sparseMatrix
-!     \item[{rc}]
-!          Return code.
-!     \end{description}
-!EOPI
-       integer :: localrc
-       type(ESMF_StaggerLoc) :: staggerLoc
-       type(ESMF_VM)        :: vm
-       integer :: has_rh, has_iw, nentries
-       type(ESMF_TempWeights) :: tweights
-
-       ! Initialize return code; assume failure until success is certain
-       localrc = ESMF_RC_NOT_IMPL
-       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-       ! global vm for now
-       call ESMF_VMGetGlobal(vm, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Choose the stagger.  Perhaps eventually this can be more configurable,
-       ! but for now, conserve = node, bilinear = center
-       if (regridMethod .eq. ESMF_REGRID_METHOD_BILINEAR) then
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       elseif (regridMethod .eq. ESMF_REGRID_METHOD_PATCH) then
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       else
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       endif
-
-       has_rh = 1
-       has_iw = 0
-       ! Call through to the C++ object that does the work
-       call c_ESMC_regrid_create(vm, srcGrid, srcArray, staggerLoc,  &
-                   dstGrid, dstArray, staggerLoc%staggerloc, &
-                   regridMethod, regridScheme, &
-                   routehandle, has_rh, has_iw, &
-                   nentries, tweights, &
-                   localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Mark route handle created
-       call ESMF_RouteHandleSetInitCreated(routeHandle, rc)
-
-      end subroutine ESMF_RegridStoreRH
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridStoreRHIW"
-!BOPI
-! !IROUTINE: ESMF_RegridStoreRH - Precomputes Regrid data
-
-! !INTERFACE:
-      subroutine ESMF_RegridStoreRHIW(srcGrid, srcArray, &
-                 dstGrid, dstArray, &
-                 regridMethod, regridScheme, &
-                 routehandle, &
-                 indicies, weights, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(inout)         :: srcGrid
-      type(ESMF_Array), intent(inout)        :: srcArray
-      type(ESMF_Grid), intent(inout)         :: dstGrid
-      type(ESMF_Array), intent(inout)        :: dstArray
-      type(ESMF_RegridMethod), intent(in)    :: regridMethod
-      integer, intent(in)                    :: regridScheme
-      type(ESMF_RouteHandle),  intent(inout) :: routehandle
-      integer(ESMF_KIND_I4), pointer         :: indicies(:,:)
-      real(ESMF_KIND_R8), pointer            :: weights(:)
-      integer,                  intent(  out), optional :: rc
-!
-! !DESCRIPTION:
-!     The arguments are:
-!     \begin{description}
-!     \item[srcGrid]
-!          The source grid.
-!     \item[srcArray]
-!          The source grid array.
-!     \item[dstGrid]
-!          The destination grid.
-!     \item[dstArray]
-!          The destination array.
-!     \item[regridMethod]
-!          The interpolation method to use.
-!     \item[regridScheme]
-!          Whether to use 3d or native coordinates
-!     \item[routeHandle]
-!          Handle to store the resulting sparseMatrix
-!     \item[{rc}]
-!          Return code.
-!     \end{description}
-!EOPI
-       integer :: localrc
-       type(ESMF_StaggerLoc) :: staggerLoc
-       type(ESMF_VM)        :: vm
-       integer :: has_rh, has_iw, nentries
-       type(ESMF_TempWeights) :: tweights
-
-       ! Initialize return code; assume failure until success is certain
-       localrc = ESMF_RC_NOT_IMPL
-       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-       ! global vm for now
-       call ESMF_VMGetGlobal(vm, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Choose the stagger.  Perhaps eventually this can be more configurable,
-       ! but for now, conserve = node, bilinear = center
-       if (regridMethod .eq. ESMF_REGRID_METHOD_BILINEAR) then
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       elseif (regridMethod .eq. ESMF_REGRID_METHOD_PATCH) then
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       else
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       endif
-
-       has_rh = 1
-       has_iw = 1
-       ! Call through to the C++ object that does the work
-       call c_ESMC_regrid_create(vm, srcGrid, srcArray, staggerLoc,  &
-                   dstGrid, dstArray, staggerLoc%staggerloc, &
-                   regridMethod, regridScheme, &
-                   routehandle, has_rh, has_iw, &
-                   nentries, tweights, &
-                   localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Now we must allocate the F90 pointers and copy weights
-       allocate(indicies(nentries,2))
-       allocate(weights(nentries))
-
-       call c_ESMC_Copy_TempWeights(tweights, indicies(1,1), weights(1))
-
-
-       ! Mark route handle created
-       call ESMF_RouteHandleSetInitCreated(routeHandle, rc)
-
-      end subroutine ESMF_RegridStoreRHIW
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridStoreIW"
-!BOPI
-! !IROUTINE: ESMF_RegridStoreIW - Precomputes Regrid data
-
-! !INTERFACE:
-      subroutine ESMF_RegridStoreIW(srcGrid, srcArray, &
-                 dstGrid, dstArray, &
-                 regridMethod, regridScheme, &
-                 indicies, weights, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(inout)         :: srcGrid
-      type(ESMF_Array), intent(inout)        :: srcArray
-      type(ESMF_Grid), intent(inout)         :: dstGrid
-      type(ESMF_Array), intent(inout)        :: dstArray
-      type(ESMF_RegridMethod), intent(in)    :: regridMethod
-      integer, intent(in)                    :: regridScheme
-      integer(ESMF_KIND_I4), pointer         :: indicies(:,:)
-      real(ESMF_KIND_R8), pointer            :: weights(:)
-      integer,                  intent(  out), optional :: rc
-!
-! !DESCRIPTION:
-!     The arguments are:
-!     \begin{description}
-!     \item[srcGrid]
-!          The source grid.
-!     \item[srcArray]
-!          The source grid array.
-!     \item[dstGrid]
-!          The destination grid.
-!     \item[dstArray]
-!          The destination array.
-!     \item[regridMethod]
-!          The interpolation method to use.
-!     \item[regridScheme]
-!          Whether to use 3d or native coordinates
-!     \item[routeHandle]
-!          Handle to store the resulting sparseMatrix
-!     \item[{rc}]
-!          Return code.
-!     \end{description}
-!EOPI
-       integer :: localrc
-       type(ESMF_StaggerLoc) :: staggerLoc
-       type(ESMF_VM)        :: vm
-       type(ESMF_RouteHandle) :: lrouteHandle
-       integer :: has_rh, has_iw, nentries
-       type(ESMF_TempWeights) :: tweights
-
-       ! Initialize return code; assume failure until success is certain
-       localrc = ESMF_RC_NOT_IMPL
-       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-       ! global vm for now
-       call ESMF_VMGetGlobal(vm, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Choose the stagger.  Perhaps eventually this can be more configurable,
-       ! but for now, conserve = node, bilinear = center
-       if (regridMethod .eq. ESMF_REGRID_METHOD_BILINEAR) then
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       elseif (regridMethod .eq. ESMF_REGRID_METHOD_PATCH) then
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       else
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       endif
-
-       has_rh = 0
-       has_iw = 1
-       ! Call through to the C++ object that does the work
-       call c_ESMC_regrid_create(vm, srcGrid, srcArray, staggerLoc,  &
-                   dstGrid, dstArray, staggerLoc%staggerloc, &
-                   regridMethod, regridScheme, &
-                   lroutehandle, has_rh, has_iw, &
-                   nentries, tweights, &
-                   localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Now we must allocate the F90 pointers and copy weights
-       allocate(indicies(nentries,2))
-       allocate(weights(nentries))
-
-       call c_ESMC_Copy_TempWeights(tweights, indicies(1,1), weights(1))
-
-
-      end subroutine ESMF_RegridStoreIW
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridStoreMeshRH"
-!BOPI
-! !IROUTINE: ESMF_RegridStoreMeshRH - Precomputes Regrid data
-
-! !INTERFACE:
-      subroutine ESMF_RegridStoreMeshRH(srcMesh, srcArray, &
-                 dstMesh, dstArray, &
-                 regridMethod, regridScheme, &
-                 routehandle, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Mesh), intent(inout)         :: srcMesh
-      type(ESMF_Array), intent(inout)        :: srcArray
-      type(ESMF_Mesh), intent(inout)         :: dstMesh
-      type(ESMF_Array), intent(inout)        :: dstArray
-      type(ESMF_RegridMethod), intent(in)    :: regridMethod
-      integer, intent(in)                    :: regridScheme
-      type(ESMF_RouteHandle),  intent(inout) :: routehandle
-      integer,                  intent(  out), optional :: rc
-!
-! !DESCRIPTION:
-!     The arguments are:
-!     \begin{description}
-!     \item[srcMesh]
-!          The source mesh.
-!     \item[srcArray]
-!          The source grid array.
-!     \item[dstMesh]
-!          The destination mesh.
-!     \item[dstArray]
-!          The destination array.
-!     \item[regridMethod]
-!          The interpolation method to use.
-!     \item[regridScheme]
-!          Whether to use 3d or native coordinates
-!     \item[routeHandle]
-!          Handle to store the resulting sparseMatrix
-!     \item[{rc}]
-!          Return code.
-!     \end{description}
-!EOPI
-       integer :: localrc
-       type(ESMF_StaggerLoc) :: staggerLoc
-       type(ESMF_VM)        :: vm
-       integer :: has_rh, has_iw, nentries
-       type(ESMF_TempWeights) :: tweights
-
-       ! Initialize return code; assume failure until success is certain
-       localrc = ESMF_RC_NOT_IMPL
-       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-       ! global vm for now
-       call ESMF_VMGetGlobal(vm, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Choose the stagger.  Perhaps eventually this can be more configurable,
-       ! but for now, conserve = node, bilinear = center
-       if (regridMethod .eq. ESMF_REGRID_METHOD_BILINEAR) then
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       elseif (regridMethod .eq. ESMF_REGRID_METHOD_PATCH) then
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       else
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       endif
-
-       has_rh = 1
-       has_iw = 0
-       ! Call through to the C++ object that does the work
-       call c_ESMC_regrid_create_mesh(vm, srcMesh, srcArray, staggerLoc,  &
-                   dstMesh, dstArray, staggerLoc%staggerloc, &
-                   regridMethod, regridScheme, &
-                   routehandle, has_rh, has_iw, &
-                   nentries, tweights, &
-                   localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! Mark route handle created
-       call ESMF_RouteHandleSetInitCreated(routeHandle, rc)
-
-      end subroutine ESMF_RegridStoreMeshRH
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -606,6 +237,124 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridStore"
+!BOPI
+! !IROUTINE: ESMF_RegridStore - Precomputes Regrid data
+
+! !INTERFACE:
+      subroutine ESMF_RegridStore(srcMesh, srcArray, &
+                 dstMesh, dstArray, &
+                 regridMethod, regridScheme, &
+                 routehandle, &
+                 indicies, weights, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Mesh), intent(inout)         :: srcMesh
+      type(ESMF_Array), intent(inout)        :: srcArray
+      type(ESMF_Mesh), intent(inout)         :: dstMesh
+      type(ESMF_Array), intent(inout)        :: dstArray
+      type(ESMF_RegridMethod), intent(in)    :: regridMethod
+      integer, intent(in)                    :: regridScheme
+      type(ESMF_RouteHandle),  intent(inout), optional :: routehandle
+      integer(ESMF_KIND_I4), pointer, optional         :: indicies(:,:)
+      real(ESMF_KIND_R8), pointer, optional            :: weights(:)
+      integer,                  intent(  out), optional :: rc
+!
+! !DESCRIPTION:
+!     The arguments are:
+!     \begin{description}
+!     \item[srcGrid]
+!          The source grid.
+!     \item[srcArray]
+!          The source grid array.
+!     \item[dstGrid]
+!          The destination grid.
+!     \item[dstArray]
+!          The destination array.
+!     \item[regridMethod]
+!          The interpolation method to use.
+!     \item[regridScheme]
+!          Whether to use 3d or native coordinates
+!     \item[routeHandle]
+!          Handle to store the resulting sparseMatrix
+!     \item[{rc}]
+!          Return code.
+!     \end{description}
+!EOPI
+       integer :: localrc
+       type(ESMF_StaggerLoc) :: staggerLoc
+       type(ESMF_VM)        :: vm
+       integer :: has_rh, has_iw, nentries
+       type(ESMF_TempWeights) :: tweights
+
+       ! Logic to determine if valid optional args are passed.  
+
+       ! First thing to check is that indicies <=> weights
+       if (.not. (present(indicies) .eq. present(weights))) then
+         localrc = ESMF_RC_ARG_BAD
+         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
+
+       ! Next, we require that the user request at least something
+       if (.not.(present(routehandle) .or. present(indicies))) then
+         localrc = ESMF_RC_ARG_BAD
+         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
+
+       ! **************************************************
+       ! Tests passed, so proceed
+
+       ! Initialize return code; assume failure until success is certain
+       localrc = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! global vm for now
+       call ESMF_VMGetGlobal(vm, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Choose the stagger.  Perhaps eventually this can be more configurable,
+       ! but for now, conserve = node, bilinear = center
+       if (regridMethod .eq. ESMF_REGRID_METHOD_BILINEAR) then
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       elseif (regridMethod .eq. ESMF_REGRID_METHOD_PATCH) then
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       else
+         staggerLoc = ESMF_STAGGERLOC_CENTER
+       endif
+
+       has_rh = 0
+       has_iw = 0
+       if (present(routehandle)) has_rh = 1
+       if (present(indicies)) has_iw = 1
+
+       ! Call through to the C++ object that does the work
+       call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, staggerLoc,  &
+                   dstMesh%this, dstArray, staggerLoc%staggerloc, &
+                   regridMethod, regridScheme, &
+                   routehandle, has_rh, has_iw, &
+                   nentries, tweights, &
+                   localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Now we must allocate the F90 pointers and copy weights
+       if (present(indicies)) then
+         allocate(indicies(nentries,2))
+         allocate(weights(nentries))
+
+         call c_ESMC_Copy_TempWeights(tweights, indicies(1,1), weights(1))
+
+       endif
+
+
+       ! Mark route handle created
+       call ESMF_RouteHandleSetInitCreated(routeHandle, rc)
+
+      end subroutine ESMF_RegridStore
 
 
 

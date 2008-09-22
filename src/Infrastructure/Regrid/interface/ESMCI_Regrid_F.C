@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.24 2008/09/15 22:52:44 theurich Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.25 2008/09/22 19:07:40 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -66,36 +66,33 @@ extern "C" void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::InterfaceInt **factorIndexList, int *rc);
 
 extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
-                   ESMCI::Grid **gridsrcpp, ESMCI::Array **arraysrcpp, int *srcstaggerLoc,
-                   ESMCI::Grid **griddstpp, ESMCI::Array **arraydstpp, int *dststaggerLoc,
+                   Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, int *srcstaggerLoc,
+                   Mesh **meshdstpp, ESMCI::Array **arraydstpp, int *dststaggerLoc,
                    int *regridMethod, int *regridScheme,
                    ESMC_RouteHandle **rh, int *has_rh, int *has_iw,
                    int *nentries, ESMCI::TempWeights **tweights,
                              int*rc) {
   Trace __trace(" FTN(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, int *srcstaggerLoc, ESMCI::Grid **griddstcpp, int *dststaggerLoc, int*rc");
   ESMCI::VM *vm = *vmpp;
-  ESMCI::Grid &srcgrid = **gridsrcpp;
-  ESMCI::Grid &dstgrid = **griddstpp;
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
 
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
 
-  Mesh srcmesh;
-  Mesh dstmesh;
+  Mesh &srcmesh = **meshsrcpp;
+  Mesh &dstmesh = **meshdstpp;
 
   try {
 
 
+/*
     if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
       srcgrid.setSphere();
       dstgrid.setSphere();
       //std::cout << "Regrid setting sphere!!" << std::endl;
     }
-
-    ESMCI::GridToMesh(srcgrid, *srcstaggerLoc, srcmesh, std::vector<ESMCI::Array*>());
-    ESMCI::GridToMesh(dstgrid, *dststaggerLoc, dstmesh, std::vector<ESMCI::Array*>());
+*/
 
     MEField<> &scoord = *srcmesh.GetCoordField();
     MEField<> &dcoord = *dstmesh.GetCoordField();
@@ -111,7 +108,7 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
     // If a spherical grid, mesh the poles, if they exist
     IWeights pole_constraints;
-    if (srcgrid.isSphere()) {
+    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
 
       UInt constraint_id = srcmesh.DefineContext("pole_constraints");
 
@@ -153,7 +150,7 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     interp(0, wts);
 
     // Remove pole constraint by condensing out
-    if (srcgrid.isSphere()) {
+    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
 
       // Get the pole matrix on the right processors
       wts.GatherToCol(pole_constraints);

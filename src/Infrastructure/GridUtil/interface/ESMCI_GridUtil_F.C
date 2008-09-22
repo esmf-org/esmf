@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.13 2008/08/31 03:09:07 theurich Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.14 2008/09/22 19:07:39 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -112,10 +112,12 @@ extern "C" void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *
 
 }
 
-extern "C" void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, Mesh **meshpp, int *rc) {
+extern "C" void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, int *isSphere, Mesh **meshpp, int *rc) {
 
 
   ESMCI::Grid &grid = **gridpp;
+
+  if (*isSphere) grid.setSphere();
 
   Mesh *meshp = new Mesh();
 
@@ -123,8 +125,9 @@ extern "C" void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, Me
 
     std::vector<ESMCI::Array*> arrays;
     ESMCI::GridToMesh(grid, *staggerLoc, *meshp, arrays);
+//WriteMesh(*meshp, "gridtomesh");
 
-    meshpp = &meshp;
+    *meshpp = meshp;
 
   } catch(std::exception &x) {
     std::cout << "Error!!! " << " <" << x.what() << ">" << std::endl;

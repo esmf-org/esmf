@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.14 2008/09/02 20:12:56 cdeluca Exp $
+! $Id: ESMF_Mesh.F90,v 1.15 2008/09/22 19:07:40 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -58,7 +58,6 @@ module ESMF_MeshMod
   ! F90 class type to hold pointer to C++ object
   type ESMF_Mesh
   sequence
-  private
     type(ESMF_Pointer) :: this
     type(ESMF_DistGrid) :: nodal_distgrid
     type(ESMF_DistGrid) :: element_distgrid
@@ -123,7 +122,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.14 2008/09/02 20:12:56 cdeluca Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.15 2008/09/22 19:07:40 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -657,7 +656,7 @@ module ESMF_MeshMod
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    rc = localrc
+    if (present(rc)) rc = localrc
     
   end subroutine ESMF_MeshWrite
 !------------------------------------------------------------------------------

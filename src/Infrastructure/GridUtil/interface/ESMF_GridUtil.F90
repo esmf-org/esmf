@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.5 2008/08/27 19:24:15 dneckels Exp $
+! $Id: ESMF_GridUtil.F90,v 1.6 2008/09/22 19:07:39 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.5 2008/08/27 19:24:15 dneckels Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.6 2008/09/22 19:07:39 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -187,7 +187,7 @@ module ESMF_GridUtilMod
 ! !IROUTINE: ESMF_GridToMesh -- return a mesh with same topo as mesh
 !
 ! !INTERFACE:
-    function ESMF_GridToMesh(grid, staggerLoc, rc)
+    function ESMF_GridToMesh(grid, staggerLoc, isSphere, rc)
 !
 !
 ! !RETURN VALUE:
@@ -196,6 +196,7 @@ module ESMF_GridUtilMod
 ! !ARGUMENTS:
     type(ESMF_Grid), intent(inout)                :: grid
     integer,                intent(inout)         :: staggerLoc
+    integer,                intent(inout)         :: isSphere
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -204,6 +205,10 @@ module ESMF_GridUtilMod
 !   \begin{description}
 !   \item [grid]
 !         The grid to copy.
+!   \item [staggerLoc]
+!         Stagger location on grid to build.
+!   \item [isSphhere]
+!         1 = a spherical grid, build 3d mesh
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -214,11 +219,12 @@ module ESMF_GridUtilMod
     type(ESMF_Pointer) :: theMesh
 
     localrc = ESMF_SUCCESS
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
-    call c_esmc_gridtomesh(grid, staggerLoc, theMesh)
+    call c_esmc_gridtomesh(grid, staggerLoc, isSphere, theMesh, localrc)
 
     ESMF_GridToMesh = ESMF_MeshCreate(theMesh)
+
+    if (present(rc)) rc = ESMF_SUCCESS
 
     end function ESMF_GridToMesh
 
