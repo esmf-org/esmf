@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.15 2008/08/28 20:33:38 theurich Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.16 2008/09/23 21:10:46 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -378,6 +378,38 @@ extern "C" void FTN(c_esmc_meshfreememory)(Mesh **meshpp, int *rc) {
 
 extern "C" void FTN(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
+
+/**
+ * Sort nodes by the order in which they were originally declared
+ * (which is stored by get_data_index)
+ */
+void getNodeGIDS(Mesh &mesh, std::vector<int> &ngid) {
+
+  UInt nnodes = mesh.num_nodes();
+
+  Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+
+  std::vector<std::pair<int,int> > gids;
+
+  for (; ni != ne; ++ni) {
+
+    MeshObj &node = *ni;
+
+    if (!GetAttr(node).is_locally_owned()) continue;
+
+    int idx = node.get_data_index();
+
+    gids.push_back(std::make_pair(idx, node.get_id()));
+
+  }
+
+  std::sort(gids.begin(), gids.end());
+
+  ngid.clear();
+  for (UInt i = 0; i < gids.size(); ++i) ngid.push_back(gids[i].second);
+
+}
+
 extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *egrid, int *num_lnodes, int *num_lelems, int *rc) {
 
 
@@ -390,10 +422,10 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *
   std::vector<int> egids; 
   {
     Context c; c.set(Attr::OWNED_ID);
-    Attr a(MeshObj::NODE, c);
     Attr ae(MeshObj::ELEMENT, c);
 
-    getMeshGIDS(*meshp, a, ngids);
+    getNodeGIDS(*meshp, ngids);
+
     getMeshGIDS(*meshp, ae, egids);
   }
 
@@ -410,6 +442,7 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *
   {
     int nsize = *num_lnodes = ngids.size();
     int rc1;
+
     FTN(f_esmf_getmeshdistgrid)(ngrid, &nsize, &ngids[0], &rc1);
 
     ESMC_LogDefault.MsgFoundError(rc1,

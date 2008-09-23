@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshRegridEx.F90,v 1.1 2008/09/23 17:20:30 dneckels Exp $
+! $Id: ESMF_FieldMeshRegridEx.F90,v 1.2 2008/09/23 21:10:43 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -48,7 +48,7 @@ program ESMF_MeshEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.1 2008/09/23 17:20:30 dneckels Exp $'
+    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.2 2008/09/23 21:10:43 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -83,18 +83,20 @@ program ESMF_MeshEx
 !EOC
 
   type(ESMF_ArraySpec) :: arrayspec
-  type(ESMF_Array)     :: dstArray
+  type(ESMF_Array)     :: dstArray, srcArray
   type(ESMF_Field)  :: dstField, srcField
   type(ESMF_Grid) :: gridDst
   integer dst_nx, dst_ny
   integer num_arrays, lDE, localDECount
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(2),fcubnd(2)
+  integer :: clbnd1(1),cubnd1(1)
   integer :: i1,i2
 
   real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
   real(ESMF_KIND_R8), pointer :: fptrYC(:,:)
   real(ESMF_KIND_R8), pointer :: fptr(:,:)
+  real(ESMF_KIND_R8), pointer :: fptr1(:)
   real(ESMF_KIND_R8) :: dst_dx, dst_dy
 
   type(ESMF_RouteHandle) :: routeHandle
@@ -108,6 +110,9 @@ program ESMF_MeshEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   write(name, *) "Test GridToMesh"
+
+  i1 = 1
+  call C_ESMC_MeshInit("MESHRegridLOG", i1)
 
   ! init success flag
   correct=.true.
@@ -156,8 +161,8 @@ program ESMF_MeshEx
   ! VTK reads coordinates as 3d, but mesh interface expects them to be
   ! of the same dim as the spatial dim of mesh
   do i =1,num_node
-    nodeCoord1(2*i) = nodeCoord(3*i)
-    nodeCoord1(2*i+1) = nodeCoord(3*i+1)
+    nodeCoord1(2*(i-1)+1) = nodeCoord(3*(i-1)+1)
+    nodeCoord1(2*(i-1)+2) = nodeCoord(3*(i-1)+2)
   enddo
 
 !BOE
@@ -266,10 +271,29 @@ program ESMF_MeshEx
 
   enddo    ! lDE
 
-  call ESMF_MeshIO(vm, gridDst, ESMF_STAGGERLOC_CENTER, &
-               "srcmesh", dstArray, rc=localrc)
+
+  ! Load a function on the mesh.  This is a bit weird.  In reality, the
+  ! user has their own data structure and fills out srcField.  Here we
+  ! use nodeCoords1 and fill out the fill, since the mesh api guarentees
+  ! that the ordering of the field will match that of the declaration
+  ! (something I just added).
+  call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+  lDE = 0
+  call ESMF_FieldGet(srcField, lDE, fptr1, computationalLBound=clbnd1, &
+                          computationalUBound=cubnd1,  rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  print *, 'cbnd', clbnd1(1), cubnd1(1)
+  do i=clbnd1(1),cubnd1(1)
+
+    x = nodeCoord1(2*(i-1)+1)
+    y = nodeCoord1(2*(i-1)+2)
+
+    fptr1(i) = sin(x) + cos(2*x*y)
+
+  enddo
 
   ! Form the regrid operator
   call ESMF_FieldRegridStore(srcField, dstField, routeHandle, &
@@ -277,6 +301,18 @@ program ESMF_MeshEx
                              rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+  ! Apply the regrid operator
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  ! Write out the mesh
+  call ESMF_MeshIO(vm, gridDst, ESMF_STAGGERLOC_CENTER, &
+               "dstmesh", dstArray, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  ! Release the operator
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! clean up
   call ESMF_MeshDestroy(meshSrc, rc)
