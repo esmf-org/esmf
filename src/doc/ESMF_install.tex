@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.70 2008/09/23 01:07:36 w6ws Exp $
+% $Id: ESMF_install.tex,v 1.71 2008/09/23 19:33:12 w6ws Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -288,12 +288,15 @@ Possible value: {\em flag}
 This variable can be used to override the default C++ optimization flag.
 
 \item[ESMF\_DEFER\_LIB\_BUILD]
-Possible value: {\em NO}
+Possible value: {\em ON} (default), {\em OFF}
 
 This variable can be used to override the deferring of the build of the
 ESMF library.  By default, the library is built after all of the source
-files have been compiled.  Setting this environment variable forces the library
-to be updated after each individual compilation.
+files have been compiled.  This speeds up the build process, and also
+allows parallel compilation of source code when the -j flag is used with
+gmake.  Setting this environment variable to OFF forces the library to
+be updated after each individual compilation, thus disabling the ability
+to use parallel compilation.
 
 \item[ESMF\_DIR]
 Possible value: {\em absolute path}
@@ -596,7 +599,11 @@ parallel processes to build the library, use -j8:
   gmake -j8 lib
 \end{verbatim}
 
-The -j flag should only be used during the creation of the library.
+The parallel compilation feature depends on ESMF\_DEFER\_LIB\_BUILD=ON (the
+default) so that the library build will be deferred until all files
+have been compiled.
+
+The -j option should only be used during the creation of the library.
 The test base and examples will not work correctly with -j set larger
 than 1.
 
