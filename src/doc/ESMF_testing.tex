@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.26 2008/07/23 04:51:57 theurich Exp $
+% $Id: ESMF_testing.tex,v 1.27 2008/09/23 18:36:47 theurich Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
@@ -215,11 +215,19 @@ The results of the unit tests will be in:
 At the end of unit test execution a script runs to analyze the results.
 
 The script output indicates whether there are any unit test failures.
+If any unit tests fail, please check if the failures are listed as known bugs in the ESMF release
+page \htmladdnormallink{http://www.esmf.ucar.edu/download/releases.shtml}{http://www.esmf.ucar.edu/download/releases.shtml}
+for your platform and compiler.
+If the failures are not listed please contact ESMF Support at \htmladdnormallink{esmf\_support@ucar.edu}
+{mailto:esmf\_support@ucar.edu}
+Please indicate which unit tests are failing, and attach the output of the "gmake info" command to the email.
+
+
+The script output indicates whether there are any unit test failures.
 The following is a sample from the script output:
 
 \begin{verbatim}
 
-There are a total of 1224 exhaustive multi processor unit tests, 1220 pass and 4 fail.
 
 The unit tests in the following files all pass:
 
@@ -278,6 +286,9 @@ The following individual unit tests fail:
 
 The stdout files for the unit tests can be found at:
 /home/bluedawn/svasquez/script_dirs/daily_builds/esmf/test/testO/AIX.default.64.default
+
+Found 1224 exhaustive multi processor unit tests, 1220 pass and 4 fail.
+
 
 \end{verbatim}
 
@@ -357,11 +368,21 @@ The results will be in:
 
 At the end of system test execution a script runs to analyze the results.
 
+
+The script output indicates whether there are any system test failures.
+If any system tests fail, please check if the failures are listed as known bugs in the ESMF release
+page \htmladdnormallink{http://www.esmf.ucar.edu/download/releases.shtml}{http://www.esmf.ucar.edu/download/releases.shtml}
+for your platform and compiler.
+If the failures are not listed please contact ESMF Support at \htmladdnormallink{esmf\_support@ucar.edu}
+{mailto:esmf\_support@ucar.edu}
+Please indicate which system tests are failing, and attach the output of the "gmake info" command to the email.
+
+
+
 The script output indicates whether there are any system test failures.
 The following is a sample from the script output:
 
 \begin{verbatim}
-There are 14 system tests, 12 passed and 2 failed.
 
 
 The following system tests passed:
@@ -392,6 +413,9 @@ src/system_tests/ESMF_RowReduce/ESMF_RowReduceSTest.F90
 
 The stdout files for the system_tests can be found at:
 /home/bluedawn/svasquez/script_dirs/daily_builds/esmf/test/testO/AIX.default.64.default
+
+Found 14 system tests, 12 passed and 2 failed.
+
 
 \end{verbatim}
 
