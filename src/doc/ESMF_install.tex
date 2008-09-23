@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.69 2008/09/22 19:34:53 w6ws Exp $
+% $Id: ESMF_install.tex,v 1.70 2008/09/23 01:07:36 w6ws Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -588,6 +588,17 @@ libraries are rebuilt only if necessary. In addition the entire ESMF
 framework may be built from any directory by entering {\tt gmake all},
 assuming that all the environmental variables are set correctly as
 described in Section~\ref{EnvironmentVariables}.
+
+The makefiles are also configured to allow multiple make targets to be
+compiled in parallel, via the gmake -j flag.  For example, to use eight
+parallel processes to build the library, use -j8:
+\begin{verbatim}
+  gmake -j8 lib
+\end{verbatim}
+
+The -j flag should only be used during the creation of the library.
+The test base and examples will not work correctly with -j set larger
+than 1.
 
 Users may also run examples or execute unit tests of specific classes
 by changing directories to the desired class {\tt examples} or {\tt tests} 
