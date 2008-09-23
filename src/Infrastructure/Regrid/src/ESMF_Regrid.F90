@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.132 2008/09/22 19:07:40 dneckels Exp $
+! $Id: ESMF_Regrid.F90,v 1.133 2008/09/23 16:17:22 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.132 2008/09/22 19:07:40 dneckels Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.133 2008/09/23 16:17:22 dneckels Exp $'
 
 !==============================================================================
 !
@@ -159,6 +159,26 @@
 !==============================================================================
 
       contains
+
+function my_xor(a, b)
+    logical                                       :: my_xor
+    logical,                intent(in)         :: a
+    logical,                intent(in)         :: b
+
+    if (a .and. b) then
+      my_xor = .false.
+      return
+    endif
+
+    if (.not.(a .or. b)) then
+      my_xor = .false.
+      return
+    endif
+
+    my_xor = .true.
+
+end function my_xor
+
 
 !==============================================================================
 !
@@ -291,7 +311,7 @@
        ! Logic to determine if valid optional args are passed.  
 
        ! First thing to check is that indicies <=> weights
-       if (.not. (present(indicies) .eq. present(weights))) then
+       if (my_xor(present(indicies), present(weights))) then
          localrc = ESMF_RC_ARG_BAD
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
