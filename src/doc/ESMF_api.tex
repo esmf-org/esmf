@@ -298,11 +298,23 @@ the set of DEs over which the object is distributed.  Data
 indices start with the first element on the first DE, and
 continue across all the elements in the sequence of DEs.
 The last data index represents the number of elements in the
-entire object.
+entire object.  The DistGrid provides the mapping between
+local and global data indices.
 
 The convention in ESMF is that entities with a global view
 have no prefix.  Entities with a DE-local (and in some cases,
 PET-local) view have the prefix ``local.''
+
+Just as data is distributed over DEs, DEs themselves can be
+distributed over PETs.  This is an advanced feature for users
+who would like to create multiple local chunks of data, for
+algorithmic or performance reasons.
+Local DEs are those DEs that are located on the local PET.
+Local DE labeling always starts at 0 and goes to localDeCount-1,
+where localDeCount is the number of DEs on the local PET.
+Global DE numbers also start at 0 and go to deCount-1.
+The DELayout class provides the mapping between local
+and global DE numbers. 
 
 \subsection{Allocation Rules}
 
