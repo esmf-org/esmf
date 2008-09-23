@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.6 2008/09/22 19:07:39 dneckels Exp $
+! $Id: ESMF_GridUtil.F90,v 1.7 2008/09/23 17:20:35 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.6 2008/09/22 19:07:39 dneckels Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.7 2008/09/23 17:20:35 dneckels Exp $'
 
 !==============================================================================
 ! 
@@ -82,7 +82,6 @@ module ESMF_GridUtilMod
 !==============================================================================
 
       contains
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshIO()"
@@ -179,6 +178,7 @@ module ESMF_GridUtilMod
 
   end subroutine ESMF_MeshIO
 !------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.38 2008/08/29 17:28:41 dneckels Exp $ 
+# $Id: makefile,v 1.39 2008/09/23 17:20:30 dneckels Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -20,7 +20,8 @@ LOCDIR	  = src/Infrastructure/Field/examples
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
                  $(ESMF_EXDIR)/ESMF_FieldEx \
                  $(ESMF_EXDIR)/ESMF_FieldRegridEx \
-                 $(ESMF_EXDIR)/ESMF_FieldSphereRegridEx 
+                 $(ESMF_EXDIR)/ESMF_FieldSphereRegridEx \
+                 $(ESMF_EXDIR)/ESMF_FieldMeshRegridEx 
 #                 $(ESMF_EXDIR)/ESMF_FieldGetEx
 #                 $(ESMF_EXDIR)/ESMF_FieldSetEx
 #                 $(ESMF_EXDIR)/ESMF_FieldFromUserEx \

@@ -1,0 +1,297 @@
+! $Id: ESMF_FieldMeshRegridEx.F90,v 1.1 2008/09/23 17:20:30 dneckels Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2008, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+!
+program ESMF_MeshEx
+
+!==============================================================================
+!ESMF_EXAMPLE        String used by test script to count examples.
+!==============================================================================
+
+!BOE
+! \subsubsection{Example: Create a Mesh}~\label{sec:usage:ex:adv:reg}
+!
+! This example uses the mesh creation API to create a mesh, and then to create
+! a field on the mesh.
+!EOE
+
+!  !PROGRAM: ESMF_MeshEx - Example of Mesh creation.
+!
+!  !DESCRIPTION: 
+!
+! This program shows examples of Mesh creation
+
+
+
+#include <ESMF_Macros.inc>
+
+! !USES:
+  use ESMF_Mod
+  use ESMF_TestMod     ! test methods
+  use ESMF_MeshMod
+  use ESMF_RegridMod
+  use ESMF_FieldMod
+  use ESMF_GridUtilMod
+
+  use ESMF_FieldGetMod
+
+  implicit none
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+  character(*), parameter :: version = &
+    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.1 2008/09/23 17:20:30 dneckels Exp $'
+!------------------------------------------------------------------------------
+    
+  ! cumulative result: count failures; no failures equals "all pass"
+  integer :: result = 0
+
+  ! individual test result code
+  integer :: finalrc, rc, petCount,localPet,localrc
+
+  ! individual test failure message
+  character(ESMF_MAXSTR) :: name, failMsg
+
+  logical :: correct
+  type(ESMF_VM) :: vm
+  type(ESMF_Mesh) :: meshSrc
+  integer :: num_elem, num_node, conn_size
+  integer :: i
+  real(ESMF_KIND_R8) :: ctheta, stheta
+  real(ESMF_KIND_R8) :: theta, d2rad, xtmp, x, y
+
+
+!BOE
+! The following arrays are used to declare the mesh to the ESMF framework.
+!EOE
+!BOC
+  integer, allocatable :: nodeId(:)
+  real(ESMF_KIND_R8), allocatable :: nodeCoord(:), nodeCoord1(:)
+  integer, allocatable :: nodeOwner(:)
+
+  integer, allocatable :: elemId(:)
+  integer, allocatable :: elemType(:)
+  integer, allocatable :: elemConn(:)
+!EOC
+
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_Array)     :: dstArray
+  type(ESMF_Field)  :: dstField, srcField
+  type(ESMF_Grid) :: gridDst
+  integer dst_nx, dst_ny
+  integer num_arrays, lDE, localDECount
+  integer :: clbnd(2),cubnd(2)
+  integer :: fclbnd(2),fcubnd(2)
+  integer :: i1,i2
+
+  real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
+  real(ESMF_KIND_R8), pointer :: fptrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: fptr(:,:)
+  real(ESMF_KIND_R8) :: dst_dx, dst_dy
+
+  type(ESMF_RouteHandle) :: routeHandle
+
+
+
+  finalrc = ESMF_SUCCESS
+  call  ESMF_Initialize(vm=vm, rc=rc)
+
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  write(name, *) "Test GridToMesh"
+
+  ! init success flag
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+!BOE
+! \subsubsection{Mesh Creation as a three step process}
+!
+! Here we create a mesh first by defining the mesh structure, then adding
+! nodes (with node coordinates) and finally adding the element types and
+! connectivities.
+! 
+! The benefit of having this as a three step process is that the node arrays
+! may be freed (if desired) before creating and using the element arrays. This
+! may be desirable in a low-memory scenario.
+!EOE
+!BOC
+!EOC
+
+  call C_ESMC_MeshVTKHeader("data/testmesh1", num_elem, num_node, conn_size, rc)
+!BOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  ! Allocate the arrays to describe Mesh
+
+  allocate(nodeId(num_node))
+  allocate(nodeCoord(3*num_node))
+  allocate(nodeCoord1(2*num_node))
+  allocate(nodeOwner(num_node))
+
+  allocate(elemId(num_elem))
+  allocate(elemType(num_elem))
+  allocate(elemConn(conn_size))
+
+
+  ! Get the arrays from the test mesh
+  call C_ESMC_MeshVTKBody("data/testmesh1", nodeId(1), nodeCoord(1), nodeOwner(1), &
+          elemId(1), elemType(1), elemConn(1), rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  ! VTKBody returns zero based elemConn, so make them 1 based
+  do i=1, conn_size
+    elemConn(i) = elemConn(i)+1
+  enddo
+
+  ! VTK reads coordinates as 3d, but mesh interface expects them to be
+  ! of the same dim as the spatial dim of mesh
+  do i =1,num_node
+    nodeCoord1(2*i) = nodeCoord(3*i)
+    nodeCoord1(2*i+1) = nodeCoord(3*i+1)
+  enddo
+
+!BOE
+! Now create the mesh
+!EOE
+!BOC
+  meshSrc = ESMF_MeshCreate(2,2,nodeId, nodeCoord1, nodeOwner, &
+                           elemId, elemType, elemConn, rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! Here we create a field that lives on the nodes of the mesh.
+!
+! Create a field on the Mesh
+!EOE
+!BOC
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc)
+
+  srcField = ESMF_FieldCreate(meshSrc, arrayspec, &
+         name="test_var", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  !call ESMF_FieldPrint(srcField)
+
+
+  ! Done with node arrays, zap.  We are going to keep
+  ! the nodeCoord around so we can assign a function to
+  ! the ESMF_Field.
+  deallocate(nodeId)
+  deallocate(nodeOwner)
+
+  ! free the element arrays
+  deallocate(elemId)
+  deallocate(elemType)
+  deallocate(elemConn)
+
+
+  ! Set up a grid
+  dst_nx = 75
+  dst_ny = 50
+  dst_dx = 1.0 / (REAL(dst_nx)-1)
+  dst_dy = 1.0 / (REAL(dst_ny)-1)
+
+  gridDst=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/petCount,1/), &
+                              gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  ! Create destination fields
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+   dstField = ESMF_FieldCreate(gridDst, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dst", &
+                         rc=localrc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_GridAddCoord(gridDst, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+  ! Get number of local DEs
+  call ESMF_GridGet(gridDst, localDECount=localDECount, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+
+  ! Get memory and set coords for dst
+  do lDE=0,localDECount-1
+ 
+     !! get coord 1
+     call ESMF_GridGetCoord(gridDst, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+     if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+     call ESMF_GridGetCoord(gridDst, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+     if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+     call ESMF_FieldGet(dstField, lDE, fptr, computationalLBound=fclbnd, &
+                             computationalUBound=fcubnd,  rc=localrc)
+     if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+    if (clbnd(1) .ne. fclbnd(1)) print *, 'Error clbnd != fclbnd'
+    if (clbnd(2) .ne. fclbnd(2)) print *, 'Error clbnd != fclbnd'
+    if (cubnd(1) .ne. fcubnd(1)) print *, 'Error cubnd != fcubnd'
+    if (cubnd(2) .ne. fcubnd(2)) print *, 'Error cubnd != fcubnd'
+
+     !! set coords 
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        x = REAL((i1-1)*dst_dx)
+        y = REAL((i2-1)*dst_dy)
+        fptrXC(i1,i2) = x
+        fptrYC(i1,i2) = y
+
+        fptr(i1,i2) = 0.    ! set destination field to zero
+     enddo
+     enddo
+
+     ! Set field values
+
+  enddo    ! lDE
+
+  call ESMF_MeshIO(vm, gridDst, ESMF_STAGGERLOC_CENTER, &
+               "srcmesh", dstArray, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+  ! Form the regrid operator
+  call ESMF_FieldRegridStore(srcField, dstField, routeHandle, &
+                             regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+                             rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+
+  ! clean up
+  call ESMF_MeshDestroy(meshSrc, rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+10   continue
+  call ESMF_Finalize(rc=rc)
+
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (finalrc==ESMF_SUCCESS) then
+    print *, "PASS: ESMF_FieldMeshRegridEx.F90"
+  else
+    print *, "FAIL: ESMF_FieldMeshRegridEx.F90"
+  endif
+
+
+
+end program ESMF_MeshEx
