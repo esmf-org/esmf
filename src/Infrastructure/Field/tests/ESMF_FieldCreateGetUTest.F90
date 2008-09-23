@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.24 2008/09/21 05:59:32 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.25 2008/09/23 20:52:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1543,6 +1543,14 @@
         call test_eric_klusek(rc)
         write(failMsg, *) ""
         write(name, *) "Testing Eric Klusek's case #852717"
+        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !NEX_UTest_Multi_Proc_Only
+        ! Creating a field from uninitialized array returns failure #1704598
+        call test_uninit_array(rc)
+        write(failMsg, *) ""
+        write(name, *) "Testing field create from uninit array"
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
@@ -4332,6 +4340,36 @@ contains
 
     end subroutine test_eric_klusek
 
+!----------------------------------------------------------------------------------
+    subroutine test_uninit_array(rc)
+
+        integer, intent(out)                :: rc
+
+        type(ESMF_Array)                    :: array
+        type(ESMF_Field)                    :: field
+        type(ESMF_DistGrid)                 :: distgrid
+        type(ESMF_Grid)                     :: grid
+        integer                             :: localrc
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        distgrid = ESMF_DistGridCreate(minIndex=(/1, 1/), maxIndex=(/10, 10/), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        
+        grid = ESMF_GridCreate(distgrid=distgrid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        field = ESMF_FieldCreate(grid, array, copyflag=ESMF_DATA_COPY, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+    end subroutine test_uninit_array
 
 
     subroutine test_globalindex(rc)
