@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.1.2.16 2008/08/28 22:17:41 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.1.2.17 2008/09/23 05:48:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -43,15 +43,15 @@
 
 namespace ESMCI {
 
-// classes and structs
+  // classes and structs
 
-class Array;
-struct SeqIndex;
+  class Array;
+  struct SeqIndex;
 
-// class definition
-class Array : public ESMC_Base {    // inherits from ESMC_Base class
+  // class definition
+  class Array : public ESMC_Base {    // inherits from ESMC_Base class
   
-  private:
+   private:
     // global information
     ESMC_TypeKind typekind;
     int rank;
@@ -102,7 +102,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
     bool distgridCreator;
     DELayout *delayout;
     
-  public:
+   public:
     // constructor and destructor
     Array(){
       typekind = ESMF_NOKIND;
@@ -129,7 +129,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       exclusiveElementCountPDe = NULL;
       totalElementCountPLocalDe = NULL;
     }
-  private:
+   private:
     Array(ESMC_TypeKind typekind, int rank, ESMC_LocalArray **larrayList,
       DistGrid *distgrid, bool distgridCreator, int *exclusiveLBound,
       int *exclusiveUBound, int *computationalLBound, int *computationalUBound,
@@ -138,7 +138,7 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       int *staggerLoc, int *vectorDim, int *distgridToArrayMapArray,
       int *arrayToDistGridMapArray, int *distgridToPackedArrayMapArray,
       ESMC_IndexFlag indexflagArg, int *rc);
-  public:
+   public:
     ~Array();
     // create() and destroy()
     static Array *create(ESMC_LocalArray **larrayList, int larrayCount,
@@ -237,23 +237,12 @@ class Array : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_Logical checkflag=ESMF_FALSE);
     static int sparseMatMulRelease(ESMC_RouteHandle *routehandle);
     
-};  // class Array
+  };  // class Array
 
-struct SeqIndex{
-  int decompSeqIndex;
-  int tensorSeqIndex;
-  static int cmp(const void *a, const void *b){
-    SeqIndex *aObj = (SeqIndex *)a;
-    SeqIndex *bObj = (SeqIndex *)b;
-    if (aObj->decompSeqIndex < bObj->decompSeqIndex) return -1;
-    if (aObj->decompSeqIndex > bObj->decompSeqIndex) return +1;
-    // decompSeqIndex must be equal
-    if (aObj->tensorSeqIndex < bObj->tensorSeqIndex) return -1;
-    if (aObj->tensorSeqIndex > bObj->tensorSeqIndex) return +1;
-    // tensorSeqIndex must be equal
-    return 0;
-  }
-};  // struct seqIndex
+  struct SeqIndex{
+    int decompSeqIndex;
+    int tensorSeqIndex;
+  };  // struct seqIndex
 
 } // namespace ESMCI
 
