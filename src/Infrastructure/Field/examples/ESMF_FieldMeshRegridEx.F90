@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshRegridEx.F90,v 1.3 2008/09/24 22:40:03 dneckels Exp $
+! $Id: ESMF_FieldMeshRegridEx.F90,v 1.4 2008/09/24 22:49:25 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -48,7 +48,7 @@ program ESMF_MeshEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.3 2008/09/24 22:40:03 dneckels Exp $'
+    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.4 2008/09/24 22:49:25 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -166,7 +166,12 @@ program ESMF_MeshEx
   enddo
 
   ! VTK reads coordinates as 3d, but mesh interface expects them to be
-  ! of the same dim as the spatial dim of mesh
+  ! of the same dim as the spatial dim of mesh, which I am declaring as
+  ! 2d here so that it matches with the grid.
+  ! There is nothing wrong with having the parametric dim of the mesh
+  ! be 2 and the spatial to be 3.  In math we call this a manifold.
+  ! The library supports regridding between manifolds and from a 3d
+  ! mesh to a manifold.
   do i =1,num_node
     nodeCoord1(2*(i-1)+1) = nodeCoord(3*(i-1)+1)
     nodeCoord1(2*(i-1)+2) = nodeCoord(3*(i-1)+2)
@@ -283,6 +288,8 @@ program ESMF_MeshEx
   ! use nodeCoords1 and fill out the fill, since the mesh api guarentees
   ! that the ordering of the field will match that of the declaration
   ! (something I just added).
+  ! We skip non-locally owned nodes, since the field stores only the
+  ! locally owned indicies.
   call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -330,6 +337,13 @@ program ESMF_MeshEx
   ! clean up
   call ESMF_MeshDestroy(meshSrc, rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_GridDestroy(gridDst, rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  deallocate(nodeCoord)
+  deallocate(nodeCoord1)
+  deallocate(nodeOwner)
 
 10   continue
   call ESMF_Finalize(rc=rc)
