@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.11 2008/09/17 22:15:23 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.12 2008/09/24 20:43:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.11 2008/09/17 22:15:23 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.12 2008/09/24 20:43:59 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3413,39 +3413,39 @@ int XXE::print(
     case sendnb:
       {
         xxeSendnbInfo = (SendnbInfo *)xxeElement;
-        printf("XXE::sendnb: <localPet=%d> buffer=%p, size=%d, dst=%d, "
+        printf("XXE::sendnb: <localPet=%d> buffer=%p, size=%d, dst=%d, tag=%d, "
           "commhandle=%p\n", vm->getLocalPet(),
           xxeSendnbInfo->buffer, xxeSendnbInfo->size, xxeSendnbInfo->dstPet,
-          xxeSendnbInfo->commhandle);
+          xxeSendnbInfo->tag, xxeSendnbInfo->commhandle);
       }
       break;
     case recvnb:
       {
         xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
-        printf("XXE::recvnb: <localPet=%d> buffer=%p, size=%d, src=%d, "
+        printf("XXE::recvnb: <localPet=%d> buffer=%p, size=%d, src=%d, tag=%d, "
           "commhandle=%p\n", vm->getLocalPet(),
           xxeRecvnbInfo->buffer, xxeRecvnbInfo->size, xxeRecvnbInfo->srcPet,
-          xxeRecvnbInfo->commhandle);
+          xxeRecvnbInfo->tag, xxeRecvnbInfo->commhandle);
       }
       break;
     case sendnbRRA:
       {
         xxeSendnbRRAInfo = (SendnbRRAInfo *)xxeElement;
         printf("XXE::sendnbRRA: <localPet=%d> rraOffset=%d, size=%d, dst=%d, "
-          " rraIndex=%d, commhandle=%p\n", vm->getLocalPet(),
+          "rraIndex=%d, tag=%d, commhandle=%p\n", vm->getLocalPet(),
           xxeSendnbRRAInfo->rraOffset, xxeSendnbRRAInfo->size,
           xxeSendnbRRAInfo->dstPet, xxeSendnbRRAInfo->rraIndex,
-          xxeSendnbRRAInfo->commhandle);
+          xxeSendnbRRAInfo->tag, xxeSendnbRRAInfo->commhandle);
       }
       break;
     case recvnbRRA:
       {
         xxeRecvnbRRAInfo = (RecvnbRRAInfo *)xxeElement;
         printf("XXE::recvnbRRA: <localPet=%d> rraOffset=%d, size=%d, src=%d, "
-          "rraIndex=%d, commhandle=%p\n", vm->getLocalPet(),
+          "rraIndex=%d, tag=%d, commhandle=%p\n", vm->getLocalPet(),
           xxeRecvnbRRAInfo->rraOffset, xxeRecvnbRRAInfo->size,
           xxeRecvnbRRAInfo->srcPet, xxeRecvnbRRAInfo->rraIndex,
-          xxeRecvnbRRAInfo->commhandle);
+          xxeRecvnbRRAInfo->tag, xxeRecvnbRRAInfo->commhandle);
       }
       break;
     case waitOnIndex:
