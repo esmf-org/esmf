@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.36 2008/09/23 20:28:47 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.37 2008/09/24 00:25:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.36 2008/09/23 20:28:47 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.37 2008/09/24 00:25:08 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -5329,7 +5329,7 @@ int Array::sparseMatMulStore(
   int *srcLocalElementsPerIntervalCount = new int[petCount];
   {
     // prepare temporary seqIndexList for sorting
-    int *seqIndexList = new int[srcElementCount];
+    vector<int> seqIndexList(srcElementCount);
     int jj=0;
     for (int j=0; j<srcLocalDeCount; j++){
       for (int k=0; k<srcLocalDeElementCount[j]; k++){
@@ -5337,7 +5337,7 @@ int Array::sparseMatMulStore(
         ++jj;
       }
     }
-    sort(seqIndexList, seqIndexList+srcElementCount);
+    sort(seqIndexList.begin(), seqIndexList.end());
     jj=0;
     for (int i=0; i<petCount; i++){
       int seqIndexMax = srcSeqIndexInterval[i].max;
@@ -5348,7 +5348,6 @@ int Array::sparseMatMulStore(
       }
       srcLocalElementsPerIntervalCount[i] = count;
     }
-    delete [] seqIndexList;
   }
   
   int *srcLocalIntervalPerPetCount = new int[petCount];
@@ -5427,7 +5426,7 @@ int Array::sparseMatMulStore(
   int *dstLocalElementsPerIntervalCount = new int[petCount];
   {
     // prepare temporary seqIndexList for sorting
-    int *seqIndexList = new int[dstElementCount];
+    vector<int> seqIndexList(dstElementCount);
     int jj=0;
     for (int j=0; j<dstLocalDeCount; j++){
       for (int k=0; k<dstLocalDeElementCount[j]; k++){
@@ -5435,7 +5434,7 @@ int Array::sparseMatMulStore(
         ++jj;
       }
     }
-    sort(seqIndexList, seqIndexList+dstElementCount);
+    sort(seqIndexList.begin(), seqIndexList.end());
     jj=0;
     for (int i=0; i<petCount; i++){
       int seqIndexMax = dstSeqIndexInterval[i].max;
@@ -5446,7 +5445,6 @@ int Array::sparseMatMulStore(
       }
       dstLocalElementsPerIntervalCount[i] = count;
     }
-    delete [] seqIndexList;
   }
   
   int *dstLocalIntervalPerPetCount = new int[petCount];

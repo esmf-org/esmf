@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.1.2.17 2008/09/23 05:48:25 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.1.2.18 2008/09/24 00:25:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -243,7 +243,9 @@ namespace ESMCI {
     int decompSeqIndex;
     int tensorSeqIndex;
   };  // struct seqIndex
-
+  bool operator==(SeqIndex a, SeqIndex b);
+  bool operator<(SeqIndex a, SeqIndex b);
+  
 } // namespace ESMCI
 
 
