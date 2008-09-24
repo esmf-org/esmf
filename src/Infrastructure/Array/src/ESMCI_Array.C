@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.28 2008/09/18 17:27:30 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.29 2008/09/24 04:15:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -27,8 +27,10 @@
 #include "ESMCI_Array.h"
 
 // include higher level, 3rd party or system headers
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
+#include <vector>
+#include <algorithm>
 
 // include ESMF headers
 #include "ESMC_Start.h"
@@ -37,11 +39,12 @@
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 
+using namespace std;
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.28 2008/09/18 17:27:30 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.29 2008/09/24 04:15:33 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4051,18 +4054,46 @@ int Array::redistRelease(
 //-----------------------------------------------------------------------------
 
 
+//-----------------------------------------------------------------------------
+bool operator==(SeqIndex a, SeqIndex b){
+  if (a.decompSeqIndex == b.decompSeqIndex) return true;
+  // decompSeqIndex must not be equal
+  return (a.tensorSeqIndex == b.tensorSeqIndex);
+}
+bool operator<(SeqIndex a, SeqIndex b){
+  if (a.decompSeqIndex < b.decompSeqIndex) return true;
+  if (a.decompSeqIndex > b.decompSeqIndex) return false;
+  // decompSeqIndex must be equal
+  return (a.tensorSeqIndex < b.tensorSeqIndex);
+}
+//-----------------------------------------------------------------------------
+
+
 namespace ArrayHelper{
   
-  // compare two integers
-  int cmpInt(const void *a, const void *b){
-    int aa = *(int *)a;
-    int bb = *(int *)b;
-    if (aa<bb)
-      return -1;
-    else if (aa>bb)
-      return +1;
-    // must be equal
-    return 0;
+  struct DstInfo{
+    int linIndex;
+    SeqIndex seqIndex;
+    SeqIndex partnerSeqIndex;
+    int localDeFactorListIndex;
+  };
+  bool operator<(DstInfo a, DstInfo b){
+    if (a.partnerSeqIndex == b.partnerSeqIndex)
+      return (a.seqIndex < b.seqIndex);
+    else
+      return (a.partnerSeqIndex < b.partnerSeqIndex);
+  }
+
+  struct SrcInfo{
+    int linIndex;
+    SeqIndex seqIndex;
+    SeqIndex partnerSeqIndex;
+  };
+  bool operator<(SrcInfo a, SrcInfo b){
+    if (a.seqIndex == b.seqIndex)
+      return (a.partnerSeqIndex < b.partnerSeqIndex);
+    else
+      return (a.seqIndex < b.seqIndex);
   }
   
   // more efficient allocation scheme for many little pieces of memory
@@ -5306,7 +5337,7 @@ int Array::sparseMatMulStore(
   int *srcLocalElementsPerIntervalCount = new int[petCount];
   {
     // prepare temporary seqIndexList for sorting
-    int *seqIndexList = new int[srcElementCount];
+    vector<int> seqIndexList(srcElementCount);
     int jj=0;
     for (int j=0; j<srcLocalDeCount; j++){
       for (int k=0; k<srcLocalDeElementCount[j]; k++){
@@ -5314,7 +5345,7 @@ int Array::sparseMatMulStore(
         ++jj;
       }
     }
-    qsort(seqIndexList, srcElementCount, sizeof(int), ArrayHelper::cmpInt);
+    sort(seqIndexList.begin(), seqIndexList.end());
     jj=0;
     for (int i=0; i<petCount; i++){
       int seqIndexMax = srcSeqIndexInterval[i].max;
@@ -5325,7 +5356,6 @@ int Array::sparseMatMulStore(
       }
       srcLocalElementsPerIntervalCount[i] = count;
     }
-    delete [] seqIndexList;
   }
   
   int *srcLocalIntervalPerPetCount = new int[petCount];
@@ -5404,7 +5434,7 @@ int Array::sparseMatMulStore(
   int *dstLocalElementsPerIntervalCount = new int[petCount];
   {
     // prepare temporary seqIndexList for sorting
-    int *seqIndexList = new int[dstElementCount];
+    vector<int> seqIndexList(dstElementCount);
     int jj=0;
     for (int j=0; j<dstLocalDeCount; j++){
       for (int k=0; k<dstLocalDeElementCount[j]; k++){
@@ -5412,7 +5442,7 @@ int Array::sparseMatMulStore(
         ++jj;
       }
     }
-    qsort(seqIndexList, dstElementCount, sizeof(int), ArrayHelper::cmpInt);
+    sort(seqIndexList.begin(), seqIndexList.end());
     jj=0;
     for (int i=0; i<petCount; i++){
       int seqIndexMax = dstSeqIndexInterval[i].max;
@@ -5423,7 +5453,6 @@ int Array::sparseMatMulStore(
       }
       dstLocalElementsPerIntervalCount[i] = count;
     }
-    delete [] seqIndexList;
   }
   
   int *dstLocalIntervalPerPetCount = new int[petCount];
@@ -7129,22 +7158,7 @@ int sparseMatMulStoreEncodeXXE(
   int *diffPartnerDeCount = new int[dstLocalDeCount];
   int **recvnbIndex = new int*[dstLocalDeCount];
   int **partnerDeCount = new int*[dstLocalDeCount];
-  struct DstInfo{
-    int linIndex;
-    SeqIndex seqIndex;
-    SeqIndex partnerSeqIndex;
-    int localDeFactorListIndex;
-    static int cmp(const void *a, const void *b){
-      DstInfo *aObj = (DstInfo *)a;
-      DstInfo *bObj = (DstInfo *)b;
-      int cmpValue =
-        SeqIndex::cmp(&(aObj->partnerSeqIndex), &(bObj->partnerSeqIndex));
-      if (cmpValue != 0) return cmpValue;
-      // partnerSeqIndex must be equal
-      return SeqIndex::cmp(&(aObj->seqIndex), &(bObj->seqIndex));
-    }
-  };
-  DstInfo ***dstInfoTable = new DstInfo**[dstLocalDeCount];
+  vector<vector<vector<ArrayHelper::DstInfo> > > dstInfoTable(dstLocalDeCount);
   char **localDeFactorList = new char*[dstLocalDeCount];
   char ***buffer = new char**[dstLocalDeCount];
       
@@ -7204,14 +7218,14 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     // invert the look-up direction
     // prepare to sort each "diffPartnerDeCount[j] group"
     // at the same time determine linIndexTermCount and linIndexTermFactorCount
-    dstInfoTable[j] = new DstInfo*[diffPartnerDeCount[j]];
-    int *dstInfoTableInit = new int[diffPartnerDeCount[j]];
+    dstInfoTable[j].resize(diffPartnerDeCount[j]);
+    vector<int> dstInfoTableInit(diffPartnerDeCount[j]);
     localDeFactorList[j] = new char[localDeFactorCount * dataSizeFactors];
     localrc = xxe->appendStorage(localDeFactorList[j]); // for xxe garb. coll.
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     for (int i=0; i<diffPartnerDeCount[j]; i++){
-      dstInfoTable[j][i] = new DstInfo[partnerDeCount[j][i]];
+      dstInfoTable[j][i].resize(partnerDeCount[j][i]);
       dstInfoTableInit[i] = 0;   // reset
     }
 #ifdef ASMMSTORETIMING
@@ -7244,8 +7258,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     // sort each "diffPartnerDeCount[j] group" wrt partnerSeqIndex and seqIndex
     // in this order (opposite of src)
     for (int i=0; i<diffPartnerDeCount[j]; i++)
-      qsort(dstInfoTable[j][i], partnerDeCount[j][i], 
-        sizeof(DstInfo), DstInfo::cmp);
+      sort(dstInfoTable[j][i].begin(), dstInfoTable[j][i].end());
 
 #ifdef ASMMSTOREPRINT
     // print:
@@ -7323,7 +7336,6 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     delete [] factorIndexRef;
     delete [] partnerDeRef;
     delete [] partnerDeList;
-    delete [] dstInfoTableInit;
     
 #ifdef ASMMSTORETIMING
     VMK::wtime(&t10Xe);   //gjt - profile
@@ -7380,24 +7392,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       }
     }
     // invert the look-up direction
-    struct SrcInfo{
-      int linIndex;
-      SeqIndex seqIndex;
-      SeqIndex partnerSeqIndex;
-      static int cmp(const void *a, const void *b){
-        SrcInfo *aObj = (SrcInfo *)a;
-        SrcInfo *bObj = (SrcInfo *)b;
-        int cmpValue = SeqIndex::cmp(&(aObj->seqIndex), &(bObj->seqIndex));
-        if (cmpValue != 0) return cmpValue;
-        // seqIndex must be equal
-        return SeqIndex::
-          cmp(&(aObj->partnerSeqIndex), &(bObj->partnerSeqIndex));
-      }
-    };
-    SrcInfo **srcInfoTable = new SrcInfo*[diffPartnerDeCount];
-    int *srcInfoTableInit = new int[diffPartnerDeCount];
+    vector<vector<ArrayHelper::SrcInfo> > srcInfoTable(diffPartnerDeCount);
+    vector<int> srcInfoTableInit(diffPartnerDeCount);
     for (int i=0; i<diffPartnerDeCount; i++){
-      srcInfoTable[i] = new SrcInfo[partnerDeCount[i]];
+      srcInfoTable[i].resize(partnerDeCount[i]);
       srcInfoTableInit[i] = 0;   // reset
     }
     for (int i=0; i<localDeFactorCount; i++){
@@ -7420,7 +7418,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     // sort each "diffPartnerDeCount group" wrt seqIndex and partnerSeqIndex
     // in this order (opposite of dst)
     for (int i=0; i<diffPartnerDeCount; i++)
-      qsort(srcInfoTable[i], partnerDeCount[i], sizeof(SrcInfo), SrcInfo::cmp);
+      sort(srcInfoTable[i].begin(), srcInfoTable[i].end());
 #ifdef ASMMSTOREPRINT
     // print:
     for (int i=0; i<diffPartnerDeCount; i++)
@@ -7586,11 +7584,6 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     delete [] partnerDeRef;
     delete [] partnerDeList;
     delete [] partnerDeCount;
-    for (int i=0; i<diffPartnerDeCount; i++){
-      delete [] srcInfoTable[i];
-    }
-    delete [] srcInfoTable;
-    delete [] srcInfoTableInit;
     
 #ifdef ASMMPROFILE
     localrc = xxe->appendWtimer(0x0, "Wt: /sendnbL", xxe->count, xxe->count);
@@ -7627,9 +7620,10 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
     for (int k=0; k<diffPartnerDeCount[j]; k++){
       int termCount = partnerDeCount[j][k];
       // fill rraOffsetList[]
+      vector<ArrayHelper::DstInfo>::iterator p = dstInfoTable[j][k].begin();
       for (int kk=0; kk<termCount; kk++){
-        DstInfo *dstInfo = &(dstInfoTable[j][k][kk]);
-        xxeZeroSuperScalarRRAInfo->rraOffsetList[kkk] = dstInfo->linIndex;
+        xxeZeroSuperScalarRRAInfo->rraOffsetList[kkk] = p->linIndex;
+        ++p;
         ++kkk;
       } // for kk - termCount
     } // k - diffPartnerDeCount[j]    
@@ -7721,14 +7715,15 @@ printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
       void **factorList = xxeProductSumSuperScalarRRAInfo->factorList;
       void **valueList = xxeProductSumSuperScalarRRAInfo->valueList;
       // fill in rraOffsetList, factorList, valueList
+      vector<ArrayHelper::DstInfo>::iterator p = dstInfoTable[j][k].begin();
       for (int kk=0; kk<termCount; kk++){
-        DstInfo *dstInfo = &(dstInfoTable[j][k][kk]);
-        int linIndex = dstInfo->linIndex;
+        int linIndex = p->linIndex;
         rraOffsetList[kk] = linIndex * dataSizeDst;
         factorList[kk] = (void *)
-          (localDeFactorList[j] + (dstInfo->localDeFactorListIndex)
+          (localDeFactorList[j] + (p->localDeFactorListIndex)
           * dataSizeFactors);
         valueList[kk] = (void *)(buffer[j][k] + kk * dataSizeSrc);
+        ++p;
       } // for kk - termCount
       // need to fill in sensible elements and values or timing will be bogus
       switch (typekindDst){
@@ -7831,10 +7826,6 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
     
     // garbage collection
     delete [] partnerDeCount[j];
-    for (int i=0; i<diffPartnerDeCount[j]; i++){
-      delete [] dstInfoTable[j][i];
-    }
-    delete [] dstInfoTable[j];
     delete [] recvnbIndex[j];
     delete [] buffer[j];
         
@@ -7851,7 +7842,6 @@ printf("gjt - on localPet %d sumSuperScalar<>RRA took dt_sScalar=%g s and"
   delete [] diffPartnerDeCount;
   delete [] recvnbIndex;
   delete [] partnerDeCount;
-  delete [] dstInfoTable;
   delete [] localDeFactorList;
   delete [] buffer;
     
