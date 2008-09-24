@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.29 2008/09/17 17:27:07 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.30 2008/09/24 20:10:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -54,11 +54,12 @@ module ESMF_FieldGetMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
   public ESMF_FieldGet
+  public ESMF_FieldGetBounds
  
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.29 2008/09/17 17:27:07 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.30 2008/09/24 20:10:31 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -80,7 +81,6 @@ module ESMF_FieldGetMod
     module procedure ESMF_FieldGetGridAllocBounds
     module procedure ESMF_FieldGetMeshAllocBounds
     module procedure ESMF_FieldGetLSAllocBounds
-    !module procedure ESMF_FieldGetDataBounds
     !module procedure ESMF_FieldGetLocalArray !TODO: FIELDINTEGRATION
     TypeKindRankInterfaceMacro(FieldGetDataPtr)
 
@@ -556,7 +556,7 @@ contains
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
-    call ESMF_FieldGetDataBounds(field, localDe, & @\
+    call ESMF_FieldGetBounds(field, localDe, & @\
         exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
         computationalLBound, computationalUBound, computationalCount, & @\
         totalLBound, totalUBound, totalCount, & @\
@@ -576,13 +576,13 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldGetDataBounds"
-!BOPI
-! !IROUTINE: ESMF_FieldGetDataBounds -  Get Field data bounds
+^define ESMF_METHOD "ESMF_FieldGetBounds"
+!BOP
+! !IROUTINE: ESMF_FieldGetBounds -  Get Field data bounds
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_FieldGet()
-  subroutine ESMF_FieldGetDataBounds(field, localDe, exclusiveLBound, &
+  ! Private name; call using ESMF_FieldGetBounds()
+  subroutine ESMF_FieldGetBounds(field, localDe, exclusiveLBound, &
     exclusiveUBound, exclusiveCount, computationalLBound, computationalUBound, &
     computationalCount, totalLBound, totalUBound, totalCount, rc)
 
@@ -658,7 +658,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: gridCompLBnd(ESMF_MAXDIM), gridCompUBnd(ESMF_MAXDIM)
     integer :: gridExclLBnd(ESMF_MAXDIM), gridExclUBnd(ESMF_MAXDIM)
@@ -914,7 +914,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     deallocate(l_ec, l_cc, l_tc)
 
     if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine ESMF_FieldGetDataBounds
+  end subroutine ESMF_FieldGetBounds
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
