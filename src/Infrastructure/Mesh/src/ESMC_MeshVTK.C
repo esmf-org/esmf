@@ -861,6 +861,10 @@ void ReadVTKMeshBody(const std::string &filename, int *nodeId, double *nodeCoord
       for (UInt i = 0; i < data.size(); ++i) nodeId[i] = (int)(data[i]+0.0001);
       //std::copy(data.begin(), data.end(), nodeId); causes double to int warnings
 
+    } else if (data_type == VTK_NODE_DATA && std::string(vname) == "_OWNER") {
+
+      for (UInt i = 0; i < data.size(); ++i) nodeOwner[i] = (int)(data[i]+0.0001);
+
     } else {
 
     }

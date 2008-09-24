@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshRegridEx.F90,v 1.2 2008/09/23 21:10:43 dneckels Exp $
+! $Id: ESMF_FieldMeshRegridEx.F90,v 1.3 2008/09/24 22:40:03 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -48,7 +48,7 @@ program ESMF_MeshEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.2 2008/09/23 21:10:43 dneckels Exp $'
+    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.3 2008/09/24 22:40:03 dneckels Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -109,10 +109,17 @@ program ESMF_MeshEx
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+  if (petCount .ne. 6) then
+    print *, 'Example must run on 6 processors since mesh is stored as such'
+    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  endif
+
   write(name, *) "Test GridToMesh"
 
-  i1 = 1
-  call C_ESMC_MeshInit("MESHRegridLOG", i1)
+  ! Call this function if you want to turn on mesh logging.  Use
+  ! Par::Out() in the mesh code to print to the file for a specific processor.
+  !i1 = 1
+  !call C_ESMC_MeshInit("MESHREGRID", i1)
 
   ! init success flag
   correct=.true.
@@ -194,7 +201,6 @@ program ESMF_MeshEx
   ! the nodeCoord around so we can assign a function to
   ! the ESMF_Field.
   deallocate(nodeId)
-  deallocate(nodeOwner)
 
   ! free the element arrays
   deallocate(elemId)
@@ -285,15 +291,22 @@ program ESMF_MeshEx
                           computationalUBound=cubnd1,  rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  print *, 'cbnd', clbnd1(1), cubnd1(1)
-  do i=clbnd1(1),cubnd1(1)
+  !print *, localPet, 'cbnd', clbnd1(1), cubnd1(1)
+  i1 = 1
+  do i=1, num_node
+
+    if (nodeOwner(i) .ne. localPet) cycle
 
     x = nodeCoord1(2*(i-1)+1)
     y = nodeCoord1(2*(i-1)+2)
 
-    fptr1(i) = sin(x) + cos(2*x*y)
+    fptr1(i1) = sin(2*3.14*x) + cos(4*3.14*y)
+
+    i1 = i1 + 1
 
   enddo
+
+  !print *, localPet, i1
 
   ! Form the regrid operator
   call ESMF_FieldRegridStore(srcField, dstField, routeHandle, &

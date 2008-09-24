@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.16 2008/09/23 21:10:46 dneckels Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.17 2008/09/24 22:40:05 dneckels Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -153,6 +153,7 @@ extern "C" void FTN(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nod
       MeshObj *node = new MeshObj(MeshObj::NODE, nodeId[n], n);
 
       node->set_owner(nodeOwner[n]);
+//Par::Out() << "node:" << node->get_id() << " has owner:" << nodeOwner[n] << std::endl;
 
       mesh.add_node(node, 0);
 
@@ -268,6 +269,9 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
     } // for e
 
     // Perhaps commit will be a separate call, but for now commit the mesh here.
+
+    mesh.build_sym_comm_rel(MeshObj::NODE);
+
     mesh.Commit();
 //mesh.Print(Par::Out());
 
@@ -430,9 +434,12 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *
   }
 
 /*
-  Par::Out() << "Node ids:" << std::endl;
-  std::copy(ngids.begin(), ngids.end(), std::ostream_iterator<UInt>(Par::Out(), "\n"));
+  Par::Out() << "Node ids:(" << ngids.size() << ")" << std::endl;
+  std::copy(ngids.begin(), ngids.end(), std::ostream_iterator<int>(Par::Out(), "\n"));
+  Par::Out().flush();
+*/
 
+/*
   Par::Out() << "Elem ids:" << std::endl;
   std::copy(egids.begin(), egids.end(), std::ostream_iterator<UInt>(Par::Out(), "\n"));
   Par::Out().flush();
