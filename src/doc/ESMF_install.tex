@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.71 2008/09/23 19:33:12 w6ws Exp $
+% $Id: ESMF_install.tex,v 1.72 2008/09/24 01:21:04 w6ws Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -29,7 +29,7 @@ that allow the user to control them.
 \subsubsection{LAPACK}
 The LAPACK library is optionally used in the Mesh class to
 compute Patch Recovery regridding weights.  This regridding method requires
-solving local least squares problems, and uses the LAPACK DGELSY solver.
+solving local least squares problems, and uses the LAPACK {\it DGELSY} solver.
 
 A few targets are known to always have a vendor-provided LAPACK
 library available.  Where possible, these are incorporated into
@@ -48,23 +48,28 @@ other systems, the default is OFF.
 
 \item[OFF] (default on most system): Disables LAPACK-dependent code, regardless of system.
 
-\item[mkl] Use the Intel MKL library.  Sets ESMF\_LAPACK\_LIBS to "-lmkl\_lapack -lmkl",
+\item[mkl] Use the Intel MKL library.  Sets {\tt ESMF\_LAPACK\_LIBS} to
+"-lmkl\_lapack -lmkl",
 unless it is already defined in the user environment.
 
-\item[netlib] (default for PGI): Sets ESMF\_LAPACK\_LIBS to "-llapack -lblas", unless
-it is already defined in the user environment.
+\item[netlib] (default for PGI): Sets {\tt ESMF\_LAPACK\_LIBS} to "-llapack -lblas",
+unless it is already defined in the user environment.
 
-\item[scsl] (default for IRIX64): Sets ESMF\_LAPACK\_LIBS to "-lscs".
+\item[scsl] (default for IRIX64): Sets {\tt ESMF\_LAPACK\_LIBS} to "-lscs",
+unless it is already defined in the user environment.
 
 \item[<userstring>] Enables LAPACK-dependent code, but does not set a default for
-ESMF\_LAPACK\_LIBS.  ESMF\_LAPACK\_LIBS, and if required, ESMF\_LAPACK\_LIBPATH,must be set in the user environment.
+{\tt ESMF\_LAPACK\_LIBS}.  {\tt ESMF\_LAPACK\_LIBS}, and if required,
+{\tt ESMF\_LAPACK\_LIBPATH},
+must be explicitly set in the user environment.
 \end{description}
 
 \item[ESMF\_LAPACK\_LIBPATH] Typical value: /usr/local/lib (no default)
 
 Specifies the path where the LAPACK library is located.
 
-\item[ESMF\_LAPACK\_LIBS] Typical value: "-llapack -lblas" (no default)
+\item[ESMF\_LAPACK\_LIBS] Typical value: "-llapack -lblas" (default is system
+dependant)
 
 Specifies the linker directive needed to link the LAPACK library to
 the application.  On some systems, the BLAS library must also be included.
@@ -80,18 +85,22 @@ of the desired NETCDF library and associated header files:
 \item[ESMF\_NETCDF] Possible value: "not set" (default), split, standard, <userstring>
 
 \begin{description}
-\item["not set"] (default): ESMF will be compiled without NETCDF-dependent features.
-The ESMF\_NETCDF\_INCLUDE, ESMF\_NETCDF\_LIBPATH, and ESMF\_NETCDF\_LIBS
-environment variables will be ignored.
+\item["not set"] (default): NETCDF-dependent features will be disabled.
+The {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBPATH}, and
+{\tt ESMF\_NETCDF\_LIBS} environment variables will be ignored.
 
-\item[split] ESMF\_NETCDF\_LIBS will be set to "-lnetcdff -lnetcdf".  The
-ESMF\_NETLIB\_INCLUDE and ESMF\_NETCDF\_LIBPATH will be also used.
+\item[split] {\tt ESMF\_NETCDF\_LIBS} will be set to "-lnetcdff -lnetcdf".  This option
+is useful for systems which have the Fortran and C bindings archived in seperate
+library files.  The {\tt ESMF\_NETLIB\_INCLUDE} and {\tt ESMF\_NETCDF\_LIBPATH}
+environment variables will also be used, if defined.
 
-\item[standard] ESMF\_NETCDF\_LIBS will be set to "-lnetcdf".
-The ESMF\_NETLIB\_INCLUDE and ESMF\_NETCDF\_LIBPATH will be also used.
+\item[standard] {\tt ESMF\_NETCDF\_LIBS} will be set to "-lnetcdf".  This option
+is useful when the Fortran and C bindings are archived together in the same
+libray file.  The {\tt ESMF\_NETLIB\_INCLUDE} and {\tt ESMF\_NETCDF\_LIBPATH}
+environment variables will be also used, if defined.
 
-\item[<userstring>] If set, ESMF\_NETCDF\_INCLUDE, ESMF\_NETCDF\_LIBPATH, and
-ESMF\_NETCDF\_LIBS environment variables will be used.
+\item[<userstring>] If set, {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBPATH},
+and {\tt ESMF\_NETCDF\_LIBS} environment variables will be used, if defined.
 \end{description}
 
 \item[ESMF\_NETCDF\_INCLUDE] Typical value: /usr/local/include (no default)
@@ -107,11 +116,10 @@ Specifies the path where the NETCDF library file is located.
 Specifies the linker directives needed to link the NETCDF library to
 the application.
 
-The default value depends on the setting of ESMF\_NETCDF.  For the
-typical case where ESMF\_NETCDF is set to "standard", ESMF\_NETCDF\_LIBS
-is set to "-lnetcdf".  On some systems, seperate libraries are used
-for Fortran and C bindings.  In this case, a typical setting is
-"-lnetcdff -lnetcdf".
+The default value depends on the setting of {\tt ESMF\_NETCDF}.  For the
+typical case where {\tt ESMF\_NETCDF} is set to "standard", {\tt ESMF\_NETCDF\_LIBS}
+is set to "-lnetcdf".  When {\tt ESMF\_NETCDF} is set to "split",
+{\tt ESMF\_NETCDF\_LIBS} is set to "-lnetcdff -lnetcdf".
 \end{description}
 
 \subsubsection{PNETCDF}
@@ -125,12 +133,13 @@ of the desired PNETCDF library and associated header files:
 When defined, enables the use of PNETCDF.
 
 \begin{description}
-\item["not set"] (default): ESMF will becompiled without PNETCDF-dependent features.
-The ESMF\_PNETCDF\_INCLUDE, ESMF\_PNETCDF\_LIBPATH, and ESMF\_PNETCDF\_LIBS
-environment variables will be ignored.
+\item["not set"] (default): PNETCDF-dependent features will be disabled.
+The {\tt ESMF\_PNETCDF\_INCLUDE}, {\tt ESMF\_PNETCDF\_LIBPATH}, and
+{\tt ESMF\_PNETCDF\_LIBS} environment variables will be ignored.
 
-\item[<userstring>] If set, ESMF\_PNETCDF\_INCLUDE, ESMF\_PNETCDF\_LIBPATH, and
-ESMF\_PNETCDF\_LIBS environment variables will be used.
+\item[<userstring>] If set, {\tt ESMF\_PNETCDF\_INCLUDE},
+{\tt ESMF\_PNETCDF\_LIBPATH}, and {\tt ESMF\_PNETCDF\_LIBS} environment
+variables will be used.
 \end{description}
 
 \item[ESMF\_PNETCDF\_INCLUDE] Typical value: /usr/local/include (no default)
@@ -292,9 +301,9 @@ Possible value: {\em ON} (default), {\em OFF}
 
 This variable can be used to override the deferring of the build of the
 ESMF library.  By default, the library is built after all of the source
-files have been compiled.  This speeds up the build process, and also
+files have been compiled.  This speeds up the build process. It also
 allows parallel compilation of source code when the -j flag is used with
-gmake.  Setting this environment variable to OFF forces the library to
+gmake.  Setting this environment variable to {\tt OFF} forces the library to
 be updated after each individual compilation, thus disabling the ability
 to use parallel compilation.
 
@@ -599,8 +608,8 @@ parallel processes to build the library, use -j8:
   gmake -j8 lib
 \end{verbatim}
 
-The parallel compilation feature depends on ESMF\_DEFER\_LIB\_BUILD=ON (the
-default) so that the library build will be deferred until all files
+The parallel compilation feature depends on {\tt ESMF\_DEFER\_LIB\_BUILD=ON}
+(the default) so that the library build will be deferred until all files
 have been compiled.
 
 The -j option should only be used during the creation of the library.
