@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.26 2008/09/25 05:03:48 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.27 2008/09/25 20:58:46 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1528,6 +1528,23 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#ifdef TEST3DREGRID
+      !------------------------------------------------------------------------
+      !EX___UTest_Multi_Proc_Only
+      ! Test 3D regrid
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "3D Regrid"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+      
+      ! do test
+      call test_regrid3D(rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 #endif
         !------------------------------------------------------------------------
@@ -4485,6 +4502,7 @@ contains
   type(ESMF_Field) :: errorField
   type(ESMF_Array) :: array180
   type(ESMF_Array) :: errorArray
+  type(ESMF_Array) :: lonArray360
   type(ESMF_Array) :: srcArray360, dstArray360
   type(ESMF_RouteHandle) :: routeHandle
   type(ESMF_RouteHandle) :: routeHandle1
@@ -4536,10 +4554,12 @@ contains
 
   ! Establish the resolution of the grids
   !dst_nx = 284
-  dst_nx = 154
-  dst_ny = 100
+!  dst_nx = 154
+!  dst_ny = 100
+  dst_nx = 90
+  dst_ny = 50
 
-  src_nx = 75
+  src_nx = 90
   src_ny = 50
 
   ! setup source grid
@@ -4648,6 +4668,16 @@ contains
   endif
 
 
+
+  !! get longitude array
+  call ESMF_GridGetCoord(grid360, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                         array=lonArray360, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+  endif
+
+
   ! Write results to a mesh
   num_arrays = 1
 
@@ -4710,7 +4740,7 @@ contains
         lat = fptrYC(i1,i2)
      
        ! Set the source to be a function of the x,y,z coordinate
-        theta = DEG2RAD*lon
+        theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
         x = cos(theta)*sin(phi)
         y = sin(theta)*sin(phi)
@@ -4718,7 +4748,9 @@ contains
 
         ! set src data
         ! (something relatively smooth, that varies everywhere)
-        fptr(i1,i2) = x+y+z+15.0
+!        fptr(i1,i2) = x+y+z+15.0
+
+!        fptr(i1,i2) = 1.0 + cos(phi)*cos(phi)*(0.5*cos(3*theta) + -0.3*sin(theta))
 
          ! initialize src destination field
          fptr2(i1,i2)=0.0
@@ -4774,7 +4806,8 @@ contains
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
         ! Set destination coordinates as -180 to 180
-        fptrXC(i1,i2) = -180.+(REAL(i1-1)*dst_dx)
+        fptrXC(i1,i2) = (REAL(i1-1)*dst_dx)
+!        fptrXC(i1,i2) = -180.+(REAL(i1-1)*dst_dx)
         fptrYC(i1,i2) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
 
         ! init destination mesh to 0
@@ -4867,7 +4900,7 @@ contains
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
         if (fptr(i1,i2) .ne. 0.0) then
-           errorfptr(i1,i2)=(fptr(i1,i2) - fptr2(i1,i2))/fptr(i1,i2)
+           errorfptr(i1,i2)=ABS((fptr(i1,i2) - fptr2(i1,i2))/fptr(i1,i2))
         else
            errorfptr(i1,i2)=(fptr(i1,i2) - fptr2(i1,i2))
         endif
@@ -4884,7 +4917,7 @@ contains
   ! Uncomment these calls to see some actual regrid results
 !  spherical_grid = 0
 !  call ESMF_MeshIO(vm, grid360, ESMF_STAGGERLOC_CENTER, &
-!               "srcmesh", srcArray360, dstArray360, errorArray, rc=localrc, &
+!               "srcmesh", srcArray360, dstArray360, errorArray, lonArray360, rc=localrc, &
 !               spherical=spherical_grid)
 !  call ESMF_MeshIO(vm, grid180, ESMF_STAGGERLOC_CENTER, &
 !               "dstmesh", array180, rc=localrc, &
@@ -4940,6 +4973,495 @@ contains
 
       end subroutine test_regrid180vs360
 
+#ifdef TEST3DREGRID
+
+      subroutine test_regrid3D(rc)
+        integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_Grid) :: gridA
+  type(ESMF_Grid) :: gridB
+  type(ESMF_Field) :: srcFieldA
+  type(ESMF_Field) :: dstFieldA
+  type(ESMF_Field) :: fieldB
+  type(ESMF_Field) :: errorField
+  type(ESMF_Array) :: arrayB
+  type(ESMF_Array) :: errorArray
+  type(ESMF_Array) :: lonArrayA
+  type(ESMF_Array) :: srcArrayA, dstArrayA
+  type(ESMF_RouteHandle) :: routeHandle
+  type(ESMF_RouteHandle) :: routeHandle1
+  type(ESMF_ArraySpec) :: arrayspec
+  type(ESMF_VM) :: vm
+  real(ESMF_KIND_R8), pointer :: fptrXC(:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptrYC(:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptrZC(:,:,:)
+  real(ESMF_KIND_R8), pointer :: fptr(:,:,:),fptr2(:,:,:),errorfptr(:,:,:)
+  integer :: clbnd(3),cubnd(3)
+  integer :: fclbnd(3),fcubnd(3)
+  integer :: i1,i2,i3, index(3)
+  integer :: lDE, localDECount
+  real(ESMF_KIND_R8) :: coord(3)
+  character(len=ESMF_MAXSTR) :: string
+  integer src_nx, src_ny, src_nz, dst_nx, dst_ny, dst_nz
+  integer num_arrays
+
+  real(ESMF_KIND_R8) :: src_minx,src_miny,src_minz
+  real(ESMF_KIND_R8) :: src_maxx,src_maxy,src_maxz
+  real(ESMF_KIND_R8) :: dst_minx,dst_miny,dst_minz
+  real(ESMF_KIND_R8) :: dst_maxx,dst_maxy,dst_maxz
+  real(ESMF_KIND_R8) :: ctheta, stheta
+  real(ESMF_KIND_R8) :: theta, d2rad, x, y, z
+  real(ESMF_KIND_R8) :: DEG2RAD, a, lat, lon, phi
+  real(ESMF_KIND_R8) :: rangle, xtmp, ytmp, ztmp
+  real(ESMF_KIND_R8) :: RAD2DEG
+
+  integer :: spherical_grid
+
+  integer, pointer :: larrayList(:)
+  integer :: localPet, petCount
+
+  ! result code
+  integer :: finalrc
+  
+  ! init success flag
+  correct=.true.
+
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+  ! Establish the resolution of the grids
+  dst_nx = 10
+  dst_ny = 10
+  dst_nz = 10
+
+  src_nx = 10
+  src_ny = 10
+  src_nz = 10
+
+  ! Establish the coordinates of the grids
+  dst_minx = 0.0
+  dst_miny = 0.0
+  dst_minz = 0.0
+
+  dst_maxx = 10.0
+  dst_maxy = 10.0
+  dst_maxz = 10.0
+
+  src_minx = 0.0
+  src_miny = 0.0
+  src_minz = 0.0
+
+  src_maxx = 10.0
+  src_maxy = 10.0
+  src_maxz = 10.0
+
+
+
+  ! setup source grid
+  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1,1/),maxIndex=(/src_nx,src_ny,src_nz/),regDecomp=(/petCount,1,1/), &
+                              gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! setup dest. grid
+  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1,1/),maxIndex=(/dst_nx,dst_ny,dst_nz/),regDecomp=(/1,1,petCount/), &
+                              gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Create source/destination fields
+  call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc)
+
+   srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+   dstFieldA = ESMF_FieldCreate(gridA, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+   errorField = ESMF_FieldCreate(gridA, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+   fieldB = ESMF_FieldCreate(gridB, arrayspec, &
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Allocate coordinates
+  call ESMF_GridAddCoord(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  call ESMF_GridAddCoord(gridB, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Get number of local DEs
+  call ESMF_GridGet(gridA, localDECount=localDECount, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Get arrays
+  ! arrayB
+  call ESMF_FieldGet(fieldB, array=arrayB, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! srcArrayA
+  call ESMF_FieldGet(srcFieldA, array=srcArrayA, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! dstArrayA
+  call ESMF_FieldGet(dstFieldA, array=dstArrayA, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! errorArray
+  call ESMF_FieldGet(errorField, array=errorArray, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Write results to a mesh
+  num_arrays = 1
+
+write(*,*) "HERE BEFORE SRC GRID"
+
+  ! Construct 3D Grid A
+  ! (Get memory and set coords for src)
+  do lDE=0,localDECount-1
+ 
+     !! get coord 1
+     call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrZC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     ! get src pointer
+     call ESMF_FieldGet(srcFieldA, lDE, fptr,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     ! get src destination Field pointer
+     call ESMF_FieldGet(dstFieldA, lDE, fptr2,   rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     !! set coords, interpolated function
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+        ! Set source coordinates
+        fptrXC(i1,i2,i3) = ((src_maxx-src_minx)*REAL(i1-1)/REAL(src_nx-1))+src_minx
+        fptrYC(i1,i2,i3) = ((src_maxy-src_miny)*REAL(i2-1)/REAL(src_ny-1))+src_miny
+        fptrZC(i1,i2,i3) = ((src_maxz-src_minz)*REAL(i3-1)/REAL(src_nz-1))+src_minz
+
+        ! set src data
+        ! (something  smooth, that varies everywhere)
+        fptr(i1,i2,i3) = fptrXC(i1,i2,i3)+fptrYC(i1,i2,i3)+fptrZC(i1,i2,i3)+15.0
+
+        ! initialize src destination field
+        fptr2(i1,i2,i3)=0.0
+
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+write(*,*) "HERE BEFORE DEST GRID"
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Destination grid
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  ! Get memory and set coords for dst
+  do lDE=0,localDECount-1
+ 
+     !! get coords
+     call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     call ESMF_GridGetCoord(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrZC, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+   
+     call ESMF_FieldGet(fieldB, lDE, fptr, computationalLBound=fclbnd, &
+                             computationalUBound=fcubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     !! set coords
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+        ! Set source coordinates
+        fptrXC(i1,i2,i3) = ((dst_maxx-dst_minx)*REAL(i1-1)/REAL(dst_nx-1))+dst_minx
+        fptrYC(i1,i2,i3) = ((dst_maxy-dst_miny)*REAL(i2-1)/REAL(dst_ny-1))+dst_miny
+        fptrZC(i1,i2,i3) = ((dst_maxz-dst_minz)*REAL(i3-1)/REAL(dst_nz-1))+dst_minz
+
+        ! initialize destination field
+        fptr(i1,i2,i3)=0.0
+
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+write(*,*) "HERE BEFORE REGRID"
+
+
+  !!! Regrid forward from the A grid to the B grid
+  ! Regrid store
+  call ESMF_FieldRegridStore(srcFieldA, fieldB, &
+          routeHandle, &
+          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+ !         regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! Do regrid
+  call ESMF_FieldRegrid(srcFieldA, fieldB, routeHandle, localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  !!!!!!!! Regrid back from the B grid to the A grid
+  ! Regrid store
+  call ESMF_FieldRegridStore(fieldB, dstFieldA, &
+          routeHandle, &
+          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+!          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+          rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+  ! Do regrid
+  call ESMF_FieldRegrid(fieldB, dstFieldA, routeHandle, localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  ! Check if the values are close
+  do lDE=0,localDECount-1
+
+     ! get src Field
+     call ESMF_FieldGet(srcFieldA, lDE, fptr, computationalLBound=clbnd, &
+                             computationalUBound=cubnd,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     ! get src destination Field
+     call ESMF_FieldGet(dstFieldA, lDE, fptr2,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     ! get src Field
+     call ESMF_FieldGet(errorField, lDE, errorfptr,  rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+
+     !! check relative error
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+     do i3=clbnd(3),cubnd(3)
+        if (fptr(i1,i2,i3) .ne. 0.0) then
+           errorfptr(i1,i2,i3)=ABS((fptr(i1,i2,i3) - fptr2(i1,i2,i3))/fptr(i1,i2,i3))
+        else
+           errorfptr(i1,i2,i3)=(fptr(i1,i2,i3) - fptr2(i1,i2,i3))
+        endif
+        if (ABS(errorfptr(i1,i2,i3)) .gt. 0.001) then
+            correct=.false. 
+        endif
+
+     enddo
+     enddo
+     enddo
+
+  enddo    ! lDE
+
+
+  ! Uncomment these calls to see some actual regrid results
+  spherical_grid = 0
+  call ESMF_MeshIO(vm, gridA, ESMF_STAGGERLOC_CENTER, &
+               "srcmesh", srcArrayA, dstArrayA, errorArray, rc=localrc, &
+               spherical=spherical_grid)
+  call ESMF_MeshIO(vm, gridB, ESMF_STAGGERLOC_CENTER, &
+               "dstmesh", arrayB, rc=localrc, &
+               spherical=spherical_grid)
+
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcFieldA, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(dstFieldA, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+   call ESMF_FieldDestroy(errorField, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+   call ESMF_FieldDestroy(fieldB, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+   endif
+
+
+  ! Free the grids
+  call ESMF_GridDestroy(gridA, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+  call ESMF_GridDestroy(gridB, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+      end subroutine test_regrid3D
+#endif
 
 
 end program ESMF_FieldCreateGetUTest
