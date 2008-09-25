@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.25 2008/09/23 20:52:04 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.26 2008/09/25 05:03:48 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -4785,7 +4785,6 @@ contains
 
   enddo    ! lDE
 
-
   !!! Regrid forward from the 0 to 360 grid to the -180 to 180 grid
   ! Regrid store
   call ESMF_FieldRegridStore(srcField360, field180, &
@@ -4872,7 +4871,7 @@ contains
         else
            errorfptr(i1,i2)=(fptr(i1,i2) - fptr2(i1,i2))
         endif
-        if (ABS(errorfptr(i1,i2)) .gt. 0.001) then
+        if (ABS(errorfptr(i1,i2)) .gt. 0.01) then
             correct=.false. 
         endif
 
@@ -4931,8 +4930,6 @@ contains
       rc=ESMF_FAILURE
       return
    endif
-
-
 
   ! return answer based on correct flag
   if (correct) then
