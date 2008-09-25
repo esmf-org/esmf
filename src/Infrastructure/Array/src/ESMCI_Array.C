@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.29 2008/09/24 04:15:33 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.30 2008/09/25 20:03:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.29 2008/09/24 04:15:33 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.30 2008/09/25 20:03:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4056,8 +4056,8 @@ int Array::redistRelease(
 
 //-----------------------------------------------------------------------------
 bool operator==(SeqIndex a, SeqIndex b){
-  if (a.decompSeqIndex == b.decompSeqIndex) return true;
-  // decompSeqIndex must not be equal
+  if (a.decompSeqIndex != b.decompSeqIndex) return false;
+  // decompSeqIndex must be equal
   return (a.tensorSeqIndex == b.tensorSeqIndex);
 }
 bool operator<(SeqIndex a, SeqIndex b){
