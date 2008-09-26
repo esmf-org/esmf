@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.27 2008/09/25 20:58:46 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.28 2008/09/26 04:14:33 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1529,9 +1529,8 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef TEST3DREGRID
       !------------------------------------------------------------------------
-      !EX___UTest_Multi_Proc_Only
+      !EX_UTest_Multi_Proc_Only
       ! Test 3D regrid
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "3D Regrid"
@@ -1544,7 +1543,6 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#endif
 
 #endif
         !------------------------------------------------------------------------
@@ -4973,8 +4971,6 @@ contains
 
       end subroutine test_regrid180vs360
 
-#ifdef TEST3DREGRID
-
       subroutine test_regrid3D(rc)
         integer, intent(out)  :: rc
   logical :: correct
@@ -5003,19 +4999,14 @@ contains
   integer :: lDE, localDECount
   real(ESMF_KIND_R8) :: coord(3)
   character(len=ESMF_MAXSTR) :: string
-  integer src_nx, src_ny, src_nz, dst_nx, dst_ny, dst_nz
+  integer A_nx, A_ny, A_nz, B_nx, B_ny, B_nz
   integer num_arrays
 
-  real(ESMF_KIND_R8) :: src_minx,src_miny,src_minz
-  real(ESMF_KIND_R8) :: src_maxx,src_maxy,src_maxz
-  real(ESMF_KIND_R8) :: dst_minx,dst_miny,dst_minz
-  real(ESMF_KIND_R8) :: dst_maxx,dst_maxy,dst_maxz
-  real(ESMF_KIND_R8) :: ctheta, stheta
-  real(ESMF_KIND_R8) :: theta, d2rad, x, y, z
-  real(ESMF_KIND_R8) :: DEG2RAD, a, lat, lon, phi
-  real(ESMF_KIND_R8) :: rangle, xtmp, ytmp, ztmp
-  real(ESMF_KIND_R8) :: RAD2DEG
-
+  real(ESMF_KIND_R8) :: A_minx,A_miny,A_minz
+  real(ESMF_KIND_R8) :: A_maxx,A_maxy,A_maxz
+  real(ESMF_KIND_R8) :: B_minx,B_miny,B_minz
+  real(ESMF_KIND_R8) :: B_maxx,B_maxy,B_maxz
+  
   integer :: spherical_grid
 
   integer, pointer :: larrayList(:)
@@ -5041,35 +5032,33 @@ contains
             ESMF_CONTEXT, rc)) return
 
   ! Establish the resolution of the grids
-  dst_nx = 10
-  dst_ny = 10
-  dst_nz = 10
+  B_nx = 20
+  B_ny = 20
+  B_nz = 20
 
-  src_nx = 10
-  src_ny = 10
-  src_nz = 10
+  A_nx = 10
+  A_ny = 10
+  A_nz = 10
 
   ! Establish the coordinates of the grids
-  dst_minx = 0.0
-  dst_miny = 0.0
-  dst_minz = 0.0
+  B_minx = 0.0
+  B_miny = 0.0
+  B_minz = 0.0
 
-  dst_maxx = 10.0
-  dst_maxy = 10.0
-  dst_maxz = 10.0
+  B_maxx = 10.0
+  B_maxy = 10.0
+  B_maxz = 10.0
 
-  src_minx = 0.0
-  src_miny = 0.0
-  src_minz = 0.0
+  A_minx = 0.0
+  A_miny = 0.0
+  A_minz = 0.0
 
-  src_maxx = 10.0
-  src_maxy = 10.0
-  src_maxz = 10.0
-
-
+  A_maxx = 10.0
+  A_maxy = 10.0
+  A_maxz = 10.0
 
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1,1/),maxIndex=(/src_nx,src_ny,src_nz/),regDecomp=(/petCount,1,1/), &
+  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1,1/),maxIndex=(/A_nx,A_ny,A_nz/),regDecomp=(/petCount,1,1/), &
                               gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
@@ -5080,7 +5069,7 @@ contains
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1,1/),maxIndex=(/dst_nx,dst_ny,dst_nz/),regDecomp=(/1,1,petCount/), &
+  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1,1/),maxIndex=(/B_nx,B_ny,B_nz/),regDecomp=(/1,1,petCount/), &
                               gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
@@ -5177,8 +5166,6 @@ contains
   ! Write results to a mesh
   num_arrays = 1
 
-write(*,*) "HERE BEFORE SRC GRID"
-
   ! Construct 3D Grid A
   ! (Get memory and set coords for src)
   do lDE=0,localDECount-1
@@ -5224,9 +5211,9 @@ write(*,*) "HERE BEFORE SRC GRID"
      do i2=clbnd(2),cubnd(2)
      do i3=clbnd(3),cubnd(3)
         ! Set source coordinates
-        fptrXC(i1,i2,i3) = ((src_maxx-src_minx)*REAL(i1-1)/REAL(src_nx-1))+src_minx
-        fptrYC(i1,i2,i3) = ((src_maxy-src_miny)*REAL(i2-1)/REAL(src_ny-1))+src_miny
-        fptrZC(i1,i2,i3) = ((src_maxz-src_minz)*REAL(i3-1)/REAL(src_nz-1))+src_minz
+        fptrXC(i1,i2,i3) = ((A_maxx-A_minx)*REAL(i1-1)/REAL(A_nx-1))+A_minx
+        fptrYC(i1,i2,i3) = ((A_maxy-A_miny)*REAL(i2-1)/REAL(A_ny-1))+A_miny
+        fptrZC(i1,i2,i3) = ((A_maxz-A_minz)*REAL(i3-1)/REAL(A_nz-1))+A_minz
 
         ! set src data
         ! (something  smooth, that varies everywhere)
@@ -5241,7 +5228,6 @@ write(*,*) "HERE BEFORE SRC GRID"
 
   enddo    ! lDE
 
-write(*,*) "HERE BEFORE DEST GRID"
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Destination grid
@@ -5285,9 +5271,9 @@ write(*,*) "HERE BEFORE DEST GRID"
      do i2=clbnd(2),cubnd(2)
      do i3=clbnd(3),cubnd(3)
         ! Set source coordinates
-        fptrXC(i1,i2,i3) = ((dst_maxx-dst_minx)*REAL(i1-1)/REAL(dst_nx-1))+dst_minx
-        fptrYC(i1,i2,i3) = ((dst_maxy-dst_miny)*REAL(i2-1)/REAL(dst_ny-1))+dst_miny
-        fptrZC(i1,i2,i3) = ((dst_maxz-dst_minz)*REAL(i3-1)/REAL(dst_nz-1))+dst_minz
+        fptrXC(i1,i2,i3) = ((B_maxx-B_minx)*REAL(i1-1)/REAL(B_nx-1))+B_minx
+        fptrYC(i1,i2,i3) = ((B_maxy-B_miny)*REAL(i2-1)/REAL(B_ny-1))+B_miny
+        fptrZC(i1,i2,i3) = ((B_maxz-B_minz)*REAL(i3-1)/REAL(B_nz-1))+B_minz
 
         ! initialize destination field
         fptr(i1,i2,i3)=0.0
@@ -5298,15 +5284,12 @@ write(*,*) "HERE BEFORE DEST GRID"
 
   enddo    ! lDE
 
-write(*,*) "HERE BEFORE REGRID"
-
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
   call ESMF_FieldRegridStore(srcFieldA, fieldB, &
           routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
- !         regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -5332,7 +5315,6 @@ write(*,*) "HERE BEFORE REGRID"
   call ESMF_FieldRegridStore(fieldB, dstFieldA, &
           routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
-!          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -5403,12 +5385,12 @@ write(*,*) "HERE BEFORE REGRID"
 
   ! Uncomment these calls to see some actual regrid results
   spherical_grid = 0
-  call ESMF_MeshIO(vm, gridA, ESMF_STAGGERLOC_CENTER, &
-               "srcmesh", srcArrayA, dstArrayA, errorArray, rc=localrc, &
-               spherical=spherical_grid)
-  call ESMF_MeshIO(vm, gridB, ESMF_STAGGERLOC_CENTER, &
-               "dstmesh", arrayB, rc=localrc, &
-               spherical=spherical_grid)
+!  call ESMF_MeshIO(vm, gridA, ESMF_STAGGERLOC_CENTER, &
+!               "srcmesh", srcArrayA, dstArrayA, errorArray, rc=localrc, &
+!               spherical=spherical_grid)
+!  call ESMF_MeshIO(vm, gridB, ESMF_STAGGERLOC_CENTER, &
+!               "dstmesh", arrayB, rc=localrc, &
+!               spherical=spherical_grid)
 
 
   ! Destroy the Fields
@@ -5452,7 +5434,6 @@ write(*,*) "HERE BEFORE REGRID"
    endif
 
 
-
   ! return answer based on correct flag
   if (correct) then
     rc=ESMF_SUCCESS
@@ -5461,7 +5442,6 @@ write(*,*) "HERE BEFORE REGRID"
   endif
 
       end subroutine test_regrid3D
-#endif
 
 
 end program ESMF_FieldCreateGetUTest
