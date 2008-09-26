@@ -144,6 +144,7 @@ public  ESMF_DefaultFlag
 
   public ESMF_GridSet
   public ESMF_GridSetCoord
+  public ESMF_GridSetMask
 
   public ESMF_GridSetCommitShapeTile
   public ESMF_GridSerialize
@@ -166,7 +167,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.87 2008/06/18 05:13:09 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.88 2008/09/26 16:03:14 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -332,6 +333,24 @@ interface ESMF_GridSetCoord
 !  types of {\tt ESMF\_GridSetCoord} functions.   
 !EOPI 
 end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridSetMask -- Generic interface
+
+! !INTERFACE:
+interface ESMF_GridSetMask
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_GridSetMaskFromArray
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_GridSetMask} functions.   
+!EOPI 
+end interface
+
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
@@ -7104,6 +7123,8 @@ endif
 
       end subroutine ESMF_GridSetCoordFromArray
 
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetCmmitShapeTileIrreg"
@@ -9215,6 +9236,80 @@ endif
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_GridSetCmmitShapeTileReg
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetMaskFromArray"
+!BOP
+! !IROUTINE: ESMF_GridSetMask - Set mask using ESMF Array
+
+! !INTERFACE:
+      subroutine ESMF_GridSetMaskFromArray(grid, staggerloc, &
+                            array, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in)            :: grid
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc ! NOT IMPLEMENTED
+      type(ESMF_Array),       intent(in)            :: array
+      type(ESMF_CopyFlag),    intent(in), optional  :: docopy ! NOT IMPLEMENTED
+      integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   This method sets the passed in Array as the holder of the mask data
+!   for stagger location {\tt staggerloc} and coordinate {\tt coord}. If the location
+!   already contains an Array, then this one overwrites it. 
+!    
+!   Eventually there should be an Add, Get,... like for the Coords to make things
+!   easy for the user (except restricted to just I4??)
+!
+!     The arguments are:
+!\begin{description}
+!\item[{staggerloc}]
+!    The stagger location into which to copy the arrays. 
+!    Please see Section~\ref{sec:opt:staggerloc} for a list 
+!    of predefined stagger locations. If not present, defaults to
+!    ESMF\_STAGGERLOC\_CENTER.
+!\item[{array}]
+!    An array to set the grid mask information from.
+!\item[{[doCopy]}]
+!    If not specified, default to {\tt ESMF\_DATA\_REF}, in this case the Grid 
+!    coordinate Array will be set to a reference to {\tt array}. Please see 
+!    Section~\ref{opt:copyflag} for further description and a list of
+!    valid values. 
+!    [THE ESMF\_DATA\_COPY OPTION IS CURRENTLY NOT IMPLEMENTED] 
+!\item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!\end{description}
+!
+!EOP
+    integer :: tmp_staggerloc
+    integer :: localrc ! local error status
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
+    endif
+
+    ! Call C++ Subroutine 
+    call c_ESMC_gridsetmaskfromarray(grid%this,tmp_staggerloc, &
+      array, docopy, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetMaskFromArray
 
 
 

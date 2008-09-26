@@ -506,6 +506,31 @@ extern "C" {
 }
 
   ///////////////////////////////////////////////////////////////////////////////////
+
+  void FTN(c_esmc_gridsetmaskfromarray)(ESMCI::Grid **grid, 
+					int *staggerloc, 
+                                        ESMCI::Array **array,
+					ESMC_DataCopy *docopy, 
+                                        int *rc) {
+    int localrc;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridsetmaskfromarray()"
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    localrc= (*grid)->setMaskArray(
+      // NOT NOW ESMC_NOT_PRESENT_FILTER(staggerloc),
+      *array
+      // NOT NOW ESMC_NOT_PRESENT_FILTER(docopy)
+       );
+      ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+}
+
+
+  ///////////////////////////////////////////////////////////////////////////////////
   
   void FTN(c_esmc_gridgetcoordbounds)(ESMCI::Grid **_grid, int *_localDE,
                                         int *_coord, int *_staggerloc,  

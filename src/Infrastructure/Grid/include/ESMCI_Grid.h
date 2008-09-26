@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.48 2008/05/01 22:43:43 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.49 2008/09/26 16:03:13 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -97,6 +97,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   int   **staggerEdgeLWidthList;     // hold LWidth info [staggerloc][dim]
   int   **staggerEdgeUWidthList;     // hold UWidth info [staggerloc][dim]
   bool  **didIAllocList;        // if true, I allocated this Array [staggerloc][coord]
+
+  Array *maskArray; // TODO: this needs to be a list per staggerloc, but while DAvid is finishing up....
 
   // map grid dim to distgrid dim and grid bounds dim
   bool *gridIsDist;  // size=dimCount [grid-dim]
@@ -207,6 +209,10 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
         int  **getCoordMapDim(void) const {return coordMapDim;} 
   const int   *getStaggerEdgeLWidth(int staggerloc) const {return staggerEdgeLWidthList[staggerloc];}
   const int   *getStaggerEdgeUWidth(int staggerloc) const {return staggerEdgeUWidthList[staggerloc];}
+
+  Array *getMaskArray() {return maskArray;}
+
+  int setMaskArray(Array *array) {maskArray=array; return ESMF_SUCCESS;}
 
   // Use these when DistGrid topology stuff is in place
   // bool isLBnd(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}

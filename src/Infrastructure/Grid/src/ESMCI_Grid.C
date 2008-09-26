@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.73 2008/09/17 22:12:56 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.74 2008/09/26 16:03:16 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.73 2008/09/17 22:12:56 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.74 2008/09/26 16:03:16 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -2815,6 +2815,8 @@ Grid::Grid(
   staggerEdgeUWidthList = ESMC_NULL_POINTER;
   didIAllocList = ESMC_NULL_POINTER;
   
+  maskArray = ESMC_NULL_POINTER;
+
   gridIsDist = ESMC_NULL_POINTER;
   gridMapDim = ESMC_NULL_POINTER;
   
