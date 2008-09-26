@@ -116,7 +116,7 @@ WriteMesh(dstmesh, "dst");
      if (Par::Rank() == 0) std::cout << "Writing weights to " << argv[3] << std::endl;
      GatherForWrite(wts);
 
-wts.Print(Par::Out());
+//wts.Print(Par::Out());
 
      // Write the weights
      WriteNCMatFilePar(argv[1], argv[2], argv[3], wts, NCMATPAR_ORDER_SEQ);
