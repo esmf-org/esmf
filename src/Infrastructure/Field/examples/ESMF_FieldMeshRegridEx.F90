@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshRegridEx.F90,v 1.4 2008/09/24 22:49:25 dneckels Exp $
+! $Id: ESMF_FieldMeshRegridEx.F90,v 1.5 2008/09/26 21:18:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -48,7 +48,7 @@ program ESMF_MeshEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.4 2008/09/24 22:49:25 dneckels Exp $'
+    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.5 2008/09/26 21:18:19 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -139,7 +139,8 @@ program ESMF_MeshEx
 !BOC
 !EOC
 
-  call C_ESMC_MeshVTKHeader("data/testmesh1", num_elem, num_node, conn_size, rc)
+  call C_ESMC_MeshVTKHeader("ESMF_FieldMeshRegridExData/testmesh1", &
+    num_elem, num_node, conn_size, rc)
 !BOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -156,8 +157,9 @@ program ESMF_MeshEx
 
 
   ! Get the arrays from the test mesh
-  call C_ESMC_MeshVTKBody("data/testmesh1", nodeId(1), nodeCoord(1), nodeOwner(1), &
-          elemId(1), elemType(1), elemConn(1), rc)
+  call C_ESMC_MeshVTKBody("ESMF_FieldMeshRegridExData/testmesh1", &
+    nodeId(1), nodeCoord(1), nodeOwner(1), elemId(1), elemType(1), &
+    elemConn(1), rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! VTKBody returns zero based elemConn, so make them 1 based
