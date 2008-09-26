@@ -1,19 +1,8 @@
-# $Id: makefile,v 1.18 2008/08/15 17:05:00 rosalind Exp $ 
+# $Id: makefile,v 1.19 2008/09/26 04:17:26 cdeluca Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/LogErr/tests
 
 # TODO:FIELDINTEGRATION Restore LogErrHaltUTest

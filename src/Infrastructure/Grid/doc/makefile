@@ -1,17 +1,7 @@
-# $Id: makefile,v 1.18 2007/07/02 19:11:28 cdeluca Exp $ 
+# $Id: makefile,v 1.19 2008/09/26 04:16:52 cdeluca Exp $ 
 
 ALL: onedoc
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Grid/doc
 
 DVIFILES  =	Grid_refdoc.dvi

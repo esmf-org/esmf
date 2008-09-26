@@ -1,18 +1,7 @@
-# $Id: makefile,v 1.7 2008/08/26 20:48:21 theurich Exp $ 
+# $Id: makefile,v 1.8 2008/09/26 04:17:37 cdeluca Exp $ 
 
 ALL:      build_unit_tests
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/test_harness
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_TestHarnessUTest

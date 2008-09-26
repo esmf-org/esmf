@@ -1,18 +1,8 @@
-# $Id: makefile,v 1.2 2007/04/12 20:39:31 theurich Exp $ 
+# $Id: makefile,v 1.3 2008/09/26 04:16:56 cdeluca Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/InternArray/tests
 
 

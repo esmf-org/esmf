@@ -1,19 +1,8 @@
-# $Id: makefile,v 1.7 2005/10/12 19:06:16 nscollins Exp $ 
+# $Id: makefile,v 1.8 2008/09/26 04:16:54 cdeluca Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/IOSpec/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_IOSpecUTest

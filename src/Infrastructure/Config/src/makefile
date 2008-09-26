@@ -1,13 +1,7 @@
-# $Id: makefile,v 1.6 2008/08/06 17:35:35 tjcnrl Exp $
+# $Id: makefile,v 1.7 2008/09/26 04:16:46 cdeluca Exp $
 
 # leave alone.
 ALL: build_here 
-
-# don't set these unless absolutely necessary - they've got to be
-#  architecture and compiler independent and should be inherited
-#  from the upper level makefile if possible.
-CFLAGS    =
-FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = 
@@ -24,7 +18,6 @@ OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 
-MANSEC	  = Configobj
 LIBBASE	  = libesmf
 
 # the following line must be set to the current subdir name relative

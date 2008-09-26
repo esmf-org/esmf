@@ -1,18 +1,8 @@
-# $Id: makefile,v 1.45 2008/07/11 19:12:54 dneckels Exp $
+# $Id: makefile,v 1.46 2008/09/26 04:17:27 cdeluca Exp $
 
 ALL:  build_unit_tests
 run:  run_unit_tests
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Regrid/tests
 
 TESTS_OBJ = 

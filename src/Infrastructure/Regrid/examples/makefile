@@ -1,16 +1,8 @@
-# $Id: makefile,v 1.12 2007/08/20 22:57:41 cdeluca Exp $
+# $Id: makefile,v 1.13 2008/09/26 04:17:27 cdeluca Exp $
 
 ALL: build_examples
 
 run: run_examples
-
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
 
 EXAMPLES_BUILD   = 
 # $(ESMF_EXDIR)/ESMF_RegridEx

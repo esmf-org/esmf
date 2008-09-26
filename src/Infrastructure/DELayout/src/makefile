@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2008/03/27 01:21:21 theurich Exp $
+# $Id: makefile,v 1.11 2008/09/26 04:16:47 cdeluca Exp $
 
 # leave alone.
 ALL: build_here 
@@ -23,7 +23,6 @@ STOREH	  = ESMCI_DELayout.h
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = DELayoutobj
 LIBBASE	  = libesmf
 
 # The following line must be set to the current subdir name relative

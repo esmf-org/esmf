@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2006/01/30 20:10:06 nscollins Exp $
+# $Id: makefile,v 1.7 2008/09/26 04:16:39 cdeluca Exp $
 
 # makefile template for the examples directory.
 
@@ -6,16 +6,6 @@ ALL: build_examples
 
 run: run_examples
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/ArraySpec/examples
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_ArraySpecEx

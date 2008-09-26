@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2005/05/31 17:31:12 nscollins Exp $ 
+# $Id: makefile,v 1.13 2008/09/26 04:16:42 cdeluca Exp $ 
 
 ALL: build_here 
 
@@ -9,7 +9,6 @@ SOURCEH	  =
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = Baseobj
 LIBBASE	  = libesmf
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/Base/interface

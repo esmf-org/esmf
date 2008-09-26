@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.2 2008/05/07 06:00:40 oehmke Exp $
+# $Id: makefile,v 1.3 2008/09/26 04:17:23 cdeluca Exp $
 
 ALL:      build_examples
 run:      run_examples
 run_uni:  run_examples_uni
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/LocStream/examples
 
 

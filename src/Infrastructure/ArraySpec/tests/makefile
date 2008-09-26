@@ -1,20 +1,9 @@
-# $Id: makefile,v 1.2 2008/02/29 17:44:03 rosalind Exp $ 
+# $Id: makefile,v 1.3 2008/09/26 04:16:40 cdeluca Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
 run_uni:  run_unit_tests_uni
 
-CFLAGS    = 
-FFLAGS    = 
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/ArraySpec/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArraySpecUTest \

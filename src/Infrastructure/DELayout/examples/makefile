@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.10 2007/08/03 22:28:34 theurich Exp $
+# $Id: makefile,v 1.11 2008/09/26 04:16:46 cdeluca Exp $
 
 ALL: build_examples
 run: run_examples
 run_uni: run_examples_uni
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/DELayout/examples
 
 

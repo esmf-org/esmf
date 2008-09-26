@@ -1,16 +1,7 @@
-# $Id: makefile,v 1.11 2006/11/16 23:55:57 cdeluca Exp $
+# $Id: makefile,v 1.12 2008/09/26 04:17:25 cdeluca Exp $
 
 ALL: onedoc
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/LogErr/doc
 
 DVIFILES  =	LogErr_refdoc.dvi 

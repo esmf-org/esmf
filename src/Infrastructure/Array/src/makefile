@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2008/04/02 23:44:52 theurich Exp $
+# $Id: makefile,v 1.12 2008/09/26 04:16:37 cdeluca Exp $
 
 # leave alone.
 ALL: build_here 
@@ -23,7 +23,6 @@ STOREH	  = ESMCI_Array.h
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = rrayobj
 LIBBASE	  = libesmf
 
 # The following line must be set to the current subdir name relative

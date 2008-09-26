@@ -1,20 +1,9 @@
-# $Id: makefile,v 1.23 2008/04/23 21:02:27 rokuingh Exp $ 
+# $Id: makefile,v 1.24 2008/09/26 04:16:53 cdeluca Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
 run_uni:  run_unit_tests_uni
 
-CFLAGS    = 
-FFLAGS    = 
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/Array/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_GridCreateUTest \

@@ -1,20 +1,9 @@
-# $Id: makefile,v 1.1 2008/05/06 21:42:14 oehmke Exp $ 
+# $Id: makefile,v 1.2 2008/09/26 04:17:24 cdeluca Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
 run_uni:  run_unit_tests_uni
 
-CFLAGS    = 
-FFLAGS    = 
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/LocStream/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_LocStreamUTest \

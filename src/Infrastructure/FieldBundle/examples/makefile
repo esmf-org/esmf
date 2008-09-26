@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.3 2008/05/28 19:18:59 feiliu Exp $ 
+# $Id: makefile,v 1.4 2008/09/26 04:16:50 cdeluca Exp $ 
 
 ALL: build_examples
 
 run: run_examples
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC   = 
-SOURCEF   =
-
-SOURCEH   = 
-OBJSC     =  
-OBJSF     = 
-MANSEC    = 
-LIBBASE   = 
 LOCDIR    = src/Infrastructure/FieldBundle/examples
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldBundleCreateEx \

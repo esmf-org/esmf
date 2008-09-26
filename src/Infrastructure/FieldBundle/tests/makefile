@@ -1,19 +1,8 @@
-# $Id: makefile,v 1.7 2008/05/28 18:38:42 feiliu Exp $ 
+# $Id: makefile,v 1.8 2008/09/26 04:16:50 cdeluca Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/FieldBundle/tests
 
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldBundleUTest \

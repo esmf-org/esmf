@@ -1,17 +1,7 @@
-# $Id: makefile,v 1.2 2008/05/07 06:39:46 oehmke Exp $ 
+# $Id: makefile,v 1.3 2008/09/26 04:17:23 cdeluca Exp $ 
 
 ALL: onedoc
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/LocStream/doc
 
 DVIFILES  =	LocStream_refdoc.dvi

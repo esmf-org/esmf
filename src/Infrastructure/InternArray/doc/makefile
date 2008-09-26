@@ -1,16 +1,7 @@
-# $Id: makefile,v 1.4 2007/09/27 06:07:08 theurich Exp $ 
+# $Id: makefile,v 1.5 2008/09/26 04:16:54 cdeluca Exp $ 
 
 ALL: onedoc 
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/InternArrayDataMap/doc
 
 DVIFILES  = 	InternArrayDataMap_refdoc.dvi

@@ -1,16 +1,7 @@
-# $Id: makefile,v 1.20 2006/11/16 23:55:58 cdeluca Exp $
+# $Id: makefile,v 1.21 2008/09/26 04:17:29 cdeluca Exp $
 
 ALL: onedoc
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/TimeMgr/doc
 
 DVIFILES  =	TimeMgr_refdoc.dvi

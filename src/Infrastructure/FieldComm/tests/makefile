@@ -1,20 +1,9 @@
-# $Id: makefile,v 1.19 2008/05/19 18:53:06 feiliu Exp $ 
+# $Id: makefile,v 1.20 2008/09/26 04:16:51 cdeluca Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
 run_uni:  run_unit_tests_uni
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/FieldComm/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldGatherUTest \

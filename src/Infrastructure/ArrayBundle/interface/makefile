@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2008/04/29 00:37:54 theurich Exp $
+# $Id: makefile,v 1.3 2008/09/26 04:16:37 cdeluca Exp $
 
 # leave alone.
 ALL: build_here
@@ -16,7 +16,6 @@ STOREH	  =
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = ArrayBundleobj
 LIBBASE	  = libesmf
 
 # The following line must be set to the current subdir name relative

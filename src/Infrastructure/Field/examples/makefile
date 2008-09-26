@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.39 2008/09/23 17:20:30 dneckels Exp $ 
+# $Id: makefile,v 1.40 2008/09/26 04:16:48 cdeluca Exp $ 
 
 ALL:      build_examples
 run:      run_examples
 run_uni:  run_examples_uni
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Field/examples
 
 

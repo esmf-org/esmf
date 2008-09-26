@@ -1,16 +1,7 @@
-# $Id: makefile,v 1.6 2008/05/12 18:38:26 feiliu Exp $ 
+# $Id: makefile,v 1.7 2008/09/26 04:16:50 cdeluca Exp $ 
 
 ALL: onedoc 
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/FieldComm/doc
 
 #

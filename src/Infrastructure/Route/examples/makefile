@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.14 2007/08/21 02:27:45 cdeluca Exp $
+# $Id: makefile,v 1.15 2008/09/26 04:17:28 cdeluca Exp $
 
 ALL:  build_examples
 
 run: run_examples
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Route/examples
 
 EXAMPLES_BUILD   = 

@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.1 2006/03/23 16:39:47 theurich Exp $
+# $Id: makefile,v 1.2 2008/09/26 04:17:23 cdeluca Exp $
 
 ALL: build_examples
 
 run: run_examples
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/InternDG/examples
 
 

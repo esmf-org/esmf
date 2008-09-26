@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.24 2007/04/12 20:41:36 theurich Exp $ 
+# $Id: makefile,v 1.25 2008/09/26 04:17:26 cdeluca Exp $ 
 
 ALL: build_examples
 
 run: run_examples
 
-CFLAGS    =
-FFLAGS    = 
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/LogErr/examples
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_LogErrEx

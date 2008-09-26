@@ -1,16 +1,7 @@
-# $Id: makefile,v 1.6 2006/11/16 23:55:54 cdeluca Exp $ 
+# $Id: makefile,v 1.7 2008/09/26 04:16:39 cdeluca Exp $ 
 
 ALL: onedoc
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/ArraySpec/doc
 
 DVIFILES  =   ArraySpec_refdoc.dvi 

@@ -1,16 +1,7 @@
-# $Id: makefile,v 1.2 2008/04/02 20:42:52 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2008/09/26 04:16:49 cdeluca Exp $ 
 
 ALL: onedoc 
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/FieldBundle/doc
 
 DVIFILES  = 	FieldBundle_refdoc.dvi

@@ -1,13 +1,7 @@
-# $Id: makefile,v 1.4 2008/08/06 17:35:42 tjcnrl Exp $
+# $Id: makefile,v 1.5 2008/09/26 04:17:35 cdeluca Exp $
 
 # leave alone.
 ALL: build_here 
-
-# don't set these unless absolutely necessary - they've got to be
-#  architecture and compiler independent and should be inherited
-#  from the upper level makefile if possible.
-CFLAGS    =
-FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMCI_Test.C ESMC_Test.C
@@ -20,8 +14,6 @@ STOREH	  = ESMCI_Test.h ESMC_Test.h
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-# is MANSEC something about documentation?
-MANSEC	  = Baseobj
 LIBBASE	  = libesmf
 
 # the following line must be set to the current subdir name relative

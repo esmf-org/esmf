@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.28 2008/06/13 04:33:38 theurich Exp $
+# $Id: makefile,v 1.29 2008/09/26 04:17:30 cdeluca Exp $
 
 ALL:  build_examples
 
 run: run_examples
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/TimeMgr/examples
 
 EXAMPLES_BUILD   =  $(ESMF_EXDIR)/ESMF_TimeEx \

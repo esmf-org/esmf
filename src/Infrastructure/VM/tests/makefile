@@ -1,20 +1,9 @@
-# $Id: makefile,v 1.35 2008/09/09 17:17:49 theurich Exp $ 
+# $Id: makefile,v 1.36 2008/09/26 04:17:35 cdeluca Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
 run_uni:  run_unit_tests_uni
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/VM/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_VMUTest \

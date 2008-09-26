@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2008/08/06 17:35:35 tjcnrl Exp $
+# $Id: makefile,v 1.5 2008/09/26 04:16:40 cdeluca Exp $
 
 # leave alone.
 ALL: build_here 
@@ -14,7 +14,6 @@ STOREH	  =
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = ArraySpecobj
 LIBBASE	  = libesmf
 
 

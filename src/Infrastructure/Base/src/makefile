@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2005/05/31 17:32:24 nscollins Exp $ 
+# $Id: makefile,v 1.31 2008/09/26 04:16:42 cdeluca Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
@@ -11,7 +11,6 @@ OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
 
-MANSEC	  = Baseobj
 LIBBASE	  = libesmf
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/Base/src
