@@ -1,28 +1,27 @@
-# $Id: makefile,v 1.2 2004/03/18 16:24:43 nscollins Exp $ 
+# $Id: makefile,v 1.3 2008/09/26 05:18:06 cdeluca Exp $ 
 
 ALL: build_here 
 
-CFLAGS    =
-FFLAGS    =
 SOURCEC	  = ESMC_IOSpec.C
 SOURCEF	  = 
 SOURCEH	  = 
+
+# List all .h files which should be copied to common include dir
 STOREH    = ESMC_IOSpec.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-MANSEC	  = IOSpecobj
+
 LIBBASE	  = libesmf
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/IOSpec/interface
-
-include $(ESMF_DIR)/makefile
-
-DIRS = 
 
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
+
+include $(ESMF_DIR)/makefile
+
+DIRS = 
 
 
 

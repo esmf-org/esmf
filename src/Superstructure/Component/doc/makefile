@@ -1,17 +1,7 @@
-# $Id: makefile,v 1.24 2006/11/16 23:55:58 cdeluca Exp $ 
+# $Id: makefile,v 1.25 2008/09/26 05:18:10 cdeluca Exp $ 
 
 ALL: onedoc
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Superstructure/Component/doc
 
 DVIFILES  =     Component_refdoc.dvi

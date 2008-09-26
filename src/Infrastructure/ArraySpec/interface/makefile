@@ -1,36 +1,24 @@
-# $Id: makefile,v 1.4 2008/09/26 04:16:39 cdeluca Exp $
+# $Id: makefile,v 1.5 2008/09/26 05:18:03 cdeluca Exp $
 
-# leave alone.
 ALL: build_here
 
-# if you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMCI_ArraySpec.C ESMC_ArraySpec.C
-# if you have F90 files in this directory, list them all on the line below.
 SOURCEF	  =  ESMF_ArraySpec_C.F90
-#SOURCEF	  = 
-# if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
-# include files which go into the public src dir
+
+# List all .h files which should be copied to common include dir
 STOREH	  =  ESMCI_ArraySpec.h ESMC_ArraySpec.h
 
-# leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 LIBBASE	  = libesmf
-
-
-
-# the following line must be set to the current subdir name relative
-# to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/ArraySpec/interface
-
-
-include $(ESMF_DIR)/makefile
-
-# leave the following line blank.
-DIRS	  = 
 
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
+
+include $(ESMF_DIR)/makefile
+
+DIRS	  = 

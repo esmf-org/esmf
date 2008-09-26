@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.2 2008/08/01 19:24:21 rokuingh Exp $ 
+# $Id: makefile,v 1.3 2008/09/26 05:18:10 cdeluca Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
 run_uni:  run_unit_tests_uni
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Superstructure/Attribute_API/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \

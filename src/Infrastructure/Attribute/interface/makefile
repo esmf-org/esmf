@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2008/04/24 21:32:07 rokuingh Exp $ 
+# $Id: makefile,v 1.6 2008/09/26 05:18:03 cdeluca Exp $ 
 
 ALL: build_here 
 
@@ -9,20 +9,16 @@ SOURCEH	  =
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = Attrobj
 LIBBASE	  = libesmf
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/Attribute/interface
-
-include $(ESMF_DIR)/makefile
-
-DIRS = 
 
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
 
+include $(ESMF_DIR)/makefile
 
+DIRS = 
 
 
 

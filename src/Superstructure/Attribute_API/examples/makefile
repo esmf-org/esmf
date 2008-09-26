@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.1 2008/08/13 14:48:47 rokuingh Exp $
+# $Id: makefile,v 1.2 2008/09/26 05:18:09 cdeluca Exp $
 
 ALL:      build_examples
 run:      run_examples
 run_uni:  run_examples_uni
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Superstructure/Attribute_API/examples
 
 

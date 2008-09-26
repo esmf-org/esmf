@@ -1,20 +1,9 @@
-# $Id: makefile,v 1.13 2008/08/26 18:17:54 theurich Exp $ 
+# $Id: makefile,v 1.14 2008/09/26 05:18:12 cdeluca Exp $ 
 
 ALL:      build_examples
 run:      run_examples
 run_uni:  run_examples_uni
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Superstructure/State/examples
 
 
@@ -34,6 +23,7 @@ CLEANDIRS   =
 CLEANFILES  = $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
+DIRS = 
 
 #
 # ESMF_StateEx

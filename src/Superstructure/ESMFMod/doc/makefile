@@ -1,17 +1,7 @@
-# $Id: makefile,v 1.5 2006/11/17 16:59:13 cdeluca Exp $ 
+# $Id: makefile,v 1.6 2008/09/26 05:18:12 cdeluca Exp $ 
 
 ALL: onedoc
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Superstructure/ESMFMod/doc
 
 DVIFILES  =     ESMFMod_refdoc.dvi

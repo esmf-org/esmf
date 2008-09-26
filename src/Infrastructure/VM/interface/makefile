@@ -1,30 +1,25 @@
-# $Id: makefile,v 1.13 2008/07/21 23:51:21 theurich Exp $
+# $Id: makefile,v 1.14 2008/09/26 05:18:09 cdeluca Exp $
 
-# leave alone.
 ALL: build_here
 
 SOURCEC	  = ESMCI_VM_F.C ESMC_VM.C
 SOURCEF	  = ESMF_VM.F90
 SOURCEH	  = 
+
+# List all .h files which should be copied to common include dir
 STOREH	  = ESMC_VM.h
 
-# Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = VMobj
 LIBBASE	  = libesmf
-
-# The following line must be set to the current subdir name relative
-# to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/VM/interface
 
 CLEANDIRS  =
 CLEANFILES =
-CLOBBERDIS =
+CLOBBERDIRS =
 
 include ${ESMF_DIR}/makefile
 
-# Leave the following line blank.
 DIRS	  = 
 

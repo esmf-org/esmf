@@ -1,27 +1,24 @@
-# $Id: makefile,v 1.16 2008/08/06 17:35:38 tjcnrl Exp $
+# $Id: makefile,v 1.17 2008/09/26 05:18:07 cdeluca Exp $
 
-# leave alone.
 ALL: build_here 
 
 AUTOGEN   = ESMF_LocalArrayCreate.F90 ESMF_LocalArrayGet.F90
-
 SOURCEC	  = ESMC_LocalArray_F.C 
 SOURCEF	  = $(AUTOGEN) ESMF_LocalArray.F90 ESMF_LocalAlloc_C.F90
 SOURCEH	  = 
+
+# List all .h files which should be copied to a common include dir
 STOREH	  = 
 
-# leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = Dataobj
 LIBBASE	  = libesmf
-
-
-# the following line must be set to the current subdir name relative
-# to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/LocalArray/interface
 
+CLEANDIRS   =
+CLEANFILES  = $(AUTOGEN)
+CLOBBERDIRS =
 
 include $(ESMF_DIR)/makefile
 
@@ -33,8 +30,4 @@ endif
 
 # leave the following line blank.
 DIRS	  = 
-
-CLEANDIRS   =
-CLEANFILES  = $(AUTOGEN)
-CLOBBERDIRS =
 

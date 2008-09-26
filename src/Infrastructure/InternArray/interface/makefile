@@ -1,31 +1,25 @@
-# $Id: makefile,v 1.6 2008/09/02 22:35:18 theurich Exp $
+# $Id: makefile,v 1.7 2008/09/26 05:18:07 cdeluca Exp $
 
-# leave alone.
 ALL: build_here 
 
-# files which are generated from .cpp files
 AUTOGEN   = ESMF_InternArrayCreate.F90 ESMF_InternArrayGet.F90
-
 SOURCEC	  = ESMC_InternArrayDataMap.C ESMC_InternArray_F.C
 SOURCEF	  = ESMF_InternArrayDataMap_C.F90 ESMF_InternArray.F90 $(AUTOGEN) ESMF_Alloc_C.F90
 SOURCEH	  =
+
+# List all .h files which should be copied to common include dir
 STOREH    = ESMC_InternArrayDataMap.h
 
-# leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
 
-# is MANSEC something about documentation?
-MANSEC	  = InternArrayobj
 LIBBASE	  = libesmf
-
-
-
-# the following line must be set to the current subdir name relative
-# to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/InternArray/interface
 
+CLEANDIRS   =
+CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
+CLOBBERDIRS =
 
 include $(ESMF_DIR)/makefile
 
@@ -35,10 +29,5 @@ ifeq ($(ESMF_COMPILER),absoft)
 ESMF_F90COMPILEOPTS += -N11
 endif
 
-# leave the following line blank.
 DIRS	  = 
-
-CLEANDIRS   =
-CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
-CLOBBERDIRS =
 

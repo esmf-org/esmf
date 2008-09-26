@@ -1,26 +1,26 @@
-# $Id: makefile,v 1.1 2008/08/29 04:58:32 oehmke Exp $ 
+# $Id: makefile,v 1.2 2008/09/26 05:18:07 cdeluca Exp $ 
 
 ALL: build_here 
 
-CFLAGS    =
-FFLAGS    =
 SOURCEC	  = ESMCI_LocStream_F.C
 SOURCEF	  = 
+
+# List all .h files which should be copied to common include dir
 STOREH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-MANSEC	  = LocStreamobj
+
 LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/LocStream/interface
-
-include $(ESMF_DIR)/makefile
-
-DIRS	  = 
 
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
+
+include $(ESMF_DIR)/makefile
+
+DIRS	  = 
 
 
 

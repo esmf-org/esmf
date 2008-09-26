@@ -1,20 +1,9 @@
-# $Id: makefile,v 1.31 2008/08/29 05:10:48 theurich Exp $ 
+# $Id: makefile,v 1.32 2008/09/26 05:18:11 cdeluca Exp $ 
 
 ALL:      build_examples
 run:      run_examples
 run_uni:  run_examples_uni
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Superstructure/Component/examples
 
 
@@ -39,6 +28,7 @@ CLEANDIRS   =
 CLEANFILES  = $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
+DIRS = 
 
 #
 # ESMF_AppMainEx
@@ -77,3 +67,4 @@ run_ESMF_InternalStateEx:
 
 run_ESMF_InternalStateEx_uni:
 	$(MAKE) EXNAME=InternalState NP=1 exfrun
+
