@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.35 2008/09/26 21:11:36 cdeluca Exp $ 
+# $Id: makefile,v 1.36 2008/09/26 23:15:45 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -14,7 +14,6 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayRedistUTest \
                 $(ESMF_TESTDIR)/ESMC_ArrayUTest 
 
-ifeq ($(ESMF_TESTHARNESS), OFF)
 TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayDataUTest \
                 RUN_ESMF_ArrayScatterUTest \
@@ -23,41 +22,17 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArrayRedistUTest \
                 RUN_ESMC_ArrayUTest 
 
+ifeq ($(ESMF_TESTHARNESS), NONEXHAUSTIVE)
+  TESTS_RUN  := $(TESTS_RUN) \
+                RUN_ESMF_ArrayHarness2UTest
 else
-   ifeq ($(ESMF_TESTHARNESS), NONEXHAUSTIVE)
-   TESTS_RUN  = RUN_ESMF_ArrayCreateGetUTest \
-                RUN_ESMF_ArrayDataUTest \
-                RUN_ESMF_ArrayScatterUTest \
-                RUN_ESMF_ArrayGatherUTest \
-                RUN_ESMF_ArrayArbIdxSMMUTest \
-                RUN_ESMF_ArrayRedistUTest \
-                RUN_ESMC_ArrayUTest  \
-                RUN_ESMF_ArrayHarness2UTest
-
-   else
-      ifeq ($(ESMF_TESTHARNESS), EXHAUSTIVE)
-      TESTS_RUN  = RUN_ESMF_ArrayCreateGetUTest \
-                RUN_ESMF_ArrayDataUTest \
-                RUN_ESMF_ArrayScatterUTest \
-                RUN_ESMF_ArrayGatherUTest \
-                RUN_ESMF_ArrayArbIdxSMMUTest \
-                RUN_ESMF_ArrayRedistUTest \
-                RUN_ESMC_ArrayUTest  \
-                RUN_ESMF_ArrayHarness1UTest   \
-                RUN_ESMF_ArrayHarness2UTest  \
-                RUN_ESMF_ArrayHarness4UTest  \
+ifeq ($(ESMF_TESTHARNESS), EXHAUSTIVE)
+  TESTS_RUN  := $(TESTS_RUN) \
+                RUN_ESMF_ArrayHarness1UTest \
+                RUN_ESMF_ArrayHarness2UTest \
+                RUN_ESMF_ArrayHarness4UTest \
                 RUN_ESMF_ArrayHarness8UTest
-      else
-      TESTS_RUN  = RUN_ESMF_ArrayCreateGetUTest \
-                RUN_ESMF_ArrayDataUTest \
-                RUN_ESMF_ArrayScatterUTest \
-                RUN_ESMF_ArrayGatherUTest \
-                RUN_ESMF_ArrayArbIdxSMMUTest \
-                RUN_ESMF_ArrayRedistUTest \
-                RUN_ESMC_ArrayUTest  \
-                RUN_ESMF_ArrayHarness2UTest
-      endif
-   endif
+endif
 endif
 
 TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \

@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.242 2008/09/19 17:58:47 theurich Exp $
+#  $Id: common.mk,v 1.243 2008/09/26 23:15:45 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -192,6 +192,10 @@ ifndef ESMF_TESTMPMD
 export ESMF_TESTMPMD = default
 endif
 
+ifndef ESMF_TESTHARNESS
+export ESMF_TESTHARNESS = default
+endif
+
 #-------------------------------------------------------------------------------
 # For some variables having the literal string "default" is ok; 
 # for others, look for this string and override it.
@@ -320,6 +324,10 @@ endif
 
 ifneq ($(ESMF_TESTMPMD),ON)
 export ESMF_TESTMPMD = OFF
+endif
+
+ifeq ($(ESMF_TESTHARNESS),default)
+export ESMF_TESTHARNESS = NONEXHAUSTIVE
 endif
 
 #-------------------------------------------------------------------------------
