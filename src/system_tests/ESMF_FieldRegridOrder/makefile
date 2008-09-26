@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.7 2006/09/22 23:55:47 theurich Exp $ 
+# $Id: makefile,v 1.8 2008/09/26 04:05:34 cdeluca Exp $ 
 
 ALL: tree_build_system_tests
 
 run: tree_run_system_tests
 
-CFLAGS    = 
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/system_tests/ESMF_FieldRegridOrder
 
 

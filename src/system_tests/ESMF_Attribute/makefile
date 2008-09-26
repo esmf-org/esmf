@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.4 2008/05/01 22:26:03 rokuingh Exp $ 
+# $Id: makefile,v 1.5 2008/09/26 04:05:31 cdeluca Exp $ 
 
 ALL: tree_build_system_tests
 
 run: tree_run_system_tests
 
-CFLAGS    = 
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/system_tests/ESMF_Attribute
 
 

@@ -1,20 +1,9 @@
-# $Id: makefile,v 1.7 2006/02/07 18:13:22 nscollins Exp $ 
+# $Id: makefile,v 1.8 2008/09/26 04:05:33 cdeluca Exp $ 
 
 ALL: tree_build_system_tests
 
 run: tree_run_system_tests
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/system_tests/ESMF_FieldHaloPer
 
 

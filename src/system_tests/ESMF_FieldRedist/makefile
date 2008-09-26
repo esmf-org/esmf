@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.6 2008/08/20 17:22:53 feiliu Exp $ 
+# $Id: makefile,v 1.7 2008/09/26 04:05:33 cdeluca Exp $ 
 
 ALL: tree_build_system_tests
 
 run: tree_run_system_tests
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/system_tests/ESMF_FieldRedist
 
 SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldRedistSTest

@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.3 2008/09/10 20:14:09 feiliu Exp $ 
+# $Id: makefile,v 1.4 2008/09/26 04:05:33 cdeluca Exp $ 
 
 ALL: tree_build_system_tests
 
 run: tree_run_system_tests
 
-CFLAGS    = 
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/system_tests/ESMF_FieldConcurrentComp
 
 

@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.8 2008/04/22 18:01:39 theurich Exp $ 
+# $Id: makefile,v 1.9 2008/09/26 04:05:31 cdeluca Exp $ 
 
 ALL: tree_build_system_tests
 
 run: tree_run_system_tests
 
-CFLAGS    = 
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/system_tests/ESMF_ArraySparseMatMul
 
 

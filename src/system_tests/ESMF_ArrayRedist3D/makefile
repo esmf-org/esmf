@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.2 2008/07/15 16:18:31 theurich Exp $ 
+# $Id: makefile,v 1.3 2008/09/26 04:05:31 cdeluca Exp $ 
 
 ALL: tree_build_system_tests
 
 run: tree_run_system_tests
 
-CFLAGS    = 
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/system_tests/ESMF_ArrayRedist3D
 
 

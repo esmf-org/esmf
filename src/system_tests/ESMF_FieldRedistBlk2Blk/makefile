@@ -2,16 +2,6 @@ ALL: tree_build_system_tests
 
 run: tree_run_system_tests
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/system_tests/ESMF_FieldRedistBlk2Blk
 
 SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldRedistBlk2BlkSTest

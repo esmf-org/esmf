@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.1 2008/07/07 19:47:49 feiliu Exp $ 
+# $Id: makefile,v 1.2 2008/09/26 04:05:32 cdeluca Exp $ 
 
 ALL: tree_build_system_tests
 
 run: tree_run_system_tests
 
-CFLAGS    = 
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/system_tests/ESMF_FieldBundleSMM
 
 

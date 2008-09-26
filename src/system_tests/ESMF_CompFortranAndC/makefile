@@ -1,20 +1,10 @@
-# $Id: makefile,v 1.1 2008/09/03 01:20:00 rosalind Exp $ 
+# $Id: makefile,v 1.2 2008/09/26 04:05:32 cdeluca Exp $ 
 
 
 ALL: tree_build_system_tests
 
 run: tree_run_system_tests
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/system_tests/ESMF_CompInFortranAndC
 
 
