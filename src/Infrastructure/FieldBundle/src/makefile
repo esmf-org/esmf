@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2008/08/06 17:35:35 tjcnrl Exp $ 
+# $Id: makefile,v 1.6 2008/09/26 05:53:54 cdeluca Exp $ 
 
 
 ALL: build_here 
@@ -11,21 +11,18 @@ SOURCEC	  =
 SOURCEF	  = ESMF_FieldBundle.F90 ESMF_FieldBundleSMM.F90 ESMF_FieldBundleRedist.F90 $(AUTOGEN)
 SOURCEH	  = 
 
-
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
 
-MANSEC	  = FieldBundleobj
 LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/FieldBundle/src
-
-
-include $(ESMF_DIR)/makefile
-
-DIRS	  = 
 
 CLEANDIRS   =
 CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS =
+
+include $(ESMF_DIR)/makefile
+
+DIRS	  = 
 

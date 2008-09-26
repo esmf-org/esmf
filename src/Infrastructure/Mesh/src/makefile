@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2008/09/02 19:26:54 dneckels Exp $
+# $Id: makefile,v 1.11 2008/09/26 05:53:54 cdeluca Exp $
 
 # leave alone.
 ALL: build_here 
@@ -6,7 +6,6 @@ ALL: build_here
 # Workaround an MPICH(2) issue
 ESMF_CXXCOMPILECPPFLAGS += -DMPICH_IGNORE_CXX_SEEK
 
-# If you have C files in this directory, list them all on the line below.
 SOURCEC	  = \
            ESMC_Attr.C \
            ESMC_BBox.C \
@@ -67,22 +66,16 @@ SOURCEC	  = \
            ESMC_WriteWeights.C \
            ESMC_WriteWeightsPar.C 
 
-# If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = 
-# If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
+
 # List all .h files which should be copied to common include dir
 STOREH	  = 
 
-# Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = mesh
 LIBBASE	  = libesmf
-
-# The following line must be set to the current subdir name relative
-# to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/Mesh/src
 
 CLEANDIRS   =
@@ -91,5 +84,4 @@ CLOBBERDIRS =
 
 include ${ESMF_DIR}/makefile
 
-# Leave the following line blank.
 DIRS	  = Zoltan

@@ -1,26 +1,18 @@
-# $Id: makefile,v 1.11 2008/03/01 00:37:01 theurich Exp $
+# $Id: makefile,v 1.12 2008/09/26 05:53:53 cdeluca Exp $
 
-# leave alone.
 ALL: build_here 
 
-# If you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMCI_DistGrid.C
-# If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = 
-# If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
+
 # List all .h files which should be copied to common include dir
 STOREH	  = ESMCI_DistGrid.h
 
-# Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = DistGridobj
 LIBBASE	  = libesmf
-
-# The following line must be set to the current subdir name relative
-# to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/DistGrid/src
 
 CLEANDIRS   =
@@ -29,5 +21,4 @@ CLOBBERDIRS =
 
 include ${ESMF_DIR}/makefile
 
-# Leave the following line blank.
 DIRS	  = 

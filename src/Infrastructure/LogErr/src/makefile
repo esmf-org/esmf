@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2008/09/02 22:35:21 theurich Exp $ 
+# $Id: makefile,v 1.15 2008/09/26 05:53:54 cdeluca Exp $ 
 
 ALL: build_here 
 
@@ -10,18 +10,15 @@ STOREH    = ESMC_LogErr.h ESMCI_LogErr.h ESMC_LogErr.inc
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = LogErrobj
 LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/LogErr/src
-
-
-include $(ESMF_DIR)/makefile
-
-
-DIRS	  = 
 
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
+
+include $(ESMF_DIR)/makefile
+
+DIRS	  = 
 
 

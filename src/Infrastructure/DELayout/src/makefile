@@ -1,6 +1,5 @@
-# $Id: makefile,v 1.11 2008/09/26 04:16:47 cdeluca Exp $
+# $Id: makefile,v 1.12 2008/09/26 05:53:53 cdeluca Exp $
 
-# leave alone.
 ALL: build_here 
 
 # on the Cray X1 default template instantiation is a pain
@@ -10,23 +9,17 @@ ESMF_CXXCOMPILEOPTS += -h simple_templates
 endif
 endif
 
-# If you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMCI_DELayout.C
-# If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = 
-# If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
+
 # List all .h files which should be copied to common include dir
 STOREH	  = ESMCI_DELayout.h
 
-# Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 LIBBASE	  = libesmf
-
-# The following line must be set to the current subdir name relative
-# to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/DELayout/src
 
 CLEANDIRS   =
