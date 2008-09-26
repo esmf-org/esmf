@@ -25,7 +25,7 @@
 
 #ifdef STANDALONE
 % Title page
-\input{../../../../scripts/doc_templates/templates/title_alldoc}
+\input{../../../doc/title_alldoc}
 
 \newpage
 \tableofcontents

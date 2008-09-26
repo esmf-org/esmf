@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.88 2008/08/28 23:14:39 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.89 2008/09/26 23:28:45 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -59,7 +59,7 @@
 
 % Title page
 
-\input{../../scripts/doc_templates/templates/verstitle_alldoc}
+\input{verstitle_alldoc}
 
 \newpage
 \input{ESMF_acknowledge.tex}

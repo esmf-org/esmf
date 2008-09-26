@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.38 2008/07/25 20:28:29 theurich Exp $
+% $Id: Component_refdoc.ctex,v 1.39 2008/09/26 23:28:44 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 
 #ifdef STANDALONE
 % Title page
-\input{../../../../scripts/doc_templates/templates/title_alldoc}
+\input{../../../doc/title_alldoc}
 
 \newpage
 \tableofcontents
