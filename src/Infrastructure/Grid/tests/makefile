@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2008/09/26 04:16:53 cdeluca Exp $ 
+# $Id: makefile,v 1.25 2008/09/26 21:11:38 cdeluca Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -22,6 +22,7 @@ CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
+DIRS        = 
 
 #
 # unit test targets

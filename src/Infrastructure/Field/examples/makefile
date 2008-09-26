@@ -1,11 +1,10 @@
-# $Id: makefile,v 1.40 2008/09/26 04:16:48 cdeluca Exp $ 
+# $Id: makefile,v 1.41 2008/09/26 21:11:37 cdeluca Exp $ 
 
 ALL:      build_examples
 run:      run_examples
 run_uni:  run_examples_uni
 
 LOCDIR	  = src/Infrastructure/Field/examples
-
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
                  $(ESMF_EXDIR)/ESMF_FieldEx \

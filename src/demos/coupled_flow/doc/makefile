@@ -1,16 +1,7 @@
-# $Id: makefile,v 1.1 2007/06/12 04:54:25 cdeluca Exp $
+# $Id: makefile,v 1.2 2008/09/26 21:11:39 cdeluca Exp $
 
 ALL: onedoc 
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/demos/coupled_flow/doc
 
 DVIFILES  = 	CoupledFlow_usrdoc.dvi

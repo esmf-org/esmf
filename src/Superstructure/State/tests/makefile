@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2008/08/26 20:48:20 theurich Exp $ 
+# $Id: makefile,v 1.25 2008/09/26 21:11:39 cdeluca Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -28,10 +28,11 @@ TESTS_RUN_UNI =	RUN_ESMC_StateUTestUNI \
 
 include $(ESMF_DIR)/makefile
 
-
 CLEANDIRS   = 
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
+
+DIRS        = 
 
 #       
 # State Create

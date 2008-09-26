@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.50 2008/09/12 22:37:39 w6ws Exp $ 
+# $Id: makefile,v 1.51 2008/09/26 21:11:40 cdeluca Exp $ 
 
 ALL: doc
 
@@ -8,18 +8,6 @@ ALL: doc
 #  the ref build rules in build/common.
 #
 
-
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/doc
 
 DVIFILES  =	ESMF_refdoc.dvi \
@@ -100,5 +88,6 @@ ${ESMC_DOCDIR}/ESMF_refdoc: ESMF_refdoc.ctex
 	${DO_L2H} ESMF ref
 	rm -f .latex2html-init
 	mv -f ESMF_refdoc ${ESMC_DOCDIR}
+
 
 

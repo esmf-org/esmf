@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.53 2008/09/26 04:16:49 cdeluca Exp $ 
+# $Id: makefile,v 1.54 2008/09/26 21:11:37 cdeluca Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -21,6 +21,9 @@ include ${ESMF_DIR}/makefile
 CLEANDIRS   = 
 CLEANFILES  = $(TESTS_BUILD) $(CPFILES)
 CLOBBERDIRS =
+
+DIRS        = 
+
 
 #
 # Field

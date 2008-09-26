@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2008/09/26 04:16:54 cdeluca Exp $ 
+# $Id: makefile,v 1.9 2008/09/26 21:11:38 cdeluca Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -18,6 +18,7 @@ CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
+DIRS        = 
 
 #
 # IOSpec

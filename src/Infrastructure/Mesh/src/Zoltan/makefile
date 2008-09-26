@@ -1,12 +1,10 @@
-# $Id: makefile,v 1.5 2008/08/06 17:35:38 tjcnrl Exp $
+# $Id: makefile,v 1.6 2008/09/26 21:11:38 cdeluca Exp $
 
-# leave alone.
 ALL: build_here 
 
 # Workaround an MPICH(2) issue
 ESMF_CXXCOMPILECPPFLAGS += -DMPICH_IGNORE_CXX_SEEK
 
-# If you have C files in this directory, list them all on the line below.
 SOURCEC	  = all_allo.c assign_param_vals.c bind_param.c box_assign.c \
             build_graph.c build_machine_desc.c ch_dist_graph.c check_param.c \
             ch_init_dist.c ch_input_assign.c ch_input_geom.c ch_input_graph.c ch_input_read.c \
@@ -36,9 +34,7 @@ SOURCEC	  = all_allo.c assign_param_vals.c bind_param.c box_assign.c \
             zz_set_fn.c zz_sort.c zz_struct.c zz_util.c mem.c
 
 
-# If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = 
-# If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = all_allo_const.h BaseLB.h ch_init_dist_const.h ch_input_const.h coloring_const.h \
 	    coloring.h comm.h CONV_NS.h costs_const.h costs.h create_proc_list_const.h \
 	    DataLocationPort.h DataMigrationPort.h DD.h dfs_const.h dfs.h \
@@ -61,18 +57,14 @@ SOURCEH	  = all_allo_const.h BaseLB.h ch_init_dist_const.h ch_input_const.h colo
 	    zoltan_dd_cpp.h zoltan_dd.h zoltan.h zoltan_id.h zoltan_mem.h zoltan_timer_cpp.h \
 	    zoltan_timer.h zoltan_types.h zoltan_util.h zz_const.h zz_heap.h zz_id_const.h \
 	    zz_rand.h zz_sort.h zz_util_const.h
+
 # List all .h files which should be copied to common include dir
 STOREH	  = 
 
-# Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
-MANSEC	  = mesh
 LIBBASE	  = libesmf
-
-# The following line must be set to the current subdir name relative
-# to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/Mesh/src/Zoltan
 
 CLEANDIRS   =
@@ -81,5 +73,4 @@ CLOBBERDIRS =
 
 include ${ESMF_DIR}/makefile
 
-# Leave the following line blank.
 DIRS	  = 

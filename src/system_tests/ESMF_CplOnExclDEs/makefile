@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.7 2006/01/30 18:11:24 nscollins Exp $ 
+# $Id: makefile,v 1.8 2008/09/26 21:11:40 cdeluca Exp $ 
 
 ALL: tree_build_system_tests
 
 run: tree_run_system_tests
 
-CFLAGS    = 
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/system_tests/ESMF_CplOnExclDEs
 
 

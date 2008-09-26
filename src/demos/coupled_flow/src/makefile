@@ -1,18 +1,9 @@
-# $Id: makefile,v 1.1 2007/06/12 04:54:26 cdeluca Exp $
+# $Id: makefile,v 1.2 2008/09/26 21:11:39 cdeluca Exp $
 
 ALL: tree_build_demos
 
 run:  tree_run_demos
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/demos/coupled_flow/src
 
 

@@ -1,4 +1,4 @@
-% $Id: ArraySpec_refdoc.ctex,v 1.5 2004/06/09 09:12:13 nscollins Exp $
+% $Id: ArraySpec_refdoc.ctex,v 1.6 2008/09/26 21:11:36 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -25,7 +25,7 @@
 
 #ifdef STANDALONE
 % Title page
-\input{../../../../scripts/doc_templates/templates/title_alldoc}
+\input{../../../doc/title_alldoc}
 
 \newpage
 \tableofcontents

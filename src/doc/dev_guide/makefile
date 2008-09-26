@@ -1,21 +1,9 @@
-# $Id: makefile,v 1.3 2006/12/13 20:19:08 cdeluca Exp $ 
+# $Id: makefile,v 1.4 2008/09/26 21:11:40 cdeluca Exp $ 
 
 #
 
 doall:  ESMF_devdoc.dvi
 
-
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/doc/dev_guide
 
 DVIFILES  =	ESMF_devdoc.dvi 

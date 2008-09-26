@@ -1,19 +1,9 @@
-# $Id: makefile,v 1.15 2008/08/26 20:48:20 theurich Exp $ 
+# $Id: makefile,v 1.16 2008/09/26 21:11:40 cdeluca Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
 run_uni:  run_unit_tests_uni
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  =
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/prologue/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_StringUTest \

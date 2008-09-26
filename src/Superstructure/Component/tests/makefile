@@ -1,20 +1,9 @@
-# $Id: makefile,v 1.45 2008/08/26 20:46:50 theurich Exp $ 
+# $Id: makefile,v 1.46 2008/09/26 21:11:39 cdeluca Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
 run_uni:  run_unit_tests_uni
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-
-SOURCEH	  = 
-OBJSC	  =  
-OBJSF	  = 
-MANSEC	  = 
-LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Superstructure/Component/tests
 
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_ComponentUTest \
@@ -41,6 +30,8 @@ include $(ESMF_DIR)/makefile
 CLEANDIRS   = 
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
+
+DIRS        = 
 
 
 #

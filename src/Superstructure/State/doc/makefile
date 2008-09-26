@@ -1,17 +1,7 @@
-# $Id: makefile,v 1.7 2007/09/27 06:07:09 theurich Exp $ 
+# $Id: makefile,v 1.8 2008/09/26 21:11:39 cdeluca Exp $ 
 
 ALL: onedoc
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Superstructure/State/doc
 
 DVIFILES  =     State_refdoc.dvi
@@ -45,11 +35,12 @@ REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 include $(ESMF_DIR)/makefile
 
-DIRS	  = 
 CLEANDIRS   = State_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               State_refdoc.tex $(PDFFILES) 
 CLOBBERDIRS =
+
+DIRS	  = 
 
 
 

@@ -1,17 +1,7 @@
-# $Id: makefile,v 1.17 2006/11/16 23:55:57 cdeluca Exp $ 
+# $Id: makefile,v 1.18 2008/09/26 21:11:38 cdeluca Exp $ 
 
 ALL: onedoc
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = 
-SOURCEH	  = 
-OBJSC     = 
-OBJSF     = 
-TEXFILES  = 
-MANSEC	  = 
-LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Regrid/doc
 
 DVIFILES  =
