@@ -14,6 +14,6 @@
 
 // TODO: figure out how to make platform indep.
 
-#define FTN(a) a##_
+#include <ESMC_Start.h>
 
 #endif
