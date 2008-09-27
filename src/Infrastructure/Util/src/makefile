@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2008/09/26 05:53:55 cdeluca Exp $ 
+# $Id: makefile,v 1.27 2008/09/27 00:12:50 w6ws Exp $ 
 
 ALL: build_here
 
@@ -8,7 +8,8 @@ SOURCEC	  = ESMC_Util.C ESMC_Fraction.C ESMCI_F90Interface.C
 SOURCEF	  = ESMF_UtilTypes.F90 \
             ESMF_LogErr.F90  \
             $(AUTOGEN) \
-            ESMF_InitMacros.F90
+            ESMF_InitMacros.F90 \
+            ESMF_FIOUtil.F90
             
 STOREH    = ESMC_Arg.h ESMCI_Arg.h ESMF_Macros.inc ESMF.h ESMC_Macros.h \
             ESMC_Util.h ESMCI_Util.h ESMF_TypeKindRankMacros.hcppF90 \
