@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.7 2008/09/17 13:20:24 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.8 2008/09/27 00:13:52 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -28,12 +28,13 @@
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF_Mod         ! the ESMF Framework
+      use ESMF_FIOUtilMod  ! Internal Fortran I/O routines
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.7 2008/09/17 13:20:24 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.8 2008/09/27 00:13:52 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -60,6 +61,8 @@
       character(len (ESMF_VERSION_STRING)) :: evs
       integer :: evs_dotpos
       integer :: i
+      integer :: funits(5), funit_low, funit_high
+      integer :: ioerr
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -124,6 +127,67 @@
       write (failMsg, *) 'Could not find revision number in string'
       call ESMF_Test(i >= 2, name, failMsg, result, ESMF_SRCLINE)      
     end if
+
+! Test Fortran unit numbers
+! =========================
+
+    !
+    !NEX_UTest
+    ! Open a few Fortran files
+
+    do, i=1, size (funits)
+      ioerr = 0
+      call ESMF_FIOUnitGet (funits(i), rc)
+      ! print *, 'ESMF_FIOUnitGet returned unit:', funits(i), ', rc =', rc
+      if (rc /= ESMF_SUCCESS) exit
+      open (funits(i), status='scratch', iostat=ioerr)
+      if (ioerr /= 0) exit
+    end do
+
+    write (name, *) "Testing ESMF_FIOUnitGet"
+    if (i > size (funits)) then
+      write (failMsg, *) "Could not obtain a unit."
+    else
+      write (failMsg, *) "Could not obtain unit:", funits(i)
+    end if
+    call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    if (i > size (funits)) then
+      write (failMsg, *) "Could not open file: xxxx"
+    else
+      write (failMsg, *) "Could not open file:", funits(i)
+    end if
+    call ESMF_Test (ioerr == 0, name, failMsg, result, ESMF_SRCLINE)
+
+    do, i=1, size (funits)
+      close (funits(i), iostat=ioerr)
+    end do
+
+!Flush data to a file
+!====================
+
+    !
+    !NEX_UTest
+    !
+
+    write (name, *) "Testing ESMF_FIOUnitFlush"
+
+    call ESMF_FIOUnitGet (funits(1), rc)
+    write (failMsg, *) "Obtaining a fresh unit"
+    call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    write (failMsg, *) "Opening scratch unit"
+    open (funits(1), status='scratch', form='formatted', iostat=ioerr)
+    call ESMF_Test (ioerr == 0, name, failMsg, result, ESMF_SRCLINE)
+
+    write (funits(1), *) 'Testing ESMF_FIOUnitFlush'
+
+    write (failMsg, *) 'calling ESMF_FIOUnitFlush'
+    call ESMF_FIOUnitFlush (funits(1), rc)
+    call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    close (funits(1), iostat=ioerr)
+
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
