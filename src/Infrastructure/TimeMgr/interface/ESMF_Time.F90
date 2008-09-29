@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.99 2008/09/17 05:23:25 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.100 2008/09/29 05:31:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.99 2008/09/17 05:23:25 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.100 2008/09/29 05:31:21 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1287,7 +1287,7 @@
 
 !------------------------------------------------------------------------------
 !
-! This section includes the inherited ESMF_BaseTime class overloaded operators
+! This section includes the inherited ESMC_BaseTime class overloaded operators
 ! internal, private implementation methods.
 ! Note:  these functions do not have a return code, since Fortran forbids more
 ! than 2 arguments for arithmetic overloaded operators
@@ -1386,7 +1386,7 @@
 !
 !EOPI
 
-      ! invoke C to C++ entry point for ESMF_BaseTime base class function
+      ! invoke C to C++ entry point for ESMC_BaseTime base class function
       call c_ESMC_BaseTimeEQ(time1, time2, ESMF_TimeEQ)
 
       end function ESMF_TimeEQ
