@@ -1,4 +1,4 @@
-! $Id: ESMF.F90,v 1.63 2008/08/21 19:59:36 oehmke Exp $
+! $Id: ESMF.F90,v 1.64 2008/09/29 04:56:23 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -28,7 +28,6 @@ module ESMF_Mod
     use ESMF_IOSpecMod
 
     use ESMF_FractionMod
-    use ESMF_BaseTimeMod
     use ESMF_CalendarMod
     use ESMF_TimeIntervalMod
     use ESMF_TimeMod
