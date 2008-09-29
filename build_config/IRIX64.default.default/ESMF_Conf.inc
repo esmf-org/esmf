@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.4 2008/04/05 03:37:48 cdeluca Exp $
+$Id: ESMF_Conf.inc,v 1.5 2008/09/29 21:10:16 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -11,7 +11,13 @@ Licensed under the University of Illinois-NCSA License.
 #endif
 
 #if 0
-currently an empty file.  available if #defines needed
-on a per-system basis for F90 code
+Define the proper way to flush Fortran units.  Choices include:
+
+  ESMF_HAS_F2003_FLUSH (preferred)
+  ESMF_HAS_1ARG_FLUSH
+  ESMF_HAS_2ARG_FLUSH
+
 #endif
+
+#define ESMF_HAS_2ARG_FLUSH
 

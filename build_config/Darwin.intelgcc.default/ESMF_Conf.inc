@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.2 2008/04/05 03:37:47 cdeluca Exp $
+$Id: ESMF_Conf.inc,v 1.3 2008/09/29 21:10:16 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -10,6 +10,20 @@ NASA Goddard Space Flight Center.
 Licensed under the University of Illinois-NCSA License.
 #endif
 
+#if 0
+Define the proper way to flush Fortran units.  Choices include:
+
+  ESMF_HAS_F2003_FLUSH (preferred)
+  ESMF_HAS_1ARG_FLUSH
+  ESMF_HAS_2ARG_FLUSH
+
+#endif
+
+#if (__INTEL_COMPILER >= 1000)
+#define ESMF_HAS_F2003_FLUSH
+#else
+#define ESMF_HAS_1ARG_FLUSH
+#endif
 
 #if 0
 Strict F90 compilers will not allow initializers.  Also, in the past when we 
