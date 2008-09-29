@@ -1,4 +1,4 @@
-! $Id: ESMF_FIOUtil.F90,v 1.1 2008/09/27 00:12:50 w6ws Exp $
+! $Id: ESMF_FIOUtil.F90,v 1.2 2008/09/29 21:51:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -71,7 +71,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_FIOUtil.F90,v 1.1 2008/09/27 00:12:50 w6ws Exp $'
+               '$Id: ESMF_FIOUtil.F90,v 1.2 2008/09/29 21:51:27 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -106,11 +106,16 @@
 #if defined (ESMF_HAS_F2003_FLUSH)
       flush (unitNumber, iostat=status)
 #elif defined (ESMF_HAS_1ARG_FLUSH)
+#if defined (PARCH_aix)
+      call flush_ (unitNumber)
+#else
       call flush (unitNumber)
+#endif
       status = 0
 #elif defined (ESMF_HAS_2ARG_FLUSH)
       call flush (unitNumber, status)
 #else
+
 #if   defined(PARCH_linux)
       print *, "need to call flush() here"
 #elif defined(PARCH_IRIX64)
@@ -126,6 +131,7 @@
 #else
       print *, "unknown architecture in ESMF_IOFlush()"
 #endif
+
 #endif
 
       if (present(rc)) rc = ESMF_SUCCESS
