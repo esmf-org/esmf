@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.28 2008/09/26 04:14:33 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.29 2008/09/29 17:21:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -4746,9 +4746,7 @@ contains
 
         ! set src data
         ! (something relatively smooth, that varies everywhere)
-!        fptr(i1,i2) = x+y+z+15.0
-
-!        fptr(i1,i2) = 1.0 + cos(phi)*cos(phi)*(0.5*cos(3*theta) + -0.3*sin(theta))
+        fptr(i1,i2) = x+y+z+15.0
 
          ! initialize src destination field
          fptr2(i1,i2)=0.0
@@ -4804,9 +4802,8 @@ contains
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
         ! Set destination coordinates as -180 to 180
-        fptrXC(i1,i2) = (REAL(i1-1)*dst_dx)
-!        fptrXC(i1,i2) = -180.+(REAL(i1-1)*dst_dx)
-        fptrYC(i1,i2) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
+        fptrXC(i1,i2) = -180. + (REAL(i1-1)*dst_dx)
+        fptrYC(i1,i2) = -90.  + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
 
         ! init destination mesh to 0
         fptr(i1,i2) = 0.
