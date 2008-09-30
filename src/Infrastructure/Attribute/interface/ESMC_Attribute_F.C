@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.22 2008/09/19 21:29:14 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.23 2008/09/30 16:18:05 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.22 2008/09/19 21:29:14 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.23 2008/09/30 16:18:05 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -79,7 +79,6 @@ extern "C" {
 //EOP
 
   int status;
-  char *cname, *cconv, *cpurp, *cobj;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -123,44 +122,39 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
-  // copy and convert F90 string to null terminated one
-  cconv = ESMC_F90toCstring(convention, clen);
-  if (!cconv) {
+  if (cconv.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
-      delete [] cname;
       if (rc) *rc = status;
       return;
   }
   
-  // copy and convert F90 string to null terminated one
-  cpurp = ESMC_F90toCstring(purpose, plen);
-  if (!cpurp) {
+  if (cpurp.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
-      delete [] cname;
-      delete [] cconv;
       if (rc) *rc = status;
       return;
   }
   
-  // copy and convert F90 string to null terminated one
-  cobj = ESMC_F90toCstring(object, olen);
-  if (!cobj) {
+  if (cobj.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
-      delete [] cname;
-      delete [] cconv;
-      delete [] cpurp;
       if (rc) *rc = status;
       return;
   }
@@ -171,12 +165,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
   }
-  
-  delete [] cname;
-  delete [] cconv;
-  delete [] cpurp;
-  delete [] cobj;
-  
+
   if (rc) *rc = status;
   return;
 
@@ -213,7 +202,6 @@ extern "C" {
 //EOP
 
   int status;
-  char *cname, *cconv, *cpurp, *cobj;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -257,44 +245,39 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
-  // copy and convert F90 string to null terminated one
-  cconv = ESMC_F90toCstring(convention, clen);
-  if (!cconv) {
+  if (cconv.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
-      delete [] cname;
       if (rc) *rc = status;
       return;
   }
   
-  // copy and convert F90 string to null terminated one
-  cpurp = ESMC_F90toCstring(purpose, plen);
-  if (!cpurp) {
+  if (cpurp.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
-      delete [] cname;
-      delete [] cconv;
       if (rc) *rc = status;
       return;
   }
   
-  // copy and convert F90 string to null terminated one
-  cobj = ESMC_F90toCstring(object, olen);
-  if (!cobj) {
+  if (cobj.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
-      delete [] cname;
-      delete [] cconv;
-      delete [] cpurp;
       if (rc) *rc = status;
       return;
   }
@@ -304,19 +287,8 @@ extern "C" {
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed removing attribute package", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
-    if (rc) *rc = status;
-    return;
   }
-  
-  delete [] cname;
-  delete [] cconv;
-  delete [] cpurp;
-  delete [] cobj;
-  
+
   if (rc) *rc = status;
   return;
 
@@ -357,7 +329,6 @@ extern "C" {
   int status;
   char msgbuf[ESMF_MAXSTR];
   ESMC_TypeKind attrTypeKind;
-  char *cname, *cvalue, *cconv, *cpurp, *cobj;
   int slen;              // actual attribute string length
   int *llens;
 
@@ -402,65 +373,43 @@ extern "C" {
       if (rc) *rc = status;
       return;
   }
+  
+  string cname(name, nlen);
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cconv = ESMC_F90toCstring(convention, clen);
-  if (!cconv) {
+  if (cconv.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
-    delete [] cname;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cpurp = ESMC_F90toCstring(purpose, plen);
-  if (!cpurp) {
+  if (cpurp.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
-    delete [] cname;
-    delete [] cconv;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cobj = ESMC_F90toCstring(object, olen);
-  if (!cobj) {
+  if (cobj.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
     if (rc) *rc = status;
     return;
   }
-
-/*
-  // get the length and type of the Attribute from the attpack 
-  status = ((**base).root.ESMC_AttPackGet(cconv, cpurp, cobj))->\
-    ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.Write(
-                          "failed getting typekind - looking for default value",
-                          ESMC_LOG_INFO);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
-    if (rc) *rc = status;
-    return;
-  }
-*/
 
   //   use the count to allocate llens
   llens = new int[1];
@@ -471,10 +420,6 @@ extern "C" {
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.Write(
                          "failed getting item char* lengths", ESMC_LOG_INFO);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
     delete [] llens;
     if (rc) *rc = status;
     return;
@@ -487,54 +432,28 @@ extern "C" {
       name, slen, vlen);
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          msgbuf, &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
     delete [] llens;
     if (rc) *rc = status;
     return; 
   }
 
-  cvalue = new char[slen+1];
-  if (!cvalue) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value allocation", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
-    delete [] llens;
-    if (rc) *rc = status;
-    return;
-  }
-
+  string cvalue;
   status = ((**base).root.ESMC_AttPackGet(cconv, cpurp, cobj))->\
     ESMC_AttributeGet(cname, cvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting the attpack attribute value", &status);
-    delete [] cname;
-    delete [] cvalue;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
     delete [] llens;
     if (rc) *rc = status;
     return;
   }
 
-  status = ESMC_CtoF90string(cvalue, value, vlen);
+  status = ESMC_CtoF90string(const_cast<char*> (cvalue.c_str()), value, cvalue.size());
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
   }
-  
-  delete [] cname;
-  delete [] cvalue;
-  delete [] cconv;
-  delete [] cpurp;
-  delete [] cobj;
+
   delete [] llens;
   
   if (rc) *rc = status;
@@ -581,8 +500,6 @@ extern "C" {
   unsigned int i,k;
   char msgbuf[ESMF_MAXSTR];
   ESMC_TypeKind attrTypeKind;
-  char *cname, *cconv, *cpurp, *cobj;
-  char **lcvalue;
   int* llens;
   int lcount;
   ESMC_Attribute *attr;
@@ -629,44 +546,39 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cconv = ESMC_F90toCstring(convention, clen);
-  if (!cconv) {
+  if (cconv.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
-    delete [] cname;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cpurp = ESMC_F90toCstring(purpose, plen);
-  if (!cpurp) {
+  if (cpurp.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
-    delete [] cname;
-    delete [] cconv;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cobj = ESMC_F90toCstring(object, olen);
-  if (!cobj) {
+  if (cobj.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
     if (rc) *rc = status;
     return;
   }
@@ -676,10 +588,6 @@ extern "C" {
   if (!attr) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting Attribute package", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
     if (rc) *rc = status;
     return;
   }
@@ -690,10 +598,6 @@ extern "C" {
     ESMC_LogDefault.Write(
                           "failed getting typekind - looking for default value",
                           ESMC_LOG_INFO);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
     if (rc) *rc = status;
     return;
   }
@@ -703,10 +607,6 @@ extern "C" {
   if (lcount != *count) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "itemcount-in does not match itemcount of attribute", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
     if (rc) *rc = status;
     return;
   }
@@ -719,10 +619,6 @@ extern "C" {
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting item char* lengths", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
     delete [] llens;
     if (rc) *rc = status;
     return;
@@ -733,13 +629,9 @@ extern "C" {
     // make sure destination will be long enough
     if (lens[i] < llens[i]) {
       sprintf(msgbuf,"attribute %s item #%d is %d bytes long, buffer length %d is too short",
-        cname, i+1, lens[i], llens[i]);
+        cname.c_str(), i+1, lens[i], llens[i]);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          msgbuf, &status);
-      delete [] cname;
-      delete [] cconv;
-      delete [] cpurp;
-      delete [] cobj;
       delete [] llens;
       if (rc) *rc = status;
       return;
@@ -747,67 +639,35 @@ extern "C" {
     lens[i] = llens[i];
   }
   
-  // allocate all char**s
-  lcvalue = new char*[*count];
-  for (i=0; i<*count; i++) {
-    // allocate space for each char*
-    lcvalue[i] = new char[lens[i]+1];
-    if (!(lcvalue[i])) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value allocation", &status);
-      delete [] cname;
-      delete [] cconv;
-      delete [] cpurp;
-      delete [] cobj;
-      delete [] llens;
-      delete [] lcvalue;
-      if (rc) *rc = status;
-      return;
-    }
-  }
+  vector<string> lcvalue;
 
   // next we get all the strings into the char**
-  status = attr->ESMC_AttributeGet(cname, &attrTypeKind, NULL, lcvalue);
+  status = attr->ESMC_AttributeGet(cname, lcvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
     delete [] llens;
-    delete [] lcvalue;
-    delete [] lcvalue;
     if (rc) *rc = status;
     return;
   }
-
+  
   // finally we convert them all to f90 and pack them into char*
   j = 0;
   for (i=0; i<*count; i++) {
     // convert strings to F90 using F90 length
-    status = ESMC_CtoF90string(lcvalue[i], &valueList[j], lens[i]);
+    status = ESMC_CtoF90string(const_cast<char*> (lcvalue[i].c_str()), &valueList[j], 
+    (lcvalue[i]).size());
     if (status != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value conversion", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
     delete [] llens;
-    delete [] lcvalue;
     if (rc) *rc = status;
     return;
     }
     j = j + lens[i];
   }
       
-  delete [] cname;
-  delete [] cconv;
-  delete [] cpurp;
-  delete [] cobj;
   delete [] llens;
-  delete [] lcvalue;
   
   if (rc) *rc = status;
   return;
@@ -849,7 +709,6 @@ extern "C" {
 
   int status, attrCount;
   ESMC_TypeKind attrTk;
-  char *cname, *cconv, *cpurp, *cobj;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -893,44 +752,39 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cconv = ESMC_F90toCstring(convention, clen);
-  if (!cconv) {
+  if (cconv.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
-    delete [] cname;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cpurp = ESMC_F90toCstring(purpose, plen);
-  if (!cpurp) {
+  if (cpurp.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
-    delete [] cname;
-    delete [] cconv;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cobj = ESMC_F90toCstring(object, olen);
-  if (!cobj) {
+  if (cobj.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
     if (rc) *rc = status;
     return;
   }
@@ -940,10 +794,6 @@ extern "C" {
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                     "failed getting attribute type and count", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
     if (rc) *rc = status;
     return;
   }
@@ -951,10 +801,6 @@ extern "C" {
   if (attrTk != *tk) {
     ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_INCOMP,
                          "attribute value not expected kind", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
     if (rc) *rc = status;
     return;
   }
@@ -962,25 +808,17 @@ extern "C" {
   if (attrCount != *count) {
     ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_INCOMP,
                          "attribute value not expected count", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
-    delete [] cobj;
     if (rc) *rc = status;
     return;
   }
 
-  status = ((**base).root.ESMC_AttPackGet(cconv, cpurp, cobj))->ESMC_AttributeGet(cname, NULL, NULL, value);
+  status = ((**base).root.ESMC_AttPackGet(cconv, cpurp, cobj))->\
+    ESMC_AttributeGet(cname, NULL, NULL, value);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
   }
-  
-  delete [] cname;
-  delete [] cconv;
-  delete [] cpurp;
-  delete [] cobj;
-  
+    
   if (rc) *rc = status;
   return;
 
@@ -1018,7 +856,6 @@ extern "C" {
 //EOP
 
   int status;
-  char *cname, *cconv, *cpurp, *cobj;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -1062,44 +899,39 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
-  // copy and convert F90 string to null terminated one
-  cconv = ESMC_F90toCstring(convention, clen);
-  if (!cconv) {
+  if (cconv.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
-    delete [] cname;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cpurp = ESMC_F90toCstring(purpose, plen);
-  if (!cpurp) {
+  if (cpurp.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
-    delete [] cname;
-    delete [] cconv;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cobj = ESMC_F90toCstring(object, olen);
-  if (!cobj) {
+  if (cobj.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
     if (rc) *rc = status;
     return;
   }
@@ -1110,11 +942,6 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed query for Attribute package Attribute", &status);
   }
-  
-  delete [] cname;
-  delete [] cconv;
-  delete [] cpurp;
-  delete [] cobj;
   
   if (rc) *rc = status;
   return;
@@ -1155,7 +982,6 @@ extern "C" {
 //EOP
 
   int status;
-  char *cname, *cvalue, *cconv, *cpurp, *cobj;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -1206,69 +1032,58 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  string cvalue(value, vlen);
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  cvalue.resize(cvalue.find_last_not_of(" ")+1);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
-  // copy and convert F90 string to null terminated one
-  cvalue = ESMC_F90toCstring(value, vlen);
-  if (!cvalue) {
+  if (cvalue.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value conversion", &status);
       if (rc) *rc = status;
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cconv = ESMC_F90toCstring(convention, clen);
-  if (!cconv) {
+  if (cconv.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
-    delete [] cname;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cpurp = ESMC_F90toCstring(purpose, plen);
-  if (!cpurp) {
+  if (cpurp.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
-    delete [] cname;
-    delete [] cconv;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cobj = ESMC_F90toCstring(object, olen);
-  if (!cobj) {
+  if (cobj.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
     if (rc) *rc = status;
     return;
   }
 
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttPackSet(cname, *tk, 1, cvalue, cconv, cpurp, cobj);
+  status = (**base).root.ESMC_AttPackSet(cname, *tk, 1, &cvalue, cconv, cpurp, cobj);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed setting attribute value", &status);
   }
-  
-  delete [] cname;
-  delete [] cvalue;
-  delete [] cconv;
-  delete [] cpurp;
-  delete [] cobj;
   
   if (rc) *rc = status;
   return;
@@ -1311,8 +1126,6 @@ extern "C" {
 //EOP
 
   int j, status;
-  char *cname, *temp, *cconv, *cpurp, *cobj;
-  char **cvalue;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -1356,50 +1169,46 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
-  // copy and convert F90 string to null terminated one
-  cconv = ESMC_F90toCstring(convention, clen);
-  if (!cconv) {
+  if (cconv.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
-    delete [] cname;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cpurp = ESMC_F90toCstring(purpose, plen);
-  if (!cpurp) {
+  if (cpurp.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
-    delete [] cname;
-    delete [] cconv;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cobj = ESMC_F90toCstring(object, olen);
-  if (!cobj) {
+  if (cobj.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
     if (rc) *rc = status;
     return;
   }
 
-  // allocate space for the array of char*'s
-  cvalue = new char*[(*count)];
+  // allocate space for the array of char*'s and vector of strings
+  vector<string> cvalue;
+  cvalue.reserve(*count);
 
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
@@ -1412,37 +1221,24 @@ extern "C" {
     }
 
     // copy and convert F90 string to null terminated one
-    temp = ESMC_F90toCstring((&valueList[j]), lens[i]);
-    if (!(temp)) {
+    string temp((&valueList[j]), lens[i]);
+    temp.resize(temp.find_last_not_of(" ")+1);
+    if (temp.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value conversion", &status);
-      delete [] cname;
-      delete [] cconv;
-      delete [] cpurp;
-      delete [] cobj;
-      delete [] cvalue;
-      delete [] cvalue;
       if (rc) *rc = status;
       return;
     }
-    cvalue[i] = new char[lens[i]];
-    strcpy(cvalue[i], temp);
+    cvalue.push_back(temp);
     j = j + lens[i];
   }
-
+  
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, cvalue, cconv, cpurp, cobj);
+  status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, &cvalue, cconv, cpurp, cobj);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed setting attribute char* value", &status);
   }
-  
-  delete [] cname;
-  delete [] temp;
-  delete [] cvalue;
-  delete [] cconv;
-  delete [] cpurp;
-  delete [] cobj;
   
   if (rc) *rc = status;
   return;
@@ -1483,7 +1279,6 @@ extern "C" {
 //EOP
 
   int status;
-  char *cname, *cconv, *cpurp, *cobj;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -1527,44 +1322,39 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
-  // copy and convert F90 string to null terminated one
-  cconv = ESMC_F90toCstring(convention, clen);
-  if (!cconv) {
+  if (cconv.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
-    delete [] cname;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cpurp = ESMC_F90toCstring(purpose, plen);
-  if (!cpurp) {
+  if (cpurp.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
-    delete [] cname;
-    delete [] cconv;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cobj = ESMC_F90toCstring(object, olen);
-  if (!cobj) {
+  if (cobj.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
-    delete [] cname;
-    delete [] cconv;
-    delete [] cpurp;
     if (rc) *rc = status;
     return;
   }
@@ -1576,11 +1366,6 @@ extern "C" {
                          "failed setting attribute value", &status);
   }
 
-  delete [] cname;
-  delete [] cconv;
-  delete [] cpurp;
-  delete [] cobj;
-  
   if (rc) *rc = status;
   return;
 
@@ -1617,7 +1402,6 @@ extern "C" {
 //EOP
 
   int status;
-  char *cconv, *cpurp, *cobj, *ctarobj;
   
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -1661,44 +1445,39 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cconv = ESMC_F90toCstring(convention, clen);
-  if (!cconv) {
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  string ctarobj(targetobj, tlen);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+  ctarobj.resize(ctarobj.find_last_not_of(" ")+1);
+
+  if (cconv.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cpurp = ESMC_F90toCstring(purpose, plen);
-  if (!cpurp) {
+  if (cpurp.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
-    delete [] cconv;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cobj = ESMC_F90toCstring(object, olen);
-  if (!cobj) {
+  if (cobj.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
-    delete [] cconv;
-    delete [] cpurp;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  ctarobj = ESMC_F90toCstring(targetobj, tlen);
-  if (!ctarobj) {
+  if (ctarobj.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute target object conversion", &status);
-      delete [] cconv;
-      delete [] cpurp;
-      delete [] cobj;
       if (rc) *rc = status;
       return;
   }
@@ -1711,11 +1490,6 @@ extern "C" {
                          "failed attributewritetab", &status);
   }
 
-  delete [] cconv;
-  delete [] cpurp;
-  delete [] cobj;
-  delete [] ctarobj;
-  
   if (rc) *rc = status;
   return;
 
@@ -1752,7 +1526,6 @@ extern "C" {
 //EOP
 
   int status;
-  char *cconv, *cpurp, *cobj, *ctarobj;
   
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -1796,44 +1569,39 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cconv = ESMC_F90toCstring(convention, clen);
-  if (!cconv) {
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  string ctarobj(targetobj, tlen);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+  ctarobj.resize(ctarobj.find_last_not_of(" ")+1);
+
+  if (cconv.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention conversion", &status);
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cpurp = ESMC_F90toCstring(purpose, plen);
-  if (!cpurp) {
+  if (cpurp.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose conversion", &status);
-    delete [] cconv;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cobj = ESMC_F90toCstring(object, olen);
-  if (!cobj) {
+  if (cobj.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
-    delete [] cconv;
-    delete [] cpurp;
     if (rc) *rc = status;
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  ctarobj = ESMC_F90toCstring(targetobj, tlen);
-  if (!ctarobj) {
+  if (ctarobj.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute target object conversion", &status);
-      delete [] cconv;
-      delete [] cpurp;
-      delete [] cobj;
       if (rc) *rc = status;
       return;
   }
@@ -1845,11 +1613,6 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed attributewritexml", &status);
   }
-  
-  delete [] cconv;
-  delete [] cpurp;
-  delete [] cobj;
-  delete [] ctarobj;
   
   if (rc) *rc = status;
   return;
@@ -1935,7 +1698,6 @@ extern "C" {
 //EOP
 
   int status;
-  char *cname;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -1955,9 +1717,10 @@ extern "C" {
       return;
   }
   
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
@@ -1970,12 +1733,9 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed removing the attribute", &status);
     if (rc) *rc = status;
-    delete [] cname;
     return;
   }
-  
-  delete [] cname;
-  
+    
   if (rc) *rc = status;
   return;
 
@@ -2010,7 +1770,6 @@ extern "C" {
   int status;
   char msgbuf[ESMF_MAXSTR];
   ESMC_TypeKind attrTypeKind;
-  char *cname, *cvalue;
   int slen;              // actual attribute string length
   int *llens;
 
@@ -2032,26 +1791,15 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
-
-/*
-  status = (**base).root.ESMC_AttributeGet(cname, &attrTypeKind, &slen, NULL);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.Write(
-                          "failed getting typekind - looking for default value",
-                          ESMC_LOG_INFO);
-    delete [] cname;
-    if (rc) *rc = status;
-    return;
-  }
-*/
 
   //   use the count to allocate llens
   llens = new int[1];
@@ -2061,7 +1809,6 @@ extern "C" {
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.Write(
                          "failed getting item char* lengths", ESMC_LOG_INFO);
-    delete [] cname;
     delete [] llens;
     if (rc) *rc = status;
     return;
@@ -2074,41 +1821,27 @@ extern "C" {
       name, slen, vlen);
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          msgbuf, &status);
-    delete [] cname;
     delete [] llens;
     if (rc) *rc = status;
     return; 
   }
 
-  cvalue = new char[slen+1];
-  if (!cvalue) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value allocation", &status);
-      delete [] cname;
-      delete [] llens;
-      if (rc) *rc = status;
-      return;
-  }
-
+  string cvalue;
   status = (**base).root.ESMC_AttributeGet(cname, cvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
-    delete [] cname;
-    delete [] cvalue;
     delete [] llens;
     if (rc) *rc = status;
     return;
   }
 
-  status = ESMC_CtoF90string(cvalue, value, vlen);
+  status = ESMC_CtoF90string(const_cast<char*> (cvalue.c_str()), value, vlen);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value conversion", &status);
+                         "failed getting attribute value", &status);
   }
-  
-  delete [] cname;
-  delete [] cvalue;
+    
   delete [] llens;
   
   if (rc) *rc = status;
@@ -2148,8 +1881,6 @@ extern "C" {
   unsigned int i,k;
   char msgbuf[ESMF_MAXSTR];
   ESMC_TypeKind attrTypeKind;
-  char *cname;
-  char **lcvalue;
   int *llens;
   int lcount;
 
@@ -2171,9 +1902,10 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
@@ -2186,7 +1918,6 @@ extern "C" {
     ESMC_LogDefault.Write(
                           "failed getting typekind - looking for default value",
                           ESMC_LOG_INFO);
-    delete [] cname;
     if (rc) *rc = status;
     return;
   }
@@ -2196,7 +1927,6 @@ extern "C" {
   if (lcount != *count) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "itemcount-in does not match itemcount of attribute", &status);
-    delete [] cname;
     if (rc) *rc = status;
     return;
   }
@@ -2209,7 +1939,6 @@ extern "C" {
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting item char* lengths", &status);
-    delete [] cname;
     delete [] llens;
     if (rc) *rc = status;
     return;
@@ -2220,10 +1949,9 @@ extern "C" {
     // make sure destination will be long enough
     if (lens[i] < llens[i]) {
       sprintf(msgbuf,"attribute %s item #%d is %d bytes long, buffer length %d is too short",
-        name, i+1, lens[i], llens[i]);
+        cname.c_str(), i+1, lens[i], llens[i]);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          msgbuf, &status);
-      delete [] cname;
       delete [] llens;
       if (rc) *rc = status;
       return;
@@ -2231,31 +1959,16 @@ extern "C" {
     lens[i] = llens[i];
   }
   
-  // allocate all char**s
-  lcvalue = new char*[*count];
-  for (i=0; i<*count; i++) {
-    // allocate space for each char*
-    lcvalue[i] = new char[lens[i]+1];
-    if (!(lcvalue[i])) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value allocation", &status);
-      delete [] cname;
-      delete [] llens;
-      delete [] lcvalue;
-      if (rc) *rc = status;
-      return;
-    }
-  }
+  // allocate all char**s and string vector
+  vector<string> cvalue;
+  cvalue.reserve(*count);
 
   // next we get all the strings into the char**
-  status = (**base).root.ESMC_AttributeGet(cname, &attrTypeKind, NULL, lcvalue);
-  //status = (**base).root.ESMC_AttributeGet(cname, tk, NULL, lcvalue);
+  status = (**base).root.ESMC_AttributeGet(cname, cvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
-    delete [] cname;
     delete [] llens;
-    delete [] lcvalue;
     if (rc) *rc = status;
     return;
   }
@@ -2264,22 +1977,18 @@ extern "C" {
   j = 0;
   for (i=0; i<*count; i++) {
     // convert strings to F90 using F90 length
-    status = ESMC_CtoF90string(lcvalue[i], &valueList[j], lens[i]);
+    status = ESMC_CtoF90string(const_cast<char*> (cvalue[i].c_str()), &valueList[j], lens[i]);
     if (status != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value conversion", &status);
-    delete [] cname;
     delete [] llens;
-    delete [] lcvalue;
     if (rc) *rc = status;
     return;
     }
     j = j + lens[i];
   }
   
-  delete [] cname;
   delete [] llens;
-  delete [] lcvalue;
   
   if (rc) *rc = status;
   return;
@@ -2315,7 +2024,6 @@ extern "C" {
 
   int status, attrCount;
   ESMC_TypeKind attrTk;
-  char *cname;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -2335,9 +2043,10 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
@@ -2347,7 +2056,6 @@ extern "C" {
   status = (**base).root.ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.Write("failed getting attribute type and count", ESMC_LOG_INFO);
-    delete [] cname;
     if (rc) *rc = status;
     return;
   }
@@ -2355,7 +2063,6 @@ extern "C" {
   if (attrTk != *tk) {
     ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_INCOMP,
                          "attribute value not expected kind", &status);
-    delete [] cname;
     if (rc) *rc = status;
     return;
   }
@@ -2363,7 +2070,6 @@ extern "C" {
   if (attrCount != *count) {
     ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_INCOMP,
                          "attribute value not expected count", &status);
-    delete [] cname;
     if (rc) *rc = status;
     return;
   }
@@ -2373,8 +2079,6 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
   }
-  
-  delete [] cname;
   
   if (rc) *rc = status;
   return;
@@ -2409,7 +2113,6 @@ extern "C" {
 //EOP
 
   int status;
-  char *cname;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -2443,9 +2146,10 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
@@ -2457,8 +2161,6 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute info by name", &status);
   }
-  
-  delete [] cname;
   
   if (rc) *rc = status;
   return;
@@ -2494,7 +2196,6 @@ extern "C" {
 //EOP
 
   int status;
-  char *cname;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMF_RC_NOT_IMPL;
@@ -2528,8 +2229,9 @@ extern "C" {
       return;
   }
 
-  cname = new char[ESMF_MAXSTR];
-  if (!cname) {
+  string cname(name, nlen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed allocating attribute name", &status);
       if (rc) *rc = status;
@@ -2540,18 +2242,15 @@ extern "C" {
   if (status != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute info by num", &status);
-      delete [] cname;
       if (rc) *rc = status;
       return;
   }
 
-  status = ESMC_CtoF90string(cname, name, nlen);
+  status = ESMC_CtoF90string(const_cast<char*> (cname.c_str()), name, nlen);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
   }
-  
-  delete [] cname;
   
   if (rc) *rc = status;
   return;
@@ -2641,7 +2340,6 @@ extern "C" {
 //EOP
 
   int status;
-  char *cname;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -2668,9 +2366,9 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
@@ -2683,8 +2381,6 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed query for Attribute", &status);
   }
-  
-  delete [] cname;
   
   if (rc) *rc = status;
   return;
@@ -2720,7 +2416,6 @@ extern "C" {
 //EOP
 
   int i, status;
-  char *cname, *cvalue;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -2747,35 +2442,32 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  string cvalue(value, vlen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  cvalue.resize(cvalue.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
-  // copy and convert F90 string to null terminated one
-  cvalue = ESMC_F90toCstring(value, vlen);
-  if (!cvalue) {
+  if (cvalue.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value conversion", &status);
-      delete [] cname;
       if (rc) *rc = status;
       return;
   }
 
-  // Set the attribute on the object.
-  status = (**base).root.ESMC_AttributeSet(cname, cvalue);
+  // Set the attribute on the object
+  status = (**base).root.ESMC_AttributeSet(cname, &cvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed setting attribute char value", &status);
   }
 
-  delete [] cname;
-  delete [] cvalue;
-  
   if (rc) *rc = status;
   return;
 
@@ -2812,8 +2504,6 @@ extern "C" {
 //EOP
 
   int j, status;
-  char *cname, *temp;
-  char **cvalue;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -2833,17 +2523,18 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
-  // allocate space for the array of char*'s
-  cvalue = new char*[(*count)];
+  // allocate space for the array of char*'s and vector of strings
+  vector<string> cvalue;
+  cvalue.reserve(*count);
 
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
@@ -2856,31 +2547,25 @@ extern "C" {
     }
 
     // copy and convert F90 string to null terminated one
-    temp = ESMC_F90toCstring((&valueList[j]), lens[i]);
-    if (!(temp)) {
+    string temp((&valueList[j]), lens[i]);
+    temp.resize(temp.find_last_not_of(" ")+1);
+    if (temp.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value conversion", &status);
-      delete [] cname;
-      delete [] cvalue;
       if (rc) *rc = status;
       return;
     }
-    cvalue[i] = new char[lens[i]];
-    strcpy(cvalue[i], temp);
+    cvalue.push_back(temp);
     j = j + lens[i];
   }
 
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttributeSet(cname, *tk, *count, cvalue);
+  status = (**base).root.ESMC_AttributeSet(cname, cvalue.size(), &cvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed setting attribute char* value", &status);
   }
 
-  delete [] cname;
-  delete [] temp;
-  delete [] cvalue;
-  
   if (rc) *rc = status;
   return;
 
@@ -2916,7 +2601,6 @@ extern "C" {
 //EOP
 
   int status;
-  char *cname;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -2936,9 +2620,9 @@ extern "C" {
     return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  if (cname.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
     if (rc) *rc = status;
@@ -2951,9 +2635,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed setting attribute value", &status);
   }
-  
-  delete [] cname;
-  
+    
   if (rc) *rc = status;
   return;
 
@@ -3044,7 +2726,6 @@ extern "C" {
 //EOP
 
   int i, status;
-  char *cobject, *cname;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -3071,35 +2752,32 @@ extern "C" {
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  cname = ESMC_F90toCstring(name, nlen);
-  if (!cname) {
+  string cname(name, nlen);
+  string cobject(object, olen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  cobject.resize(cobject.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", &status);
       if (rc) *rc = status;
       return;
   }
   
-  // copy and convert F90 string to null terminated one
-  cobject = ESMC_F90toCstring(object, olen);
-  if (!cobject) {
+  if (cobject.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object conversion", &status);
-      delete [] cname;
       if (rc) *rc = status;
       return;
   }
 
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttributeSetObjsInTree(cobject,cname,*tk,*count,value);
+  status = (**base).root.ESMC_AttributeSetObjsInTree(cname,cobject,*tk,*count,value);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed call AttributeSetObjsInTree", &status);
   }
 
-  delete [] cname;
-  delete [] cobject;
-  
   if (rc) *rc = status;
   return;
 
