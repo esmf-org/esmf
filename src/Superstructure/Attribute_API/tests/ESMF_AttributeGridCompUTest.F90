@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridCompUTest.F90,v 1.6 2008/09/22 17:15:41 rokuingh Exp $
+! $Id: ESMF_AttributeGridCompUTest.F90,v 1.7 2008/09/30 21:03:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.6 2008/09/22 17:15:41 rokuingh Exp $'
+      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.7 2008/09/30 21:03:06 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -89,8 +89,6 @@ program ESMF_AttributeGridCompUTest
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
   !-----------------------------------------------------------------------------
 
-#ifdef ESMF_TESTEXHAUSTIVE
-
       !------------------------------------------------------------------------
       ! preparations
       ! states
@@ -108,6 +106,8 @@ program ESMF_AttributeGridCompUTest
 !-------------------------------------------------------------------------
 !  GRIDCOMP
 !-------------------------------------------------------------------------
+
+#ifdef ESMF_TESTEXHAUSTIVE
 
     !-------------------------------------------------------------------------
     !  ESMF_I4
@@ -436,13 +436,15 @@ program ESMF_AttributeGridCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultR8l==dfltoutR8l), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+#endif
       
     !-------------------------------------------------------------------------
     !  Character
     !-------------------------------------------------------------------------
       inChar = "charAttribute"
       attrName = "char_"
-      !EX_UTest
+      !NEX_UTest
       ! Add a char Attribute to a GridComp Test
       call ESMF_AttributeSet(gridcomp, name=attrname, value=inChar, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -450,7 +452,7 @@ program ESMF_AttributeGridCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Get a char Attribute from a GridComp Test
       call ESMF_AttributeGet(gridcomp, name=attrname, value=outChar, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -459,7 +461,7 @@ program ESMF_AttributeGridCompUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Remove an Attribute on a GridComp Test
       call ESMF_AttributeRemove(gridcomp, name=attrname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -468,7 +470,7 @@ program ESMF_AttributeGridCompUTest
       !------------------------------------------------------------------------
       
       defaultChar = "charAttributeDefault"
-      !EX_UTest
+      !NEX_UTest
       ! Get a default char Attribute from a GridComp Test
       call ESMF_AttributeGet(gridcomp, name=attrname, value=dfltoutChar, &
         defaultvalue=defaultChar, rc=rc)
@@ -478,6 +480,8 @@ program ESMF_AttributeGridCompUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
+#ifdef ESMF_TESTEXHAUSTIVE
+
     !-------------------------------------------------------------------------
     !  Character list
     !-------------------------------------------------------------------------
@@ -706,13 +710,15 @@ program ESMF_AttributeGridCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+#endif
+
     !-------------------------------------------------------------------------
     !  Attribute package - standard
     !-------------------------------------------------------------------------
       conv = 'CF'
       purp = 'general'
       
-      !EX_UTest
+      !NEX_UTest
       ! Create an Attribute package on a GridComp Test
       call ESMF_AttributeAdd(gridcomp, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -723,7 +729,7 @@ program ESMF_AttributeGridCompUTest
       attrname = "discipline"
       attrvalue = "atmosphere"
       
-      !EX_UTest
+      !NEX_UTest
       ! Set an Attribute in an Attribute package on a GridComp Test
       call ESMF_AttributeSet(gridcomp, name=attrname, value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
@@ -732,6 +738,8 @@ program ESMF_AttributeGridCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
+#ifdef ESMF_TESTEXHAUSTIVE
+
       attpackListTNames(1) = "ESMF_I4name"
       attpackListTNames(2) = "ESMF_I4namelist"
       attpackListTNames(3) = "ESMF_I8name"
@@ -827,6 +835,24 @@ program ESMF_AttributeGridCompUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
+      ! Set a Logical Attribute in an Attribute package on a GridComp Test
+      call ESMF_AttributeSet(gridcomp, name="Logical_name", value=inLog, &
+        convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting a logical Attribute in an Attribute package on a GridComp Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Set a Logical list Attribute in an Attribute package on a GridComp Test
+      call ESMF_AttributeSet(gridcomp, name="Logical_namelist", valueList=inLogl, &
+        convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting a logical list Attribute in an Attribute package on a GridComp Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
       ! Set a character Attribute in an Attribute package on a GridComp Test
       call ESMF_AttributeSet(gridcomp, name="Character_name", value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
@@ -895,11 +921,13 @@ program ESMF_AttributeGridCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+#endif
+
     !-------------------------------------------------------------------------
     !  Attribute hierarchy linking
     !-------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Link a GridComp Attribute hierarchy to a State Attribute hierarchy GridComp Test
       call ESMF_AttributeSet(gridcomp, sfg, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -907,7 +935,7 @@ program ESMF_AttributeGridCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Link a GridComp Attribute hierarchy to a CplComp Attribute hierarchy GridComp Test
       call ESMF_AttributeSet(gridcomp, cfg, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -915,7 +943,7 @@ program ESMF_AttributeGridCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Link a GridComp Attribute hierarchy to a GridComp Attribute hierarchy GridComp Test
       call ESMF_AttributeSet(gridcomp, gfg, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -932,7 +960,7 @@ program ESMF_AttributeGridCompUTest
       ! Set a Character Attribute on a GridComp to test the get info calls
       call ESMF_AttributeSet(gridcomp, name=attrname, value=attrvalue, rc=rc)
 
-      !EX_UTest
+      !NEX_UTest
       ! Get the Attribute count from a GridComp Test
       call ESMF_AttributeGet(gridcomp, count=count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -941,7 +969,7 @@ program ESMF_AttributeGridCompUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Get Attribute info by name from a GridComp Test
       call ESMF_AttributeGet(gridcomp, name=attrname, typekind=attrTK, &
         itemcount=items, rc=rc)
@@ -953,7 +981,7 @@ program ESMF_AttributeGridCompUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Get Attribute info by num from a GridComp Test
       call ESMF_AttributeGet(gridcomp, attributeIndex=count, name=attrnameOut, &
         typekind=attrTK, itemcount=items, rc=rc)
@@ -975,7 +1003,6 @@ program ESMF_AttributeGridCompUTest
       call ESMF_StateDestroy(sfg, rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-#endif
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.6 2008/09/22 17:15:41 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.7 2008/09/30 21:03:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.6 2008/09/22 17:15:41 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.7 2008/09/30 21:03:06 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -87,8 +87,6 @@ program ESMF_AttributeFieldUTest
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
   !-----------------------------------------------------------------------------
 
-#ifdef ESMF_TESTEXHAUSTIVE
-
       !------------------------------------------------------------------------
       ! preparations
       ! fields
@@ -98,6 +96,8 @@ program ESMF_AttributeFieldUTest
 !  FIELD
 !-------------------------------------------------------------------------
     
+#ifdef ESMF_TESTEXHAUSTIVE
+
     !-------------------------------------------------------------------------
     !  ESMF_I4
     !-------------------------------------------------------------------------
@@ -425,13 +425,15 @@ program ESMF_AttributeFieldUTest
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (defaultR8l==dfltoutR8l), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+#endif
       
     !-------------------------------------------------------------------------
     !  Character
     !-------------------------------------------------------------------------
       inChar = "charAttribute"
       attrName = "char_"
-      !EX_UTest
+      !NEX_UTest
       ! Add a char Attribute to a Field Test
       call ESMF_AttributeSet(field, name=attrname, value=inChar, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -439,7 +441,7 @@ program ESMF_AttributeFieldUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Get a char Attribute from a Field Test
       call ESMF_AttributeGet(field, name=attrname, value=outChar, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -448,7 +450,7 @@ program ESMF_AttributeFieldUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Remove an Attribute on a Field Test
       call ESMF_AttributeRemove(field, name=attrname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -457,7 +459,7 @@ program ESMF_AttributeFieldUTest
       !------------------------------------------------------------------------
       
       defaultChar = "charAttributeDefault"
-      !EX_UTest
+      !NEX_UTest
       ! Get a default char Attribute from a Field Test
       call ESMF_AttributeGet(field, name=attrname, value=dfltoutChar, &
         defaultvalue=defaultChar, rc=rc)
@@ -467,6 +469,8 @@ program ESMF_AttributeFieldUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
+#ifdef ESMF_TESTEXHAUSTIVE
+
     !-------------------------------------------------------------------------
     !  Character list
     !-------------------------------------------------------------------------
@@ -695,13 +699,15 @@ program ESMF_AttributeFieldUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+#endif
+
     !-------------------------------------------------------------------------
     !  Attribute package - standard
     !-------------------------------------------------------------------------
       conv = 'CF'
       purp = 'general'
       
-      !EX_UTest
+      !NEX_UTest
       ! Create an Attribute package on a Field Test
       call ESMF_AttributeAdd(field, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -712,7 +718,7 @@ program ESMF_AttributeFieldUTest
       attrname = "name"
       attrvalue = "Field Attribute"
       
-      !EX_UTest
+      !NEX_UTest
       ! Set an Attribute in an Attribute package on a Field Test
       call ESMF_AttributeSet(field, name=attrname, value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
@@ -721,6 +727,8 @@ program ESMF_AttributeFieldUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
+#ifdef ESMF_TESTEXHAUSTIVE
+
       attpackListTNames(1) = "ESMF_I4name"
       attpackListTNames(2) = "ESMF_I4namelist"
       attpackListTNames(3) = "ESMF_I8name"
@@ -816,6 +824,24 @@ program ESMF_AttributeFieldUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
+      ! Set a Logical Attribute in an Attribute package on a Field Test
+      call ESMF_AttributeSet(field, name="Logical_name", value=inLog, &
+        convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting a logical Attribute in an Attribute package on a Field Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Set a Logical list Attribute in an Attribute package on a Field Test
+      call ESMF_AttributeSet(field, name="Logical_namelist", valueList=inLogl, &
+        convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting a logical list Attribute in an Attribute package on a Field Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
       ! Set a character Attribute in an Attribute package on a Field Test
       call ESMF_AttributeSet(field, name="Character_name", value=attrvalue, &
         convention=conv, purpose=purp, rc=rc)
@@ -884,6 +910,8 @@ program ESMF_AttributeFieldUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+#endif
+
     !-------------------------------------------------------------------------
     !  Attribute Info
     !-------------------------------------------------------------------------
@@ -893,7 +921,7 @@ program ESMF_AttributeFieldUTest
       ! Set a Character Attribute on a Field to test the get info calls
       call ESMF_AttributeSet(field, name=attrname, value=attrvalue, rc=rc)
 
-      !EX_UTest
+      !NEX_UTest
       ! Get the Attribute count from a Field Test
       call ESMF_AttributeGet(field, count=count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -902,7 +930,7 @@ program ESMF_AttributeFieldUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Get Attribute info by name from a Field Test
       call ESMF_AttributeGet(field, name=attrname, typekind=attrTK, &
         itemcount=items, rc=rc)
@@ -914,7 +942,7 @@ program ESMF_AttributeFieldUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Get Attribute info by num from a Field Test
       call ESMF_AttributeGet(field, attributeIndex=count, name=attrnameOut, &
         typekind=attrTK, itemcount=items, rc=rc)
@@ -926,12 +954,11 @@ program ESMF_AttributeFieldUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-     !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       ! clean up
       call ESMF_FieldDestroy(field, rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-#endif
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)
