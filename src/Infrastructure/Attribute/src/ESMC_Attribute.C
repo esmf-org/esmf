@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.30 2008/09/30 16:18:06 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.31 2008/10/01 01:56:04 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.30 2008/09/30 16:18:06 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.31 2008/10/01 01:56:04 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -369,8 +369,8 @@
 
   // FIXME: this should be arrays of *attrs, not whole size, right?
   saveme = (void *)attrList;
-  attrList = (ESMC_Attribute **)realloc((void *)attrList, 
-                           (attrAlloc + ATTR_CHUNK) * sizeof(ESMC_Attribute *));
+  attrList = static_cast<ESMC_Attribute**> (realloc(static_cast<void*> (attrList), 
+                           (attrAlloc + ATTR_CHUNK) * sizeof(ESMC_Attribute *)));
   if (attrList == NULL) {
       free(saveme);   // although at this point, the heap is probably boffed
       return ESMF_FAILURE;
@@ -699,7 +699,6 @@
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
-
 
   // Get the attribute
   attr = ESMC_AttributeGet(name);
@@ -1391,15 +1390,15 @@
     if (value) {
       if (attr->items == 1) {
               if (attr->tk == ESMC_TYPEKIND_I4)
-                  *(ESMC_I4 *)value = attr->vi; 
+                  *(static_cast<ESMC_I4*> (value)) = attr->vi; 
               else if (attr->tk == ESMC_TYPEKIND_I8)
-                  *(ESMC_I8 *)value = attr->vtl; 
+                  *(static_cast<ESMC_I8*> (value)) = attr->vtl; 
               else if (attr->tk == ESMC_TYPEKIND_R4)
-                  *(ESMC_R4 *)value = attr->vf; 
+                  *(static_cast<ESMC_R4*> (value)) = attr->vf; 
               else if (attr->tk == ESMC_TYPEKIND_R8)
-                  *(ESMC_R8 *)value = attr->vd; 
+                  *(static_cast<ESMC_R8*> (value)) = attr->vd; 
               else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
-                  *(ESMC_Logical *)value = attr->vb;
+                  *(static_cast<ESMC_Logical*> (value)) = attr->vb;
               else if (attr->tk == ESMC_TYPEKIND_CHARACTER) {
                   attr->slen = (attr->vcp).size();
                   *(static_cast<string*> (value)) = attr->vcp;
@@ -1413,19 +1412,19 @@
         else if (attr->items > 1) {
               if (attr->tk == ESMC_TYPEKIND_I4) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMC_I4 *)value)[i] = attr->vip[i];
+                      (static_cast<ESMC_I4*> (value))[i] = attr->vip[i];
               } else if (attr->tk == ESMC_TYPEKIND_I8) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMC_I8 *)value)[i] = attr->vlp[i];
+                      (static_cast<ESMC_I8*> (value))[i] = attr->vlp[i];
               } else if (attr->tk == ESMC_TYPEKIND_R4) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMC_R4 *)value)[i] = attr->vfp[i];
+                      (static_cast<ESMC_R4*> (value))[i] = attr->vfp[i];
               } else if (attr->tk == ESMC_TYPEKIND_R8) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMC_R8 *)value)[i] = attr->vdp[i];
+                      (static_cast<ESMC_R8*> (value))[i] = attr->vdp[i];
               } else if (attr->tk == ESMC_TYPEKIND_LOGICAL) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMC_Logical *)value)[i] = attr->vbp[i];
+                      (static_cast<ESMC_Logical*> (value))[i] = attr->vbp[i];
               } else if (attr->tk == ESMC_TYPEKIND_CHARACTER) {
                       *(static_cast<vector<string>*> (value)) = attr->vcpp;
               } else{
@@ -1497,48 +1496,48 @@
     if (value) {
       if (attr->items == 1) {
               if (attr->tk == ESMC_TYPEKIND_I4)
-                  *(ESMC_I4 *)value = attr->vi; 
+                  *(static_cast<ESMC_I4*> (value)) = attr->vi; 
               else if (attr->tk == ESMC_TYPEKIND_I8)
-                  *(ESMC_I8 *)value = attr->vtl; 
+                  *(static_cast<ESMC_I8*> (value)) = attr->vtl; 
               else if (attr->tk == ESMC_TYPEKIND_R4)
-                  *(ESMC_R4 *)value = attr->vf; 
+                  *(static_cast<ESMC_R4*> (value)) = attr->vf; 
               else if (attr->tk == ESMC_TYPEKIND_R8)
-                  *(ESMC_R8 *)value = attr->vd; 
+                  *(static_cast<ESMC_R8*> (value)) = attr->vd; 
               else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
-                  *(ESMC_Logical *)value = attr->vb;
+                  *(static_cast<ESMC_Logical*> (value)) = attr->vb;
               else if (attr->tk == ESMC_TYPEKIND_CHARACTER) {
-                  attr->slen = (attr->vcp).size()+1;
+                  attr->slen = (attr->vcp).size();
                   *(static_cast<string*> (value)) = attr->vcp;
               } else{
-                  ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                                       "unknown typekind", 
+                   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                       "unknown typekind",
                                        &localrc);
-                  return ESMF_FAILURE;
-              }
+                   return ESMF_FAILURE;
+               }
  
       } else {
               if (attr->tk == ESMC_TYPEKIND_I4) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMC_I4 *)value)[i] = attr->vip[i];
+                      (static_cast<ESMC_I4*> (value))[i] = attr->vip[i];
               } else if (attr->tk == ESMC_TYPEKIND_I8) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMC_I8 *)value)[i] = attr->vlp[i];
+                      (static_cast<ESMC_I8*> (value))[i] = attr->vlp[i];
               } else if (attr->tk == ESMC_TYPEKIND_R4) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMC_R4 *)value)[i] = attr->vfp[i];
+                      (static_cast<ESMC_R4*> (value))[i] = attr->vfp[i];
               } else if (attr->tk == ESMC_TYPEKIND_R8) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMC_R8 *)value)[i] = attr->vdp[i];
+                      (static_cast<ESMC_R8*> (value))[i] = attr->vdp[i];
               } else if (attr->tk == ESMC_TYPEKIND_LOGICAL) {
                   for (i=0; i<attr->items; i++)
-                      ((ESMC_Logical *)value)[i] = attr->vbp[i];
+                      (static_cast<ESMC_Logical*> (value))[i] = attr->vbp[i];
               } else if (attr->tk == ESMC_TYPEKIND_CHARACTER) {
                       *(static_cast<vector<string>*> (value)) = attr->vcpp;
-              } else {
-                  ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+              } else{
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                        "unknown typekind", 
                                        &localrc);
-                  return ESMF_FAILURE;
+              return ESMF_FAILURE;
               }
       }
     }  // value
@@ -3031,15 +3030,15 @@
   if (items == 1) {
       if (datap) {
             if (tk == ESMC_TYPEKIND_I4)
-                vi = *(ESMC_I4 *)datap;  
+                vi = *(static_cast<ESMC_I4*> (datap));  
             else if (tk == ESMC_TYPEKIND_I8)
-                vtl = *(ESMC_I8 *)datap;  
+                vtl = *(static_cast<ESMC_I8*> (datap));  
             else if (tk == ESMC_TYPEKIND_R4)
-                vf = *(ESMC_R4 *)datap;  
+                vf = *(static_cast<ESMC_R4*> (datap));  
             else if (tk == ESMC_TYPEKIND_R8)
-                vd = *(ESMC_R8 *)datap;  
+                vd = *(static_cast<ESMC_R8*> (datap));  
             else if (tk == ESMC_TYPEKIND_LOGICAL)
-                vb = *(ESMC_Logical *)datap;  
+                vb = *(static_cast<ESMC_Logical*> (datap));  
             else if (tk == ESMC_TYPEKIND_CHARACTER)
                 vcp = *(static_cast<string*> (datap));
       }
@@ -3050,27 +3049,27 @@
             vip = new ESMC_I4[items];      
             if (datap) 
               for (i=0; i<items; i++)
-                vip[i] = ((ESMC_I4 *)datap)[i];  
+                vip[i] = (static_cast<ESMC_I4*> (datap))[i];  
         } else if (tk == ESMC_TYPEKIND_I8) {
             vlp = new ESMC_I8[items];      
             if (datap) 
               for (i=0; i<items; i++)
-                vlp[i] = ((ESMC_I8 *)datap)[i];  
+                vlp[i] = (static_cast<ESMC_I8*> (datap))[i];  
         } else if (tk == ESMC_TYPEKIND_R4) {
             vfp = new ESMC_R4[items];      
             if (datap) 
               for (i=0; i<items; i++)
-                vfp[i] = ((ESMC_R4 *)datap)[i];  
+                vfp[i] = (static_cast<ESMC_R4*> (datap))[i];  
         } else if (tk == ESMC_TYPEKIND_R8) {
             vdp = new ESMC_R8[items];      
             if (datap) 
               for (i=0; i<items; i++)
-                vdp[i] = ((ESMC_R8 *)datap)[i];  
+                vdp[i] = (static_cast<ESMC_R8*> (datap))[i];  
         } else if (tk == ESMC_TYPEKIND_LOGICAL) {
             vbp = new ESMC_Logical[items];      
             if (datap) 
               for (i=0; i<items; i++)
-                vbp[i] = ((ESMC_Logical *)datap)[i];  
+                vbp[i] = (static_cast<ESMC_Logical*> (datap))[i];  
         } else if (tk == ESMC_TYPEKIND_CHARACTER) {
             vcpp.reserve(items);
             if (datap) {
@@ -3256,15 +3255,15 @@
           voidp = NULL;
       else  {
             if (tk == ESMC_TYPEKIND_I4)
-                vi = *(ESMC_I4 *)datap;  
+                vi = *(static_cast<ESMC_I4*> (datap));  
             else if (tk == ESMC_TYPEKIND_I8)
-                vtl = *(ESMC_I8 *)datap;  
+                vtl = *(static_cast<ESMC_I8*> (datap));  
             else if (tk == ESMC_TYPEKIND_R4)
-                vf = *(ESMC_R4 *)datap;  
+                vf = *(static_cast<ESMC_R4*> (datap));  
             else if (tk == ESMC_TYPEKIND_R8)
-                vd = *(ESMC_R8 *)datap;  
+                vd = *(static_cast<ESMC_R8*> (datap));  
             else if (tk == ESMC_TYPEKIND_LOGICAL)
-                vb = *(ESMC_Logical *)datap;  
+                vb = *(static_cast<ESMC_Logical*> (datap));  
             else if (tk == ESMC_TYPEKIND_CHARACTER) {
                 vcp = *(static_cast<string*> (datap));
                 slen = vcp.size(); }
@@ -3279,31 +3278,31 @@
             vip = new ESMC_I4[items];      
             if (datap) 
               for (i=0; i<items; i++)
-                vip[i] = ((ESMC_I4 *)datap)[i];  
+                vip[i] = (static_cast<ESMC_I4*> (datap))[i];  
         } else if (tk == ESMC_TYPEKIND_I8) {
 //            delete [] vlp;  ***FIXME*** memory leak, uncomment after c/c++ standardizing done
             vlp = new ESMC_I8[items];      
             if (datap) 
               for (i=0; i<items; i++)
-                vlp[i] = ((ESMC_I8 *)datap)[i];  
+                vlp[i] = (static_cast<ESMC_I8*> (datap))[i];  
         } else if (tk == ESMC_TYPEKIND_R4) {
 //            delete [] vfp;  ***FIXME*** memory leak, uncomment after c/c++ standardizing done
             vfp = new ESMC_R4[items];      
             if (datap) 
               for (i=0; i<items; i++)
-                vfp[i] = ((ESMC_R4 *)datap)[i];  
+                vfp[i] = (static_cast<ESMC_R4*> (datap))[i];  
         } else if (tk == ESMC_TYPEKIND_R8) {
 //            delete [] vdp;  ***FIXME*** memory leak, uncomment after c/c++ standardizing done
             vdp = new ESMC_R8[items];      
             if (datap) 
               for (i=0; i<items; i++)
-                vdp[i] = ((ESMC_R8 *)datap)[i];  
+                vdp[i] = (static_cast<ESMC_R8*> (datap))[i];  
         } else if (tk == ESMC_TYPEKIND_LOGICAL) {
 //            delete [] vbp;  ***FIXME*** memory leak, uncomment after c/c++ standardizing done
             vbp = new ESMC_Logical[items];      
             if (datap) 
               for (i=0; i<items; i++)
-                vbp[i] = ((ESMC_Logical *)datap)[i];  
+                vbp[i] = (static_cast<ESMC_Logical*> (datap))[i];  
         } else if (tk == ESMC_TYPEKIND_CHARACTER) {
             vcpp.reserve(items);
             if (datap) {
@@ -3346,7 +3345,7 @@
 
     // Define serialization macros
 #define DESERIALIZE_VAR(bufptr,loff,var,t) \
-  var=(*((t *)((bufptr)+(loff))));    \
+  var=(*(reinterpret_cast<t*> ((bufptr)+(loff))));    \
   loff += (sizeof(t));  
 
 #define DESERIALIZE_VARC(bufptr,loff,var,var2,s) \
@@ -3514,7 +3513,7 @@
 
     // Define serialization macros
 #define SERIALIZE_VAR(cc,bufptr,loff,var,t) \
-  if (cc) *((t *)((bufptr)+(loff)))=var;    \
+  if (cc) *(reinterpret_cast<t*> ((bufptr)+(loff)))=var;    \
   loff += (sizeof(t));   
 
 #define SERIALIZE_VARC(cc,bufptr,loff,var,s) \
@@ -3765,7 +3764,6 @@
   attrPack = source.attrPack;
 
   //attrCount and attrAlloc not set, they should automatically sync
-  
 
   if (items <= 0)
     voidp = NULL;
@@ -3782,7 +3780,7 @@
         else if (tk == ESMC_TYPEKIND_LOGICAL)
             vb = source.vb;
         else if (tk == ESMC_TYPEKIND_CHARACTER)
-            vcp = static_cast<string> (source.vcp);
+            vcp = source.vcp;
         else
             voidp = NULL;
   } else {
