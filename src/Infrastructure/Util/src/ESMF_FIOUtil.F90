@@ -1,4 +1,4 @@
-! $Id: ESMF_FIOUtil.F90,v 1.2 2008/09/29 21:51:27 w6ws Exp $
+! $Id: ESMF_FIOUtil.F90,v 1.3 2008/10/06 23:28:13 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -64,14 +64,14 @@
 !
 !==============================================================================
 
-      integer, private :: ESMF_FIOUnitLower = ESMF_LOG_FORT_STDOUT
+      integer, private :: ESMF_FIOUnitLower = ESMF_LOG_FORT_UNIT_NUMBER
       integer, private :: ESMF_FIOUnitUpper = ESMF_LOG_UPPER
 
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_FIOUtil.F90,v 1.2 2008/09/29 21:51:27 w6ws Exp $'
+               '$Id: ESMF_FIOUtil.F90,v 1.3 2008/10/06 23:28:13 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -83,10 +83,10 @@
 ! !IROUTINE: ESMF_FIOUnitFlush - flush output on a unit number
 !
 ! !INTERFACE:
-      subroutine ESMF_FIOUnitFlush(unitNumber, rc)
+      subroutine ESMF_FIOUnitFlush(unit, rc)
 !
 ! !PARAMETERS:
-      integer, intent(in) :: unitNumber
+      integer, intent(in) :: unit
       integer, intent(out), optional :: rc               ! return code
 
 !
@@ -104,30 +104,30 @@
       status = ESMF_RC_NOT_IMPL
 
 #if defined (ESMF_HAS_F2003_FLUSH)
-      flush (unitNumber, iostat=status)
+      flush (unit, iostat=status)
 #elif defined (ESMF_HAS_1ARG_FLUSH)
 #if defined (PARCH_aix)
-      call flush_ (unitNumber)
+      call flush_ (unit)
 #else
-      call flush (unitNumber)
+      call flush (unit)
 #endif
       status = 0
 #elif defined (ESMF_HAS_2ARG_FLUSH)
-      call flush (unitNumber, status)
+      call flush (unit, status)
 #else
 
 #if   defined(PARCH_linux)
       print *, "need to call flush() here"
 #elif defined(PARCH_IRIX64)
-      call flush(unitNumber, status)
+      call flush(unit, status)
 #elif defined(PARCH_aix)
-      call flush_(unitNumber, status)
+      call flush_(unit, status)
 #elif defined(PARCH_darwin)
       print *, "need to call flush() here"
 #elif defined(PARCH_sunos)
       print *, "need to call flush() here"
 #elif defined(PARCH_osf1)
-      call flush(unitNumber, status)
+      call flush(unit, status)
 #else
       print *, "unknown architecture in ESMF_IOFlush()"
 #endif
@@ -145,10 +145,10 @@
 !  !IROUTINE:  ESMF_FIOUnitGet - Return a free I/O unit number
 !
 ! !INTERFACE:
-      subroutine ESMF_FIOUnitGet (iunit, rc)
+      subroutine ESMF_FIOUnitGet (unit, rc)
 !
 ! !ARGUMENTS:
-      integer, intent(out) :: iunit
+      integer, intent(out) :: unit
       integer, intent(out), optional :: rc
 
 !
@@ -157,7 +157,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[iunit]}]
+!     \item[{[unit]}]
 !       A Fortran I/O unit number.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -177,10 +177,10 @@
         end do
   
         if (i <= ESMF_FIOUnitUpper) then
-          iunit = i
+          unit = i
           if (present (rc)) rc = ESMF_SUCCESS
         else
-          iunit = -1
+          unit = -1
         end if
 
       end subroutine ESMF_FIOUnitGet
