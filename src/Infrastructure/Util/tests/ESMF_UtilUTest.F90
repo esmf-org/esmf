@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.9 2008/09/29 13:41:38 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.10 2008/10/06 23:29:47 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.9 2008/09/29 13:41:38 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.10 2008/10/06 23:29:47 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -134,38 +134,28 @@
     !
     !NEX_UTest
     ! Obtain a few Fortran units
+    funits = -1
     do, i=1, size (funits)
       call ESMF_FIOUnitGet (funits(i), rc)
-      ! print *, 'ESMF_FIOUnitGet returned unit:', funits(i), ', rc =', rc
-      if (rc /= ESMF_SUCCESS) exit
+      ioerr = 0
+      if (rc == ESMF_SUCCESS) then
+        open (funits(i), status='scratch', iostat=ioerr)
+      end if
+      if (rc /= ESMF_SUCCESS .or. ioerr /= 0) exit
     end do
 
-    write (name, *) "Testing ESMF_FIOUnitGet, obtaining units"
+    write (name, *) "Testing ESMF_FIOUnitGet, obtaining and opening units"
     if (i > size (funits)) then
       write (failMsg, *) "Could not obtain a unit."
     else
       write (failMsg, *) "Could not obtain unit:", funits(i)
     end if
-    call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !
-    !NEX_UTest
-    ! Open them
-    do, i=1, min (i, size (funits))
-      open (funits(i), status='scratch', iostat=ioerr)
-      if (ioerr /= 0) exit
-    end do
-
-    write (name, *) "Testing ESMF_FIOUnitGet, opening files"
-    if (i > size (funits)) then
-      write (failMsg, *) "Could not open scratch file with given unit"
-    else
-      write (failMsg, *) "Could not open scratch file on unit:", funits(i)
-    end if
-    call ESMF_Test (ioerr == 0, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test (rc == ESMF_SUCCESS .or. ioerr /= 0, name, failMsg, result, ESMF_SRCLINE)
 
     do, i=1, size (funits)
-      close (funits(i), iostat=ioerr)
+      if (funits(i) /= -1) then
+        close (funits(i), iostat=ioerr)
+      end if
     end do
 
 !Flush data to a file
