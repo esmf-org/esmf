@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.h,v 1.17 2008/09/30 16:18:05 rokuingh Exp $
+// $Id: ESMC_Attribute.h,v 1.18 2008/10/06 19:15:19 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -66,24 +66,21 @@ class ESMC_Attribute
     int attrAlloc;              // number of attributes currently allocated
     ESMC_Attribute **attrList;  // attributes - array of pointers
 
-    // ***FIXME*** members of a union are public by default
-//    union {                     // overload pointers to conserve space 
-      ESMC_I4    vi;       // integer, or
-      ESMC_I4  *vip;       // pointer to integer list, or
-      ESMC_I8   vtl;       // long, or
-                  //  ^  TODO: change back to vl when Cray X1 compiler fixed
-      ESMC_I8  *vlp;       // pointer to long list, or
-      ESMC_R4    vf;       // float (real*4), or
-      ESMC_R4  *vfp;       // pointer to float (real*4) list, or
-      ESMC_R8    vd;       // double (real*8), or
-      ESMC_R8  *vdp;       // pointer to double (real*8) list, or
-      ESMC_Logical    vb;       // boolean (logical), or
-      ESMC_Logical    *vbp;       // pointer to boolean (logical) list, or
-      string          vcp;       // pointer to a NULL term character string, or
-      vector<string>  vcpp;
-      void            *voidp;       // cannot be dereferenced, but generic.
-      // ESMC_Array  *ap;       // pointer to an ESMC_Array object (someday?)
-//    };
+    // Attribute values
+    ESMC_I4               vi;       // integer, or
+    vector<ESMC_I4>       vip;       // pointer to integer list, or
+    ESMC_I8               vtl;       // long, or
+                            //  ^  TODO: change back to vl when Cray X1 compiler fixed
+    vector<ESMC_I8>       vlp;       // pointer to long list, or
+    ESMC_R4               vf;       // float (real*4), or
+    vector<ESMC_R4>       vfp;       // pointer to float (real*4) list, or
+    ESMC_R8               vd;       // double (real*8), or
+    vector<ESMC_R8>       vdp;       // pointer to double (real*8) list, or
+    ESMC_Logical          vb;       // boolean (logical), or
+    vector<ESMC_Logical>  vbp;       // pointer to boolean (logical) list, or
+    string                vcp;       // pointer to a NULL term character string, or
+    vector<string>        vcpp;
+    //void                  *voidp;       // cannot be dereferenced, but generic.
 
     // prevent accidental copying
     //ESMC_Attribute& operator=(const ESMC_Attribute&);
@@ -124,17 +121,17 @@ class ESMC_Attribute
     
     // attribute methods - get
     int ESMC_AttributeGet(const string &name, ESMC_I4 *value) const;
-    int ESMC_AttributeGet(const string &name, int *count, ESMC_I4 *value) const;
+    int ESMC_AttributeGet(const string &name, int *count, vector<ESMC_I4> *value) const;
     int ESMC_AttributeGet(const string &name, ESMC_I8 *value) const;
-    int ESMC_AttributeGet(const string &name, int *count, ESMC_I8 *value) const;
+    int ESMC_AttributeGet(const string &name, int *count, vector<ESMC_I8> *value) const;
     int ESMC_AttributeGet(const string &name, ESMC_R4 *value) const;
-    int ESMC_AttributeGet(const string &name, int *count, ESMC_R4 *value) const;
+    int ESMC_AttributeGet(const string &name, int *count, vector<ESMC_R4> *value) const;
     int ESMC_AttributeGet(const string &name, ESMC_R8 *value) const;
-    int ESMC_AttributeGet(const string &name, int *count, ESMC_R8 *value) const;
+    int ESMC_AttributeGet(const string &name, int *count, vector<ESMC_R8> *value) const;
     int ESMC_AttributeGet(const string &name, ESMC_Logical *value) const;
-    int ESMC_AttributeGet(const string &name, int *count, ESMC_Logical *value) const;
-    int ESMC_AttributeGet(const string &name, string &value) const;
-    int ESMC_AttributeGet(const string &name, vector<string> &value) const;
+    int ESMC_AttributeGet(const string &name, int *count, vector<ESMC_Logical> *value) const;
+    int ESMC_AttributeGet(const string &name, string *value) const;
+    int ESMC_AttributeGet(const string &name, vector<string> *value) const;
     int ESMC_AttributeGet(const string &name, ESMC_TypeKind *tk, int *count, 
       void *value) const;
     int ESMC_AttributeGet(int num, string &name, ESMC_TypeKind *tk, int *count,
@@ -161,19 +158,19 @@ class ESMC_Attribute
 
     // attribute methods - set
     int ESMC_AttributeSet(const string &name, ESMC_I4 value);
-    int ESMC_AttributeSet(const string &name, int count, ESMC_I4 *value);
+    int ESMC_AttributeSet(const string &name, int count, vector<ESMC_I4> *value);
     int ESMC_AttributeSet(const string &name, ESMC_I8 value);
-    int ESMC_AttributeSet(const string &name, int count, ESMC_I8 *value);
+    int ESMC_AttributeSet(const string &name, int count, vector<ESMC_I8> *value);
     int ESMC_AttributeSet(const string &name, ESMC_R4 value);
-    int ESMC_AttributeSet(const string &name, int count, ESMC_R4 *value);
+    int ESMC_AttributeSet(const string &name, int count, vector<ESMC_R4> *value);
     int ESMC_AttributeSet(const string &name, ESMC_R8 value);
-    int ESMC_AttributeSet(const string &name, int count, ESMC_R8 *value);
+    int ESMC_AttributeSet(const string &name, int count, vector<ESMC_R8> *value);
     int ESMC_AttributeSet(const string &name, ESMC_Logical value);
-    int ESMC_AttributeSet(const string &name, int count, ESMC_Logical *value);
+    int ESMC_AttributeSet(const string &name, int count, vector<ESMC_Logical> *value);
     int ESMC_AttributeSet(const string &name, string *value);
     int ESMC_AttributeSet(const string &name, int count, vector<string> *value);
-    int ESMC_AttributeSet(const string &name, const ESMC_TypeKind &tk, 
-      int count, void *value);
+//    int ESMC_AttributeSet(const string &name, const ESMC_TypeKind &tk, 
+//      int count, void *value);
     
     // attribute set a link in hierarchy
     int ESMC_AttributeSetLink(ESMC_Base *destination);
@@ -193,24 +190,22 @@ class ESMC_Attribute
     int ESMC_AttributeWriteXMLrecurse(FILE *xml, const string &convention, 
       const string &purpose, const string &object, const string &varobj, 
       const int &stop, int &fldcount) const;
+    int ESMC_Print(void) const;
 
-    // Modifiers, Constructors, Destructors, Serializers, Print
-    ESMC_Attribute(void);
-    ESMC_Attribute(const string &name, const ESMC_TypeKind &typekind, 
-      int numitems, void *datap);
+    // Modifiers, Constructors, Destructors, Serializers, Operators
     ESMC_Attribute(const string &name, const string &conv, const string &purp, 
       const string &obj);
+    ESMC_Attribute(void);
     ESMC_Attribute(const ESMC_Logical &attributeRoot);
-    ~ESMC_Attribute(void);
+    ESMC_Attribute(const string &name, const ESMC_TypeKind &typekind, 
+      int numitems, void *datap);
     int ESMC_AttrModifyValue(const ESMC_TypeKind &typekind, int numitems, 
       void *datap);
+    ESMC_Attribute& operator=(const ESMC_Attribute &source);
+    ~ESMC_Attribute(void);
     int ESMC_Deserialize(char *buffer, int *offset);
     int ESMC_Serialize(char *buffer, int *length, int *offset) const;
     int ESMC_SerializeCC(char *buffer, int *length, int &offset, bool cc) const;
-    int ESMC_Print(void) const;
-
-    // temporary copy constructor
-    ESMC_Attribute& operator=(const ESMC_Attribute &source);
 };
 
 // fortran interface functions to attribute objects
@@ -279,7 +274,7 @@ extern "C" {
 
 // class utility functions, not methods, since they operate on
 //  multiple objects
-int ESMC_AttributeSetObjectList(ESMC_Base *anytypelist, ESMC_Attribute *valuelist);
-int ESMC_AttributeGetObjectList(ESMC_Base *anytypelist, ESMC_Attribute *valuelist);
+//int ESMC_AttributeSetObjectList(ESMC_Base *anytypelist, ESMC_Attribute *valuelist);
+//int ESMC_AttributeGetObjectList(ESMC_Base *anytypelist, ESMC_Attribute *valuelist);
 
 #endif  // ESMC_ATTRIBUTE_H

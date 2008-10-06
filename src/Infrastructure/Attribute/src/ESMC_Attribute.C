@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.31 2008/10/01 01:56:04 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.32 2008/10/06 19:15:19 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.31 2008/10/01 01:56:04 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.32 2008/10/06 19:15:19 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -743,7 +743,7 @@
 // !ARGUMENTS:
       const string &name,                    // in - name of Attribute to retrieve
       int *count,                    // out - number of values in list
-      ESMC_I4 *value) const {        // out - Attribute value
+      vector<ESMC_I4> *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
 //    Get the {\tt ESMC_I4} valueList of an {\tt ESMC_Attribute}.
@@ -771,15 +771,18 @@
        return ESMF_FAILURE;
     }
 
+    // simple sanity checks
+    if (attr->items <= 1) {
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "Attribute not single value", &localrc);
+       return ESMF_FAILURE;
+    }
+
     if (count) 
       *count = attr->items;
 
-    if (value) {
-      if (attr->items == 1)
-        value[0] = attr->vi;
-      else for (i=0; i<attr->items; i++)
-        value[i] = attr->vip[i];
-    }
+    if (value) 
+      *value = attr->vip;
   }
 
   return ESMF_SUCCESS;
@@ -855,7 +858,7 @@
 // !ARGUMENTS:
       const string &name,                    // in - name of Attribute to retrieve
       int *count,                    // out - number of values in list
-      ESMC_I8 *value) const {        // out - Attribute value
+      vector<ESMC_I8> *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
 //    Get the {\tt ESMC_I8} valueList of an {\tt ESMC_Attribute}.
@@ -883,15 +886,18 @@
        return ESMF_FAILURE;
     }
 
+    // simple sanity checks
+    if (attr->items <= 1) {
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "Attribute not single value", &localrc);
+       return ESMF_FAILURE;
+    }
+
     if (count) 
       *count = attr->items;
 
-    if (value) {
-      if (attr->items == 1)
-          value[0] = attr->vtl;
-      else for (i=0; i<attr->items; i++)
-          value[i] = attr->vlp[i];
-    }
+    if (value) 
+      *value = attr->vlp;
   }
 
   return ESMF_SUCCESS;
@@ -967,7 +973,7 @@
 // !ARGUMENTS:
       const string &name,                    // in - name of Attribute to retrieve
       int *count,                    // out - number of values in list
-      ESMC_R4 *value) const {        // out - Attribute value
+      vector<ESMC_R4> *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
 //    Get the {\tt ESMC_R4} valueList of an {\tt ESMC_Attribute}.
@@ -995,15 +1001,18 @@
        return ESMF_FAILURE;
     }
 
+    // simple sanity checks
+    if (attr->items <= 1) {
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "Attribute not single value", &localrc);
+       return ESMF_FAILURE;
+    }
+
     if (count) 
       *count = attr->items;
 
-    if (value) {
-      if (attr->items == 1)
-          value[0] = attr->vf;
-      else for (i=0; i<attr->items; i++)
-          value[i] = attr->vfp[i];
-    }
+    if (value) 
+      *value = attr->vfp;
   }
 
   return ESMF_SUCCESS;
@@ -1079,7 +1088,7 @@
 // !ARGUMENTS:
       const string &name,                    // in - name of Attribute to retrieve
       int *count,                    // out - number of values in list
-      ESMC_R8 *value) const {        // out - Attribute value
+      vector<ESMC_R8> *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
 //    Get the {\tt ESMC_R8} valueList of an {\tt ESMC_Attribute}.
@@ -1107,15 +1116,18 @@
        return ESMF_FAILURE;
     }
 
+    // simple sanity checks
+    if (attr->items <= 1) {
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "Attribute not single value", &localrc);
+       return ESMF_FAILURE;
+    }
+
     if (count) 
       *count = attr->items;
 
-    if (value) {
-      if (attr->items == 1)
-          value[0] = attr->vd;
-      else for (i=0; i<attr->items; i++)
-          value[i] = attr->vdp[i];
-    }
+    if (value) 
+      *value = attr->vdp;
   }
 
   return ESMF_SUCCESS;
@@ -1191,7 +1203,7 @@
 // !ARGUMENTS:
       const string &name,                    // in - name of Attribute to retrieve
       int *count,                    // out - number of values in list
-      ESMC_Logical *value) const {   // out - Attribute value
+      vector<ESMC_Logical> *value) const {   // out - Attribute value
 // 
 // !DESCRIPTION:
 //    Get the {\tt ESMC_Logical} valueList of an {\tt ESMC_Attribute}.
@@ -1219,15 +1231,18 @@
        return ESMF_FAILURE;
     }
 
+    // simple sanity checks
+    if (attr->items <= 1) {
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "Attribute not single value", &localrc);
+       return ESMF_FAILURE;
+    }
+
     if (count) 
       *count = attr->items;
 
-    if (value) {
-      if (attr->items == 1)
-          value[0] = attr->vb;
-      else for (i=0; i<attr->items; i++)
-          value[i] = attr->vbp[i];
-    }
+    if (value) 
+      *value = attr->vbp;
   }
 
   return ESMF_SUCCESS;
@@ -1247,7 +1262,7 @@
 // 
 // !ARGUMENTS:
       const string &name,            // in - name of Attribute to retrieve
-      string &value) const {   // out - Attribute value
+      string *value) const {   // out - Attribute value
 // 
 // !DESCRIPTION:
 //    Get the value of an {\tt ESMC_Attribute}.
@@ -1282,7 +1297,7 @@
        return ESMF_FAILURE;
     }
 
-    value = attr->vcp;
+    *value = attr->vcp;
   }
   
   return ESMF_SUCCESS;
@@ -1302,7 +1317,7 @@
 // 
 // !ARGUMENTS:
       const string &name,            // in - name of Attribute to retrieve
-      vector<string> &value) const {   // out - Attribute values
+      vector<string> *value) const {   // out - Attribute values
 // 
 // !DESCRIPTION:
 //    Get the value of an {\tt ESMC_Attribute}.
@@ -1337,7 +1352,7 @@
        return ESMF_FAILURE;
     }
 
-    value = attr->vcpp;
+    *value = attr->vcpp;
   }
   
   return ESMF_SUCCESS;
@@ -1387,7 +1402,7 @@
     if (count)
          *count = attr->items; 
 
-    if (value) {
+/*    if (value) {
       if (attr->items == 1) {
               if (attr->tk == ESMC_TYPEKIND_I4)
                   *(static_cast<ESMC_I4*> (value)) = attr->vi; 
@@ -1410,31 +1425,26 @@
                }
         }
         else if (attr->items > 1) {
-              if (attr->tk == ESMC_TYPEKIND_I4) {
-                  for (i=0; i<attr->items; i++)
-                      (static_cast<ESMC_I4*> (value))[i] = attr->vip[i];
-              } else if (attr->tk == ESMC_TYPEKIND_I8) {
-                  for (i=0; i<attr->items; i++)
-                      (static_cast<ESMC_I8*> (value))[i] = attr->vlp[i];
-              } else if (attr->tk == ESMC_TYPEKIND_R4) {
-                  for (i=0; i<attr->items; i++)
-                      (static_cast<ESMC_R4*> (value))[i] = attr->vfp[i];
-              } else if (attr->tk == ESMC_TYPEKIND_R8) {
-                  for (i=0; i<attr->items; i++)
-                      (static_cast<ESMC_R8*> (value))[i] = attr->vdp[i];
-              } else if (attr->tk == ESMC_TYPEKIND_LOGICAL) {
-                  for (i=0; i<attr->items; i++)
-                      (static_cast<ESMC_Logical*> (value))[i] = attr->vbp[i];
-              } else if (attr->tk == ESMC_TYPEKIND_CHARACTER) {
-                      *(static_cast<vector<string>*> (value)) = attr->vcpp;
-              } else{
+              if (attr->tk == ESMC_TYPEKIND_I4)
+                  *(static_cast<vector<ESMC_I4>*> (value)) = attr->vip;
+              else if (attr->tk == ESMC_TYPEKIND_I8)
+                  *(static_cast<vector<ESMC_I8>*> (value)) = attr->vlp;
+              else if (attr->tk == ESMC_TYPEKIND_R4)
+                  *(static_cast<vector<ESMC_R4>*> (value)) = attr->vfp;
+              else if (attr->tk == ESMC_TYPEKIND_R8)
+                  *(static_cast<vector<ESMC_R8>*> (value)) = attr->vdp;
+              else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
+                  *(static_cast<vector<ESMC_Logical>*> (value)) = attr->vbp;
+              else if (attr->tk == ESMC_TYPEKIND_CHARACTER)
+                  *(static_cast<vector<string>*> (value)) = attr->vcpp;
+              else{
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                        "unknown typekind", 
                                        &localrc);
               return ESMF_FAILURE;
               }
         }
-      }  // value
+      }  // value*/
   }
 
   return ESMF_SUCCESS;
@@ -1493,7 +1503,7 @@
     if (count)
       *count = attr->items;
 
-    if (value) {
+    /*if (value) {
       if (attr->items == 1) {
               if (attr->tk == ESMC_TYPEKIND_I4)
                   *(static_cast<ESMC_I4*> (value)) = attr->vi; 
@@ -1516,31 +1526,26 @@
                }
  
       } else {
-              if (attr->tk == ESMC_TYPEKIND_I4) {
-                  for (i=0; i<attr->items; i++)
-                      (static_cast<ESMC_I4*> (value))[i] = attr->vip[i];
-              } else if (attr->tk == ESMC_TYPEKIND_I8) {
-                  for (i=0; i<attr->items; i++)
-                      (static_cast<ESMC_I8*> (value))[i] = attr->vlp[i];
-              } else if (attr->tk == ESMC_TYPEKIND_R4) {
-                  for (i=0; i<attr->items; i++)
-                      (static_cast<ESMC_R4*> (value))[i] = attr->vfp[i];
-              } else if (attr->tk == ESMC_TYPEKIND_R8) {
-                  for (i=0; i<attr->items; i++)
-                      (static_cast<ESMC_R8*> (value))[i] = attr->vdp[i];
-              } else if (attr->tk == ESMC_TYPEKIND_LOGICAL) {
-                  for (i=0; i<attr->items; i++)
-                      (static_cast<ESMC_Logical*> (value))[i] = attr->vbp[i];
-              } else if (attr->tk == ESMC_TYPEKIND_CHARACTER) {
-                      *(static_cast<vector<string>*> (value)) = attr->vcpp;
-              } else{
+              if (attr->tk == ESMC_TYPEKIND_I4)
+                  *(static_cast<vector<ESMC_I4>*> (value)) = attr->vip;
+              else if (attr->tk == ESMC_TYPEKIND_I8)
+                  *(static_cast<vector<ESMC_I8>*> (value)) = attr->vlp;
+              else if (attr->tk == ESMC_TYPEKIND_R4)
+                  *(static_cast<vector<ESMC_R4>*> (value)) = attr->vfp;
+              else if (attr->tk == ESMC_TYPEKIND_R8)
+                  *(static_cast<vector<ESMC_R8>*> (value)) = attr->vdp;
+              else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
+                  *(static_cast<vector<ESMC_Logical>*> (value)) = attr->vbp;
+              else if (attr->tk == ESMC_TYPEKIND_CHARACTER)
+                  *(static_cast<vector<string>*> (value)) = attr->vcpp;
+              else{
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                        "unknown typekind", 
                                        &localrc);
               return ESMF_FAILURE;
               }
       }
-    }  // value
+    }  // value*/
   }
   
 
@@ -1880,7 +1885,7 @@
 // !ARGUMENTS:
       const string &name,              // in - Attribute name
       int count,               // in - number of ints in list
-      ESMC_I4 *value) {        // in - Attribute values
+      vector<ESMC_I4> *value) {        // in - Attribute values
 // 
 // !DESCRIPTION:
 //    Set the {\tt ESMC_I4} valueList of an {\tt ESMC_Attribute}.
@@ -1953,7 +1958,7 @@
 // !ARGUMENTS:
       const string &name,              // in - Attribute name
       int count,               // in - number of ints in list
-      ESMC_I8 *value) {        // in - Attribute values
+      vector<ESMC_I8> *value) {        // in - Attribute values
 // 
 // !DESCRIPTION:
 //    Set the {\tt ESMC_I8} valueList of an {\tt ESMC_Attribute}.
@@ -2026,7 +2031,7 @@
 // !ARGUMENTS:
       const string &name,              // in - Attribute name
       int count,               // in - number of ESMC_R4s in list
-      ESMC_R4 *value) {        // in - Attribute values
+      vector<ESMC_R4> *value) {        // in - Attribute values
 // 
 // !DESCRIPTION:
 //    Set the {\tt ESMC_R4} valueList of an {\tt ESMC_Attribute}.
@@ -2099,7 +2104,7 @@
 // !ARGUMENTS:
       const string &name,              // in - Attribute name
       int count,               // in - number of ESMC_R8s in list
-      ESMC_R8 *value) {        // in - Attribute values
+      vector<ESMC_R8> *value) {        // in - Attribute values
 // 
 // !DESCRIPTION:
 //    Set the {\tt ESMC_R8} valueList of an {\tt ESMC_Attribute}.
@@ -2172,7 +2177,7 @@
 // !ARGUMENTS:
       const string &name,              // in - Attribute name
       int count,               // in - number of logicals in list
-      ESMC_Logical *value) {   // in - Attribute values
+      vector<ESMC_Logical> *value) {   // in - Attribute values
 // 
 // !DESCRIPTION:
 //    Set the {\tt ESMC_Logical} valueList of an {\tt ESMC_Attribute}.
@@ -2268,7 +2273,7 @@
 
 }  // end ESMC_AttributeSet(charlist)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
+/*#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMC_AttributeSet - set {\tt ESMC_Attribute} on an ESMF type
@@ -2304,7 +2309,7 @@
 
   return localrc;
 
-}  // end ESMC_AttributeSet
+}  // end ESMC_AttributeSet*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeSetLink"
@@ -2923,696 +2928,6 @@
 
  } // end ESMC_AttributeWriteXMLrecurse
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//
-// Modifiers, Constructors, Destructors, Serializers, Print:
-//
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Attribute()"
-//BOPI
-// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
-//
-// !INTERFACE:
-      ESMC_Attribute::ESMC_Attribute(void) {
-//
-// !RETURN VALUE:
-//    none
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//     Create an empty {\tt ESMC_Attribute} structure.
-//
-//EOPI
-
-  attrName = '\0';
-  tk = ESMF_NOKIND;
-  items = 0;
-  slen = 0;
-  attrRoot = ESMF_TRUE;
-
-  attrConvention = '\0';
-  attrPurpose = '\0';
-  attrObject = '\0';
-  attrPack = ESMF_FALSE;
-
-  attrCount = 0;
-  attrAlloc = 0;
-  attrList = ESMC_NULL_POINTER;
-
-  vi = 0;
-  vip = NULL;
-  vtl = 0;
-  vlp = NULL;
-  vf = 0;
-  vfp = NULL;
-  vd = 0;
-  vdp = NULL;
-  vb = ESMF_FALSE;
-  vbp = NULL;
-  voidp = NULL;
-  
- } // end ESMC_Attribute
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Attribute()"
-//BOPI
-// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
-//
-// !INTERFACE:
-      ESMC_Attribute::ESMC_Attribute(
-//
-// !RETURN VALUE:
-//    {\tt ESMC_Attribute} object
-//
-// !ARGUMENTS:
-        const string &name,                // Attribute name
-        const ESMC_TypeKind &typekind,    // typekind
-        int numitems,              // single or list
-        void *datap) {             // generic pointer to values
-//
-// !DESCRIPTION:
-//   Initialize an {\tt ESMC_Attribute}, and make a copy of the data if items > 1.
-//
-//EOPI
-  unsigned int i;
-
-  attrName = name;
-  tk = typekind;
-  items = numitems;
-  slen = 0;          // only used for string values
-  attrRoot = ESMF_FALSE;
-   
-  attrConvention = '\0';
-  attrPurpose = '\0';
-  attrObject = '\0';
-  attrPack = ESMF_FALSE;
-
-  attrCount = 0;
-  attrAlloc = 0;
-  attrList = ESMC_NULL_POINTER;
-  
-  vi = 0;
-  vip = NULL;
-  vtl = 0;
-  vlp = NULL;
-  vf = 0;
-  vfp = NULL;
-  vd = 0;
-  vdp = NULL;
-  vb = ESMF_FALSE;
-  vbp = NULL;
-  voidp = NULL;
- 
-  if (items == 1) {
-      if (datap) {
-            if (tk == ESMC_TYPEKIND_I4)
-                vi = *(static_cast<ESMC_I4*> (datap));  
-            else if (tk == ESMC_TYPEKIND_I8)
-                vtl = *(static_cast<ESMC_I8*> (datap));  
-            else if (tk == ESMC_TYPEKIND_R4)
-                vf = *(static_cast<ESMC_R4*> (datap));  
-            else if (tk == ESMC_TYPEKIND_R8)
-                vd = *(static_cast<ESMC_R8*> (datap));  
-            else if (tk == ESMC_TYPEKIND_LOGICAL)
-                vb = *(static_cast<ESMC_Logical*> (datap));  
-            else if (tk == ESMC_TYPEKIND_CHARACTER)
-                vcp = *(static_cast<string*> (datap));
-      }
-
-  } else if (items > 1) {
-    // items > 1, alloc space for a list and do the copy
-        if (tk == ESMC_TYPEKIND_I4) {
-            vip = new ESMC_I4[items];      
-            if (datap) 
-              for (i=0; i<items; i++)
-                vip[i] = (static_cast<ESMC_I4*> (datap))[i];  
-        } else if (tk == ESMC_TYPEKIND_I8) {
-            vlp = new ESMC_I8[items];      
-            if (datap) 
-              for (i=0; i<items; i++)
-                vlp[i] = (static_cast<ESMC_I8*> (datap))[i];  
-        } else if (tk == ESMC_TYPEKIND_R4) {
-            vfp = new ESMC_R4[items];      
-            if (datap) 
-              for (i=0; i<items; i++)
-                vfp[i] = (static_cast<ESMC_R4*> (datap))[i];  
-        } else if (tk == ESMC_TYPEKIND_R8) {
-            vdp = new ESMC_R8[items];      
-            if (datap) 
-              for (i=0; i<items; i++)
-                vdp[i] = (static_cast<ESMC_R8*> (datap))[i];  
-        } else if (tk == ESMC_TYPEKIND_LOGICAL) {
-            vbp = new ESMC_Logical[items];      
-            if (datap) 
-              for (i=0; i<items; i++)
-                vbp[i] = (static_cast<ESMC_Logical*> (datap))[i];  
-        } else if (tk == ESMC_TYPEKIND_CHARACTER) {
-            vcpp.reserve(items);
-            if (datap) {
-              for (i=0; i<items; i++) 
-                vcpp.push_back((*(static_cast<vector<string>*> (datap)))[i]);
-            }
-        }
-  }
-
- } // end ESMC_Attribute
-//----------------------------------------------------------------------------- 
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Attribute()"
-//BOPI
-// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
-//
-// !INTERFACE:
-      ESMC_Attribute::ESMC_Attribute(
-//
-// !RETURN VALUE:
-//    new {\tt ESMC_Attribute} object
-//
-// !ARGUMENTS:
-        const string &name,                  // Attribute name
-        const string &conv,                  // convention
-        const string &purp,                  // purpose
-        const string &obj) {                 // object
-//
-// !DESCRIPTION:
-//   Initialize an {\tt ESMC_Attribute} and set the name, convention, and purpose.
-//
-//EOPI
-
-  attrName = name;
-  tk = ESMF_NOKIND;
-  items = 0;
-  slen = 0;
-  attrRoot = ESMF_FALSE;
-
-  attrConvention = conv;
-  attrPurpose = purp;
-  attrObject = obj;
-  attrPack = ESMF_TRUE;
-
-  attrCount = 0;
-  attrAlloc = 0;
-  attrList = ESMC_NULL_POINTER;
-
-  vi = 0;
-  vip = NULL;
-  vtl = 0;
-  vlp = NULL;
-  vf = 0;
-  vfp = NULL;
-  vd = 0;
-  vdp = NULL;
-  vb = ESMF_FALSE;
-  vbp = NULL;
-  voidp = NULL;
-
-
-} // end ESMC_Attribute
-//----------------------------------------------------------------------------- 
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Attribute()"
-//BOPI
-// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
-//
-// !INTERFACE:
-      ESMC_Attribute::ESMC_Attribute(
-//
-// !RETURN VALUE:
-//    new {\tt ESMC_Attribute} object
-//
-// !ARGUMENTS:
-        const ESMC_Logical &attributeRoot) {                 // root value
-//
-// !DESCRIPTION:
-//   Initialize an {\tt ESMC_Attribute} and set the name, convention, and purpose.
-//
-//EOPI
-
-  attrName = '\0';
-  tk = ESMF_NOKIND;
-  items = 0;
-  slen = 0;
-  attrRoot = attributeRoot;
-
-  attrConvention = '\0';
-  attrPurpose = '\0';
-  attrObject = '\0';
-  attrPack = ESMF_FALSE;
-
-  attrCount = 0;
-  attrAlloc = 0;
-  attrList = ESMC_NULL_POINTER;
-
-  vi = 0;
-  vip = NULL;
-  vtl = 0;
-  vlp = NULL;
-  vf = 0;
-  vfp = NULL;
-  vd = 0;
-  vdp = NULL;
-  vb = ESMF_FALSE;
-  vbp = NULL;
-  voidp = NULL;
-
-} // end ESMC_Attribute
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "~ESMC_Attribute()"
-//BOPI
-// !IROUTINE:  ~ESMC_Attribute - native C++ destructor for ESMC_Attribute class
-//
-// !INTERFACE:
-      ESMC_Attribute::~ESMC_Attribute(void) {
-//
-// !RETURN VALUE:
-//    none
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//    Delete an {\tt ESMC_Attribute} hierarchy.
-//
-//EOPI
-
-  if (items > 1) {
-        if (tk == ESMC_TYPEKIND_I4) delete [] vip;
-        else if (tk == ESMC_TYPEKIND_I8) delete [] vlp;
-        else if (tk == ESMC_TYPEKIND_R4) delete [] vfp;
-        else if (tk == ESMC_TYPEKIND_R8) delete [] vdp;  
-        else if (tk == ESMC_TYPEKIND_LOGICAL) delete [] vbp;
-        else if (tk == ESMC_TYPEKIND_CHARACTER) {
-          vcpp.clear();
-        }
-  }
-
-  // if there are Attributes or attpacks delete, if links disconnect
-  for (int i=0; i<attrCount; i++) {
-    if (attrRoot == ESMF_TRUE) attrList[i] = ESMC_NULL_POINTER;
-    else delete attrList[i];
-  }
-
-  if (attrList) delete [] attrList;
-
- } // end ~ESMC_Attribute
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttrModifyValue()"
-//BOPI
-// !IROUTINE:  ESMC_AttrModifyValue - native C++ modifyer for ESMC_Attribute class
-//
-// !INTERFACE:
-      int ESMC_Attribute::ESMC_AttrModifyValue(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-//
-// !ARGUMENTS:
-        const ESMC_TypeKind &typekind,    // typekind
-        int numitems,              // single or list
-        void *datap) {             // generic pointer to values
-//
-// !DESCRIPTION:
-//   Set a value on an existing {\tt ESMC_Attribute} object.
-//
-//EOPI
-  int i, localrc;
-
-  tk = typekind;
-  items = numitems;
-  slen = 0;          // only used for string values
-  
-  // Initialize local return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-
-  if (items == 1) {
-      if (!datap) 
-          voidp = NULL;
-      else  {
-            if (tk == ESMC_TYPEKIND_I4)
-                vi = *(static_cast<ESMC_I4*> (datap));  
-            else if (tk == ESMC_TYPEKIND_I8)
-                vtl = *(static_cast<ESMC_I8*> (datap));  
-            else if (tk == ESMC_TYPEKIND_R4)
-                vf = *(static_cast<ESMC_R4*> (datap));  
-            else if (tk == ESMC_TYPEKIND_R8)
-                vd = *(static_cast<ESMC_R8*> (datap));  
-            else if (tk == ESMC_TYPEKIND_LOGICAL)
-                vb = *(static_cast<ESMC_Logical*> (datap));  
-            else if (tk == ESMC_TYPEKIND_CHARACTER) {
-                vcp = *(static_cast<string*> (datap));
-                slen = vcp.size(); }
-            else
-                voidp = NULL;
-    }
-
-  } else  if (items > 1) {
-    // items > 1, alloc space for a list and do the copy
-        if (tk == ESMC_TYPEKIND_I4) {
-//            delete [] vip;  ***FIXME*** memory leak, uncomment after c/c++ standardizing done
-            vip = new ESMC_I4[items];      
-            if (datap) 
-              for (i=0; i<items; i++)
-                vip[i] = (static_cast<ESMC_I4*> (datap))[i];  
-        } else if (tk == ESMC_TYPEKIND_I8) {
-//            delete [] vlp;  ***FIXME*** memory leak, uncomment after c/c++ standardizing done
-            vlp = new ESMC_I8[items];      
-            if (datap) 
-              for (i=0; i<items; i++)
-                vlp[i] = (static_cast<ESMC_I8*> (datap))[i];  
-        } else if (tk == ESMC_TYPEKIND_R4) {
-//            delete [] vfp;  ***FIXME*** memory leak, uncomment after c/c++ standardizing done
-            vfp = new ESMC_R4[items];      
-            if (datap) 
-              for (i=0; i<items; i++)
-                vfp[i] = (static_cast<ESMC_R4*> (datap))[i];  
-        } else if (tk == ESMC_TYPEKIND_R8) {
-//            delete [] vdp;  ***FIXME*** memory leak, uncomment after c/c++ standardizing done
-            vdp = new ESMC_R8[items];      
-            if (datap) 
-              for (i=0; i<items; i++)
-                vdp[i] = (static_cast<ESMC_R8*> (datap))[i];  
-        } else if (tk == ESMC_TYPEKIND_LOGICAL) {
-//            delete [] vbp;  ***FIXME*** memory leak, uncomment after c/c++ standardizing done
-            vbp = new ESMC_Logical[items];      
-            if (datap) 
-              for (i=0; i<items; i++)
-                vbp[i] = (static_cast<ESMC_Logical*> (datap))[i];  
-        } else if (tk == ESMC_TYPEKIND_CHARACTER) {
-            vcpp.reserve(items);
-            if (datap) {
-              for (i=0; i<items; i++)
-                 vcpp.push_back((*(static_cast<vector<string>*> (datap)))[i]);
-            }
-        } 
-  }
-
-  return ESMF_SUCCESS;
-
- } // end ESMC_AttrModifyValue
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Deserialize"
-//BOPI
-// !IROUTINE:  ESMC_Deserialize - Turn a byte stream into an object
-//
-// !INTERFACE:
-      int ESMC_Attribute::ESMC_Deserialize(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-//
-// !ARGUMENTS:
-      char *buffer,          // in - byte stream to read
-      int *offset) {         // inout - original offset, updated to point 
-                             //       to first free byte after current obj
-//
-// !DESCRIPTION:
-//    Turn a stream of bytes into an {\tt ESMC_Attribute} hierarchy.
-//
-//EOPI
-    int loffset, nbytes, chars;
-    int localrc;
-    unsigned int i;
-    
-    // Initialize local return code; assume routine not implemented
-    localrc = ESMC_RC_NOT_IMPL;
-
-    // Define serialization macros
-#define DESERIALIZE_VAR(bufptr,loff,var,t) \
-  var=(*(reinterpret_cast<t*> ((bufptr)+(loff))));    \
-  loff += (sizeof(t));  
-
-#define DESERIALIZE_VARC(bufptr,loff,var,var2,s) \
-  string var2((bufptr)+(loff),s); \
-  var = var2; \
-  loff += s; \
-
-#define DESERIALIZE_VAR1D(bufptr,loff,varptr,s,t)  \
-  varptr = new t[s]; \
-  memcpy(varptr,(bufptr)+(loff),((s)*sizeof(t)));      \
-  loff += ((s)*sizeof(t));
-
-    // get localoffset
-    loffset=*offset;
-    
-    DESERIALIZE_VAR(buffer,loffset,chars,int);
-    DESERIALIZE_VARC(buffer,loffset,attrName,temp,chars);
-
-    DESERIALIZE_VAR(buffer,loffset,tk,ESMC_TypeKind);
-    DESERIALIZE_VAR(buffer,loffset,items,int);
-    DESERIALIZE_VAR(buffer,loffset,slen,int);
-    DESERIALIZE_VAR(buffer,loffset,attrRoot,ESMC_Logical);
-    
-    DESERIALIZE_VAR(buffer,loffset,chars,int);
-    DESERIALIZE_VARC(buffer,loffset,attrConvention,temp2,chars);
-    DESERIALIZE_VAR(buffer,loffset,chars,int);
-    DESERIALIZE_VARC(buffer,loffset,attrPurpose,temp3,chars);
-    DESERIALIZE_VAR(buffer,loffset,chars,int);
-    DESERIALIZE_VARC(buffer,loffset,attrObject,temp4,chars);
-      
-    DESERIALIZE_VAR(buffer,loffset,attrPack,ESMC_Logical);
-    
-    DESERIALIZE_VAR(buffer,loffset,attrCount,int);
-    DESERIALIZE_VAR(buffer,loffset,attrAlloc,int);
-    
-    localrc = ESMC_AttributeAlloc(attrAlloc);
-
-    if (items == 1) {
-      if (tk == ESMC_TYPEKIND_I4) {
-        DESERIALIZE_VAR(buffer,loffset,vi,ESMC_I4); }
-      else if (tk == ESMC_TYPEKIND_I8) {
-        DESERIALIZE_VAR(buffer,loffset,vtl,ESMC_I8); }
-      else if (tk == ESMC_TYPEKIND_R4) {
-        DESERIALIZE_VAR(buffer,loffset,vf,ESMC_R4); }
-      else if (tk == ESMC_TYPEKIND_R8) {
-        DESERIALIZE_VAR(buffer,loffset,vd,ESMC_R8); }
-      else if (tk == ESMC_TYPEKIND_LOGICAL) {
-        DESERIALIZE_VAR(buffer,loffset,vb,ESMC_Logical); }
-      else if (tk == ESMC_TYPEKIND_CHARACTER) {
-        DESERIALIZE_VAR(buffer,loffset,chars,int);
-        DESERIALIZE_VARC(buffer,loffset,vcp,temp5,chars); 
-      }
-    }
-    if (items > 1) { 
-      if (tk == ESMC_TYPEKIND_I4) {
-        DESERIALIZE_VAR1D(buffer,loffset,vip,items,ESMC_I4); }
-      else if (tk == ESMC_TYPEKIND_I8) {
-        DESERIALIZE_VAR1D(buffer,loffset,vlp,items,ESMC_I8);} 
-      else if (tk == ESMC_TYPEKIND_R4) {
-        DESERIALIZE_VAR1D(buffer,loffset,vfp,items,ESMC_R4); }
-      else if (tk == ESMC_TYPEKIND_R8) {
-        DESERIALIZE_VAR1D(buffer,loffset,vdp,items,ESMC_R8);}
-      else if (tk == ESMC_TYPEKIND_LOGICAL) {
-        DESERIALIZE_VAR1D(buffer,loffset,vbp,items,ESMC_Logical); }
-      else if (tk == ESMC_TYPEKIND_CHARACTER) {
-          vcpp.reserve(items);
-          for (i=0; i<items; i++) {
-            DESERIALIZE_VAR(buffer,loffset,chars,int);
-            string stemp((buffer)+(loffset),chars);
-            loffset += chars;
-            vcpp.push_back(stemp);
-          }
-        }
-    }
-
-    // make sure loffset is aligned correctly
-    nbytes=loffset%8;
-    if (nbytes!=0) loffset += 8-nbytes;  
-
-    // Deserialize the {\tt ESMC_Attribute} hierarchy
-    for (int i=0; i<attrCount; i++) {
-      attrList[i] = new ESMC_Attribute(ESMF_FALSE);
-      if (!(attrList[i]))
-        return ESMF_FAILURE;
-      attrList[i]->ESMC_Deserialize(buffer,&loffset);
-    }
-      
-    // make sure loffset is aligned correctly
-    nbytes=loffset%8;
-    if (nbytes!=0) loffset += 8-nbytes;
-       
-    // output localoffset
-    *offset=loffset;
-
-    // Undefine serialization macros, so they don't cause troubles elsewhere
-#undef DESERIALIZE_VAR
-#undef DESERIALIZE_VARC
-#undef DESERIALIZE_VAR1D
-
-   return ESMF_SUCCESS;
-
- } // end ESMC_Deserialize
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Serialize"
-//BOPI
-// !IROUTINE:  ESMC_Serialize - Turn the object information into a byte stream
-//
-// !INTERFACE:
-      int ESMC_Attribute::ESMC_Serialize(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-//
-// !ARGUMENTS:
-      char *buffer,          // inout - byte stream to fill
-      int *length,           // inout - buf length; realloc'd here if needed
-      int *offset) const{    // inout - original offset, updated to point 
-                             //  to first free byte after current obj info
-// 
-// !DESCRIPTION:
-//    Turn an {\tt ESMC_Attribute} into a stream of bytes.
-//
-//EOPI
-    int loffset=0;
-    bool cc;
-    int localrc;
-
-    // Initialize local return code; assume routine not implemented
-    localrc = ESMC_RC_NOT_IMPL;
-    cc = false;
-    localrc = ESMC_SerializeCC(buffer,length,loffset,cc);
-    cc = true;
-    localrc = ESMC_SerializeCC(buffer,length,*offset,cc);
-
-    // return successfully
-    return ESMF_SUCCESS;
-
- } // end ESMC_Serialize
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_SerializeCC"
-//BOPI
-// !IROUTINE:  ESMC_SerializeCC - Turn the object information into a byte stream
-//
-// !INTERFACE:
-      int ESMC_Attribute::ESMC_SerializeCC(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-//
-// !ARGUMENTS:
-      char *buffer,          // inout - byte stream to fill
-      int *length,           // inout - buf length; realloc'd here if needed
-      int &offset,           // inout - original offset, updated throughout
-      bool cc) const {       // in - to tell whether in count or copy mode 
-//
-// !DESCRIPTION:
-//    Turn an {\tt ESMC_Attribute} into a stream of bytes.
-//
-//EOPI
-    int nbytes;
-    int localrc;
-    unsigned int i;
-
-    // Define serialization macros
-#define SERIALIZE_VAR(cc,bufptr,loff,var,t) \
-  if (cc) *(reinterpret_cast<t*> ((bufptr)+(loff)))=var;    \
-  loff += (sizeof(t));   
-
-#define SERIALIZE_VARC(cc,bufptr,loff,var,s) \
-  if (cc) strncpy((bufptr)+(loff),(var).c_str(),s);      \
-  loff += s;
-
-#define SERIALIZE_VAR1D(cc,bufptr,loff,varptr,s,t)    \
-  if (cc) memcpy((bufptr)+(loff),varptr,((s)*sizeof(t)));       \
-  loff += ((s)*sizeof(t)); 
-  
-    // Initialize local return code; assume routine not implemented
-    localrc = ESMC_RC_NOT_IMPL;
-
-      SERIALIZE_VAR(cc,buffer,offset,(attrName.size()),int);
-      SERIALIZE_VARC(cc,buffer,offset,attrName,(attrName.size()));
-
-      SERIALIZE_VAR(cc,buffer,offset,tk,ESMC_TypeKind);
-      
-      SERIALIZE_VAR(cc,buffer,offset,items,int);
-      SERIALIZE_VAR(cc,buffer,offset,slen,int);
-      SERIALIZE_VAR(cc,buffer,offset,attrRoot,ESMC_Logical);
-      
-      SERIALIZE_VAR(cc,buffer,offset,(attrConvention.size()),int);
-      SERIALIZE_VARC(cc,buffer,offset,attrConvention,(attrConvention.size()));
-      SERIALIZE_VAR(cc,buffer,offset,(attrPurpose.size()),int);
-      SERIALIZE_VARC(cc,buffer,offset,attrPurpose,(attrPurpose.size()));
-      SERIALIZE_VAR(cc,buffer,offset,(attrObject.size()),int);
-      SERIALIZE_VARC(cc,buffer,offset,attrObject,(attrObject.size()));
-      
-      SERIALIZE_VAR(cc,buffer,offset,attrPack,ESMC_Logical);
-           
-      SERIALIZE_VAR(cc,buffer,offset,attrCount,int);
-      SERIALIZE_VAR(cc,buffer,offset,attrAlloc,int);
-
-      if (items == 1) {
-        if (tk == ESMC_TYPEKIND_I4) {
-          SERIALIZE_VAR(cc,buffer,offset,vi,ESMC_I4); }
-        else if (tk == ESMC_TYPEKIND_I8) {
-          SERIALIZE_VAR(cc,buffer,offset,vtl,ESMC_I8); }
-        else if (tk == ESMC_TYPEKIND_R4) {
-          SERIALIZE_VAR(cc,buffer,offset,vf,ESMC_R4); }
-        else if (tk == ESMC_TYPEKIND_R8) {
-          SERIALIZE_VAR(cc,buffer,offset,vd,ESMC_R8); }
-        else if (tk == ESMC_TYPEKIND_LOGICAL) {
-          SERIALIZE_VAR(cc,buffer,offset,vb,ESMC_Logical); }
-        else if (tk == ESMC_TYPEKIND_CHARACTER) {
-          SERIALIZE_VAR(cc,buffer,offset,(vcp.size()),int);
-          SERIALIZE_VARC(cc,buffer,offset,vcp,(vcp.size()));
-        }
-      }
-      if (items > 1) { 
-        if (tk == ESMC_TYPEKIND_I4) {
-          SERIALIZE_VAR1D(cc,buffer,offset,vip,items,ESMC_I4); }
-        else if (tk == ESMC_TYPEKIND_I8) {
-          SERIALIZE_VAR1D(cc,buffer,offset,vlp,items,ESMC_I8); }
-        else if (tk == ESMC_TYPEKIND_R4) {
-          SERIALIZE_VAR1D(cc,buffer,offset,vfp,items,ESMC_R4); }
-        else if (tk == ESMC_TYPEKIND_R8) {
-          SERIALIZE_VAR1D(cc,buffer,offset,vdp,items,ESMC_R8); }
-        else if (tk == ESMC_TYPEKIND_LOGICAL) {
-          SERIALIZE_VAR1D(cc,buffer,offset,vbp,items,ESMC_Logical); }
-        else if (tk == ESMC_TYPEKIND_CHARACTER) {
-          for (i=0; i<items; i++) {
-            SERIALIZE_VAR(cc,buffer,offset,(vcpp[i].size()),int);
-            SERIALIZE_VARC(cc,buffer,offset,vcpp[i],(vcpp[i].size())); 
-          }
-        }
-      }
-
-      // make sure offset is aligned correctly
-      nbytes=offset%8;
-      if (nbytes!=0) offset += 8-nbytes;
-    
-      // Serialize the Attribute hierarchy
-      for (int i=0; i<attrCount; i++) {
-        attrList[i]->ESMC_SerializeCC(buffer,length,offset,cc);
-      }
-  
-      // make sure offset is aligned correctly
-      nbytes=offset%8;
-      if (nbytes!=0) offset += 8-nbytes;
-      
-      // check if buffer has enough free memory, expand?
-      if (*length < offset){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                      "Buffer too short to add an Attribute hierarchy", &localrc);
-        return localrc;
-      }
-      
-    // Undefine serialization macros, so they don't cause troubles elsewhere
-#undef SERIALIZE_VAR
-#undef SERIALIZE_VARC
-#undef SERIALIZE_VAR1D
-
-  // return successfully
-  return ESMF_SUCCESS;
-
- } // end ESMC_SerializeCC
-//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_Print"
 //BOPI
@@ -3731,6 +3046,349 @@
 
 }  // end ESMC_Print
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//
+// Modifiers, Constructors, Destructors, Serializers, Print:
+//
+//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------- 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Attribute()"
+//BOPI
+// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
+//
+// !INTERFACE:
+      ESMC_Attribute::ESMC_Attribute(
+//
+// !RETURN VALUE:
+//    new {\tt ESMC_Attribute} object
+//
+// !ARGUMENTS:
+        const string &name,                  // Attribute name
+        const string &conv,                  // convention
+        const string &purp,                  // purpose
+        const string &obj) {                 // object
+//
+// !DESCRIPTION:
+//   Initialize an {\tt ESMC_Attribute} and set the name, convention, and purpose.
+//
+//EOPI
+
+  attrName = name;
+  tk = ESMF_NOKIND;
+  items = 0;
+  slen = 0;
+  attrRoot = ESMF_FALSE;
+
+  attrConvention = conv;
+  attrPurpose = purp;
+  attrObject = obj;
+  attrPack = ESMF_TRUE;
+
+  attrCount = 0;
+  attrAlloc = 0;
+  attrList = ESMC_NULL_POINTER;
+
+  vi = 0;
+  vip.reserve(0);
+  vtl = 0;
+  vlp.reserve(0);
+  vf = 0;
+  vfp.reserve(0);
+  vd = 0;
+  vdp.reserve(0);
+  vb = ESMF_FALSE;
+  vbp.reserve(0);
+
+} // end ESMC_Attribute
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Attribute()"
+//BOPI
+// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
+//
+// !INTERFACE:
+      ESMC_Attribute::ESMC_Attribute(void) {
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//     Create an empty {\tt ESMC_Attribute} structure.
+//
+//EOPI
+
+  attrName = '\0';
+  tk = ESMF_NOKIND;
+  items = 0;
+  slen = 0;
+  attrRoot = ESMF_TRUE;
+
+  attrConvention = '\0';
+  attrPurpose = '\0';
+  attrObject = '\0';
+  attrPack = ESMF_FALSE;
+
+  attrCount = 0;
+  attrAlloc = 0;
+  attrList = ESMC_NULL_POINTER;
+
+  vi = 0;
+  vip.reserve(0);
+  vtl = 0;
+  vlp.reserve(0);
+  vf = 0;
+  vfp.reserve(0);
+  vd = 0;
+  vdp.reserve(0);
+  vb = ESMF_FALSE;
+  vbp.reserve(0);
+  
+ } // end ESMC_Attribute
+//----------------------------------------------------------------------------- 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Attribute()"
+//BOPI
+// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
+//
+// !INTERFACE:
+      ESMC_Attribute::ESMC_Attribute(
+//
+// !RETURN VALUE:
+//    new {\tt ESMC_Attribute} object
+//
+// !ARGUMENTS:
+        const ESMC_Logical &attributeRoot) {                 // root value
+//
+// !DESCRIPTION:
+//   Initialize an {\tt ESMC_Attribute} and set the name, convention, and purpose.
+//
+//EOPI
+
+  attrName = '\0';
+  tk = ESMF_NOKIND;
+  items = 0;
+  slen = 0;
+  attrRoot = attributeRoot;
+
+  attrConvention = '\0';
+  attrPurpose = '\0';
+  attrObject = '\0';
+  attrPack = ESMF_FALSE;
+
+  attrCount = 0;
+  attrAlloc = 0;
+  attrList = ESMC_NULL_POINTER;
+
+  vi = 0;
+  vip.reserve(0);
+  vtl = 0;
+  vlp.reserve(0);
+  vf = 0;
+  vfp.reserve(0);
+  vd = 0;
+  vdp.reserve(0);
+  vb = ESMF_FALSE;
+  vbp.reserve(0);
+
+} // end ESMC_Attribute
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Attribute()"
+//BOPI
+// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
+//
+// !INTERFACE:
+      ESMC_Attribute::ESMC_Attribute(
+//
+// !RETURN VALUE:
+//    {\tt ESMC_Attribute} object
+//
+// !ARGUMENTS:
+        const string &name,                // Attribute name
+        const ESMC_TypeKind &typekind,    // typekind
+        int numitems,              // single or list
+        void *datap) {             // generic pointer to values
+//
+// !DESCRIPTION:
+//   Initialize an {\tt ESMC_Attribute}, and make a copy of the data if items > 1.
+//
+//EOPI
+  unsigned int i;
+
+  attrName = name;
+  tk = typekind;
+  items = numitems;
+  slen = 0;          // only used for string values
+  attrRoot = ESMF_FALSE;
+   
+  attrConvention = '\0';
+  attrPurpose = '\0';
+  attrObject = '\0';
+  attrPack = ESMF_FALSE;
+
+  attrCount = 0;
+  attrAlloc = 0;
+  attrList = ESMC_NULL_POINTER;
+  
+  vi = 0;
+  vip.reserve(0);
+  vtl = 0;
+  vlp.reserve(0);
+  vf = 0;
+  vfp.reserve(0);
+  vd = 0;
+  vdp.reserve(0);
+  vb = ESMF_FALSE;
+  vbp.reserve(0);
+ 
+  if (items == 1) {
+      if (datap) {
+            if (tk == ESMC_TYPEKIND_I4)
+                vi = *(static_cast<ESMC_I4*> (datap));  
+            else if (tk == ESMC_TYPEKIND_I8)
+                vtl = *(static_cast<ESMC_I8*> (datap));  
+            else if (tk == ESMC_TYPEKIND_R4)
+                vf = *(static_cast<ESMC_R4*> (datap));  
+            else if (tk == ESMC_TYPEKIND_R8)
+                vd = *(static_cast<ESMC_R8*> (datap));  
+            else if (tk == ESMC_TYPEKIND_LOGICAL)
+                vb = *(static_cast<ESMC_Logical*> (datap));  
+            else if (tk == ESMC_TYPEKIND_CHARACTER)
+                vcp = *(static_cast<string*> (datap));
+      }
+
+  } else if (items > 1) {
+    // items > 1, alloc space for a list and do the copy
+        if (tk == ESMC_TYPEKIND_I4) {
+            vip.reserve(items);      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vip.push_back((*(static_cast<vector<ESMC_I4>*> (datap)))[i]);  
+        } else if (tk == ESMC_TYPEKIND_I8) {
+            vlp.reserve(items);      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vlp.push_back((*(static_cast<vector<ESMC_I8>*> (datap)))[i]);  
+        } else if (tk == ESMC_TYPEKIND_R4) {
+            vfp.reserve(items);      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vfp.push_back((*(static_cast<vector<ESMC_R4>*> (datap)))[i]);  
+        } else if (tk == ESMC_TYPEKIND_R8) {
+            vdp.reserve(items);      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vdp.push_back((*(static_cast<vector<ESMC_R8>*> (datap)))[i]);  
+        } else if (tk == ESMC_TYPEKIND_LOGICAL) {
+            vbp.reserve(items);      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vbp.push_back((*(static_cast<vector<ESMC_Logical>*> (datap)))[i]);  
+        } else if (tk == ESMC_TYPEKIND_CHARACTER) {
+            vcpp.reserve(items);
+            if (datap) {
+              for (i=0; i<items; i++) 
+                vcpp.push_back((*(static_cast<vector<string>*> (datap)))[i]);
+            }
+        }
+  }
+
+ } // end ESMC_Attribute
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_AttrModifyValue()"
+//BOPI
+// !IROUTINE:  ESMC_AttrModifyValue - native C++ modifyer for ESMC_Attribute class
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_AttrModifyValue(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+        const ESMC_TypeKind &typekind,    // typekind
+        int numitems,              // single or list
+        void *datap) {             // generic pointer to values
+//
+// !DESCRIPTION:
+//   Set a value on an existing {\tt ESMC_Attribute} object.
+//
+//EOPI
+  int i, localrc;
+
+  tk = typekind;
+  items = numitems;
+  slen = 0;          // only used for string values
+  
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  if (items == 1) {
+      if (datap) {
+            if (tk == ESMC_TYPEKIND_I4)
+                vi = *(static_cast<ESMC_I4*> (datap));  
+            else if (tk == ESMC_TYPEKIND_I8)
+                vtl = *(static_cast<ESMC_I8*> (datap));  
+            else if (tk == ESMC_TYPEKIND_R4)
+                vf = *(static_cast<ESMC_R4*> (datap));  
+            else if (tk == ESMC_TYPEKIND_R8)
+                vd = *(static_cast<ESMC_R8*> (datap));  
+            else if (tk == ESMC_TYPEKIND_LOGICAL)
+                vb = *(static_cast<ESMC_Logical*> (datap));  
+            else if (tk == ESMC_TYPEKIND_CHARACTER)
+                vcp = *(static_cast<string*> (datap));
+      }
+
+  } else if (items > 1) {
+        if (tk == ESMC_TYPEKIND_I4) {
+            vip.clear();
+            vip.reserve(items);      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vip.push_back((*(static_cast<vector<ESMC_I4>*> (datap)))[i]);  
+        } else if (tk == ESMC_TYPEKIND_I8) {
+            vlp.clear();
+            vlp.reserve(items);      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vlp.push_back((*(static_cast<vector<ESMC_I8>*> (datap)))[i]);  
+        } else if (tk == ESMC_TYPEKIND_R4) {
+            vfp.clear();
+            vfp.reserve(items);      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vfp.push_back((*(static_cast<vector<ESMC_R4>*> (datap)))[i]);  
+        } else if (tk == ESMC_TYPEKIND_R8) {
+            vdp.clear();
+            vdp.reserve(items);      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vdp.push_back((*(static_cast<vector<ESMC_R8>*> (datap)))[i]);  
+        } else if (tk == ESMC_TYPEKIND_LOGICAL) {
+            vbp.clear();
+            vbp.reserve(items);      
+            if (datap) 
+              for (i=0; i<items; i++)
+                vbp.push_back((*(static_cast<vector<ESMC_Logical>*> (datap)))[i]);  
+        } else if (tk == ESMC_TYPEKIND_CHARACTER) {
+            vcpp.clear();
+            vcpp.reserve(items);
+            if (datap) {
+              for (i=0; i<items; i++) 
+                vcpp.push_back((*(static_cast<vector<string>*> (datap)))[i]);
+            }
+        }
+  }
+
+  return ESMF_SUCCESS;
+
+ } // end ESMC_AttrModifyValue
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeCopy(=)"
 //BOPI
@@ -3763,12 +3421,7 @@
   attrObject = source.attrObject;
   attrPack = source.attrPack;
 
-  //attrCount and attrAlloc not set, they should automatically sync
-
-  if (items <= 0)
-    voidp = NULL;
- 
-  else if (items == 1) {
+  if (items == 1) {
         if (tk == ESMC_TYPEKIND_I4)
             vi = source.vi;  
         else if (tk == ESMC_TYPEKIND_I8)
@@ -3781,35 +3434,33 @@
             vb = source.vb;
         else if (tk == ESMC_TYPEKIND_CHARACTER)
             vcp = source.vcp;
-        else
-            voidp = NULL;
-  } else {
+  } else if (items > 1) {
     // items > 1, alloc space for a list and do the copy
           if (tk == ESMC_TYPEKIND_I4) {
-              vip = new ESMC_I4[items];      
-              for (i=0; i<items; i++)
-                  vip[i] = source.vip[i];  
+              vip.clear();
+              vip.reserve(items);
+              vip = source.vip;
           } else if (tk == ESMC_TYPEKIND_I8) {
-              vlp = new ESMC_I8[items];      
-              for (i=0; i<items; i++)
-                  vlp[i] = source.vlp[i];  
+              vlp.clear();
+              vlp.reserve(items);
+              vlp = source.vlp;
           } else if (tk == ESMC_TYPEKIND_R4) {
-              vfp = new ESMC_R4[items];      
-              for (i=0; i<items; i++)
-                  vfp[i] = source.vfp[i];  
+              vfp.clear();
+              vfp.reserve(items);
+              vfp = source.vfp;
           } else if (tk == ESMC_TYPEKIND_R8) {
-              vdp = new ESMC_R8[items];      
-              for (i=0; i<items; i++)
-                  vdp[i] = source.vdp[i];  
+              vdp.clear();
+              vdp.reserve(items);
+              vdp = source.vdp;
           } else if (tk == ESMC_TYPEKIND_LOGICAL){
-              vbp = new ESMC_Logical[items];      
-              for (i=0; i<items; i++)
-                vbp[i] = source.vbp[i];  
+              vbp.clear();
+              vbp.reserve(items);
+              vbp = source.vbp;
           } else if (tk == ESMC_TYPEKIND_CHARACTER) {
+              vcpp.clear();
               vcpp.reserve(items);
               vcpp = source.vcpp;
-          } else
-             voidp = NULL;
+          }
   }
 
   // if Attribute list, copy it.
@@ -3834,6 +3485,370 @@
  } // end ESMC_Attribute::operator=
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_Attribute()"
+//BOPI
+// !IROUTINE:  ~ESMC_Attribute - native C++ destructor for ESMC_Attribute class
+//
+// !INTERFACE:
+      ESMC_Attribute::~ESMC_Attribute(void) {
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//    Delete an {\tt ESMC_Attribute} hierarchy.
+//
+//EOPI
+
+  if (items > 1) {
+        if (tk == ESMC_TYPEKIND_I4) vip.clear();
+        else if (tk == ESMC_TYPEKIND_I8) vlp.clear();
+        else if (tk == ESMC_TYPEKIND_R4) vfp.clear();
+        else if (tk == ESMC_TYPEKIND_R8) vdp.clear();  
+        else if (tk == ESMC_TYPEKIND_LOGICAL) vbp.clear();
+        else if (tk == ESMC_TYPEKIND_CHARACTER) vcpp.clear();
+  }
+
+  // if there are Attributes or attpacks delete, if links disconnect
+  for (int i=0; i<attrCount; i++) {
+    if (attrRoot == ESMF_TRUE) attrList[i] = ESMC_NULL_POINTER;
+    else delete attrList[i];
+  }
+
+  if (attrList) delete [] attrList;
+
+ } // end ~ESMC_Attribute
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Deserialize"
+//BOPI
+// !IROUTINE:  ESMC_Deserialize - Turn a byte stream into an object
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_Deserialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // in - byte stream to read
+      int *offset) {         // inout - original offset, updated to point 
+                             //       to first free byte after current obj
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an {\tt ESMC_Attribute} hierarchy.
+//
+//EOPI
+    int loffset, nbytes, chars;
+    int localrc;
+    unsigned int i;
+    
+    // Initialize local return code; assume routine not implemented
+    localrc = ESMC_RC_NOT_IMPL;
+
+    // Define serialization macros
+#define DESERIALIZE_VAR(bufptr,loff,var,t) \
+  var=(*(reinterpret_cast<t*> ((bufptr)+(loff))));    \
+  loff += (sizeof(t));  
+
+#define DESERIALIZE_VARC(bufptr,loff,var,var2,s) \
+  string var2((bufptr)+(loff),s); \
+  var = var2; \
+  loff += s; \
+
+    // get localoffset
+    loffset=*offset;
+    
+    DESERIALIZE_VAR(buffer,loffset,chars,int);
+    DESERIALIZE_VARC(buffer,loffset,attrName,temp,chars);
+
+    DESERIALIZE_VAR(buffer,loffset,tk,ESMC_TypeKind);
+    DESERIALIZE_VAR(buffer,loffset,items,int);
+    DESERIALIZE_VAR(buffer,loffset,slen,int);
+    DESERIALIZE_VAR(buffer,loffset,attrRoot,ESMC_Logical);
+    
+    DESERIALIZE_VAR(buffer,loffset,chars,int);
+    DESERIALIZE_VARC(buffer,loffset,attrConvention,temp2,chars);
+    DESERIALIZE_VAR(buffer,loffset,chars,int);
+    DESERIALIZE_VARC(buffer,loffset,attrPurpose,temp3,chars);
+    DESERIALIZE_VAR(buffer,loffset,chars,int);
+    DESERIALIZE_VARC(buffer,loffset,attrObject,temp4,chars);
+      
+    DESERIALIZE_VAR(buffer,loffset,attrPack,ESMC_Logical);
+    
+    DESERIALIZE_VAR(buffer,loffset,attrCount,int);
+    DESERIALIZE_VAR(buffer,loffset,attrAlloc,int);
+    
+    localrc = ESMC_AttributeAlloc(attrAlloc);
+
+    if (items == 1) {
+      if (tk == ESMC_TYPEKIND_I4) {
+        DESERIALIZE_VAR(buffer,loffset,vi,ESMC_I4); }
+      else if (tk == ESMC_TYPEKIND_I8) {
+        DESERIALIZE_VAR(buffer,loffset,vtl,ESMC_I8); }
+      else if (tk == ESMC_TYPEKIND_R4) {
+        DESERIALIZE_VAR(buffer,loffset,vf,ESMC_R4); }
+      else if (tk == ESMC_TYPEKIND_R8) {
+        DESERIALIZE_VAR(buffer,loffset,vd,ESMC_R8); }
+      else if (tk == ESMC_TYPEKIND_LOGICAL) {
+        DESERIALIZE_VAR(buffer,loffset,vb,ESMC_Logical); }
+      else if (tk == ESMC_TYPEKIND_CHARACTER) {
+        DESERIALIZE_VAR(buffer,loffset,chars,int);
+        DESERIALIZE_VARC(buffer,loffset,vcp,temp5,chars); 
+      }
+    }
+    if (items > 1) { 
+      if (tk == ESMC_TYPEKIND_I4) {
+        vip.reserve(items);
+        for (i=0; i<items; i++) {
+          ESMC_I4 vipTemp;
+          vipTemp = (*(reinterpret_cast<ESMC_I4*> (buffer+loffset)));
+          vip.push_back(vipTemp);
+          loffset += sizeof(ESMC_I4);
+        }}
+      else if (tk == ESMC_TYPEKIND_I8) {
+        vlp.reserve(items);
+        for (i=0; i<items; i++) {
+          ESMC_I8 vlpTemp;
+          vlpTemp = (*(reinterpret_cast<ESMC_I8*> (buffer+loffset)));
+          vlp.push_back(vlpTemp);
+          loffset += sizeof(ESMC_I8);
+        }}
+      else if (tk == ESMC_TYPEKIND_R4) {
+        vfp.reserve(items);
+        for (i=0; i<items; i++) {
+          ESMC_R4 vfpTemp;
+          vfpTemp = (*(reinterpret_cast<ESMC_R4*> (buffer+loffset)));
+          vfp.push_back(vfpTemp);
+          loffset += sizeof(ESMC_R4);
+        }}
+      else if (tk == ESMC_TYPEKIND_R8) {
+        vdp.reserve(items);
+        for (i=0; i<items; i++) {
+          ESMC_R8 vdpTemp;
+          vdpTemp = (*(reinterpret_cast<ESMC_R8*> (buffer+loffset)));
+          vdp.push_back(vdpTemp);
+          loffset += sizeof(ESMC_R8);
+        }}
+      else if (tk == ESMC_TYPEKIND_LOGICAL) {
+        vbp.reserve(items);
+        for (i=0; i<items; i++) {
+          ESMC_Logical vbpTemp;
+          vbpTemp = (*(reinterpret_cast<ESMC_Logical*> (buffer+loffset)));
+          vbp.push_back(vbpTemp);
+          loffset += sizeof(ESMC_Logical);
+        }}
+      else if (tk == ESMC_TYPEKIND_CHARACTER) {
+          vcpp.reserve(items);
+          for (i=0; i<items; i++) {
+            DESERIALIZE_VAR(buffer,loffset,chars,int);
+            string vcppTemp((buffer)+(loffset),chars);
+            loffset += chars;
+            vcpp.push_back(vcppTemp);
+          }
+        }
+    }
+
+    // make sure loffset is aligned correctly
+    nbytes=loffset%8;
+    if (nbytes!=0) loffset += 8-nbytes;  
+
+    // Deserialize the {\tt ESMC_Attribute} hierarchy
+    for (int i=0; i<attrCount; i++) {
+      attrList[i] = new ESMC_Attribute(ESMF_FALSE);
+      if (!(attrList[i]))
+        return ESMF_FAILURE;
+      attrList[i]->ESMC_Deserialize(buffer,&loffset);
+    }
+      
+    // make sure loffset is aligned correctly
+    nbytes=loffset%8;
+    if (nbytes!=0) loffset += 8-nbytes;
+       
+    // output localoffset
+    *offset=loffset;
+
+    // Undefine serialization macros, so they don't cause troubles elsewhere
+#undef DESERIALIZE_VAR
+#undef DESERIALIZE_VARC
+
+   return ESMF_SUCCESS;
+
+ } // end ESMC_Deserialize
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Serialize"
+//BOPI
+// !IROUTINE:  ESMC_Serialize - Turn the object information into a byte stream
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_Serialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // inout - byte stream to fill
+      int *length,           // inout - buf length; realloc'd here if needed
+      int *offset) const{    // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+// 
+// !DESCRIPTION:
+//    Turn an {\tt ESMC_Attribute} into a stream of bytes.
+//
+//EOPI
+    int loffset=0;
+    bool cc;
+    int localrc;
+
+    // Initialize local return code; assume routine not implemented
+    localrc = ESMC_RC_NOT_IMPL;
+    cc = false;
+    localrc = ESMC_SerializeCC(buffer,length,loffset,cc);
+    cc = true;
+    localrc = ESMC_SerializeCC(buffer,length,*offset,cc);
+
+    // return successfully
+    return ESMF_SUCCESS;
+
+ } // end ESMC_Serialize
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SerializeCC"
+//BOPI
+// !IROUTINE:  ESMC_SerializeCC - Turn the object information into a byte stream
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_SerializeCC(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // inout - byte stream to fill
+      int *length,           // inout - buf length; realloc'd here if needed
+      int &offset,           // inout - original offset, updated throughout
+      bool cc) const {       // in - to tell whether in count or copy mode 
+//
+// !DESCRIPTION:
+//    Turn an {\tt ESMC_Attribute} into a stream of bytes.
+//
+//EOPI
+    int nbytes;
+    int localrc;
+    unsigned int i;
+
+    // Define serialization macros
+#define SERIALIZE_VAR(cc,bufptr,loff,var,t) \
+  if (cc) *(reinterpret_cast<t*> ((bufptr)+(loff)))=var;    \
+  loff += (sizeof(t));   
+
+#define SERIALIZE_VARC(cc,bufptr,loff,var,s) \
+  if (cc) strncpy((bufptr)+(loff),(var).c_str(),s);      \
+  loff += s;
+
+    // Initialize local return code; assume routine not implemented
+    localrc = ESMC_RC_NOT_IMPL;
+
+      SERIALIZE_VAR(cc,buffer,offset,(attrName.size()),int);
+      SERIALIZE_VARC(cc,buffer,offset,attrName,(attrName.size()));
+
+      SERIALIZE_VAR(cc,buffer,offset,tk,ESMC_TypeKind);
+      
+      SERIALIZE_VAR(cc,buffer,offset,items,int);
+      SERIALIZE_VAR(cc,buffer,offset,slen,int);
+      SERIALIZE_VAR(cc,buffer,offset,attrRoot,ESMC_Logical);
+      
+      SERIALIZE_VAR(cc,buffer,offset,(attrConvention.size()),int);
+      SERIALIZE_VARC(cc,buffer,offset,attrConvention,(attrConvention.size()));
+      SERIALIZE_VAR(cc,buffer,offset,(attrPurpose.size()),int);
+      SERIALIZE_VARC(cc,buffer,offset,attrPurpose,(attrPurpose.size()));
+      SERIALIZE_VAR(cc,buffer,offset,(attrObject.size()),int);
+      SERIALIZE_VARC(cc,buffer,offset,attrObject,(attrObject.size()));
+      
+      SERIALIZE_VAR(cc,buffer,offset,attrPack,ESMC_Logical);
+           
+      SERIALIZE_VAR(cc,buffer,offset,attrCount,int);
+      SERIALIZE_VAR(cc,buffer,offset,attrAlloc,int);
+
+      if (items == 1) {
+        if (tk == ESMC_TYPEKIND_I4) {
+          SERIALIZE_VAR(cc,buffer,offset,vi,ESMC_I4); }
+        else if (tk == ESMC_TYPEKIND_I8) {
+          SERIALIZE_VAR(cc,buffer,offset,vtl,ESMC_I8); }
+        else if (tk == ESMC_TYPEKIND_R4) {
+          SERIALIZE_VAR(cc,buffer,offset,vf,ESMC_R4); }
+        else if (tk == ESMC_TYPEKIND_R8) {
+          SERIALIZE_VAR(cc,buffer,offset,vd,ESMC_R8); }
+        else if (tk == ESMC_TYPEKIND_LOGICAL) {
+          SERIALIZE_VAR(cc,buffer,offset,vb,ESMC_Logical); }
+        else if (tk == ESMC_TYPEKIND_CHARACTER) {
+          SERIALIZE_VAR(cc,buffer,offset,(vcp.size()),int);
+          SERIALIZE_VARC(cc,buffer,offset,vcp,(vcp.size()));
+        }
+      }
+      if (items > 1) { 
+        if (tk == ESMC_TYPEKIND_I4) {
+          for (i=0; i<items; i++) {
+            SERIALIZE_VAR(cc,buffer,offset,vip[i],ESMC_I4);
+          }}
+        else if (tk == ESMC_TYPEKIND_I8) {
+          for (i=0; i<items; i++) {
+            SERIALIZE_VAR(cc,buffer,offset,vlp[i],ESMC_I8);
+          }}
+        else if (tk == ESMC_TYPEKIND_R4) {
+          for (i=0; i<items; i++) {
+            SERIALIZE_VAR(cc,buffer,offset,vfp[i],ESMC_R4);
+          }}
+        else if (tk == ESMC_TYPEKIND_R8) {
+          for (i=0; i<items; i++) {
+            SERIALIZE_VAR(cc,buffer,offset,vdp[i],ESMC_R8);
+          }}
+        else if (tk == ESMC_TYPEKIND_LOGICAL) {
+          for (i=0; i<items; i++) {
+            SERIALIZE_VAR(cc,buffer,offset,vbp[i],ESMC_Logical);
+          }}
+        else if (tk == ESMC_TYPEKIND_CHARACTER) {
+          for (i=0; i<items; i++) {
+            SERIALIZE_VAR(cc,buffer,offset,(vcpp[i].size()),int);
+            SERIALIZE_VARC(cc,buffer,offset,vcpp[i],(vcpp[i].size())); 
+          }
+        }
+      }
+
+      // make sure offset is aligned correctly
+      nbytes=offset%8;
+      if (nbytes!=0) offset += 8-nbytes;
+    
+      // Serialize the Attribute hierarchy
+      for (int i=0; i<attrCount; i++) {
+        attrList[i]->ESMC_SerializeCC(buffer,length,offset,cc);
+      }
+  
+      // make sure offset is aligned correctly
+      nbytes=offset%8;
+      if (nbytes!=0) offset += 8-nbytes;
+      
+      // check if buffer has enough free memory, expand?
+      if (*length < offset){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                      "Buffer too short to add an Attribute hierarchy", &localrc);
+        return localrc;
+      }
+      
+    // Undefine serialization macros, so they don't cause troubles elsewhere
+#undef SERIALIZE_VAR
+#undef SERIALIZE_VARC
+
+  // return successfully
+  return ESMF_SUCCESS;
+
+ } // end ESMC_SerializeCC
+//-----------------------------------------------------------------------------
+/*#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_AttributeGetObjectList"
 //BOPI
 // !IROUTINE:  ESMC_AttributeGetObjectList - get an {\tt ESMC_Attribute} from multiple ESMF objects 
@@ -3891,3 +3906,4 @@
 
 }  // end ESMC_AttributeSetObjectList
 //-----------------------------------------------------------------------------
+*/

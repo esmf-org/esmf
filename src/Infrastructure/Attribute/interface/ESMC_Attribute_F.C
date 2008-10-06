@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.23 2008/09/30 16:18:05 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.24 2008/10/06 19:15:19 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.23 2008/09/30 16:18:05 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.24 2008/10/06 19:15:19 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -439,7 +439,7 @@ extern "C" {
 
   string cvalue;
   status = ((**base).root.ESMC_AttPackGet(cconv, cpurp, cobj))->\
-    ESMC_AttributeGet(cname, cvalue);
+    ESMC_AttributeGet(cname, &cvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting the attpack attribute value", &status);
@@ -642,7 +642,7 @@ extern "C" {
   vector<string> lcvalue;
 
   // next we get all the strings into the char**
-  status = attr->ESMC_AttributeGet(cname, lcvalue);
+  status = attr->ESMC_AttributeGet(cname, &lcvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
@@ -709,6 +709,7 @@ extern "C" {
 
   int status, attrCount;
   ESMC_TypeKind attrTk;
+  ESMC_Attribute *attpack;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -789,8 +790,15 @@ extern "C" {
     return;
   }
 
-  status = ((**base).root.ESMC_AttPackGet(cconv, cpurp, cobj))->\
-    ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
+  attpack = (**base).root.ESMC_AttPackGet(cconv, cpurp, cobj);
+  if (!attpack) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                    "failed getting attribute package", &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  status = attpack->ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                     "failed getting attribute type and count", &status);
@@ -812,12 +820,75 @@ extern "C" {
     return;
   }
 
-  status = ((**base).root.ESMC_AttPackGet(cconv, cpurp, cobj))->\
-    ESMC_AttributeGet(cname, NULL, NULL, value);
+  if (value) {
+    if (*count == 1) {
+      if (*tk == ESMC_TYPEKIND_I4)
+        status = attpack->ESMC_AttributeGet(cname, (static_cast<ESMC_I4*> (value)));  
+      else if (*tk == ESMC_TYPEKIND_I8)
+        status = attpack->ESMC_AttributeGet(cname, (static_cast<ESMC_I8*> (value)));
+      else if (*tk == ESMC_TYPEKIND_R4)
+        status = attpack->ESMC_AttributeGet(cname, (static_cast<ESMC_R4*> (value)));
+      else if (*tk == ESMC_TYPEKIND_R8)
+        status = attpack->ESMC_AttributeGet(cname, (static_cast<ESMC_R8*> (value)));
+      else if (*tk == ESMC_TYPEKIND_LOGICAL)
+        status = attpack->ESMC_AttributeGet(cname, (static_cast<ESMC_Logical*> (value)));
+      else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "typekind was inappropriate for this routine", &status);
+      }
+      if (status != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed setting attribute value", &status);
+      }
+    }
+    else if (*count > 1) {
+      if (*tk == ESMC_TYPEKIND_I4) {
+        vector<ESMC_I4> temp;
+        temp.reserve(*count);
+        status = attpack->ESMC_AttributeGet(cname, count, &temp);
+        for (unsigned int i=0; i<*count; i++)
+          (static_cast<ESMC_I4*> (value))[i] = temp[i];
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_I8) {
+        vector<ESMC_I8> temp;
+        temp.reserve(*count);
+        status = attpack->ESMC_AttributeGet(cname, count, &temp);
+        for (unsigned int i=0; i<*count; i++)
+          (static_cast<ESMC_I8*> (value))[i] = temp[i];
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_R4) {
+        vector<ESMC_R4> temp;
+        temp.reserve(*count);
+        status = attpack->ESMC_AttributeGet(cname, count, &temp);
+        for (unsigned int i=0; i<*count; i++)
+          (static_cast<ESMC_R4*> (value))[i] = temp[i];
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_R8) {
+        vector<ESMC_R8> temp;
+        temp.reserve(*count);
+        status = attpack->ESMC_AttributeGet(cname, count, &temp);
+        for (unsigned int i=0; i<*count; i++)
+          (static_cast<ESMC_R8*> (value))[i] = temp[i];
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
+        vector<ESMC_Logical> temp;
+        temp.reserve(*count);
+        status = attpack->ESMC_AttributeGet(cname, count, &temp);
+        for (unsigned int i=0; i<*count; i++)
+          (static_cast<ESMC_Logical*> (value))[i] = temp[i];
+        temp.clear();
+      } else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "typekind was inappropriate for this routine", &status);
+      }
+    }
+  }
+
+/*  status = attpack->ESMC_AttributeGet(cname, NULL, NULL, value);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
-  }
+  }*/
     
   if (rc) *rc = status;
   return;
@@ -1051,10 +1122,9 @@ extern "C" {
   }
   
   if (cvalue.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value conversion", &status);
-      if (rc) *rc = status;
-      return;
+      ESMC_LogDefault.Write("Attribute has an empty value argument",
+                              ESMC_LOG_INFO);
+      cvalue = '\0';
   }
 
   if (cconv.empty()) {
@@ -1359,13 +1429,82 @@ extern "C" {
     return;
   }
 
-  // Set the attribute on the object.
+  if (value) {
+    if (*count == 1) {
+      if (*tk == ESMC_TYPEKIND_I4)
+        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count,
+          (static_cast<ESMC_I4*> (value)), cconv, cpurp, cobj);  
+      else if (*tk == ESMC_TYPEKIND_I8)
+        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count,
+          (static_cast<ESMC_I8*> (value)), cconv, cpurp, cobj);
+      else if (*tk == ESMC_TYPEKIND_R4)
+        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count,
+          (static_cast<ESMC_R4*> (value)), cconv, cpurp, cobj);
+      else if (*tk == ESMC_TYPEKIND_R8)
+        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count,
+          (static_cast<ESMC_R8*> (value)), cconv, cpurp, cobj);
+      else if (*tk == ESMC_TYPEKIND_LOGICAL)
+        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count,
+          (static_cast<ESMC_Logical*> (value)), cconv, cpurp, cobj);
+      else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "typekind was inappropriate for this routine", &status);
+      }
+      if (status != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed setting attribute value", &status);
+      }
+    }
+    else if (*count > 1) {
+      if (*tk == ESMC_TYPEKIND_I4) {
+        vector<ESMC_I4> temp;
+        temp.reserve(*count);
+        for (unsigned int i=0; i<*count; i++)
+          temp.push_back((static_cast<ESMC_I4*> (value))[i]);
+        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_I8) {
+        vector<ESMC_I8> temp;
+        temp.reserve(*count);
+        for (unsigned int i=0; i<*count; i++)
+          temp.push_back((static_cast<ESMC_I8*> (value))[i]);
+        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_R4) {
+        vector<ESMC_R4> temp;
+        temp.reserve(*count);
+        for (unsigned int i=0; i<*count; i++)
+          temp.push_back((static_cast<ESMC_R4*> (value))[i]);
+        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_R8) {
+        vector<ESMC_R8> temp;
+        temp.reserve(*count);
+        for (unsigned int i=0; i<*count; i++)
+          temp.push_back((static_cast<ESMC_R8*> (value))[i]);
+        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
+        vector<ESMC_Logical> temp;
+        temp.reserve(*count);
+        for (unsigned int i=0; i<*count; i++)
+          temp.push_back((static_cast<ESMC_Logical*> (value))[i]);
+        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        temp.clear();
+      } else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "typekind was inappropriate for this routine", &status);
+      }
+    }
+  }
+
+/*  // Set the attribute on the object.
   status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, value, cconv, cpurp, cobj);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed setting attribute value", &status);
   }
-
+*/
   if (rc) *rc = status;
   return;
 
@@ -1827,7 +1966,7 @@ extern "C" {
   }
 
   string cvalue;
-  status = (**base).root.ESMC_AttributeGet(cname, cvalue);
+  status = (**base).root.ESMC_AttributeGet(cname, &cvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
@@ -1964,7 +2103,7 @@ extern "C" {
   cvalue.reserve(*count);
 
   // next we get all the strings into the char**
-  status = (**base).root.ESMC_AttributeGet(cname, cvalue);
+  status = (**base).root.ESMC_AttributeGet(cname, &cvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
@@ -2074,12 +2213,76 @@ extern "C" {
     return;
   }
   
-  status = (**base).root.ESMC_AttributeGet(cname, NULL, NULL, value);
+  if (value) {
+    if (*count == 1) {
+      if (*tk == ESMC_TYPEKIND_I4)
+        status = (**base).root.ESMC_AttributeGet(cname, (static_cast<ESMC_I4*> (value)));  
+      else if (*tk == ESMC_TYPEKIND_I8)
+        status = (**base).root.ESMC_AttributeGet(cname, (static_cast<ESMC_I8*> (value)));
+      else if (*tk == ESMC_TYPEKIND_R4)
+        status = (**base).root.ESMC_AttributeGet(cname, (static_cast<ESMC_R4*> (value)));
+      else if (*tk == ESMC_TYPEKIND_R8)
+        status = (**base).root.ESMC_AttributeGet(cname, (static_cast<ESMC_R8*> (value)));
+      else if (*tk == ESMC_TYPEKIND_LOGICAL)
+        status = (**base).root.ESMC_AttributeGet(cname, (static_cast<ESMC_Logical*> (value)));
+      else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "typekind was inappropriate for this routine", &status);
+      }
+      if (status != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed setting attribute value", &status);
+      }
+    }
+    else if (*count > 1) {
+      if (*tk == ESMC_TYPEKIND_I4) {
+        vector<ESMC_I4> temp;
+        temp.reserve(*count);
+        status = (**base).root.ESMC_AttributeGet(cname, count, &temp);
+        for (unsigned int i=0; i<*count; i++)
+          (static_cast<ESMC_I4*> (value))[i] = temp[i];
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_I8) {
+        vector<ESMC_I8> temp;
+        temp.reserve(*count);
+        status = (**base).root.ESMC_AttributeGet(cname, count, &temp);
+        for (unsigned int i=0; i<*count; i++)
+          (static_cast<ESMC_I8*> (value))[i] = temp[i];
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_R4) {
+        vector<ESMC_R4> temp;
+        temp.reserve(*count);
+        status = (**base).root.ESMC_AttributeGet(cname, count, &temp);
+        for (unsigned int i=0; i<*count; i++)
+          (static_cast<ESMC_R4*> (value))[i] = temp[i];
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_R8) {
+        vector<ESMC_R8> temp;
+        temp.reserve(*count);
+        status = (**base).root.ESMC_AttributeGet(cname, count, &temp);
+        for (unsigned int i=0; i<*count; i++)
+          (static_cast<ESMC_R8*> (value))[i] = temp[i];
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
+        vector<ESMC_Logical> temp;
+        temp.reserve(*count);
+        status = (**base).root.ESMC_AttributeGet(cname, count, &temp);
+        for (unsigned int i=0; i<*count; i++)
+          (static_cast<ESMC_Logical*> (value))[i] = temp[i];
+        temp.clear();
+      } else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "typekind was inappropriate for this routine", &status);
+      }
+    }
+  }
+
+/*  status = (**base).root.ESMC_AttributeGet(cname, NULL, NULL, value);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
   }
-  
+*/  
   if (rc) *rc = status;
   return;
 
@@ -2455,10 +2658,9 @@ extern "C" {
   }
   
   if (cvalue.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value conversion", &status);
-      if (rc) *rc = status;
-      return;
+      ESMC_LogDefault.Write("Attribute has an empty value argument",
+                              ESMC_LOG_INFO);
+      cvalue = '\0';
   }
 
   // Set the attribute on the object
@@ -2629,11 +2831,68 @@ extern "C" {
     return;
   }
 
-  // Set the attribute on the object.
-  status = (**base).root.ESMC_AttributeSet(cname, *tk, *count, value);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+  if (value) {
+    if (*count == 1) {
+      if (*tk == ESMC_TYPEKIND_I4)
+        status = (**base).root.ESMC_AttributeSet(cname, *(static_cast<ESMC_I4*> (value)));  
+      else if (*tk == ESMC_TYPEKIND_I8)
+        status = (**base).root.ESMC_AttributeSet(cname, *(static_cast<ESMC_I8*> (value)));
+      else if (*tk == ESMC_TYPEKIND_R4)
+        status = (**base).root.ESMC_AttributeSet(cname, *(static_cast<ESMC_R4*> (value)));
+      else if (*tk == ESMC_TYPEKIND_R8)
+        status = (**base).root.ESMC_AttributeSet(cname, *(static_cast<ESMC_R8*> (value)));
+      else if (*tk == ESMC_TYPEKIND_LOGICAL)
+        status = (**base).root.ESMC_AttributeSet(cname, *(static_cast<ESMC_Logical*> (value)));
+      else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "typekind was inappropriate for this routine", &status);
+      }
+      if (status != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed setting attribute value", &status);
+      }
+    }
+    else if (*count > 1) {
+      if (*tk == ESMC_TYPEKIND_I4) {
+        vector<ESMC_I4> temp;
+        temp.reserve(*count);
+        for (unsigned int i=0; i<*count; i++)
+          temp.push_back((static_cast<ESMC_I4*> (value))[i]);
+        status = (**base).root.ESMC_AttributeSet(cname, *count, &temp);
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_I8) {
+        vector<ESMC_I8> temp;
+        temp.reserve(*count);
+        for (unsigned int i=0; i<*count; i++)
+          temp.push_back((static_cast<ESMC_I8*> (value))[i]);
+        status = (**base).root.ESMC_AttributeSet(cname, *count, &temp);
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_R4) {
+        vector<ESMC_R4> temp;
+        temp.reserve(*count);
+        for (unsigned int i=0; i<*count; i++)
+          temp.push_back((static_cast<ESMC_R4*> (value))[i]);
+        status = (**base).root.ESMC_AttributeSet(cname, *count, &temp);
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_R8) {
+        vector<ESMC_R8> temp;
+        temp.reserve(*count);
+        for (unsigned int i=0; i<*count; i++)
+          temp.push_back((static_cast<ESMC_R8*> (value))[i]);
+        status = (**base).root.ESMC_AttributeSet(cname, *count, &temp);
+        temp.clear();
+      } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
+        vector<ESMC_Logical> temp;
+        temp.reserve(*count);
+        for (unsigned int i=0; i<*count; i++)
+          temp.push_back((static_cast<ESMC_Logical*> (value))[i]);
+        status = (**base).root.ESMC_AttributeSet(cname, *count, &temp);
+        temp.clear();
+      } else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "typekind was inappropriate for this routine", &status);
+      }
+    }
   }
     
   if (rc) *rc = status;
