@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.h,v 1.18 2008/10/06 19:15:19 rokuingh Exp $
+// $Id: ESMC_Attribute.h,v 1.19 2008/10/07 00:22:03 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -18,11 +18,10 @@
 
 //-----------------------------------------------------------------------------
 
-#include "stdio.h"
+#include <cstring>
 #include <string>
-using std::string;
 #include <vector>
-using std::vector;
+using namespace std;
 
 #include "ESMCI_Util.h"
 
@@ -42,12 +41,6 @@ using std::vector;
   class ESMC_Attribute;
   class ESMC_Base;
 
-
-// Single Attribute, (name, value) pair which can contain:
-//  int / Integer*4, single value or list
-//  double / Real*8, single value or list
-//  char / Character - single character string (lists not allowed)
-//  ESMC_Logical - single value or arrays (note: not bool or .TRUE.)
 class ESMC_Attribute 
 {
  private:

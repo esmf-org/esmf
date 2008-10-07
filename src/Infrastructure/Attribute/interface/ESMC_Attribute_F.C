@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.24 2008/10/06 19:15:19 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.25 2008/10/07 00:22:03 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.24 2008/10/06 19:15:19 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.25 2008/10/07 00:22:03 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1294,10 +1294,9 @@ extern "C" {
     string temp((&valueList[j]), lens[i]);
     temp.resize(temp.find_last_not_of(" ")+1);
     if (temp.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value conversion", &status);
-      if (rc) *rc = status;
-      return;
+      ESMC_LogDefault.Write("Attribute has an empty value argument",
+                              ESMC_LOG_INFO);
+      temp = '\0';
     }
     cvalue.push_back(temp);
     j = j + lens[i];
@@ -1498,13 +1497,6 @@ extern "C" {
     }
   }
 
-/*  // Set the attribute on the object.
-  status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, value, cconv, cpurp, cobj);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed setting attribute value", &status);
-  }
-*/
   if (rc) *rc = status;
   return;
 
@@ -2752,10 +2744,9 @@ extern "C" {
     string temp((&valueList[j]), lens[i]);
     temp.resize(temp.find_last_not_of(" ")+1);
     if (temp.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value conversion", &status);
-      if (rc) *rc = status;
-      return;
+      ESMC_LogDefault.Write("Attribute has an empty value argument",
+                              ESMC_LOG_INFO);
+      temp = '\0';
     }
     cvalue.push_back(temp);
     j = j + lens[i];
