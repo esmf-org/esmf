@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.36 2008/09/26 23:15:45 theurich Exp $ 
+# $Id: makefile,v 1.37 2008/10/07 20:47:03 donstark Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -15,12 +15,12 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMC_ArrayUTest 
 
 TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
-                RUN_ESMF_ArrayDataUTest \
-                RUN_ESMF_ArrayScatterUTest \
-                RUN_ESMF_ArrayGatherUTest \
-                RUN_ESMF_ArrayArbIdxSMMUTest \
-                RUN_ESMF_ArrayRedistUTest \
-                RUN_ESMC_ArrayUTest 
+                RUN_ESMF_ArrayDataUTest 
+#               RUN_ESMF_ArrayScatterUTest \
+#               RUN_ESMF_ArrayGatherUTest \
+#               RUN_ESMF_ArrayArbIdxSMMUTest \
+#               RUN_ESMF_ArrayRedistUTest \
+#               RUN_ESMC_ArrayUTest 
 
 ifeq ($(ESMF_TESTHARNESS), NONEXHAUSTIVE)
   TESTS_RUN  := $(TESTS_RUN) \
@@ -91,7 +91,7 @@ RUN_ESMC_ArrayUTestUNI:
 
 RUN_ESMF_ArrayHarness1UTest:
 	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
-	  if [ ! `grep ArrayHarness1UTest $(ESMF_TESTDIR)/test_harness.list` ] ; then \
+	  if ! grep ArrayHarness1UTest $(ESMF_TESTDIR)/test_harness.list ; then \
 	    echo "ESMF_ArrayHarness1UTest" >> $(ESMF_TESTDIR)/test_harness.list ; \
 	  fi ; \
 	else \
@@ -107,7 +107,7 @@ RUN_ESMF_ArrayHarness1UTest:
 
 RUN_ESMF_ArrayHarness2UTest:
 	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
-	  if [ ! `grep ArrayHarness2UTest $(ESMF_TESTDIR)/test_harness.list` ] ; then \
+	  if ! grep ArrayHarness2UTest $(ESMF_TESTDIR)/test_harness.list ; then \
 	    echo "ESMF_ArrayHarness2UTest" >> $(ESMF_TESTDIR)/test_harness.list ; \
 	  fi ; \
 	else \
@@ -123,7 +123,7 @@ RUN_ESMF_ArrayHarness2UTest:
 
 RUN_ESMF_ArrayHarness4UTest:
 	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
-	  if [ ! `grep ArrayHarness4UTest $(ESMF_TESTDIR)/test_harness.list` ] ; then \
+	  if ! grep ArrayHarness4UTest $(ESMF_TESTDIR)/test_harness.list ; then \
 	    echo "ESMF_ArrayHarness4UTest" >> $(ESMF_TESTDIR)/test_harness.list ; \
 	  fi ; \
 	else \
@@ -139,7 +139,7 @@ RUN_ESMF_ArrayHarness4UTest:
 
 RUN_ESMF_ArrayHarness8UTest:
 	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
-	  if [ ! `grep ArrayHarness8UTest $(ESMF_TESTDIR)/test_harness.list` ] ; then \
+	  if ! grep ArrayHarness8UTest $(ESMF_TESTDIR)/test_harness.list ; then \
 	    echo "ESMF_ArrayHarness8UTest" >> $(ESMF_TESTDIR)/test_harness.list ; \
 	  fi ; \
 	else \
