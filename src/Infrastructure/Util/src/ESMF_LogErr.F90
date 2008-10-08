@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.47 2008/05/16 19:16:36 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.48 2008/10/08 01:30:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -45,6 +45,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
     ! inherit from ESMF base class
+    use ESMF_FIOUtilMod
     use ESMF_UtilTypesMod
  !!  use ESMF_InitMacrosMod Commented out to prevent circular dependency
  !!                         this is possible because since all the checks
@@ -677,6 +678,7 @@ end subroutine ESMF_LogFinalize
 !EOP
     integer 			    :: j
     type(ESMF_LogPrivate),pointer     :: alog
+    integer                         :: localrc
    
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     
@@ -767,11 +769,13 @@ end subroutine ESMF_LogFinalize
       123  FORMAT(a8,a,3i2.2,a,i6.6,7a,i0,2a)
       132  FORMAT(a8,a,3i2.2,a,i6.6,8a)
       133  FORMAT(a8,a,3i2.2,a,i6.6,6a)
-   
+  
+      call ESMF_FIOUnitFlush (alog%unitNumber, localrc)
+ 
       alog%flushed = ESMF_TRUE
       alog%dirty = ESMF_FALSE
           
-      rc=ESMF_SUCCESS	
+      rc=merge (ESMF_SUCCESS, ESMF_FAILURE, localrc == 0)
       
     endif
 
@@ -1514,16 +1518,8 @@ end subroutine ESMF_LogMsgSetError
     endif
 
     ! find an available unit number
-    do j=ESMF_LOG_FORT_STDOUT, ESMF_LOG_UPPER
-        inquire(unit=j, opened=inuse, iostat=status)
-        if (.not. inuse .and. status .eq. 0) then
-	  alog%unitNumber= j
-          exit
-     	endif
-    enddo
-
-    ! if no available unit number then error out
-    if (status .ne. 0) then
+    call ESMF_FIOUnitGet (alog%unitNumber, status)
+    if (status /= 0) then
         if (present(rc)) then
             rc=ESMF_FAILURE
         endif
