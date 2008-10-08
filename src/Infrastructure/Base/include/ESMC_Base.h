@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.96 2008/07/21 23:25:49 theurich Exp $
+// $Id: ESMC_Base.h,v 1.97 2008/10/08 23:36:22 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -25,9 +25,9 @@
 
 #include "stdio.h"
 
-#include "ESMC_Attribute.h"
 #include "ESMCI_Util.h"
 #include "ESMCI_VM.h"
+#include "ESMC_Attribute.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -43,7 +43,7 @@
 
 // !PUBLIC TYPES:
  class ESMC_Base;
- class ESMC_Attribute;
+ class ESMCI_Attribute;
 
 class ESMC_Base
 {
@@ -65,7 +65,7 @@ class ESMC_Base
     ESMC_Base(const ESMC_Base&);
   
   public:
-    ESMC_Attribute root;  // public for now
+    ESMCI::ESMCI_Attribute root;  // public for now
 
     // required & optional standard interface methods for all ESMF classes.
     // should not instantiate a ESMC_Base object directly; must sub-class first.

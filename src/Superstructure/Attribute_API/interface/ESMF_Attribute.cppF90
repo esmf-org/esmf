@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.12 2008/09/18 03:45:52 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.13 2008/10/08 23:43:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.12 2008/09/18 03:45:52 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.13 2008/10/08 23:43:58 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -921,25 +921,25 @@ contains
       do i = 1, localCount @\
        @\
         if (directional == 0) then @\
-        call c_ESMC_AttPackCreate(mthisfield, attrList(i), fconvention, & @\
+        call c_ESMCI_AttPackCreate(mthisfield, attrList(i), fconvention, & @\
           fpurpose, fobject, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
         else if (directional == 1) then @\
-        call c_ESMC_AttPackCreate(mthisfield, attrList(i), convention, & @\
+        call c_ESMCI_AttPackCreate(mthisfield, attrList(i), convention, & @\
           fpurpose, fobject, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
         else if (directional == 2) then @\
-        call c_ESMC_AttPackCreate(mthisfield, attrList(i), fconvention, & @\
+        call c_ESMCI_AttPackCreate(mthisfield, attrList(i), fconvention, & @\
           purpose, fobject, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
         else if (directional == 3) then @\
-        call c_ESMC_AttPackCreate(mthisfield, attrList(i), convention, & @\
+        call c_ESMCI_AttPackCreate(mthisfield, attrList(i), convention, & @\
           purpose, fobject, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
@@ -1020,25 +1020,25 @@ contains
       endif @\
  @\
       if (directional == 0) then @\
-      call c_ESMC_AttPackRemove(mthisfield, name, fconvention, & @\
+      call c_ESMCI_AttPackRemove(mthisfield, name, fconvention, & @\
         fpurpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 1) then @\
-      call c_ESMC_AttPackRemove(mthisfield, name, convention, & @\
+      call c_ESMCI_AttPackRemove(mthisfield, name, convention, & @\
         fpurpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 2) then @\
-      call c_ESMC_AttPackRemove(mthisfield, name, fconvention, & @\
+      call c_ESMCI_AttPackRemove(mthisfield, name, fconvention, & @\
         purpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 3) then @\
-      call c_ESMC_AttPackRemove(mthisfield, name, convention, & @\
+      call c_ESMCI_AttPackRemove(mthisfield, name, convention, & @\
         purpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
@@ -1046,7 +1046,7 @@ contains
       end if @\
     else @\
  @\
-      call c_ESMC_AttributeRemove(mthisfield, name, localrc) @\
+      call c_ESMCI_AttributeRemove(mthisfield, name, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
@@ -1138,13 +1138,13 @@ contains
       endif @\
  @\
       if (directional == 0) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, & @\
         fconvention, fpurpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1152,13 +1152,13 @@ contains
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 1) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, & @\
         convention, fpurpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1166,13 +1166,13 @@ contains
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 2) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, & @\
         fconvention, purpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1180,13 +1180,13 @@ contains
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 3) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, & @\
         convention, purpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1206,14 +1206,14 @@ contains
  @\
     else @\
        @\
-      call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
+      call c_ESMCI_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
  @\
       if (present_flag == ESMF_TRUE) then @\
  @\
-      call c_ESMC_AttributeGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttributeGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
@@ -1326,13 +1326,13 @@ contains
       endif @\
  @\
       if (directional == 0) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
         fconvention, fpurpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1340,13 +1340,13 @@ contains
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 1) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
         convention, fpurpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1354,13 +1354,13 @@ contains
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 2) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
         fconvention, purpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1368,13 +1368,13 @@ contains
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 3) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
         convention, purpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1394,14 +1394,14 @@ contains
  @\
     else @\
        @\
-      call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
+      call c_ESMCI_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
  @\
       if (present_flag == ESMF_TRUE) then @\
  @\
-      call c_ESMC_AttributeGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttributeGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
@@ -1501,13 +1501,13 @@ contains
       endif @\
  @\
       if (directional == 0) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
         fconvention, fpurpose, fobject, localrc) @\
       value = localvalue   @\
@@ -1516,13 +1516,13 @@ contains
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 1) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
         convention, fpurpose, fobject, localrc) @\
       value = localvalue   @\
@@ -1531,13 +1531,13 @@ contains
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 2) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
         fconvention, purpose, fobject, localrc) @\
       value = localvalue   @\
@@ -1546,13 +1546,13 @@ contains
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 3) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
         convention, purpose, fobject, localrc) @\
       value = localvalue   @\
@@ -1573,14 +1573,14 @@ contains
  @\
     else @\
        @\
-      call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
+      call c_ESMCI_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
  @\
       if (present_flag == ESMF_TRUE) then @\
  @\
-      call c_ESMC_AttributeGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttributeGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc) @\
       value = localvalue @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1696,14 +1696,14 @@ contains
       endif @\
  @\
       if (directional == 0) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
       allocate (localvalueList(limit)) @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
         fconvention, fpurpose, fobject, localrc) @\
       valueList = localvalueList @\
@@ -1713,14 +1713,14 @@ contains
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 1) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
       allocate (localvalueList(limit)) @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
         convention, fpurpose, fobject, localrc) @\
       valueList = localvalueList @\
@@ -1730,14 +1730,14 @@ contains
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 2) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
       allocate (localvalueList(limit)) @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
         fconvention, purpose, fobject, localrc) @\
       valueList = localvalueList @\
@@ -1747,14 +1747,14 @@ contains
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 3) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
       allocate (localvalueList(limit)) @\
-      call c_ESMC_AttPackGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
         convention, purpose, fobject, localrc) @\
       valueList = localvalueList @\
@@ -1776,7 +1776,7 @@ contains
  @\
     else @\
        @\
-      call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
+      call c_ESMCI_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
@@ -1784,7 +1784,7 @@ contains
       if (present_flag == ESMF_TRUE) then @\
  @\
       allocate (localvalueList(limit)) @\
-      call c_ESMC_AttributeGetValue(mthisfield, name, & @\
+      call c_ESMCI_AttributeGetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, localrc) @\
       valueList = localvalueList @\
       deallocate (localvalueList) @\
@@ -1884,52 +1884,52 @@ contains
       endif @\
  @\
       if (directional == 0) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetChar(mthisfield, name, value, & @\
+      call c_ESMCI_AttPackGetChar(mthisfield, name, value, & @\
         fconvention, fpurpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 1) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetChar(mthisfield, name, value, & @\
+      call c_ESMCI_AttPackGetChar(mthisfield, name, value, & @\
         convention, fpurpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 2) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetChar(mthisfield, name, value, & @\
+      call c_ESMCI_AttPackGetChar(mthisfield, name, value, & @\
         fconvention, purpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 3) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetChar(mthisfield, name, value, & @\
+      call c_ESMCI_AttPackGetChar(mthisfield, name, value, & @\
         convention, purpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
@@ -1948,14 +1948,14 @@ contains
  @\
     else @\
        @\
-      call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
+      call c_ESMCI_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
  @\
       if (present_flag == ESMF_TRUE) then @\
  @\
-      call c_ESMC_AttributeGetChar(mthisfield, name, value, localrc) @\
+      call c_ESMCI_AttributeGetChar(mthisfield, name, value, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
@@ -2072,52 +2072,52 @@ contains
       endif @\
  @\
       if (directional == 0) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+      call c_ESMCI_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, lens, valueString, fconvention, fpurpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 1) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+      call c_ESMCI_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, lens, valueString, convention, fpurpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 2) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+      call c_ESMCI_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, lens, valueString, fconvention, purpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
       else if (directional == 3) then @\
-      call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
+      call c_ESMCI_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      call c_ESMC_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+      call c_ESMCI_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, lens, valueString, convention, purpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
@@ -2140,14 +2140,14 @@ contains
  @\
     else @\
        @\
-      call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
+      call c_ESMCI_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
  @\
       if (present_flag == ESMF_TRUE) then @\
  @\
-      call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+      call c_ESMCI_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, lens, valueString, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
@@ -2223,7 +2223,7 @@ contains
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      call c_ESMC_AttributeGetCount(mthisfield, count, localrc) @\
+      call c_ESMCI_AttributeGetCount(mthisfield, count, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
@@ -2284,7 +2284,7 @@ contains
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      call c_ESMC_AttributeGetInfoName(mthisfield, name, & @\
+      call c_ESMCI_AttributeGetInfoName(mthisfield, name, & @\
         localTk, litemCount, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
@@ -2354,7 +2354,7 @@ contains
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      call c_ESMC_AttributeGetInfoNum(mthisfield, attributeIndex, & @\
+      call c_ESMCI_AttributeGetInfoNum(mthisfield, attributeIndex, & @\
         localName, localTk, litemCount, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
@@ -2449,28 +2449,28 @@ contains
       endif @\
  @\
       if (directional == 0) then @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, & @\
         fconvention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 1) then @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, & @\
         convention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 2) then @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, & @\
         fconvention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 3) then @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, & @\
         convention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
@@ -2478,7 +2478,7 @@ contains
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
     else @\
-      call c_ESMC_AttributeSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttributeSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
@@ -2582,28 +2582,28 @@ contains
       endif @\
  @\
       if (directional == 0) then @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
         fconvention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 1) then @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
         convention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 2) then @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
         fconvention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 3) then @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
         convention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
@@ -2612,7 +2612,7 @@ contains
       end if @\
     else @\
        @\
-      call c_ESMC_AttributeSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttributeSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
@@ -2701,28 +2701,28 @@ contains
  @\
       localvalue = value @\
       if (directional == 0) then @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
         fconvention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 1) then @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
         convention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 2) then @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
         fconvention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 3) then @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
         convention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
@@ -2732,7 +2732,7 @@ contains
     else @\
  @\
       localvalue = value @\
-      call c_ESMC_AttributeSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttributeSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
@@ -2839,7 +2839,7 @@ contains
       if (directional == 0) then @\
       allocate (localvalueList(litemCount)) @\
       localvalueList = valueList @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
         fconvention, fpurpose, fobject, localrc) @\
       deallocate (localvalueList) @\
@@ -2849,7 +2849,7 @@ contains
       else if (directional == 1) then @\
       allocate (localvalueList(litemCount)) @\
       localvalueList = valueList @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
         convention, fpurpose, fobject, localrc) @\
       deallocate (localvalueList) @\
@@ -2859,7 +2859,7 @@ contains
       else if (directional == 2) then @\
       allocate (localvalueList(litemCount)) @\
       localvalueList = valueList @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
         fconvention, purpose, fobject, localrc) @\
       deallocate (localvalueList) @\
@@ -2869,7 +2869,7 @@ contains
       else if (directional == 3) then @\
       allocate (localvalueList(litemCount)) @\
       localvalueList = valueList @\
-      call c_ESMC_AttPackSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
         convention, purpose, fobject, localrc) @\
       deallocate (localvalueList) @\
@@ -2881,7 +2881,7 @@ contains
  @\
       allocate (localvalueList(litemCount)) @\
       localvalueList = valueList @\
-      call c_ESMC_AttributeSetValue(mthisfield, name, & @\
+      call c_ESMCI_AttributeSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, localrc) @\
       deallocate (localvalueList) @\
  @\
@@ -2970,25 +2970,25 @@ contains
       endif @\
  @\
       if (directional == 0) then @\
-      call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
+      call c_ESMCI_AttPackSetChar(mthisfield, name, value, & @\
         ESMF_TYPEKIND_CHARACTER, fconvention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 1) then @\
-      call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
+      call c_ESMCI_AttPackSetChar(mthisfield, name, value, & @\
         ESMF_TYPEKIND_CHARACTER, convention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 2) then @\
-      call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
+      call c_ESMCI_AttPackSetChar(mthisfield, name, value, & @\
         ESMF_TYPEKIND_CHARACTER, fconvention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 3) then @\
-      call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
+      call c_ESMCI_AttPackSetChar(mthisfield, name, value, & @\
         ESMF_TYPEKIND_CHARACTER, convention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
@@ -2996,7 +2996,7 @@ contains
       end if @\
     else @\
  @\
-      call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
+      call c_ESMCI_AttributeSetChar(mthisfield, name, value, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
@@ -3102,25 +3102,25 @@ contains
       endif @\
  @\
       if (directional == 0) then @\
-      call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+      call c_ESMCI_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, valueString, lens, fconvention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 1) then @\
-      call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+      call c_ESMCI_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, valueString, lens, convention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 2) then @\
-      call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+      call c_ESMCI_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, valueString, lens, fconvention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       else if (directional == 3) then @\
-      call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+      call c_ESMCI_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, valueString, lens, convention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
@@ -3128,7 +3128,7 @@ contains
       end if @\
     else @\
  @\
-      call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+      call c_ESMCI_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, valueString, lens, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
@@ -3203,17 +3203,17 @@ contains
       fconvention = convention
       fpurpose = purpose
 
-      call c_ESMC_AttPackCreate(array, name1, fconvention, &
+      call c_ESMCI_AttPackCreate(array, name1, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(array, name2, fconvention, &
+      call c_ESMCI_AttPackCreate(array, name2, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(array, name3, fconvention, &
+      call c_ESMCI_AttPackCreate(array, name3, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(array, name4, fconvention, &
+      call c_ESMCI_AttPackCreate(array, name4, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(array, name5, fconvention, &
+      call c_ESMCI_AttPackCreate(array, name5, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(array, name6, fconvention, &
+      call c_ESMCI_AttPackCreate(array, name6, fconvention, &
         fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -3319,13 +3319,13 @@ AttSetCharacterMacro(ESMF_Array, array, array)
       
       if (directional == 0) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(array, fconvention, &
+        call c_ESMCI_AttributeWriteTab(array, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(array, fconvention, &
+        call c_ESMCI_AttributeWriteXML(array, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3333,13 +3333,13 @@ AttSetCharacterMacro(ESMF_Array, array, array)
       endif
       else if (directional == 1) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(array, convention, &
+        call c_ESMCI_AttributeWriteTab(array, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(array, convention, &
+        call c_ESMCI_AttributeWriteXML(array, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3347,13 +3347,13 @@ AttSetCharacterMacro(ESMF_Array, array, array)
       endif
       else if (directional == 2) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(array, fconvention, &
+        call c_ESMCI_AttributeWriteTab(array, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(array, fconvention, &
+        call c_ESMCI_AttributeWriteXML(array, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3361,13 +3361,13 @@ AttSetCharacterMacro(ESMF_Array, array, array)
       endif
       else if (directional == 3) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(array, convention, &
+        call c_ESMCI_AttributeWriteTab(array, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(array, convention, &
+        call c_ESMCI_AttributeWriteXML(array, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3446,25 +3446,25 @@ AttSetCharacterMacro(ESMF_Array, array, array)
       fconvention = convention
       fpurpose = purpose
 
-      call c_ESMC_AttPackCreate(comp%compp%base, name1, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name1, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name2, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name2, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name3, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name3, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name4, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name4, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name5, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name5, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name6, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name6, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name7, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name7, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name8, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name8, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name9, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name9, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name10, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name10, fconvention, &
         fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -3584,7 +3584,7 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
+      call c_ESMCI_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
         localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3645,7 +3645,7 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
+      call c_ESMCI_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
         localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3699,7 +3699,7 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetLink(comp1%compp%base, state%statep%base, &
+      call c_ESMCI_AttributeSetLink(comp1%compp%base, state%statep%base, &
         localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3789,13 +3789,13 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
       
       if (directional == 0) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, fconvention, &
+        call c_ESMCI_AttributeWriteTab(comp%compp%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, fconvention, &
+        call c_ESMCI_AttributeWriteXML(comp%compp%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3803,13 +3803,13 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
       endif
       else if (directional == 1) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, convention, &
+        call c_ESMCI_AttributeWriteTab(comp%compp%base, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, convention, &
+        call c_ESMCI_AttributeWriteXML(comp%compp%base, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3817,13 +3817,13 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
       endif
       else if (directional == 2) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, fconvention, &
+        call c_ESMCI_AttributeWriteTab(comp%compp%base, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, fconvention, &
+        call c_ESMCI_AttributeWriteXML(comp%compp%base, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3831,13 +3831,13 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
       endif
       else if (directional == 3) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, convention, &
+        call c_ESMCI_AttributeWriteTab(comp%compp%base, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, convention, &
+        call c_ESMCI_AttributeWriteXML(comp%compp%base, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3916,25 +3916,25 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
       fconvention = convention
       fpurpose = purpose
 
-      call c_ESMC_AttPackCreate(comp%compp%base, name1, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name1, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name2, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name2, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name3, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name3, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name4, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name4, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name5, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name5, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name6, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name6, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name7, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name7, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name8, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name8, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name9, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name9, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name10, fconvention, &
+      call c_ESMCI_AttPackCreate(comp%compp%base, name10, fconvention, &
         fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -4011,7 +4011,7 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
+      call c_ESMCI_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
         localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4072,7 +4072,7 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
+      call c_ESMCI_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
         localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4126,7 +4126,7 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetLink(comp1%compp%base, state%statep%base, &
+      call c_ESMCI_AttributeSetLink(comp1%compp%base, state%statep%base, &
         localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4216,13 +4216,13 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
       
       if (directional == 0) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, fconvention, &
+        call c_ESMCI_AttributeWriteTab(comp%compp%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, fconvention, &
+        call c_ESMCI_AttributeWriteXML(comp%compp%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4230,13 +4230,13 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
       endif
       else if (directional == 1) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, convention, &
+        call c_ESMCI_AttributeWriteTab(comp%compp%base, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, convention, &
+        call c_ESMCI_AttributeWriteXML(comp%compp%base, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4244,13 +4244,13 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
       endif
       else if (directional == 2) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, fconvention, &
+        call c_ESMCI_AttributeWriteTab(comp%compp%base, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, fconvention, &
+        call c_ESMCI_AttributeWriteXML(comp%compp%base, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4258,13 +4258,13 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
       endif
       else if (directional == 3) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, convention, &
+        call c_ESMCI_AttributeWriteTab(comp%compp%base, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, convention, &
+        call c_ESMCI_AttributeWriteXML(comp%compp%base, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4339,17 +4339,17 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
       fconvention = convention
       fpurpose = purpose
 
-      call c_ESMC_AttPackCreate(field%ftypep%base, name1, fconvention, &
+      call c_ESMCI_AttPackCreate(field%ftypep%base, name1, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(field%ftypep%base, name2, fconvention, &
+      call c_ESMCI_AttPackCreate(field%ftypep%base, name2, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(field%ftypep%base, name3, fconvention, &
+      call c_ESMCI_AttPackCreate(field%ftypep%base, name3, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(field%ftypep%base, name4, fconvention, &
+      call c_ESMCI_AttPackCreate(field%ftypep%base, name4, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(field%ftypep%base, name5, fconvention, &
+      call c_ESMCI_AttPackCreate(field%ftypep%base, name5, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(field%ftypep%base, name6, fconvention, &
+      call c_ESMCI_AttPackCreate(field%ftypep%base, name6, fconvention, &
         fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -4455,13 +4455,13 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
       
       if (directional == 0) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(field%ftypep%base, fconvention, &
+        call c_ESMCI_AttributeWriteTab(field%ftypep%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(field%ftypep%base, fconvention, &
+        call c_ESMCI_AttributeWriteXML(field%ftypep%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4469,13 +4469,13 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
       endif
       else if (directional == 1) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(field%ftypep%base, convention, &
+        call c_ESMCI_AttributeWriteTab(field%ftypep%base, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(field%ftypep%base, convention, &
+        call c_ESMCI_AttributeWriteXML(field%ftypep%base, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4483,13 +4483,13 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
       endif
       else if (directional == 2) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(field%ftypep%base, fconvention, &
+        call c_ESMCI_AttributeWriteTab(field%ftypep%base, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(field%ftypep%base, fconvention, &
+        call c_ESMCI_AttributeWriteXML(field%ftypep%base, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4497,13 +4497,13 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
       endif
       else if (directional == 3) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(field%ftypep%base, convention, &
+        call c_ESMCI_AttributeWriteTab(field%ftypep%base, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(field%ftypep%base, convention, &
+        call c_ESMCI_AttributeWriteXML(field%ftypep%base, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4638,7 +4638,7 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetLink(fieldbundle%btypep%base, field%ftypep%base, &
+      call c_ESMCI_AttributeSetLink(fieldbundle%btypep%base, field%ftypep%base, &
         localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4728,13 +4728,13 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
       
       if (directional == 0) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(fieldbundle%btypep%base, fconvention, &
+        call c_ESMCI_AttributeWriteTab(fieldbundle%btypep%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(fieldbundle%btypep%base, fconvention, &
+        call c_ESMCI_AttributeWriteXML(fieldbundle%btypep%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4742,13 +4742,13 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
       endif
       else if (directional == 1) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(fieldbundle%btypep%base, convention, &
+        call c_ESMCI_AttributeWriteTab(fieldbundle%btypep%base, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(fieldbundle%btypep%base, convention, &
+        call c_ESMCI_AttributeWriteXML(fieldbundle%btypep%base, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4756,13 +4756,13 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
       endif
       else if (directional == 2) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(fieldbundle%btypep%base, fconvention, &
+        call c_ESMCI_AttributeWriteTab(fieldbundle%btypep%base, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(fieldbundle%btypep%base, fconvention, &
+        call c_ESMCI_AttributeWriteXML(fieldbundle%btypep%base, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4770,13 +4770,13 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
       endif
       else if (directional == 3) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(fieldbundle%btypep%base, convention, &
+        call c_ESMCI_AttributeWriteTab(fieldbundle%btypep%base, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(fieldbundle%btypep%base, convention, &
+        call c_ESMCI_AttributeWriteXML(fieldbundle%btypep%base, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4941,13 +4941,13 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
       
       if (directional == 0) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(grid, fconvention, &
+        call c_ESMCI_AttributeWriteTab(grid, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(grid, fconvention, &
+        call c_ESMCI_AttributeWriteXML(grid, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4955,13 +4955,13 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
       endif
       else if (directional == 1) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(grid, convention, &
+        call c_ESMCI_AttributeWriteTab(grid, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(grid, convention, &
+        call c_ESMCI_AttributeWriteXML(grid, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4969,13 +4969,13 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
       endif
       else if (directional == 2) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(grid, fconvention, &
+        call c_ESMCI_AttributeWriteTab(grid, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(grid, fconvention, &
+        call c_ESMCI_AttributeWriteXML(grid, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4983,13 +4983,13 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
       endif
       else if (directional == 3) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(grid, convention, &
+        call c_ESMCI_AttributeWriteTab(grid, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(grid, convention, &
+        call c_ESMCI_AttributeWriteXML(grid, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5061,21 +5061,21 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
       fconvention = convention
       fpurpose = purpose
 
-      call c_ESMC_AttPackCreate(state%statep%base, name1, fconvention, &
+      call c_ESMCI_AttPackCreate(state%statep%base, name1, fconvention, &
         fpurpose, fobject, localrc)
-      call c_ESMC_AttPackCreate(state%statep%base, name2, fconvention, &
+      call c_ESMCI_AttPackCreate(state%statep%base, name2, fconvention, &
         fpurpose, fobject, localrc)
 
       lvalue = .true.
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttPackSetValue(state%statep%base, name1, &
+        call c_ESMCI_AttPackSetValue(state%statep%base, name1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue, &
           fconvention, fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttPackSetValue(state%statep%base, name2, &
+        call c_ESMCI_AttPackSetValue(state%statep%base, name2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue, &
           fconvention, fpurpose, fobject, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -5140,7 +5140,7 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeCopyAll(state1%statep%base, state2%statep%base, localrc)
+      call c_ESMCI_AttributeCopyAll(state1%statep%base, state2%statep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -5250,7 +5250,7 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetLink(state%statep%base, bundle%btypep%base, localrc)
+      call c_ESMCI_AttributeSetLink(state%statep%base, bundle%btypep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -5259,17 +5259,17 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
       lvalue1 = .true.
       lvalue2 = .false.
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5328,7 +5328,7 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetLink(state%statep%base, field%ftypep%base, localrc)
+      call c_ESMCI_AttributeSetLink(state%statep%base, field%ftypep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -5337,17 +5337,17 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
       lvalue1 = .true.
       lvalue2 = .false.
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5412,7 +5412,7 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeSetLink(state1%statep%base, state2%statep%base, localrc)
+      call c_ESMCI_AttributeSetLink(state1%statep%base, state2%statep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -5421,17 +5421,17 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
       lvalue1 = .true.
       lvalue2 = .false.
       if (state1%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state1%statep%base, lobject, lname1, &
+        call c_ESMCI_AttributeSetObjsInTree(state1%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state1%statep%base, lobject, lname2, &
+        call c_ESMCI_AttributeSetObjsInTree(state1%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state1%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state1%statep%base, lobject, lname1, &
+        call c_ESMCI_AttributeSetObjsInTree(state1%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state1%statep%base, lobject, lname2, &
+        call c_ESMCI_AttributeSetObjsInTree(state1%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5522,13 +5522,13 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
       
       if (directional == 0) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(state%statep%base, fconvention, &
+        call c_ESMCI_AttributeWriteTab(state%statep%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(state%statep%base, fconvention, &
+        call c_ESMCI_AttributeWriteXML(state%statep%base, fconvention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5536,13 +5536,13 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
       endif
       else if (directional == 1) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(state%statep%base, convention, &
+        call c_ESMCI_AttributeWriteTab(state%statep%base, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(state%statep%base, convention, &
+        call c_ESMCI_AttributeWriteXML(state%statep%base, convention, &
           fpurpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5550,13 +5550,13 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
       endif
       else if (directional == 2) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(state%statep%base, fconvention, &
+        call c_ESMCI_AttributeWriteTab(state%statep%base, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(state%statep%base, fconvention, &
+        call c_ESMCI_AttributeWriteXML(state%statep%base, fconvention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5564,13 +5564,13 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
       endif
       else if (directional == 3) then
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(state%statep%base, convention, &
+        call c_ESMCI_AttributeWriteTab(state%statep%base, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(state%statep%base, convention, &
+        call c_ESMCI_AttributeWriteXML(state%statep%base, convention, &
           purpose, fobject, ftarobj, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &

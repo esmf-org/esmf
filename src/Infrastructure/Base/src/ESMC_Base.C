@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.113 2008/08/01 23:36:49 rosalind Exp $
+// $Id: ESMC_Base.C,v 1.114 2008/10/08 23:36:22 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.113 2008/08/01 23:36:49 rosalind Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.114 2008/10/08 23:36:22 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -936,7 +936,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 /*  ***FIXME*** This code is invalid - when Attribute removed from Base,
 //              the nattrs argument should be removed from the call.
   if (nattrs > 0) {
-      if (root.ESMC_AttributeAlloc(nattrs) != ESMF_SUCCESS) {
+      if (root.ESMCI_AttributeAlloc(nattrs) != ESMF_SUCCESS) {
           baseStatus = ESMF_STATUS_INVALID;   // can't return err, but can
           return;                            // try to indicate unhappiness
       }
