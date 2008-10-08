@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.33 2008/10/07 00:22:03 rokuingh Exp $
+// $Id: ESMC_Attribute.C,v 1.34 2008/10/08 23:35:37 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 
 #define ESMF_FILENAME "ESMC_Attribute.C"
 
-// ESMC_Attribute method implementation (body) file
+// ESMCI_Attribute method implementation (body) file
 
 // single blank line to make protex happy.
 //BOPI
@@ -20,12 +20,13 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC_Attribute} methods declared
+// The code in this file implements the C++ {\tt ESMCI_Attribute} methods declared
 // in the companion file ESMC_Attribute.h
 //
 //-----------------------------------------------------------------------------
 //
  // associated class definition file and others
+#include "ESMC_Start.h"
 #include "ESMC_Attribute.h"
 #include "ESMC_Base.h"
 #include "ESMCI_LogErr.h"
@@ -33,13 +34,15 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.33 2008/10/07 00:22:03 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute.C,v 1.34 2008/10/08 23:35:37 rokuingh Exp $";
 //-----------------------------------------------------------------------------
+
+namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
-// This section includes all the ESMC_Attribute routines
+// This section includes all the ESMCI_Attribute routines
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -48,26 +51,26 @@
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Attribute"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_Attribute"
 //BOPI
-// !IROUTINE:  ESMC_Attribute - empty private copy constructor
+// !IROUTINE:  ESMCI_Attribute - empty private copy constructor
 //
 // !INTERFACE:
-      ESMC_Attribute::ESMC_Attribute(
+      ESMCI_Attribute::ESMCI_Attribute(
 //
 // !ARGUMENTS:
-      const ESMC_Attribute&) {
+      const ESMCI_Attribute&) {
 // 
 // !RETURN VALUE:
-//    {\tt ESMC_Attribute} object.
+//    {\tt ESMCI_Attribute} object.
 // 
 // !DESCRIPTION:
 //    Empty private copy constructor.
 //
 //EOPI
 
-}  // end ESMC_Attribute
+}  // end ESMCI_Attribute
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -76,13 +79,13 @@
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttPackCreate"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttPackCreate"
 //BOPI
-// !IROUTINE:  ESMC_AttPackCreate() - create an attpack and add an {\tt ESMC_Attribute}
+// !IROUTINE:  ESMCI_AttPackCreate() - create an attpack and add an {\tt ESMCI_Attribute}
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttPackCreate(
+      int ESMCI_Attribute::ESMCI_AttPackCreate(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -95,30 +98,30 @@
 // 
 // !DESCRIPTION:
 //     Setup the name, convention and purpose of an attpack and add
-//     an {\tt ESMC_Attribute} with a specified name but no value.
+//     an {\tt ESMCI_Attribute} with a specified name but no value.
 //
 //EOPI
 
   int localrc;
   char attpackname[ESMF_MAXSTR];
-  ESMC_Attribute *attr;
-  ESMC_Attribute *attpack;
+  ESMCI_Attribute *attr;
+  ESMCI_Attribute *attpack;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Search for the attpack, make it if not found
-  attpack = ESMC_AttPackGet(convention, purpose, object);
+  attpack = ESMCI_AttPackGet(convention, purpose, object);
   if(!attpack) {
     sprintf(attpackname,"Attribute Package %s %s %s %d",object.c_str(),purpose.c_str(),
       convention.c_str(),attrCount);
-    attpack = new ESMC_Attribute(attpackname, convention, purpose, object);
+    attpack = new ESMCI_Attribute(attpackname, convention, purpose, object);
     if (!attpack) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed initializing an attpack", &localrc);
       return ESMF_FAILURE;
     }
-    localrc = ESMC_AttributeSet(attpack);
+    localrc = ESMCI_AttributeSet(attpack);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed adding an attpack to an Attribute", &localrc);
@@ -127,7 +130,7 @@
   }
   
   // make an Attribute in the attpack
-  attr = new ESMC_Attribute(name, convention, purpose, object);  
+  attr = new ESMCI_Attribute(name, convention, purpose, object);  
   if (!attr) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed initialized an attpack Attribute", &localrc);
@@ -135,7 +138,7 @@
   }
   
   // add an Attribute to the attpack
-  localrc = attpack->ESMC_AttributeSet(attr);
+  localrc = attpack->ESMCI_AttributeSet(attr);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed adding an attpack Attribute", &localrc);
@@ -144,25 +147,25 @@
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttPackCreate()
+}  // end ESMCI_AttPackCreate()
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttPackGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttPackGet"
 //BOPI
-// !IROUTINE:  ESMC_AttPackGet - get an attpack on an {\tt ESMC_Attribute}
+// !IROUTINE:  ESMCI_AttPackGet - get an attpack on an {\tt ESMCI_Attribute}
 //
 // !INTERFACE:
-      ESMC_Attribute *ESMC_Attribute::ESMC_AttPackGet(
+      ESMCI_Attribute *ESMCI_Attribute::ESMCI_AttPackGet(
 // 
 // !RETURN VALUE:
-//    {\tt ESMC_Attribute} pointer to requested object or NULL on early exit.
+//    {\tt ESMCI_Attribute} pointer to requested object or NULL on early exit.
 // 
 // !ARGUMENTS:
       const string &convention,             // in - Attribute convention to retrieve
       const string &purpose,                // in - Attribute purpose to retrieve
       const string &object) const {         // in - Attribute object type to retrieve
 // !DESCRIPTION:
-//    Get an attpack on an {\tt ESMC_Attribute} given it's convention, 
+//    Get an attpack on an {\tt ESMCI_Attribute} given it's convention, 
 //    purpose, and object type.
 //
 //EOPI
@@ -180,18 +183,18 @@
   // if you got here, you did not find the attpack
   return NULL;
 
-}  // end ESMC_AttPackGet
+}  // end ESMCI_AttPackGet
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttPackGetAttribute"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttPackGetAttribute"
 //BOPI
-// !IROUTINE:  ESMC_AttPackGetAttribute - get an {\tt ESMC_Attribute} from an attpack
+// !IROUTINE:  ESMCI_AttPackGetAttribute - get an {\tt ESMCI_Attribute} from an attpack
 //
 // !INTERFACE:
-      ESMC_Attribute *ESMC_Attribute::ESMC_AttPackGetAttribute(
+      ESMCI_Attribute *ESMCI_Attribute::ESMCI_AttPackGetAttribute(
 // 
 // !RETURN VALUE:
-//    {\tt ESMC_Attribute} pointer to requested object or NULL on early exit.
+//    {\tt ESMCI_Attribute} pointer to requested object or NULL on early exit.
 // 
 // !ARGUMENTS:
       const string &name,                   // in - Attribute name to retrieve
@@ -200,14 +203,14 @@
       const string &object) const {         // in - Attribute object type to retrieve)
 // 
 // !DESCRIPTION:
-//     Get an {\tt ESMC_Attribute} from an attpack given its name, convention, 
+//     Get an {\tt ESMCI_Attribute} from an attpack given its name, convention, 
 //     purpose, and object type.
 //
 //EOPI
 
   int i;
   int attCount;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // look for the Attribute on this attpack
   for (i=0; i<attrCount; i++) {
@@ -224,15 +227,15 @@
   // you get here if no matches found
   return NULL;
 
-}  // end ESMC_AttPackGetAttribute
+}  // end ESMCI_AttPackGetAttribute
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttPackIsPresent"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttPackIsPresent"
 //BOPI
-// !IROUTINE:  ESMC_AttPackIsPresent - query an {\tt ESMC_Attribute} for an attpack
+// !IROUTINE:  ESMCI_AttPackIsPresent - query an {\tt ESMCI_Attribute} for an attpack
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttPackIsPresent(
+      int ESMCI_Attribute::ESMCI_AttPackIsPresent(
 // 
 // !RETURN VALUE:
 //    Value of the present flag.
@@ -245,35 +248,35 @@
       ESMC_Logical *present ) const {         // in/out - the present flag
 // 
 // !DESCRIPTION:
-//     Query an Attribute package for an {\tt ESMC_Attribute} given its name, convention, 
+//     Query an Attribute package for an {\tt ESMCI_Attribute} given its name, convention, 
 //     purpose, and object type.
 //
 //EOPI
 
   unsigned int i;
-  ESMC_Attribute *attr, *attpack;
+  ESMCI_Attribute *attr, *attpack;
 
-  attpack = ESMC_AttPackGet(convention, purpose, object);
+  attpack = ESMCI_AttPackGet(convention, purpose, object);
   if (!attpack) {
     *present = ESMF_FALSE;
     return ESMF_SUCCESS;
   }
-  attr = attpack->ESMC_AttPackGetAttribute(name, convention, purpose, object);
+  attr = attpack->ESMCI_AttPackGetAttribute(name, convention, purpose, object);
   if (!attr) *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
   
   // return
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttPackIsPresent
+}  // end ESMCI_AttPackIsPresent
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttPackSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttPackSet"
 //BOPI
-// !IROUTINE:  ESMC_AttPackSet() - set an {\tt ESMC_Attribute} in an attpack
+// !IROUTINE:  ESMCI_AttPackSet() - set an {\tt ESMCI_Attribute} in an attpack
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttPackSet(
+      int ESMCI_Attribute::ESMCI_AttPackSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -288,21 +291,21 @@
       const string &object) {         // in - attpack object type
 // 
 // !DESCRIPTION:
-//     Set the value for an {\tt ESMC_Attribute} belonging to an attpack with  
+//     Set the value for an {\tt ESMCI_Attribute} belonging to an attpack with  
 //     convention, purpose, and object type.
 //
 //EOPI
 
   int localrc;
   char msgbuf[ESMF_MAXSTR];
-  ESMC_Attribute *attr;
-  ESMC_Attribute *attpack;
+  ESMCI_Attribute *attr;
+  ESMCI_Attribute *attpack;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Find the attpack Attribute
-  attpack = ESMC_AttPackGet(convention, purpose, object);
+  attpack = ESMCI_AttPackGet(convention, purpose, object);
   if(!attpack) {
        sprintf(msgbuf, "Cannot find an Attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
                       convention.c_str(), purpose.c_str(), object.c_str());
@@ -312,7 +315,7 @@
        return localrc;
   }
   
-  attr = attpack->ESMC_AttPackGetAttribute(name, convention, purpose, object);
+  attr = attpack->ESMCI_AttPackGetAttribute(name, convention, purpose, object);
   if (!attr) {
        sprintf(msgbuf, "This Attribute package does have an Attribute named '%s'\n", name.c_str());
        printf(msgbuf);
@@ -322,7 +325,7 @@
   }
 
   // Set the Attribute
-  localrc = attr->ESMC_AttrModifyValue(tk, count, value);
+  localrc = attr->ESMCI_AttrModifyValue(tk, count, value);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed modifying an attpack Attribute", &localrc);
@@ -333,61 +336,15 @@
   if (localrc != ESMF_SUCCESS) return ESMF_FAILURE;
   return ESMF_SUCCESS;
   
-}  // end ESMC_AttPackSet()
+}  // end ESMCI_AttPackSet()
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeAlloc"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeCopyAll"
 //BOPI
-// !IROUTINE:  ESMC_AttributeAlloc - insure the attrList is long enough
+// !IROUTINE:  ESMCI_AttributeCopyAll - copy {\tt ESMCI_Attributes} between objects 
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeAlloc(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-      int adding) {             // in - number of Attributes being added
-// 
-// !DESCRIPTION:
-//     Insure there is enough space to add nattr more {\tt ESMC_Attributes}.
-//
-//EOPI
-
-#define ATTR_CHUNK  4           // allocate and realloc in units of this
-
-  void *saveme;
-  int localrc;
-
-  // Initialize local return code
-  localrc = ESMC_RC_NOT_IMPL;
-
-  if ((attrCount + adding) <= attrAlloc) 
-      return ESMF_SUCCESS;
-
-  // FIXME: this should be arrays of *attrs, not whole size, right?
-  saveme = (void *)attrList;
-  attrList = static_cast<ESMC_Attribute**> (realloc(static_cast<void*> (attrList), 
-                           (attrAlloc + ATTR_CHUNK) * sizeof(ESMC_Attribute *)));
-  if (attrList == NULL) {
-      free(saveme);   // although at this point, the heap is probably boffed
-      return ESMF_FAILURE;
-  }
-  attrAlloc += ATTR_CHUNK;
-
-#undef ATTR_CHUNK
-
-  return ESMF_SUCCESS;
-
-}  // end ESMC_AttributeAlloc
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeCopyAll"
-//BOPI
-// !IROUTINE:  ESMC_AttributeCopyAll - copy {\tt ESMC_Attributes} between objects 
-//
-// !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeCopyAll(
+      int ESMCI_Attribute::ESMCI_AttributeCopyAll(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -396,7 +353,7 @@
       ESMC_Base *source) {  // in - the source object
 // 
 // !DESCRIPTION:
-//     All {\tt ESMC_Attributes} associated with the source object are copied to the
+//     All {\tt ESMCI_Attributes} associated with the source object are copied to the
 //     destination object (*this).
 //
 //EOPI
@@ -410,15 +367,15 @@
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeCopyAll
+}  // end ESMCI_AttributeCopyAll
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeCountTree"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeCountTree"
 //BOPI
-// !IROUTINE:  ESMC_AttributeCountTree - count objects in {\tt ESMC_Attribute} hierarchy 
+// !IROUTINE:  ESMCI_AttributeCountTree - count objects in {\tt ESMCI_Attribute} hierarchy 
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeCountTree(
+      int ESMCI_Attribute::ESMCI_AttributeCountTree(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -431,7 +388,7 @@
       int &objmaxattrCount ) const{     // inout - max count of attrs on objects in tree
 // 
 // !DESCRIPTION:
-//     Count the number of objects in the {\tt ESMC_Attribute} hierarchy 
+//     Count the number of objects in the {\tt ESMCI_Attribute} hierarchy 
 
 //EOPI
 
@@ -451,21 +408,21 @@
   
   // Recurse the hierarchy
   for (int i = 0; i < attrCount; i++) {
-    localrc = attrList[i]->ESMC_AttributeCountTree(convention, purpose, object, 
+    localrc = attrList[i]->ESMCI_AttributeCountTree(convention, purpose, object, 
       objCount, objmaxattrCount);
   }
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeCountTree
+}  // end ESMCI_AttributeCountTree
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeCountTreeLens"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeCountTreeLens"
 //BOPI
-// !IROUTINE:  ESMC_AttributeCountTreeLens - get lengths of {\tt ESMC_Attribute} values
+// !IROUTINE:  ESMCI_AttributeCountTreeLens - get lengths of {\tt ESMCI_Attribute} values
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeCountTreeLens(
+      int ESMCI_Attribute::ESMCI_AttributeCountTreeLens(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -478,7 +435,7 @@
       vector<string> &attrNames ) const{         // inout - names to match values
 // 
 // !DESCRIPTION:
-//     Find the length of {\tt ESMC_Attribute} values and names to go with them.
+//     Find the length of {\tt ESMCI_Attribute} values and names to go with them.
 
 //EOPI
 
@@ -540,21 +497,21 @@
   
   // Recurse the hierarchy
   for (int i = 0; i < attrCount; i++) {
-    localrc = attrList[i]->ESMC_AttributeCountTreeLens(convention, purpose, object, 
+    localrc = attrList[i]->ESMCI_AttributeCountTreeLens(convention, purpose, object, 
       attrLens, attrNames);
   }
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeCountTreeLens
+}  // end ESMCI_AttributeCountTreeLens
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeRemove"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeRemove"
 //BOPI
-// !IROUTINE:  ESMC_AttributeRemove - Remove the {\tt ESMC_Attribute}
+// !IROUTINE:  ESMCI_AttributeRemove - Remove the {\tt ESMCI_Attribute}
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeRemove(
+      int ESMCI_Attribute::ESMCI_AttributeRemove(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -566,14 +523,14 @@
       const string &object) {                // in - object type to look for
 // 
 // !DESCRIPTION:
-//     Remove the {\tt ESMC_Attribute} 
+//     Remove the {\tt ESMCI_Attribute} 
 
 //EOPI
 
   int localrc;
   char msgbuf[ESMF_MAXSTR];
-  unsigned int i, j;
-  ESMC_Attribute *attpack;
+  unsigned int i;
+  ESMCI_Attribute *attpack;
   bool done;
 
   // Initialize local return code
@@ -582,7 +539,7 @@
   done = false;
   
   // get the attpack
-  attpack = ESMC_AttPackGet(convention, purpose, object);
+  attpack = ESMCI_AttPackGet(convention, purpose, object);
   if(!attpack) {
        sprintf(msgbuf, "Cannot find an Attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
                       convention.c_str(), purpose.c_str(), object.c_str());
@@ -597,13 +554,8 @@
       purpose.compare(attpack->attrList[i]->attrPurpose) == 0 &&
       object.compare(attpack->attrList[i]->attrObject) == 0) {
       // found a match, destroy it
-      (attpack->attrList[i])->~ESMC_Attribute();
-      // now repoint everything (up one)
-      for (j=i; j<(attpack->attrCount)-1; j++)
-        attpack->attrList[j] = attpack->attrList[j+1];
-      // null the last pointer
-      attpack->attrList[(attpack->attrCount)-1] = ESMC_NULL_POINTER;
-      // decrement the attrCount and break out
+      (attpack->attrList[i])->~ESMCI_Attribute();
+      attpack->attrList.erase(attpack->attrList.begin() + i);
       (attpack->attrCount)--;
       done = true;
       break;
@@ -618,15 +570,15 @@
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeRemove
+}  // end ESMCI_AttributeRemove
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeRemove"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeRemove"
 //BOPI
-// !IROUTINE:  ESMC_AttributeRemove - Remove the {\tt ESMC_Attribute}
+// !IROUTINE:  ESMCI_AttributeRemove - Remove the {\tt ESMCI_Attribute}
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeRemove(
+      int ESMCI_Attribute::ESMCI_AttributeRemove(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -635,7 +587,7 @@
       const string &name) {                // in - name
 // 
 // !DESCRIPTION:
-//     Remove the {\tt ESMC_Attribute} 
+//     Remove the {\tt ESMCI_Attribute} 
 
 //EOPI
 
@@ -649,13 +601,8 @@
   for (i=0; i<attrCount; i++) {
     if (name.compare(attrList[i]->attrName) == 0) {
       // found a match, destroy it
-      attrList[i]->~ESMC_Attribute();
-      // now repoint everything (up one)
-      for (j=i; j<attrCount-1; j++)
-        attrList[j] = attrList[j+1];
-      // null the last pointer
-      attrList[attrCount-1] = ESMC_NULL_POINTER;
-      // decrement the attrCount and break out
+      attrList[i]->~ESMCI_Attribute();
+      attrList.erase(attrList.begin() + i);
       attrCount--;
       done = true;
       break;
@@ -670,15 +617,15 @@
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeRemove
+}  // end ESMCI_AttributeRemove
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(int) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(int) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -688,18 +635,18 @@
       ESMC_I4 *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_I4} value of an {\tt ESMC_Attribute}.
+//    Get the {\tt ESMC_I4} value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Get the attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
@@ -725,15 +672,15 @@
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(int)
+}  // end ESMCI_AttributeGet(int)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(int *) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(int *) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -744,18 +691,18 @@
       vector<ESMC_I4> *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_I4} valueList of an {\tt ESMC_Attribute}.
+//    Get the {\tt ESMC_I4} valueList of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc, i;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Get the attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
@@ -785,15 +732,15 @@
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(int *)
+}  // end ESMCI_AttributeGet(int *)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(ESMC_I8) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(ESMC_I8) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -803,18 +750,18 @@
       ESMC_I8 *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_I8} value of an {\tt ESMC_Attribute}.
+//    Get the {\tt ESMC_I8} value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Get the attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
@@ -840,15 +787,15 @@
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_I8)
+}  // end ESMCI_AttributeGet(ESMC_I8)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(ESMC_I8 *) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(ESMC_I8 *) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -859,18 +806,18 @@
       vector<ESMC_I8> *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_I8} valueList of an {\tt ESMC_Attribute}.
+//    Get the {\tt ESMC_I8} valueList of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc, i;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Get the attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
@@ -900,15 +847,15 @@
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_I8 *)
+}  // end ESMCI_AttributeGet(ESMC_I8 *)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(ESMC_R4) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(ESMC_R4) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -918,18 +865,18 @@
       ESMC_R4 *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_R4} value of an {\tt ESMC_Attribute}.
+//    Get the {\tt ESMC_R4} value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Get the attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
@@ -955,15 +902,15 @@
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_R4)
+}  // end ESMCI_AttributeGet(ESMC_R4)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(ESMC_R4 *) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(ESMC_R4 *) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -974,18 +921,18 @@
       vector<ESMC_R4> *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_R4} valueList of an {\tt ESMC_Attribute}.
+//    Get the {\tt ESMC_R4} valueList of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc, i;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Get the attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
@@ -1015,15 +962,15 @@
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_R4 *)
+}  // end ESMCI_AttributeGet(ESMC_R4 *)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(ESMC_R8) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(ESMC_R8) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1033,18 +980,18 @@
       ESMC_R8 *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_R8} value of an {\tt ESMC_Attribute}.
+//    Get the {\tt ESMC_R8} value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Get the attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
@@ -1070,15 +1017,15 @@
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_R8)
+}  // end ESMCI_AttributeGet(ESMC_R8)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(ESMC_R8 *) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(ESMC_R8 *) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1089,18 +1036,18 @@
       vector<ESMC_R8> *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_R8} valueList of an {\tt ESMC_Attribute}.
+//    Get the {\tt ESMC_R8} valueList of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc, i;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL; 
   
   // Get the attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
@@ -1130,15 +1077,15 @@
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_R8 *)
+}  // end ESMCI_AttributeGet(ESMC_R8 *)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(ESMC_Logical) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(ESMC_Logical) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1148,18 +1095,18 @@
       ESMC_Logical *value) const {   // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_Logical} value of an {\tt ESMC_Attribute}.
+//    Get the {\tt ESMC_Logical} value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Get the attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
@@ -1185,15 +1132,15 @@
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_Logical)
+}  // end ESMCI_AttributeGet(ESMC_Logical)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(ESMC_Logical *) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(ESMC_Logical *) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1204,18 +1151,18 @@
       vector<ESMC_Logical> *value) const {   // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_Logical} valueList of an {\tt ESMC_Attribute}.
+//    Get the {\tt ESMC_Logical} valueList of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc, i;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Get the attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
@@ -1245,15 +1192,15 @@
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(ESMC_Logical *)
+}  // end ESMCI_AttributeGet(ESMC_Logical *)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(char) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(char) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1263,18 +1210,18 @@
       string *value) const {   // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the value of an {\tt ESMC_Attribute}.
+//    Get the value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Get the attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
@@ -1300,15 +1247,15 @@
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(char)
+}  // end ESMCI_AttributeGet(char)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(charlist) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(charlist) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1318,18 +1265,18 @@
       vector<string> *value) const {   // out - Attribute values
 // 
 // !DESCRIPTION:
-//    Get the value of an {\tt ESMC_Attribute}.
+//    Get the value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Get the attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
@@ -1355,39 +1302,37 @@
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(charlist)
+}  // end ESMCI_AttributeGet(charlist)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(name) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(name) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      const string &name,                    // in - name of Attribute to retrieve
-      ESMC_TypeKind *tk,             // out - typekind
-      int *count,                    // out - number of values in list
-      void *value) const {           // out - Attribute value(s)
+      const string &name,           // in - name of Attribute to retrieve
+      ESMC_TypeKind *tk,            // out - typekind
+      int *itemCount) const {           // out - number of values in list
 // 
 // !DESCRIPTION:
-//    Get the {\tt void *} value of an {\tt ESMC_Attribute} by name.
+//    Get the {\tt void *} value of an {\tt ESMCI_Attribute} by name.
 //
 //EOPI
 
   int localrc, i;
-  ESMC_Attribute *attr;
-  char *temp;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   // Get the attribute
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
@@ -1397,83 +1342,38 @@
     if (tk) 
       *tk = attr->tk;
 
-    if (count)
-         *count = attr->items; 
-
-/*    if (value) {
-      if (attr->items == 1) {
-              if (attr->tk == ESMC_TYPEKIND_I4)
-                  *(static_cast<ESMC_I4*> (value)) = attr->vi; 
-              else if (attr->tk == ESMC_TYPEKIND_I8)
-                  *(static_cast<ESMC_I8*> (value)) = attr->vtl; 
-              else if (attr->tk == ESMC_TYPEKIND_R4)
-                  *(static_cast<ESMC_R4*> (value)) = attr->vf; 
-              else if (attr->tk == ESMC_TYPEKIND_R8)
-                  *(static_cast<ESMC_R8*> (value)) = attr->vd; 
-              else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
-                  *(static_cast<ESMC_Logical*> (value)) = attr->vb;
-              else if (attr->tk == ESMC_TYPEKIND_CHARACTER) {
-                  attr->slen = (attr->vcp).size();
-                  *(static_cast<string*> (value)) = attr->vcp;
-              } else{
-                   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                                       "unknown typekind",
-                                       &localrc);
-                   return ESMF_FAILURE;
-               }
-        }
-        else if (attr->items > 1) {
-              if (attr->tk == ESMC_TYPEKIND_I4)
-                  *(static_cast<vector<ESMC_I4>*> (value)) = attr->vip;
-              else if (attr->tk == ESMC_TYPEKIND_I8)
-                  *(static_cast<vector<ESMC_I8>*> (value)) = attr->vlp;
-              else if (attr->tk == ESMC_TYPEKIND_R4)
-                  *(static_cast<vector<ESMC_R4>*> (value)) = attr->vfp;
-              else if (attr->tk == ESMC_TYPEKIND_R8)
-                  *(static_cast<vector<ESMC_R8>*> (value)) = attr->vdp;
-              else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
-                  *(static_cast<vector<ESMC_Logical>*> (value)) = attr->vbp;
-              else if (attr->tk == ESMC_TYPEKIND_CHARACTER)
-                  *(static_cast<vector<string>*> (value)) = attr->vcpp;
-              else{
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                                       "unknown typekind", 
-                                       &localrc);
-              return ESMF_FAILURE;
-              }
-        }
-      }  // value*/
+    if (itemCount)
+      *itemCount = attr->items; 
   }
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(name)
+}  // end ESMCI_AttributeGet(name)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet(num) - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet(num) - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
       int num,                       // in - number of Attribute to retrieve
-      string &name,                    // out - Attribute name
+      string *name,                  // out - Attribute name
       ESMC_TypeKind *tk,             // out - typekind
-      int *count,                    // out - number of values in list
-      void *value) const {           // out - Attribute value(s)
+      int *itemCount) const {            // out - number of values in list
 // 
 // !DESCRIPTION:
-//    Get the {\tt void *} value of an {\tt ESMC_Attribute} by number.
+//    Get the {\tt void *} value of an {\tt ESMCI_Attribute} by number.
 //
 //EOPI
 
   int localrc, i;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
@@ -1486,87 +1386,43 @@
   }
 
   // Get the attribute
-  attr = ESMC_AttributeGet(num);
+  attr = ESMCI_AttributeGet(num);
   if (!attr) {
     ESMC_LogDefault.Write("Attribute not found, using default value if present",
       ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
-    name = attr->attrName;
+    if (name) 
+      *name = attr->attrName;
 
     if (tk) 
       *tk = attr->tk;
 
-    if (count)
-      *count = attr->items;
-
-    /*if (value) {
-      if (attr->items == 1) {
-              if (attr->tk == ESMC_TYPEKIND_I4)
-                  *(static_cast<ESMC_I4*> (value)) = attr->vi; 
-              else if (attr->tk == ESMC_TYPEKIND_I8)
-                  *(static_cast<ESMC_I8*> (value)) = attr->vtl; 
-              else if (attr->tk == ESMC_TYPEKIND_R4)
-                  *(static_cast<ESMC_R4*> (value)) = attr->vf; 
-              else if (attr->tk == ESMC_TYPEKIND_R8)
-                  *(static_cast<ESMC_R8*> (value)) = attr->vd; 
-              else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
-                  *(static_cast<ESMC_Logical*> (value)) = attr->vb;
-              else if (attr->tk == ESMC_TYPEKIND_CHARACTER) {
-                  attr->slen = (attr->vcp).size();
-                  *(static_cast<string*> (value)) = attr->vcp;
-              } else{
-                   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                                       "unknown typekind",
-                                       &localrc);
-                   return ESMF_FAILURE;
-               }
- 
-      } else {
-              if (attr->tk == ESMC_TYPEKIND_I4)
-                  *(static_cast<vector<ESMC_I4>*> (value)) = attr->vip;
-              else if (attr->tk == ESMC_TYPEKIND_I8)
-                  *(static_cast<vector<ESMC_I8>*> (value)) = attr->vlp;
-              else if (attr->tk == ESMC_TYPEKIND_R4)
-                  *(static_cast<vector<ESMC_R4>*> (value)) = attr->vfp;
-              else if (attr->tk == ESMC_TYPEKIND_R8)
-                  *(static_cast<vector<ESMC_R8>*> (value)) = attr->vdp;
-              else if (attr->tk == ESMC_TYPEKIND_LOGICAL)
-                  *(static_cast<vector<ESMC_Logical>*> (value)) = attr->vbp;
-              else if (attr->tk == ESMC_TYPEKIND_CHARACTER)
-                  *(static_cast<vector<string>*> (value)) = attr->vcpp;
-              else{
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                                       "unknown typekind", 
-                                       &localrc);
-              return ESMF_FAILURE;
-              }
-      }
-    }  // value*/
+    if (itemCount)
+      *itemCount = attr->items;
   }
-  
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet(num)
+}  // end ESMCI_AttributeGet(num)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      ESMC_Attribute *ESMC_Attribute::ESMC_AttributeGet(
+      ESMCI_Attribute *ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
-//    {\tt ESMC_Attribute} pointer or NULL on error exit.
+//    {\tt ESMCI_Attribute} pointer or NULL on error exit.
 // 
 // !ARGUMENTS:
       const string &name) const {        // in - Attribute name to retrieve
 // 
 // !DESCRIPTION:
-//    Get the name of an {\tt ESMC_Attribute}.
+//    Get the name of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
@@ -1583,15 +1439,15 @@
   // you get here if no matches found
   return NULL;
 
-}  // end ESMC_AttributeGet
+}  // end ESMCI_AttributeGet
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet - get an {\tt ESMC_Attribute} by number
+// !IROUTINE:  ESMCI_AttributeGet - get an {\tt ESMCI_Attribute} by number
 //
 // !INTERFACE:
-      ESMC_Attribute *ESMC_Attribute::ESMC_AttributeGet(
+      ESMCI_Attribute *ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1600,8 +1456,8 @@
       int number) const {             // in - Attribute number
 // 
 // !DESCRIPTION:
-//     Allows the caller to get {\tt ESMC_Attributes} by number instead of by name.
-//     This can be useful in iterating through all {\tt ESMC_Attributes} in a loop.
+//     Allows the caller to get {\tt ESMCI_Attributes} by number instead of by name.
+//     This can be useful in iterating through all {\tt ESMCI_Attributes} in a loop.
 //
 //EOPI
 
@@ -1617,18 +1473,18 @@
 
   return attrList[number];
 
-}  // end ESMC_AttributeGet
+}  // end ESMCI_AttributeGet
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGet - get {\tt ESMC_Attribute} from an ESMF type
+// !IROUTINE:  ESMCI_AttributeGet - get {\tt ESMCI_Attribute} from an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGet(
+      int ESMCI_Attribute::ESMCI_AttributeGet(
 // 
 // !RETURN VALUE:
-//    {\tt ESMC_Attribute} pointer or NULL on error exit.
+//    {\tt ESMCI_Attribute} pointer or NULL on error exit.
 // 
 // !ARGUMENTS:
       const string &name,               // in - Attribute name to retrieve
@@ -1636,13 +1492,13 @@
       int count) const {        // in - number of Attribute lengths to retrieve
 // 
 // !DESCRIPTION:
-//    Get the lengths of the strings in an {\tt ESMC_Attribute}.
+//    Get the lengths of the strings in an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int size;
   unsigned int i;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // look for the Attribute
   for (i=0; i<attrCount; i++) {
@@ -1679,53 +1535,53 @@
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeGet
+}  // end ESMCI_AttributeGet
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGetCount"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGetCount"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGetCount - get an the number of {\tt ESMC_Attributes}
+// !IROUTINE:  ESMCI_AttributeGetCount - get an the number of {\tt ESMCI_Attributes}
 // 
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGetCount(
+      int ESMCI_Attribute::ESMCI_AttributeGetCount(
 // 
 // !RETURN VALUE:
-//    number of {\tt ESMC_Attributes} in this attrList
+//    number of {\tt ESMCI_Attributes} in this attrList
 // 
 // !ARGUMENTS:
       void) const {  
 // 
 // !DESCRIPTION:
-//      Returns number of {\tt ESMC_Attributes} present
+//      Returns number of {\tt ESMCI_Attributes} present
 //
 //EOPI
 
   return attrCount;
 
-} // end ESMC_AttributeGetCount
+} // end ESMCI_AttributeGetCount
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGetItemCount"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGetItemCount"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGetItemCount - get the item count of this {\tt ESMC_Attribute}
+// !IROUTINE:  ESMCI_AttributeGetItemCount - get the item count of this {\tt ESMCI_Attribute}
 // 
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeGetItemCount(
+      int ESMCI_Attribute::ESMCI_AttributeGetItemCount(
 // 
 // !RETURN VALUE:
-//    item count of this {\tt ESMC_Attribute}
+//    item count of this {\tt ESMCI_Attribute}
 // 
 // !ARGUMENTS:
       const string &name) const {       // in - name
 // 
 // !DESCRIPTION:
-//      Returns number of items on this {\tt ESMC_Attribute}
+//      Returns number of items on this {\tt ESMCI_Attribute}
 //
 //EOPI
 
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                                             "Attribute not found", NULL);
@@ -1734,15 +1590,15 @@
 
   return attr->items;
 
-} // end ESMC_AttributeGetItemCount
+} // end ESMCI_AttributeGetItemCount
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeIsPresent"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeIsPresent"
 //BOPI
-// !IROUTINE:  ESMC_AttributeIsPresent - query for an {\tt ESMC_Attribute}
+// !IROUTINE:  ESMCI_AttributeIsPresent - query for an {\tt ESMCI_Attribute}
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeIsPresent(
+      int ESMCI_Attribute::ESMCI_AttributeIsPresent(
 // 
 // !RETURN VALUE:
 //    Value of the present flag.
@@ -1752,39 +1608,39 @@
       ESMC_Logical *present) const {         // in/out - the present flag
 // 
 // !DESCRIPTION:
-//     Query for an {\tt ESMC_Attribute} given its name
+//     Query for an {\tt ESMCI_Attribute} given its name
 //
 //EOPI
 
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
-  attr = ESMC_AttributeGet(name);
+  attr = ESMCI_AttributeGet(name);
   if (!attr) *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
   
   // return
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeIsPresent
+}  // end ESMCI_AttributeIsPresent
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      ESMC_Attribute *attr) {   // in - Attribute name, type, value
+      ESMCI_Attribute *attr) {   // in - Attribute name, type, value
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
 //     This version of set is used when the caller has already allocated
-//     an {\tt ESMC_Attribute} object and filled it, and the {\tt ESMC_Attribute} 
+//     an {\tt ESMCI_Attribute} object and filled it, and the {\tt ESMCI_Attribute} 
 //     is simply added to the list belonging to this object.
 //
 //EOPI
@@ -1813,33 +1669,26 @@
 
       // FIXME: this should use destroy
       // delete old Attribute, including possibly freeing a list
-      attrList[i]->~ESMC_Attribute();
+      attrList[i]->~ESMCI_Attribute();
 
       attrList[i] = attr;
       return ESMF_SUCCESS;
   }   
 
-  // new Attribute name, make sure there is space for it.
-  localrc = ESMC_AttributeAlloc(1);
-  if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "AttributeSet failed to allocate space", &localrc);
-       return ESMF_FAILURE;
-  }  
-  attrList[attrCount] = attr;   
+  attrList.push_back(attr);   
   attrCount++;
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeSet
+}  // end ESMCI_AttributeSet
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(int) - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet(int) - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1849,33 +1698,33 @@
       ESMC_I4 value) {         // in - Attribute value
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_I4} value of an {\tt ESMC_Attribute}.
+//    Set the {\tt ESMC_I4} value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I4, 1, &value);  
+  attr = new ESMCI_Attribute(name, ESMC_TYPEKIND_I4, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
-  localrc = ESMC_AttributeSet(attr);
+  localrc = ESMCI_AttributeSet(attr);
 
   return localrc;
 
-}  // end ESMC_AttributeSet(int)
+}  // end ESMCI_AttributeSet(int)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(int *) - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet(int *) - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1886,33 +1735,33 @@
       vector<ESMC_I4> *value) {        // in - Attribute values
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_I4} valueList of an {\tt ESMC_Attribute}.
+//    Set the {\tt ESMC_I4} valueList of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I4, count, value);  
+  attr = new ESMCI_Attribute(name, ESMC_TYPEKIND_I4, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
-  localrc = ESMC_AttributeSet(attr);
+  localrc = ESMCI_AttributeSet(attr);
 
   return localrc;
 
-}  // end ESMC_AttributeSet(int *)
+}  // end ESMCI_AttributeSet(int *)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(ESMC_I8) - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet(ESMC_I8) - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1922,33 +1771,33 @@
       ESMC_I8 value) {         // in - Attribute value
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_I*} value of an {\tt ESMC_Attribute}.
+//    Set the {\tt ESMC_I*} value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I8, 1, &value);  
+  attr = new ESMCI_Attribute(name, ESMC_TYPEKIND_I8, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
-  localrc = ESMC_AttributeSet(attr);
+  localrc = ESMCI_AttributeSet(attr);
 
   return localrc;
 
-}  // end ESMC_AttributeSet(ESMC_I8)
+}  // end ESMCI_AttributeSet(ESMC_I8)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(ESMC_I8 *) - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet(ESMC_I8 *) - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1959,33 +1808,33 @@
       vector<ESMC_I8> *value) {        // in - Attribute values
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_I8} valueList of an {\tt ESMC_Attribute}.
+//    Set the {\tt ESMC_I8} valueList of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_I8, count, value);  
+  attr = new ESMCI_Attribute(name, ESMC_TYPEKIND_I8, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
-  localrc = ESMC_AttributeSet(attr);
+  localrc = ESMCI_AttributeSet(attr);
 
   return localrc;
 
-}  // end ESMC_AttributeSet(ESMC_I8 *)
+}  // end ESMCI_AttributeSet(ESMC_I8 *)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(ESMC_R4) - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet(ESMC_R4) - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1995,33 +1844,33 @@
       ESMC_R4 value) {         // in - Attribute value
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_R4} value of an {\tt ESMC_Attribute}.
+//    Set the {\tt ESMC_R4} value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R4, 1, &value);  
+  attr = new ESMCI_Attribute(name, ESMC_TYPEKIND_R4, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
-  localrc = ESMC_AttributeSet(attr);
+  localrc = ESMCI_AttributeSet(attr);
 
   return localrc;
 
-}  // end ESMC_AttributeSet(ESMC_R4)
+}  // end ESMCI_AttributeSet(ESMC_R4)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(ESMC_R4 *) - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet(ESMC_R4 *) - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2032,33 +1881,33 @@
       vector<ESMC_R4> *value) {        // in - Attribute values
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_R4} valueList of an {\tt ESMC_Attribute}.
+//    Set the {\tt ESMC_R4} valueList of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R4, count, value);  
+  attr = new ESMCI_Attribute(name, ESMC_TYPEKIND_R4, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
-  localrc = ESMC_AttributeSet(attr);
+  localrc = ESMCI_AttributeSet(attr);
 
   return localrc;
 
-}  // end ESMC_AttributeSet(ESMC_R4 *)
+}  // end ESMCI_AttributeSet(ESMC_R4 *)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(ESMC_R8) - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet(ESMC_R8) - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2068,33 +1917,33 @@
       ESMC_R8 value) {         // in - Attribute value
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_R8} value of an {\tt ESMC_Attribute}.
+//    Set the {\tt ESMC_R8} value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R8, 1, &value);  
+  attr = new ESMCI_Attribute(name, ESMC_TYPEKIND_R8, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
-  localrc = ESMC_AttributeSet(attr);
+  localrc = ESMCI_AttributeSet(attr);
 
   return localrc;
 
-}  // end ESMC_AttributeSet(ESMC_R8)
+}  // end ESMCI_AttributeSet(ESMC_R8)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(ESMC_R8 *) - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet(ESMC_R8 *) - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2105,33 +1954,33 @@
       vector<ESMC_R8> *value) {        // in - Attribute values
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_R8} valueList of an {\tt ESMC_Attribute}.
+//    Set the {\tt ESMC_R8} valueList of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_R8, count, value);  
+  attr = new ESMCI_Attribute(name, ESMC_TYPEKIND_R8, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
-  localrc = ESMC_AttributeSet(attr);
+  localrc = ESMCI_AttributeSet(attr);
 
   return localrc;
 
-}  // end ESMC_AttributeSet(ESMC_R8 *)
+}  // end ESMCI_AttributeSet(ESMC_R8 *)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(ESMC_Logical) - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet(ESMC_Logical) - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2141,33 +1990,33 @@
       ESMC_Logical value) {    // in - Attribute value
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_Logical} value of an {\tt ESMC_Attribute}.
+//    Set the {\tt ESMC_Logical} value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_LOGICAL, 1, &value);  
+  attr = new ESMCI_Attribute(name, ESMC_TYPEKIND_LOGICAL, 1, &value);  
   if (!attr)
     return ESMF_FAILURE;
  
-  localrc = ESMC_AttributeSet(attr);
+  localrc = ESMCI_AttributeSet(attr);
 
   return localrc;
 
-}  // end ESMC_AttributeSet(ESMC_Logical)
+}  // end ESMCI_AttributeSet(ESMC_Logical)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(ESMC_Logical *) - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet(ESMC_Logical *) - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2178,33 +2027,33 @@
       vector<ESMC_Logical> *value) {   // in - Attribute values
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_Logical} valueList of an {\tt ESMC_Attribute}.
+//    Set the {\tt ESMC_Logical} valueList of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_LOGICAL, count, value);  
+  attr = new ESMCI_Attribute(name, ESMC_TYPEKIND_LOGICAL, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
-  localrc = ESMC_AttributeSet(attr);
+  localrc = ESMCI_AttributeSet(attr);
 
   return localrc;
 
-}  // end ESMC_AttributeSet(ESMC_Logical *)
+}  // end ESMCI_AttributeSet(ESMC_Logical *)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(char) - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet(char) - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2214,33 +2063,33 @@
       string *value) {    // in - Attribute value
 // 
 // !DESCRIPTION:
-//    Set the value of an {\tt ESMC_Attribute}.
+//    Set the value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_CHARACTER, 1, value);  
+  attr = new ESMCI_Attribute(name, ESMC_TYPEKIND_CHARACTER, 1, value);  
   if (!attr)
     return ESMF_FAILURE;
  
-  localrc = ESMC_AttributeSet(attr);
+  localrc = ESMCI_AttributeSet(attr);
 
   return localrc;
 
-}  // end ESMC_AttributeSet(char)
+}  // end ESMCI_AttributeSet(char)
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet(charlist) - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet(charlist) - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2251,33 +2100,33 @@
       vector<string> *value) {    // in - Attribute value
 // 
 // !DESCRIPTION:
-//    Set the value of an {\tt ESMC_Attribute}.
+//    Set the value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute(name, ESMC_TYPEKIND_CHARACTER, count, value);  
+  attr = new ESMCI_Attribute(name, ESMC_TYPEKIND_CHARACTER, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
-  localrc = ESMC_AttributeSet(attr);
+  localrc = ESMCI_AttributeSet(attr);
 
   return localrc;
 
-}  // end ESMC_AttributeSet(charlist)
+}  // end ESMCI_AttributeSet(charlist)
 //-----------------------------------------------------------------------------
-/*#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSet"
+/*#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSet"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSet - set {\tt ESMC_Attribute} on an ESMF type
+// !IROUTINE:  ESMCI_AttributeSet - set {\tt ESMCI_Attribute} on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSet(
+      int ESMCI_Attribute::ESMCI_AttributeSet(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2289,33 +2138,33 @@
       void *value) {        // in - Attribute value
 // 
 // !DESCRIPTION:
-//    Set the {\tt void*} value of an {\tt ESMC_Attribute}.
+//    Set the {\tt void*} value of an {\tt ESMCI_Attribute}.
 //
 //EOPI
 
   int localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new ESMC_Attribute(name, tk, count, value);  
+  attr = new ESMCI_Attribute(name, tk, count, value);  
   if (!attr)
     return ESMF_FAILURE;
  
-  localrc = ESMC_AttributeSet(attr);
+  localrc = ESMCI_AttributeSet(attr);
 
   return localrc;
 
-}  // end ESMC_AttributeSet*/
+}  // end ESMCI_AttributeSet*/
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSetLink"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSetLink"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSetLink - set a link in an {\tt ESMC_Attribute} hierarchy
+// !IROUTINE:  ESMCI_AttributeSetLink - set a link in an {\tt ESMCI_Attribute} hierarchy
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSetLink(
+      int ESMCI_Attribute::ESMCI_AttributeSetLink(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2323,38 +2172,32 @@
 // !ARGUMENTS:
       ESMC_Base *destination) {  // in/out destination Attribute to be linked
 // !DESCRIPTION:
-//     Set a link in an {\tt ESMC_Attribute} hierarchy.
+//     Set a link in an {\tt ESMCI_Attribute} hierarchy.
 //
 //EOPI
 
   int localrc;
+  ESMCI_Attribute *attr;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
   
-  if(this->attrAlloc < (this->attrCount + 1)) {
-    localrc = this->ESMC_AttributeAlloc(1);
-    if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "AttributeSetLink failed to allocate space", &localrc);
-      return ESMF_FAILURE;
-    }
-  }
+  attr = &(destination->root);
     
-  (this->attrList)[attrCount] = &(destination->root);
-  (this->attrCount)++;
+  attrList.push_back(attr);
+  attrCount++;
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeSetLink
+}  // end ESMCI_AttributeSetLink
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSetObjsInTree"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSetObjsInTree"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSetObjsInTree - set all objects in {\tt ESMC_Attribute} hierarchy 
+// !IROUTINE:  ESMCI_AttributeSetObjsInTree - set all objects in {\tt ESMCI_Attribute} hierarchy 
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeSetObjsInTree(
+      int ESMCI_Attribute::ESMCI_AttributeSetObjsInTree(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2367,7 +2210,7 @@
       void *value) {                 // in - value
 // 
 // !DESCRIPTION:
-//     Set the objects in the {\tt ESMC_Attribute} hierarchy 
+//     Set the objects in the {\tt ESMCI_Attribute} hierarchy 
 
 //EOPI
 
@@ -2379,7 +2222,7 @@
   // If this is object matches, count it
   if (object.compare(attrObject) == 0 && 
       name.compare(attrName) == 0) {
-    localrc = ESMC_AttrModifyValue(tk, count, value);
+    localrc = ESMCI_AttrModifyValue(tk, count, value);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeSetObjsInTree failed to set an Attribute", &localrc);
@@ -2389,12 +2232,12 @@
   
   // Recurse the hierarchy
   for (int i = 0; i < attrCount; i++) {
-    localrc = attrList[i]->ESMC_AttributeSetObjsInTree(object,name,tk,count,value);
+    localrc = attrList[i]->ESMCI_AttributeSetObjsInTree(object,name,tk,count,value);
   }
   
   return ESMF_SUCCESS;
 
-}  // end ESMC_AttributeSetObjsInTree
+}  // end ESMCI_AttributeSetObjsInTree
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
@@ -2403,13 +2246,13 @@
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeWriteTab"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeWriteTab"
 //BOPI
-// !IROUTINE:  ESMC_AttributeWriteTab - write Attributes in Tab delimited format
+// !IROUTINE:  ESMCI_AttributeWriteTab - write Attributes in Tab delimited format
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeWriteTab(
+      int ESMCI_Attribute::ESMCI_AttributeWriteTab(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2422,7 +2265,7 @@
       const string &basename) const{        //  in - basename
 //
 // !DESCRIPTION:
-//    Write the contents on an {\tt ESMC_Attribute} hierarchy in Tab delimited format.  
+//    Write the contents on an {\tt ESMCI_Attribute} hierarchy in Tab delimited format.  
 //    Expected to be called internally.
 //
 //EOPI
@@ -2452,10 +2295,10 @@
   } 
 
   // determine the number of fields to write
-  localrc = ESMC_AttributeCountTree(convention, purpose, varobj, na, maxobjs);
+  localrc = ESMCI_AttributeCountTree(convention, purpose, varobj, na, maxobjs);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "ESMC_AttributeWriteTab failed counting max objs",
+                               "ESMCI_AttributeWriteTab failed counting max objs",
                                 &localrc);
     fclose(tab);
     return ESMF_FAILURE;
@@ -2465,7 +2308,7 @@
   attrLens = new int[maxobjs];
   if (!attrLens) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "ESMC_AttributeWriteTab failed allocating attrLens",
+                               "ESMCI_AttributeWriteTab failed allocating attrLens",
                                 &localrc);
     fclose(tab);
     return ESMF_FAILURE;
@@ -2474,11 +2317,11 @@
   attrNames.reserve(maxobjs);
     
   // make a function to recurse the tree, find the max lengths, and compare names
-  localrc = ESMC_AttributeCountTreeLens(convention, purpose, varobj, attrLens,
+  localrc = ESMCI_AttributeCountTreeLens(convention, purpose, varobj, attrLens,
     attrNames);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "ESMC_AttributeWriteTab failed CountTreeLens",
+                               "ESMCI_AttributeWriteTab failed CountTreeLens",
                                 &localrc);
     delete [] attrLens;
     attrNames.clear();
@@ -2498,11 +2341,11 @@
   fprintf(tab,msgbuf);
     
  // recurse the Attribute hierarchy
-  localrc = ESMC_AttributeWriteTabrecurse(tab,convention,purpose,varobj,attrLens,
+  localrc = ESMCI_AttributeWriteTabrecurse(tab,convention,purpose,varobj,attrLens,
     attrNames,maxobjs,count);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "ESMC_Attribute failed recursing in WriteTab", &localrc);
+                               "ESMCI_Attribute failed recursing in WriteTab", &localrc);
     delete [] attrLens;
     attrNames.clear();
     fclose(tab);
@@ -2516,16 +2359,16 @@
   
   return ESMF_SUCCESS;
 
- } // end ESMC_AttributeWriteTab
+ } // end ESMCI_AttributeWriteTab
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeWriteTabrecurse"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeWriteTabrecurse"
 //BOPI
-// !IROUTINE:  ESMC_AttributeWriteTabrecurse - write Attributes in Tab delimited format
+// !IROUTINE:  ESMCI_AttributeWriteTabrecurse - write Attributes in Tab delimited format
 //                                             recursive function
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeWriteTabrecurse(
+      int ESMCI_Attribute::ESMCI_AttributeWriteTabrecurse(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2541,7 +2384,7 @@
       int &count) const{            //  inout - current count
 //
 // !DESCRIPTION:
-//    Write the contents on an {\tt ESMC_Attribute} hierarchy in Tab delimited format.  
+//    Write the contents on an {\tt ESMCI_Attribute} hierarchy in Tab delimited format.  
 //    Expected to be called internally.
 //
 //EOPI
@@ -2593,21 +2436,21 @@
         }
   }
   for(i=0;  i<attrCount; i++) {
-      attrList[i]->ESMC_AttributeWriteTabrecurse(tab,convention,purpose,varobj,
+      attrList[i]->ESMCI_AttributeWriteTabrecurse(tab,convention,purpose,varobj,
         attrLens,attrNames,maxattrs,count);
   }
 
   return ESMF_SUCCESS;
 
- } // end ESMC_AttributeWriteTabrecurse
+ } // end ESMCI_AttributeWriteTabrecurse
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeWriteXML"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeWriteXML"
 //BOPI
-// !IROUTINE:  ESMC_AttributeWriteXML - Write contents of an {\tt ESMC_Attribute} package
+// !IROUTINE:  ESMCI_AttributeWriteXML - Write contents of an {\tt ESMCI_Attribute} package
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeWriteXML(
+      int ESMCI_Attribute::ESMCI_AttributeWriteXML(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2620,7 +2463,7 @@
       const string &basename) const{        //  in - basename
 //
 // !DESCRIPTION:
-//    Print the contents of an {\tt ESMC_Attribute}.  Expected to be
+//    Print the contents of an {\tt ESMCI_Attribute}.  Expected to be
 //    called internally.
 //
 //EOPI
@@ -2628,7 +2471,7 @@
   FILE* xml;
   char msgbuf[ESMF_MAXSTR];
   string modelcompname, fullname, version;
-  ESMC_Attribute *attpack, *attr;
+  ESMCI_Attribute *attpack, *attr;
   int localrc, stop, fldcount, na;
   ESMC_Logical presentflag;
 
@@ -2651,7 +2494,7 @@
 
 //  *** THIS IS A HACK, DON'T LIKE IT, TEMPORARY UNTIL WRITE CLASS AVAILABLE ***
   if (object.compare("comp")==0) {
-  attpack = ESMC_AttPackGet(convention, purpose, object);
+  attpack = ESMCI_AttPackGet(convention, purpose, object);
   if (!attpack) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed getting attpack in WriteXML", &localrc);
@@ -2659,7 +2502,7 @@
   }
 
   // get value of attribute 0 or set to N/A if not present
-  localrc = attpack->ESMC_AttributeIsPresent("name", &presentflag);
+  localrc = attpack->ESMCI_AttributeIsPresent("name", &presentflag);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed finding an attribute", &localrc);
@@ -2667,9 +2510,8 @@
     return ESMF_FAILURE;
   }
   if (presentflag == ESMF_SUCCESS) {
-    attr = attpack->ESMC_AttributeGet(0);
+    attr = attpack->ESMCI_AttributeGet(0);
     modelcompname = attr->vcp;
-//    localrc = attpack->ESMC_AttributeGet(0,NULL,NULL,NULL,&modelcompname);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed getting attribute value", &localrc);
@@ -2682,7 +2524,7 @@
   }
   
   // get value of attribute 1 or set to N/A if not present
-  localrc = attpack->ESMC_AttributeIsPresent("full_name", &presentflag);
+  localrc = attpack->ESMCI_AttributeIsPresent("full_name", &presentflag);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed finding an attribute", &localrc);
@@ -2690,9 +2532,8 @@
     return ESMF_FAILURE;
   }
   if (presentflag == ESMF_SUCCESS) {
-    attr = attpack->ESMC_AttributeGet(1);
+    attr = attpack->ESMCI_AttributeGet(1);
     fullname = attr->vcp;
-//    localrc = attpack->ESMC_AttributeGet(1,NULL,NULL,NULL,&fullname);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed getting attribute value", &localrc);
@@ -2705,7 +2546,7 @@
   }
   
   // get value of attribute 2 or set to N/A if not present
-  localrc = attpack->ESMC_AttributeIsPresent("version", &presentflag);
+  localrc = attpack->ESMCI_AttributeIsPresent("version", &presentflag);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed finding an attribute", &localrc);
@@ -2713,9 +2554,8 @@
     return ESMF_FAILURE;
   }
   if (presentflag == ESMF_SUCCESS) {
-    attr = attpack->ESMC_AttributeGet(2);
+    attr = attpack->ESMCI_AttributeGet(2);
     version = attr->vcp;
-//    localrc = attpack->ESMC_AttributeGet(2,NULL,NULL,NULL,&version);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed getting attribute value", &localrc);
@@ -2745,19 +2585,19 @@
 // *** HACK ***
    
   // determine the number of fields to write
-  localrc = ESMC_AttributeCountTree(convention, purpose, varobj, stop, na);
+  localrc = ESMCI_AttributeCountTree(convention, purpose, varobj, stop, na);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "ESMC_Attribute failed counting fields", &localrc);
+                               "ESMCI_Attribute failed counting fields", &localrc);
     fclose(xml);
     return ESMF_FAILURE;
   }
 
   // recurse the Attribute hierarchy
-  localrc = ESMC_AttributeWriteXMLrecurse(xml,convention,purpose,object,varobj,stop,fldcount);
+  localrc = ESMCI_AttributeWriteXMLrecurse(xml,convention,purpose,object,varobj,stop,fldcount);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "ESMC_Attribute failed recursing in WriteTab", &localrc);
+                               "ESMCI_Attribute failed recursing in WriteTab", &localrc);
     fclose(xml);
     return ESMF_FAILURE;
   }
@@ -2767,15 +2607,15 @@
 
   return ESMF_SUCCESS;
 
- } // end ESMC_AttributeWriteXML
+ } // end ESMCI_AttributeWriteXML
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeWriteXMLrecurse"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeWriteXMLrecurse"
 //BOPI
-// !IROUTINE:  ESMC_AttributeWriteXMLrecurse - {\tt ESMC_Attribute} hierarchy recurse write
+// !IROUTINE:  ESMCI_AttributeWriteXMLrecurse - {\tt ESMCI_Attribute} hierarchy recurse write
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttributeWriteXMLrecurse(
+      int ESMCI_Attribute::ESMCI_AttributeWriteXMLrecurse(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2790,7 +2630,7 @@
       int &fldcount) const{    //  in - field count
 //
 // !DESCRIPTION:
-//    Write the contents of an {\tt ESMC_Attribute}.  Expected to be
+//    Write the contents of an {\tt ESMCI_Attribute}.  Expected to be
 //    called internally.
 //
 //EOPI
@@ -2894,7 +2734,7 @@
         ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
       }
     }
-    if (attrList != NULL) {
+    if (!attrList.empty()) {
       sprintf(msgbuf," />\n");
       //printf(msgbuf);
       fprintf(xml,msgbuf);
@@ -2918,21 +2758,21 @@
   
   // recurse through the Attribute hierarchy
   for(int i=0;  i<attrCount; i++) {
-      attrList[i]->ESMC_AttributeWriteXMLrecurse(xml,convention,purpose,object,
+      attrList[i]->ESMCI_AttributeWriteXMLrecurse(xml,convention,purpose,object,
         varobj,stop,fldcount);
   }
 
   return ESMF_SUCCESS;
 
- } // end ESMC_AttributeWriteXMLrecurse
+ } // end ESMCI_AttributeWriteXMLrecurse
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Print"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMC_Print"
 //BOPI
-// !IROUTINE:  ESMC_Attribute::ESMC_Print - Print the {\tt ESMC_Attribute} contents
+// !IROUTINE:  ESMCI_Attribute::ESMC_Print - Print the {\tt ESMCI_Attribute} contents
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_Print(
+      int ESMCI_Attribute::ESMC_Print(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2941,7 +2781,7 @@
       void) const {                    // could add options at some point
 // 
 // !DESCRIPTION:
-//     Print the contents of an {\tt ESMC_Attribute} object
+//     Print the contents of an {\tt ESMCI_Attribute} object
 //
 //EOPI
   int localrc;
@@ -3050,16 +2890,16 @@
 //
 //-----------------------------------------------------------------------------
 //----------------------------------------------------------------------------- 
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Attribute()"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_Attribute()"
 //BOPI
-// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
+// !IROUTINE:  ESMCI_Attribute - native C++ constructor for ESMCI_Attribute class
 //
 // !INTERFACE:
-      ESMC_Attribute::ESMC_Attribute(
+      ESMCI_Attribute::ESMCI_Attribute(
 //
 // !RETURN VALUE:
-//    new {\tt ESMC_Attribute} object
+//    new {\tt ESMCI_Attribute} object
 //
 // !ARGUMENTS:
         const string &name,                  // Attribute name
@@ -3068,7 +2908,7 @@
         const string &obj) {                 // object
 //
 // !DESCRIPTION:
-//   Initialize an {\tt ESMC_Attribute} and set the name, convention, and purpose.
+//   Initialize an {\tt ESMCI_Attribute} and set the name, convention, and purpose.
 //
 //EOPI
 
@@ -3084,8 +2924,7 @@
   attrPack = ESMF_TRUE;
 
   attrCount = 0;
-  attrAlloc = 0;
-  attrList = ESMC_NULL_POINTER;
+  attrList.reserve(attrCount);
 
   vi = 0;
   vip.reserve(0);
@@ -3098,15 +2937,15 @@
   vb = ESMF_FALSE;
   vbp.reserve(0);
 
-} // end ESMC_Attribute
+} // end ESMCI_Attribute
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Attribute()"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_Attribute()"
 //BOPI
-// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
+// !IROUTINE:  ESMCI_Attribute - native C++ constructor for ESMCI_Attribute class
 //
 // !INTERFACE:
-      ESMC_Attribute::ESMC_Attribute(void) {
+      ESMCI_Attribute::ESMCI_Attribute(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -3115,7 +2954,7 @@
 //    none
 //
 // !DESCRIPTION:
-//     Create an empty {\tt ESMC_Attribute} structure.
+//     Create an empty {\tt ESMCI_Attribute} structure.
 //
 //EOPI
 
@@ -3131,8 +2970,7 @@
   attrPack = ESMF_FALSE;
 
   attrCount = 0;
-  attrAlloc = 0;
-  attrList = ESMC_NULL_POINTER;
+  attrList.reserve(attrCount);
 
   vi = 0;
   vip.reserve(0);
@@ -3145,24 +2983,24 @@
   vb = ESMF_FALSE;
   vbp.reserve(0);
   
- } // end ESMC_Attribute
+ } // end ESMCI_Attribute
 //----------------------------------------------------------------------------- 
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Attribute()"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_Attribute()"
 //BOPI
-// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
+// !IROUTINE:  ESMCI_Attribute - native C++ constructor for ESMCI_Attribute class
 //
 // !INTERFACE:
-      ESMC_Attribute::ESMC_Attribute(
+      ESMCI_Attribute::ESMCI_Attribute(
 //
 // !RETURN VALUE:
-//    new {\tt ESMC_Attribute} object
+//    new {\tt ESMCI_Attribute} object
 //
 // !ARGUMENTS:
         const ESMC_Logical &attributeRoot) {                 // root value
 //
 // !DESCRIPTION:
-//   Initialize an {\tt ESMC_Attribute} and set the name, convention, and purpose.
+//   Initialize an {\tt ESMCI_Attribute} and set the name, convention, and purpose.
 //
 //EOPI
 
@@ -3178,8 +3016,7 @@
   attrPack = ESMF_FALSE;
 
   attrCount = 0;
-  attrAlloc = 0;
-  attrList = ESMC_NULL_POINTER;
+  attrList.reserve(attrCount);
 
   vi = 0;
   vip.reserve(0);
@@ -3192,18 +3029,18 @@
   vb = ESMF_FALSE;
   vbp.reserve(0);
 
-} // end ESMC_Attribute
+} // end ESMCI_Attribute
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Attribute()"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_Attribute()"
 //BOPI
-// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
+// !IROUTINE:  ESMCI_Attribute - native C++ constructor for ESMCI_Attribute class
 //
 // !INTERFACE:
-      ESMC_Attribute::ESMC_Attribute(
+      ESMCI_Attribute::ESMCI_Attribute(
 //
 // !RETURN VALUE:
-//    {\tt ESMC_Attribute} object
+//    {\tt ESMCI_Attribute} object
 //
 // !ARGUMENTS:
         const string &name,                // Attribute name
@@ -3212,7 +3049,7 @@
         void *datap) {             // generic pointer to values
 //
 // !DESCRIPTION:
-//   Initialize an {\tt ESMC_Attribute}, and make a copy of the data if items > 1.
+//   Initialize an {\tt ESMCI_Attribute}, and make a copy of the data if items > 1.
 //
 //EOPI
   unsigned int i;
@@ -3229,8 +3066,7 @@
   attrPack = ESMF_FALSE;
 
   attrCount = 0;
-  attrAlloc = 0;
-  attrList = ESMC_NULL_POINTER;
+  attrList.reserve(attrCount);
   
   vi = 0;
   vip.reserve(0);
@@ -3295,15 +3131,15 @@
         }
   }
 
- } // end ESMC_Attribute
+ } // end ESMCI_Attribute
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttrModifyValue()"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttrModifyValue()"
 //BOPI
-// !IROUTINE:  ESMC_AttrModifyValue - native C++ modifyer for ESMC_Attribute class
+// !IROUTINE:  ESMCI_AttrModifyValue - native C++ modifyer for ESMCI_Attribute class
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_AttrModifyValue(
+      int ESMCI_Attribute::ESMCI_AttrModifyValue(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -3314,7 +3150,7 @@
         void *datap) {             // generic pointer to values
 //
 // !DESCRIPTION:
-//   Set a value on an existing {\tt ESMC_Attribute} object.
+//   Set a value on an existing {\tt ESMCI_Attribute} object.
 //
 //EOPI
   int i, localrc;
@@ -3385,28 +3221,28 @@
 
   return ESMF_SUCCESS;
 
- } // end ESMC_AttrModifyValue
+ } // end ESMCI_AttrModifyValue
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeCopy(=)"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeCopy(=)"
 //BOPI
-// !IROUTINE:  ESMC_AttributeCopy(=) - assignment operator for {\tt ESMC_Attribute}
+// !IROUTINE:  ESMCI_AttributeCopy(=) - assignment operator for {\tt ESMCI_Attribute}
 //
 // !INTERFACE:
-      ESMC_Attribute& ESMC_Attribute::operator=(
+      ESMCI_Attribute& ESMCI_Attribute::operator=(
 //
 // !RETURN VALUE:
-//    Updated desination {\tt ESMC_Attribute}
+//    Updated desination {\tt ESMCI_Attribute}
 //
 // !ARGUMENTS:
-        const ESMC_Attribute &source) {   // in - ESMC_Attribute
+        const ESMCI_Attribute &source) {   // in - ESMCI_Attribute
 //
 // !DESCRIPTION:
-//   Copy an {\tt ESMC_Attribute}, including contents, to destination (this).
+//   Copy an {\tt ESMCI_Attribute}, including contents, to destination (this).
 //
 //EOPI
   int i, localrc;
-  ESMC_Attribute *attr;
+  ESMCI_Attribute *attr;
 
   attrName = source.attrName;
   tk = source.tk;
@@ -3463,32 +3299,29 @@
 
   // if Attribute list, copy it.
   for (i=0; i<source.attrCount; i++) {
-    if(source.attrRoot == ESMF_FALSE) {
-      attr = new ESMC_Attribute(ESMF_FALSE);
+    if(source.attrList[i]->attrRoot == ESMF_FALSE) {
+      attr = new ESMCI_Attribute(ESMF_FALSE);
       *attr = *(source.attrList[i]);
-      localrc = ESMC_AttributeSet(attr);
+      localrc = ESMCI_AttributeSet(attr);
     }
     else {
-      if(this->attrAlloc < (this->attrCount + 1)) {
-        localrc = this->ESMC_AttributeAlloc(1);
-      }
-    
-      attrList[attrCount] = source.attrList[i];
-      (this->attrCount)++;
+      attr = source.attrList[i];
+      attrList.push_back(attr);
+      attrCount++;
     }
   }
 
   return (*this);
 
- } // end ESMC_Attribute::operator=
+ } // end ESMCI_Attribute::operator=
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "~ESMC_Attribute()"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "~ESMCI_Attribute()"
 //BOPI
-// !IROUTINE:  ~ESMC_Attribute - native C++ destructor for ESMC_Attribute class
+// !IROUTINE:  ~ESMCI_Attribute - native C++ destructor for ESMCI_Attribute class
 //
 // !INTERFACE:
-      ESMC_Attribute::~ESMC_Attribute(void) {
+      ESMCI_Attribute::~ESMCI_Attribute(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -3497,7 +3330,7 @@
 //    none
 //
 // !DESCRIPTION:
-//    Delete an {\tt ESMC_Attribute} hierarchy.
+//    Delete an {\tt ESMCI_Attribute} hierarchy.
 //
 //EOPI
 
@@ -3516,17 +3349,15 @@
     else delete attrList[i];
   }
 
-  if (attrList) delete [] attrList;
-
- } // end ~ESMC_Attribute
+ } // end ~ESMCI_Attribute
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Deserialize"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMC_Deserialize"
 //BOPI
 // !IROUTINE:  ESMC_Deserialize - Turn a byte stream into an object
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_Deserialize(
+      int ESMCI_Attribute::ESMC_Deserialize(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -3537,7 +3368,7 @@
                              //       to first free byte after current obj
 //
 // !DESCRIPTION:
-//    Turn a stream of bytes into an {\tt ESMC_Attribute} hierarchy.
+//    Turn a stream of bytes into an {\tt ESMCI_Attribute} hierarchy.
 //
 //EOPI
     int loffset, nbytes, chars;
@@ -3578,9 +3409,8 @@
     DESERIALIZE_VAR(buffer,loffset,attrPack,ESMC_Logical);
     
     DESERIALIZE_VAR(buffer,loffset,attrCount,int);
-    DESERIALIZE_VAR(buffer,loffset,attrAlloc,int);
-    
-    localrc = ESMC_AttributeAlloc(attrAlloc);
+        
+    attrList.reserve(attrCount);
 
     if (items == 1) {
       if (tk == ESMC_TYPEKIND_I4) {
@@ -3654,9 +3484,9 @@
     nbytes=loffset%8;
     if (nbytes!=0) loffset += 8-nbytes;  
 
-    // Deserialize the {\tt ESMC_Attribute} hierarchy
+    // Deserialize the {\tt ESMCI_Attribute} hierarchy
     for (int i=0; i<attrCount; i++) {
-      attrList[i] = new ESMC_Attribute(ESMF_FALSE);
+      attrList[i] = new ESMCI_Attribute(ESMF_FALSE);
       if (!(attrList[i]))
         return ESMF_FAILURE;
       attrList[i]->ESMC_Deserialize(buffer,&loffset);
@@ -3677,13 +3507,13 @@
 
  } // end ESMC_Deserialize
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_Serialize"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMC_Serialize"
 //BOPI
 // !IROUTINE:  ESMC_Serialize - Turn the object information into a byte stream
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_Serialize(
+      int ESMCI_Attribute::ESMC_Serialize(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -3695,7 +3525,7 @@
                              //  to first free byte after current obj info
 // 
 // !DESCRIPTION:
-//    Turn an {\tt ESMC_Attribute} into a stream of bytes.
+//    Turn an {\tt ESMCI_Attribute} into a stream of bytes.
 //
 //EOPI
     int loffset=0;
@@ -3714,13 +3544,13 @@
 
  } // end ESMC_Serialize
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_SerializeCC"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMC_SerializeCC"
 //BOPI
 // !IROUTINE:  ESMC_SerializeCC - Turn the object information into a byte stream
 //
 // !INTERFACE:
-      int ESMC_Attribute::ESMC_SerializeCC(
+      int ESMCI_Attribute::ESMC_SerializeCC(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -3732,7 +3562,7 @@
       bool cc) const {       // in - to tell whether in count or copy mode 
 //
 // !DESCRIPTION:
-//    Turn an {\tt ESMC_Attribute} into a stream of bytes.
+//    Turn an {\tt ESMCI_Attribute} into a stream of bytes.
 //
 //EOPI
     int nbytes;
@@ -3770,7 +3600,6 @@
       SERIALIZE_VAR(cc,buffer,offset,attrPack,ESMC_Logical);
            
       SERIALIZE_VAR(cc,buffer,offset,attrCount,int);
-      SERIALIZE_VAR(cc,buffer,offset,attrAlloc,int);
 
       if (items == 1) {
         if (tk == ESMC_TYPEKIND_I4) {
@@ -3846,13 +3675,13 @@
 
  } // end ESMC_SerializeCC
 //-----------------------------------------------------------------------------
-/*#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeGetObjectList"
+/*#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeGetObjectList"
 //BOPI
-// !IROUTINE:  ESMC_AttributeGetObjectList - get an {\tt ESMC_Attribute} from multiple ESMF objects 
+// !IROUTINE:  ESMCI_AttributeGetObjectList - get an {\tt ESMCI_Attribute} from multiple ESMF objects 
 //
 // !INTERFACE:
-      int ESMC_AttributeGetObjectList(
+      int ESMCI_AttributeGetObjectList(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -3860,10 +3689,10 @@
 // !ARGUMENTS:
       ESMC_Base *anytypelist,            // in - list of ESMC objects
       string name,                        // in - Attribute name
-      ESMC_Attribute *valuelist) {       // out - list of Attribute values
+      ESMCI_Attribute *valuelist) {       // out - list of Attribute values
 // 
 // !DESCRIPTION:
-//     Get the same {\tt ESMC_Attribute} name from multiple objects in one call.
+//     Get the same {\tt ESMCI_Attribute} name from multiple objects in one call.
 //
 //EOPI
     int localrc;
@@ -3873,25 +3702,25 @@
 
     return localrc;
 
-}  // end ESMC_AttributeGetObjectList
+}  // end ESMCI_AttributeGetObjectList
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_AttributeSetObjectList"
+#undef  ESMCI_METHOD
+#define ESMCI_METHOD "ESMCI_AttributeSetObjectList"
 //BOPI
-// !IROUTINE:  ESMC_AttributeSetObjectList - set an {\tt ESMC_Attribute} on multiple ESMF objects
+// !IROUTINE:  ESMCI_AttributeSetObjectList - set an {\tt ESMCI_Attribute} on multiple ESMF objects
 //
 // !INTERFACE:
-      int ESMC_AttributeSetObjectList(
+      int ESMCI_AttributeSetObjectList(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
       ESMC_Base *anytypelist,    // in - list of ESMC objects
-      ESMC_Attribute *value) {   // in - Attribute value
+      ESMCI_Attribute *value) {   // in - Attribute value
 // 
 // !DESCRIPTION:
-//     Set the same {\tt ESMC_Attribute} on multiple objects in one call.
+//     Set the same {\tt ESMCI_Attribute} on multiple objects in one call.
 //
 //EOPI
 
@@ -3902,6 +3731,8 @@
 
     return localrc;
 
-}  // end ESMC_AttributeSetObjectList
+}  // end ESMCI_AttributeSetObjectList
 //-----------------------------------------------------------------------------
 */
+
+} // namespace ESMCI

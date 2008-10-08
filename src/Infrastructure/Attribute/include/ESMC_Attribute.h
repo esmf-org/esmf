@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.h,v 1.19 2008/10/07 00:22:03 rokuingh Exp $
+// $Id: ESMC_Attribute.h,v 1.20 2008/10/08 23:35:37 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@ using namespace std;
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC_Attribute
+// !CLASS:  ESMCI_Attribute
 //
 // !DESCRIPTION:
 // The code in this file implements the Attribute defined type
@@ -37,11 +37,15 @@ using namespace std;
 //
 // !USES:
 
+
 // !PUBLIC TYPES:
-  class ESMC_Attribute;
   class ESMC_Base;
 
-class ESMC_Attribute 
+namespace ESMCI {
+
+  class ESMCI_Attribute;
+
+class ESMCI_Attribute 
 {
  private:
     string attrName; // inline to reduce memory thrashing
@@ -56,8 +60,7 @@ class ESMC_Attribute
     ESMC_Logical attrPack;                         // for att packages
 
     int attrCount;              // number of attributes in use in list
-    int attrAlloc;              // number of attributes currently allocated
-    ESMC_Attribute **attrList;  // attributes - array of pointers
+    vector<ESMCI_Attribute*>  attrList;  // attributes - array of pointers
 
     // Attribute values
     ESMC_I4               vi;       // integer, or
@@ -73,201 +76,191 @@ class ESMC_Attribute
     vector<ESMC_Logical>  vbp;       // pointer to boolean (logical) list, or
     string                vcp;       // pointer to a NULL term character string, or
     vector<string>        vcpp;
-    //void                  *voidp;       // cannot be dereferenced, but generic.
 
     // prevent accidental copying
-    //ESMC_Attribute& operator=(const ESMC_Attribute&);
-    ESMC_Attribute(const ESMC_Attribute&);
+    ESMCI_Attribute(const ESMCI_Attribute&);
 
 //-----------------------------------------------------------------------------
  public:
     // attpack methods
-    int ESMC_AttPackCreate(const string &name, const string &convention, 
+    int ESMCI_AttPackCreate(const string &name, const string &convention, 
       const string &purpose, const string &object);
-    ESMC_Attribute *ESMC_AttPackGet(const string &convention, 
+    ESMCI_Attribute *ESMCI_AttPackGet(const string &convention, 
       const string &purpose, const string &object) const;
-    ESMC_Attribute *ESMC_AttPackGetAttribute(const string &name, 
+    ESMCI_Attribute *ESMCI_AttPackGetAttribute(const string &name, 
       const string &convention, const string &purpose, 
       const string &object) const;
-    int ESMC_AttPackIsPresent(const string &name, const string &convention, 
+    int ESMCI_AttPackIsPresent(const string &name, const string &convention, 
       const string &purpose, const string &object, ESMC_Logical *present) const;
-    int ESMC_AttPackSet(const string &name, const ESMC_TypeKind &tk, 
+    int ESMCI_AttPackSet(const string &name, const ESMC_TypeKind &tk, 
       int count, void *value, const string &convention, 
       const string &purpose, const string &object);
     
-    // extend pointer list
-    int ESMC_AttributeAlloc(int adding);
-    
     // copy an attribute hierarchy
-    int ESMC_AttributeCopyAll(ESMC_Base *source);
+    int ESMCI_AttributeCopyAll(ESMC_Base *source);
     
     // count the number of objects in an attribute hierarchy
-    int ESMC_AttributeCountTree(const string &convention, const string &purpose,  
+    int ESMCI_AttributeCountTree(const string &convention, const string &purpose,  
       const string &object, int &objCount, int &objmaxattrCount) const;
-    int ESMC_AttributeCountTreeLens(const string &convention, const string &purpose,  
+    int ESMCI_AttributeCountTreeLens(const string &convention, const string &purpose,  
       const string &object, int *attrLens, vector<string> &attrNames) const;
     
     // destroy an attribute or attpack
-    int ESMC_AttributeRemove(const string &name, const string &convention, 
+    int ESMCI_AttributeRemove(const string &name, const string &convention, 
       const string &purpose, const string &object);
-    int ESMC_AttributeRemove(const string &name);
+    int ESMCI_AttributeRemove(const string &name);
     
     // attribute methods - get
-    int ESMC_AttributeGet(const string &name, ESMC_I4 *value) const;
-    int ESMC_AttributeGet(const string &name, int *count, vector<ESMC_I4> *value) const;
-    int ESMC_AttributeGet(const string &name, ESMC_I8 *value) const;
-    int ESMC_AttributeGet(const string &name, int *count, vector<ESMC_I8> *value) const;
-    int ESMC_AttributeGet(const string &name, ESMC_R4 *value) const;
-    int ESMC_AttributeGet(const string &name, int *count, vector<ESMC_R4> *value) const;
-    int ESMC_AttributeGet(const string &name, ESMC_R8 *value) const;
-    int ESMC_AttributeGet(const string &name, int *count, vector<ESMC_R8> *value) const;
-    int ESMC_AttributeGet(const string &name, ESMC_Logical *value) const;
-    int ESMC_AttributeGet(const string &name, int *count, vector<ESMC_Logical> *value) const;
-    int ESMC_AttributeGet(const string &name, string *value) const;
-    int ESMC_AttributeGet(const string &name, vector<string> *value) const;
-    int ESMC_AttributeGet(const string &name, ESMC_TypeKind *tk, int *count, 
-      void *value) const;
-    int ESMC_AttributeGet(int num, string &name, ESMC_TypeKind *tk, int *count,
-      void *value) const;
+    int ESMCI_AttributeGet(const string &name, ESMC_I4 *value) const;
+    int ESMCI_AttributeGet(const string &name, int *count, vector<ESMC_I4> *value) const;
+    int ESMCI_AttributeGet(const string &name, ESMC_I8 *value) const;
+    int ESMCI_AttributeGet(const string &name, int *count, vector<ESMC_I8> *value) const;
+    int ESMCI_AttributeGet(const string &name, ESMC_R4 *value) const;
+    int ESMCI_AttributeGet(const string &name, int *count, vector<ESMC_R4> *value) const;
+    int ESMCI_AttributeGet(const string &name, ESMC_R8 *value) const;
+    int ESMCI_AttributeGet(const string &name, int *count, vector<ESMC_R8> *value) const;
+    int ESMCI_AttributeGet(const string &name, ESMC_Logical *value) const;
+    int ESMCI_AttributeGet(const string &name, int *count, vector<ESMC_Logical> *value) const;
+    int ESMCI_AttributeGet(const string &name, string *value) const;
+    int ESMCI_AttributeGet(const string &name, vector<string> *value) const;
 
     // getting either by name or number directly return attribute ptr
-    ESMC_Attribute *ESMC_AttributeGet(const string &name) const; 
-    ESMC_Attribute *ESMC_AttributeGet(int num) const;
+    ESMCI_Attribute *ESMCI_AttributeGet(const string &name) const; 
+    ESMCI_Attribute *ESMCI_AttributeGet(int num) const;
 
-    // helper to get lengths of strings in a char* list
-    int ESMC_AttributeGet(const string &name, int *lens, int count) const;
-
-    // count of attributes on an object
-    int ESMC_AttributeGetCount(void) const;
-    
-    // number of items on an attribute
-    int ESMC_AttributeGetItemCount(const string &name) const;
+    // get attribute info
+    int ESMCI_AttributeGet(const string &name, int *lens, int count) const;
+    int ESMCI_AttributeGet(const string &name, ESMC_TypeKind *tk, int *itemCount) const;
+    int ESMCI_AttributeGet(int num, string *name, ESMC_TypeKind *tk, int *itemCount) const;
+    int ESMCI_AttributeGetCount(void) const;
+    int ESMCI_AttributeGetItemCount(const string &name) const;
 
     // query for existence of an attribute
-    int ESMC_AttributeIsPresent(const string &name, ESMC_Logical *present) const;
+    int ESMCI_AttributeIsPresent(const string &name, ESMC_Logical *present) const;
 
     // setting when you have an attribute already assembled
-    int ESMC_AttributeSet(ESMC_Attribute *attr);
+    int ESMCI_AttributeSet(ESMCI_Attribute *attr);
 
     // attribute methods - set
-    int ESMC_AttributeSet(const string &name, ESMC_I4 value);
-    int ESMC_AttributeSet(const string &name, int count, vector<ESMC_I4> *value);
-    int ESMC_AttributeSet(const string &name, ESMC_I8 value);
-    int ESMC_AttributeSet(const string &name, int count, vector<ESMC_I8> *value);
-    int ESMC_AttributeSet(const string &name, ESMC_R4 value);
-    int ESMC_AttributeSet(const string &name, int count, vector<ESMC_R4> *value);
-    int ESMC_AttributeSet(const string &name, ESMC_R8 value);
-    int ESMC_AttributeSet(const string &name, int count, vector<ESMC_R8> *value);
-    int ESMC_AttributeSet(const string &name, ESMC_Logical value);
-    int ESMC_AttributeSet(const string &name, int count, vector<ESMC_Logical> *value);
-    int ESMC_AttributeSet(const string &name, string *value);
-    int ESMC_AttributeSet(const string &name, int count, vector<string> *value);
-//    int ESMC_AttributeSet(const string &name, const ESMC_TypeKind &tk, 
+    int ESMCI_AttributeSet(const string &name, ESMC_I4 value);
+    int ESMCI_AttributeSet(const string &name, int count, vector<ESMC_I4> *value);
+    int ESMCI_AttributeSet(const string &name, ESMC_I8 value);
+    int ESMCI_AttributeSet(const string &name, int count, vector<ESMC_I8> *value);
+    int ESMCI_AttributeSet(const string &name, ESMC_R4 value);
+    int ESMCI_AttributeSet(const string &name, int count, vector<ESMC_R4> *value);
+    int ESMCI_AttributeSet(const string &name, ESMC_R8 value);
+    int ESMCI_AttributeSet(const string &name, int count, vector<ESMC_R8> *value);
+    int ESMCI_AttributeSet(const string &name, ESMC_Logical value);
+    int ESMCI_AttributeSet(const string &name, int count, vector<ESMC_Logical> *value);
+    int ESMCI_AttributeSet(const string &name, string *value);
+    int ESMCI_AttributeSet(const string &name, int count, vector<string> *value);
+//    int ESMCI_AttributeSet(const string &name, const ESMC_TypeKind &tk, 
 //      int count, void *value);
     
     // attribute set a link in hierarchy
-    int ESMC_AttributeSetLink(ESMC_Base *destination);
+    int ESMCI_AttributeSetLink(ESMC_Base *destination);
 
-    // attribute set a link in hierarchy
-    int ESMC_AttributeSetObjsInTree(const string &name, const string &object, 
+    // recursive call to set all attributes with attrObject = object
+    int ESMCI_AttributeSetObjsInTree(const string &name, const string &object, 
       const ESMC_TypeKind &tk, int count, void *value);
 
     // attribute write methods
-    int ESMC_AttributeWriteTab(const string &convention, const string &purpose, 
+    int ESMCI_AttributeWriteTab(const string &convention, const string &purpose, 
       const string &object, const string &varobj, const string &basename) const;
-    int ESMC_AttributeWriteTabrecurse(FILE *tab, const string &convention, 
+    int ESMCI_AttributeWriteTabrecurse(FILE *tab, const string &convention, 
       const string &purpose, const string &obj, int *attrLens, 
       const vector<string> &attrNames, const int &maxattrs, int &count) const;
-    int ESMC_AttributeWriteXML(const string &convention, const string &purpose, 
+    int ESMCI_AttributeWriteXML(const string &convention, const string &purpose, 
       const string &object, const string &varobj, const string &basename) const;
-    int ESMC_AttributeWriteXMLrecurse(FILE *xml, const string &convention, 
+    int ESMCI_AttributeWriteXMLrecurse(FILE *xml, const string &convention, 
       const string &purpose, const string &object, const string &varobj, 
       const int &stop, int &fldcount) const;
     int ESMC_Print(void) const;
 
     // Modifiers, Constructors, Destructors, Serializers, Operators
-    ESMC_Attribute(const string &name, const string &conv, const string &purp, 
+    ESMCI_Attribute(const string &name, const string &conv, const string &purp, 
       const string &obj);
-    ESMC_Attribute(void);
-    ESMC_Attribute(const ESMC_Logical &attributeRoot);
-    ESMC_Attribute(const string &name, const ESMC_TypeKind &typekind, 
+    ESMCI_Attribute(void);
+    ESMCI_Attribute(const ESMC_Logical &attributeRoot);
+    ESMCI_Attribute(const string &name, const ESMC_TypeKind &typekind, 
       int numitems, void *datap);
-    int ESMC_AttrModifyValue(const ESMC_TypeKind &typekind, int numitems, 
+    int ESMCI_AttrModifyValue(const ESMC_TypeKind &typekind, int numitems, 
       void *datap);
-    ESMC_Attribute& operator=(const ESMC_Attribute &source);
-    ~ESMC_Attribute(void);
+    ESMCI_Attribute& operator=(const ESMCI_Attribute &source);
+    ~ESMCI_Attribute(void);
     int ESMC_Deserialize(char *buffer, int *offset);
     int ESMC_Serialize(char *buffer, int *length, int *offset) const;
     int ESMC_SerializeCC(char *buffer, int *length, int &offset, bool cc) const;
 };
+} // namespace
 
 // fortran interface functions to attribute objects
 extern "C" {
-  void FTN(c_esmc_attpackcreate)(ESMC_Base **base, char *name, char *convention, char *purpose, 
+  void FTN(c_esmci_attpackcreate)(ESMC_Base **base, char *name, char *convention, char *purpose, 
                                  char *object, int *rc, int nlen, int clen, int plen, int olen);
-  void FTN(c_esmc_attpackdestroy)(ESMC_Base **base, char *name, char *convention, char *purpose,
+  void FTN(c_esmci_attpackdestroy)(ESMC_Base **base, char *name, char *convention, char *purpose,
                                     char *object, int *rc, int nlen, int clen, int plen, int olen);
-  void FTN(c_esmc_attpackgetchar)(ESMC_Base **base, char *name, char *value, 
+  void FTN(c_esmci_attpackgetchar)(ESMC_Base **base, char *name, char *value, 
                                   char *convention, char *purpose, char *object, int *rc, int nlen, 
                                   int vlen, int clen, int plen, int olen);
-  void FTN(c_esmc_attpackgetcharlist)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
+  void FTN(c_esmci_attpackgetcharlist)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
                                   int *lens, char *valueList, char *convention, char *purpose, 
                                   char *object, int *rc, int nlen, int vlen, int clen, int plen, 
                                   int olen);
-  void FTN(c_esmc_attpackgetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
+  void FTN(c_esmci_attpackgetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
                                   void *value, char *convention, char *purpose, char *object, 
                                   int *rc, int nlen, int clen, int plen, int olen);
-  void FTN(c_esmc_attpackispresent)(ESMC_Base **base, char *name, char *convention, char *purpose, 
+  void FTN(c_esmci_attpackispresent)(ESMC_Base **base, char *name, char *convention, char *purpose, 
                                   char *object, ESMC_Logical *present, int *rc, int nlen, 
                                   int clen, int plen, int olen);
-  void FTN(c_esmc_attpacksetchar)(ESMC_Base **base, char *name, char *value, ESMC_TypeKind *tk, 
+  void FTN(c_esmci_attpacksetchar)(ESMC_Base **base, char *name, char *value, ESMC_TypeKind *tk, 
                                   char *convention, char *purpose, char *object, int *rc, int nlen, 
                                   int vlen, int clen, int plen, int olen);
-  void FTN(c_esmc_attpacksetcharlist)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
+  void FTN(c_esmci_attpacksetcharlist)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
                                    char *valueList, int *lens, char *convention, char *purpose, 
                                    char *object, int *rc, int nlen, int vlen, int clen, int plen, 
                                    int olen);
-  void FTN(c_esmc_attpacksetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
+  void FTN(c_esmci_attpacksetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk, int *count,
                                   void *value, char *convention, char *purpose, char *object, 
                                   int *rc, int nlen, int clen, int plen, int olen);
-  void FTN(c_esmc_attributewritetab)(ESMC_Base **base, char *convention, char *purpose,
+  void FTN(c_esmci_attributewritetab)(ESMC_Base **base, char *convention, char *purpose,
                                   char *object, char *targetobj, int *rc, int clen, int plen, 
                                   int olen, int tlen);
-  void FTN(c_esmc_attributewritexml)(ESMC_Base **base, char *convention, char *purpose,
+  void FTN(c_esmci_attributewritexml)(ESMC_Base **base, char *convention, char *purpose,
                                   char *object, char *targetobj, int *rc, 
                                   int clen, int plen, int olen, int tlen);
-  void FTN(c_esmc_attributecopyall)(ESMC_Base **source, ESMC_Base **destination, int *rc);
-  void FTN(c_esmc_attributedestroy)(ESMC_Base **base, char *name, int *rc, int nlen);
-  void FTN(c_esmc_attributegetcount)(ESMC_Base **base, int *count, int *rc);
-  void FTN(c_esmc_attributegetinfoname)(ESMC_Base **base, char *name, 
+  void FTN(c_esmci_attributecopyall)(ESMC_Base **source, ESMC_Base **destination, int *rc);
+  void FTN(c_esmci_attributedestroy)(ESMC_Base **base, char *name, int *rc, int nlen);
+  void FTN(c_esmci_attributegetcount)(ESMC_Base **base, int *count, int *rc);
+  void FTN(c_esmci_attributegetinfoname)(ESMC_Base **base, char *name, 
                                         ESMC_TypeKind *tk,
                                         int *count, int *rc, int nlen);
-  void FTN(c_esmc_attributegetinfonum)(ESMC_Base **base, int *num, 
+  void FTN(c_esmci_attributegetinfonum)(ESMC_Base **base, int *num, 
                                       char *name,
                                       ESMC_TypeKind *tk, int *count, 
                                       int *rc, int nlen);
-  void FTN(c_esmc_attributegetchar)(ESMC_Base **base, char *name, char *value, 
+  void FTN(c_esmci_attributegetchar)(ESMC_Base **base, char *name, char *value, 
                                     int *rc, int nlen, int vlen);
-  void FTN(c_esmc_attributegetvalue)(ESMC_Base **base, char *name, 
+  void FTN(c_esmci_attributegetvalue)(ESMC_Base **base, char *name, 
                                     ESMC_TypeKind *tk,
                                     int *count, void *value, int *rc, int nlen);
-  void FTN(c_esmc_attributeispresent)(ESMC_Base **base, char *name, ESMC_Logical *present, 
+  void FTN(c_esmci_attributeispresent)(ESMC_Base **base, char *name, ESMC_Logical *present, 
                                     int *rc, int nlen);
-  void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, 
+  void FTN(c_esmci_attributesetchar)(ESMC_Base **base, char *name, char *value, 
                                     int *rc, int nlen, int vlen);
-  void FTN(c_esmc_attributesetcharlist)(ESMC_Base **base, char *name, ESMC_TypeKind *tk,
+  void FTN(c_esmci_attributesetcharlist)(ESMC_Base **base, char *name, ESMC_TypeKind *tk,
                                         int *count, char *valueList, int *lens, int *rc, int nlen);
-  void FTN(c_esmc_attributesetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk,
+  void FTN(c_esmci_attributesetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk,
                                     int *count, void *value, int *rc, int nlen);
-  void FTN(c_esmc_attributesetlink)(ESMC_Base **source, ESMC_Base **destination, int *rc);
-  void FTN(c_esmc_attributesetobjsintree)(ESMC_Base **base, char *object, char *name, 
+  void FTN(c_esmci_attributesetlink)(ESMC_Base **source, ESMC_Base **destination, int *rc);
+  void FTN(c_esmci_attributesetobjsintree)(ESMC_Base **base, char *object, char *name, 
                                           ESMC_TypeKind *tk, int *count, void *value, 
                                           int *rc, int olen, int nlen);
   }
 
 // class utility functions, not methods, since they operate on
 //  multiple objects
-//int ESMC_AttributeSetObjectList(ESMC_Base *anytypelist, ESMC_Attribute *valuelist);
-//int ESMC_AttributeGetObjectList(ESMC_Base *anytypelist, ESMC_Attribute *valuelist);
+//int ESMCI_AttributeSetObjectList(ESMC_Base *anytypelist, ESMCI_Attribute *valuelist);
+//int ESMCI_AttributeGetObjectList(ESMC_Base *anytypelist, ESMCI_Attribute *valuelist);
 
 #endif  // ESMC_ATTRIBUTE_H

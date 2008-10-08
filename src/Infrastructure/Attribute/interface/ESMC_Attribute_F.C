@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute_F.C,v 1.25 2008/10/07 00:22:03 rokuingh Exp $
+// $Id: ESMC_Attribute_F.C,v 1.26 2008/10/08 23:35:37 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -23,6 +23,7 @@
  // associated class definition file and others
 #include <string.h>
 #include <stdlib.h>
+#include "ESMC_Start.h"
 #include "ESMC_Attribute.h"
 #include "ESMC_Base.h"
 #include "ESMCI_LogErr.h"
@@ -30,14 +31,14 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.25 2008/10/07 00:22:03 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Attribute_F.C,v 1.26 2008/10/08 23:35:37 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
-// This section includes ESMC_Attribute routine interfaces
+// This section includes ESMCI_Attribute routine interfaces
 //
 //
 
@@ -50,13 +51,13 @@ extern "C" {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attpackcreate - Setup the attribute package
+// !IROUTINE:  c_ESMCI_attpackcreate - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackcreate)(
+      void FTN(c_esmci_attpackcreate)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpackcreate()"
+#define ESMC_METHOD "c_esmci_attpackcreate()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -160,7 +161,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttPackCreate(cname, cconv, cpurp, cobj);
+  status = (**base).root.ESMCI_AttPackCreate(cname, cconv, cpurp, cobj);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
@@ -169,17 +170,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attpackcreate
+}  // end c_ESMCI_attpackcreate
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attpackremove - Remove the attribute package
+// !IROUTINE:  c_ESMCI_attpackremove - Remove the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackremove)(
+      void FTN(c_esmci_attpackremove)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpackremove()"
+#define ESMC_METHOD "c_esmci_attpackremove()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -283,7 +284,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttributeRemove(cname, cconv, cpurp, cobj);
+  status = (**base).root.ESMCI_AttributeRemove(cname, cconv, cpurp, cobj);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed removing attribute package", &status);
@@ -292,17 +293,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attpackremove
+}  // end c_ESMCI_attpackremove
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attpackgetchar - get attribute from an attpack
+// !IROUTINE:  c_ESMCI_attpackgetchar - get attribute from an attpack
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackgetchar)(
+      void FTN(c_esmci_attpackgetchar)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpackgetchar()"
+#define ESMC_METHOD "c_esmci_attpackgetchar()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -415,8 +416,8 @@ extern "C" {
   llens = new int[1];
   
   //  use llens to get the lengths of all items on this attribute
-  status = (**base).root.ESMC_AttPackGet(cconv, cpurp, cobj)->\
-    ESMC_AttributeGet(cname, llens, 1);
+  status = (**base).root.ESMCI_AttPackGet(cconv, cpurp, cobj)->\
+    ESMCI_AttributeGet(cname, llens, 1);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.Write(
                          "failed getting item char* lengths", ESMC_LOG_INFO);
@@ -438,8 +439,8 @@ extern "C" {
   }
 
   string cvalue;
-  status = ((**base).root.ESMC_AttPackGet(cconv, cpurp, cobj))->\
-    ESMC_AttributeGet(cname, &cvalue);
+  status = ((**base).root.ESMCI_AttPackGet(cconv, cpurp, cobj))->\
+    ESMCI_AttributeGet(cname, &cvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting the attpack attribute value", &status);
@@ -459,17 +460,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attpackgetchar
+}  // end c_ESMCI_attpackgetchar
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attpackgetcharlist - get attribute from an attpack
+// !IROUTINE:  c_ESMCI_attpackgetcharlist - get attribute from an attpack
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackgetcharlist)(
+      void FTN(c_esmci_attpackgetcharlist)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpackgetcharlist()"
+#define ESMC_METHOD "c_esmci_attpackgetcharlist()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -502,7 +503,7 @@ extern "C" {
   ESMC_TypeKind attrTypeKind;
   int* llens;
   int lcount;
-  ESMC_Attribute *attr;
+  ESMCI::ESMCI_Attribute *attr;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -584,7 +585,7 @@ extern "C" {
   }
 
   // get the Attribute package
-  attr = (**base).root.ESMC_AttPackGet(cconv, cpurp, cobj);
+  attr = (**base).root.ESMCI_AttPackGet(cconv, cpurp, cobj);
   if (!attr) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting Attribute package", &status);
@@ -593,7 +594,7 @@ extern "C" {
   }
 
   // get type of the Attribute from the attpack, do not return error (default value possible)
-  status = attr->ESMC_AttributeGet(cname, &attrTypeKind, NULL, NULL);
+  status = attr->ESMCI_AttributeGet(cname, &attrTypeKind, NULL);
   if (status != ESMF_SUCCESS || attrTypeKind != *tk) {
     ESMC_LogDefault.Write(
                           "failed getting typekind - looking for default value",
@@ -603,7 +604,7 @@ extern "C" {
   }
 
   // we need to get the count first 
-  lcount = attr->ESMC_AttributeGetItemCount(cname);
+  lcount = attr->ESMCI_AttributeGetItemCount(cname);
   if (lcount != *count) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "itemcount-in does not match itemcount of attribute", &status);
@@ -615,7 +616,7 @@ extern "C" {
   llens = new int[*count];
   
   //  use llens to get the lengths of all items on this attribute
-  status = attr->ESMC_AttributeGet(cname, llens, *count);
+  status = attr->ESMCI_AttributeGet(cname, llens, *count);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting item char* lengths", &status);
@@ -642,7 +643,7 @@ extern "C" {
   vector<string> lcvalue;
 
   // next we get all the strings into the char**
-  status = attr->ESMC_AttributeGet(cname, &lcvalue);
+  status = attr->ESMCI_AttributeGet(cname, &lcvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
@@ -672,17 +673,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attpackgetcharlist
+}  // end c_ESMCI_attpackgetcharlist
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attpackgetvalue - get attribute from an attpack
+// !IROUTINE:  c_ESMCI_attpackgetvalue - get attribute from an attpack
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackgetvalue)(
+      void FTN(c_esmci_attpackgetvalue)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpackgetvalue()"
+#define ESMC_METHOD "c_esmci_attpackgetvalue()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -709,7 +710,7 @@ extern "C" {
 
   int status, attrCount;
   ESMC_TypeKind attrTk;
-  ESMC_Attribute *attpack;
+  ESMCI::ESMCI_Attribute *attpack;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -790,7 +791,7 @@ extern "C" {
     return;
   }
 
-  attpack = (**base).root.ESMC_AttPackGet(cconv, cpurp, cobj);
+  attpack = (**base).root.ESMCI_AttPackGet(cconv, cpurp, cobj);
   if (!attpack) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                     "failed getting attribute package", &status);
@@ -798,7 +799,7 @@ extern "C" {
     return;
   }
 
-  status = attpack->ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
+  status = attpack->ESMCI_AttributeGet(cname, &attrTk, &attrCount);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                     "failed getting attribute type and count", &status);
@@ -823,15 +824,15 @@ extern "C" {
   if (value) {
     if (*count == 1) {
       if (*tk == ESMC_TYPEKIND_I4)
-        status = attpack->ESMC_AttributeGet(cname, (static_cast<ESMC_I4*> (value)));  
+        status = attpack->ESMCI_AttributeGet(cname, (static_cast<ESMC_I4*> (value)));  
       else if (*tk == ESMC_TYPEKIND_I8)
-        status = attpack->ESMC_AttributeGet(cname, (static_cast<ESMC_I8*> (value)));
+        status = attpack->ESMCI_AttributeGet(cname, (static_cast<ESMC_I8*> (value)));
       else if (*tk == ESMC_TYPEKIND_R4)
-        status = attpack->ESMC_AttributeGet(cname, (static_cast<ESMC_R4*> (value)));
+        status = attpack->ESMCI_AttributeGet(cname, (static_cast<ESMC_R4*> (value)));
       else if (*tk == ESMC_TYPEKIND_R8)
-        status = attpack->ESMC_AttributeGet(cname, (static_cast<ESMC_R8*> (value)));
+        status = attpack->ESMCI_AttributeGet(cname, (static_cast<ESMC_R8*> (value)));
       else if (*tk == ESMC_TYPEKIND_LOGICAL)
-        status = attpack->ESMC_AttributeGet(cname, (static_cast<ESMC_Logical*> (value)));
+        status = attpack->ESMCI_AttributeGet(cname, (static_cast<ESMC_Logical*> (value)));
       else {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "typekind was inappropriate for this routine", &status);
@@ -845,35 +846,35 @@ extern "C" {
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
         temp.reserve(*count);
-        status = attpack->ESMC_AttributeGet(cname, count, &temp);
+        status = attpack->ESMCI_AttributeGet(cname, count, &temp);
         for (unsigned int i=0; i<*count; i++)
           (static_cast<ESMC_I4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
         temp.reserve(*count);
-        status = attpack->ESMC_AttributeGet(cname, count, &temp);
+        status = attpack->ESMCI_AttributeGet(cname, count, &temp);
         for (unsigned int i=0; i<*count; i++)
           (static_cast<ESMC_I8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
         temp.reserve(*count);
-        status = attpack->ESMC_AttributeGet(cname, count, &temp);
+        status = attpack->ESMCI_AttributeGet(cname, count, &temp);
         for (unsigned int i=0; i<*count; i++)
           (static_cast<ESMC_R4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
         temp.reserve(*count);
-        status = attpack->ESMC_AttributeGet(cname, count, &temp);
+        status = attpack->ESMCI_AttributeGet(cname, count, &temp);
         for (unsigned int i=0; i<*count; i++)
           (static_cast<ESMC_R8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
         temp.reserve(*count);
-        status = attpack->ESMC_AttributeGet(cname, count, &temp);
+        status = attpack->ESMCI_AttributeGet(cname, count, &temp);
         for (unsigned int i=0; i<*count; i++)
           (static_cast<ESMC_Logical*> (value))[i] = temp[i];
         temp.clear();
@@ -884,26 +885,20 @@ extern "C" {
     }
   }
 
-/*  status = attpack->ESMC_AttributeGet(cname, NULL, NULL, value);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting attribute value", &status);
-  }*/
-    
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attpackgetvalue
+}  // end c_ESMCI_attpackgetvalue
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attpackispresent - Query for an Attribute package Attribute
+// !IROUTINE:  c_ESMCI_attpackispresent - Query for an Attribute package Attribute
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackispresent)(
+      void FTN(c_esmci_attpackispresent)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpackispresent()"
+#define ESMC_METHOD "c_esmci_attpackispresent()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1008,7 +1003,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttPackIsPresent(cname, cconv, cpurp, cobj, present);
+  status = (**base).root.ESMCI_AttPackIsPresent(cname, cconv, cpurp, cobj, present);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed query for Attribute package Attribute", &status);
@@ -1017,17 +1012,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attpackispresent
+}  // end c_ESMCI_attpackispresent
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attpacksetchar - Set attributes in the attribute package
+// !IROUTINE:  c_ESMCI_attpacksetchar - Set attributes in the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpacksetchar)(
+      void FTN(c_esmci_attpacksetchar)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpacksetchar()"
+#define ESMC_METHOD "c_esmci_attpacksetchar()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1149,7 +1144,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttPackSet(cname, *tk, 1, &cvalue, cconv, cpurp, cobj);
+  status = (**base).root.ESMCI_AttPackSet(cname, *tk, 1, &cvalue, cconv, cpurp, cobj);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed setting attribute value", &status);
@@ -1158,17 +1153,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attpacksetchar
+}  // end c_ESMCI_attpacksetchar
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attpacksetcharlsit - Set attributes in the attribute package
+// !IROUTINE:  c_ESMCI_attpacksetcharlsit - Set attributes in the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpacksetcharlist)(
+      void FTN(c_esmci_attpacksetcharlist)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpacksetcharlist()"
+#define ESMC_METHOD "c_esmci_attpacksetcharlist()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1303,7 +1298,7 @@ extern "C" {
   }
   
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, &cvalue, cconv, cpurp, cobj);
+  status = (**base).root.ESMCI_AttPackSet(cname, *tk, *count, &cvalue, cconv, cpurp, cobj);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed setting attribute char* value", &status);
@@ -1312,17 +1307,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attpacksetcharlist
+}  // end c_ESMCI_attpacksetcharlist
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attpacksetvalue - Set attributes in the attribute package
+// !IROUTINE:  c_ESMCI_attpacksetvalue - Set attributes in the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpacksetvalue)(
+      void FTN(c_esmci_attpacksetvalue)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpacksetvalue()"
+#define ESMC_METHOD "c_esmci_attpacksetvalue()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1431,19 +1426,19 @@ extern "C" {
   if (value) {
     if (*count == 1) {
       if (*tk == ESMC_TYPEKIND_I4)
-        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count,
+        status = (**base).root.ESMCI_AttPackSet(cname, *tk, *count,
           (static_cast<ESMC_I4*> (value)), cconv, cpurp, cobj);  
       else if (*tk == ESMC_TYPEKIND_I8)
-        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count,
+        status = (**base).root.ESMCI_AttPackSet(cname, *tk, *count,
           (static_cast<ESMC_I8*> (value)), cconv, cpurp, cobj);
       else if (*tk == ESMC_TYPEKIND_R4)
-        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count,
+        status = (**base).root.ESMCI_AttPackSet(cname, *tk, *count,
           (static_cast<ESMC_R4*> (value)), cconv, cpurp, cobj);
       else if (*tk == ESMC_TYPEKIND_R8)
-        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count,
+        status = (**base).root.ESMCI_AttPackSet(cname, *tk, *count,
           (static_cast<ESMC_R8*> (value)), cconv, cpurp, cobj);
       else if (*tk == ESMC_TYPEKIND_LOGICAL)
-        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count,
+        status = (**base).root.ESMCI_AttPackSet(cname, *tk, *count,
           (static_cast<ESMC_Logical*> (value)), cconv, cpurp, cobj);
       else {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -1460,35 +1455,35 @@ extern "C" {
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I4*> (value))[i]);
-        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        status = (**base).root.ESMCI_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I8*> (value))[i]);
-        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        status = (**base).root.ESMCI_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R4*> (value))[i]);
-        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        status = (**base).root.ESMCI_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R8*> (value))[i]);
-        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        status = (**base).root.ESMCI_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_Logical*> (value))[i]);
-        status = (**base).root.ESMC_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
+        status = (**base).root.ESMCI_AttPackSet(cname, *tk, *count, &temp, cconv, cpurp, cobj);
         temp.clear();
       } else {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -1500,17 +1495,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attpacksetvalue
+}  // end c_ESMCI_attpacksetvalue
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attributewritetab - Setup the attribute package
+// !IROUTINE:  c_ESMCI_attributewritetab - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributewritetab)(
+      void FTN(c_esmci_attributewritetab)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributewritetab()"
+#define ESMC_METHOD "c_esmci_attributewritetab()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1614,7 +1609,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttributeWriteTab(cconv, cpurp, cobj, ctarobj,
+  status = (**base).root.ESMCI_AttributeWriteTab(cconv, cpurp, cobj, ctarobj,
     (*base)->ESMC_Base::ESMC_BaseGetName());
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -1624,17 +1619,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attributewritetab
+}  // end c_ESMCI_attributewritetab
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attributewritexml - Setup the attribute package
+// !IROUTINE:  c_ESMCI_attributewritexml - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributewritexml)(
+      void FTN(c_esmci_attributewritexml)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributewritexml()"
+#define ESMC_METHOD "c_esmci_attributewritexml()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1738,7 +1733,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttributeWriteXML(cconv, cpurp, cobj, ctarobj, 
+  status = (**base).root.ESMCI_AttributeWriteXML(cconv, cpurp, cobj, ctarobj, 
     (*base)->ESMC_Base::ESMC_BaseGetName());
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -1748,17 +1743,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attpackwritexml
+}  // end c_ESMCI_attpackwritexml
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeCopyAll - copy an attribute hierarchy between objects
+// !IROUTINE:  c_ESMCI_AttributeCopyAll - copy an attribute hierarchy between objects
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributecopyall)(
+      void FTN(c_esmci_attributecopyall)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributecopyall()"
+#define ESMC_METHOD "c_esmci_attributecopyall()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1774,7 +1769,6 @@ extern "C" {
 //EOP
 
   int status;
-  ESMC_Attribute *temp;
   
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -1793,7 +1787,7 @@ extern "C" {
     return;
   }
 
-  status = (**destination).root.ESMC_AttributeCopyAll(*source);
+  status = (**destination).root.ESMCI_AttributeCopyAll(*source);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed attributecopyall", &status);
@@ -1802,17 +1796,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_AttributeCopyAll
+}  // end c_ESMCI_AttributeCopyAll
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attributeremove - Remove the attribute
+// !IROUTINE:  c_ESMCI_attributeremove - Remove the attribute
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributeremove)(
+      void FTN(c_esmci_attributeremove)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributeremove()"
+#define ESMC_METHOD "c_esmci_attributeremove()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1859,7 +1853,7 @@ extern "C" {
   }
   
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttributeRemove(cname);
+  status = (**base).root.ESMCI_AttributeRemove(cname);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed removing the attribute", &status);
@@ -1870,17 +1864,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attributeremove
+}  // end c_ESMCI_attributeremove
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGetChar - get attribute from an ESMF type
+// !IROUTINE:  c_ESMCI_AttributeGetChar - get attribute from an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetchar)(
+      void FTN(c_esmci_attributegetchar)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributegetchar()"
+#define ESMC_METHOD "c_esmci_attributegetchar()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -1936,7 +1930,7 @@ extern "C" {
   llens = new int[1];
   
   //  use llens to get the lengths of all items on this attribute
-  status = (**base).root.ESMC_AttributeGet(cname, llens, 1);
+  status = (**base).root.ESMCI_AttributeGet(cname, llens, 1);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.Write(
                          "failed getting item char* lengths", ESMC_LOG_INFO);
@@ -1958,7 +1952,7 @@ extern "C" {
   }
 
   string cvalue;
-  status = (**base).root.ESMC_AttributeGet(cname, &cvalue);
+  status = (**base).root.ESMCI_AttributeGet(cname, &cvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
@@ -1978,17 +1972,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_AttributeGetChar
+}  // end c_ESMCI_AttributeGetChar
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGetCharList - get attribute list from an ESMF type
+// !IROUTINE:  c_ESMCI_AttributeGetCharList - get attribute list from an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetcharlist)(
+      void FTN(c_esmci_attributegetcharlist)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributegetcharlist()"
+#define ESMC_METHOD "c_esmci_attributegetcharlist()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -2044,7 +2038,7 @@ extern "C" {
   }
 
   // check the typekind, do not return error (default value possible)
-  status = (**base).root.ESMC_AttributeGet(cname, &attrTypeKind, NULL, NULL);
+  status = (**base).root.ESMCI_AttributeGet(cname, &attrTypeKind, NULL);
   if (status != ESMF_SUCCESS || attrTypeKind != *tk) {
     ESMC_LogDefault.Write(
                           "failed getting typekind - looking for default value",
@@ -2054,7 +2048,7 @@ extern "C" {
   }
 
   // we need to get the count first 
-  lcount = (**base).root.ESMC_AttributeGetItemCount(cname);
+  lcount = (**base).root.ESMCI_AttributeGetItemCount(cname);
   if (lcount != *count) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "itemcount-in does not match itemcount of attribute", &status);
@@ -2066,7 +2060,7 @@ extern "C" {
   llens = new int[*count];
   
   //  use llens to get the lengths of all items on this attribute
-  status = (**base).root.ESMC_AttributeGet(cname, llens, *count);
+  status = (**base).root.ESMCI_AttributeGet(cname, llens, *count);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting item char* lengths", &status);
@@ -2095,7 +2089,7 @@ extern "C" {
   cvalue.reserve(*count);
 
   // next we get all the strings into the char**
-  status = (**base).root.ESMC_AttributeGet(cname, &cvalue);
+  status = (**base).root.ESMCI_AttributeGet(cname, &cvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
@@ -2124,17 +2118,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_AttributeGetCharList
+}  // end c_ESMCI_AttributeGetCharList
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGetValue - get attribute from an ESMF type
+// !IROUTINE:  c_ESMCI_AttributeGetValue - get attribute from an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetvalue)(
+      void FTN(c_esmci_attributegetvalue)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributegetvalue()"
+#define ESMC_METHOD "c_esmci_attributegetvalue()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -2184,7 +2178,7 @@ extern "C" {
       return;
   }
 
-  status = (**base).root.ESMC_AttributeGet(cname, &attrTk, &attrCount, NULL);
+  status = (**base).root.ESMCI_AttributeGet(cname, &attrTk, &attrCount);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.Write("failed getting attribute type and count", ESMC_LOG_INFO);
     if (rc) *rc = status;
@@ -2208,15 +2202,15 @@ extern "C" {
   if (value) {
     if (*count == 1) {
       if (*tk == ESMC_TYPEKIND_I4)
-        status = (**base).root.ESMC_AttributeGet(cname, (static_cast<ESMC_I4*> (value)));  
+        status = (**base).root.ESMCI_AttributeGet(cname, (static_cast<ESMC_I4*> (value)));  
       else if (*tk == ESMC_TYPEKIND_I8)
-        status = (**base).root.ESMC_AttributeGet(cname, (static_cast<ESMC_I8*> (value)));
+        status = (**base).root.ESMCI_AttributeGet(cname, (static_cast<ESMC_I8*> (value)));
       else if (*tk == ESMC_TYPEKIND_R4)
-        status = (**base).root.ESMC_AttributeGet(cname, (static_cast<ESMC_R4*> (value)));
+        status = (**base).root.ESMCI_AttributeGet(cname, (static_cast<ESMC_R4*> (value)));
       else if (*tk == ESMC_TYPEKIND_R8)
-        status = (**base).root.ESMC_AttributeGet(cname, (static_cast<ESMC_R8*> (value)));
+        status = (**base).root.ESMCI_AttributeGet(cname, (static_cast<ESMC_R8*> (value)));
       else if (*tk == ESMC_TYPEKIND_LOGICAL)
-        status = (**base).root.ESMC_AttributeGet(cname, (static_cast<ESMC_Logical*> (value)));
+        status = (**base).root.ESMCI_AttributeGet(cname, (static_cast<ESMC_Logical*> (value)));
       else {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "typekind was inappropriate for this routine", &status);
@@ -2230,35 +2224,35 @@ extern "C" {
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
         temp.reserve(*count);
-        status = (**base).root.ESMC_AttributeGet(cname, count, &temp);
+        status = (**base).root.ESMCI_AttributeGet(cname, count, &temp);
         for (unsigned int i=0; i<*count; i++)
           (static_cast<ESMC_I4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
         temp.reserve(*count);
-        status = (**base).root.ESMC_AttributeGet(cname, count, &temp);
+        status = (**base).root.ESMCI_AttributeGet(cname, count, &temp);
         for (unsigned int i=0; i<*count; i++)
           (static_cast<ESMC_I8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
         temp.reserve(*count);
-        status = (**base).root.ESMC_AttributeGet(cname, count, &temp);
+        status = (**base).root.ESMCI_AttributeGet(cname, count, &temp);
         for (unsigned int i=0; i<*count; i++)
           (static_cast<ESMC_R4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
         temp.reserve(*count);
-        status = (**base).root.ESMC_AttributeGet(cname, count, &temp);
+        status = (**base).root.ESMCI_AttributeGet(cname, count, &temp);
         for (unsigned int i=0; i<*count; i++)
           (static_cast<ESMC_R8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
         temp.reserve(*count);
-        status = (**base).root.ESMC_AttributeGet(cname, count, &temp);
+        status = (**base).root.ESMCI_AttributeGet(cname, count, &temp);
         for (unsigned int i=0; i<*count; i++)
           (static_cast<ESMC_Logical*> (value))[i] = temp[i];
         temp.clear();
@@ -2269,26 +2263,20 @@ extern "C" {
     }
   }
 
-/*  status = (**base).root.ESMC_AttributeGet(cname, NULL, NULL, value);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting attribute value", &status);
-  }
-*/  
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_AttributeGetValue
+}  // end c_ESMCI_AttributeGetValue
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGetInfoName - get type and number of items in an attr
+// !IROUTINE:  c_ESMCI_AttributeGetInfoName - get type and number of items in an attr
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetinfoname)(
+      void FTN(c_esmci_attributegetinfoname)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributegetinfoname()"
+#define ESMC_METHOD "c_esmci_attributegetinfoname()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -2351,7 +2339,7 @@ extern "C" {
       return;
   }
 
-  status = (**base).root.ESMC_AttributeGet(cname, tk, count, NULL);
+  status = (**base).root.ESMCI_AttributeGet(cname, tk, count);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute info by name", &status);
@@ -2360,17 +2348,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_AttributeGetInfoName
+}  // end c_ESMCI_AttributeGetInfoName
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGetInfoNum - get type and number of items in an attr
+// !IROUTINE:  c_ESMCI_AttributeGetInfoNum - get type and number of items in an attr
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetinfonum)(
+      void FTN(c_esmci_attributegetinfonum)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributegetinfonum()"
+#define ESMC_METHOD "c_esmci_attributegetinfonum()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -2433,7 +2421,7 @@ extern "C" {
       return;
   }
 
-  status = (**base).root.ESMC_AttributeGet((*num)-1, cname, tk, count, NULL);
+  status = (**base).root.ESMCI_AttributeGet((*num)-1, &cname, tk, count);
   if (status != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute info by num", &status);
@@ -2450,18 +2438,18 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_AttributeGetInfoNum
+}  // end c_ESMCI_AttributeGetInfoNum
 
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGetCount - get number of attrs
+// !IROUTINE:  c_ESMCI_AttributeGetCount - get number of attrs
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetcount)(
+      void FTN(c_esmci_attributegetcount)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributegetcount()"
+#define ESMC_METHOD "c_esmci_attributegetcount()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -2496,7 +2484,7 @@ extern "C" {
     return;
   }
 
-  *count = (**base).root.ESMC_AttributeGetCount();
+  *count = (**base).root.ESMCI_AttributeGetCount();
   if (count <= 0) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute count", &status);
@@ -2507,17 +2495,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_AttributeGetCount
+}  // end c_ESMCI_AttributeGetCount
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_attributeispresent - Query for an Attribute
+// !IROUTINE:  c_ESMCI_attributeispresent - Query for an Attribute
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributeispresent)(
+      void FTN(c_esmci_attributeispresent)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributeispresent()"
+#define ESMC_METHOD "c_esmci_attributeispresent()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -2571,7 +2559,7 @@ extern "C" {
   }
   
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttributeIsPresent(cname, present);
+  status = (**base).root.ESMCI_AttributeIsPresent(cname, present);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed query for Attribute", &status);
@@ -2580,17 +2568,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_attributeispresent
+}  // end c_ESMCI_attributeispresent
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeSetChar - Set String Attribute on an ESMF type
+// !IROUTINE:  c_ESMCI_AttributeSetChar - Set String Attribute on an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetchar)(
+      void FTN(c_esmci_attributesetchar)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributesetchar()"
+#define ESMC_METHOD "c_esmci_attributesetchar()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -2656,7 +2644,7 @@ extern "C" {
   }
 
   // Set the attribute on the object
-  status = (**base).root.ESMC_AttributeSet(cname, &cvalue);
+  status = (**base).root.ESMCI_AttributeSet(cname, &cvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed setting attribute char value", &status);
@@ -2665,17 +2653,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_AttributeSetChar
+}  // end c_ESMCI_AttributeSetChar
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeSetCharList - Set String Attribute List on an ESMF type
+// !IROUTINE:  c_ESMCI_AttributeSetCharList - Set String Attribute List on an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetcharlist)(
+      void FTN(c_esmci_attributesetcharlist)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributesetcharlist()"
+#define ESMC_METHOD "c_esmci_attributesetcharlist()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -2753,7 +2741,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttributeSet(cname, cvalue.size(), &cvalue);
+  status = (**base).root.ESMCI_AttributeSet(cname, cvalue.size(), &cvalue);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed setting attribute char* value", &status);
@@ -2762,17 +2750,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_AttributeSetCharList
+}  // end c_ESMCI_AttributeSetCharList
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeSetValue - Set Attribute on an ESMF type
+// !IROUTINE:  c_ESMCI_AttributeSetValue - Set Attribute on an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetvalue)(
+      void FTN(c_esmci_attributesetvalue)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributesetvalue()"
+#define ESMC_METHOD "c_esmci_attributesetvalue()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -2825,15 +2813,15 @@ extern "C" {
   if (value) {
     if (*count == 1) {
       if (*tk == ESMC_TYPEKIND_I4)
-        status = (**base).root.ESMC_AttributeSet(cname, *(static_cast<ESMC_I4*> (value)));  
+        status = (**base).root.ESMCI_AttributeSet(cname, *(static_cast<ESMC_I4*> (value)));  
       else if (*tk == ESMC_TYPEKIND_I8)
-        status = (**base).root.ESMC_AttributeSet(cname, *(static_cast<ESMC_I8*> (value)));
+        status = (**base).root.ESMCI_AttributeSet(cname, *(static_cast<ESMC_I8*> (value)));
       else if (*tk == ESMC_TYPEKIND_R4)
-        status = (**base).root.ESMC_AttributeSet(cname, *(static_cast<ESMC_R4*> (value)));
+        status = (**base).root.ESMCI_AttributeSet(cname, *(static_cast<ESMC_R4*> (value)));
       else if (*tk == ESMC_TYPEKIND_R8)
-        status = (**base).root.ESMC_AttributeSet(cname, *(static_cast<ESMC_R8*> (value)));
+        status = (**base).root.ESMCI_AttributeSet(cname, *(static_cast<ESMC_R8*> (value)));
       else if (*tk == ESMC_TYPEKIND_LOGICAL)
-        status = (**base).root.ESMC_AttributeSet(cname, *(static_cast<ESMC_Logical*> (value)));
+        status = (**base).root.ESMCI_AttributeSet(cname, *(static_cast<ESMC_Logical*> (value)));
       else {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "typekind was inappropriate for this routine", &status);
@@ -2849,35 +2837,35 @@ extern "C" {
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I4*> (value))[i]);
-        status = (**base).root.ESMC_AttributeSet(cname, *count, &temp);
+        status = (**base).root.ESMCI_AttributeSet(cname, *count, &temp);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_I8*> (value))[i]);
-        status = (**base).root.ESMC_AttributeSet(cname, *count, &temp);
+        status = (**base).root.ESMCI_AttributeSet(cname, *count, &temp);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R4*> (value))[i]);
-        status = (**base).root.ESMC_AttributeSet(cname, *count, &temp);
+        status = (**base).root.ESMCI_AttributeSet(cname, *count, &temp);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_R8*> (value))[i]);
-        status = (**base).root.ESMC_AttributeSet(cname, *count, &temp);
+        status = (**base).root.ESMCI_AttributeSet(cname, *count, &temp);
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
         temp.reserve(*count);
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_Logical*> (value))[i]);
-        status = (**base).root.ESMC_AttributeSet(cname, *count, &temp);
+        status = (**base).root.ESMCI_AttributeSet(cname, *count, &temp);
         temp.clear();
       } else {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -2889,17 +2877,17 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_AttributeSetValue
+}  // end c_ESMCI_AttributeSetValue
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeSetLink - Set a link in an Attribute hierarchy
+// !IROUTINE:  c_ESMCI_AttributeSetLink - Set a link in an Attribute hierarchy
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetlink)(
+      void FTN(c_esmci_attributesetlink)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributesetlink()"
+#define ESMC_METHOD "c_esmci_attributesetlink()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -2934,7 +2922,7 @@ extern "C" {
   }
 
   // Set the attribute link on the object.
-  status = (**source).root.ESMC_AttributeSetLink(*destination);
+  status = (**source).root.ESMCI_AttributeSetLink(*destination);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed setting attribute link", &status);
@@ -2943,18 +2931,18 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_AttributeSetLink
+}  // end c_ESMCI_AttributeSetLink
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeSetObjsInTree - Set an Attribute on all objects
+// !IROUTINE:  c_ESMCI_AttributeSetObjsInTree - Set an Attribute on all objects
 //                                               in an Attribute hierarchy
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetobjsintree)(
+      void FTN(c_esmci_attributesetobjsintree)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributesetobjsintree()"
+#define ESMC_METHOD "c_esmci_attributesetobjsintree()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -3022,7 +3010,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.ESMC_AttributeSetObjsInTree(cname,cobject,*tk,*count,value);
+  status = (**base).root.ESMCI_AttributeSetObjsInTree(cname,cobject,*tk,*count,value);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed call AttributeSetObjsInTree", &status);
@@ -3031,7 +3019,7 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMC_AttributeSetObjsInTree
+}  // end c_ESMCI_AttributeSetObjsInTree
 
 #undef  ESMC_METHOD
 
