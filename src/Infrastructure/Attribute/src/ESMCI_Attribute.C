@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.1 2008/10/09 14:28:15 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.2 2008/10/09 18:57:36 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.1 2008/10/09 14:28:15 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.2 2008/10/09 18:57:36 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -51,8 +51,8 @@ namespace ESMCI {
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_Attribute"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_Attribute"
 //BOPI
 // !IROUTINE:  ESMCI_Attribute - empty private copy constructor
 //
@@ -79,8 +79,8 @@ namespace ESMCI {
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttPackCreate"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttPackCreate"
 //BOPI
 // !IROUTINE:  ESMCI_AttPackCreate() - create an attpack and add an {\tt ESMCI_Attribute}
 //
@@ -149,8 +149,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttPackCreate()
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttPackGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttPackGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttPackGet - get an attpack on an {\tt ESMCI_Attribute}
 //
@@ -185,8 +185,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttPackGet
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttPackGetAttribute"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttPackGetAttribute"
 //BOPI
 // !IROUTINE:  ESMCI_AttPackGetAttribute - get an {\tt ESMCI_Attribute} from an attpack
 //
@@ -229,8 +229,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttPackGetAttribute
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttPackIsPresent"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttPackIsPresent"
 //BOPI
 // !IROUTINE:  ESMCI_AttPackIsPresent - query an {\tt ESMCI_Attribute} for an attpack
 //
@@ -270,8 +270,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttPackIsPresent
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttPackSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttPackSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttPackSet() - set an {\tt ESMCI_Attribute} in an attpack
 //
@@ -338,8 +338,8 @@ namespace ESMCI {
   
 }  // end ESMCI_AttPackSet()
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeCopyAll"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeCopyAll"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeCopyAll - copy {\tt ESMCI_Attributes} between objects 
 //
@@ -369,8 +369,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeCopyAll
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeCountTree"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeCountTree"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeCountTree - count objects in {\tt ESMCI_Attribute} hierarchy 
 //
@@ -416,8 +416,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeCountTree
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeCountTreeLens"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeCountTreeLens"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeCountTreeLens - get lengths of {\tt ESMCI_Attribute} values
 //
@@ -505,8 +505,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeCountTreeLens
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeRemove"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeRemove"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeRemove - Remove the {\tt ESMCI_Attribute}
 //
@@ -572,8 +572,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeRemove
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeRemove"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeRemove"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeRemove - Remove the {\tt ESMCI_Attribute}
 //
@@ -619,8 +619,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeRemove
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(int) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -674,8 +674,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(int)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(int *) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -734,8 +734,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(int *)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(ESMC_I8) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -789,8 +789,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(ESMC_I8)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(ESMC_I8 *) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -849,8 +849,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(ESMC_I8 *)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(ESMC_R4) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -904,8 +904,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(ESMC_R4)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(ESMC_R4 *) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -964,8 +964,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(ESMC_R4 *)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(ESMC_R8) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -1019,8 +1019,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(ESMC_R8)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(ESMC_R8 *) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -1079,8 +1079,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(ESMC_R8 *)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(ESMC_Logical) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -1134,8 +1134,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(ESMC_Logical)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(ESMC_Logical *) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -1194,8 +1194,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(ESMC_Logical *)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(char) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -1249,8 +1249,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(char)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(charlist) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -1304,8 +1304,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(charlist)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(name) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -1350,8 +1350,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(name)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet(num) - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -1407,8 +1407,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet(num)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -1441,8 +1441,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet - get an {\tt ESMCI_Attribute} by number
 //
@@ -1475,8 +1475,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGet - get {\tt ESMCI_Attribute} from an ESMF type
 //
@@ -1537,8 +1537,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGet
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGetCount"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGetCount"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGetCount - get an the number of {\tt ESMCI_Attributes}
 // 
@@ -1560,8 +1560,8 @@ namespace ESMCI {
 
 } // end ESMCI_AttributeGetCount
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGetItemCount"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGetItemCount"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGetItemCount - get the item count of this {\tt ESMCI_Attribute}
 // 
@@ -1592,8 +1592,8 @@ namespace ESMCI {
 
 } // end ESMCI_AttributeGetItemCount
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeIsPresent"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeIsPresent"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeIsPresent - query for an {\tt ESMCI_Attribute}
 //
@@ -1623,8 +1623,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeIsPresent
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -1682,8 +1682,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet(int) - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -1718,8 +1718,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet(int)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet(int *) - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -1755,8 +1755,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet(int *)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet(ESMC_I8) - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -1791,8 +1791,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet(ESMC_I8)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet(ESMC_I8 *) - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -1828,8 +1828,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet(ESMC_I8 *)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet(ESMC_R4) - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -1864,8 +1864,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet(ESMC_R4)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet(ESMC_R4 *) - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -1901,8 +1901,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet(ESMC_R4 *)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet(ESMC_R8) - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -1937,8 +1937,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet(ESMC_R8)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet(ESMC_R8 *) - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -1974,8 +1974,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet(ESMC_R8 *)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet(ESMC_Logical) - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -2010,8 +2010,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet(ESMC_Logical)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet(ESMC_Logical *) - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -2047,8 +2047,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet(ESMC_Logical *)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet(char) - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -2083,8 +2083,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet(char)
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet(charlist) - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -2120,8 +2120,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet(charlist)
 //-----------------------------------------------------------------------------
-/*#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSet"
+/*#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet - set {\tt ESMCI_Attribute} on an ESMF type
 //
@@ -2158,8 +2158,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSet*/
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSetLink"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSetLink"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSetLink - set a link in an {\tt ESMCI_Attribute} hierarchy
 //
@@ -2191,8 +2191,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeSetLink
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSetObjsInTree"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSetObjsInTree"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSetObjsInTree - set all objects in {\tt ESMCI_Attribute} hierarchy 
 //
@@ -2246,8 +2246,8 @@ namespace ESMCI {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeWriteTab"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeWriteTab"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeWriteTab - write Attributes in Tab delimited format
 //
@@ -2361,8 +2361,8 @@ namespace ESMCI {
 
  } // end ESMCI_AttributeWriteTab
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeWriteTabrecurse"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeWriteTabrecurse"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeWriteTabrecurse - write Attributes in Tab delimited format
 //                                             recursive function
@@ -2444,8 +2444,8 @@ namespace ESMCI {
 
  } // end ESMCI_AttributeWriteTabrecurse
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeWriteXML"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeWriteXML"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeWriteXML - Write contents of an {\tt ESMCI_Attribute} package
 //
@@ -2609,8 +2609,8 @@ namespace ESMCI {
 
  } // end ESMCI_AttributeWriteXML
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeWriteXMLrecurse"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeWriteXMLrecurse"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeWriteXMLrecurse - {\tt ESMCI_Attribute} hierarchy recurse write
 //
@@ -2766,8 +2766,8 @@ namespace ESMCI {
 
  } // end ESMCI_AttributeWriteXMLrecurse
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMC_Print"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Print"
 //BOPI
 // !IROUTINE:  ESMCI_Attribute::ESMC_Print - Print the {\tt ESMCI_Attribute} contents
 //
@@ -2890,8 +2890,8 @@ namespace ESMCI {
 //
 //-----------------------------------------------------------------------------
 //----------------------------------------------------------------------------- 
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_Attribute()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_Attribute()"
 //BOPI
 // !IROUTINE:  ESMCI_Attribute - native C++ constructor for ESMCI_Attribute class
 //
@@ -2939,8 +2939,8 @@ namespace ESMCI {
 
 } // end ESMCI_Attribute
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_Attribute()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_Attribute()"
 //BOPI
 // !IROUTINE:  ESMCI_Attribute - native C++ constructor for ESMCI_Attribute class
 //
@@ -2985,8 +2985,8 @@ namespace ESMCI {
   
  } // end ESMCI_Attribute
 //----------------------------------------------------------------------------- 
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_Attribute()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_Attribute()"
 //BOPI
 // !IROUTINE:  ESMCI_Attribute - native C++ constructor for ESMCI_Attribute class
 //
@@ -3031,8 +3031,8 @@ namespace ESMCI {
 
 } // end ESMCI_Attribute
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_Attribute()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_Attribute()"
 //BOPI
 // !IROUTINE:  ESMCI_Attribute - native C++ constructor for ESMCI_Attribute class
 //
@@ -3133,8 +3133,8 @@ namespace ESMCI {
 
  } // end ESMCI_Attribute
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttrModifyValue()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttrModifyValue()"
 //BOPI
 // !IROUTINE:  ESMCI_AttrModifyValue - native C++ modifyer for ESMCI_Attribute class
 //
@@ -3223,8 +3223,8 @@ namespace ESMCI {
 
  } // end ESMCI_AttrModifyValue
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeCopy(=)"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeCopy(=)"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeCopy(=) - assignment operator for {\tt ESMCI_Attribute}
 //
@@ -3315,8 +3315,8 @@ namespace ESMCI {
 
  } // end ESMCI_Attribute::operator=
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "~ESMCI_Attribute()"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMCI_Attribute()"
 //BOPI
 // !IROUTINE:  ~ESMCI_Attribute - native C++ destructor for ESMCI_Attribute class
 //
@@ -3351,8 +3351,8 @@ namespace ESMCI {
 
  } // end ~ESMCI_Attribute
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMC_Deserialize"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Deserialize"
 //BOPI
 // !IROUTINE:  ESMC_Deserialize - Turn a byte stream into an object
 //
@@ -3507,8 +3507,8 @@ namespace ESMCI {
 
  } // end ESMC_Deserialize
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMC_Serialize"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Serialize"
 //BOPI
 // !IROUTINE:  ESMC_Serialize - Turn the object information into a byte stream
 //
@@ -3544,8 +3544,8 @@ namespace ESMCI {
 
  } // end ESMC_Serialize
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMC_SerializeCC"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SerializeCC"
 //BOPI
 // !IROUTINE:  ESMC_SerializeCC - Turn the object information into a byte stream
 //
@@ -3675,8 +3675,8 @@ namespace ESMCI {
 
  } // end ESMC_SerializeCC
 //-----------------------------------------------------------------------------
-/*#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeGetObjectList"
+/*#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeGetObjectList"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeGetObjectList - get an {\tt ESMCI_Attribute} from multiple ESMF objects 
 //
@@ -3704,8 +3704,8 @@ namespace ESMCI {
 
 }  // end ESMCI_AttributeGetObjectList
 //-----------------------------------------------------------------------------
-#undef  ESMCI_METHOD
-#define ESMCI_METHOD "ESMCI_AttributeSetObjectList"
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeSetObjectList"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSetObjectList - set an {\tt ESMCI_Attribute} on multiple ESMF objects
 //
