@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.14 2005/05/17 18:22:07 theurich Exp $
+! $Id: user_coupler.F90,v 1.15 2008/10/09 19:25:45 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -78,12 +78,12 @@
         integer :: status
 
         print *, "User Coupler Init starting"
-        call ESMF_StateGetField(importState, "humidity", humidity1, rc=status)
+        call ESMF_StateGet(importState, "humidity", humidity1, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
         call ESMF_FieldPrint(humidity1, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
 
-        call ESMF_StateGetField(exportState, "humidity", humidity2, rc=status)
+        call ESMF_StateGet(exportState, "humidity", humidity2, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
         call ESMF_FieldPrint(humidity2, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
@@ -93,7 +93,7 @@
         if (status .ne. ESMF_SUCCESS) goto 10 
 
         ! Precompute communication patterns
-        call ESMF_FieldRedistStore(humidity1, humidity2, vm, &
+        call ESMF_FieldRedistStore(humidity1, humidity2, &
                                    routehandle=routehandle, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
 
@@ -126,13 +126,13 @@
         print *, "User Coupler Run starting"
 
         ! Get input data
-        call ESMF_StateGetField(importState, "humidity", humidity1, rc=status)
+        call ESMF_StateGet(importState, "humidity", humidity1, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
         call ESMF_FieldPrint(humidity1, "", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
 
         ! Get location of output data
-        call ESMF_StateGetField(exportState, "humidity", humidity2, rc=status)
+        call ESMF_StateGet(exportState, "humidity", humidity2, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
         call ESMF_FieldPrint(humidity2, "", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 

@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.27 2007/06/23 07:01:05 cdeluca Exp $
+! $Id: user_model2.F90,v 1.28 2008/10/09 19:25:45 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -96,13 +96,12 @@
         type(ESMF_Field) :: humidity
         type(ESMF_VM) :: vm
         type(ESMF_DELayout) :: layout
-        type(ESMF_IGrid) :: igrid1
+        type(ESMF_Grid) :: grid1
         type(ESMF_ArraySpec) :: arrayspec
         integer, dimension(:,:), pointer :: idata
         real(ESMF_KIND_R8) :: g_min(2), g_max(2)
         integer :: counts(2)
-        integer :: npets, de_id
-        type(ESMF_IGridHorzStagger) :: horz_stagger
+        integer :: npets, de_id(1)
         integer :: status
 
         print *, "User Comp Init starting"
@@ -114,12 +113,9 @@
         if (status .ne. ESMF_SUCCESS) goto 10 
         layout = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        
-        ! and get our local de number
-        call ESMF_DELayoutGetDeprecated(layout, localDE=de_id, rc=status)
+        call ESMF_DELayoutGet(layout, localDEList=de_id, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-      
-
+        
         ! Add a "humidity" field to the import state.
         counts(1) = 40
         counts(2) = 20
@@ -127,15 +123,9 @@
         g_max(1) = 20.0
         g_min(2) = 0.0
         g_max(2) = 5.0
-        horz_stagger = ESMF_IGRID_HORZ_STAGGER_A
 
-        igrid1 = ESMF_IGridCreateHorzXYUni(counts=counts, &
-                                minGlobalCoordPerDim=g_min, &
-                                maxGlobalCoordPerDim=g_max, &
-                                horzStagger=horz_stagger, &
-                                name="source igrid", rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_IGridDistribute(igrid1, delayout=layout, rc=status)
+        grid1 = ESMF_GridCreateShapeTile(maxIndex=counts, &
+                                name="source grid", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a 2D integer array
@@ -143,18 +133,18 @@
                                typekind=ESMF_TYPEKIND_I4)
 
         ! Create the field and have it create the array internally
-        humidity = ESMF_FieldCreate(igrid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+        humidity = ESMF_FieldCreate(grid1, arrayspec, &
                                          name="humidity", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Get the allocated array back and get an F90 array pointer
-        call ESMF_FieldGetDataPointer(humidity, idata, rc=status)
+        call ESMF_FieldGet(humidity, localDe=0, farray=idata, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set initial data values over exclusive domain to the de identifier
-        idata = de_id
+        idata = de_id(1)
 
-        call ESMF_StateAddField(importState, humidity, rc=status)
+        call ESMF_StateAdd(importState, humidity, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_StatePrint(importState, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
@@ -186,7 +176,7 @@
         ! Get information from the component.
         call ESMF_StatePrint(importState, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_StateGetField(importState, "humidity", humidity, rc=status)
+        call ESMF_StateGet(importState, "humidity", humidity, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_FieldPrint(humidity, "", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
