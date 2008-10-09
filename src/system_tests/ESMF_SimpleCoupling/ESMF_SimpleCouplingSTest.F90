@@ -1,10 +1,10 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.30 2008/10/09 19:25:45 feiliu Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.31 2008/10/09 20:23:05 feiliu Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
 
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_SYSTEM_removeTEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP
@@ -265,14 +265,9 @@
       if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
-            ! Separate message to console, for quick confirmation of success/failure
-            write(finalMsg, *) "SUCCESS: ",trim(testname)," finished correctly."
-            write(0, *) ""
-            write(0, *) trim(testname)
-            write(0, *) trim(finalMsg)
-            write(0, *) ""
+          write(finalMsg, *) "SUCCESS: Component Coupling complete."
         else
-            write(finalMsg, *) "System Test did not succeed.  Error code ", rc
+          write(finalMsg, *) "System Test did not succeed.  Error code ", rc
         endif
         write(0, *) ""
         write(0, *) trim(testname)
