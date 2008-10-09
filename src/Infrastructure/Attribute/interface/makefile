@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.6 2008/09/26 05:18:03 cdeluca Exp $ 
+# $Id: makefile,v 1.7 2008/10/09 14:28:15 rokuingh Exp $ 
 
 ALL: build_here 
 
-SOURCEC	  = ESMC_Attribute_F.C
+SOURCEC	  = ESMCI_Attribute_F.C
 SOURCEF	  = 
 SOURCEH	  = 
 

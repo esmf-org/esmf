@@ -1,11 +1,11 @@
-# $Id: makefile,v 1.4 2008/09/26 05:53:53 cdeluca Exp $ 
+# $Id: makefile,v 1.5 2008/10/09 14:28:15 rokuingh Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
 
-SOURCEC	  = ESMC_Attribute.C
+SOURCEC	  = ESMCI_Attribute.C
 SOURCEF	  = 
-STOREH    = ESMC_Attribute.h 
+STOREH    = ESMCI_Attribute.h 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

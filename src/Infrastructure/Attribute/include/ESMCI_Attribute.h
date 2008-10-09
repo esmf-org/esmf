@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.h,v 1.20 2008/10/08 23:35:37 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.1 2008/10/09 14:28:15 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -13,8 +13,8 @@
 //-----------------------------------------------------------------------------
 //
 
-#ifndef ESMC_ATTRIBUTE_H
-#define ESMC_ATTRIBUTE_H
+#ifndef ESMCI_ATTRIBUTE_H
+#define ESMCI_ATTRIBUTE_H
 
 //-----------------------------------------------------------------------------
 
@@ -263,4 +263,4 @@ extern "C" {
 //int ESMCI_AttributeSetObjectList(ESMC_Base *anytypelist, ESMCI_Attribute *valuelist);
 //int ESMCI_AttributeGetObjectList(ESMC_Base *anytypelist, ESMCI_Attribute *valuelist);
 
-#endif  // ESMC_ATTRIBUTE_H
+#endif  // ESMCI_ATTRIBUTE_H

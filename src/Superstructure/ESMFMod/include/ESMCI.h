@@ -1,4 +1,4 @@
-// $Id: ESMCI.h,v 1.25 2008/10/08 23:41:14 rokuingh Exp $
+// $Id: ESMCI.h,v 1.26 2008/10/09 14:23:21 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 #include "ESMCI_Clock.h"
 
 // attribute
-#include "ESMC_Attribute.h"
+#include "ESMCI_Attribute.h"
 
 // local array, datamap
 #include "ESMCI_ArraySpec.h"

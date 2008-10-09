@@ -1,4 +1,4 @@
-// $Id: ESMC_Attribute.C,v 1.34 2008/10/08 23:35:37 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.1 2008/10/09 14:28:15 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-#define ESMF_FILENAME "ESMC_Attribute.C"
+#define ESMF_FILENAME "ESMCI_Attribute.C"
 
 // ESMCI_Attribute method implementation (body) file
 
@@ -21,20 +21,20 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ {\tt ESMCI_Attribute} methods declared
-// in the companion file ESMC_Attribute.h
+// in the companion file ESMCI_Attribute.h
 //
 //-----------------------------------------------------------------------------
 //
  // associated class definition file and others
 #include "ESMC_Start.h"
-#include "ESMC_Attribute.h"
+#include "ESMCI_Attribute.h"
 #include "ESMC_Base.h"
 #include "ESMCI_LogErr.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Attribute.C,v 1.34 2008/10/08 23:35:37 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.1 2008/10/09 14:28:15 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
