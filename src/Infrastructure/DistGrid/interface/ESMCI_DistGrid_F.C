@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.11 2008/08/21 23:12:03 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.12 2008/10/10 17:37:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -490,22 +490,28 @@ extern "C" {
           "- seqIndexList array must be of rank 1", rc);
         return;
       }
-      if ((*seqIndexList)->extent[0] <
-        ((*ptr)->getElementCountPDe())[(*ptr)->getDELayout()->
-        getLocalDeList()[localDe]]){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of seqIndexList array size insufficiently", rc);
-        return;
-      }
       // check for arbitrary sequence indices
       int *const*arbSeqIndexCountPCollPLocalDe =
         (*ptr)->getElementCountPCollPLocalDe();
       if (arbSeqIndexListPLocalDe){
         // arbitrary seq indices -> fill in arbSeqIndexListPLocalDe
+        if ((*seqIndexList)->extent[0] <
+          arbSeqIndexCountPCollPLocalDe[collIndex][localDe]){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+            "- 1st dimension of seqIndexList array insufficiently sized", rc);
+          return;
+        }
         memcpy((*seqIndexList)->array, arbSeqIndexListPLocalDe,
           sizeof(int) * arbSeqIndexCountPCollPLocalDe[collIndex][localDe]);
       }else{
-        // default seq indices
+        // default seq indices -> generate on the fly and fill in
+        if ((*seqIndexList)->extent[0] <
+          ((*ptr)->getElementCountPDe())[(*ptr)->getDELayout()->
+          getLocalDeList()[localDe]]){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+            "- 1st dimension of seqIndexList array insufficiently sized", rc);
+          return;
+        }
         int dimCount = (*ptr)->getDimCount();
         // TODO: must consider collocation subspace here!!!
         int *ii = new int[dimCount];     // index tuple basis 0
