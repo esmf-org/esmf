@@ -12,7 +12,7 @@
 #ifndef ESMC_Iterator_h
 #define ESMC_Iterator_h
 
-namespace ESMC {
+namespace ESMCI {
 
 // Adapts a map to a linear iterator, so that
 // *it yields *it->second.  This both dereferences the right

@@ -17,7 +17,7 @@
 
 #include <vector>
 
-namespace ESMC {
+namespace ESMCI {
 
 /**
  * @defgroup polynomials

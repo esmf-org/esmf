@@ -10,7 +10,7 @@
 //==============================================================================
 #include <Mesh/include/ESMC_IOField.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 // ********** Old style nodal fields ************
 template<class DataAssoc,typename DTYPE>

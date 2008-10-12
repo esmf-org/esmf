@@ -14,7 +14,7 @@
 
 #include <algorithm>
 
-namespace ESMC {
+namespace ESMCI {
 
 FieldReg::FieldReg() :
 is_committed(false),

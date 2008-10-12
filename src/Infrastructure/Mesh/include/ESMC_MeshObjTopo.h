@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-namespace ESMC {
+namespace ESMCI {
 
 // Get the topo instance
 class MeshObjTopo;

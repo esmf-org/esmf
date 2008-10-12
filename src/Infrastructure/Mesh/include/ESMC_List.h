@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <typeinfo>
 
-namespace ESMC {
+namespace ESMCI {
 
 // A 'self aware' list class.  Objects themselves carry connectivity,
 // which allows them to 'self delete'.

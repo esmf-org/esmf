@@ -15,7 +15,7 @@
 #include <iomanip>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 // Just in case someday a byte is not 8??
 #define CSIZE 8

@@ -29,7 +29,7 @@
  * the mesh database.
  * @ingroup mesh
  */
-namespace ESMC {
+namespace ESMCI {
 
 class Kernel;
 

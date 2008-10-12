@@ -37,7 +37,7 @@
 #include <cmath>
 
 
-using namespace ESMC;
+using namespace ESMCI;
 
 
 void fill_src(const Mesh &mesh, MEField<> *s, double t) {

@@ -21,7 +21,7 @@
 #include <functional>
 #include <numeric>
 
-namespace ESMC {
+namespace ESMCI {
 
 UInt mev_round_to_dword(UInt size) {
   UInt dwsz = sizeof(void*)*4;

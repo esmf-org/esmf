@@ -17,7 +17,7 @@
 
 #include <ostream>
 
-namespace ESMC {
+namespace ESMCI {
 
 template <typename> class SparsePack;
 template <typename> class SparseUnpack;

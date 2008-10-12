@@ -21,7 +21,7 @@
 #include <vector>
 // Quadrature algorithms
 
-namespace ESMC { 
+namespace ESMCI { 
 
 class MeshObjTopo;
 

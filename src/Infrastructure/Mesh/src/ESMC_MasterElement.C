@@ -20,7 +20,7 @@
 #include <map>
 #include <iterator>
 
-namespace ESMC {
+namespace ESMCI {
 
 typedef std::map<UInt, std::vector<int> > DofIdMapType;
 

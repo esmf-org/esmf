@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.25 2008/09/22 19:07:40 dneckels Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.26 2008/10/12 02:39:29 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-------------------------------------------------------------------------
 
 
-using namespace ESMC;
+using namespace ESMCI;
 
 enum {ESMF_REGRID_SCHEME_FULL3D = 0, ESMF_REGRID_SCHEME_NATIVE = 1};
 enum {ESMF_REGRID_METHOD_BILINEAR = 0, ESMF_REGRID_METHOD_PATCH = 1};

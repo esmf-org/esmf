@@ -18,7 +18,7 @@
 
 #include <Mesh/include/ESMC_Exception.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 
 template<class SFUNC_TYPE,typename MPTRAITS, int SPATIAL_DIM, int PARAMETRIC_DIM>

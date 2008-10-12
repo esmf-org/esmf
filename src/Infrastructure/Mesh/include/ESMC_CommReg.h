@@ -18,7 +18,7 @@
 #include <iostream>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 /**
  * A class to represent a connection between two meshes (possible the same mesh).

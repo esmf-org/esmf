@@ -37,7 +37,7 @@ extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,doub
 
           
 
-namespace ESMC {
+namespace ESMCI {
 
 
 template<typename NFIELD, typename Real>

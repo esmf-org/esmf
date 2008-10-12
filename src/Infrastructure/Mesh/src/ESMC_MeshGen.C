@@ -18,7 +18,7 @@
 #include <Mesh/include/ESMC_IOField.h>
 #include <Mesh/include/ESMC_MeshSkin.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 static void gen2d(Mesh &mesh, const MeshObjTopo *topo) {
   Trace __trace("gen2d(Mesh &mesh, const MeshObjTopo *topo");

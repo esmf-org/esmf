@@ -35,7 +35,7 @@
  * @ingroup mesh
  */
 
-namespace ESMC {
+namespace ESMCI {
 
 class MEFieldBase;
 
@@ -586,6 +586,6 @@ std::vector<_field*> fields;
 };
 
 
-} // namespace ESMC
+} // namespace ESMCI
 
 #endif

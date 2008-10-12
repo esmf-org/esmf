@@ -21,7 +21,7 @@
 
 
 
-namespace ESMC {
+namespace ESMCI {
 
 class Mesh;
 

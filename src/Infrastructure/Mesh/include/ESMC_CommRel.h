@@ -19,7 +19,7 @@
 #include <Mesh/include/ESMC_MeshllField.h>
 #include <Mesh/include/ESMC_SparseMsg.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 /**
  * A class to describe the communication path

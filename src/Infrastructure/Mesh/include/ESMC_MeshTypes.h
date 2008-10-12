@@ -14,7 +14,7 @@
 
 #include <Mesh/include/sacado/Sacado.hpp>
 
-namespace ESMC {
+namespace ESMCI {
 
 typedef unsigned int UInt;
 typedef unsigned char UChar;

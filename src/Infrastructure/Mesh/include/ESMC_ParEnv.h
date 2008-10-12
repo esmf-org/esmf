@@ -21,7 +21,7 @@
 
 #include <mpi.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 
 // Implement a null ostream for ESMF users when we don't want mesh

@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 
-namespace ESMC {
+namespace ESMCI {
 
 
 static UInt share_parametric_dim(UInt pdim) {

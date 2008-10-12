@@ -16,7 +16,7 @@
 #include <Mesh/include/ESMC_Mesh.h>
 #include <string>
 
-namespace ESMC {
+namespace ESMCI {
 
 class Mesh;
 class MeshDB;

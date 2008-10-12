@@ -17,7 +17,7 @@
 #include <Mesh/include/ESMC_DDir.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 /*
  * Generic object migration.  Transposes the parallel distribution of an object.

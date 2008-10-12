@@ -34,7 +34,7 @@
 
 // A basic container for all mesh objects (used to connect different types)
 //  Some container types
-namespace ESMC {
+namespace ESMCI {
 
 class MeshObj;
 typedef List<MeshObj> MeshObjList;

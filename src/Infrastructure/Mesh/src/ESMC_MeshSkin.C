@@ -20,7 +20,7 @@
 #include <iostream>
 #include <fstream>
 
-namespace ESMC {
+namespace ESMCI {
 
 const UInt exposed_sideset_key = 10001;
 

@@ -18,7 +18,7 @@
 
 #include <vector>
 
-namespace ESMC {
+namespace ESMCI {
   
 /**
  * @defgroup shapelag

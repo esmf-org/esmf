@@ -15,7 +15,7 @@
 #include <Mesh/include/ESMC_SFuncAdaptor.h>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 /*
 MasterElement<METraits<> > *MEFamily::getME(const std::string &toponame) const {

@@ -19,7 +19,7 @@
 // A class to ease the definition of poritions of a mesh.  These may be used
 // to specify iteration subsets of the mesh, or field subsets, etc....
 
-namespace ESMC {
+namespace ESMCI {
 
 class Mesh;
 class Context;

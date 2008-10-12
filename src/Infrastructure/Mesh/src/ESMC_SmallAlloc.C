@@ -12,7 +12,7 @@
 
 #include <Mesh/include/ESMC_Exception.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 
 
@@ -193,7 +193,7 @@ SmallObject<ObjType>::~SmallObject() {
 #include <Mesh/include/ESMC_MeshObj.h>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 
 template class ObjPool<MeshObj>;

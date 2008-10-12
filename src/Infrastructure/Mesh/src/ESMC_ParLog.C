@@ -14,7 +14,7 @@
 #include <cstdlib>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 ParLog *ParLog::classInstance = NULL;
 

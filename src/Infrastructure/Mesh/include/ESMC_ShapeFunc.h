@@ -30,7 +30,7 @@
  * @ingroup mesystem
  */
 
-namespace ESMC {
+namespace ESMCI {
 
 
 typedef enum {DOF_NODE=0, DOF_EDGE=1, DOF_FACE=2, DOF_ELEM=3} DofLoc;

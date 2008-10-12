@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <Mesh/include/ESMC_ParEnv.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 MeshObj::MeshObj(UChar _type, int _id, long _data_index, int _owner) :
 TreeNode<MeshObj_id_type>(_id),

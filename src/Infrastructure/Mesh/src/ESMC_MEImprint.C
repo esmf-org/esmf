@@ -15,7 +15,7 @@
 
 #include <map>
 
-namespace ESMC {
+namespace ESMCI {
 
 void MEImprintValSets(const std::string &imname, MeshObj &obj, const MasterElementBase &me,
                std::vector<UInt> &nvalSet, std::vector<UInt> &valSetObj) {

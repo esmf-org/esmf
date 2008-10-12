@@ -19,7 +19,7 @@
 #include <map>
 #include <string>
 
-namespace ESMC {
+namespace ESMCI {
 
 
 /**

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// $Id: gridtomesh.C,v 1.7 2008/08/31 03:09:08 theurich Exp $
+// $Id: gridtomesh.C,v 1.8 2008/10/12 02:39:29 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -28,14 +28,14 @@
 
 
 extern "C" void FTN(gridtomesh_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *staggerLoc, int*rc) {
-  ESMC::Trace __trace("FTN(gridtomesh_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *staggerLoc, int*rc)");
+  ESMCI::Trace __trace("FTN(gridtomesh_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *staggerLoc, int*rc)");
   ESMCI::VM *vm = *vmpp;
   ESMCI::Grid &grid = **gridpp;
 
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
 
-  ESMC::Mesh mesh;
+  ESMCI::Mesh mesh;
 
   try {
 

@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-namespace ESMC {
+namespace ESMCI {
 
 class MasterElementBase;
 

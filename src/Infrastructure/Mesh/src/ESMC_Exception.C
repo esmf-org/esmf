@@ -11,7 +11,7 @@
 #include <Mesh/include/ESMC_Exception.h>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 
 static std::vector<std::string> &get_traceBuf() {

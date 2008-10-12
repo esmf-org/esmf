@@ -26,7 +26,7 @@
  * 
  */
 
-namespace ESMC {
+namespace ESMCI {
 /**
  * Basic parallel mesh operations.  Aggregates the serial meshes,
  * the list of fields, and the parallel communiation relations.

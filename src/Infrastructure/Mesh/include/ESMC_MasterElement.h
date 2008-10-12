@@ -39,7 +39,7 @@
  * 
  */
 
-namespace ESMC {
+namespace ESMCI {
 
 // A type to determine the various types in a master element
 template<typename FIELD_TYPE=double, typename MDATA_TYPE=double>

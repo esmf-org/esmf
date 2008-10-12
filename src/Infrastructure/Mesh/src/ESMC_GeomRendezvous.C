@@ -20,7 +20,7 @@
 
 #include <limits>
 
-namespace ESMC {
+namespace ESMCI {
 
 /*-----------------------------------------------------------------------------------*/
 // Zoltan callbacks
@@ -638,4 +638,4 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
 
 }
 
-} // namespace ESMC
+} // namespace ESMCI

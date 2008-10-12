@@ -16,7 +16,7 @@
 
 #include <Mesh/include/ESMC_Mesh.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 enum { ESMC_FILE_EXODUS = 0, ESMC_FILE_VTK=1 };
 

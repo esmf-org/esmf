@@ -45,7 +45,7 @@
  */
 
 
-using namespace ESMC;
+using namespace ESMCI;
 
 int main(int argc, char *argv[]) {
 

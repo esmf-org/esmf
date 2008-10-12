@@ -23,7 +23,7 @@
 #include <iomanip>
 #include <cstdlib>
 
-namespace ESMC {
+namespace ESMCI {
 
 MasterElementBase &GetME(const MEFieldBase &field, const MeshObj&obj) {
  MasterElementBase *me = obj.GetKernel()->GetME(field.GetOrdinal());

@@ -18,7 +18,7 @@
 // Both Mesh and context include this file to determine the
 // size of the context object.
 
-namespace ESMC {
+namespace ESMCI {
 
 const UInt NUM_CONTEXT_CHARS = 4;
 

@@ -11,7 +11,7 @@
 #include <Mesh/include/ESMC_Migrator.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 
-namespace ESMC { 
+namespace ESMCI { 
 
 Migrator::Migrator(UInt ndest_gids, const UInt dest_gids[],
     const UInt *dest_lids,

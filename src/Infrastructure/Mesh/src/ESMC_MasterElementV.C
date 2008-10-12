@@ -13,7 +13,7 @@
 #include <iostream>
 #include <iterator>
 
-namespace ESMC {
+namespace ESMCI {
 
 template <class METRAITS>
 std::map<std::string, MasterElementV<METRAITS>*>  MasterElementV<METRAITS>::meVMap;

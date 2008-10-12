@@ -27,7 +27,7 @@ typedef long long MPI_OffType;
 #define M_PI 3.14159265358979323846
 #endif
 
-namespace ESMC {
+namespace ESMCI {
 
 void GatherForWrite(IWeights &w) {
   // Strategy: find min/max row.  Assume indices are somewhat 

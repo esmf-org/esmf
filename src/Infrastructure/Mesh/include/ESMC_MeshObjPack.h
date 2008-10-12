@@ -21,7 +21,7 @@
 
 #include <cstddef>
 
-namespace ESMC {
+namespace ESMCI {
 
 // Pack a meshobject, or determine its packing size
 UInt MeshObjPackSize(MeshObj &obj);

@@ -14,7 +14,7 @@
 
 #include <string>
 
-namespace ESMC {
+namespace ESMCI {
 
 class Mesh;
 void LoadExMesh(Mesh &mesh, const std::string &filename, int nstep = 1);

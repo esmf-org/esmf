@@ -16,7 +16,7 @@
 #include <Mesh/include/ESMC_MeshObjTopo.h>
 #include <Mesh/include/ESMC_Exception.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 class RefineTopo {
 public:

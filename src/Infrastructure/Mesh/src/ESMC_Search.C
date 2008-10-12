@@ -30,7 +30,7 @@
 
 #include <Mesh/include/ESMC_BBox.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 // Store the index and a found flag for the
 // dimension.

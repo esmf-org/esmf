@@ -20,7 +20,7 @@
 #include <iterator>
 #include <functional>
 
-namespace ESMC {
+namespace ESMCI {
 
 typedef bool _Tree_color_type;
 const _Tree_color_type _Tree_red = false;

@@ -12,7 +12,7 @@
 #include <Mesh/include/ESMC_Attr.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 
 

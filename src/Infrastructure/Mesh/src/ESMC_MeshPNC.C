@@ -34,7 +34,7 @@ typedef long long MPI_OffType;
 #include <set>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 
 void LoadNCDualMeshPar(Mesh &mesh, const std::string fname) {

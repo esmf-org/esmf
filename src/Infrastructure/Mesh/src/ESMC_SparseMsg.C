@@ -16,7 +16,7 @@
 #include <iostream>
 #include <algorithm>
 
-namespace ESMC {
+namespace ESMCI {
 
 static UInt round_to_dword(UInt size) {
   UInt dwsz = sizeof(void*)*4;

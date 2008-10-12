@@ -21,7 +21,7 @@
 // This file abstracts things that depend on a mesh object and a meshh object topology.
 // This is necessary since the MeshObj Cannot directly access its topo.
 
-namespace ESMC {
+namespace ESMCI {
 
 namespace MeshObjConn {
 

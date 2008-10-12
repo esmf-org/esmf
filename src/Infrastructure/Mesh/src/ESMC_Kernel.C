@@ -16,7 +16,7 @@
 #include <iterator>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 const MeshObjTopo *GetMeshObjTopo(const MeshObj &obj) {
   return obj.GetKernel()->GetTopo();

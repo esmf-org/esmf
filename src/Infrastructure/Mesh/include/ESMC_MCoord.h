@@ -14,7 +14,7 @@
 
 #include <Mesh/include/ESMC_MeshTypes.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 // Define local manifold coordinates from a normal vector.  Hardcoded for 2d in 3d.
 // Make an abstract class and inherit to generalize.

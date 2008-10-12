@@ -17,7 +17,7 @@
 #include <Mesh/include/ESMC_MeshField.h>
 
 // Partitions a mesh and saves the output as a nemesis file
-namespace ESMC {
+namespace ESMCI {
 
 // Partition using metis and save the results.
 // ep = element partition field, np = nodal partition field

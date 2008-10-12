@@ -25,7 +25,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace ESMC {
+namespace ESMCI {
 
 void WriteMesh(const Mesh &mesh, const std::string &fbase, int nstep, double tstep, int file_type) 
 {

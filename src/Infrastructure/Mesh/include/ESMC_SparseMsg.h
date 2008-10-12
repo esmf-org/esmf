@@ -19,7 +19,7 @@
 #include <vector>
 #include <map>
 
-namespace ESMC {
+namespace ESMCI {
 
 // Handles mpi communication in a sparse pattern.
 // Call sequence:

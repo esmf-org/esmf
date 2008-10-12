@@ -33,7 +33,7 @@ typedef int idxtype;
 void METIS_PartGraphKway(int *, idxtype *, idxtype *, idxtype *, idxtype *, int *, int *, int *, int *, int *, idxtype *);
 }
 
-namespace ESMC {
+namespace ESMCI {
 
 void GetMetisPartition(const Mesh &mesh, UInt npart, const MEField<> &ep);
 

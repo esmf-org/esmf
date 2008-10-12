@@ -19,7 +19,7 @@
 #include <exception>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 /**
  * An exception helper class.  Allows one to throw formatted

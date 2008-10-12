@@ -15,7 +15,7 @@
 #include <Mesh/include/ESMC_MeshTypes.h>
 #include <Mesh/include/ESMC_MeshDB.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 struct NodalField { static const MeshObj::MeshObjType dtype = MeshObj::NODE;};
 struct ElementField { static const MeshObj::MeshObjType dtype = MeshObj::ELEMENT;};

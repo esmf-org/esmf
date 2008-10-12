@@ -12,7 +12,7 @@
 #ifndef ESMC_Rebalance_h
 #define ESMC_Rebalance_h
 
-namespace ESMC {
+namespace ESMCI {
 
 class Mesh;
 class CommReg;

@@ -30,7 +30,7 @@
  * @ingroup field
  */
 
-namespace ESMC {
+namespace ESMCI {
 
 class _field;
 

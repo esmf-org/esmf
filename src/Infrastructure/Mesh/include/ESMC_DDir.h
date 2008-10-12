@@ -24,7 +24,7 @@
 // Utilizes a hash function to create a rendezvous directory structure.
 // It is assumed that an id is an unsigned int for this design.
 
-namespace ESMC {
+namespace ESMCI {
 
 
 // Base class for a hash function.  operator() should

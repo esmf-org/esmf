@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.h,v 1.3 2008/04/05 03:38:27 cdeluca Exp $
+// $Id: ESMC_GridToMesh.h,v 1.4 2008/10/12 02:39:29 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -21,17 +21,15 @@
 
 #include <vector>
 
-namespace ESMC {
-class Mesh;
-}
 
 namespace ESMCI {
 
+class Mesh;
 class Grid;
 class Array;
 
 // Create a mesh from the given grid.
-void GridToMesh(const ESMCI::Grid &grid, int staggerLoc, ESMC::Mesh &mesh, const std::vector<ESMCI::Array*> &arrays);
+void GridToMesh(const ESMCI::Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, const std::vector<ESMCI::Array*> &arrays);
 
 } // namespace
 

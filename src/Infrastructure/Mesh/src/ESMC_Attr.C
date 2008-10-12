@@ -11,7 +11,7 @@
 #include <Mesh/include/ESMC_Attr.h>
 #include <Mesh/include/ESMC_MeshObj.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 std::ostream &operator<<(std::ostream &os, const Attr &attr) {
   os << MeshObjTypeString(attr.type);

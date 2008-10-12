@@ -18,7 +18,7 @@
 
 #include <Zoltan/zoltan.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 static bool form_rebalance_comm(Mesh &mesh, CommReg &migration);
 

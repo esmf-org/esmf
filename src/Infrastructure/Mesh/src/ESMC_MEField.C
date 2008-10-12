@@ -16,7 +16,7 @@
 #include <Mesh/include/ESMC_ParEnv.h>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 // ********** New style fields ************
 // MEFieldBase (no templates)

@@ -17,7 +17,7 @@
 #include <bitset>
  
 
-namespace ESMC {
+namespace ESMCI {
 
 
 void GlobalIds(const std::vector<long> &current_ids,

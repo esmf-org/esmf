@@ -22,7 +22,7 @@
 #include <Mesh/include/ESMC_MeshTypes.h>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 namespace MEV {
 typedef enum {update_sf=0x01,    // shape functions

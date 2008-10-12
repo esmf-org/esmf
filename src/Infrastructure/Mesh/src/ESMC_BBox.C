@@ -22,7 +22,7 @@
 
 #include <mpi.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 BBox::BBox(UInt _dim, const double _min[], const double _max[]) :
  isempty(false),

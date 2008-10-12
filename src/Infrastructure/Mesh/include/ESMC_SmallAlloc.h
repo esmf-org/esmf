@@ -21,7 +21,7 @@
 // A class to efficiently store a large collection of uniformly sized
 // small objects.
 
-namespace ESMC {
+namespace ESMCI {
 
 class Chunk : public ListNode<Chunk> {
 public:

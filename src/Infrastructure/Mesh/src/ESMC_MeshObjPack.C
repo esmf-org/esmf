@@ -13,7 +13,7 @@
 #include <Mesh/include/ESMC_MeshObjConn.h>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 UInt MeshObjPackSize(MeshObj &obj) {
   
@@ -233,4 +233,4 @@ Par::Out() << "obj " << MeshObjTypeString(obj->get_type()) << " " << obj->get_id
 
 }
 
-} // namespace ESMC
+} // namespace ESMCI

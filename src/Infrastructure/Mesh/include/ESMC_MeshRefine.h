@@ -16,7 +16,7 @@
 #include <Mesh/include/ESMC_MEField.h>
 #include <Mesh/include/ESMC_RefineTopo.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 // Refine the object on the local processor (may require synchronization
 // of face/edge refinement across processor boundaries).

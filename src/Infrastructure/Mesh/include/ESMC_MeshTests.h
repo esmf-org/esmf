@@ -12,7 +12,7 @@
 #ifndef ESMC_MeshTests_h
 #define ESMC_MeshTests_h
 
-namespace ESMC {
+namespace ESMCI {
 
 } // namespace
 

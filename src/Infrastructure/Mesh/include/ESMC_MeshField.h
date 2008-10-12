@@ -21,7 +21,7 @@
 #include <string>
 #include <map>
 
-namespace ESMC {
+namespace ESMCI {
 
 /**
  * A field that allows one to provide an object that acts on

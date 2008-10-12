@@ -14,7 +14,7 @@
 
 #include <Mesh/include/ESMC_MeshTypes.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 class Mesh; class Context; class IWeights;
 

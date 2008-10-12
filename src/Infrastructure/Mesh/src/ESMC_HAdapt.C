@@ -22,7 +22,7 @@
 
 #include <map>
 
-namespace ESMC {
+namespace ESMCI {
 
 HAdapt::HAdapt(Mesh &_mesh) :
 mesh(_mesh)

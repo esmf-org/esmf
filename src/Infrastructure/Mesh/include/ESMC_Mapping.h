@@ -19,7 +19,7 @@
 
 #include <string>
 
-namespace ESMC {
+namespace ESMCI {
 
 /**
  * Mapping subsystem.  Provides the mapping from a parametric element

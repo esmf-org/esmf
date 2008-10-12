@@ -13,7 +13,7 @@
 
 #include <map>
 
-namespace ESMC {
+namespace ESMCI {
 
 
 

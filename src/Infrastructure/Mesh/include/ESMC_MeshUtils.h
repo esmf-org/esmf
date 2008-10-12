@@ -16,7 +16,7 @@
 #include <Mesh/include/ESMC_MCoord.h>
 #include <Mesh/include/ESMC_Mesh.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 MasterElementBase &GetME(const MEFieldBase &field, const MeshObj &obj);
 MasterElementBase &GetME(const MEFieldBase &field, const Kernel &ker);

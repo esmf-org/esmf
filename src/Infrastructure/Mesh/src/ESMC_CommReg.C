@@ -16,7 +16,7 @@
 #include <Mesh/include/ESMC_Mesh.h>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 CommReg::CommReg() :
 node_rel(),

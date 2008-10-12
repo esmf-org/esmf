@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <mpi.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 template<typename HASH>
 DDir<HASH>::DDir() :
@@ -548,4 +548,4 @@ void DDir<HASH>::clear() {
 
 template class DDir<DDir_lin_hash>;
 
-} // namespace ESMC
+} // namespace ESMCI

@@ -14,7 +14,7 @@
 
 #include <ostream>
 
-namespace ESMC {
+namespace ESMCI {
 
 class Mesh;
 class MeshObjTopo;

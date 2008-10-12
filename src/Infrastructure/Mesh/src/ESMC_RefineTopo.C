@@ -12,7 +12,7 @@
 
 #include <map>
 
-namespace ESMC {
+namespace ESMCI {
 
 static UInt bar_homorefine_cnodes[] = {
 0, 2, // child 0

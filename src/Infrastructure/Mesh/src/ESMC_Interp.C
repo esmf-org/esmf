@@ -27,7 +27,7 @@
 
 //#define CHECK_SENS
 
-namespace ESMC {
+namespace ESMCI {
 
 
 /*-----------------------------------------------------------------*/

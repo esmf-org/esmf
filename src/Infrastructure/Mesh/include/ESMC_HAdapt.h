@@ -21,7 +21,7 @@
 #include <Mesh/include/ESMC_WMat.h>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 class Mesh;
 class _field;

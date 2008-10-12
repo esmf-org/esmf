@@ -19,7 +19,7 @@
 
 #include <set>
 
-namespace ESMC {
+namespace ESMCI {
 
 namespace MeshObjConn {
 

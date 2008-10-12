@@ -12,7 +12,7 @@
 #include <Mesh/include/ESMC_SFuncAdaptor.h>
 #include <Mesh/include/sacado/Sacado.hpp>
 
-namespace ESMC {
+namespace ESMCI {
 
 template<typename SFUNC>
 SFuncAdaptor<SFUNC> *SFuncAdaptor<SFUNC>::classInstance = 0;

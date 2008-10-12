@@ -18,7 +18,7 @@
 extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
 #endif
 
-namespace ESMC {
+namespace ESMCI {
 
 void generate_ILkernel(std::vector<double> &coef) {
   UInt k = coef.size() - 3;

@@ -23,7 +23,7 @@
 
 // Class to support basic bounding box type operations such
 // as creation, intersection, etc...
-namespace ESMC {
+namespace ESMCI {
 
 class _field;
 

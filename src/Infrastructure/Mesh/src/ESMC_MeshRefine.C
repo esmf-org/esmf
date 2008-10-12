@@ -22,7 +22,7 @@
 
 //#define REF_DEBUG
 
-namespace ESMC {
+namespace ESMCI {
 
 // Same as below, but instead of having the side object, we only
 // have the nodes that represent it.

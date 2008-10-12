@@ -20,7 +20,7 @@
 #include <map>
 #include <cstdio>
 
-namespace ESMC {
+namespace ESMCI {
 
 enum {VTK_TRIANGLE=5, VTK_QUAD=9, VTK_TETRA=10, VTK_HEXAHEDRON=12};
 

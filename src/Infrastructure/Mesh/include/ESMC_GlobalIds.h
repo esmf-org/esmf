@@ -14,7 +14,7 @@
 
 #include <vector>
 
-namespace ESMC {
+namespace ESMCI {
 
 // Retrieve a list of new global ids, given the set of current ids
 void GlobalIds(const std::vector<long> &current_ids,

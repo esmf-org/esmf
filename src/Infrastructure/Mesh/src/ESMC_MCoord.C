@@ -11,7 +11,7 @@
 #include <Mesh/include/ESMC_MCoord.h>
 #include <cmath>
 
-namespace ESMC {
+namespace ESMCI {
 
 MCoord::MCoord(const double c[], const double n[]) {
   for (UInt i = 0; i < SpaceDim(); i++) {

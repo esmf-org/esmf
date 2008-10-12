@@ -16,7 +16,7 @@
 
 #include <ostream>
 
-namespace ESMC {
+namespace ESMCI {
 
 class CommRel;
 class MeshObj;

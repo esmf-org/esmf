@@ -14,7 +14,7 @@
 
 #include "ESMC_Mesh.h"
 
-namespace ESMC {
+namespace ESMCI {
 
 // Add sidesets for exterior blocks and for interior block boundaries
 // (Locally) mark nodes as boundary nodes.  If add_fadces=true, create the faces.

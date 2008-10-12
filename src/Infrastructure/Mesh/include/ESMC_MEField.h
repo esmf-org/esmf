@@ -20,7 +20,7 @@
 #include <vector>
 #include <set>
 
-namespace ESMC {
+namespace ESMCI {
 
 class MEFamily;
 

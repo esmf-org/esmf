@@ -22,7 +22,7 @@
 
 #include <map>
 
-namespace ESMC {
+namespace ESMCI {
 
 template <typename NFIELD=MEField<>, typename Real=double>
 class PatchRecov {

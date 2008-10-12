@@ -20,7 +20,7 @@
 
 #include <Mesh/src/Zoltan/zoltan.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 class BBox;
 class _field;

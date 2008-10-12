@@ -23,7 +23,7 @@
 #include <ostream>
 #include <map>
 
-namespace ESMC {
+namespace ESMCI {
   
 class CommRel;
 class MeshObj;

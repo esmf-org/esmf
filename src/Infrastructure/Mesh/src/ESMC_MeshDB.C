@@ -23,7 +23,7 @@
 #include <ostream>
 #include <algorithm>
 
-namespace ESMC {
+namespace ESMCI {
 
 //#define DEL_DEBUG
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.17 2008/09/24 22:40:05 dneckels Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.18 2008/10/12 02:39:29 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 
 
 
-using namespace ESMC;
+using namespace ESMCI;
 
 
 //------------------------------------------------------------------------------

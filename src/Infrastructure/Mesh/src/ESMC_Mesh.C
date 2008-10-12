@@ -21,7 +21,7 @@
 
 //#define CRE_DEBUG
 
-namespace ESMC {
+namespace ESMCI {
 
 // *** Mesh implementation ***
 

@@ -25,7 +25,7 @@
 #include <algorithm>
 #include <mpi.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 CommRel::CommRel() :
 domain(),

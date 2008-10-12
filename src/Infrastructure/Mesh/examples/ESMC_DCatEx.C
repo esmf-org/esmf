@@ -42,7 +42,7 @@
 #include <cmath>
 
 
-using namespace ESMC;
+using namespace ESMCI;
 
 void usage(const std::string &pname) {
     std::cout << "Usage:" << pname << " file nparts" << std::endl;

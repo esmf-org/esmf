@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.28 2008/09/23 21:10:43 dneckels Exp $
+// $Id: ESMC_GridToMesh.C,v 1.29 2008/10/12 02:39:29 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -80,11 +80,11 @@ namespace ESMCI {
 // and, maybe, for simple single patch grids with a periodic component,
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
-void GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh, const std::vector<ESMCI::Array*> &arrays) {
-  Trace __trace("GridToMesh(const Grid &grid_, int staggerLoc, ESMC::Mesh &mesh)");
+void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std::vector<ESMCI::Array*> &arrays) {
+  Trace __trace("GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh)");
 
   // Initialize the parallel environment for mesh (if not already done)
-  ESMC::Par::Init("MESHLOG", false /* use log */);
+  ESMCI::Par::Init("MESHLOG", false /* use log */);
 
   Grid &grid = const_cast<Grid&>(grid_);
 

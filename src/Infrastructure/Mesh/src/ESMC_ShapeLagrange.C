@@ -16,7 +16,7 @@
 
 #include <vector>
 
-namespace ESMC {
+namespace ESMCI {
 
 /**
  * This function provided by Amik St-Cyr, NCAR.  Not sure what that means

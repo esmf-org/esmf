@@ -10,7 +10,7 @@
 //==============================================================================
 #include <Mesh/include/ESMC_MeshllField.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 
 template<typename SCALAR>

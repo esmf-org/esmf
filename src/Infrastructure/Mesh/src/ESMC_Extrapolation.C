@@ -18,7 +18,7 @@
 
 #include <set>
 
-namespace ESMC {
+namespace ESMCI {
 
 /*
 void MeshAddPole(Mesh &mesh, UInt node_id, UInt constraint_id, IWeights &cweights) {

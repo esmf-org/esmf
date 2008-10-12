@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.14 2008/09/22 19:07:39 dneckels Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.15 2008/10/12 02:39:29 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-------------------------------------------------------------------------
 
 
-using namespace ESMC;
+using namespace ESMCI;
 
 
 extern "C" void FTN(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,

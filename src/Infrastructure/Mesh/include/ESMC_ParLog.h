@@ -16,7 +16,7 @@
 #include <fstream>
 #include <map>
 
-namespace ESMC {
+namespace ESMCI {
 
 class ParLog {
 public:
