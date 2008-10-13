@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocStream_F.C,v 1.2 2008/10/13 17:40:14 oehmke Exp $
+// $Id: ESMCI_LocStream_F.C,v 1.3 2008/10/13 21:32:32 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_LocStream_F.C,v 1.2 2008/10/13 17:40:14 oehmke Exp $";
+             "$Id: ESMCI_LocStream_F.C,v 1.3 2008/10/13 21:32:32 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -427,19 +427,19 @@ void FTN(c_esmc_locstreamkeydeserialize)(
 
   // Save keyNames
   // First fill with spaces (NOTE THAT THIS ASSUMES THAT keyName is of size ESMF_MAXSTR)
-  memset((const void *)keyName,' ', ESMF_MAXSTR*sizeof(char));  
+  memset((void *)keyName,' ', ESMF_MAXSTR*sizeof(char));  
   memcpy((void *)keyName, (const void *)cp, keyNameLen*sizeof(char));
   cp += keyNameLen*sizeof(char);
 
   // Save units
   // First fill with spaces (NOTE THAT THIS ASSUMES THAT units is of size ESMF_MAXSTR)
-  memset((const void *)units,' ', ESMF_MAXSTR*sizeof(char));  
+  memset((void *)units,' ', ESMF_MAXSTR*sizeof(char));  
   memcpy((void *)units, (const void *)cp, unitsLen*sizeof(char));
   cp += unitsLen*sizeof(char);
 
   // Save longName
   // First fill with spaces (NOTE THAT THIS ASSUMES THAT longName is of size ESMF_MAXSTR)
-  memset((const void *)longName,' ', ESMF_MAXSTR*sizeof(char));  
+  memset((void *)longName,' ', ESMF_MAXSTR*sizeof(char));  
   memcpy((void *)longName, (const void *)cp, longNameLen*sizeof(char));
   cp += longNameLen*sizeof(char);
 
