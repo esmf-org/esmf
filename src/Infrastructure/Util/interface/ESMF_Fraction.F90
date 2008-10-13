@@ -1,4 +1,4 @@
-! $Id: ESMF_Fraction.F90,v 1.18 2008/04/05 03:38:58 cdeluca Exp $
+! $Id: ESMF_Fraction.F90,v 1.1 2008/10/13 05:59:19 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -7,8 +7,6 @@
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
-!
-! ESMF Fraction Module
 !
 !==============================================================================
 #define ESMF_FILENAME "ESMF_Fraction.F90"
@@ -42,7 +40,6 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_UtilTypesMod
-      use ESMF_BaseMod
       use ESMF_InitMacrosMod
       implicit none
 !
@@ -57,10 +54,8 @@
 
       type ESMF_Fraction
       sequence
-      private
-        integer :: whole        ! Integer (whole) seconds (signed)
-        integer :: numerator    ! Integer fraction (exact) n/d; numerator (signed)
-        integer :: denominator  ! Integer fraction (exact) n/d; denominator
+      private  ! (members opaque on Fortran side)
+        integer(ESMF_KIND_I8) :: shallowMemory(3)
         ESMF_INIT_DECLARE
       end type
 !
@@ -70,8 +65,8 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-      public ESMF_FractionInit
       public ESMF_FractionGetInit
+      public ESMF_FractionInit
       public ESMF_FractionValidate
 
 ! !PRIVATE MEMBER FUNCTIONS:
@@ -81,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Fraction.F90,v 1.18 2008/04/05 03:38:58 cdeluca Exp $'
+      '$Id: ESMF_Fraction.F90,v 1.1 2008/10/13 05:59:19 eschwab Exp $'
 
 !==============================================================================
 
@@ -141,6 +136,7 @@
 !     \end{description}
 !
 !EOPI
+        s%shallowMemory = 0
         ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_FractionInit
 
@@ -151,7 +147,7 @@
 ! !IROUTINE:  ESMF_FractionValidate - Check validity of a Fraction
 
 ! !INTERFACE:
-    subroutine ESMF_FractionValidate(s,rc)
+    subroutine ESMF_FractionValidate(s, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_Fraction), intent(inout) :: s
@@ -179,21 +175,11 @@
     end subroutine ESMF_FractionValidate
 
 
-
 !==============================================================================
 !
 ! Wrappers to C++ fraction routines
 !
 !------------------------------------------------------------------------------
-!
-
-    ! dummy entry point to make ranlib stop complaining about a file
-    ! with no symbols.  TODO: replace with real code asap.   nsc.
-    subroutine ESMF_FractionDummy(rc)
-       integer :: rc
-
-       rc = ESMF_RC_NOT_IMPL
-    end subroutine ESMF_FractionDummy
 
 !------------------------------------------------------------------------------
 

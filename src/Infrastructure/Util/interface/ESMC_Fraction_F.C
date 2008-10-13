@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction_F.C,v 1.21 2008/06/08 03:33:46 rosalind Exp $
+// $Id: ESMC_Fraction_F.C,v 1.1 2008/10/13 05:59:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
