@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.12 2008/10/10 17:37:33 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.13 2008/10/13 17:38:50 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -666,7 +666,39 @@ extern "C" {
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-  
+
+
+  void FTN(c_esmc_distgridserialize)(ESMCI::DistGrid **distgrid, char *buf, int *length,
+    int *offset, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_distgridserialize()"
+
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError(
+      (*distgrid)->serialize(buf, length, offset),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN(c_esmc_distgriddeserialize)(ESMCI::DistGrid **distgrid, char *buf,
+    int *offset, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_distgriddeserialize()"
+
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+    // Deserialize the distgrid
+    *distgrid=ESMCI::DistGrid::deserialize(buf, offset);
+
+    // Return success
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+
 #undef  ESMC_METHOD
 }
 
