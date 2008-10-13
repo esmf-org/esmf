@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.138 2008/07/03 23:07:48 eschwab Exp $
+! $Id: ESMF_Base.F90,v 1.139 2008/10/13 17:36:27 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -100,6 +100,7 @@ module ESMF_BaseMod
        public ESMF_BaseValidate
        
        public ESMF_BaseGetInit
+       public ESMF_BaseSetInitCreated
 
 !   Virtual methods to be defined by derived classes
 !      public ESMF_Read
@@ -122,7 +123,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.138 2008/07/03 23:07:48 eschwab Exp $'
+               '$Id: ESMF_Base.F90,v 1.139 2008/10/13 17:36:27 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -517,5 +518,49 @@ module ESMF_BaseMod
 
   end function ESMF_BaseGetInit
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseSetInitCreated()"
+!BOPI
+! !IROUTINE: ESMF_BaseSetInitCreated - Set Base init code to "CREATED"
+
+! !INTERFACE:
+  subroutine ESMF_BaseSetInitCreated(base, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Base), intent(inout) :: base
+    integer, intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+! Set init code in Base object to "CREATED".
+!
+! The arguments are:
+! \begin{description}
+! \item[base]
+! Specified {\tt ESMF\_Base} object.
+! \item[{[rc]}]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Set init code
+    ESMF_INIT_SET_CREATED(base)
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_BaseSetInitCreated
+!------------------------------------------------------------------------------
+
 
 end module ESMF_BaseMod
