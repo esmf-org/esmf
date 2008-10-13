@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_Attr.h>
+#include <Mesh/include/ESMCI_Attr.h>
 #include <Mesh/include/ESMC_MeshObj.h>
 
 namespace ESMCI {

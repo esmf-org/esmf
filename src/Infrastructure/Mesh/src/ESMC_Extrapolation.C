@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_Extrapolation.h>
+#include <Mesh/include/ESMCI_Extrapolation.h>
 
 #include <Mesh/include/ESMC_Interp.h>
 #include <Mesh/include/ESMC_Mesh.h>

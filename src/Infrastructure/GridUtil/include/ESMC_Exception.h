@@ -8,7 +8,7 @@
 #include <exception>
 
 
-namespace ESMC {
+namespace ESMCI {
 
 //-------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.29 2008/10/12 02:39:29 rosalind Exp $
+// $Id: ESMC_GridToMesh.C,v 1.30 2008/10/13 04:09:26 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 #include <Mesh/include/ESMC_Mesh.h>
 #include <Mesh/include/ESMC_IOField.h>
 #include <Mesh/include/ESMC_ParEnv.h>
-#include <Mesh/include/ESMC_DDir.h>
+#include <Mesh/include/ESMCI_DDir.h>
 
 #include <limits>
 #include <iostream>
@@ -49,7 +49,7 @@
 
 //#define G2M_DBG
 
-using namespace ESMC;
+// using namespace ESMCI;
 
 namespace ESMCI {
 

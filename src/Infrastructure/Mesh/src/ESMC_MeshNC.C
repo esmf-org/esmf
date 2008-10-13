@@ -11,7 +11,7 @@
 #include <Mesh/include/ESMC_MeshNC.h>
 #include <Mesh/include/ESMC_MeshDB.h>
 
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMC_MeshObjTopo.h>
 #include <Mesh/include/ESMC_MeshSkin.h>
 #include <Mesh/include/ESMC_MeshField.h>

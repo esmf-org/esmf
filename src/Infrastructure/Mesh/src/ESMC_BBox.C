@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_BBox.h>
+#include <Mesh/include/ESMCI_BBox.h>
 #include <Mesh/include/ESMC_MeshTypes.h>
 #include <Mesh/include/ESMC_MeshObjTopo.h>
 #include <Mesh/include/ESMC_MeshUtils.h>

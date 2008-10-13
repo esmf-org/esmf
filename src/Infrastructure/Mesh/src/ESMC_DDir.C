@@ -8,9 +8,9 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_DDir.h>
+#include <Mesh/include/ESMCI_DDir.h>
 #include <Mesh/include/ESMC_SparseMsg.h>
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 
 #include <limits>

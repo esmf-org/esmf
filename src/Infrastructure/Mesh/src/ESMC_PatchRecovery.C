@@ -8,14 +8,14 @@
 //
 //==============================================================================
 #include <Mesh/include/ESMC_PatchRecovery.h>
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMC_MeshObjConn.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
 #include <Mesh/include/ESMC_MEValues.h>
 #include <Mesh/include/ESMC_Polynomial.h>
 #include <Mesh/include/ESMC_MeshField.h>
 #include <Mesh/include/ESMC_MeshTypes.h>
-#include <Mesh/include/ESMC_Ftn.h>
+#include <Mesh/include/ESMCI_Ftn.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 
 

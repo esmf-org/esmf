@@ -9,7 +9,7 @@
 //
 //==============================================================================
 #include <Mesh/include/ESMC_Quadrature.h>
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMC_MeshObjTopo.h>
 #include <Mesh/include/ESMC_Mapping.h>
 

@@ -8,8 +8,8 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_Context.h>
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Context.h>
+#include <Mesh/include/ESMCI_Exception.h>
 
 #include <iostream>
 #include <iomanip>

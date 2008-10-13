@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// $Id: cdistdir_test.C,v 1.12 2008/07/29 01:34:58 rosalind Exp $
+// $Id: cdistdir_test.C,v 1.13 2008/10/13 04:09:26 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -27,9 +27,9 @@
 
 
 
-using ESMC::UInt;
-using ESMC::UChar;
-using ESMC::Ex;
+using ESMCI::UInt;
+using ESMCI::UChar;
+using ESMCI::Ex;
 
 
 extern "C" {
@@ -49,7 +49,7 @@ void FTN(cdistdir_test)(ESMCI::VM **vmpp, int*rc) {
   // Here is the test:  ON each pet, send messages to yourself and
   // every pet with an id less than you.  The particular message that you send
   // is your localPet #, localPet # + 1 times.  Simple enough.
-  ESMC::SparseMsgVM msg(*vm);
+  ESMCI::SparseMsgVM msg(*vm);
 
 
   std::vector<UInt> procs(localPet+1, 0);
@@ -60,15 +60,15 @@ void FTN(cdistdir_test)(ESMCI::VM **vmpp, int*rc) {
 
   std::vector<UInt> sizes(localPet+1, 0);
   // send my own pid my id number of times
-  for (int i = localPet; i >= 0; i--) sizes[i] = ESMC::SparsePack<int>::size()*(localPet+1); 
+  for (int i = localPet; i >= 0; i--) sizes[i] = ESMCI::SparsePack<int>::size()*(localPet+1); 
 
   msg.setSizes(&sizes[0]);
 
   
   for (int i = localPet; i >= 0; i--)  {
-    ESMC::SparseMsgVM::buffer &b = *msg.getSendBuffer(i);
+    ESMCI::SparseMsgVM::buffer &b = *msg.getSendBuffer(i);
     for (int j = 0; j < localPet+1; j++) 
-      ESMC::SparsePack<int>(b, localPet);
+      ESMCI::SparsePack<int>(b, localPet);
   }
 
   if (!msg.filled()) throw Ex() << "P:" << localPet << ", Error!! message not filled" << std::endl;
@@ -76,12 +76,12 @@ void FTN(cdistdir_test)(ESMCI::VM **vmpp, int*rc) {
   msg.communicate();
 
   for (UInt *p = msg.inPet_begin(); p != msg.inPet_end(); p++) {
-    ESMC::SparseMsgVM::buffer &b = *msg.getRecvBuffer(*p);
-    UInt num = b.msg_size() / ESMC::SparsePack<int>::size();
+    ESMCI::SparseMsgVM::buffer &b = *msg.getRecvBuffer(*p);
+    UInt num = b.msg_size() / ESMCI::SparsePack<int>::size();
     if (num != *p+1) throw Ex() << "P:" << localPet << ", Error!!! Num=" << num << ", should have num=" << localPet+1 << std::endl;
     for (UInt i= 0; i < num; i++) {
       int val;
-      ESMC::SparseUnpack<int>(b, val);
+      ESMCI::SparseUnpack<int>(b, val);
       //std::cout << "Pet:" << localPet << " got " << val << " from pet:" << *p << std::endl;
       if (val != *p) throw Ex() << "P:" << localPet << ", Error!!! val =" << val << " should be " << *p << std::endl;
     }
@@ -105,7 +105,7 @@ void FTN(cdistdir_test)(ESMCI::VM **vmpp, int*rc) {
     my_gid[i] = localPet + i*petCount;
     my_lid[i] = i;
   }
-  ESMC::DistDir<UInt> dir(*vm, ngid, &my_gid[0], &my_lid[0]);
+  ESMCI::DistDir<UInt> dir(*vm, ngid, &my_gid[0], &my_lid[0]);
 
   //dir.Print();
 

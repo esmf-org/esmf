@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_FieldReg.h>
+#include <Mesh/include/ESMCI_FieldReg.h>
 #include <Mesh/include/ESMC_MEImprint.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 

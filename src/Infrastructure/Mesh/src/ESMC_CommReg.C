@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_CommReg.h>
+#include <Mesh/include/ESMCI_CommReg.h>
 #include <Mesh/include/ESMC_MeshllField.h>
 #include <Mesh/include/ESMC_MeshObjPack.h>
 #include <Mesh/include/ESMC_SparseMsg.h>

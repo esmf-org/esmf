@@ -9,7 +9,7 @@
 //
 //==============================================================================
 #include <Mesh/include/ESMC_MEFamily.h>
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 
 #include <Mesh/include/ESMC_ShapeLagrange.h>
 #include <Mesh/include/ESMC_SFuncAdaptor.h>

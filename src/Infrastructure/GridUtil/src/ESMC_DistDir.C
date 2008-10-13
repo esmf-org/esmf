@@ -1,4 +1,4 @@
-// $Id: ESMC_DistDir.C,v 1.9 2008/04/22 18:01:36 theurich Exp $
+// $Id: ESMC_DistDir.C,v 1.10 2008/10/13 04:09:26 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -34,11 +34,11 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistDir.C,v 1.9 2008/04/22 18:01:36 theurich Exp $";
+static const char *const version = "$Id: ESMC_DistDir.C,v 1.10 2008/10/13 04:09:26 rosalind Exp $";
 //-----------------------------------------------------------------------------
 
 
-namespace ESMC {
+namespace ESMCI {
 
 template<typename id_type, typename hash>
 //-----------------------------------------------------------------------------

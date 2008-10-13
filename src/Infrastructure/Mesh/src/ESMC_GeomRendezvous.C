@@ -8,9 +8,9 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_GeomRendezvous.h>
-#include <Mesh/include/ESMC_Exception.h>
-#include <Mesh/include/ESMC_BBox.h>
+#include <Mesh/include/ESMCI_GeomRendezvous.h>
+#include <Mesh/include/ESMCI_Exception.h>
+#include <Mesh/include/ESMCI_BBox.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 #include <Mesh/include/ESMC_MeshRead.h>

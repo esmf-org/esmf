@@ -9,7 +9,7 @@
 //
 //==============================================================================
 #include <Mesh/include/ESMC_Polynomial.h>
-#include <Mesh/include/ESMC_Ftn.h>
+#include <Mesh/include/ESMCI_Ftn.h>
 
 #include <iterator>
 #include <iostream>

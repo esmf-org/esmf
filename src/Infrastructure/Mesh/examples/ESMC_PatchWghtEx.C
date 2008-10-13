@@ -26,7 +26,7 @@
 #include <ESMC_Rebalance.h>
 #include <ESMC_Interp.h>
 #include <ESMC_MeshPNC.h>
-#include <ESMC_Extrapolation.h>
+#include <ESMCI_Extrapolation.h>
 #include <ESMC_WriteWeightsPar.h>
 
 #include <iterator>

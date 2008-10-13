@@ -28,7 +28,7 @@
 #include <limits>
 #include <vector>
 
-#include <Mesh/include/ESMC_BBox.h>
+#include <Mesh/include/ESMCI_BBox.h>
 
 namespace ESMCI {
 

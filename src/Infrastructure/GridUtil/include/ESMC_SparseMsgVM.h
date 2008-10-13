@@ -1,4 +1,4 @@
-// $Id: ESMC_SparseMsgVM.h,v 1.3 2008/07/21 23:25:51 theurich Exp $
+// $Id: ESMC_SparseMsgVM.h,v 1.4 2008/10/13 04:09:26 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 #include <GridUtil/include/ESMC_Ptypes.h>
 #include <GridUtil/include/ESMC_Exception.h>
 
-namespace ESMC {
+namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 //BOP

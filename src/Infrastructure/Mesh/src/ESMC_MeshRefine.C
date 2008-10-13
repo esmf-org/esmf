@@ -10,9 +10,9 @@
 //==============================================================================
 #include <Mesh/include/ESMC_MeshRefine.h>
 #include <Mesh/include/ESMC_Kernel.h>
-#include <Mesh/include/ESMC_Attr.h>
+#include <Mesh/include/ESMCI_Attr.h>
 #include <Mesh/include/ESMC_MeshObjConn.h>
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
 

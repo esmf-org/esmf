@@ -16,7 +16,7 @@
 
 #include <Mesh/include/sacado/Sacado.hpp>
 
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 
 namespace ESMCI {
 
