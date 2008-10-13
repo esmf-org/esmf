@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocStream_F.C,v 1.1 2008/08/29 04:58:32 oehmke Exp $
+// $Id: ESMCI_LocStream_F.C,v 1.2 2008/10/13 17:40:14 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_LocStream_F.C,v 1.1 2008/08/29 04:58:32 oehmke Exp $";
+             "$Id: ESMCI_LocStream_F.C,v 1.2 2008/10/13 17:40:14 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -275,119 +275,188 @@ void FTN(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid,
   
 
 
-#if 0
+#if 1
 // non-method functions
-void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus, 
-                ESMC_Status *gridstatus, 
-                ESMC_Status *datastatus, 
-                ESMC_Status *iostatus,
-                int * staggerloc,
-                int * gridToFieldMap,
-                int * ungriddedLBound,
-                int * ungriddedUBound,
-                int * maxHaloLWidth,
-                int * maxHaloUWidth,
-				void *buffer, int *length, int *offset, int *localrc){
-    int i;
+void FTN(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag, 
+                int *keyCount,
+	        void *buffer, int *length, int *offset, int *localrc){
+
+    ESMC_IndexFlag *ifp;
+    int *ip;
 
 
     // Initialize return code; assume routine not implemented
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
-    // either put the code here, or call into a real C++ function
-    ESMC_Status *sp;
 
-    // TODO: verify length > 4 status vars, and if not, make room.
-    int fixedpart = 4 * sizeof(int *) + sizeof(int) + 5 * ESMF_MAXDIM * sizeof(int);
-    if ((*length - *offset) < fixedpart) {
-         
+    // TODO: verify length > vars.
+    int size = sizeof(ESMC_IndexFlag) + sizeof(int);
+    if ((*length - *offset) < size) {         
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                            "Buffer too short to add a Field object", localrc);
+          "Buffer too short to add a LocStream object", localrc);
          return;
- 
-        //buffer = (char *)realloc((void *)buffer,
-        //                         *length + 2*fixedpart + byte_count);
-        //*length += 2 * fixedpart;
     }
 
 
-    sp = (ESMC_Status *)((char *)(buffer) + *offset);
-    *sp++ = *fieldstatus;
-    *sp++ = *gridstatus; 
-    *sp++ = *datastatus; 
-    *sp++ = *iostatus; 
+    // Save indexflag
+    ifp = (ESMC_IndexFlag *)((char *)(buffer) + *offset);
+    *ifp++ = *indexflag;
 
-    // copy the rest of the field parameters
-    // we are explicitly assuming Fortran-integer is of size C-int
-    // This might be probelmatic on 64bit machines depending how compiler flag is used
-    // e.g. we know gridToFieldMap is of type cpu_word *, its element maybe int32 or int64
-    // depending on the size of Fortran-integer
-    char * ptr = (char *)sp;
-    memcpy((void *)ptr, (const void *)staggerloc, sizeof(int));
-    ptr += sizeof(int);
-    memcpy((void *)ptr, (const void *)gridToFieldMap, ESMF_MAXDIM*sizeof(int));
-    ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)ptr, (const void *)ungriddedLBound, ESMF_MAXDIM*sizeof(int));
-    ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)ptr, (const void *)ungriddedUBound, ESMF_MAXDIM*sizeof(int));
-    ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)ptr, (const void *)maxHaloLWidth, ESMF_MAXDIM*sizeof(int));
-    ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)ptr, (const void *)maxHaloUWidth, ESMF_MAXDIM*sizeof(int));
-    ptr += ESMF_MAXDIM*sizeof(int);
+    // Save keyCount
+    ip= (int *)ifp;
+    *ip++ = *keyCount; 
 
-    *offset = ptr - (char *)buffer;
+    // Adjust offset
+    *offset += sizeof(ESMC_IndexFlag) + sizeof(int);
 
+    // return success
     if (localrc) *localrc = ESMF_SUCCESS;
 
     return;
 } 
 
 
-void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus, 
-                ESMC_Status *gridstatus, 
-                ESMC_Status *datastatus, 
-                ESMC_Status *iostatus, 
-                int * staggerloc,
-                int * gridToFieldMap,
-                int * ungriddedLBound,
-                int * ungriddedUBound,
-                int * maxHaloLWidth,
-                int * maxHaloUWidth,
-				void *buffer, int *offset, int *localrc){
+void FTN(c_esmc_locstreamdeserialize)(ESMC_IndexFlag *indexflag, 
+                int *keyCount, void *buffer, int *offset, int *localrc){
 
-    int i;
+    ESMC_IndexFlag *ifp;
+    int *ip;
 
     // Initialize return code; assume routine not implemented
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
-    // either put the code here, or call into a real C++ function
-    ESMC_Status *sp;
 
-    sp = (ESMC_Status *)((char *)(buffer) + *offset);
-    *fieldstatus = *sp++;
-    *gridstatus = *sp++;
-    *datastatus = *sp++;
-    *iostatus = *sp++;
+    // Get indexflag
+    ifp = (ESMC_IndexFlag *)((char *)(buffer) + *offset);
+    *indexflag=*ifp++; 
 
-    char * ptr = (char *)sp;
-    memcpy((void *)staggerloc, (const void *)ptr, sizeof(int));
-    ptr += sizeof(int);
-    memcpy((void *)gridToFieldMap, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
-    ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)ungriddedLBound, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
-    ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)ungriddedUBound, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
-    ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)maxHaloLWidth, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
-    ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)maxHaloUWidth, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
-    ptr += ESMF_MAXDIM*sizeof(int);
+    // Get keyCount
+    ip= (int *)ifp;
+    *keyCount=*ip++;
 
-    *offset = ptr - (char *)buffer;
+    // Adjust offset
+    *offset += sizeof(ESMC_IndexFlag) + sizeof(int);
 
+    // return success
     if (localrc) *localrc = ESMF_SUCCESS;
 
     return;
 } 
+
+// non-method functions
+void FTN(c_esmc_locstreamkeyserialize)(
+				       int *keyNameLen, char *keyName,
+				       int *unitsLen, char *units,
+				       int *longNameLen, char *longName,
+	        void *buffer, int *length, int *offset, int *localrc){
+
+  int *ip;
+  char *cp;
+  int r;  
+
+  // Initialize return code; assume routine not implemented
+  if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+  
+  // TODO: verify length > vars.
+  int size = *keyNameLen + *unitsLen + *longNameLen;
+  if ((*length - *offset) < size) {         
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+       "Buffer too short to add a LocStream object", localrc);
+    return;
+  }
+
+  // Get pointer to memory
+  ip = (int *)((char *)(buffer) + *offset);
+
+  // Save string lengths
+  *ip++ = *keyNameLen; 
+  *ip++ = *unitsLen; 
+  *ip++ = *longNameLen; 
+
+  // Switch to char pointer
+  cp = (char *)ip;
+
+  // Save keyNames
+  memcpy((void *)cp, (const void *)keyName, *keyNameLen*sizeof(char));
+  cp += *keyNameLen*sizeof(char);
+
+  // Save units
+  memcpy((void *)cp, (const void *)units, *unitsLen*sizeof(char));
+  cp += *unitsLen*sizeof(char);
+
+  // Save longName
+  memcpy((void *)cp, (const void *)longName, *longNameLen*sizeof(char));
+  cp += *longNameLen*sizeof(char);
+
+  // Adjust offset
+  *offset += 3*sizeof(int)+*keyNameLen + *unitsLen + *longNameLen;
+
+  // Adjust alignment
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;
+
+  // return success
+  if (localrc) *localrc = ESMF_SUCCESS;
+  
+  return;
+} 
+  
+
+void FTN(c_esmc_locstreamkeydeserialize)(
+					 char *keyName,
+					 char *units,
+					 char *longName,
+					 void *buffer, int *offset, int *localrc){
+
+  int *ip;
+  char *cp;
+  int r, keyNameLen, unitsLen, longNameLen;  
+
+
+  // Initialize return code; assume routine not implemented
+  if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+
+  // Get pointer to memory
+  ip = (int *)((char *)(buffer) + *offset);
+
+  // Save string lengths
+  keyNameLen = *ip++; 
+  unitsLen = *ip++;
+  longNameLen = *ip++;
+
+  // Switch to char pointer
+  cp = (char *)ip;
+
+  // Save keyNames
+  // First fill with spaces (NOTE THAT THIS ASSUMES THAT keyName is of size ESMF_MAXSTR)
+  memset((const void *)keyName,' ', ESMF_MAXSTR*sizeof(char));  
+  memcpy((void *)keyName, (const void *)cp, keyNameLen*sizeof(char));
+  cp += keyNameLen*sizeof(char);
+
+  // Save units
+  // First fill with spaces (NOTE THAT THIS ASSUMES THAT units is of size ESMF_MAXSTR)
+  memset((const void *)units,' ', ESMF_MAXSTR*sizeof(char));  
+  memcpy((void *)units, (const void *)cp, unitsLen*sizeof(char));
+  cp += unitsLen*sizeof(char);
+
+  // Save longName
+  // First fill with spaces (NOTE THAT THIS ASSUMES THAT longName is of size ESMF_MAXSTR)
+  memset((const void *)longName,' ', ESMF_MAXSTR*sizeof(char));  
+  memcpy((void *)longName, (const void *)cp, longNameLen*sizeof(char));
+  cp += longNameLen*sizeof(char);
+
+  // Adjust offset
+  *offset += 3*sizeof(int)+keyNameLen + unitsLen + longNameLen;
+
+  // Adjust alignment
+  r=*offset%8;
+  if (r!=0) *offset += 8-r;
+    
+  // return success
+  if (localrc) *localrc = ESMF_SUCCESS;
+  
+  return;
+} 
+
+
 #endif
 
 }

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.8 2008/09/03 22:22:32 oehmke Exp $
+! $Id: ESMF_LocStream.F90,v 1.9 2008/10/13 17:40:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -101,10 +101,13 @@ module ESMF_LocStreamMod
    public ESMF_LocStreamValidate           ! Check internal consistency
    public ESMF_LocStreamCreate
    public ESMF_LocStreamGet
+   public ESMF_LocStreamDeserialize
+   public ESMF_LocStreamSerialize
    public ESMF_LocStreamDestroy
    public ESMF_LocStreamPrint              ! Print contents of a LocStream
    public ESMF_LocStreamGetKey
    public ESMF_LocStreamAddKey
+
 
 ! - ESMF-internal methods:
    public ESMF_LocStreamTypeGetInit        ! For Standardized Initialization
@@ -119,7 +122,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.8 2008/09/03 22:22:32 oehmke Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.9 2008/10/13 17:40:14 oehmke Exp $'
 
 !==============================================================================
 !
@@ -2495,6 +2498,7 @@ end subroutine ESMF_LocStreamGetBounds
         end subroutine ESMF_LocStreamPrint
 
 
+#define FINISH_LATER
 #ifdef FINISH_LATER
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2551,20 +2555,43 @@ end subroutine ESMF_LocStreamGetBounds
       ! Get internal pointer to locstream type
       lstypep => locstream%lstypep
 
-     ! Serialize locstream items
-      call c_ESMC_LocStreamSerialize(lstypep%base, lstypep%distgrid, lstypep%indexflag, &
-               lstypep%keyCount, buffer(1), length, offset, localrc)
+     ! Serialize Base
+     call c_ESMC_BaseSerialize(lstypep%base, buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+     ! Serialize Distgrid
+     call c_ESMC_DistgridSerialize(lstypep%distgrid, buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! Serialize other locstream items
+      call c_ESMC_LocStreamSerialize(lstypep%indexflag, lstypep%keyCount, &
+              buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
       ! Serialize locstream key info
       do i=1,lstypep%keyCount
-         call c_ESMC_LocStreamKeySerialize(lstypep%keyNames(i), lstypep%keyUnits(i), &
-                 lstypep%keyLongNames(i), lstypep%keys(i), buffer(1), length, offset, localrc)
+         ! Serialize key info
+         call c_ESMC_LocStreamKeySerialize(&
+                  len_trim(lstypep%keyNames(i)), lstypep%keyNames(i), &
+                  len_trim(lstypep%keyUnits(i)), lstypep%keyUnits(i), &
+                  len_trim(lstypep%keyLongNames(i)), lstypep%keyLongNames(i), &
+                 buffer(1), length, offset, localrc)
          if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
+
+         ! Serialize key Array
+         call c_ESMC_ArraySerialize(lstypep%keys(i), buffer(1), length, offset, localrc)
+         if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
       enddo
 
       ! return success
@@ -2615,6 +2642,7 @@ end subroutine ESMF_LocStreamGetBounds
 
       integer :: localrc
       type(ESMF_LocStreamType),pointer :: lstypep
+      integer :: i
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2625,24 +2653,94 @@ end subroutine ESMF_LocStreamGetBounds
       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating LocStream type object", &
                                      ESMF_CONTEXT, rc)) return
 
+     ! Deserialize Base
+     call c_ESMC_BaseDeserialize(lstypep%base, buffer(1),  offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call ESMF_BaseSetInitCreated(lstypep%base, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+
+     ! Deserialize Distgrid
+     call c_ESMC_DistGridDeserialize(lstypep%distgrid, buffer(1), offset, localrc)
+     if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      call ESMF_DistGridSetInitCreated(lstypep%distgrid, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+
+      ! Deserialize other locstream items
+      call c_ESMC_LocStreamDeserialize(lstypep%indexflag, lstypep%keyCount, &
+              buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+
+      ! Allocate arrays for names, etc.
+      allocate (lstypep%keyNames(lstypep%keyCount), stat=localrc )
+      if (ESMF_LogMsgFoundAllocError(localrc, " Allocating KeyNames", &
+                                     ESMF_CONTEXT, rc)) return
+      allocate (lstypep%keyUnits(lstypep%keyCount), stat=localrc )
+      if (ESMF_LogMsgFoundAllocError(localrc, " Allocating units", &
+                                     ESMF_CONTEXT, rc)) return
+      allocate (lstypep%keyLongNames(lstypep%keyCount), stat=localrc )
+      if (ESMF_LogMsgFoundAllocError(localrc, " Allocating longNames", &
+                                     ESMF_CONTEXT, rc)) return
+      allocate( lstypep%keys(lstypep%keyCount), stat=localrc )  ! Array of keys
+      if (ESMF_LogMsgFoundAllocError(localrc, " Allocating keys", &
+                                     ESMF_CONTEXT, rc)) return
+      allocate( lstypep%destroyKeys(lstypep%keyCount), stat=localrc )  ! Array of keys
+      if (ESMF_LogMsgFoundAllocError(localrc, " Allocating keys", &
+                                     ESMF_CONTEXT, rc)) return
+
+      ! Serialize locstream key info
+      do i=1,lstypep%keyCount
+         ! Deserialize key info
+         call c_ESMC_LocStreamKeyDeserialize(&
+                  lstypep%keyNames(i), &
+                  lstypep%keyUnits(i), &
+                  lstypep%keyLongNames(i), &
+                 buffer(1), offset, localrc)
+         if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+         ! Deserialize key Array
+         call c_ESMC_ArrayDeserialize(lstypep%keys(i), buffer(1), offset, localrc)
+         if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+         call ESMF_ArraySetInitCreated(lstypep%keys(i), rc=localrc)
+         if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      enddo
 
 
      ! Set to destroy proxy objects
      lstypep%destroyDistgrid=.true.
-
-     ! Set to destroy proxy objects
      lstypep%destroyKeys=.true.
 
      ! Set pointer to locstream
      ESMF_LocStreamDeserialize%lstypep=>lstypep
 
      ! Set init status
-      ESMF_INIT_SET_CREATED(ESMF_LocStreamDeserialize)
+     ESMF_INIT_SET_CREATED(ESMF_LocStreamDeserialize)
 
-      if  (present(rc)) rc = ESMF_SUCCESS
+     if  (present(rc)) rc = ESMF_SUCCESS
 
-
-      end function ESMF_LocStreamDeserialize
+     end function ESMF_LocStreamDeserialize
 
 #endif
 

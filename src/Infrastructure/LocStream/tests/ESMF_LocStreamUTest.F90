@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStreamUTest.F90,v 1.2 2008/08/29 04:55:56 oehmke Exp $
+! $Id: ESMF_LocStreamUTest.F90,v 1.3 2008/10/13 17:40:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_LocStreamCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_LocStreamUTest.F90,v 1.2 2008/08/29 04:55:56 oehmke Exp $'
+    '$Id: ESMF_LocStreamUTest.F90,v 1.3 2008/10/13 17:40:14 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -55,12 +55,14 @@ program ESMF_LocStreamCreateUTest
   type(ESMF_Array) :: array
   type(ESMF_DELayout) :: delayout
   type(ESMF_IndexFlag) :: indexflag
-  type(ESMF_LocStream) :: locstream
+  type(ESMF_LocStream) :: locstream, locstream2
   integer :: ec,el,eu,cc,cl,cu,tc,tl,tu
   integer :: keyCount, localDECount, localDECountOut, i
   real(ESMF_KIND_R8), pointer :: keyDataR8(:),tmpR8(:)
   real(ESMF_KIND_R4), pointer :: keyDataR4(:),tmpR4(:)
   integer (ESMF_KIND_I4), pointer :: keyDataI4(:),tmpI4(:)
+  integer :: bufCount, offset
+  integer(ESMF_KIND_I4), pointer :: buf(:)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -141,7 +143,6 @@ program ESMF_LocStreamCreateUTest
      if (cu .ne. 6) correct=.false.
      if (cc .ne. 5) correct=.false.
 
-!write(*,*) "0", correct, el, eu, ec
      ! Check non-key bounds
      call  ESMF_LocStreamGet(locstream, localDE=1, &
              exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
@@ -157,7 +158,6 @@ program ESMF_LocStreamCreateUTest
      if (cu .ne. 11) correct=.false.
      if (cc .ne. 5) correct=.false.
 
-!write(*,*) "1", correct, el, eu, ec
      ! Check non-key bounds
      call  ESMF_LocStreamGet(locstream, localDE=2, &
              exclusiveLBound=el, exclusiveUBound=eu, exclusiveCount=ec, & 
@@ -814,6 +814,81 @@ program ESMF_LocStreamCreateUTest
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  ! NOTE THAT SERIALIZE/DESERIALIZE IS AN INTERNAL INTERFACE AND NOT INTENDED FOR PUBLIC USE
+  !NEX_UTest
+  write(name, *) "Test LocStream Serialize/Deserialize"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Grid
+  locstream=ESMF_LocStreamCreate(maxIndex=20, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+     
+  ! Add key A1
+  call ESMF_LocStreamAddKey(locstream, keyName="A1", keyUnits="U1", keyLongName="LN1", rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Add key A2
+  call ESMF_LocStreamAddKey(locstream, keyName="A2", keyUnits="U2", keyLongName="LN2", rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Create a buffer to put the locstream in
+  bufCount=10000
+  allocate(buf(bufCount))
+
+  ! Serialize
+  offset=0
+  call ESMF_LocStreamSerialize(locstream, buf, bufCount, offset, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Deserialize
+  offset=0
+  locstream2=ESMF_LocStreamDeserialize(vm, buf, offset, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Check loc stream info
+  call ESMF_LocStreamGet(locstream2, keyCount=keyCount, indexflag=indexflag, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check info
+  if (keyCount .ne. 2) correct=.false.
+  if (.not. (indexflag .eq. ESMF_INDEX_GLOBAL)) correct=.false.
+
+  ! Get info for A1
+  call ESMF_LocStreamGetKey(locstream2, keyName="A1", keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check info
+  if (trim(keyUnits) .ne. "U1") correct=.false.
+  if (trim(keyLongName) .ne. "LN1") correct=.false.
+
+  ! Get info for A2
+  call ESMF_LocStreamGetKey(locstream2, keyName="A2", keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check info
+  if (trim(keyUnits) .ne. "U2") correct=.false.
+  if (trim(keyLongName) .ne. "LN2") correct=.false.
+
+  call ESMF_LocStreamDestroy(locstream,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_LocStreamDestroy(locstream2,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of buffer
+  deallocate(buf)
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
 
   !-----------------------------------------------------------------------------
