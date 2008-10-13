@@ -13,7 +13,7 @@
 #define ESMC_MeshObjConn_h
 
 #include <Mesh/include/ESMC_MeshObj.h>
-#include <Mesh/include/ESMC_CommRel.h>
+#include <Mesh/include/ESMCI_CommRel.h>
 
 #include <set>
 

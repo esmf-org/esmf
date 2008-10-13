@@ -13,7 +13,7 @@
 #define ESMC_SHAPELAGRANGE_H_
 
 #include <Mesh/include/ESMC_ShapeFunc.h>
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 
 
 #include <vector>

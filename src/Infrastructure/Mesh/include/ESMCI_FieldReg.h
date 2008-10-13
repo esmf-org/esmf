@@ -12,7 +12,7 @@
 #ifndef ESMC_FieldReg_h
 #define ESMC_FieldReg_h
 
-#include <Mesh/include/ESMC_Attr.h>
+#include <Mesh/include/ESMCI_Attr.h>
 #include <Mesh/include/ESMC_MEField.h>
 #include <Mesh/include/ESMC_MeshDB.h>
 #include <Mesh/include/ESMC_MEFamily.h>

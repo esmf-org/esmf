@@ -14,7 +14,7 @@
 
 #include <Mesh/include/ESMC_MEField.h>
 #include <Mesh/include/ESMC_Search.h>
-#include <Mesh/include/ESMC_GeomRendezvous.h>
+#include <Mesh/include/ESMCI_GeomRendezvous.h>
 #include <Mesh/include/ESMC_Migrator.h>
 #include <Mesh/include/ESMC_SparseMsg.h>
 #include <Mesh/include/ESMC_WMat.h>

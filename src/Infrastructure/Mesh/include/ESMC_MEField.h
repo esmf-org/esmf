@@ -15,7 +15,7 @@
 #include <Mesh/include/ESMC_MeshllField.h>
 #include <Mesh/include/ESMC_MEFamily.h>
 #include <Mesh/include/ESMC_MeshField.h>
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 
 #include <vector>
 #include <set>

@@ -12,7 +12,7 @@
 #ifndef ESMC_Attr_h
 #define ESMC_Attr_h
 
-#include <Mesh/include/ESMC_Context.h>
+#include <Mesh/include/ESMCI_Context.h>
 #include <Mesh/include/ESMC_MeshObj.h>
 
 #include <ostream>

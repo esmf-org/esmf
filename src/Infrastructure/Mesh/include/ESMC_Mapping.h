@@ -14,7 +14,7 @@
 
 #include <Mesh/include/ESMC_MeshTypes.h>
 #include <Mesh/include/ESMC_MeshObjTopo.h>
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMC_ShapeFunc.h>
 
 #include <string>

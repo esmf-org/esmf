@@ -15,7 +15,7 @@
 #include <vector>
 #include <map>
 
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMC_MeshTypes.h>
 #include <Mesh/include/ESMC_MEField.h>
 #include <Mesh/include/ESMC_WMat.h>

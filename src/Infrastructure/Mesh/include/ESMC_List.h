@@ -12,7 +12,7 @@
 #ifndef ESMC_List_h
 #define ESMC_List_h
 
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 
 #include <cstddef>
 #include <iterator>

@@ -13,9 +13,9 @@
 #define ESMC_Mesh_h
 
 #include <Mesh/include/ESMC_MeshDB.h>
-#include <Mesh/include/ESMC_CommRel.h>
-#include <Mesh/include/ESMC_FieldReg.h>
-#include <Mesh/include/ESMC_CommReg.h>
+#include <Mesh/include/ESMCI_CommRel.h>
+#include <Mesh/include/ESMCI_FieldReg.h>
+#include <Mesh/include/ESMCI_CommReg.h>
 #include <mpi.h>
 
 /**

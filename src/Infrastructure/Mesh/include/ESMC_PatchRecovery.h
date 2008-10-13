@@ -17,7 +17,7 @@
 #include <Mesh/include/ESMC_MeshObj.h>
 #include <Mesh/include/ESMC_MEField.h>
 #include <Mesh/include/ESMC_MasterElement.h>
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMC_MCoord.h>
 
 #include <map>

@@ -13,7 +13,7 @@
 #define ESMC_Tree_h
 
 
-#include <Mesh/include/ESMC_Exception.h>
+#include <Mesh/include/ESMCI_Exception.h>
 
 #include <cstddef>
 #include <algorithm>

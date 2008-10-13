@@ -14,7 +14,7 @@
 
 #include <Mesh/include/ESMC_SparseMsg.h>
 #include <Mesh/include/ESMC_MeshTypes.h>
-#include <Mesh/include/ESMC_DDir.h>
+#include <Mesh/include/ESMCI_DDir.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 
 namespace ESMCI {

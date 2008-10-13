@@ -13,9 +13,9 @@
 #define ESMC_MeshDB_h
 
 #include <Mesh/include/ESMC_MeshObj.h>
-#include <Mesh/include/ESMC_Context.h>
+#include <Mesh/include/ESMCI_Context.h>
 #include <Mesh/include/ESMC_MeshContext.h>
-#include <Mesh/include/ESMC_Attr.h>
+#include <Mesh/include/ESMCI_Attr.h>
 #include <Mesh/include/ESMC_Kernel.h>
 #include <Mesh/include/ESMC_MeshObjTopo.h>
 #include <Mesh/include/ESMC_Tree.h>

@@ -13,8 +13,8 @@
 #define ESMC_GeomRendezvous_h
 
 #include <Mesh/include/ESMC_MeshTypes.h>
-#include <Mesh/include/ESMC_Context.h>
-#include <Mesh/include/ESMC_CommReg.h>
+#include <Mesh/include/ESMCI_Context.h>
+#include <Mesh/include/ESMCI_CommReg.h>
 #include <Mesh/include/ESMC_Mesh.h>
 #include <Mesh/include/ESMC_MEField.h>
 
