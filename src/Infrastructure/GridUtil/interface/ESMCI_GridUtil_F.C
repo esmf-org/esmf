@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.16 2008/10/13 04:09:26 rosalind Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.17 2008/10/13 23:25:42 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 #include <Mesh/include/ESMC_Mesh.h>
 #include <Mesh/include/ESMC_MeshRead.h>
 #include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMC_Interp.h>
+#include <Mesh/include/ESMCI_Interp.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 
 

@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_Mapping.h>
+#include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/include/ESMC_ShapeFunc.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 #include <iostream>

@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_MEValues.h>
+#include <Mesh/include/ESMCI_MEValues.h>
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
 #include <Mesh/include/ESMC_MeshField.h>

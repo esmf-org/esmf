@@ -12,7 +12,7 @@
 #include <Mesh/include/ESMC_MeshTypes.h>
 #include <Mesh/include/ESMC_MeshObjTopo.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
-#include <Mesh/include/ESMC_Mapping.h>
+#include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/include/ESMC_MeshllField.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 

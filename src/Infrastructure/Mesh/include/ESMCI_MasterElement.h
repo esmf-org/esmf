@@ -13,7 +13,7 @@
 #define ESMC_MasterElement_h
 
 #include <Mesh/include/ESMC_ShapeFunc.h>
-#include <Mesh/include/ESMC_Mapping.h>
+#include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/include/ESMC_MeshTypes.h>
 #include <Mesh/include/ESMC_Quadrature.h>
 

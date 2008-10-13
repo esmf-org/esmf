@@ -1,17 +1,17 @@
 #include <ESMC_Mesh.h>
 #include <ESMC_MeshSkin.h>
 #include <ESMC_ShapeFunc.h>
-#include <ESMC_Mapping.h>
+#include <ESMCI_Mapping.h>
 #include <ESMC_Search.h>
 #include <ESMC_MeshUtils.h>
-#include <ESMC_MasterElement.h>
+#include <ESMCI_MasterElement.h>
 #include <ESMC_MeshRead.h>
 #include <ESMC_ParEnv.h>
 #include <ESMC_MeshRefine.h>
 #include <ESMC_RefineTopo.h>
 #include <ESMC_MeshObjConn.h>
 #include <ESMC_MeshGen.h>
-#include <ESMC_HAdapt.h>
+#include <ESMCI_HAdapt.h>
 #include <ESMC_Rebalance.h>
 #include <ESMC_MeshTypes.h>
 

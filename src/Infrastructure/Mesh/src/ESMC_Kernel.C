@@ -8,9 +8,9 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_Kernel.h>
-#include <Mesh/include/ESMC_MEField.h>
-#include <Mesh/include/ESMC_MEImprint.h>
+#include <Mesh/include/ESMCI_Kernel.h>
+#include <Mesh/include/ESMCI_MEField.h>
+#include <Mesh/include/ESMCI_MEImprint.h>
 #include <Mesh/include/ESMC_MeshObjConn.h>
 #include <Mesh/include/ESMC_MeshllField.h>
 #include <iterator>

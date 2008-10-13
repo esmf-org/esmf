@@ -13,7 +13,7 @@
 #define ESMC_MeshRefine_h
 
 #include <Mesh/include/ESMC_MeshObj.h>
-#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMCI_MEField.h>
 #include <Mesh/include/ESMC_RefineTopo.h>
 
 namespace ESMCI {

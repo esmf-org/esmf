@@ -9,7 +9,7 @@
 //
 //==============================================================================
 #include <Mesh/include/ESMCI_FieldReg.h>
-#include <Mesh/include/ESMC_MEImprint.h>
+#include <Mesh/include/ESMCI_MEImprint.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 
 #include <algorithm>

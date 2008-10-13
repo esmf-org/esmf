@@ -11,7 +11,7 @@
 #include <Mesh/include/ESMC_MeshObjConn.h>
 #include <Mesh/include/ESMC_MeshObj.h>
 #include <Mesh/include/ESMC_MeshObjTopo.h>
-#include <Mesh/include/ESMC_Kernel.h>
+#include <Mesh/include/ESMCI_Kernel.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 #include <Mesh/include/ESMC_Mesh.h>
 

@@ -11,10 +11,10 @@
 #include <Mesh/include/ESMC_MeshUtils.h>
 
 #include <Mesh/include/ESMC_MeshObjTopo.h>
-#include <Mesh/include/ESMC_Mapping.h>
+#include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/include/ESMC_MeshObjConn.h>
 #include <Mesh/include/sacado/Sacado.hpp>
-#include <Mesh/include/ESMC_MEValues.h>
+#include <Mesh/include/ESMCI_MEValues.h>
 #include <Mesh/include/ESMC_MeshField.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 #include <Mesh/include/ESMC_ShapeFunc.h>

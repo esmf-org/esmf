@@ -12,7 +12,7 @@
 #ifndef ESMC_MeshNC_h
 #define ESMC_MeshNC_h
 
-#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMCI_MEField.h>
 #include <Mesh/include/ESMC_Mesh.h>
 #include <string>
 

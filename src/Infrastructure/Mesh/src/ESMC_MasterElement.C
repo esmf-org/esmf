@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_MasterElement.h>
+#include <Mesh/include/ESMCI_MasterElement.h>
 #include <Mesh/include/ESMC_SFuncAdaptor.h>
 
 #include <Mesh/include/ESMC_Quadrature.h>

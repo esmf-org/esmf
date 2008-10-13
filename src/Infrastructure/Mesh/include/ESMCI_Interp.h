@@ -12,7 +12,7 @@
 #ifndef ESMC_Interp_h
 #define ESMC_Interp_h
 
-#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMCI_MEField.h>
 #include <Mesh/include/ESMC_Search.h>
 #include <Mesh/include/ESMCI_GeomRendezvous.h>
 #include <Mesh/include/ESMC_Migrator.h>

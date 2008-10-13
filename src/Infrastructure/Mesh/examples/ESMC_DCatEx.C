@@ -19,11 +19,11 @@
 #include <ESMC_Mesh.h>
 #include <ESMC_MeshSkin.h>
 #include <ESMC_ShapeFunc.h>
-#include <ESMC_Mapping.h>
+#include <ESMCI_Mapping.h>
 #include <ESMC_Search.h>
 #include <ESMC_MeshField.h>
 #include <ESMC_MeshUtils.h>
-#include <ESMC_MasterElement.h>
+#include <ESMCI_MasterElement.h>
 #include <ESMC_MeshRead.h>
 #include <ESMC_MeshPartition.h>
 #include <ESMC_ParEnv.h>

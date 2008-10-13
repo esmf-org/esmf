@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_GlobalIds.h>
+#include <Mesh/include/ESMCI_GlobalIds.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 #include <Mesh/include/ESMC_SparseMsg.h>
 #include <Mesh/include/ESMCI_Exception.h>

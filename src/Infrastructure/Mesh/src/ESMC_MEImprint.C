@@ -8,10 +8,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_MEImprint.h>
+#include <Mesh/include/ESMCI_MEImprint.h>
 #include <Mesh/include/ESMC_MeshObjConn.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
-#include <Mesh/include/ESMC_MasterElement.h>
+#include <Mesh/include/ESMCI_MasterElement.h>
 
 #include <map>
 

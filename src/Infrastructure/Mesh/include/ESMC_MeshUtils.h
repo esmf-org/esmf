@@ -12,8 +12,8 @@
 #ifndef ESMC_MeshUtils_h
 #define ESMC_MeshUtils_h
 
-#include <Mesh/include/ESMC_MEField.h>
-#include <Mesh/include/ESMC_MCoord.h>
+#include <Mesh/include/ESMCI_MEField.h>
+#include <Mesh/include/ESMCI_MCoord.h>
 #include <Mesh/include/ESMC_Mesh.h>
 
 namespace ESMCI {

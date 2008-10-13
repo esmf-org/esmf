@@ -14,7 +14,7 @@
 
 #include <Mesh/include/ESMC_MeshDB.h>
 #include <Mesh/include/ESMC_MeshObj.h>
-#include <Mesh/include/ESMC_MEField.h>  // for coords
+#include <Mesh/include/ESMCI_MEField.h>  // for coords
 
 
 #include <Mesh/include/ESMC_MeshTypes.h>

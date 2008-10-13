@@ -9,15 +9,15 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_HAdapt_h
-#define ESMC_HAdapt_h
+#ifndef ESMCI_HAdapt_h
+#define ESMCI_HAdapt_h
 
 #include <vector>
 #include <map>
 
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMC_MeshTypes.h>
-#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMCI_MEField.h>
 #include <Mesh/include/ESMC_WMat.h>
 
 

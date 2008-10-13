@@ -9,7 +9,7 @@
 //
 //==============================================================================
 #include <Mesh/include/ESMC_WriteWeights.h>
-#include <Mesh/include/ESMC_Interp.h>
+#include <Mesh/include/ESMCI_Interp.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 

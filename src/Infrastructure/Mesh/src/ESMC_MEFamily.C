@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_MEFamily.h>
+#include <Mesh/include/ESMCI_MEFamily.h>
 #include <Mesh/include/ESMCI_Exception.h>
 
 #include <Mesh/include/ESMC_ShapeLagrange.h>

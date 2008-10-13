@@ -11,7 +11,7 @@
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMC_MeshObjConn.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
-#include <Mesh/include/ESMC_MEValues.h>
+#include <Mesh/include/ESMCI_MEValues.h>
 #include <Mesh/include/ESMC_Polynomial.h>
 #include <Mesh/include/ESMC_MeshField.h>
 #include <Mesh/include/ESMC_MeshTypes.h>

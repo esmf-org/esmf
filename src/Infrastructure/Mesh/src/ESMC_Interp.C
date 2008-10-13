@@ -8,11 +8,11 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_Interp.h>
+#include <Mesh/include/ESMCI_Interp.h>
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMC_Search.h>
 #include <Mesh/include/ESMC_ParEnv.h>
-#include <Mesh/include/ESMC_MEValues.h>
+#include <Mesh/include/ESMCI_MEValues.h>
 #include <Mesh/include/ESMC_PatchRecovery.h>
 #include <Mesh/include/ESMC_MeshField.h>
 #include <Mesh/include/ESMCI_CommRel.h>

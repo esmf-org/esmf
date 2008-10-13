@@ -13,7 +13,7 @@
 #define ESMC_CommReg_h
 
 #include <Mesh/include/ESMCI_CommRel.h>
-#include <Mesh/include/ESMC_MEField.h>
+#include <Mesh/include/ESMCI_MEField.h>
 
 #include <iostream>
 

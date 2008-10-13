@@ -13,7 +13,7 @@
 #define ESMC_SmallAlloc_h
 
 #include <Mesh/include/ESMC_MeshTypes.h>
-#include <Mesh/include/ESMC_List.h>
+#include <Mesh/include/ESMCI_List.h>
 
 #include <cstddef>
 

@@ -12,12 +12,12 @@
 #ifndef ESMC_MEValues_h
 #define ESMC_MEValues_h
 
-#include <Mesh/include/ESMC_MasterElement.h>
+#include <Mesh/include/ESMCI_MasterElement.h>
 #include <Mesh/include/ESMC_MeshObj.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
-#include <Mesh/include/ESMC_MEField.h>
-#include <Mesh/include/ESMC_Mapping.h>
-#include <Mesh/include/ESMC_Kernel.h>
+#include <Mesh/include/ESMCI_MEField.h>
+#include <Mesh/include/ESMCI_Mapping.h>
+#include <Mesh/include/ESMCI_Kernel.h>
 
 #include <Mesh/include/ESMC_MeshTypes.h>
 

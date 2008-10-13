@@ -16,7 +16,7 @@
 #include <Mesh/include/ESMCI_Context.h>
 #include <Mesh/include/ESMC_MeshContext.h>
 #include <Mesh/include/ESMCI_Attr.h>
-#include <Mesh/include/ESMC_Kernel.h>
+#include <Mesh/include/ESMCI_Kernel.h>
 #include <Mesh/include/ESMC_MeshObjTopo.h>
 #include <Mesh/include/ESMC_Tree.h>
 
