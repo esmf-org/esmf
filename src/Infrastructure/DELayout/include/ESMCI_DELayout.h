@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.1.2.5 2008/08/08 20:28:37 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.1.2.6 2008/10/14 20:58:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -215,7 +215,7 @@ class XXE{
       productSumScalar, productSumScalarRRA,
       productSumSuperScalarRRA,
       productSumSuperScalarContigRRA,
-      zeroSuperScalarRRA,
+      zeroScalarRRA, zeroSuperScalarRRA,
       memCpy, memCpySrcRRA,
       memGatherSrcRRA,
       // --- subs
@@ -285,6 +285,27 @@ class XXE{
         delete xxeSubList[i];
       delete [] xxeSubList;
     }
+    void clearReset(int countArg, int storageCountArg=-1, 
+      int commhandleCountArg=-1, int xxeSubCountArg=-1){
+      count = countArg; // reset
+      if (storageCountArg>0){
+        for (int i=storageCountArg; i<storageCount; i++)
+          delete [] storage[i];
+        storageCount = storageCountArg; // reset
+      }
+      if (commhandleCountArg>0){
+        for (int i=commhandleCountArg; i<commhandleCount; i++){
+          delete *commhandle[i];
+          delete commhandle[i];
+        }
+        commhandleCount = commhandleCountArg; // reset
+      }
+      if (xxeSubCountArg>0){
+        for (int i=xxeSubCountArg; i<xxeSubCount; i++)
+          delete xxeSubList[i];
+        xxeSubCount = xxeSubCountArg; // reset
+      }
+    }
     int exec(int rraCount=0, char **rraList=NULL, int filterBitField=0x0,
       double *dTime=NULL, int indexStart=-1, int indexStop=-1);
     int print(int rraCount=0, char **rraList=NULL, int filterBitField=0x0,
@@ -319,6 +340,8 @@ class XXE{
       void *dstMem, int rraIndex);
     int appendMemGatherSrcRRA(int predicateBitField, void *dstBase,
       TKId dstBaseTK, int rraIndex, int chunkCount);
+    int appendZeroScalarRRA(int predicateBitField, TKId elementTK,
+      int rraOffset, int rraIndex);
     int appendZeroSuperScalarRRA(int predicateBitField, TKId elementTK,
       int termCount, int rraIndex);
     int appendProductSumScalarRRA(int predicateBitField, TKId elementTK,
@@ -326,9 +349,11 @@ class XXE{
       int rraIndex);
     int appendProductSumSuperScalarRRA(int predicateBitField, TKId elementTK,
       TKId valueTK, TKId factorTK, int rraIndex, int termCount);
+    int appendWaitOnIndex(int predicateBitField, int index);
     int appendWaitOnAnyIndexSub(int predicateBitField, int count);
     int appendWaitOnAllSendnb(int predicateBitField);
     int appendProfileMessage(int predicateBitField, char *messageString);
+    int appendMessage(int predicateBitField, char *messageString);
     
   private:
     template<typename T, typename U, typename V>
@@ -473,6 +498,14 @@ class XXE{
       int rraIndex;
       int termCount;
     }ProductSumSuperScalarContigRRAInfo;
+
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      TKId elementTK;
+      int rraOffset;
+      int rraIndex;
+    }ZeroScalarRRAInfo;
 
     typedef struct{
       OpId opId;
