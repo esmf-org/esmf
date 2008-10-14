@@ -9,11 +9,11 @@
 //
 //==============================================================================
 #include <Mesh/include/ESMC_Rebalance.h>
-#include <Mesh/include/ESMC_Mesh.h>
+#include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
 #include <Mesh/include/ESMC_ParEnv.h>
-#include <Mesh/include/ESMC_MeshObjConn.h>
-#include <Mesh/include/ESMC_MeshField.h>
+#include <Mesh/include/ESMCI_MeshOBjConn.h>
+#include <Mesh/include/ESMCI_MeshField.h>
 
 
 #include <Zoltan/zoltan.h>

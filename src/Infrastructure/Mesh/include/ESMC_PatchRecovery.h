@@ -13,8 +13,8 @@
 #define ESMC_PatchRecovery_h
 
 
-#include <Mesh/include/ESMC_MeshDB.h>
-#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMCI_MeshDB.h>
+#include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_MEField.h>
 #include <Mesh/include/ESMCI_MasterElement.h>
 #include <Mesh/include/ESMCI_Exception.h>

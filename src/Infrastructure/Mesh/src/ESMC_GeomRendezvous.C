@@ -14,7 +14,7 @@
 #include <Mesh/include/ESMC_MeshUtils.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 #include <Mesh/include/ESMC_MeshRead.h>
-#include <Mesh/include/ESMC_MeshObjConn.h>
+#include <Mesh/include/ESMCI_MeshOBjConn.h>
 
 #include <Mesh/src/Zoltan/zoltan.h>
 

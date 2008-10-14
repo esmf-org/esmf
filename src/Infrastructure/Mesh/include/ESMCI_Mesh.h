@@ -12,7 +12,7 @@
 #ifndef ESMC_Mesh_h
 #define ESMC_Mesh_h
 
-#include <Mesh/include/ESMC_MeshDB.h>
+#include <Mesh/include/ESMCI_MeshDB.h>
 #include <Mesh/include/ESMCI_CommRel.h>
 #include <Mesh/include/ESMCI_FieldReg.h>
 #include <Mesh/include/ESMCI_CommReg.h>

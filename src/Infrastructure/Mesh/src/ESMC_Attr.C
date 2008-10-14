@@ -9,7 +9,7 @@
 //
 //==============================================================================
 #include <Mesh/include/ESMCI_Attr.h>
-#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMCI_MeshObj.h>
 
 namespace ESMCI {
 

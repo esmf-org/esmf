@@ -13,7 +13,7 @@
 #define ESMC_MeshField_h
 
 #include <Mesh/include/ESMC_MeshTypes.h>
-#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_MEFamily.h>
 #include <Mesh/include/ESMCI_Context.h>
 #include <Mesh/include/ESMC_MeshllField.h>

@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMCI_MeshObj.h>
 #include <iostream>
 #include <set>
 #include <algorithm>

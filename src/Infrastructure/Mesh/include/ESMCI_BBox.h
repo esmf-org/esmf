@@ -12,8 +12,8 @@
 #ifndef ESMC_BBox_h
 #define ESMC_BBox_h
 
-#include <Mesh/include/ESMC_MeshDB.h>
-#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMCI_MeshDB.h>
+#include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_MEField.h>  // for coords
 
 

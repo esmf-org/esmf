@@ -12,7 +12,7 @@
 #ifndef ESMC_MEImprint_h
 #define ESMC_MEImprint_h
 
-#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMCI_MeshObj.h>
 
 #include <string>
 #include <vector>

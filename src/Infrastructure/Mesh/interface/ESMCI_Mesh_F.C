@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.19 2008/10/13 23:25:43 rosalind Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.20 2008/10/14 23:22:21 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 #include "ESMC_RHandle.h"
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
-#include "ESMC_Mesh.h"
+#include "ESMCI_Mesh.h"
 #include "ESMC_MeshRead.h"
 #include "ESMC_MeshVTK.h"
 #include "ESMC_ParEnv.h"

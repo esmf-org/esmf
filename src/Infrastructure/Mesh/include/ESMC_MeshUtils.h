@@ -14,7 +14,7 @@
 
 #include <Mesh/include/ESMCI_MEField.h>
 #include <Mesh/include/ESMCI_MCoord.h>
-#include <Mesh/include/ESMC_Mesh.h>
+#include <Mesh/include/ESMCI_Mesh.h>
 
 namespace ESMCI {
 

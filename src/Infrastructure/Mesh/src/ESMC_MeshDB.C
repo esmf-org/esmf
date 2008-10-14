@@ -8,11 +8,11 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_MeshDB.h>
+#include <Mesh/include/ESMCI_MeshDB.h>
 
-#include <Mesh/include/ESMC_MeshObjTopo.h>
+#include <Mesh/include/ESMCI_MeshObjTopo.h>
 #include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMC_MeshObjConn.h>
+#include <Mesh/include/ESMCI_MeshOBjConn.h>
 #include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/include/ESMC_Quadrature.h>
 #include <Mesh/include/ESMCI_MEField.h>

@@ -8,10 +8,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_Mesh.h>
-#include <Mesh/include/ESMC_MeshField.h>
-#include <Mesh/include/ESMC_MeshObjConn.h>
-#include <Mesh/include/ESMC_MeshObjPack.h>
+#include <Mesh/include/ESMCI_Mesh.h>
+#include <Mesh/include/ESMCI_MeshField.h>
+#include <Mesh/include/ESMCI_MeshOBjConn.h>
+#include <Mesh/include/ESMCI_MeshObjPack.h>
 #include <Mesh/include/ESMC_MeshSkin.h>
 #include <Mesh/include/ESMC_SparseMsg.h>
 #include <Mesh/include/ESMC_ParEnv.h>

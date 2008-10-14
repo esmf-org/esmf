@@ -8,10 +8,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_MeshExodus.h>
+#include <Mesh/include/ESMCI_MeshExodus.h>
 
-#include <Mesh/include/ESMC_MeshDB.h>
-#include <Mesh/include/ESMC_MeshObjTopo.h>
+#include <Mesh/include/ESMCI_MeshDB.h>
+#include <Mesh/include/ESMCI_MeshObjTopo.h>
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
@@ -19,7 +19,7 @@
 #include <iterator>
 #include <string>
 
-#include <Mesh/include/ESMC_MeshField.h>
+#include <Mesh/include/ESMCI_MeshField.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
 #include <Mesh/include/ESMC_MeshSkin.h>
 

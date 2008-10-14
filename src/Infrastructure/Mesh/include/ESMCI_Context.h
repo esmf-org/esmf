@@ -13,7 +13,7 @@
 #define ESMC_Context_h
 
 #include <Mesh/include/ESMC_MeshTypes.h>
-#include <Mesh/include/ESMC_MeshContext.h>
+#include <Mesh/include/ESMCI_MeshContext.h>
 
 #include <ostream>
 

@@ -13,7 +13,7 @@
 #define ESMC_IOField_h
 
 #include <Mesh/include/ESMC_MeshTypes.h>
-#include <Mesh/include/ESMC_MeshDB.h>
+#include <Mesh/include/ESMCI_MeshDB.h>
 
 namespace ESMCI {
 

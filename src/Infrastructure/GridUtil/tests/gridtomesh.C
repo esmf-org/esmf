@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// $Id: gridtomesh.C,v 1.9 2008/10/13 04:09:26 rosalind Exp $
+// $Id: gridtomesh.C,v 1.10 2008/10/14 23:22:21 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -20,7 +20,7 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"
-#include <Mesh/include/ESMC_Mesh.h>
+#include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMC_MeshRead.h>
 #include <Mesh/include/ESMCI_Exception.h>
 

@@ -15,17 +15,17 @@
 /*
  * Program concatenates a set of parallel mesh files into a single file
 */
-#include <ESMC_MeshExodus.h>
-#include <ESMC_Mesh.h>
+#include <ESMCI_MeshExodus.h>
+#include <ESMCI_Mesh.h>
 #include <ESMC_MeshSkin.h>
 #include <ESMC_ShapeFunc.h>
 #include <ESMCI_Mapping.h>
 #include <ESMC_Search.h>
-#include <ESMC_MeshField.h>
+#include <ESMCI_MeshField.h>
 #include <ESMC_MeshUtils.h>
 #include <ESMCI_MasterElement.h>
 #include <ESMC_MeshRead.h>
-#include <ESMC_MeshPartition.h>
+#include <ESMCI_MeshPartition.h>
 #include <ESMC_ParEnv.h>
 #include <ESMC_MeshTypes.h>
 

@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_MeshField.h>
+#include <Mesh/include/ESMCI_MeshField.h>
 
 #include <iostream>
 #include <algorithm>

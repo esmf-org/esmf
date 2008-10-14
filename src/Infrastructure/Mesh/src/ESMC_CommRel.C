@@ -10,12 +10,12 @@
 //==============================================================================
 #include <Mesh/include/ESMCI_CommRel.h>
 #include <Mesh/include/ESMC_SparseMsg.h>
-#include <Mesh/include/ESMC_MeshObjTopo.h>
-#include <Mesh/include/ESMC_MeshField.h>
+#include <Mesh/include/ESMCI_MeshObjTopo.h>
+#include <Mesh/include/ESMCI_MeshField.h>
 #include <Mesh/include/ESMCI_Kernel.h>
-#include <Mesh/include/ESMC_MeshObjPack.h>
+#include <Mesh/include/ESMCI_MeshObjPack.h>
 #include <Mesh/include/ESMC_ParEnv.h>
-#include <Mesh/include/ESMC_MeshObjConn.h>
+#include <Mesh/include/ESMCI_MeshOBjConn.h>
 
 #include <iostream>
 #include <iterator>

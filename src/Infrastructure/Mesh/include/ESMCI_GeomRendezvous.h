@@ -15,7 +15,7 @@
 #include <Mesh/include/ESMC_MeshTypes.h>
 #include <Mesh/include/ESMCI_Context.h>
 #include <Mesh/include/ESMCI_CommReg.h>
-#include <Mesh/include/ESMC_Mesh.h>
+#include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMCI_MEField.h>
 
 #include <Mesh/src/Zoltan/zoltan.h>

@@ -13,7 +13,7 @@
 #define ESMC_MeshNC_h
 
 #include <Mesh/include/ESMCI_MEField.h>
-#include <Mesh/include/ESMC_Mesh.h>
+#include <Mesh/include/ESMCI_Mesh.h>
 #include <string>
 
 namespace ESMCI {

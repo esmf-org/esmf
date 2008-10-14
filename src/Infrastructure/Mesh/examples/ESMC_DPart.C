@@ -21,8 +21,8 @@
 #include <iostream>
 
 #include <stdexcept>
-#include <ESMC_MeshExodus.h>
-#include <ESMC_MeshDB.h>
+#include <ESMCI_MeshExodus.h>
+#include <ESMCI_MeshDB.h>
 #include <ESMC_MeshSkin.h>
 
 #include <ESMC_ShapeFunc.h>
@@ -33,7 +33,7 @@
 #include <ESMC_MeshUtils.h>
 #include <ESMCI_MasterElement.h>
 
-#include <ESMC_MeshPartition.h>
+#include <ESMCI_MeshPartition.h>
 #include <ESMC_MeshRead.h>
 
 #include <iterator>

@@ -13,7 +13,7 @@
 #define ESMC_DDir_h
 
 #include <Mesh/include/ESMC_MeshTypes.h>
-#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMCI_MeshObj.h>
 
 #include <cmath>
 #include <iostream>

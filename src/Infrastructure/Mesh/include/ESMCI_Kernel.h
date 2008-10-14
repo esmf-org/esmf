@@ -13,7 +13,7 @@
 #define ESMC_Kernel_h
 
 #include <Mesh/include/ESMCI_Attr.h>
-#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMCI_MeshObj.h>
 
 #include <ostream>
 

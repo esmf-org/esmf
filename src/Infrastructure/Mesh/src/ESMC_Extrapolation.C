@@ -11,7 +11,7 @@
 #include <Mesh/include/ESMCI_Extrapolation.h>
 
 #include <Mesh/include/ESMCI_Interp.h>
-#include <Mesh/include/ESMC_Mesh.h>
+#include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMC_ParEnv.h>
 #include <Mesh/include/ESMC_Rebalance.h>
 #include <Mesh/include/ESMCI_GlobalIds.h>

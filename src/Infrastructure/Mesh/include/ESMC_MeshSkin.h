@@ -12,7 +12,7 @@
 #ifndef ESMC_MeshSkin_h
 #define ESMC_MeshSkin_h
 
-#include "ESMC_Mesh.h"
+#include "ESMCI_Mesh.h"
 
 namespace ESMCI {
 

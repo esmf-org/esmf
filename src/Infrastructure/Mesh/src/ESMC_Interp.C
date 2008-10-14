@@ -14,11 +14,11 @@
 #include <Mesh/include/ESMC_ParEnv.h>
 #include <Mesh/include/ESMCI_MEValues.h>
 #include <Mesh/include/ESMC_PatchRecovery.h>
-#include <Mesh/include/ESMC_MeshField.h>
+#include <Mesh/include/ESMCI_MeshField.h>
 #include <Mesh/include/ESMCI_CommRel.h>
-#include <Mesh/include/ESMC_MeshObjConn.h>
+#include <Mesh/include/ESMCI_MeshOBjConn.h>
 #include <Mesh/include/ESMC_Migrator.h>
-#include <Mesh/include/ESMC_MeshObj.h>
+#include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMC_MeshUtils.h>
 
 #include <iostream>

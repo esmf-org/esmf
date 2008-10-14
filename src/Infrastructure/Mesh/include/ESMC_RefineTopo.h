@@ -13,7 +13,7 @@
 #define ESMC_RefineTopo_h
 
 #include <Mesh/include/ESMC_MeshTypes.h>
-#include <Mesh/include/ESMC_MeshObjTopo.h>
+#include <Mesh/include/ESMCI_MeshObjTopo.h>
 #include <Mesh/include/ESMCI_Exception.h>
 
 namespace ESMCI {

@@ -15,7 +15,7 @@
 #include <vector>
 #include <iostream>
 
-#include <Mesh/include/ESMC_MeshDB.h>
+#include <Mesh/include/ESMCI_MeshDB.h>
 #include <Mesh/include/ESMC_MeshllField.h>
 #include <Mesh/include/ESMC_SparseMsg.h>
 
