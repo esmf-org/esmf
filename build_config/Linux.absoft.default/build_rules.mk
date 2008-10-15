@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.30 2008/07/23 04:51:54 theurich Exp $
+# $Id: build_rules.mk,v 1.31 2008/10/15 03:47:28 w6ws Exp $
 #
 # Linux.absoft.default
 #
@@ -99,12 +99,12 @@ ESMF_CXXLINKRPATHS += $(addprefix $(ESMF_RPATHPREFIXFIXED), $(shell $(ESMF_DIR)/
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lrt -lstdc++
+ESMF_F90LINKLIBS += -lU77 -lrt -lstdc++
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.absoft $(ESMF_F90COMPILER))
+ESMF_CXXLINKLIBS += -lU77 -lrt $(shell $(ESMF_DIR)/scripts/libs.absoft $(ESMF_F90COMPILER))
 
 ############################################################
 # Blank out shared library options

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.13 2008/07/23 04:51:54 theurich Exp $
+# $Id: build_rules.mk,v 1.14 2008/10/15 03:47:28 w6ws Exp $
 #
 # Linux.absoftintel.default
 #
@@ -112,12 +112,12 @@ ESMF_F90LINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.icpc "$(
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS)") -lrt -ldl
+ESMF_F90LINKLIBS += -lU77 $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS)") -lrt -ldl
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt -ldl $(shell $(ESMF_DIR)/scripts/libs.absoft $(ESMF_F90COMPILER))
+ESMF_CXXLINKLIBS += -lU77 -lrt -ldl $(shell $(ESMF_DIR)/scripts/libs.absoft $(ESMF_F90COMPILER))
 
 ############################################################
 # Blank out shared library options

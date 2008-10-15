@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.30 2008/07/23 04:51:53 theurich Exp $
+# $Id: build_rules.mk,v 1.31 2008/10/15 03:47:28 w6ws Exp $
 #
 # Darwin.absoft.default
 #
@@ -122,12 +122,12 @@ ESMF_CXXLINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.absoft $
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lstdc++
+ESMF_F90LINKLIBS += -lU77 -lstdc++
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.absoft $(ESMF_F90COMPILER))
+ESMF_CXXLINKLIBS += -lU77 $(shell $(ESMF_DIR)/scripts/libs.absoft $(ESMF_F90COMPILER))
 
 ############################################################
 # Blank out shared library options
