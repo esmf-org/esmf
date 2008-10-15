@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.5 2008/09/29 21:10:16 w6ws Exp $
+$Id: ESMF_Conf.inc,v 1.6 2008/10/15 13:07:34 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -9,6 +9,17 @@ Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 NASA Goddard Space Flight Center.
 Licensed under the University of Illinois-NCSA License.
 #endif
+
+#if 0
+Define the proper way to flush Fortran units.  Choices include:
+
+  ESMF_HAS_F2003_FLUSH (preferred)
+  ESMF_HAS_1ARG_FLUSH
+  ESMF_HAS_2ARG_FLUSH
+
+#endif
+
+#define ESMF_HAS_2ARG_FLUSH
 
 #if 0
 Define the proper way to flush Fortran units.  Choices include:
