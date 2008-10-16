@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_List_h
-#define ESMC_List_h
+#ifndef ESMCI_List_h
+#define ESMCI_List_h
 
 #include <Mesh/include/ESMCI_Exception.h>
 

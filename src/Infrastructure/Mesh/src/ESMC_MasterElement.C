@@ -9,9 +9,9 @@
 //
 //==============================================================================
 #include <Mesh/include/ESMCI_MasterElement.h>
-#include <Mesh/include/ESMC_SFuncAdaptor.h>
+#include <Mesh/include/ESMCI_SFuncAdaptor.h>
 
-#include <Mesh/include/ESMC_Quadrature.h>
+#include <Mesh/include/ESMCI_Quadrature.h>
 
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/sacado/Sacado.hpp>

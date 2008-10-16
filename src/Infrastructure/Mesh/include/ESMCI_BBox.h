@@ -9,15 +9,15 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_BBox_h
-#define ESMC_BBox_h
+#ifndef ESMCI_BBox_h
+#define ESMCI_BBox_h
 
 #include <Mesh/include/ESMCI_MeshDB.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_MEField.h>  // for coords
 
 
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 
 #include <iostream>
 

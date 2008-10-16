@@ -14,9 +14,9 @@
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_MeshOBjConn.h>
 #include <Mesh/include/ESMCI_Mapping.h>
-#include <Mesh/include/ESMC_Quadrature.h>
+#include <Mesh/include/ESMCI_Quadrature.h>
 #include <Mesh/include/ESMCI_MEField.h>
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 
 #include <iterator>
 #include <iostream>

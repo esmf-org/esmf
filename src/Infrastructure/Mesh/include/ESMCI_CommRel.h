@@ -9,15 +9,15 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_CommRel
-#define ESMC_CommRel
+#ifndef ESMCI_CommRel
+#define ESMCI_CommRel
 
 #include <vector>
 #include <iostream>
 
 #include <Mesh/include/ESMCI_MeshDB.h>
-#include <Mesh/include/ESMC_MeshllField.h>
-#include <Mesh/include/ESMC_SparseMsg.h>
+#include <Mesh/include/ESMCI_MeshllField.h>
+#include <Mesh/include/ESMCI_SparseMsg.h>
 
 namespace ESMCI {
 

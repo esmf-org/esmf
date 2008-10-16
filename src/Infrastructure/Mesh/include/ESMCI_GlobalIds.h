@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_GlobalIds_h
-#define ESMC_GlobalIds_h
+#ifndef ESMCI_GlobalIds_h
+#define ESMCI_GlobalIds_h
 
 #include <vector>
 

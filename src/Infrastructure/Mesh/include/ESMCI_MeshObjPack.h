@@ -9,14 +9,14 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MeshObjPack_h
-#define ESMC_MeshObjPack_h
+#ifndef ESMCI_MeshObjPack_h
+#define ESMCI_MeshObjPack_h
 
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_CommRel.h>
 #include <Mesh/include/ESMCI_Kernel.h>
 #include <Mesh/include/ESMCI_Context.h>
-#include <Mesh/include/ESMC_SparseMsg.h>
+#include <Mesh/include/ESMCI_SparseMsg.h>
 #include <Mesh/include/ESMCI_MeshDB.h>
 
 #include <cstddef>

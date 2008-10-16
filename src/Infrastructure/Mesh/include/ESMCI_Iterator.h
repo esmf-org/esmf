@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_Iterator_h
-#define ESMC_Iterator_h
+#ifndef ESMCI_Iterator_h
+#define ESMCI_Iterator_h
 
 namespace ESMCI {
 

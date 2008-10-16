@@ -9,10 +9,10 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_Context_h
-#define ESMC_Context_h
+#ifndef ESMCI_Context_h
+#define ESMCI_Context_h
 
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_MeshContext.h>
 
 #include <ostream>

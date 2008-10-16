@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MeshExodus_h
-#define ESMC_MeshExodus_h
+#ifndef ESMCI_MeshExodus_h
+#define ESMCI_MeshExodus_h
 
 #include <string>
 

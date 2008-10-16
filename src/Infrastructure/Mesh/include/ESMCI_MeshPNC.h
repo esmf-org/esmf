@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MESHPNC_H_
-#define ESMC_MESHPNC_H_
+#ifndef ESMCI_MESHPNC_H_
+#define ESMCI_MESHPNC_H_
 
 #include <string>
 

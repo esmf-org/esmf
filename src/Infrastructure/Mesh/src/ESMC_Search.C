@@ -8,14 +8,14 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_Search.h>
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_Search.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_MeshObjTopo.h>
 #include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_Mesh.h>
-#include <Mesh/include/ESMC_MeshUtils.h>
-#include <Mesh/include/ESMC_OctBox3d.h>
+#include <Mesh/include/ESMCI_MeshUtils.h>
+#include <Mesh/include/ESMCI_OctBox3d.h>
  
 #include <iostream>
 #include <algorithm>

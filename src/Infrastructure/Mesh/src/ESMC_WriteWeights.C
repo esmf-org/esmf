@@ -8,10 +8,10 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_WriteWeights.h>
+#include <Mesh/include/ESMCI_WriteWeights.h>
 #include <Mesh/include/ESMCI_Interp.h>
-#include <Mesh/include/ESMC_MeshUtils.h>
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_MeshUtils.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 
 #ifdef ESMC_NETCDF
 #include <netcdf.h>

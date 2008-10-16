@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMCI_MeshUtils.h>
 
 #include <Mesh/include/ESMCI_MeshObjTopo.h>
 #include <Mesh/include/ESMCI_Mapping.h>
@@ -16,8 +16,8 @@
 #include <Mesh/include/sacado/Sacado.hpp>
 #include <Mesh/include/ESMCI_MEValues.h>
 #include <Mesh/include/ESMCI_MeshField.h>
-#include <Mesh/include/ESMC_ParEnv.h>
-#include <Mesh/include/ESMC_ShapeFunc.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
+#include <Mesh/include/ESMCI_ShapeFunc.h>
 
 #include <iostream>
 #include <iomanip>

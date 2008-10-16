@@ -12,7 +12,7 @@
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_MeshObjTopo.h>
 #include <Mesh/include/ESMCI_Kernel.h>
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_Mesh.h>
 
 #include <mpi.h>

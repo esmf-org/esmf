@@ -9,10 +9,10 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_GeomRendezvous_h
-#define ESMC_GeomRendezvous_h
+#ifndef ESMCI_GeomRendezvous_h
+#define ESMCI_GeomRendezvous_h
 
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_Context.h>
 #include <Mesh/include/ESMCI_CommReg.h>
 #include <Mesh/include/ESMCI_Mesh.h>

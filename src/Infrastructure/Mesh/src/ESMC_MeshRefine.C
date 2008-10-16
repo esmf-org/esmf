@@ -8,13 +8,13 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_MeshRefine.h>
+#include <Mesh/include/ESMCI_MeshRefine.h>
 #include <Mesh/include/ESMCI_Kernel.h>
 #include <Mesh/include/ESMCI_Attr.h>
 #include <Mesh/include/ESMCI_MeshOBjConn.h>
 #include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMC_ParEnv.h>
-#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
+#include <Mesh/include/ESMCI_MeshUtils.h>
 
 #include <functional>
 #include <algorithm>

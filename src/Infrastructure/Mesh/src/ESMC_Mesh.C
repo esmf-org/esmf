@@ -12,9 +12,9 @@
 #include <Mesh/include/ESMCI_MeshField.h>
 #include <Mesh/include/ESMCI_MeshOBjConn.h>
 #include <Mesh/include/ESMCI_MeshObjPack.h>
-#include <Mesh/include/ESMC_MeshSkin.h>
-#include <Mesh/include/ESMC_SparseMsg.h>
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_MeshSkin.h>
+#include <Mesh/include/ESMCI_SparseMsg.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_GlobalIds.h>
 
 #include <bitset>

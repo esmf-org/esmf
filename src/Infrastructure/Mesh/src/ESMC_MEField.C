@@ -10,10 +10,10 @@
 //==============================================================================
 #include <Mesh/include/ESMCI_MEField.h>
 #include <Mesh/include/ESMCI_MeshField.h>
-#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMCI_MeshUtils.h>
 #include <Mesh/include/ESMCI_MeshOBjConn.h>
 
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 
 
 namespace ESMCI {

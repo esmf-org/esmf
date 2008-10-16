@@ -9,10 +9,10 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MEField_h
-#define ESMC_MEField_h
+#ifndef ESMCI_MEField_h
+#define ESMCI_MEField_h
 
-#include <Mesh/include/ESMC_MeshllField.h>
+#include <Mesh/include/ESMCI_MeshllField.h>
 #include <Mesh/include/ESMCI_MEFamily.h>
 #include <Mesh/include/ESMCI_MeshField.h>
 #include <Mesh/include/ESMCI_Exception.h>

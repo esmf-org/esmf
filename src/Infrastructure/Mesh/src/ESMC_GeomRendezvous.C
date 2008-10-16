@@ -11,9 +11,9 @@
 #include <Mesh/include/ESMCI_GeomRendezvous.h>
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_BBox.h>
-#include <Mesh/include/ESMC_MeshUtils.h>
-#include <Mesh/include/ESMC_ParEnv.h>
-#include <Mesh/include/ESMC_MeshRead.h>
+#include <Mesh/include/ESMCI_MeshUtils.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
+#include <Mesh/include/ESMCI_MeshRead.h>
 #include <Mesh/include/ESMCI_MeshOBjConn.h>
 
 #include <Mesh/src/Zoltan/zoltan.h>

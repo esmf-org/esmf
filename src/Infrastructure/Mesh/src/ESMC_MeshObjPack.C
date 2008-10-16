@@ -9,7 +9,7 @@
 //
 //==============================================================================
 #include <Mesh/include/ESMCI_MeshObjPack.h>
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_MeshOBjConn.h>
 
 

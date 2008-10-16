@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_MeshllField.h>
+#include <Mesh/include/ESMCI_MeshllField.h>
 
 namespace ESMCI {
 

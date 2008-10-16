@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_Exception.h>
 
 #include <mpi.h>

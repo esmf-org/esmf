@@ -9,10 +9,10 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_IOField_h
-#define ESMC_IOField_h
+#ifndef ESMCI_IOField_h
+#define ESMCI_IOField_h
 
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_MeshDB.h>
 
 namespace ESMCI {

@@ -20,11 +20,11 @@
 #include <string>
 
 #include <Mesh/include/ESMCI_MeshField.h>
-#include <Mesh/include/ESMC_MeshUtils.h>
-#include <Mesh/include/ESMC_MeshSkin.h>
+#include <Mesh/include/ESMCI_MeshUtils.h>
+#include <Mesh/include/ESMCI_MeshSkin.h>
 
 #include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 
 
 #ifdef ESMC_EXODUS

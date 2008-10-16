@@ -9,10 +9,10 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MeshContext_h
-#define ESMC_MeshContext_h
+#ifndef ESMCI_MeshContext_h
+#define ESMCI_MeshContext_h
 
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 
 // Manage the number of context bits.
 // Both Mesh and context include this file to determine the

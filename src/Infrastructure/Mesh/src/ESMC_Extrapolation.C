@@ -12,8 +12,8 @@
 
 #include <Mesh/include/ESMCI_Interp.h>
 #include <Mesh/include/ESMCI_Mesh.h>
-#include <Mesh/include/ESMC_ParEnv.h>
-#include <Mesh/include/ESMC_Rebalance.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
+#include <Mesh/include/ESMCI_Rebalance.h>
 #include <Mesh/include/ESMCI_GlobalIds.h>
 
 #include <set>

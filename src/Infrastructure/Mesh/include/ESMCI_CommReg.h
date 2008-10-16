@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_CommReg_h
-#define ESMC_CommReg_h
+#ifndef ESMCI_CommReg_h
+#define ESMCI_CommReg_h
 
 #include <Mesh/include/ESMCI_CommRel.h>
 #include <Mesh/include/ESMCI_MEField.h>

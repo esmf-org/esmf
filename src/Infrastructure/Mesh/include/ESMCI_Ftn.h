@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_Ftn_h
-#define ESMC_Ftn_h
+#ifndef ESMCI_Ftn_h
+#define ESMCI_Ftn_h
 
 // TODO: figure out how to make platform indep.
 

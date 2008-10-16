@@ -16,8 +16,8 @@
 
 #include <Mesh/include/ESMCI_MeshField.h>
 #include <Mesh/include/ESMCI_MeshExodus.h>
-#include <Mesh/include/ESMC_MeshUtils.h>
-#include <Mesh/include/ESMC_MeshRead.h>
+#include <Mesh/include/ESMCI_MeshUtils.h>
+#include <Mesh/include/ESMCI_MeshRead.h>
 
 #include <iostream>
 #include <iterator>

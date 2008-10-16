@@ -10,7 +10,7 @@
 //==============================================================================
 #include <Mesh/include/ESMCI_MEImprint.h>
 #include <Mesh/include/ESMCI_MeshOBjConn.h>
-#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMCI_MeshUtils.h>
 #include <Mesh/include/ESMCI_MasterElement.h>
 
 #include <map>

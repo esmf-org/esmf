@@ -9,10 +9,10 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_EXTRAPOLATION_H_
-#define ESMC_EXTRAPOLATION_H_
+#ifndef ESMCI_EXTRAPOLATION_H_
+#define ESMCI_EXTRAPOLATION_H_
 
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 
 namespace ESMCI {
 

@@ -9,8 +9,8 @@
 //
 //==============================================================================
 #include <Mesh/include/ESMCI_Mapping.h>
-#include <Mesh/include/ESMC_ShapeFunc.h>
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_ShapeFunc.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 #include <iostream>
 #include <limits>
 

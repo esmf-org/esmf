@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MEImprint_h
-#define ESMC_MEImprint_h
+#ifndef ESMCI_MEImprint_h
+#define ESMCI_MEImprint_h
 
 #include <Mesh/include/ESMCI_MeshObj.h>
 

@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MeshNC_h
-#define ESMC_MeshNC_h
+#ifndef ESMCI_MeshNC_h
+#define ESMCI_MeshNC_h
 
 #include <Mesh/include/ESMCI_MEField.h>
 #include <Mesh/include/ESMCI_Mesh.h>

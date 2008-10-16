@@ -9,14 +9,14 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_FieldReg_h
-#define ESMC_FieldReg_h
+#ifndef ESMCI_FieldReg_h
+#define ESMCI_FieldReg_h
 
 #include <Mesh/include/ESMCI_Attr.h>
 #include <Mesh/include/ESMCI_MEField.h>
 #include <Mesh/include/ESMCI_MeshDB.h>
 #include <Mesh/include/ESMCI_MEFamily.h>
-#include <Mesh/include/ESMC_MeshllField.h>
+#include <Mesh/include/ESMCI_MeshllField.h>
 #include <map>
 #include <Mesh/include/ESMCI_MeshDB.h>
 #include <Mesh/include/ESMCI_Iterator.h>

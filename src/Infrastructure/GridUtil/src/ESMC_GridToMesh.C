@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.32 2008/10/14 23:22:21 rosalind Exp $
+// $Id: ESMC_GridToMesh.C,v 1.33 2008/10/16 20:36:47 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 #include "ESMC_Ptypes.h"
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMCI_IOField.h>
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_DDir.h>
 
 #include <limits>

@@ -9,13 +9,13 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_Mapping_h
-#define ESMC_Mapping_h
+#ifndef ESMCI_Mapping_h
+#define ESMCI_Mapping_h
 
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_MeshObjTopo.h>
 #include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMC_ShapeFunc.h>
+#include <Mesh/include/ESMCI_ShapeFunc.h>
 
 #include <string>
 

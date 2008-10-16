@@ -9,17 +9,17 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MEValues_h
-#define ESMC_MEValues_h
+#ifndef ESMCI_MEValues_h
+#define ESMCI_MEValues_h
 
 #include <Mesh/include/ESMCI_MasterElement.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
-#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMCI_MeshUtils.h>
 #include <Mesh/include/ESMCI_MEField.h>
 #include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/include/ESMCI_Kernel.h>
 
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 
 
 namespace ESMCI {

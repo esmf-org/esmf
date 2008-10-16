@@ -7,16 +7,16 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_PatchRecovery.h>
+#include <Mesh/include/ESMCI_PatchRecovery.h>
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_MeshOBjConn.h>
-#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMCI_MeshUtils.h>
 #include <Mesh/include/ESMCI_MEValues.h>
-#include <Mesh/include/ESMC_Polynomial.h>
+#include <Mesh/include/ESMCI_Polynomial.h>
 #include <Mesh/include/ESMCI_MeshField.h>
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_Ftn.h>
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 
 
 #include <set>

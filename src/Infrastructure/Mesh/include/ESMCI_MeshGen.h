@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MeshGen_h
-#define ESMC_MeshGen_h
+#ifndef ESMCI_MeshGen_h
+#define ESMCI_MeshGen_h
 
 #include <ostream>
 

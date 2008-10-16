@@ -9,10 +9,10 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MeshObjTopo_h
-#define ESMC_MeshObjTopo_h
+#ifndef ESMCI_MeshObjTopo_h
+#define ESMCI_MeshObjTopo_h
 
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_Exception.h>
 
 

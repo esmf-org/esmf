@@ -13,7 +13,7 @@
 #define ESMCI_MeshPartition.h
 
 #include <Mesh/include/ESMCI_Mesh.h>
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_MeshField.h>
 
 // Partitions a mesh and saves the output as a nemesis file

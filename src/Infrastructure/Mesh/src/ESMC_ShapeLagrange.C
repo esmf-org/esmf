@@ -8,9 +8,9 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_ShapeLagrange.h>
+#include <Mesh/include/ESMCI_ShapeLagrange.h>
 #include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 #include <iterator>
 #include <iostream>
 

@@ -9,10 +9,10 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_DDir_h
-#define ESMC_DDir_h
+#ifndef ESMCI_DDir_h
+#define ESMCI_DDir_h
 
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
 
 #include <cmath>

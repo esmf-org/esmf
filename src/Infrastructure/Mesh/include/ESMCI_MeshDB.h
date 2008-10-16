@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MeshDB_h
-#define ESMC_MeshDB_h
+#ifndef ESMCI_MeshDB_h
+#define ESMCI_MeshDB_h
 
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_Context.h>
@@ -18,7 +18,7 @@
 #include <Mesh/include/ESMCI_Attr.h>
 #include <Mesh/include/ESMCI_Kernel.h>
 #include <Mesh/include/ESMCI_MeshObjTopo.h>
-#include <Mesh/include/ESMC_Tree.h>
+#include <Mesh/include/ESMCI_Tree.h>
 
 #include <map>
 #include <set>

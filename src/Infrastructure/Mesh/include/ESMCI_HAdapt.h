@@ -16,9 +16,9 @@
 #include <map>
 
 #include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_MEField.h>
-#include <Mesh/include/ESMC_WMat.h>
+#include <Mesh/include/ESMCI_WMat.h>
 
 
 namespace ESMCI {

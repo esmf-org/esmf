@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_Exception_h
-#define ESMC_Exception_h
+#ifndef ESMCI_Exception_h
+#define ESMCI_Exception_h
 
 #include <string>
 #include <sstream>

@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MeshObjConn_h
-#define ESMC_MeshObjConn_h
+#ifndef ESMCI_MeshObjConn_h
+#define ESMCI_MeshObjConn_h
 
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_CommRel.h>

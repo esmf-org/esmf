@@ -9,15 +9,15 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MasterElement_h
-#define ESMC_MasterElement_h
+#ifndef ESMCI_MasterElement_h
+#define ESMCI_MasterElement_h
 
-#include <Mesh/include/ESMC_ShapeFunc.h>
+#include <Mesh/include/ESMCI_ShapeFunc.h>
 #include <Mesh/include/ESMCI_Mapping.h>
-#include <Mesh/include/ESMC_MeshTypes.h>
-#include <Mesh/include/ESMC_Quadrature.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
+#include <Mesh/include/ESMCI_Quadrature.h>
 
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 
 #include <map>
 #include <string>

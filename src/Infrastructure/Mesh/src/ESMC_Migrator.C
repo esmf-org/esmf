@@ -8,8 +8,8 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_Migrator.h>
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_Migrator.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 
 namespace ESMCI { 
 

@@ -23,18 +23,18 @@
 #include <stdexcept>
 #include <ESMCI_MeshExodus.h>
 #include <ESMCI_MeshDB.h>
-#include <ESMC_MeshSkin.h>
+#include <ESMCI_MeshSkin.h>
 
-#include <ESMC_ShapeFunc.h>
+#include <ESMCI_ShapeFunc.h>
 #include <ESMCI_Mapping.h>
-#include <ESMC_Search.h>
+#include <ESMCI_Search.h>
 #include <ESMC_Transfer.h>
 
-#include <ESMC_MeshUtils.h>
+#include <ESMCI_MeshUtils.h>
 #include <ESMCI_MasterElement.h>
 
 #include <ESMCI_MeshPartition.h>
-#include <ESMC_MeshRead.h>
+#include <ESMCI_MeshRead.h>
 
 #include <iterator>
 #include <ostream>
@@ -42,7 +42,7 @@
 #include <cmath>
 
 #include <ESMC_types.h>
-#include <ESMC_ParEnv.h>
+#include <ESMCI_ParEnv.h>
 
 using namespace ESMCI::MESH;
 

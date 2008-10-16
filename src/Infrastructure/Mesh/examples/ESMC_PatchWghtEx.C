@@ -11,23 +11,23 @@
 //==============================================================================
 #include <ESMCI_MeshExodus.h>
 #include <ESMCI_Mesh.h>
-#include <ESMC_MeshSkin.h>
-#include <ESMC_ShapeFunc.h>
+#include <ESMCI_MeshSkin.h>
+#include <ESMCI_ShapeFunc.h>
 #include <ESMCI_Mapping.h>
-#include <ESMC_Search.h>
+#include <ESMCI_Search.h>
 #include <ESMCI_MeshField.h>
-#include <ESMC_MeshUtils.h>
+#include <ESMCI_MeshUtils.h>
 #include <ESMCI_MasterElement.h>
-#include <ESMC_MeshRead.h>
-#include <ESMC_MeshTypes.h>
-#include <ESMC_ParEnv.h>
+#include <ESMCI_MeshRead.h>
+#include <ESMCI_MeshTypes.h>
+#include <ESMCI_ParEnv.h>
 #include <ESMCI_MeshGen.h>
 #include <ESMCI_HAdapt.h>
-#include <ESMC_Rebalance.h>
+#include <ESMCI_Rebalance.h>
 #include <ESMCI_Interp.h>
 #include <ESMCI_MeshPNC.h>
 #include <ESMCI_Extrapolation.h>
-#include <ESMC_WriteWeightsPar.h>
+#include <ESMCI_WriteWeightsPar.h>
 
 #include <iterator>
 #include <ostream>

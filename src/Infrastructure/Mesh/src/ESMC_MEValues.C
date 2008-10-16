@@ -10,10 +10,10 @@
 //==============================================================================
 #include <Mesh/include/ESMCI_MEValues.h>
 #include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMC_MeshUtils.h>
+#include <Mesh/include/ESMCI_MeshUtils.h>
 #include <Mesh/include/ESMCI_MeshField.h>
-#include <Mesh/include/ESMC_ParEnv.h>
-#include <Mesh/include/ESMC_ShapeFunc.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
+#include <Mesh/include/ESMCI_ShapeFunc.h>
 
 #include <cstddef> // NULL
 #include <vector>

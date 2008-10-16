@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_Mesh_h
-#define ESMC_Mesh_h
+#ifndef ESMCI_Mesh_h
+#define ESMCI_Mesh_h
 
 #include "ESMCI_Util.h"
 #include "ESMCI_F90Interface.h"

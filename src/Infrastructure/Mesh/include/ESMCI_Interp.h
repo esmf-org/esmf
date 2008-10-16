@@ -9,15 +9,15 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_Interp_h
-#define ESMC_Interp_h
+#ifndef ESMCI_Interp_h
+#define ESMCI_Interp_h
 
 #include <Mesh/include/ESMCI_MEField.h>
-#include <Mesh/include/ESMC_Search.h>
+#include <Mesh/include/ESMCI_Search.h>
 #include <Mesh/include/ESMCI_GeomRendezvous.h>
-#include <Mesh/include/ESMC_Migrator.h>
-#include <Mesh/include/ESMC_SparseMsg.h>
-#include <Mesh/include/ESMC_WMat.h>
+#include <Mesh/include/ESMCI_Migrator.h>
+#include <Mesh/include/ESMCI_SparseMsg.h>
+#include <Mesh/include/ESMCI_WMat.h>
 
 #include <vector>
 #include <ostream>

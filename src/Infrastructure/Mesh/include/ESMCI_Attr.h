@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_Attr_h
-#define ESMC_Attr_h
+#ifndef ESMCI_Attr_h
+#define ESMCI_Attr_h
 
 #include <Mesh/include/ESMCI_Context.h>
 #include <Mesh/include/ESMCI_MeshObj.h>

@@ -9,9 +9,9 @@
 //
 //==============================================================================
 #include <Mesh/include/ESMCI_DDir.h>
-#include <Mesh/include/ESMC_SparseMsg.h>
+#include <Mesh/include/ESMCI_SparseMsg.h>
 #include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 
 #include <limits>
 #include <map>

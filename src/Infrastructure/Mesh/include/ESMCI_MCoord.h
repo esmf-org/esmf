@@ -9,10 +9,10 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_MCoord_h
-#define ESMC_MCoord_h
+#ifndef ESMCI_MCoord_h
+#define ESMCI_MCoord_h
 
-#include <Mesh/include/ESMC_MeshTypes.h>
+#include <Mesh/include/ESMCI_MeshTypes.h>
 
 namespace ESMCI {
 

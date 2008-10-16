@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMC_Kernel_h
-#define ESMC_Kernel_h
+#ifndef ESMCI_Kernel_h
+#define ESMCI_Kernel_h
 
 #include <Mesh/include/ESMCI_Attr.h>
 #include <Mesh/include/ESMCI_MeshObj.h>

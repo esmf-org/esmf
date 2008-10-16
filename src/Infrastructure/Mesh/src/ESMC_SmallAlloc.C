@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_SmallAlloc.h>
+#include <Mesh/include/ESMCI_SmallAlloc.h>
 
 #include <Mesh/include/ESMCI_Exception.h>
 

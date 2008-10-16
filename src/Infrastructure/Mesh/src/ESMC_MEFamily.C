@@ -11,8 +11,8 @@
 #include <Mesh/include/ESMCI_MEFamily.h>
 #include <Mesh/include/ESMCI_Exception.h>
 
-#include <Mesh/include/ESMC_ShapeLagrange.h>
-#include <Mesh/include/ESMC_SFuncAdaptor.h>
+#include <Mesh/include/ESMCI_ShapeLagrange.h>
+#include <Mesh/include/ESMCI_SFuncAdaptor.h>
 
 
 namespace ESMCI {

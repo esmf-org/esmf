@@ -8,7 +8,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMC_RefineTopo.h>
+#include <Mesh/include/ESMCI_RefineTopo.h>
 
 #include <map>
 

@@ -14,9 +14,9 @@
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_MeshObjTopo.h>
 #include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMC_ParEnv.h>
+#include <Mesh/include/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_IOField.h>
-#include <Mesh/include/ESMC_MeshSkin.h>
+#include <Mesh/include/ESMCI_MeshSkin.h>
 
 namespace ESMCI {
 
