@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.50 2008/07/25 18:31:22 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.51 2008/10/16 21:31:32 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,6 +40,7 @@
 ! !USES: 
       use ESMF_UtilTypesMod
       use ESMF_BaseMod
+      use ESMF_FIOUtilMod
       use ESMF_IOSpecMod
       use ESMF_LogErrMod
       use ESMF_ConfigMod
@@ -95,7 +96,8 @@
 !
 ! !INTERFACE:
       subroutine ESMF_Initialize(defaultConfigFileName, defaultCalendar, &
-        defaultLogFileName, defaultLogType, mpiCommunicator, vm, rc)
+        defaultLogFileName, defaultLogType, mpiCommunicator,  &
+        FIOUnitLower, FIOUnitUpper, vm, rc)
 !
 ! !ARGUMENTS:
       character(len=*),        intent(in),  optional :: defaultConfigFileName
@@ -103,6 +105,8 @@
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_LogType),      intent(in),  optional :: defaultLogType
       integer,                 intent(in),  optional :: mpiCommunicator
+      integer,                 intent(in),  optional :: FIOUnitLower
+      integer,                 intent(in),  optional :: FIOUnitUpper
       type(ESMF_VM),           intent(out), optional :: vm
       integer,                 intent(out), optional :: rc
 
@@ -161,6 +165,13 @@
 !           MPI communicator defining the group of processes on which the
 !           ESMF application is running.
 !           If not specified, defaults to {\tt MPI\_COMM\_WORLD}
+!     \item [{[FIOUnitLower]}]
+!           Lower bound for Fortran unit numbers used within the ESMF library.
+!           Fortran units are primarily used for log files.
+!           If not specified, defaults to {\tt ESMF\_LOG\_FORT\_UNIT\_NUMBER}
+!     \item [{[FIOUnitUpper]}]
+!           Upper bound for Fortran unit numbers used within the ESMF library.
+!           If not specified, defaults to {\tt ESMF\_LOG\_UPPER}
 !     \item [{[vm]}]
 !           Returns the global {\tt ESMF\_VM} that was created 
 !           during initialization.
@@ -181,6 +192,7 @@
         defaultConfigFileName=defaultConfigFileName, &
         defaultCalendar=defaultCalendar, defaultLogFileName=defaultLogFileName,&
         defaultLogType=defaultLogType, mpiCommunicator=mpiCommunicator, &
+        FIOUnitLower=FIOUnitLower, FIOUnitUpper=FIOUnitUpper,  &
         rc=localrc)
                                       
       ! on failure LogErr is not initialized -> explicit print on error
@@ -213,7 +225,7 @@
 ! !INTERFACE:
       subroutine ESMF_FrameworkInternalInit(lang, defaultConfigFileName, &
         defaultCalendar, defaultLogFileName, defaultLogType, &
-        mpiCommunicator, rc)
+        mpiCommunicator, FIOUnitLower, FIOUnitUpper, rc)
 !
 ! !ARGUMENTS:
       integer,                 intent(in)            :: lang     
@@ -222,6 +234,8 @@
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_LogType),      intent(in),  optional :: defaultLogType  
       integer,                 intent(in),  optional :: mpiCommunicator
+      integer,                 intent(in),  optional :: FIOUnitLower
+      integer,                 intent(in),  optional :: FIOUnitUpper
       integer,                 intent(out), optional :: rc     
 
 !
@@ -248,6 +262,13 @@
 !           MPI communicator defining the group of processes on which the
 !           ESMF application is running.
 !           If not sepcified, defaults to {\tt MPI\_COMM\_WORLD}
+!     \item [{[FIOUnitLower]}]
+!           Lower bound for Fortran unit numbers used within the ESMF library.
+!           Fortran units are primarily used for log files.
+!           If not specified, defaults to {\tt ESMF\_LOG\_FORT\_UNIT\_NUMBER}
+!     \item [{[FIOUnitUpper]}]
+!           Upper bound for Fortran unit numbers used within the ESMF library.
+!           If not specified, defaults to {\tt ESMF\_LOG\_UPPER}
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -270,6 +291,18 @@
           if (rcpresent) rc = ESMF_SUCCESS
           return
       endif
+
+      ! If non-default Fortran unit numbers are to be used, set them
+      ! prior to log files being created.
+
+      if (present (FIOUnitLower) .or. present (FIOUnitUpper)) then
+          call ESMF_FIOUnitInit (lower=FIOUnitLower, upper=FIOUnitUpper, rc=status)
+          if (status /= ESMF_SUCCESS) then
+              if (rcpresent) rc = status
+              print *, "Error setting unit number bounds"
+              return
+          end if
+      end if
 
       ! Initialize the VM. This creates the GlobalVM.
       ! Note that if VMKernel threading is to be used ESMF_VMInitialize() _must_
