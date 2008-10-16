@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.53 2008/09/15 17:10:25 theurich Exp $
+! $Id: ESMF_Config.F90,v 1.54 2008/10/16 04:43:33 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -154,26 +154,6 @@
        character, parameter :: EOB = achar(00)   ! end of buffer mark (null)
        character, parameter :: NUL = achar(00)   ! what it says
        
-
-!    Defines standard i/o units.
-
-        integer, parameter :: stdin  = 5
-        integer, parameter :: stdout = 6
-
-#ifdef sysHP_UX
-
-        ! Special setting for HP_UX
-
-        integer, parameter :: stderr = 7
-#else
-        ! Generic setting for UNIX other than HP-UX
-
-        integer, parameter :: stderr = 0
-#endif
-
-        integer,parameter :: MX_LU=255
-!------------------------------------------------------------------------------
-! !OPAQUE TYPES:
 !------------------------------------------------------------------------------
        type ESMF_ConfigAttrUsed
           sequence
@@ -2170,8 +2150,8 @@
 
 !     Open file
 !     ---------     
-      lu = luavail() ! a more portable version
-      if ( lu .lt. 0 ) then
+      call ESMF_FIOUnitGet (lu, localrc)
+      if ( localrc /= ESMF_SUCCESS ) then
          localrc = -97
          if ( present (rc )) then
            rc = localrc
@@ -2937,78 +2917,6 @@
       end subroutine ESMF_Config_pad
 
     
-
-
-
-
-!-----------------------------------------------------------------------
-!
-! !IROUTINE: luavail - locate the next available unit
-!
-! !DESCRIPTION:
-!
-!    luavail() Look for an available (not opened and not statically
-!    assigned to any I/O attributes to) logical unit.
-!
-! !INTERFACE:
-
-        function luavail()
-          !!!use m_stdio_Config
-          implicit none
-          integer :: luavail ! result
-
-!-----------------------------------------------------------------------
-
-        integer :: lu,ios
-        logical :: inuse
-#ifdef _UNICOS
-        character(len=8) :: attr
-#endif
-
-        lu=-1
-        ios=0
-        inuse=.true.
-
-        do while(ios.eq.0.and.inuse)
-          lu=lu+1
-
-                ! Test #1, reserved
-
-          inuse = lu.eq.stdout .or. lu.eq.stdin .or. lu.eq.stderr
-
-#ifdef sysSunOS
-                ! Reserved units under SunOS
-          inuse = lu.eq.100 .or. lu.eq.101 .or. lu.eq.102
-#endif
-
-                ! Test #2, in-use
-
-          if(.not.inuse) inquire(unit=lu,opened=inuse,iostat=ios)
-
-#ifdef _UNICOS
-                ! Test #3, if the user has reserved the unit through
-                ! UNICOS' assign().
-
-          if(ios.eq.0 .and. .not.inuse) then
-            call asnqunit(lu,attr,ios)
-
-                ! see asnqunig(3f):
-                !
-                ! ios ==  0, has been assigned to some attributes
-                !        -1, not been assigned any attributes
-                !     >   0, an error condition, but who cares why.
-
-            inuse=ios.ne.-1  ! the unit is in-use
-            if(ios .ge. -1) ios=0  ! still a valid test
-          endif
-#endif
-
-          if(lu .ge. MX_LU) ios=-1
-        end do
-
-        if(ios.ne.0) lu=-1
-        luavail=lu
-end function luavail
 
 
 
