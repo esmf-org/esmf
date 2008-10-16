@@ -1,4 +1,4 @@
-! $Id: ESMF_FIOUtil.F90,v 1.3 2008/10/06 23:28:13 w6ws Exp $
+! $Id: ESMF_FIOUtil.F90,v 1.4 2008/10/16 04:41:42 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -64,6 +64,28 @@
 !
 !==============================================================================
 
+! Standard I/O Units
+
+! (F2003 TODO: Eventually, for compilers which support the F2003
+! ISO_FORTRAN_ENV intrinsic module, these should access the constants
+! 'input_unit', 'output_unit', and 'error_unit'.)
+
+        integer, parameter, public :: ESMF_FIOstdin  = 5
+        integer, parameter, public :: ESMF_FIOstdout = 6
+
+#ifdef sysHP_UX
+
+        ! Special setting for HP_UX
+
+        integer, parameter, public :: ESMF_FIOstderr = 7
+#else
+        ! Generic setting for UNIX other than HP-UX
+
+        integer, parameter, public :: ESMF_FIOstderr = 0
+#endif
+
+! Unit number range for ESMF internal use.
+
       integer, private :: ESMF_FIOUnitLower = ESMF_LOG_FORT_UNIT_NUMBER
       integer, private :: ESMF_FIOUnitUpper = ESMF_LOG_UPPER
 
@@ -71,7 +93,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_FIOUtil.F90,v 1.3 2008/10/06 23:28:13 w6ws Exp $'
+               '$Id: ESMF_FIOUtil.F90,v 1.4 2008/10/16 04:41:42 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
