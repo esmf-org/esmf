@@ -131,7 +131,7 @@
 ! ! Special dimenaion for Arbitrarily distributed dimension
 !
 !------------------------------------------------------------------------------
-#define ESMF_GRID_ARBDIM   -1
+integer,parameter :: ESMF_GRID_ARBDIM = -1
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC TYPES:
@@ -184,6 +184,8 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
   public ESMF_ArrayCreateFromGrid
   public ESMF_GridGetArrayInfo
 
+  public ESMF_GRID_ARBDIM
+
 ! - ESMF-internal methods:
   public ESMF_GridGetInit  
 
@@ -192,7 +194,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.89 2008/10/16 21:27:07 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.90 2008/10/16 22:54:27 peggyli Exp $'
 
 !==============================================================================
 ! 
