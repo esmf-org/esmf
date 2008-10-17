@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2008/09/26 21:11:38 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2008/10/17 18:43:58 rosalind Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -6,13 +6,16 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR    = src/Infrastructure/Mesh/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest 
+              # $(ESMF_TESTDIR)/ESMC_MeshUTest
 
 TESTS_OBJ = 
 
 TESTS_RUN     = RUN_ESMF_MeshUTest
+              #RUN_ESMC_MeshUTest
 
 TESTS_RUN_UNI = RUN_ESMF_MeshUTestUNI
+              #RUN_ESMC_MeshUTestUNI
 
 
 
@@ -22,18 +25,23 @@ CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
-DIRS        = 
 
 
 #
 # unit test targets
 #
 
-# --- Mesh test
+# --- Mesh tests
 
 RUN_ESMF_MeshUTest:
 	$(MAKE) TNAME=Mesh NP=4 ftest
 
 RUN_ESMF_MeshUTestUNI:
 	$(MAKE) TNAME=Mesh NP=1 ftest
+
+RUN_ESMC_MeshUTest:
+	$(MAKE) TNAME=Mesh NP=4 ctest
+
+RUN_ESMC_MeshUTestUNI:
+	$(MAKE) TNAME=Mesh NP=1 ctest
 
