@@ -194,7 +194,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.90 2008/10/16 22:54:27 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.91 2008/10/17 16:27:05 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -2257,8 +2257,8 @@ end subroutine ESMF_GridConvertIndex
     ! Initialize this grid object as invalid
     grid%this = ESMF_NULL_POINTER
 
-    ! Call C++ Subroutine to do the create
-    call c_ESMC_gridcreatefromdistgridarb(grid%this, nameLen, name, &
+    ! Call C++ Subroutine to do the create         
+    call c_ESMC_gridcreatedistgridarb(grid%this, nameLen, name, &
       coordTypeKind, distgrid, distDimArg, arbDim, &
       coordDimCountArg, coordDimMapArg, &
       minIndexArg, maxIndexArg, localIndicesArg, localCounts, &

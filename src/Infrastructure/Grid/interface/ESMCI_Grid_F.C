@@ -133,7 +133,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridcreatefromdistgridarb)(ESMCI::Grid **ptr, 
+  void FTN(c_esmc_gridcreatedistgridarb)(ESMCI::Grid **ptr, 
     int *nameLen, char *name, ESMC_TypeKind *coordTypeKind, 
 					  ESMCI::DistGrid **distgrid,
 					  ESMCI::InterfaceInt **distDimArg, 
@@ -149,7 +149,7 @@ extern "C" {
 					  int *rc){
     int localrc;
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridcreatefromdistgridarb()"
+#define ESMC_METHOD "c_esmc_gridcreatedistgridarb()"
     bool destroyDistgrid, *destroyDistgridPtr;
     bool destroyDELayout, *destroyDELayoutPtr;
 
