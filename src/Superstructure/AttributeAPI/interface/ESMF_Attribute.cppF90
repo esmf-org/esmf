@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.1 2008/10/09 17:01:02 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.2 2008/10/17 20:08:45 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.1 2008/10/09 17:01:02 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.2 2008/10/17 20:08:45 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -723,14 +723,14 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute
+! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute or Attribute package
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeRemove(<object>, name, convention, purpose, rc)
 !
 ! !ARGUMENTS:
-!     <object>, see below for supported values  
-!     character (len = *), intent(in) :: name
+!     <object>, see below for supported values
+!     character (len = *), intent(in), optional :: name
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
 !     integer, intent(out), optional :: rc   
@@ -761,6 +761,11 @@ contains
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
+!
+!     NOTE:  An entire Attribute package can be removed by specifying a 
+!            convention and purpose only, without a name.  By specifying
+!            a convention, purpose, and name an Attribute will be moved 
+!            from the corresponding Attribute package, if it exists.
 !
 !
 !EOP
@@ -966,7 +971,7 @@ contains
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
-      character (len = *), intent(in) :: name @\
+      character (len = *), intent(in), optional :: name @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       integer, intent(out), optional :: rc    @\
@@ -1019,32 +1024,38 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
-      if (directional == 0) then @\
-      call c_ESMCI_AttPackRemove(mthisfield, name, fconvention, & @\
-        fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (directional == 1) then @\
-      call c_ESMCI_AttPackRemove(mthisfield, name, convention, & @\
-        fpurpose, fobject, localrc) @\
-      if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (directional == 2) then @\
-      call c_ESMCI_AttPackRemove(mthisfield, name, fconvention, & @\
+      if (directional == 3 .AND. not(present(name))) then @\
+      call c_ESMCI_AttPackRemove(mthisfield, convention, & @\
         purpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 3) then @\
-      call c_ESMCI_AttPackRemove(mthisfield, name, convention, & @\
+      else if (directional == 0 .AND. present(name)) then @\
+      call c_ESMCI_AttPackRemoveAttribute(mthisfield, name, fconvention, & @\
+        fpurpose, fobject, localrc) @\
+      if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (directional == 1 .AND. present(name)) then @\
+      call c_ESMCI_AttPackRemoveAttribute(mthisfield, name, convention, & @\
+        fpurpose, fobject, localrc) @\
+      if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (directional == 2 .AND. present(name)) then @\
+      call c_ESMCI_AttPackRemoveAttribute(mthisfield, name, fconvention, & @\
+        purpose, fobject, localrc) @\
+      if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (directional == 3 .AND. present(name)) then @\
+      call c_ESMCI_AttPackRemoveAttribute(mthisfield, name, convention, & @\
         purpose, fobject, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-    else @\
+    else if (present(name)) then @\
  @\
       call c_ESMCI_AttributeRemove(mthisfield, name, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1254,7 +1265,7 @@ contains
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(inout), optional :: defaultvalueList @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: itemCount    @\
+      integer, intent(out), optional :: itemCount    @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -1298,11 +1309,7 @@ contains
  @\
       directional = 0 ! neither convention nor purpose @\
  @\
-      if (present(itemCount)) then @\
-	litemCount = itemCount @\
-      else @\
-	litemCount = size(valueList) @\
-      end if @\
+      litemCount = size(valueList) @\
  @\
       limit = size(valueList) @\
       if (litemCount > limit .OR. litemCount .le. 0) then @\
@@ -1417,6 +1424,10 @@ contains
         endif @\
       endif @\
  @\
+    endif @\
+ @\
+    if (present(itemCount)) then @\
+      itemCount = litemCount @\
     endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
@@ -1621,7 +1632,7 @@ contains
       logical, dimension(:), intent(inout), optional :: defaultvalueList @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: itemCount    @\
+      integer, intent(out), optional :: itemCount    @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -1668,11 +1679,7 @@ contains
  @\
       directional = 0 ! neither convention nor purpose @\
  @\
-      if (present(itemCount)) then @\
-	litemCount = itemCount @\
-      else @\
-	litemCount = size(valueList) @\
-      end if @\
+      litemCount = size(valueList) @\
  @\
       limit = size(valueList) @\
       if (litemCount > limit .OR. litemCount .le. 0) then @\
@@ -1801,6 +1808,10 @@ contains
         endif @\
       endif @\
  @\
+    endif @\
+@\
+    if (present(itemCount)) then @\
+      itemCount = litemCount @\
     endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
@@ -1993,7 +2004,7 @@ contains
       character (len=*), dimension(:), intent(in), optional :: defaultvalueList @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: itemCount @\
+      integer, intent(out), optional :: itemCount @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -2040,11 +2051,7 @@ contains
  @\
       directional = 0 ! neither convention nor purpose @\
  @\
-      if (present(itemCount)) then @\
-	litemCount = itemCount @\
-      else @\
-	litemCount = size(valueList) @\
-      end if @\
+      litemCount = size(valueList) @\
  @\
       limit = size(valueList) @\
       if (litemCount > limit .OR. litemCount .le. 0) then @\
@@ -2173,6 +2180,10 @@ contains
         valueList(i) = valueString(j:(j+lens(i)-1)) @\
         j = j + lens(i) @\
       enddo @\
+ @\
+    if (present(itemCount)) then @\
+      itemCount = litemCount @\
+    endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.1 2008/10/09 14:28:15 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.2 2008/10/17 20:07:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -59,6 +59,7 @@ class ESMCI_Attribute
     string attrObject;                 // for att packages
     ESMC_Logical attrPack;                         // for att packages
 
+    int attrID;                 // ID of the attribute
     int attrCount;              // number of attributes in use in list
     vector<ESMCI_Attribute*>  attrList;  // attributes - array of pointers
 
@@ -90,8 +91,14 @@ class ESMCI_Attribute
     ESMCI_Attribute *ESMCI_AttPackGetAttribute(const string &name, 
       const string &convention, const string &purpose, 
       const string &object) const;
+    int ESMCI_AttPackGetIndex(const string &convention, 
+      const string &purpose, const string &object) const;
     int ESMCI_AttPackIsPresent(const string &name, const string &convention, 
       const string &purpose, const string &object, ESMC_Logical *present) const;
+    int ESMCI_AttPackRemove(const string &convention, 
+      const string &purpose, const string &object);
+    int ESMCI_AttPackRemoveAttribute(const string &name, const string &convention, 
+      const string &purpose, const string &object);
     int ESMCI_AttPackSet(const string &name, const ESMC_TypeKind &tk, 
       int count, void *value, const string &convention, 
       const string &purpose, const string &object);
@@ -104,11 +111,6 @@ class ESMCI_Attribute
       const string &object, int &objCount, int &objmaxattrCount) const;
     int ESMCI_AttributeCountTreeLens(const string &convention, const string &purpose,  
       const string &object, int *attrLens, vector<string> &attrNames) const;
-    
-    // destroy an attribute or attpack
-    int ESMCI_AttributeRemove(const string &name, const string &convention, 
-      const string &purpose, const string &object);
-    int ESMCI_AttributeRemove(const string &name);
     
     // attribute methods - get
     int ESMCI_AttributeGet(const string &name, ESMC_I4 *value) const;
@@ -138,6 +140,9 @@ class ESMCI_Attribute
     // query for existence of an attribute
     int ESMCI_AttributeIsPresent(const string &name, ESMC_Logical *present) const;
 
+    // destroy an attribute or attpack
+    int ESMCI_AttributeRemove(const string &name);
+    
     // setting when you have an attribute already assembled
     int ESMCI_AttributeSet(ESMCI_Attribute *attr);
 

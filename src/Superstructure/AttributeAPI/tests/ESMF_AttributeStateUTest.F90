@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeStateUTest.F90,v 1.1 2008/10/09 17:01:02 rokuingh Exp $
+! $Id: ESMF_AttributeStateUTest.F90,v 1.2 2008/10/17 20:08:45 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeStateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeStateUTest.F90,v 1.1 2008/10/09 17:01:02 rokuingh Exp $'
+      '$Id: ESMF_AttributeStateUTest.F90,v 1.2 2008/10/17 20:08:45 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -50,7 +50,7 @@ program ESMF_AttributeStateUTest
       type(ESMF_State)       :: state, state2, sfs
       type(ESMF_FieldBundle) :: fbfs
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrnameOut, attrvalue
-      integer                :: rc, count, items
+      integer                :: rc, count, items, itemCount
       type(ESMF_TypeKind)    :: attrTK
 
       integer(kind=4)                     :: inI4, outI4, defaultI4, dfltoutI4
@@ -60,11 +60,14 @@ program ESMF_AttributeStateUTest
       real(kind=4)                     :: inR4, outR4, defaultR4, dfltoutR4
       real(kind=4), dimension(3)       :: inR4l, outR4l, defaultR4l, dfltoutR4l
       real(kind=8)                     :: inR8, outR8, defaultR8, dfltoutR8
-      real(kind=8), dimension(3)       :: inR8l, outR8l, defaultR8l, dfltoutR8l
+      real(kind=8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l
+      real(kind=8), dimension(5)       :: outR8l
       character(ESMF_MAXSTR)                     :: inChar, outChar, defaultChar, dfltoutChar
-      character(ESMF_MAXSTR), dimension(3)       :: inCharl, outCharl, defaultCharl, dfltoutCharl
+      character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl
+      character(ESMF_MAXSTR), dimension(5)       :: outCharl
       logical                          :: inLog, outLog, defaultLog, dfltoutLog
-      logical, dimension(3)            :: inLogl, outLogl, defaultLogl, dfltoutLogl
+      logical, dimension(3)            :: inLogl, defaultLogl, dfltoutLogl
+      logical, dimension(5)            :: outLogl
   
       character(ESMF_MAXSTR), dimension(3)  :: attpackList, attpackListOut, &
                                                attpackListOut2, attpackDfltList, &
@@ -412,11 +415,11 @@ program ESMF_AttributeStateUTest
       !EX_UTest
       ! Get an ESMF_R8 list Attribute from a State Test
       call ESMF_AttributeGet(state, name="AttrR8l", &
-        valueList=outR8l, rc=rc)
+        valueList=outR8l(2:5), itemCount=itemCount, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an ESMF_R8l Attribute from a State Test"
-      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8l), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8l(2:4) .and. &
+                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -505,11 +508,11 @@ program ESMF_AttributeStateUTest
       !EX_UTest
       ! Get a char list Attribute on a State Test
       call ESMF_AttributeGet(state, name="Charl", &
-        valueList=OutCharl, rc=rc)
+        valueList=OutCharl(2:5),itemCount=itemCount, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an Attribute char list from a State test"
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl==OutCharl), &
-        name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl==OutCharl(2:4) .and. &
+                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -601,11 +604,11 @@ program ESMF_AttributeStateUTest
       !EX_UTest
       ! Get a logical attribute - state version
       call ESMF_AttributeGet(state, name=attrname,  &
-        valueList=outLogl, rc=rc)
+        valueList=outLogl(2:5), itemCount=itemCount, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting State Attribute (type Fortran logical state)"
-      call ESMF_Test((rc == ESMF_SUCCESS) .and. all (inLogl .eqv. outLogl),   &
-        name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc == ESMF_SUCCESS) .and. all (inLogl .eqv. outLogl(2:4) &
+                    .and. itemCount==3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -708,6 +711,14 @@ program ESMF_AttributeStateUTest
         attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Writing an Attribute package from a State Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Remove the entire Attribute package from a State Test
+      call ESMF_AttributeRemove(state, convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Removing the entire Attribute package from a State Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -947,6 +958,34 @@ program ESMF_AttributeStateUTest
       write(name, *) "Copy an Attribute hierarchy from state1 to state2"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+#ifdef ESMF_TESTEXHAUSTIVE
+
+      !EX_UTest
+      ! Link a State Attribute hierarchy to a State Attribute hierarchy State Test, again
+      call ESMF_AttributeSet(state, sfs, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a State hierarchy to a State hierarchy Test, again"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Link a State Attribute hierarchy to a Field Attribute hierarchy State Test, again
+      call ESMF_AttributeSet(state, ffs, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a State hierarchy to a Field hierarchy Test, again"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Link a State Attribute hierarchy to a FieldBundle Attribute hierarchy State Test, again
+      call ESMF_AttributeSet(state, fbfs, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Linking a State hierarchy to a FieldBundle hierarchy Test, again"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+#endif
 
     !-------------------------------------------------------------------------
     !  Attribute Info

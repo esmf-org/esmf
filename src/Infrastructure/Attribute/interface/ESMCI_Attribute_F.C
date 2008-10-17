@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.1 2008/10/09 14:28:15 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.2 2008/10/17 20:07:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.1 2008/10/09 14:28:15 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.2 2008/10/17 20:07:49 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -187,6 +187,111 @@ extern "C" {
 // 
 // !ARGUMENTS:
       ESMC_Base **base,          // in/out - base object
+      char *convention,          // in - convention
+      char *purpose,             // in - purpose
+      char *object,              // in - object type
+      int *rc,                   // in - return code
+      int clen,                  // hidden/in - strlen count for convention
+      int plen,                  // hidden/in - strlen count for purpose           
+      int olen) {                // hidden/in - strlen count for object
+// 
+// !DESCRIPTION:
+//    Remove an attribute package
+//
+//EOP
+
+  int status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cconv.empty()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  if (cpurp.empty()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  if (cobj.empty()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Set the attribute on the object.
+  status = (**base).root.ESMCI_AttPackRemove(cconv, cpurp, cobj);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed removing attribute package", &status);
+  }
+
+  if (rc) *rc = status;
+  return;
+
+}  // end c_ESMCI_attpackremove
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMCI_attpackremoveattribute - Remove an attribute from an
+//                                              attribute package
+//
+// !INTERFACE:
+      void FTN(c_esmci_attpackremoveattribute)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmci_attpackremoveattribute()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,          // in/out - base object
       char *name,                // in - F90, non-null terminated string
       char *convention,          // in - convention
       char *purpose,             // in - purpose
@@ -284,7 +389,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.ESMCI_AttributeRemove(cname, cconv, cpurp, cobj);
+  status = (**base).root.ESMCI_AttPackRemoveAttribute(cname, cconv, cpurp, cobj);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed removing attribute package", &status);
@@ -293,7 +398,7 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_ESMCI_attpackremove
+}  // end c_ESMCI_attpackremoveattribute
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -605,18 +710,20 @@ extern "C" {
 
   // we need to get the count first 
   lcount = attr->ESMCI_AttributeGetItemCount(cname);
-  if (lcount != *count) {
+  if (lcount > *count) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "itemcount-in does not match itemcount of attribute", &status);
+                         "itemcount-in is less than the itemcount of the attribute", &status);
     if (rc) *rc = status;
     return;
   }
+  // set the itemcount out to the itemcount of the attribute
+  *count = lcount;
   
   //   use the count to allocate llens
-  llens = new int[*count];
+  llens = new int[lcount];
   
   //  use llens to get the lengths of all items on this attribute
-  status = attr->ESMCI_AttributeGet(cname, llens, *count);
+  status = attr->ESMCI_AttributeGet(cname, llens, lcount);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting item char* lengths", &status);
@@ -626,7 +733,7 @@ extern "C" {
   }
 
   //  check the llens against the supplied lens to make sure buffer is large enough
-  for (i=0; i<*count; i++) {
+  for (i=0; i<lcount; i++) {
     // make sure destination will be long enough
     if (lens[i] < llens[i]) {
       sprintf(msgbuf,"attribute %s item #%d is %d bytes long, buffer length %d is too short",
@@ -654,7 +761,7 @@ extern "C" {
   
   // finally we convert them all to f90 and pack them into char*
   j = 0;
-  for (i=0; i<*count; i++) {
+  for (i=0; i<lcount; i++) {
     // convert strings to F90 using F90 length
     status = ESMC_CtoF90string(const_cast<char*> (lcvalue[i].c_str()), &valueList[j], 
     (lcvalue[i]).size());
@@ -814,9 +921,9 @@ extern "C" {
     return;
   }
 
-  if (attrCount != *count) {
+  if (attrCount > *count) {
     ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_INCOMP,
-                         "attribute value not expected count", &status);
+                         "attribute has more items than array has space", &status);
     if (rc) *rc = status;
     return;
   }
@@ -2026,7 +2133,8 @@ extern "C" {
       if (rc) *rc = status;
       return;
   }
-
+ 
+  // allocate space for the name
   string cname(name, nlen);
   cname.resize(cname.find_last_not_of(" ")+1);
 
@@ -2047,20 +2155,22 @@ extern "C" {
     return;
   }
 
-  // we need to get the count first 
+  // get the number of items on the attribute, compare to the buffer size
   lcount = (**base).root.ESMCI_AttributeGetItemCount(cname);
-  if (lcount != *count) {
+  if (lcount > *count) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "itemcount-in does not match itemcount of attribute", &status);
+                         "itemcount-in is less than the itemcount of the attribute", &status);
     if (rc) *rc = status;
     return;
   }
+  // now set *count to the actual number of items in the attribute
+  *count = lcount;
   
   //   use the count to allocate llens
-  llens = new int[*count];
+  llens = new int[lcount];
   
   //  use llens to get the lengths of all items on this attribute
-  status = (**base).root.ESMCI_AttributeGet(cname, llens, *count);
+  status = (**base).root.ESMCI_AttributeGet(cname, llens, lcount);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting item char* lengths", &status);
@@ -2070,7 +2180,7 @@ extern "C" {
   }
 
   //  check the llens against the supplied lens to make sure buffer is large enough
-  for (i=0; i<*count; i++) {
+  for (i=0; i<lcount; i++) {
     // make sure destination will be long enough
     if (lens[i] < llens[i]) {
       sprintf(msgbuf,"attribute %s item #%d is %d bytes long, buffer length %d is too short",
@@ -2086,7 +2196,7 @@ extern "C" {
   
   // allocate all char**s and string vector
   vector<string> cvalue;
-  cvalue.reserve(*count);
+  cvalue.reserve(lcount);
 
   // next we get all the strings into the char**
   status = (**base).root.ESMCI_AttributeGet(cname, &cvalue);
@@ -2100,7 +2210,7 @@ extern "C" {
   
   // finally we convert them all to f90 and pack them into char*
   j = 0;
-  for (i=0; i<*count; i++) {
+  for (i=0; i<lcount; i++) {
     // convert strings to F90 using F90 length
     status = ESMC_CtoF90string(const_cast<char*> (cvalue[i].c_str()), &valueList[j], lens[i]);
     if (status != ESMF_SUCCESS) {
@@ -2192,9 +2302,9 @@ extern "C" {
     return;
   }
   
-  if (attrCount != *count) {
+  if (attrCount > *count) {
     ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_INCOMP,
-                         "attribute value not expected count", &status);
+                         "attribute has more items than array has space", &status);
     if (rc) *rc = status;
     return;
   }

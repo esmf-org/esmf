@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.2 2008/10/09 18:57:36 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.3 2008/10/17 20:07:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,10 +34,13 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.2 2008/10/09 18:57:36 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.3 2008/10/17 20:07:49 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
+
+// initialize class-wide instance counter
+static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -230,6 +233,43 @@ namespace ESMCI {
 }  // end ESMCI_AttPackGetAttribute
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttPackGetIndex"
+//BOPI
+// !IROUTINE:  ESMCI_AttPackGetIndex - get the index of an attpack on an 
+//                                    {\tt ESMCI_Attribute}
+//
+// !INTERFACE:
+      int ESMCI_Attribute::ESMCI_AttPackGetIndex(
+// 
+// !RETURN VALUE:
+//    {\tt ESMCI_Attribute} pointer to requested object or NULL on early exit.
+// 
+// !ARGUMENTS:
+      const string &convention,             // in - Attribute convention to retrieve
+      const string &purpose,                // in - Attribute purpose to retrieve
+      const string &object) const {         // in - Attribute object type to retrieve
+// !DESCRIPTION:
+//    Get an attpack on an {\tt ESMCI_Attribute} given it's convention, 
+//    purpose, and object type.
+//
+//EOPI
+
+  // look for the attpack on this Attribute
+  for (int i=0; i<attrCount; i++) {
+      if (convention.compare(attrList[i]->attrConvention) == 0 && 
+          purpose.compare(attrList[i]->attrPurpose) == 0 &&
+          object.compare(attrList[i]->attrObject) == 0 &&
+          attrList[i]->attrPack == ESMF_TRUE) {
+          return i;
+          }
+  }
+ 
+  // if you got here, you did not find the attpack
+  return -1;
+
+}  // end ESMCI_AttPackGetIndex
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_AttPackIsPresent"
 //BOPI
 // !IROUTINE:  ESMCI_AttPackIsPresent - query an {\tt ESMCI_Attribute} for an attpack
@@ -269,6 +309,151 @@ namespace ESMCI {
   return ESMF_SUCCESS;
 
 }  // end ESMCI_AttPackIsPresent
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttPackRemove"
+//BOPI
+// !IROUTINE:  ESMCI_AttPackRemove - Remove an {\tt ESMCI_Attribute} package
+//
+// !INTERFACE:
+      int ESMCI_Attribute::ESMCI_AttPackRemove(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      const string &convention,              // in - convention
+      const string &purpose,                 // in - purpose
+      const string &object) {                // in - object type to look for
+// 
+// !DESCRIPTION:
+//     Remove an {\tt ESMCI_Attribute} package
+
+//EOPI
+
+  int localrc;
+  char msgbuf[ESMF_MAXSTR];
+  unsigned int i;
+  ESMCI_Attribute *attpack;
+
+  // Initialize local return code
+  localrc = ESMC_RC_NOT_IMPL;
+    
+  // get the attpack
+  attpack = ESMCI_AttPackGet(convention, purpose, object);
+  if(!attpack) {
+       sprintf(msgbuf, "Cannot find an Attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
+                      convention.c_str(), purpose.c_str(), object.c_str());
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                             msgbuf, &localrc);
+      return ESMF_FAILURE;
+  }
+  
+  int end = attpack->attrCount;
+  int removed = 0;
+  // remove all of the attributes in this package
+  for (i=0; i<end; i++) {
+    (attpack->attrList[i])->~ESMCI_Attribute();
+    attpack->attrList.erase(attpack->attrList.begin() + i - removed);
+    (attpack->attrCount)--;
+    removed++;
+  }
+  
+  if (!(attpack->attrList.empty())) {
+    sprintf(msgbuf, "failed removing entire attribute package, attrCount = %d",
+      attpack->attrCount);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  msgbuf, &localrc);
+    return ESMF_FAILURE;
+  }
+
+  int ind = ESMCI_AttPackGetIndex(convention, purpose, object);
+  if (ind >= 0) {
+    attpack->~ESMCI_Attribute();
+    attrList.erase(attrList.begin() + ind);
+    attrCount--;
+  }
+  
+  return ESMF_SUCCESS;
+
+}  // end ESMCI_AttPackRemove
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttPackRemoveAttribute"
+//BOPI
+// !IROUTINE:  ESMCI_AttPackRemoveAttribute - Remove an {\tt ESMCI_Attribute} from
+//                                            an {\tt ESMCI_Attribute} package
+//
+// !INTERFACE:
+      int ESMCI_Attribute::ESMCI_AttPackRemoveAttribute(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      const string &name,                    // in - name
+      const string &convention,              // in - convention
+      const string &purpose,                 // in - purpose
+      const string &object) {                // in - object type to look for
+// 
+// !DESCRIPTION:
+//     Remove an {\tt ESMCI_Attribute} from an {\tt ESMCI_Attribute} package
+
+//EOPI
+
+  int localrc;
+  char msgbuf[ESMF_MAXSTR];
+  unsigned int i;
+  ESMCI_Attribute *attpack;
+  bool done;
+
+  // Initialize local return code
+  localrc = ESMC_RC_NOT_IMPL;
+  
+  done = false;
+  
+  // get the attpack
+  attpack = ESMCI_AttPackGet(convention, purpose, object);
+  if(!attpack) {
+       sprintf(msgbuf, "Cannot find an Attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
+                      convention.c_str(), purpose.c_str(), object.c_str());
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                             msgbuf, &localrc);
+      return ESMF_FAILURE;
+  }
+  
+  for (i=0; i<attpack->attrCount; i++) {
+    if (name.compare(attpack->attrList[i]->attrName) == 0 &&
+      convention.compare(attpack->attrList[i]->attrConvention) == 0 && 
+      purpose.compare(attpack->attrList[i]->attrPurpose) == 0 &&
+      object.compare(attpack->attrList[i]->attrObject) == 0) {
+      // found a match, destroy it
+      (attpack->attrList[i])->~ESMCI_Attribute();
+      attpack->attrList.erase(attpack->attrList.begin() + i);
+      (attpack->attrCount)--;
+      done = true;
+      break;
+    }
+  }
+  
+  if (!done) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "could not locate, ", &localrc);
+    return ESMF_FAILURE;
+  }
+
+  if (attpack->attrCount == 0) {
+    int ind = ESMCI_AttPackGetIndex(convention, purpose, object);
+    if (ind >= 0) {
+      attpack->~ESMCI_Attribute();
+      attrList.erase(attrList.begin() + ind);
+      attrCount--;
+    }
+  }
+  
+  return ESMF_SUCCESS;
+
+}  // end ESMCI_AttPackRemoveAttribute
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_AttPackSet"
@@ -504,120 +689,6 @@ namespace ESMCI {
   return ESMF_SUCCESS;
 
 }  // end ESMCI_AttributeCountTreeLens
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_AttributeRemove"
-//BOPI
-// !IROUTINE:  ESMCI_AttributeRemove - Remove the {\tt ESMCI_Attribute}
-//
-// !INTERFACE:
-      int ESMCI_Attribute::ESMCI_AttributeRemove(
-// 
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-      const string &name,                    // in - name
-      const string &convention,              // in - convention
-      const string &purpose,                 // in - purpose
-      const string &object) {                // in - object type to look for
-// 
-// !DESCRIPTION:
-//     Remove the {\tt ESMCI_Attribute} 
-
-//EOPI
-
-  int localrc;
-  char msgbuf[ESMF_MAXSTR];
-  unsigned int i;
-  ESMCI_Attribute *attpack;
-  bool done;
-
-  // Initialize local return code
-  localrc = ESMC_RC_NOT_IMPL;
-  
-  done = false;
-  
-  // get the attpack
-  attpack = ESMCI_AttPackGet(convention, purpose, object);
-  if(!attpack) {
-       sprintf(msgbuf, "Cannot find an Attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
-                      convention.c_str(), purpose.c_str(), object.c_str());
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                             msgbuf, &localrc);
-      return ESMF_FAILURE;
-  }
-  
-  for (i=0; i<attpack->attrCount; i++) {
-    if (name.compare(attpack->attrList[i]->attrName) == 0 &&
-      convention.compare(attpack->attrList[i]->attrConvention) == 0 && 
-      purpose.compare(attpack->attrList[i]->attrPurpose) == 0 &&
-      object.compare(attpack->attrList[i]->attrObject) == 0) {
-      // found a match, destroy it
-      (attpack->attrList[i])->~ESMCI_Attribute();
-      attpack->attrList.erase(attpack->attrList.begin() + i);
-      (attpack->attrCount)--;
-      done = true;
-      break;
-    }
-  }
-  
-  if (!done) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "could not locate, ", &localrc);
-    return ESMF_FAILURE;
-  }
-
-  return ESMF_SUCCESS;
-
-}  // end ESMCI_AttributeRemove
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_AttributeRemove"
-//BOPI
-// !IROUTINE:  ESMCI_AttributeRemove - Remove the {\tt ESMCI_Attribute}
-//
-// !INTERFACE:
-      int ESMCI_Attribute::ESMCI_AttributeRemove(
-// 
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-      const string &name) {                // in - name
-// 
-// !DESCRIPTION:
-//     Remove the {\tt ESMCI_Attribute} 
-
-//EOPI
-
-  int localrc;
-  unsigned int i, j;
-  bool done=false;
-
-  // Initialize local return code
-  localrc = ESMC_RC_NOT_IMPL;
-  
-  for (i=0; i<attrCount; i++) {
-    if (name.compare(attrList[i]->attrName) == 0) {
-      // found a match, destroy it
-      attrList[i]->~ESMCI_Attribute();
-      attrList.erase(attrList.begin() + i);
-      attrCount--;
-      done = true;
-      break;
-    }
-  }
-  
-  if (!done) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "could not locate, ", &localrc);
-    return ESMF_FAILURE;
-  }
-  
-  return ESMF_SUCCESS;
-
-}  // end ESMCI_AttributeRemove
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_AttributeGet"
@@ -1624,6 +1695,53 @@ namespace ESMCI {
 }  // end ESMCI_AttributeIsPresent
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_AttributeRemove"
+//BOPI
+// !IROUTINE:  ESMCI_AttributeRemove - Remove the {\tt ESMCI_Attribute}
+//
+// !INTERFACE:
+      int ESMCI_Attribute::ESMCI_AttributeRemove(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      const string &name) {                // in - name
+// 
+// !DESCRIPTION:
+//     Remove the {\tt ESMCI_Attribute} 
+
+//EOPI
+
+  int localrc;
+  unsigned int i, j;
+  bool done=false;
+
+  // Initialize local return code
+  localrc = ESMC_RC_NOT_IMPL;
+  
+  for (i=0; i<attrCount; i++) {
+    if (name.compare(attrList[i]->attrName) == 0) {
+      // found a match, destroy it
+      attrList[i]->~ESMCI_Attribute();
+      attrList.erase(attrList.begin() + i);
+      attrCount--;
+      done = true;
+      break;
+    }
+  }
+  
+  if (!done) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "could not locate, ", &localrc);
+    return ESMF_FAILURE;
+  }
+  
+  return ESMF_SUCCESS;
+
+}  // end ESMCI_AttributeRemove
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMCI_AttributeSet - set {\tt ESMCI_Attribute} on an ESMF type
@@ -2181,6 +2299,16 @@ namespace ESMCI {
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
+    
+  for (unsigned int i=0; i<attrCount; i++) {
+    if (attrList[i]->attrRoot) {
+      if (destination->root.attrID == attrList[i]->attrID) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "AttributeSetLink tried to double set a link", &localrc);
+        return ESMF_FAILURE;
+      }
+    }
+  }
   
   attr = &(destination->root);
     
@@ -2923,6 +3051,7 @@ namespace ESMCI {
   attrObject = obj;
   attrPack = ESMF_TRUE;
 
+  attrID = globalCount++;
   attrCount = 0;
   attrList.reserve(attrCount);
 
@@ -2969,6 +3098,7 @@ namespace ESMCI {
   attrObject = '\0';
   attrPack = ESMF_FALSE;
 
+  attrID = globalCount++;
   attrCount = 0;
   attrList.reserve(attrCount);
 
@@ -3015,6 +3145,7 @@ namespace ESMCI {
   attrObject = '\0';
   attrPack = ESMF_FALSE;
 
+  attrID = globalCount++;
   attrCount = 0;
   attrList.reserve(attrCount);
 
@@ -3065,6 +3196,7 @@ namespace ESMCI {
   attrObject = '\0';
   attrPack = ESMF_FALSE;
 
+  attrID = globalCount++;
   attrCount = 0;
   attrList.reserve(attrCount);
   
