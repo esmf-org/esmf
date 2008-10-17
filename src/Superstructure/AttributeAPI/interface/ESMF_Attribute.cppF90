@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.2 2008/10/17 20:08:45 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.3 2008/10/17 23:28:00 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.2 2008/10/17 20:08:45 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.3 2008/10/17 23:28:00 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -395,8 +395,8 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Adds an Attribute package to <object> with four Attributes named 
-!     {\tt shortname}, {\tt longname}, {\tt units}, and {\tt coordinates}.
+!     Adds an Attribute package to <object> with Attribute names according
+!     to the ESG convention.
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -428,15 +428,15 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
-!     subroutine ESMF_AttAddPackCstm(<object>, convention, purpose, &
-!     attrList, count, rc)
+!     subroutine ESMF_AttAddPackCstm(<object>, attrList, convention, purpose, &
+!     count, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
+!     character (len=*), dimension(:), intent(in) :: attrList
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
-!     character (len=*), dimension(:), intent(in) :: attrList
-!     integer, intent(in) :: count   
+!     integer, intent(in), optional :: count   
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -456,12 +456,12 @@ contains
 !     \begin{description}
 !     \item [<object>]
 !           An {\tt ESMF} object.
+!     \item [attrList]
+!           The list of Attribute names to specify the custom Attribute package.
 !     \item [convention]
 !           The convention of the Attribute package.
 !     \item [purpose]
 !           The purpose of the Attribute package.
-!     \item [attrList]
-!           The list of Attribute names to specify the custom Attribute package.
 !     \item [count]
 !           The number of Attributes to add to the custom Attribute package.
 !     \item [{[rc]}] 
@@ -511,17 +511,18 @@ contains
 ! !IROUTINE: ESMF_AttributeGet  - Get an Attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeGet(<object>, name, count, <value argument>, &
-!                            <defaultvalue argument>, convention, purpose, rc)
+!     subroutine ESMF_AttributeGet(<object>, name, <value argument>, &
+!                            <defaultvalue argument>, convention, purpose, &
+!                            itemCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character (len = *), intent(in) :: name
-!     integer, intent(in), optional :: count
 !     <value argument>, see below for supported values
 !     <defaultvalue argument>, see below for supported values   
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
+!     integer, intent(out), optional :: itemCount
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -567,7 +568,7 @@ contains
 !     \item logical, intent(out) :: defaultvalue
 !     \item logical, dimension(:), intent(out) :: defaultvalueList
 !     \item character (len = *), intent(out), defaultvalue
-!     \item character (len = *), dimension(count), intent(out), defaultvalueList
+!     \item character (len = *), dimension(:), intent(out), defaultvalueList
 !     \end{description}
 !
 !     The arguments are:
@@ -576,8 +577,6 @@ contains
 !           An {\tt ESMF} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!     \item [count]
-!           The number of items in a multi-valued Attribute.
 !     \item [<value argument>]
 !           The value of the named Attribute.
 !     \item [<defaultvalue argument>]
@@ -586,6 +585,8 @@ contains
 !           The convention of the Attribute package.
 !     \item [purpose]
 !           The purpose of the Attribute package.
+!     \item [itemCount]
+!           The number of items in a multi-valued Attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -597,6 +598,7 @@ contains
 ! !IROUTINE: ESMF_AttributeGet - Get the Attribute count
 !
 ! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet() 
 !     subroutine ESMF_AttributeGetCount(<object>, count, rc)
 !
 ! !ARGUMENTS:
@@ -634,18 +636,19 @@ contains
 ! !IROUTINE: ESMF_AttributeGet - Get Attribute info by name
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, typekind, itemcount, rc)
+!     ! Private name; call using ESMF_AttributeGet() 
+!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, typekind, itemCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character (len = *), intent(in) :: name
 !     type(ESMF_TypeKind), intent(out), optional :: typekind
-!     integer, intent(out), optional :: itemcount   
+!     integer, intent(out), optional :: itemCount   
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !     Returns information associated with the named Attribute, 
-!     including {\tt typekind} and {\tt itemcount}.
+!     including {\tt typekind} and {\tt itemCount}.
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -665,7 +668,7 @@ contains
 !           The name of the Attribute to query.
 !     \item [typekind]
 !           The typekind of the Attribute.
-!     \item [itemcount]
+!     \item [itemCount]
 !           The number of items in this Attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -678,20 +681,21 @@ contains
 ! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number
 !
 ! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet() 
 !     subroutine ESMF_AttributeGetInfoByNum(<object>, attributeIndex, name, &
 !       typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     integer, intent(in) :: attributeIndex
-!     character (len = *), intent(in) :: name
+!     character (len = *), intent(out) :: name
 !     type(ESMF_TypeKind), intent(out), optional :: typekind
-!     integer, intent(out), optional :: itemcount   
+!     integer, intent(out), optional :: itemCount   
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !     Returns information associated with the indexed Attribute, 
-!     including {\tt name}, {\tt typekind} and {\tt itemcount}.
+!     including {\tt name}, {\tt typekind} and {\tt itemCount}.
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -713,7 +717,7 @@ contains
 !           Returns the name of the Attribute.
 !     \item [typekind]
 !           The typekind of the Attribute.
-!     \item [itemcount]
+!     \item [itemCount]
 !           Returns the number of items in this Attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -762,10 +766,12 @@ contains
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!     NOTE:  An entire Attribute package can be removed by specifying a 
-!            convention and purpose only, without a name.  By specifying
-!            a convention, purpose, and name an Attribute will be moved 
-!            from the corresponding Attribute package, if it exists.
+!     NOTE:  An entire Attribute package can be removed by specifying 
+!            {\tt convention} and {\tt purpose} only, without {\tt name}.  By specifying
+!            {\tt convention}, {\tt purpose}, and {\tt name} an Attribute will be removed 
+!            from the corresponding Attribute package, if it exists.  An 
+!            Attribute can be removed directly from <object> by specifying
+!            {\tt name}, without {\tt convention} and {\tt purpose}.
 !
 !
 !EOP
@@ -774,23 +780,23 @@ contains
 ! !IROUTINE: ESMF_AttributeSet - Set an Attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeSet(<object>, name, count, <value argument>, &
-!                                 convention, purpose, rc)
+!     subroutine ESMF_AttributeSet(<object>, name, <value argument>, &
+!                                 convention, purpose, itemCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character (len = *), intent(in) :: name
-!     integer, intent(in), optional :: count
 !     <value argument>, see below for supported values
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
+!     integer, intent(in), optional :: itemCount
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !     Attaches an Attribute to <object>, or sets an Attribute on an 
 !     Attribute package.
 !     The Attribute has a {\tt name} and either a {\tt value} or a 
-!     {\tt valueList}, with a {\tt count}, and a {\tt convention} and {\tt purpose}.
+!     {\tt valueList}, with an {\tt itemCount}, and a {\tt convention} and {\tt purpose}.
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -814,7 +820,7 @@ contains
 !     \item logical, intent(in) :: value
 !     \item logical, dimension(:), intent(in) :: valueList
 !     \item character (len = *), intent(in), :: value
-!     \item character (ESMF\_MAXSTR), dimension(:), intent(in), :: valueList
+!     \item character (len = *), dimension(:), intent(in), :: valueList
 !     \end{description}
 ! 
 !     The arguments are:
@@ -823,14 +829,14 @@ contains
 !           An {\tt ESMF} object.
 !     \item [name]
 !           The name of the Attribute to set.
-!     \item [count]
-!           The number of items in a multi-valued Attribute.
 !     \item [<value argument>]
 !           The value of the Attribute to set.
 !     \item [convention]
 !           The convention of the Attribute package.
 !     \item [purpose]
 !           The purpose of the Attribute package.
+!     \item [itemCount]
+!           The number of items in a multi-valued Attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -855,9 +861,9 @@ contains
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
+      character (len = *), dimension(:), intent(in) :: attrList @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      character (len = *), dimension(:), intent(in) :: attrList @\
       integer, intent(in), optional :: count @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3185,8 +3191,6 @@ contains
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
-!     \item [attrList]
-!      An array of character strings specifying the names of the user defined Attributes
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3424,8 +3428,6 @@ AttSetCharacterMacro(ESMF_Array, array, array)
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
-!     \item [attrList]
-!      An array of character strings specifying the names of the user defined Attributes
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3683,7 +3685,7 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 
 !
 ! !DESCRIPTION:
-!     Attaches a comp to a Field in an Attribute hierarchy
+!     Attaches a CplComp to a Field in an Attribute hierarchy
 !
 !     The arguments are:
 !     \begin{description}
@@ -3894,8 +3896,6 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
-!     \item [attrList]
-!      An array of character strings specifying the names of the user defined Attributes
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4097,7 +4097,7 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_GridCompAttSetLinkState"
 !BOPI
-! !IROUTINE: ESMF_AttributeSet - Link an GridComp Attribute hierarchy to a State
+! !IROUTINE: ESMF_AttributeSet - Link a GridComp Attribute hierarchy to a State
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
@@ -4110,7 +4110,7 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 
 !
 ! !DESCRIPTION:
-!     Attaches a comp to a Field in an Attribute hierarchy
+!     Attaches a GridComp to a Field in an Attribute hierarchy
 !
 !     The arguments are:
 !     \begin{description}
@@ -4321,8 +4321,6 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
-!     \item [attrList]
-!      An array of character strings specifying the names of the user defined Attributes
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4560,8 +4558,6 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
-!     \item [attrList]
-!      An array of character strings specifying the names of the user defined Attributes
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4630,6 +4626,7 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 !      An {\tt ESMF\_FieldBundle} object.
 !     \item [field]
 !      An {\tt ESMF\_Field} object.
+!     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -4833,8 +4830,6 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
-!     \item [attrList]
-!      An array of character strings specifying the names of the user defined Attributes
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5046,8 +5041,6 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
-!     \item [attrList]
-!      An array of character strings specifying the names of the user defined Attributes
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5230,7 +5223,7 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
 
 !
 ! !DESCRIPTION:
-!     Attaches a state to a FieldBundle in an Attribute hierarchy
+!     Attaches a State to a FieldBundle in an Attribute hierarchy
 !
 !     The arguments are:
 !     \begin{description}
@@ -5609,7 +5602,7 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
 ! !DESCRIPTION:
 !     Write the Attribute package for <object>.  The Attribute package defines 
 !     the convention, purpose, and object type of the associated Attributes.  Either
-!     tab-delimited or xml format is acheived by using the attwriteflag.
+!     tab-delimited or xml format is acheived by using {\tt attwriteflag}.
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
@@ -5631,13 +5624,16 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
 !           The purpose of the Attribute package.
 !     \item [attwriteflag]
 !           The flag to specify which format is desired for the write, the 
-!           default is tab-delimited.  The options for attwriteflag include:
-!              1. ESMF\_ATTWRITE\_XML will write in xml format
-!              2. ESMF\_ATTWRITE\_TAB will write in tab-delimited format
+!           default is tab-delimited.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!     NOTE:  The options for {\tt attwriteflag} include:
+!            \begin{enumerate}
+!              \item ESMF\_ATTWRITE\_XML will write in xml format
+!              \item ESMF\_ATTWRITE\_TAB will write in tab-delimited format
+!            \end{enumerate}
 !
 !EOP
 !------------------------------------------------------------------------------
