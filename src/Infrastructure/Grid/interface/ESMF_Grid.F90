@@ -194,7 +194,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.91 2008/10/17 16:27:05 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.92 2008/10/18 16:11:08 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -2003,7 +2003,7 @@ end subroutine ESMF_GridConvertIndex
 !      map of each coordinate array's dimensions onto the grids
 !      dimensions.  {\tt coordDimMap(i,j)} is the grid dimension of the jth dimension
 !      of the i'th coordinate array.  If not specified, the default value of
-!      {\tt coordDimMap(i,1)} is ESMF_GRID_ARBDIM if the ith dimension of the grid is
+!      {\tt coordDimMap(i,1)} is /ESMF\_GRID\_ARBDIM/ if the ith dimension of the grid is
 !      arbitrarily distributed, or {\tt i} if the ith dimension is not distributed.
 !      Note that if j is bigger than {\tt coordDimCount(i)} then it's ignored.        
 ! \item[{[destroyDistgrid]}]
@@ -4277,31 +4277,31 @@ end subroutine ESMF_GridConvertIndex
 !     The size of the array specifies the number of dimensions of the 
 !     first coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF_GRID_ARBDIM, n/ where
-!     ESMF_GRID_ARBDIM is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
+!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF_GRID_ARBDIM/ if the first dimension
+!     If not present the default is /ESMF\_GRID\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF_GRID_ARBDIM, n/ where
-!     ESMF_GRID_ARBDIM is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
+!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF_GRID_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF_GRID_ARBDIM, n/ where
-!     ESMF_GRID_ARBDIM is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
+!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF_GRID_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
@@ -10381,31 +10381,31 @@ endif
 !     The size of the array specifies the number of dimensions of the 
 !     first coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF_GRID_ARBDIM, n/ where
-!     ESMF_GRID_ARBDIM is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
+!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF_GRID_ARBDIM/ if the first dimension
+!     If not present the default is /ESMF\_GRID\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF_GRID_ARBDIM, n/ where
-!     ESMF_GRID_ARBDIM is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
+!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF_GRID_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF_GRID_ARBDIM, n/ where
-!     ESMF_GRID_ARBDIM is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
+!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF_GRID_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
