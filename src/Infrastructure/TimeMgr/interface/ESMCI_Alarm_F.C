@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.37 2008/06/27 03:51:19 rosalind Exp $
+// $Id: ESMCI_Alarm_F.C,v 1.1 2008/10/19 03:59:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 

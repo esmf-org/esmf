@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.35 2008/10/13 05:59:19 eschwab Exp $ 
+# $Id: makefile,v 1.36 2008/10/19 03:59:25 eschwab Exp $ 
 
 ALL: build_here 
 
-SOURCEC	  = ESMC_BaseTime_F.C \
-            ESMC_Calendar_F.C ESMC_TimeInterval_F.C ESMC_Time_F.C \
-            ESMC_Alarm_F.C ESMC_Clock_F.C \
+SOURCEC	  = ESMCI_BaseTime_F.C \
+            ESMCI_Calendar_F.C ESMCI_TimeInterval_F.C ESMCI_Time_F.C \
+            ESMCI_Alarm_F.C ESMCI_Clock_F.C \
             ESMC_Calendar.C ESMC_Time.C ESMC_TimeInterval.C \
             ESMC_Clock.C
 SOURCEF	  = ESMF_Calendar.F90 \

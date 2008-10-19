@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.49 2008/06/27 03:51:20 rosalind Exp $
+// $Id: ESMCI_TimeInterval_F.C,v 1.1 2008/10/19 03:59:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------------
 #include <ESMCI_F90Interface.h>
 #include <ESMCI_TimeInterval.h>
+#include <ESMCI_Fraction.h>
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -496,7 +497,7 @@ extern "C" {
 
        void FTN(c_esmc_timeintervalfquot)(TimeInterval *timeinterval1,
                                           TimeInterval *timeinterval2,
-                                          ESMC_Fraction *timeintervalFQuot) {
+                                          Fraction *timeintervalFQuot) {
            *timeintervalFQuot = 
                         timeinterval1->TimeInterval::div(*timeinterval2);
        }
@@ -520,12 +521,12 @@ extern "C" {
        }
 
        void FTN(c_esmc_timeintervalprodtf)(TimeInterval *timeinterval,
-                                        ESMC_Fraction *multiplier,
+                                        Fraction *multiplier,
                                         TimeInterval *timeintervalProdTF) {
            *timeintervalProdTF = (*timeinterval * *multiplier);
        }
 
-       void FTN(c_esmc_timeintervalprodft)(ESMC_Fraction *multiplier,
+       void FTN(c_esmc_timeintervalprodft)(Fraction *multiplier,
                                         TimeInterval *timeinterval,
                                         TimeInterval *timeintervalProdFT) {
            *timeintervalProdFT = (*multiplier * *timeinterval);
