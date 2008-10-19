@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.106 2008/09/03 05:57:34 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.107 2008/10/19 04:05:07 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.106 2008/09/03 05:57:34 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.107 2008/10/19 04:05:07 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -82,7 +82,8 @@
       type(ESMF_Time) :: currentTime, current_time, &
                          previousTime, syncTime, stopTime4
       type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
-      integer(ESMF_KIND_I8) :: advanceCounts, year, day2, minute, second
+      integer(ESMF_KIND_I8) :: advanceCounts, nTimeSteps, &
+                               year, day2, minute, second
       integer(ESMF_KIND_I4) :: day, hour
       integer :: datetime(8)
       integer :: timeStepCount
@@ -870,6 +871,17 @@
       call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and.(.not.bool)), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "bool = ", bool
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS and advanceCount=247"
+      write(name, *) "ClockSet(clock, advanceCount) Test"
+      nTimeSteps = 247
+      call ESMF_ClockSet(clock, advanceCount=nTimeSteps, rc=rc)
+      call ESMF_ClockGet(clock, advanceCount=advanceCounts, rc=rc)
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and.(advanceCounts.eq.247)), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "advanceCount = ", advanceCounts
       call ESMF_ClockDestroy(clock, rc)
 
       ! ----------------------------------------------------------------------------
