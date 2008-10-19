@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction_F.C,v 1.1 2008/10/13 05:59:19 eschwab Exp $
+// $Id: ESMCI_Fraction_F.C,v 1.1 2008/10/19 03:44:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include <ESMCI_F90Interface.h>
-#include <ESMC_Fraction.h>
+#include <ESMCI_Fraction.h>
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -42,57 +42,54 @@ static int fred;
 extern "C" {
 
 #if 0
-       void FTN(c_esmc_fractionset)(ESMC_Fraction *ptr, int *arg1, int *arg2,
-                                                  int *arg3, int *status) {
-          int rc = (ptr)->ESMC_FractionSet(*arg1, *arg2, *arg3);
+       void FTN(c_esmc_fractionset)(Fraction *ptr, int *arg1, int *arg2,
+                                             int *arg3, int *status) {
+          int rc = (ptr)->set(*arg1, *arg2, *arg3);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_fractionget)(ESMC_Fraction *ptr, 
+       void FTN(c_esmc_fractionget)(Fraction *ptr, 
                                          <value> *value, int *status} {
-          int rc = (ptr)->ESMC_FractionGet(&value);
+          int rc = (ptr)->get(&value);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_fractionset)(ESMC_Fraction *ptr, 
+       void FTN(c_esmc_fractionset)(Fraction *ptr, 
                                          <value> *value, int *status} {
-          int rc = (ptr)->ESMC_FractionSet(value);
+          int rc = (ptr)->set(value);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_fractionreadrestart)(ESMC_Fraction *ptr, int *nameLen,
+       void FTN(c_esmc_fractionreadrestart)(Fraction *ptr, int *nameLen,
                                             const char *name,
                                             ESMC_IOSpec *iospec,
                                             int *status) {
-          int rc = (ptr)->ESMC_FractionReadRestart(
-                                                   *nameLen,  // always present
-                                                              //   internal
-                                                              //   argument.
-                                                    name,     // required.
+          int rc = (ptr)->readRestart(*nameLen,  // always present
+                                                 //   internal
+                                                 //   argument.
+                                       name,     // required.
                             ESMC_NOT_PRESENT_FILTER(iospec) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_fractionwriterestart)(ESMC_Fraction *ptr,
+       void FTN(c_esmc_fractionwriterestart)(Fraction *ptr,
                                              ESMC_IOSpec *iospec,
                                              int *status) {
-          int rc = (ptr)->ESMC_FractionWriteRestart(
+          int rc = (ptr)->writeRestart(
                             ESMC_NOT_PRESENT_FILTER(iospec) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_fractionvalidate)(ESMC_Fraction *ptr,
+       void FTN(c_esmc_fractionvalidate)(Fraction *ptr,
                                          const char *options,
                                          int *status) {
-          int rc = (ptr)->ESMC_Fraction::ESMC_Validate(
-                               ESMC_NOT_PRESENT_FILTER(options) );
+          int rc = (ptr)->validate(ESMC_NOT_PRESENT_FILTER(options) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_fractionprint)(ESMC_Fraction *ptr, const char *options,
+       void FTN(c_esmc_fractionprint)(Fraction *ptr, const char *options,
                                       int *status) {
-          int rc = (ptr)->ESMC_Fraction::ESMC_Print(
-                            ESMC_NOT_PRESENT_FILTER(options) );
+          int rc = (ptr)->print(ESMC_NOT_PRESENT_FILTER(options) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 #endif
