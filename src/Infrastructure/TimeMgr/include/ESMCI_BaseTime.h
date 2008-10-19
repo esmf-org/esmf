@@ -1,4 +1,4 @@
-// $Id: ESMCI_BaseTime.h,v 1.6 2008/08/28 21:33:15 theurich Exp $
+// $Id: ESMCI_BaseTime.h,v 1.7 2008/10/19 03:53:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -81,9 +81,9 @@
 // the common comparison logic between {\tt TimeIntervals} and {\tt Time} and
 // hence are defined here for sharing.
 //
-// The separate class ESMC_Fraction is inherited to handle fractional
+// The separate class ESMCI::Fraction is inherited to handle fractional
 // arithmetic.  ESMC_BaseTime encapsulates common time-specific knowledge,
-// whereas ESMC_Fraction is time-knowledge independent; it simply performs
+// whereas ESMCI::Fraction is time-knowledge independent; it simply performs
 // generic fractional arithmetic, manipulations and comparisons.
 //
 // For ease in calendar conversions, a time value of zero (both whole and
@@ -109,7 +109,7 @@
 // !USES:
 #include <ESMC_Base.h>   // all classes inherit from the ESMC Base class.
 #include <ESMC_IOSpec.h> // IOSpec class for ReadRestart()/WriteRestart()
-#include <ESMC_Fraction.h>
+#include <ESMCI_Fraction.h>
 
 namespace ESMCI {
 
@@ -122,7 +122,7 @@ namespace ESMCI {
  // class configuration type:  not needed for ESMC_BaseTime
 
  // class definition type
-class BaseTime : public ESMC_Fraction { // it is a fraction !
+class BaseTime : public Fraction { // it is a fraction !
 //class ESMC_BaseTime : public ESMC_Base { // TODO: inherit from ESMC_Base class
                                            // when fully aligned with F90 equiv
 
@@ -168,7 +168,7 @@ class BaseTime : public ESMC_Fraction { // it is a fraction !
     // TODO: should be implicit, but then won't support
     //   F90 ESMF_Time & ESMF_TimeInterval via ESMC_BaseTime_F.C interface
     //   for increment/decrement
-    BaseTime& operator=(const ESMC_Fraction &);
+    BaseTime& operator=(const Fraction &);
 
     // required methods inherited and overridden from the ESMC_Base class
 

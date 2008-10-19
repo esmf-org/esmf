@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.C,v 1.8 2008/09/03 05:56:37 eschwab Exp $"
+// $Id: ESMCI_Time.C,v 1.9 2008/10/19 03:53:58 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -33,13 +33,13 @@
  // associated class definition file
  #include "ESMCI_Time.h"
  #include "ESMCI_TimeInterval.h"
- #include "ESMC_Fraction.h"
+ #include "ESMCI_Fraction.h"
 
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Time.C,v 1.8 2008/09/03 05:56:37 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Time.C,v 1.9 2008/10/19 03:53:58 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -127,9 +127,9 @@ namespace ESMCI{
         us_r8 != ESMC_NULL_POINTER || ns_r8 != ESMC_NULL_POINTER ||
         sN    != ESMC_NULL_POINTER || sD    != ESMC_NULL_POINTER) {
 
-      ESMC_FractionSet(0,0,1);  // set seconds = 0
-                                // set fractional seconds numerator = 0
-                                // set fractional seconds denominator = 1
+      Fraction::set(0,0,1);  // set seconds = 0
+                             // set fractional seconds numerator = 0
+                             // set fractional seconds denominator = 1
 
       this->calendar = ESMC_NULL_POINTER; // to trap no calendar case below
       this->timeZone = 0;                 // default is UTC
@@ -176,9 +176,9 @@ namespace ESMCI{
     } else {
 
       // no arguments specified, initialize and use defaults
-      ESMC_FractionSet(0,0,1);  // set seconds = 0
-                                // set fractional seconds numerator = 0
-                                // set fractional seconds denominator = 1
+      Fraction::set(0,0,1);  // set seconds = 0
+                             // set fractional seconds numerator = 0
+                             // set fractional seconds denominator = 1
 
       this->calendar = ESMC_NULL_POINTER; // to trap no calendar case below
       this->timeZone = 0;                 // default is UTC
@@ -306,9 +306,8 @@ namespace ESMCI{
           { *this = saveTime; return(rc); }
 
       // fractional part
-      ESMC_FractionSetw(ESMC_FractionGetw() +
-                         (ESMC_I8) (modf(*d_r8, ESMC_NULL_POINTER) *
-                                         this->calendar->secondsPerDay));
+      setw(getw() + (ESMC_I8) (modf(*d_r8, ESMC_NULL_POINTER) *
+                                           this->calendar->secondsPerDay));
     } else {
       // no year, month or day specified; set defaults per calendar, if any
       if (this->calendar != ESMC_NULL_POINTER) {
@@ -447,8 +446,8 @@ namespace ESMCI{
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                                  ", calendar required.", &rc); return(rc);
       }
-      timeToConvert.ESMC_FractionSetw(timeToConvert.ESMC_FractionGetw() %
-                                      timeToConvert.calendar->secondsPerDay);
+      timeToConvert.setw(timeToConvert.getw() %
+                         timeToConvert.calendar->secondsPerDay);
     }
 
     // use base class to get all other non-calendar dependant units
@@ -821,7 +820,7 @@ namespace ESMCI{
 //EOP
 // !REQUIREMENTS:  
 
-//    Implementation note:  This overrides the ESMC_Fraction (+) operator
+//    Implementation note:  This overrides the ESMCI::Fraction (+) operator
 //                          in order to copy the Time-only properties
 //                          (calendar & timeZone) to the result. 
 //
@@ -850,7 +849,7 @@ namespace ESMCI{
 //EOP
 // !REQUIREMENTS:  
 
-//    Implementation note:  This overrides the ESMC_Fraction (-) operator
+//    Implementation note:  This overrides the ESMCI::Fraction (-) operator
 //                          in order to copy the Time-only properties
 //                          (calendar & timeZone) to the result. 
 //
@@ -933,11 +932,11 @@ namespace ESMCI{
 //EOP
 // !REQUIREMENTS:  
 
-//    Implementation note:  This overrides the 2nd ESMC_Fraction (-) operator
+//    Implementation note:  This overrides the 2nd ESMCI::Fraction (-) operator
 //                          simply because the 1st (-) operator is overridden.
-//                          Visibility into ESMC_Fraction is lost; if not
+//                          Visibility into ESMCI::Fraction is lost; if not
 //                          defined here, the compiler won't see the 2nd (-)
-//                          operator defined at ESMC_Fraction!
+//                          operator defined at ESMCI::Fraction!
 
     // the calendars of the two times must be the same
     int rc;
@@ -952,8 +951,8 @@ namespace ESMCI{
     TimeInterval diff;
     diff.calendar = this->calendar;
 
-    // perform the difference using the ESMC_Fraction operator
-    diff = ESMC_Fraction::operator-(time);
+    // perform the difference using the ESMCI::Fraction operator
+    diff = Fraction::operator-(time);
 
     return(diff);
 
@@ -1096,7 +1095,7 @@ namespace ESMCI{
     // earliest Gregorian date representable by the Fliegel algorithm
     //  is -4800/3/1 == -32044 Julian days == -2,768,601,600 core seconds
     if (calendar->calendarType == ESMC_CAL_GREGORIAN &&
-        ESMC_FractionGetw() < -2768601600LL) {
+        getw() < -2768601600LL) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
                                  "; Gregorian time is before -4800/3/1", &rc);
       return(rc);
@@ -1105,7 +1104,7 @@ namespace ESMCI{
     // earliest Julian date representable by the Hatcher algorithm
     //  is -4712/3/1 == 60 Julian days == 5,184,000 core seconds
     if (calendar->calendarType == ESMC_CAL_JULIAN &&
-        ESMC_FractionGetw() < 5184000LL) {
+        getw() < 5184000LL) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
                                  "; Julian time is before -4712/3/1", &rc);
       return(rc);
@@ -1183,9 +1182,9 @@ namespace ESMCI{
 // !REQUIREMENTS:  
 
 //   BaseTime(0,0,1) {  // TODO: F90 issue with base class constructor?
-   ESMC_FractionSet(0,0,1);  // set seconds = 0
-                             // set fractional seconds numerator = 0
-                             // set fractional seconds denominator = 1
+   Fraction::set(0,0,1);  // set seconds = 0
+                          // set fractional seconds numerator = 0
+                          // set fractional seconds denominator = 1
    calendar = ESMC_NULL_POINTER;  // to detect invalid, unset time
                                   // TODO: replace with ESMC_Base logic
    timeZone = 0;

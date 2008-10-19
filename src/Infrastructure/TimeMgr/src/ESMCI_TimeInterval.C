@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.C,v 1.9 2008/09/03 05:56:38 eschwab Exp $
+// $Id: ESMCI_TimeInterval.C,v 1.10 2008/10/19 03:53:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
  #include <ESMCI_LogErr.h>
  #include <ESMF_LogMacros.inc>
  #include <ESMCI_Time.h>
- #include <ESMC_Fraction.h>
+ #include <ESMCI_Fraction.h>
  #include <ESMCI_Calendar.h>
 
  // associated class definition file
@@ -40,7 +40,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.9 2008/09/03 05:56:38 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.10 2008/10/19 03:53:58 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -122,9 +122,9 @@ namespace ESMCI{
     // save current value to restore in case of failure
     TimeInterval saveTimeInterval = *this;
 
-    ESMC_FractionSet(0,0,1);  // set seconds = 0
-                              // set fractional seconds numerator = 0
-                              // set fractional seconds denominator = 1
+    Fraction::set(0,0,1);  // set seconds = 0
+                           // set fractional seconds numerator = 0
+                           // set fractional seconds denominator = 1
     this->yy = 0;
     this->mm = 0;
     this->d  = 0;
@@ -431,9 +431,8 @@ namespace ESMCI{
               tiToConvert.startTime = iTime - oneYear;
 
               // calculate remaining baseTimeToConvert (remove years we got)
-              TimeInterval ti =
-                                   tiToConvert.endTime - tiToConvert.startTime;
-              tiToConvert.ESMC_FractionSetw(ti.ESMC_FractionGetw());
+              TimeInterval ti = tiToConvert.endTime - tiToConvert.startTime;
+              tiToConvert.setw(ti.getw());
               //TODO: tiToConvert = tiToConvert.endTime - tiToConvert.startTime;
               //      should just copy base class part wholesale, rather than
               //      individual properties (including fraction sN/sD); breaks
@@ -451,19 +450,19 @@ namespace ESMCI{
 
               // convert remaining seconds to years
               if (tiToConvert.calendar->calendarType == ESMC_CAL_NOLEAP) {
-                years += tiToConvert.ESMC_FractionGetw() /
+                years += tiToConvert.getw() /
                          tiToConvert.calendar->secondsPerYear;
-                tiToConvert.ESMC_FractionSetw(tiToConvert.ESMC_FractionGetw() %
-                                          tiToConvert.calendar->secondsPerYear);
+                tiToConvert.setw(tiToConvert.getw() %
+                                 tiToConvert.calendar->secondsPerYear);
 
               } else { // ESMC_CAL_GREGORIAN or ESMC_CAL_JULIAN
                 // note: can't use abs() or labs() since result is (long long)
                 //       could use ISO llabs() if supported on all platforms
-                if (tiToConvert.ESMC_FractionGetw() >=
+                if (tiToConvert.getw() >=
                     tiToConvert.calendar->secondsPerYear ||
-                    tiToConvert.ESMC_FractionGetw() <=
+                    tiToConvert.getw() <=
                    -tiToConvert.calendar->secondsPerYear){
-                  // tiToConvert.ESMC_FractionGetw() >= 1 year =>
+                  // tiToConvert.getw() >= 1 year =>
                   //  can't determine leap years without startTime or endTime !
                   char logMsg[ESMF_MAXSTR];
                   sprintf(logMsg, 
@@ -480,9 +479,9 @@ namespace ESMCI{
           }
           break;
         case ESMC_CAL_360DAY:
-          years = tiToConvert.ESMC_FractionGetw() /
+          years = tiToConvert.getw() /
                   tiToConvert.calendar->secondsPerYear;
-          tiToConvert.ESMC_FractionSetw(tiToConvert.ESMC_FractionGetw() %
+          tiToConvert.setw(tiToConvert.getw() %
                                         tiToConvert.calendar->secondsPerYear);
           break;
         case ESMC_CAL_JULIANDAY:
@@ -556,18 +555,18 @@ namespace ESMCI{
 
             // calculate remaining baseTimeToConvert (remove months we got)
             TimeInterval ti = tiToConvert.endTime - tiToConvert.startTime;
-            tiToConvert.ESMC_FractionSetw(ti.ESMC_FractionGetw());
+            tiToConvert.setw(ti.getw());
             //TODO: tiToConvert = tiToConvert.endTime - tiToConvert.startTime;
             //      should just copy base class part wholesale, rather than
             //      individual properties (including fraction sN/sD); breaks
             //      encapsulation principle.
 
           } else { // no startTime or endTime available, convert what we can
-            if (tiToConvert.ESMC_FractionGetw() >=
+            if (tiToConvert.getw() >=
                               (28 * tiToConvert.calendar->secondsPerDay)
                                   ||
-               tiToConvert.ESMC_FractionGetw() <=
-                              (-28 * tiToConvert.calendar->secondsPerDay))
+               tiToConvert.getw() <=
+                             (-28 * tiToConvert.calendar->secondsPerDay))
                 // TODO: can't use abs() or labs() since result is (long long)
                 //       could use ISO llabs() if supported on all platforms
             {
@@ -587,10 +586,10 @@ namespace ESMCI{
           }
           break;
         case ESMC_CAL_360DAY:
-          months = tiToConvert.ESMC_FractionGetw() /
-                           (30 * tiToConvert.calendar->secondsPerDay);
-          tiToConvert.ESMC_FractionSetw(tiToConvert.ESMC_FractionGetw() %
-                                    (30 * tiToConvert.calendar->secondsPerDay));
+          months = tiToConvert.getw() /
+                                   (30 * tiToConvert.calendar->secondsPerDay);
+          tiToConvert.setw(tiToConvert.getw() %
+                                   (30 * tiToConvert.calendar->secondsPerDay));
           break;
         case ESMC_CAL_JULIANDAY:
         case ESMC_CAL_MODJULIANDAY:
@@ -722,13 +721,12 @@ namespace ESMCI{
       // convert any days from base time
       if (tiToConvert.calendar->secondsPerDay != 0) {
         // absolute part
-        days += tiToConvert.ESMC_FractionGetw() /
-                  tiToConvert.calendar->secondsPerDay;
+        days += tiToConvert.getw() / tiToConvert.calendar->secondsPerDay;
                       // TODO: assign, not add, if tiToConvert.d always = 0 ?
         // remove days from base conversion time to get remaining sub-day
         // units (h,m,s)
-        tiToConvert.ESMC_FractionSetw(tiToConvert.ESMC_FractionGetw() %
-                                      tiToConvert.calendar->secondsPerDay);
+        tiToConvert.setw(tiToConvert.getw() %
+                         tiToConvert.calendar->secondsPerDay);
       }
 
       // return requested days value
@@ -758,10 +756,9 @@ namespace ESMCI{
         }
         // TODO: put floating point seconds calculation into Fraction class
         *d_r8 = (ESMC_R8) days +
-                (((ESMC_R8) tiToConvert.ESMC_FractionGetw() + 
-                 (ESMC_R8) tiToConvert.ESMC_FractionGetn() /
-                 (ESMC_R8) tiToConvert.ESMC_FractionGetd()) /
-                 (ESMC_R8) tiToConvert.calendar->secondsPerDay);
+                (((ESMC_R8) tiToConvert.getw() + 
+                  (ESMC_R8) tiToConvert.getn() / (ESMC_R8) tiToConvert.getd()) /
+                  (ESMC_R8) tiToConvert.calendar->secondsPerDay);
       }
     }
 
@@ -1042,13 +1039,13 @@ namespace ESMCI{
     // if absolute, simply perform absolute value on baseTime seconds and return
     if (absValue.yy == 0 && absValue.mm == 0 && absValue.d == 0) {
       if (absValueType == ESMC_POSITIVE_ABS) {
-        if (absValue.ESMC_FractionGetw() < 0) {
-          absValue.ESMC_FractionSetw(absValue.ESMC_FractionGetw() * -1);
+        if (absValue.getw() < 0) {
+          absValue.setw(absValue.getw() * -1);
           // TODO: fractions
         }
       } else { // ESMC_NEGATIVE_ABS
-        if (absValue.ESMC_FractionGetw() > 0) {
-          absValue.ESMC_FractionSetw(absValue.ESMC_FractionGetw() * -1);
+        if (absValue.getw() > 0) {
+          absValue.setw(absValue.getw() * -1);
           // TODO: fractions
         }
       }
@@ -1078,7 +1075,7 @@ namespace ESMCI{
           return(errorResult);
 
         // all relative case (yy (reduced to mm), mm, no seconds)
-        } else if (absValue.ESMC_FractionGetw() == 0) {
+        } else if (absValue.getw() == 0) {
           if (absValueType == ESMC_POSITIVE_ABS) {
             if (absValue.mm < 0) absValue.mm *= -1;  // invert sign
           } else { // ESMC_NEGATIVE_ABS
@@ -1090,16 +1087,16 @@ namespace ESMCI{
         } else {
           // mm & s must have same sign
           if ( (absValueType == ESMC_POSITIVE_ABS && 
-                  absValue.mm < 0 && absValue.ESMC_FractionGetw() < 0) ||
+                  absValue.mm < 0 && absValue.getw() < 0) ||
                (absValueType == ESMC_NEGATIVE_ABS && 
-                  absValue.mm > 0 && absValue.ESMC_FractionGetw() > 0) ) {
+                  absValue.mm > 0 && absValue.getw() > 0) ) {
               absValue.mm *= -1;  // invert sign
-              absValue.ESMC_FractionSetw(absValue.ESMC_FractionGetw() * -1);
+              absValue.setw(absValue.getw() * -1);
               return(absValue);
           } else if ((absValueType == ESMC_POSITIVE_ABS &&
-                      absValue.mm >= 0 && absValue.ESMC_FractionGetw() >= 0) ||
+                      absValue.mm >= 0 && absValue.getw() >= 0) ||
                      (absValueType == ESMC_NEGATIVE_ABS &&
-                      absValue.mm <= 0 && absValue.ESMC_FractionGetw() <= 0) ) {
+                      absValue.mm <= 0 && absValue.getw() <= 0) ) {
               return(absValue);   // return as is
           } else {
             // mixed signs
@@ -1142,21 +1139,21 @@ namespace ESMCI{
         // all units must have same sign
         if ( (absValueType == ESMC_POSITIVE_ABS &&
                 absValue.yy < 0 && absValue.mm < 0 &&
-                absValue.d  < 0 && absValue.ESMC_FractionGetw()  < 0) ||
+                absValue.d  < 0 && absValue.getw()  < 0) ||
              (absValueType == ESMC_NEGATIVE_ABS &&
                 absValue.yy > 0 && absValue.mm > 0 &&
-                absValue.d  > 0 && absValue.ESMC_FractionGetw()  > 0) ) {
+                absValue.d  > 0 && absValue.getw()  > 0) ) {
           absValue.yy *= -1;   // invert sign
           absValue.mm *= -1;
           absValue.d  *= -1;
-          absValue.ESMC_FractionSetw(absValue.ESMC_FractionGetw() * -1);
+          absValue.setw(absValue.getw() * -1);
           return(absValue);
         } else if ( (absValueType == ESMC_POSITIVE_ABS &&
                       absValue.yy >= 0 && absValue.mm >= 0 &&
-                      absValue.d  >= 0 && absValue.ESMC_FractionGetw() >= 0) ||
+                      absValue.d  >= 0 && absValue.getw() >= 0) ||
                     (absValueType == ESMC_NEGATIVE_ABS &&
                       absValue.yy <= 0 && absValue.mm <= 0 &&
-                      absValue.d  <= 0 && absValue.ESMC_FractionGetw() <= 0) ) {
+                      absValue.d  <= 0 && absValue.getw() <= 0) ) {
           return(absValue);    // return as is
         } else {
           // mixed signs
@@ -1506,8 +1503,7 @@ namespace ESMCI{
       quotient.d  = (ESMC_I8) ((ESMC_R8) quotient.d  / divisor);
 
       // divide absolute s part  // TODO: fractions
-      quotient.ESMC_FractionSetw((ESMC_I8)
-                      ((ESMC_R8) quotient.ESMC_FractionGetw() / divisor));
+      quotient.setw((ESMC_I8) ((ESMC_R8) quotient.getw() / divisor));
 
     } else {
       // TODO: write LogErr message (divide-by-zero)
@@ -1552,10 +1548,10 @@ namespace ESMCI{
 // !IROUTINE:  TimeInterval::div - Divide two time intervals, return fraction result
 //
 // !INTERFACE:
-      ESMC_Fraction TimeInterval::div(
+      Fraction TimeInterval::div(
 //
 // !RETURN VALUE:
-//    ESMC_Fraction result
+//    Fraction result
 //
 // !ARGUMENTS:
       const TimeInterval &timeinterval) const {  // in - TimeInterval
@@ -1568,7 +1564,7 @@ namespace ESMCI{
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_Fraction quotient;
+    Fraction quotient;
 
     // TODO:
 
@@ -1915,7 +1911,7 @@ namespace ESMCI{
 //    TimeInterval result
 //
 // !ARGUMENTS:
-      const ESMC_Fraction &multiplier) const {   // in - fraction multiplier
+      const Fraction &multiplier) const {   // in - fraction multiplier
 //
 // !DESCRIPTION:
 //     Multiply a {\tt ESMC\_TimeInterval} by an fraction, return product as a
@@ -1943,7 +1939,7 @@ namespace ESMCI{
 //    TimeInterval result
 //
 // !ARGUMENTS:
-      const ESMC_Fraction &multiplier, // in - fraction multiplier
+      const Fraction &multiplier, // in - fraction multiplier
       const TimeInterval &ti) {   // in - TimeInterval multiplicand
 //
 // !DESCRIPTION:
@@ -1969,7 +1965,7 @@ namespace ESMCI{
 //    TimeInterval& result
 //
 // !ARGUMENTS:
-      const ESMC_Fraction &multiplier) {   // in - fraction multiplier
+      const Fraction &multiplier) {   // in - fraction multiplier
 //
 // !DESCRIPTION:
 //     Multiply a {\tt ESMC\_TimeInterval} by a fraction
@@ -2017,8 +2013,7 @@ namespace ESMCI{
     product.d  = (ESMC_I8) ((ESMC_R8) product.d  * multiplier);
 
     // multiply absolute s part  // TODO: fractions
-    product.ESMC_FractionSetw((ESMC_I8)
-                    ((ESMC_R8) product.ESMC_FractionGetw() * multiplier));
+    product.setw((ESMC_I8) ((ESMC_R8) product.getw() * multiplier));
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
@@ -2612,7 +2607,7 @@ namespace ESMCI{
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  TimeInterval(=) - copy or assign from ESMC_Fraction expression
+// !IROUTINE:  TimeInterval(=) - copy or assign from Fraction expression
 //
 // !INTERFACE:
       TimeInterval& TimeInterval::operator=(
@@ -2621,7 +2616,7 @@ namespace ESMCI{
 //    TimeInterval& result
 //
 // !ARGUMENTS:
-      const ESMC_Fraction &fraction) {   // in - ESMC_Fraction to copy
+      const Fraction &fraction) {   // in - Fraction to copy
 //
 // !DESCRIPTION:
 //    Assign {\tt ESMC\_Fraction} expression to this time interval.
@@ -2632,7 +2627,7 @@ namespace ESMCI{
 
     // invoke fraction assignment operator; supports Time1-Time2 operator
     // in Time.  TODO:  should be implicit ?
-    ESMC_Fraction::operator=(fraction);
+    Fraction::operator=(fraction);
 
     return(*this);
 
@@ -2800,7 +2795,7 @@ namespace ESMCI{
 
 //   BaseTime(0, 0, 1) { // TODO: F90 issue with base class constructor?
 
-   ESMC_FractionSet(0,0,1);
+   Fraction::set(0,0,1);
 
    yy = 0;
    mm = 0;
@@ -3052,7 +3047,7 @@ namespace ESMCI{
         if (startTime.Time::validate("initialized") == ESMF_SUCCESS) {
           endTime = startTime + *this;
           TimeInterval ti = endTime - startTime;
-          ESMC_FractionSetw(ti.ESMC_FractionGetw());
+          setw(ti.getw());
           //TODO: *this = endTime - startTime;
           //      should just copy base class part wholesale, rather than
           //      individual properties (including fraction sN/sD); breaks
@@ -3063,7 +3058,7 @@ namespace ESMCI{
         } else if (endTime.Time::validate("initialized") == ESMF_SUCCESS) {
           startTime = endTime - *this;
           TimeInterval ti = endTime - startTime;
-          ESMC_FractionSetw(ti.ESMC_FractionGetw());
+          setw(ti.getw());
           //TODO: *this = endTime - startTime;
           //      should just copy base class part wholesale, rather than
           //      individual properties (including fraction sN/sD); breaks
@@ -3082,15 +3077,14 @@ namespace ESMCI{
           } else { // ESMC_CAL_NOLEAP
             // reduce yy to seconds
             if (yy != 0) {
-              ESMC_FractionSetw(ESMC_FractionGetw() +
-                                yy * calendar->secondsPerYear);
+              setw(getw() + yy * calendar->secondsPerYear);
               yy = 0;
             }
             // cannot reduce mm to seconds
           }
           // reduce d to seconds
           if (d != 0) {
-            ESMC_FractionSetw(ESMC_FractionGetw() + d*calendar->secondsPerDay);
+            setw(getw() + d*calendar->secondsPerDay);
             d = 0;
           }
           // we now have (mm, s); yy and d have been reduced
@@ -3098,16 +3092,15 @@ namespace ESMCI{
         break;
       case ESMC_CAL_360DAY:
         if (yy != 0) {
-          ESMC_FractionSetw(ESMC_FractionGetw() + yy*calendar->secondsPerYear);
+          setw(getw() + yy*calendar->secondsPerYear);
           yy = 0;
         }
         if (mm != 0) {
-          ESMC_FractionSetw(ESMC_FractionGetw() +
-                            mm * 30 * calendar->secondsPerDay);
+          setw(getw() + mm * 30 * calendar->secondsPerDay);
           mm = 0;
         }
         if (d != 0) {
-          ESMC_FractionSetw(ESMC_FractionGetw() + d * calendar->secondsPerDay);
+          setw(getw() + d * calendar->secondsPerDay);
           d = 0;
         }
         // yy, mm, d all reduced to base seconds
@@ -3118,7 +3111,7 @@ namespace ESMCI{
 
         // reduce days to seconds
         if (d != 0) {
-          ESMC_FractionSetw(ESMC_FractionGetw() + d * calendar->secondsPerDay);
+          setw(getw() + d * calendar->secondsPerDay);
           d = 0;
         }
         break;

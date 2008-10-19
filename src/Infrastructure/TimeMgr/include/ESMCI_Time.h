@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.h,v 1.7 2008/06/27 03:51:18 rosalind Exp $
+// $Id: ESMCI_Time.h,v 1.8 2008/10/19 03:53:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -156,7 +156,7 @@
     Time& operator-=(const TimeInterval &); // time -= timeinterval
 
     // override 2nd BaseTime (-) operator because 1st (-) operator is overridden
-    // (compiler can't find 2nd (-) operator at ESMC_Fraction!)
+    // (compiler can't find 2nd (-) operator at ESMCI::Fraction!)
     TimeInterval operator-(const Time&) const;  // time1 - time2
 
     // TODO: ? override BaseTime arithmetic operators with same operators

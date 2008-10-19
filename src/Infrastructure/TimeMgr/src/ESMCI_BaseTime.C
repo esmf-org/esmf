@@ -1,4 +1,4 @@
-// $Id: ESMCI_BaseTime.C,v 1.5 2008/08/01 23:36:57 rosalind Exp $
+// $Id: ESMCI_BaseTime.C,v 1.6 2008/10/19 03:53:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.5 2008/08/01 23:36:57 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.6 2008/10/19 03:53:58 eschwab Exp $";
 //-------------------------------------------------------------------------
 
   namespace ESMCI{
@@ -96,33 +96,33 @@
 
     // integer units
     if (h != ESMC_NULL_POINTER) {
-      ESMC_Fraction time(((ESMC_I8) *h) * SECONDS_PER_HOUR);
+      Fraction time(((ESMC_I8) *h) * SECONDS_PER_HOUR);
       *this += time;
     }
     if (m != ESMC_NULL_POINTER) {
-      ESMC_Fraction time(((ESMC_I8) *m) * SECONDS_PER_MINUTE);
+      Fraction time(((ESMC_I8) *m) * SECONDS_PER_MINUTE);
       *this += time;
     }
     if (s != ESMC_NULL_POINTER) {
-      ESMC_Fraction time(*s);
+      Fraction time(*s);
       *this += time;  // >= 32-bit
     } else if (s_i8 != ESMC_NULL_POINTER) {
-      ESMC_Fraction time(*s_i8);
+      Fraction time(*s_i8);
       *this += time;  // >= 64-bit
     }
 
     // floating point units
     // TODO: include fractional part
     if (h_r8 != ESMC_NULL_POINTER) {
-      ESMC_Fraction time((ESMC_I8) (*h_r8 * SECONDS_PER_HOUR));
+      Fraction time((ESMC_I8) (*h_r8 * SECONDS_PER_HOUR));
       *this += time;
     }
     if (m_r8 != ESMC_NULL_POINTER) {
-      ESMC_Fraction time((ESMC_I8) (*m_r8 * SECONDS_PER_MINUTE));
+      Fraction time((ESMC_I8) (*m_r8 * SECONDS_PER_MINUTE));
       *this += time;
     }
     if (s_r8 != ESMC_NULL_POINTER) {
-      ESMC_Fraction time((ESMC_I8) *s_r8);
+      Fraction time((ESMC_I8) *s_r8);
       *this += time;
     }
 
@@ -132,36 +132,36 @@
 
     // integer units
     if (ms != ESMC_NULL_POINTER) {
-      ESMC_Fraction fractional_time(0, *ms, 1000);
+      Fraction fractional_time(0, *ms, 1000);
       *this += fractional_time;
     }
     if (us != ESMC_NULL_POINTER) {
-      ESMC_Fraction fractional_time(0, *us, 1000000);
+      Fraction fractional_time(0, *us, 1000000);
       *this += fractional_time;
     }
     if (ns != ESMC_NULL_POINTER) {
-      ESMC_Fraction fractional_time(0, *ns, 1000000000);
+      Fraction fractional_time(0, *ns, 1000000000);
       *this += fractional_time;
     }
 
     // floating point units
     // TODO: include fractional part
     if (ms_r8 != ESMC_NULL_POINTER) {
-      ESMC_Fraction fractional_time(0, (ESMC_I4) *ms_r8, 1000);
+      Fraction fractional_time(0, (ESMC_I4) *ms_r8, 1000);
       *this += fractional_time;
     }
     if (us_r8 != ESMC_NULL_POINTER) {
-      ESMC_Fraction fractional_time(0, (ESMC_I4) *us_r8, 1000000);
+      Fraction fractional_time(0, (ESMC_I4) *us_r8, 1000000);
       *this += fractional_time;
     }
     if (ns_r8 != ESMC_NULL_POINTER) {
-      ESMC_Fraction fractional_time(0, (ESMC_I4) *ns_r8, 1000000000);
+      Fraction fractional_time(0, (ESMC_I4) *ns_r8, 1000000000);
       *this += fractional_time;
     }
 
     // integer numerator and denominator
     if (sN != ESMC_NULL_POINTER && sD != ESMC_NULL_POINTER) {
-      ESMC_Fraction fractional_time(0, *sN, *sD);
+      Fraction fractional_time(0, *sN, *sD);
       *this += fractional_time;
     }
 
@@ -203,7 +203,7 @@
       return(ESMF_FAILURE);
     }
 
-    ESMC_FractionSet(s, sN, sD);
+    Fraction::set(s, sN, sD);
 
     return(ESMF_SUCCESS);
 
@@ -260,16 +260,16 @@
 
     // make local copy for manipulation
     BaseTime remainingTime = *timeToConvert;
-    remainingTime.ESMC_FractionSimplify(); // ensure maximum whole seconds
+    remainingTime.simplify(); // ensure maximum whole seconds
     BaseTime saveRemainingTime = remainingTime;  // for float units below
-    ESMC_I8 remainingSeconds = remainingTime.ESMC_FractionGetw();
+    ESMC_I8 remainingSeconds = remainingTime.getw();
 
     // get integer numerator and denominator
     if (sN != ESMC_NULL_POINTER) {
-      *sN = remainingTime.ESMC_FractionGetn();
+      *sN = remainingTime.getn();
     }
     if (sD != ESMC_NULL_POINTER) {
-      *sD = remainingTime.ESMC_FractionGetd();
+      *sD = remainingTime.getd();
     }
 
     if (h != ESMC_NULL_POINTER) {
@@ -319,39 +319,39 @@
     // fractional seconds
 
     // reset whole seconds part of remaining time
-    remainingTime.ESMC_FractionSetw(remainingSeconds);
+    remainingTime.setw(remainingSeconds);
 
     if (ms != ESMC_NULL_POINTER) {
       // convert remaining time to milliseconds
-      ESMC_Fraction msRemainingTime = remainingTime;
-      int rc = msRemainingTime.ESMC_FractionConvert(1000);
+      Fraction msRemainingTime = remainingTime;
+      int rc = msRemainingTime.convert(1000);
       if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
-      *ms = msRemainingTime.ESMC_FractionGetn();
+      *ms = msRemainingTime.getn();
 
       // remove total milliseconds from remainingTime
-      ESMC_Fraction milliseconds(0, *ms, 1000);
+      Fraction milliseconds(0, *ms, 1000);
       remainingTime -= milliseconds;
     }
     if (us != ESMC_NULL_POINTER) {
       // convert remaining time to microseconds
-      ESMC_Fraction usRemainingTime = remainingTime;
-      int rc = usRemainingTime.ESMC_FractionConvert(1000000);
+      Fraction usRemainingTime = remainingTime;
+      int rc = usRemainingTime.convert(1000000);
       if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
-      *us = usRemainingTime.ESMC_FractionGetn();
+      *us = usRemainingTime.getn();
 
       // remove total microseconds from remainingTime
-      ESMC_Fraction microseconds(0, *us, 1000000);
+      Fraction microseconds(0, *us, 1000000);
       remainingTime -= microseconds;
     }
     if (ns != ESMC_NULL_POINTER) {
       // convert remaining time to nanoseconds
-      ESMC_Fraction nsRemainingTime = remainingTime;
-      int rc = nsRemainingTime.ESMC_FractionConvert(1000000000);
+      Fraction nsRemainingTime = remainingTime;
+      int rc = nsRemainingTime.convert(1000000000);
       if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
-      *ns = nsRemainingTime.ESMC_FractionGetn();
+      *ns = nsRemainingTime.getn();
     }
 
     //
@@ -361,7 +361,7 @@
 
     // reset remainingSeconds for floating point conversion
     remainingTime = saveRemainingTime;
-    remainingSeconds = remainingTime.ESMC_FractionGetw();
+    remainingSeconds = remainingTime.getw();
 
     if (h_r8 != ESMC_NULL_POINTER) {
       *h_r8 = (ESMC_R8) remainingSeconds / SECONDS_PER_HOUR;
@@ -377,50 +377,50 @@
     }
 
     // reset whole seconds part of remaining time
-    remainingTime.ESMC_FractionSetw(remainingSeconds);
+    remainingTime.setw(remainingSeconds);
 
     if (ms_r8 != ESMC_NULL_POINTER) {
       // convert remaining time to milliseconds
-      ESMC_Fraction msRemainingTime = remainingTime;
+      Fraction msRemainingTime = remainingTime;
 
-      // TODO: use ESMC_FractionConvert() when n/d changed to ESMC_I8 ?
+      // TODO: use Fraction::convert() when n/d changed to ESMC_I8 ?
 
       // get total milliseconds
-      ESMC_R8 w = msRemainingTime.ESMC_FractionGetw();
-      ESMC_R8 n = msRemainingTime.ESMC_FractionGetn();
-      ESMC_R8 d = msRemainingTime.ESMC_FractionGetd();
+      ESMC_R8 w = msRemainingTime.getw();
+      ESMC_R8 n = msRemainingTime.getn();
+      ESMC_R8 d = msRemainingTime.getd();
       *ms_r8 = w * 1000 + (n * 1000) / d;
 
       // remove total milliseconds from remainingTime
-      ESMC_Fraction milliseconds(0, (ESMC_I4)*ms_r8, 1000);
+      Fraction milliseconds(0, (ESMC_I4)*ms_r8, 1000);
       remainingTime -= milliseconds;
     }
     if (us_r8 != ESMC_NULL_POINTER) {
       // convert remaining time to microseconds
-      ESMC_Fraction usRemainingTime = remainingTime;
+      Fraction usRemainingTime = remainingTime;
 
-      // TODO: use ESMC_FractionConvert() when n/d changed to ESMC_I8 ?
+      // TODO: use Fraction::convert() when n/d changed to ESMC_I8 ?
 
       // get total microseconds
-      ESMC_R8 w = usRemainingTime.ESMC_FractionGetw();
-      ESMC_R8 n = usRemainingTime.ESMC_FractionGetn();
-      ESMC_R8 d = usRemainingTime.ESMC_FractionGetd();
+      ESMC_R8 w = usRemainingTime.getw();
+      ESMC_R8 n = usRemainingTime.getn();
+      ESMC_R8 d = usRemainingTime.getd();
       *us_r8 = w * 1000000 + (n * 1000000) / d;
 
       // remove total microseconds from remainingTime
-      ESMC_Fraction microseconds(0, (ESMC_I4)*us_r8, 1000000);
+      Fraction microseconds(0, (ESMC_I4)*us_r8, 1000000);
       remainingTime -= microseconds;
     }
     if (ns_r8 != ESMC_NULL_POINTER) {
       // convert remaining time to nanoseconds
-      ESMC_Fraction nsRemainingTime = remainingTime;
+      Fraction nsRemainingTime = remainingTime;
 
-      // TODO: use ESMC_FractionConvert() when n/d changed to ESMC_I8 ?
+      // TODO: use Fraction::convert() when n/d changed to ESMC_I8 ?
 
       // get total nanoseconds
-      ESMC_R8 w = nsRemainingTime.ESMC_FractionGetw();
-      ESMC_R8 n = nsRemainingTime.ESMC_FractionGetn();
-      ESMC_R8 d = nsRemainingTime.ESMC_FractionGetd();
+      ESMC_R8 w = nsRemainingTime.getw();
+      ESMC_R8 n = nsRemainingTime.getn();
+      ESMC_R8 d = nsRemainingTime.getd();
       *ns_r8 = w * 1000000000 + (n * 1000000000) / d;
     }
 
@@ -439,7 +439,7 @@
 //    ESMCI::BaseTime& result
 //
 // !ARGUMENTS:
-      const ESMC_Fraction &fraction) {   // in - ESMC_Fraction
+      const Fraction &fraction) {   // in - Fraction
 //
 // !DESCRIPTION:
 //      Assign current object's (this) {\tt ESMC\_Fraction} with given
@@ -451,8 +451,8 @@
     //   F90 ESMF_Time & ESMF_TimeInterval via ESMC_BaseTime_F.C interface
     //   for increment/decrement
 
-    // use = operator in ESMC_Fraction class
-    ESMC_Fraction::operator=(fraction);
+    // use = operator in Fraction class
+    Fraction::operator=(fraction);
 
     return(*this);
 
@@ -537,7 +537,7 @@
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::BaseTime::validate()"
 
-    return(ESMC_FractionValidate());
+    return(Fraction::validate());
 
 }  // end ESMCI::BaseTime::validate
 
@@ -561,9 +561,9 @@
 // !REQUIREMENTS:  
 
     printf("BaseTime -------------------------------\n");
-    printf("s = %lld\n", ESMC_FractionGetw());
-    printf("sN = %d\n",  ESMC_FractionGetn());
-    printf("sD = %d\n",  ESMC_FractionGetd());
+    printf("s = %lld\n", getw());
+    printf("sN = %d\n",  getn());
+    printf("sD = %d\n",  getd());
     printf("end BaseTime ---------------------------\n\n");
 
     return(ESMF_SUCCESS);
@@ -589,7 +589,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_Fraction(0,0,1);
+    Fraction(0,0,1);
 
 }  // end ESMCI::BaseTime
 
@@ -614,7 +614,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_Fraction(s, sN, sD) {  // use base class constructor
+    Fraction(s, sN, sD) {  // use base class constructor
 
 }  // end ESMCI::BaseTime
 

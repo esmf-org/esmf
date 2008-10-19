@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.h,v 1.9 2008/07/29 19:28:00 feiliu Exp $
+// $Id: ESMCI_TimeInterval.h,v 1.10 2008/10/19 03:53:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@
  // include files.
 #include <ESMC_Start.h>
 #include <ESMF_TimeMgr.inc>
-#include <ESMC_Fraction.h>
+#include <ESMCI_Fraction.h>
 
 //-------------------------------------------------------------------------
 //BOP
@@ -166,7 +166,7 @@ class TimeInterval : public BaseTime {
     TimeInterval& operator/=(const ESMC_R8 &);
 
     // division (TMG 1.5.5)
-    ESMC_Fraction div(const TimeInterval &) const;
+    Fraction div(const TimeInterval &) const;
     ESMC_R8 operator/(const TimeInterval &) const;
 
     // modulus
@@ -176,8 +176,8 @@ class TimeInterval : public BaseTime {
     // multiplication (TMG 1.5.7, 7.2)
     TimeInterval  operator* (const ESMC_I4 &) const;
     TimeInterval& operator*=(const ESMC_I4 &);
-    TimeInterval  operator* (const ESMC_Fraction &) const;
-    TimeInterval& operator*=(const ESMC_Fraction &);
+    TimeInterval  operator* (const Fraction &) const;
+    TimeInterval& operator*=(const Fraction &);
     TimeInterval  operator* (const ESMC_R8 &) const;
     TimeInterval& operator*=(const ESMC_R8 &);
 
@@ -196,10 +196,10 @@ class TimeInterval : public BaseTime {
     bool operator<=(const TimeInterval &) const;
     bool operator>=(const TimeInterval &) const;
 
-    // copy or assign from ESMC_Fraction expressions, supports Time1-Time2
+    // copy or assign from ESMCI::Fraction expressions, supports Time1-Time2
     // operator in Time.
     // TODO:  should be implicit ?
-    TimeInterval& operator=(const ESMC_Fraction &);
+    TimeInterval& operator=(const Fraction &);
 
     // required methods inherited and overridden from the ESMC_Base class
 
@@ -240,7 +240,7 @@ class TimeInterval : public BaseTime {
     friend TimeInterval
                    operator* (const ESMC_I4 &, const TimeInterval &);
     friend TimeInterval
-                   operator* (const ESMC_Fraction &, const TimeInterval &);
+                   operator* (const Fraction &, const TimeInterval &);
     friend TimeInterval
                    operator* (const ESMC_R8 &, const TimeInterval &);
 
