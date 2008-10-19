@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.27 2008/09/27 00:12:50 w6ws Exp $ 
+# $Id: makefile,v 1.28 2008/10/19 03:47:03 eschwab Exp $ 
 
 ALL: build_here
 
 AUTOGEN   = ESMF_FortranWordsize.F90 ESMF_TypeKindGet.F90
 
-SOURCEC	  = ESMC_Util.C ESMC_Fraction.C ESMCI_F90Interface.C
+SOURCEC	  = ESMC_Util.C ESMCI_Fraction.C ESMCI_F90Interface.C
 SOURCEF	  = ESMF_UtilTypes.F90 \
             ESMF_LogErr.F90  \
             $(AUTOGEN) \
@@ -15,7 +15,7 @@ STOREH    = ESMC_Arg.h ESMCI_Arg.h ESMF_Macros.inc ESMF.h ESMC_Macros.h \
             ESMC_Util.h ESMCI_Util.h ESMF_TypeKindRankMacros.hcppF90 \
             ESMC_Start.h \
             ESMCI_F90Interface.h ESMF_ErrReturnCodes.inc \
-            ESMF_LogMacros.inc ESMF_LogConstants.inc ESMC_Fraction.h \
+            ESMF_LogMacros.inc ESMF_LogConstants.inc ESMCI_Fraction.h \
             ESMF_TypeKindMacros.hcppF90 ESMF_InitMacros.inc \
             ESMC_LogMacros.inc
 
