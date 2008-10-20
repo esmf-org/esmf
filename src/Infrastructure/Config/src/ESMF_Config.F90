@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.44.2.2 2008/04/05 03:12:34 cdeluca Exp $
+! $Id: ESMF_Config.F90,v 1.44.2.3 2008/10/20 19:26:52 theurich Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -140,10 +140,19 @@
 !------------------------------------------------------------------------------
 ! Revised parameter table to fit Fortran 90 standard.
 
-       integer,   parameter :: LSZ = 256
-       integer,   parameter :: MSZ = 1000
+       integer,   parameter :: LSZ = 256  ! Maximum line size
+       integer,   parameter :: MSZ = 200  ! Used to size buffer; this is
+                                          ! usually *less* than the number
+                                          ! of non-blank/comment lines
+                                          ! (because most lines are shorter
+                                          ! then LSZ)
+ 
        integer,   parameter :: NBUF_MAX = MSZ*LSZ ! max size of buffer
-       
+       integer,   parameter :: NATT_MAX = NBUF_MAX/16 ! max # attributes;  
+                                                  ! assumes an average line
+                                                  ! size of 16, the code
+                                                  ! will do a bound check
+
        character, parameter :: BLK = achar(32)   ! blank (space)
        character, parameter :: TAB = achar(09)   ! TAB
 #ifdef ESMF_HAS_ACHAR_BUG
@@ -511,7 +520,7 @@
       ! TODO: Absoft 8 compiler bug necessitates allocating pointer within
       ! derived type via local pointer first.  Absoft 9/Jazz bug necessitates
       ! this must be a separate allocate statement.
-      allocate(attr_used_local(MSZ), stat = iret)
+      allocate(attr_used_local(NATT_MAX), stat = iret)
       if (ESMF_LogMsgFoundAllocError(iret, "Allocating local buffer 2", &
                                         ESMF_CONTEXT, rc)) return
       config_local%attr_used => attr_used_local
@@ -2366,7 +2375,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       ! initialize this config's attributes table "used" flags to "not used"
-      do a = 1, MSZ
+      do a = 1, NATT_MAX
         config%cptr%attr_used(a)%used = .false.
       enddo
 
@@ -2405,8 +2414,14 @@
 
             ! ... and place it into attributes table
             if (.not.duplicate) then
-              config%cptr%attr_used(a)%label = label
-              a = a + 1
+               if ( a <= NATT_MAX ) then
+                  config%cptr%attr_used(a)%label = label
+               else
+                  if (ESMF_LogMsgFoundError(ESMF_RC_INTNRL_LIST,    &
+                       "attribute out-of-range; increase NATT_MAX", &
+                       ESMF_CONTEXT, rc)) return
+               endif
+               a = a + 1
             endif
           endif
         endif
@@ -2668,7 +2683,7 @@
 
       ! find attr label and set its used flag to given value
       !  TODO:  pre-sort and use binary search, or use hash function
-      do i = 1, MSZ
+      do i = 1, NATT_MAX
         if (trim(config%cptr%current_attr) == trim(config%cptr%attr_used(i)%label)) then
           config%cptr%attr_used(i)%used = used
           exit
@@ -2746,7 +2761,7 @@
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      if (config%cptr%nattr < 0 .or. config%cptr%nattr > MSZ) then
+      if (config%cptr%nattr < 0 .or. config%cptr%nattr > NATT_MAX) then
         if (ESMF_LogMsgFoundError(ESMF_RC_INTNRL_LIST, &
                                   "config%cptr%nattr out-of-range.", &
                                   ESMF_CONTEXT, rc)) return
