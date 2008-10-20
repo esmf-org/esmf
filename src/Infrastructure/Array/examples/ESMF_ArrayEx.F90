@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.40 2008/09/18 21:05:18 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.41 2008/10/20 18:36:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,10 +34,10 @@ program ESMF_ArrayEx
 !  type(ESMF_Array), allocatable:: arrayList(:)
   type(ESMF_LocalArray), allocatable:: larrayList(:)
   type(ESMF_LocalArray), allocatable:: larrayList1(:), larrayList2(:)
-  real(ESMF_KIND_R8), pointer:: myF90Array(:,:)
-!  real(ESMF_KIND_R8), pointer:: myF90Array1(:,:), myF90Array2(:,:)
-  real(ESMF_KIND_R8), pointer:: myF90Array1D(:), myF90Array3D(:,:,:)
-  real(ESMF_KIND_R8), pointer:: myF90Array2D(:,:)
+  real(ESMF_KIND_R8), pointer:: myFarray(:,:)
+!  real(ESMF_KIND_R8), pointer:: myFarray1(:,:), myFarray2(:,:)
+  real(ESMF_KIND_R8), pointer:: myFarray1D(:), myFarray3D(:,:,:)
+  real(ESMF_KIND_R8), pointer:: myFarray2D(:,:)
   real(ESMF_KIND_R8):: dummySum
   type(ESMF_IndexFlag):: indexflag
 !  integer, allocatable:: dimExtent(:,:), indexList(:), regDecompDeCoord(:)
@@ -185,8 +185,8 @@ program ESMF_ArrayEx
 !BOE
 ! Now each PET can loop through its local list of DEs and access the associated
 ! memory through a suitable Fortran pointer. In the current example the native
-! pointer {\tt myF90Array} must be declared as\newline
-! {\tt real(ESMF\_KIND\_R8), pointer:: myF90Array(:,:)}\newline
+! pointer {\tt myFarray} must be declared as\newline
+! {\tt real(ESMF\_KIND\_R8), pointer:: myFarray(:,:)}\newline
 ! in order to match the {\tt arrayspec} that was used to create the
 ! {\tt array} object. The following loop uses the native language access to
 ! initialize the entire memory chunks of all PET-local DEs to 0 using 
@@ -194,8 +194,8 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
-    myF90Array = 0.
+    call ESMF_LocalArrayGet(larrayList(de), myFarray, ESMF_DATA_REF, rc=rc)
+    myFarray = 0.
   enddo
 !EOC
 
@@ -353,10 +353,10 @@ program ESMF_ArrayEx
 !
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
-    do i=1, size(myF90Array, 1)
-      do j=1, size(myF90Array, 2)
-        print *, "PET-local DE=", de, ": array(",i,",",j,")=", myF90Array(i,j)
+    call ESMF_LocalArrayGet(larrayList(de), myFarray, ESMF_DATA_REF, rc=rc)
+    do i=1, size(myFarray, 1)
+      do j=1, size(myFarray, 2)
+        print *, "PET-local DE=", de, ": array(",i,",",j,")=", myFarray(i,j)
       enddo
     enddo
   enddo
@@ -400,11 +400,11 @@ program ESMF_ArrayEx
     ! this is the default
 !    print *, "DE-local exclusive regions start at (1,1)"
     do de=1, localDeCount
-      call ESMF_LocalArrayGet(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
+      call ESMF_LocalArrayGet(larrayList(de), myFarray, ESMF_DATA_REF, rc=rc)
       do i=1, exclusiveUBound(1, de)
         do j=1, exclusiveUBound(2, de)
 !          print *, "DE-local exclusive region for PET-local DE=", de, &
-!            ": array(",i,",",j,")=", myF90Array(i,j)
+!            ": array(",i,",",j,")=", myFarray(i,j)
         enddo
       enddo
     enddo
@@ -412,11 +412,11 @@ program ESMF_ArrayEx
     ! only if set during ESMF_ArrayCreate()
 !    print *, "DE-local exclusive regions of this Array have global bounds"
     do de=1, localDeCount
-      call ESMF_LocalArrayGet(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
+      call ESMF_LocalArrayGet(larrayList(de), myFarray, ESMF_DATA_REF, rc=rc)
       do i=exclusiveLBound(1, de), exclusiveUBound(1, de)
         do j=exclusiveLBound(2, de), exclusiveUBound(2, de)
 !          print *, "DE-local exclusive region for PET-local DE=", de, &
-!            ": array(",i,",",j,")=", myF90Array(i,j)
+!            ": array(",i,",",j,")=", myFarray(i,j)
         enddo
       enddo
     enddo
@@ -536,28 +536,28 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myF90Array, ESMF_DATA_REF, rc=rc)
+    call ESMF_LocalArrayGet(larrayList(de), myFarray, ESMF_DATA_REF, rc=rc)
     ! initialize the DE-local array
-    myF90Array = 0.1d0 * localDeList(de)
+    myFarray = 0.1d0 * localDeList(de)
     ! first time through the total region of array    
-!    print *, "myF90Array bounds for DE=", localDeList(de), lbound(myF90Array), &
-!      ubound(myF90Array)
+!    print *, "myFarray bounds for DE=", localDeList(de), lbound(myFarray), &
+!      ubound(myFarray)
     do j=exclusiveLBound(2, de), exclusiveUBound(2, de)
       do i=exclusiveLBound(1, de), exclusiveUBound(1, de)
 !        print *, "Excl region DE=", localDeList(de), ": array(",i,",",j,")=", &
-!          myF90Array(i,j)
+!          myFarray(i,j)
       enddo
     enddo
     do j=computationalLBound(2, de), computationalUBound(2, de)
       do i=computationalLBound(1, de), computationalUBound(1, de)
 !        print *, "Excl region DE=", localDeList(de), ": array(",i,",",j,")=", &
-!          myF90Array(i,j)
+!          myFarray(i,j)
       enddo
     enddo
     do j=totalLBound(2, de), totalUBound(2, de)
       do i=totalLBound(1, de), totalUBound(1, de)
 !        print *, "Total region DE=", localDeList(de), ": array(",i,",",j,")=", &
-!          myF90Array(i,j)
+!          myFarray(i,j)
       enddo
     enddo
 
@@ -567,7 +567,7 @@ program ESMF_ArrayEx
       do i=exclusiveLBound(1, de)-totalLWidth(1, de), &
         exclusiveUBound(1, de)+totalUWidth(1, de)
 !        print *, "Excl region DE=", localDeList(de), ": array(",i,",",j,")=", &
-!          myF90Array(i,j)
+!          myFarray(i,j)
       enddo
     enddo
   enddo
@@ -1191,16 +1191,16 @@ program ESMF_ArrayEx
   call ESMF_ArrayGet(array1, computationalLBound=computationalLBound, &
     computationalUBound=computationalUBound, rc=rc)
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList1(de), myF90Array1, ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList1(de), myFarray1, ESMF_DATA_REF, &
       rc=rc)
-    call ESMF_LocalArrayGet(larrayList2(de), myF90Array2, ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList2(de), myFarray2, ESMF_DATA_REF, &
       rc=rc)
     ! use the computational bounds of array1 for the kernel
     do i=computationalLBound(de, 1), computationalUBound(de, 1)
       do j=computationalLBound(de, 2), computationalUBound(de, 2)
         ! (i,j) references the same element in both Array objects!
         dummySum = dummySum + &
-          (myF90Array2(i,j-1) - myF90Array2(i,j)) * myF90Array1(i,j)
+          (myFarray2(i,j-1) - myFarray2(i,j)) * myFarray1(i,j)
       enddo
     enddo
   enddo
@@ -1482,19 +1482,19 @@ program ESMF_ArrayEx
   allocate(larrayList2(localDeCount))
   call ESMF_ArrayGet(array2D, larrayList=larrayList2, rc=rc)
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList1(de), myF90Array3D, ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList1(de), myFarray3D, ESMF_DATA_REF, &
       rc=rc)
-    myF90Array3D = 0.1d0 * de ! initialize
-    call ESMF_LocalArrayGet(larrayList2(de), myF90Array2D, ESMF_DATA_REF, &
+    myFarray3D = 0.1d0 * de ! initialize
+    call ESMF_LocalArrayGet(larrayList2(de), myFarray2D, ESMF_DATA_REF, &
       rc=rc)
-    myF90Array2D = 0.5d0 * de ! initialize
+    myFarray2D = 0.5d0 * de ! initialize
     do k=1, 4
       do j=1, 4
         dummySum = 0.d0
         do i=1, 16
-          dummySum = dummySum + myF90Array3D(i,j,k) ! sum up the (j,k) column
+          dummySum = dummySum + myFarray3D(i,j,k) ! sum up the (j,k) column
         enddo
-        dummySum = dummySum * myF90Array2D(j,k) ! multiply with local 2D element
+        dummySum = dummySum * myFarray2D(j,k) ! multiply with local 2D element
 !        print *, "dummySum(",j,k,")=",dummySum
       enddo
     enddo
@@ -1631,7 +1631,7 @@ program ESMF_ArrayEx
 !BOE
 ! The following loop shows how a Fortran pointer to the DE-local data chunks
 ! can be obtained and used to set data values in the exclusive regions. The
-! {\tt myF90Array3D} variable must be of rank 3 to match the Array rank of
+! {\tt myFarray3D} variable must be of rank 3 to match the Array rank of
 ! {\tt array}. However, variables such as {\tt exclusiveUBound} that store the
 ! information about the decomposition, remain to be allocated for the 2D 
 ! index space.
@@ -1640,11 +1640,11 @@ program ESMF_ArrayEx
   call ESMF_ArrayGet(array, exclusiveLBound=exclusiveLBound, &
     exclusiveUBound=exclusiveUBound, rc=rc)
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myF90Array3D, ESMF_DATA_REF, rc=rc)
-    myF90Array3D = 0.0 ! initialize
-    myF90Array3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
+    call ESMF_LocalArrayGet(larrayList(de), myFarray3D, ESMF_DATA_REF, rc=rc)
+    myFarray3D = 0.0 ! initialize
+    myFarray3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
       exclusiveLBound(2,de):exclusiveUBound(2,de), 1) = 5.1 ! dummy assignment
-    myF90Array3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
+    myFarray3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
       exclusiveLBound(2,de):exclusiveUBound(2,de), 2) = 2.5 ! dummy assignment
   enddo
   deallocate(larrayList)
@@ -1723,10 +1723,10 @@ program ESMF_ArrayEx
   allocate(larrayList(localDeCount))
   call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myF90Array3D, ESMF_DATA_REF, rc=rc)
-    myF90Array3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
+    call ESMF_LocalArrayGet(larrayList(de), myFarray3D, ESMF_DATA_REF, rc=rc)
+    myFarray3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
       1, exclusiveLBound(2,de):exclusiveUBound(2,de)) = 10.5 ! dummy assignment
-    myF90Array3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
+    myFarray3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
       2, exclusiveLBound(2,de):exclusiveUBound(2,de)) = 23.3 ! dummy assignment
   enddo
   deallocate(exclusiveLBound, exclusiveUBound)
@@ -1824,13 +1824,13 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myF90Array1D, ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList(de), myFarray1D, ESMF_DATA_REF, &
       rc=rc)
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
-    print *, "DE ",localDeList(de)," [", lbound(myF90Array1D), &
-      ubound(myF90Array1D),"]"
+    print *, "DE ",localDeList(de)," [", lbound(myFarray1D), &
+      ubound(myFarray1D),"]"
   enddo
   deallocate(larrayList)
   deallocate(localDeList)
@@ -1903,7 +1903,7 @@ program ESMF_ArrayEx
 ! PET. 
 !EOE
 !BOC
-  allocate(myF90Array2D(3,10))
+  allocate(myFarray2D(3,10))
 !EOC
 !BOE
 ! Assuming a petCount of 4 the following DistGrid defines a 2D index space
@@ -1915,7 +1915,7 @@ program ESMF_ArrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! The following call creates an Array object on the above distgrid using
-! the locally existing {\tt myF90Array2D} Fortran arrays. The difference 
+! the locally existing {\tt myFarray2D} Fortran arrays. The difference 
 ! compared to the case with automatic memory allocation is that instead of
 ! {\tt arrayspec} the Fortran array is provided as argument. Futhermore,
 ! the {\tt undistLBound} and {\tt undistUBound} arguments can be omitted,
@@ -1923,7 +1923,7 @@ program ESMF_ArrayEx
 ! bound equal to the size of the respective Fortran array dimension.
 !EOE
 !BOC
-  array = ESMF_ArrayCreate(farray=myF90Array2D, distgrid=distgrid, &
+  array = ESMF_ArrayCreate(farray=myFarray2D, distgrid=distgrid, &
     distgridToArrayMap=(/0,2/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1941,7 +1941,7 @@ program ESMF_ArrayEx
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  deallocate(myF90Array2D)
+  deallocate(myFarray2D)
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 !!!! UNTIL FURTHER IMPLEMENTATION SKIP SECTIONS OF THIS EXAMPLE >>>>>>>>>>>>>>>>

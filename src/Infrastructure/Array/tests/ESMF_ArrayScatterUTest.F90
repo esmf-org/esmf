@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterUTest.F90,v 1.33 2008/04/07 06:45:50 theurich Exp $
+! $Id: ESMF_ArrayScatterUTest.F90,v 1.34 2008/10/20 18:36:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@ program ESMF_ArrayScatterUTest
 ! !PROGRAM: ESMF_ArrayScatterUTest - This unit test file tests ArrayScatter()
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 ArrayScatter unit tests.
+! The code in this file drives Fortran ArrayScatter unit tests.
 ! The companion file ESMF\_Array.F90 contains the definitions for the
 ! Array methods.
 !
@@ -35,7 +35,7 @@ program ESMF_ArrayScatterUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayScatterUTest.F90,v 1.33 2008/04/07 06:45:50 theurich Exp $'
+    '$Id: ESMF_ArrayScatterUTest.F90,v 1.34 2008/10/20 18:36:28 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -56,16 +56,16 @@ program ESMF_ArrayScatterUTest
   type(ESMF_ArraySpec)  :: arrayspec
   type(ESMF_DistGrid)   :: distgrid
   type(ESMF_Array)      :: array
-  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching F90 array pointer
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching Fortran array pointer
   real(ESMF_KIND_R8), allocatable :: srcfarray(:,:)
   real(ESMF_KIND_R8):: value
-  real(ESMF_KIND_R4), pointer :: farrayPtr_R4(:,:)     ! matching F90 array pointer
+  real(ESMF_KIND_R4), pointer :: farrayPtr_R4(:,:)     ! matching Fortran array pointer
   real(ESMF_KIND_R4), allocatable :: srcfarray_R4(:,:)
   real(ESMF_KIND_R4):: value_R4
 #ifdef ESMF_TESTEXHAUSTIVE
   integer:: k, kk, ii, jj, dimExtent1, dimExtent2
   integer, allocatable:: indexList1(:), indexList2(:)
-  real(ESMF_KIND_R8), pointer :: farrayPtr3d(:,:,:) ! matching F90 array pointer
+  real(ESMF_KIND_R8), pointer :: farrayPtr3d(:,:,:) ! matching Fortran array pointer
   real(ESMF_KIND_R8), allocatable :: srcfarray3d(:,:,:)
   integer:: exclusiveLBound(2,1), exclusiveUBound(2,1)
 #endif

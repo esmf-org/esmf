@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.12 2008/05/08 02:27:11 theurich Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.13 2008/10/20 18:36:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.12 2008/05/08 02:27:11 theurich Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.13 2008/10/20 18:36:28 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -54,7 +54,7 @@ program ESMF_ArrayArbIdxSMMUTest
   type(ESMF_Array)      :: srcArray, dstArray
   type(ESMF_ArraySpec)  :: arrayspec
   type(ESMF_RouteHandle):: routehandle
-  integer(ESMF_KIND_I4), pointer :: farrayPtr(:)  ! matching F90 array pointer
+  integer(ESMF_KIND_I4), pointer :: farrayPtr(:)  ! matching Fortran array pointer
   integer(ESMF_KIND_I4) :: factorList(3)
   integer               :: factorIndexList(2,3)
 #ifdef ESMF_TESTEXHAUSTIVE
@@ -63,7 +63,7 @@ program ESMF_ArrayArbIdxSMMUTest
   type(ESMF_Array)      :: dstArray2, dstArray3
   type(ESMF_ArraySpec)  :: arrayspec3
   type(ESMF_RouteHandle):: routehandle3
-  integer(ESMF_KIND_I4), pointer :: farrayPtr2D(:,:)! matching F90 array pointer
+  integer(ESMF_KIND_I4), pointer :: farrayPtr2D(:,:)! matching Fortran array pointer
   integer(ESMF_KIND_I4) :: factorList2(1)
   integer               :: factorIndexList2(4,1)
 #endif

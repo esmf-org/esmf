@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.3 2008/04/05 03:37:56 cdeluca Exp $
+! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.4 2008/10/20 18:36:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@ program ESMF_ArrayScatterGatherEx
   type(ESMF_Array):: array
   type(ESMF_ArraySpec):: arrayspec
   integer(ESMF_KIND_I4), allocatable:: farray(:,:,:)
-  real(ESMF_KIND_R8), pointer:: myF90Array2D(:,:), myF90Array2D2(:,:)
+  real(ESMF_KIND_R8), pointer:: myFarray2D(:,:), myFarray2D2(:,:)
   integer :: finalrc
   
 ! ------------------------------------------------------------------------------
@@ -152,25 +152,25 @@ program ESMF_ArrayScatterGatherEx
 !EOE
 !BOC
   if (localPet == 0) then
-    allocate(myF90Array2D(4,2))
+    allocate(myFarray2D(4,2))
     do j=1,2
       do i=1,4
-        myF90Array2D(i,j) = i * 100.d0 + j * 1.2345d0 ! initialize
+        myFarray2D(i,j) = i * 100.d0 + j * 1.2345d0 ! initialize
       enddo
     enddo
   endif
   
-  call ESMF_ArrayScatter(array, farray=myF90Array2D, rootPet=0, rc=rc)
+  call ESMF_ArrayScatter(array, farray=myFarray2D, rootPet=0, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   if (localPet == 0) then
-    deallocate(myF90Array2D)
+    deallocate(myFarray2D)
   endif
 !EOC
 !BOE
 ! This will have filled each local 4 x 2 Array piece with the replicated
-! data of {\tt myF90Array2D}.
+! data of {\tt myFarray2D}.
 !EOE
 !  call ESMF_ArrayPrint(array, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -191,12 +191,12 @@ program ESMF_ArrayScatterGatherEx
 ! following replicated Array created from existing local Fortran arrays.
 !EOE
 !BOC
-  allocate(myF90Array2D(3,10))
+  allocate(myFarray2D(3,10))
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
-  array = ESMF_ArrayCreate(farray=myF90Array2D, distgrid=distgrid, &
+  array = ESMF_ArrayCreate(farray=myFarray2D, distgrid=distgrid, &
     distgridToArrayMap=(/0,2/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -209,7 +209,7 @@ program ESMF_ArrayScatterGatherEx
 ! indpendently.
 !EOE
 !BOC
-  myF90Array2D = localPet ! initialize
+  myFarray2D = localPet ! initialize
 !EOC
 !  call ESMF_ArrayPrint(array, rc=rc)
 !  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -219,21 +219,21 @@ program ESMF_ArrayScatterGatherEx
 !EOE
 !BOC
   if (localPet == 0) then
-    allocate(myF90Array2D2(5:7,11:20))
+    allocate(myFarray2D2(5:7,11:20))
   
     do j=11,20
       do i=5,7
-        myF90Array2D2(i,j) = i * 100.d0 + j * 1.2345d0 ! initialize
+        myFarray2D2(i,j) = i * 100.d0 + j * 1.2345d0 ! initialize
       enddo
     enddo
   endif
   
-  call ESMF_ArrayScatter(array, farray=myF90Array2D2, rootPet=0, rc=rc)
+  call ESMF_ArrayScatter(array, farray=myFarray2D2, rootPet=0, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   if (localPet == 0) then
-    deallocate(myF90Array2D2)
+    deallocate(myFarray2D2)
   endif
 !BOE
 ! The Array pieces on every DE will receive the same source data, resulting
@@ -252,7 +252,7 @@ program ESMF_ArrayScatterGatherEx
 !EOE
 !BOC
   if (localPet == 1) then
-    myF90Array2D = real(1.2345, ESMF_KIND_R8)
+    myFarray2D = real(1.2345, ESMF_KIND_R8)
   endif
 !EOC
 !BOE
@@ -261,12 +261,12 @@ program ESMF_ArrayScatterGatherEx
   call ESMF_ArrayPrint(array, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
-  allocate(myF90Array2D2(3,10))
-  myF90Array2D2 = 0.d0    ! initialize to a known value
-  call ESMF_ArrayGather(array, farray=myF90Array2D2, rootPet=0, rc=rc)
+  allocate(myFarray2D2(3,10))
+  myFarray2D2 = 0.d0    ! initialize to a known value
+  call ESMF_ArrayGather(array, farray=myFarray2D2, rootPet=0, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  print *, "localPet = ", localPet, "myF90Array2D2: ", myF90Array2D2
+  print *, "localPet = ", localPet, "myFarray2D2: ", myFarray2D2
   
 !BOE
 ! The result remains completely defined by the unmodified values of Array in 
@@ -275,7 +275,7 @@ program ESMF_ArrayScatterGatherEx
 !EOE
 !BOC
   if (localPet==3) then
-    myF90Array2D = real(5.4321, ESMF_KIND_R8)
+    myFarray2D = real(5.4321, ESMF_KIND_R8)
   endif
 !EOC
   call ESMF_ArrayPrint(array, rc=rc)
@@ -284,15 +284,15 @@ program ESMF_ArrayScatterGatherEx
 ! will change the outcome of
 !EOE
 !BOC
-  call ESMF_ArrayGather(array, farray=myF90Array2D2, rootPet=0, rc=rc)
+  call ESMF_ArrayGather(array, farray=myFarray2D2, rootPet=0, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
 ! as expected.
 !EOE
-  print *, "localPet = ", localPet, "myF90Array2D2: ", myF90Array2D2
+  print *, "localPet = ", localPet, "myFarray2D2: ", myFarray2D2
 !BOC
-  deallocate(myF90Array2D2)
+  deallocate(myFarray2D2)
 
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
@@ -301,7 +301,7 @@ program ESMF_ArrayScatterGatherEx
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  deallocate(myF90Array2D)
+  deallocate(myFarray2D)
   
   
 ! ------------------------------------------------------------------------------

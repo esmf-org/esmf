@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.8 2008/04/07 06:45:50 theurich Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.9 2008/10/20 18:36:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.8 2008/04/07 06:45:50 theurich Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.9 2008/10/20 18:36:28 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -51,7 +51,7 @@ program ESMF_ArrayRedistUTest
   type(ESMF_Array)      :: srcArray, dstArray
   type(ESMF_ArraySpec)  :: arrayspec
   type(ESMF_RouteHandle):: routehandle
-  integer(ESMF_KIND_I4), pointer :: farrayPtr(:)  ! matching F90 array pointer
+  integer(ESMF_KIND_I4), pointer :: farrayPtr(:)  ! matching Fortran array pointer
 #ifdef ESMF_TESTEXHAUSTIVE
   type(ESMF_DistGrid)   :: srcDistgrid2
   type(ESMF_Array)      :: srcArray2, srcArray3
@@ -59,11 +59,11 @@ program ESMF_ArrayRedistUTest
   type(ESMF_ArraySpec)  :: arrayspec3
   type(ESMF_ArraySpec)  :: arrayspec4, arrayspec5
   type(ESMF_Array)      :: srcArray4, dstArray5
-  real(ESMF_KIND_R8), pointer :: farrayPtr4(:)  ! matching F90 array pointer
-  real(ESMF_KIND_R4), pointer :: farrayPtr5(:)  ! matching F90 array pointer
+  real(ESMF_KIND_R8), pointer :: farrayPtr4(:)  ! matching Fortran array pointer
+  real(ESMF_KIND_R4), pointer :: farrayPtr5(:)  ! matching Fortran array pointer
   type(ESMF_RouteHandle):: routehandle45
   type(ESMF_RouteHandle):: routehandle3
-  integer(ESMF_KIND_I4), pointer :: farrayPtr2D(:,:)! matching F90 array pointer
+  integer(ESMF_KIND_I4), pointer :: farrayPtr2D(:,:)! matching Fortran array pointer
 #endif
   integer               :: rc, i, j, petCount, localPet
   integer, allocatable  :: srcIndices(:)

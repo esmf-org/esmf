@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.11 2008/04/05 03:38:03 cdeluca Exp $
+! $Id: ESMF_ArrayDataUTest.F90,v 1.12 2008/10/20 18:36:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@ program ESMF_ArrayDataUTest
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 Array data unit tests.
+! The code in this file drives Fortran Array data unit tests.
 ! The companion file ESMF\_Array.F90 contains the definitions for the
 ! LocalArray methods.
 !
@@ -36,7 +36,7 @@ program ESMF_ArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayDataUTest.F90,v 1.11 2008/04/05 03:38:03 cdeluca Exp $'
+    '$Id: ESMF_ArrayDataUTest.F90,v 1.12 2008/10/20 18:36:28 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -52,7 +52,7 @@ program ESMF_ArrayDataUTest
   integer :: i, j, petCount
   logical :: looptest
 
-  ! F90 array pointer of 4-byte integers
+  ! Fortran array pointer of 4-byte integers
   integer (ESMF_KIND_I4),dimension(:), pointer :: fdata
   integer (ESMF_KIND_I4),dimension(:), pointer :: fdataSlice
   integer (ESMF_KIND_I4),dimension(:), pointer :: fptr
@@ -71,7 +71,7 @@ program ESMF_ArrayDataUTest
   call ESMF_VMGet(vm, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  ! prepare for F90 allocatable array "data"
+  ! prepare for Fortran allocatable array "data"
   allocate(fdata(-12:-6), stat=rc)
   do i = -12, -6
     fdata(i) = i*1000
@@ -83,7 +83,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Creating an Array from allocated F90 array pointer"
+  write(name, *) "Creating an Array from allocated Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array = ESMF_ArrayCreate(fdata, distgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -91,7 +91,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(name, *) "Printing Array created from allocated Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -99,7 +99,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Obtaining access to data in Array via F90 array pointer"
+  write(name, *) "Obtaining access to data in Array via Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, localDe=0, farrayPtr=fptr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -107,7 +107,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(name, *) "Verifying data in Array via Fortran array pointer access"
   write(failMsg, *) "Incorrect data detected"
   looptest = .true.
   do i = -12, -6
@@ -127,7 +127,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(name, *) "Printing Array created from allocated Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -135,7 +135,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(name, *) "Verifying data in Array via Fortran array pointer access"
   write(failMsg, *) "Incorrect data detected"
   looptest = .true.
   do i = -12, -6
@@ -148,7 +148,7 @@ program ESMF_ArrayDataUTest
   
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Destroying Array created from an allocated F90 ",&
+  write(name, *) "Destroying Array created from an allocated Fortran ",&
     "array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
@@ -157,7 +157,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Creating an Array from allocated F90 array pointer using ESMF_DATA_COPY"
+  write(name, *) "Creating an Array from allocated Fortran array pointer using ESMF_DATA_COPY"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array = ESMF_ArrayCreate(fdata, distgrid, copyflag=ESMF_DATA_COPY, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -165,7 +165,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(name, *) "Printing Array created from allocated Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -173,7 +173,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Obtaining access to data in Array via F90 array pointer"
+  write(name, *) "Obtaining access to data in Array via Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, localDe=0, farrayPtr=fptr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -181,7 +181,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(name, *) "Verifying data in Array via Fortran array pointer access"
   write(failMsg, *) "Incorrect data detected"
   looptest = .true.
   do i = -12, -6
@@ -201,7 +201,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(name, *) "Printing Array created from allocated Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -209,7 +209,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(name, *) "Verifying data in Array via Fortran array pointer access"
   write(failMsg, *) "Incorrect data detected"
   looptest = .true.
   do i = -12, -6
@@ -222,7 +222,7 @@ program ESMF_ArrayDataUTest
   
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Destroying Array created from an allocated F90 ",&
+  write(name, *) "Destroying Array created from an allocated Fortran ",&
     "array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
@@ -234,7 +234,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Creating an Array from allocated F90 array pointer slice"
+  write(name, *) "Creating an Array from allocated Fortran array pointer slice"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array = ESMF_ArrayCreate(fdataSlice, distgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -242,7 +242,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(name, *) "Printing Array created from allocated Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -250,7 +250,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Obtaining access to data in Array via F90 array pointer"
+  write(name, *) "Obtaining access to data in Array via Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, localDe=0, farrayPtr=fptr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -258,7 +258,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(name, *) "Verifying data in Array via Fortran array pointer access"
   write(failMsg, *) "Incorrect data detected"
   looptest = .true.
   do i = -12, -6
@@ -278,7 +278,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(name, *) "Printing Array created from allocated Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -286,7 +286,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(name, *) "Verifying data in Array via Fortran array pointer access"
   write(failMsg, *) "Incorrect data detected"
   looptest = .true.
   do i = -12, -6
@@ -299,7 +299,7 @@ program ESMF_ArrayDataUTest
   
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Destroying Array created from an allocated F90 ",&
+  write(name, *) "Destroying Array created from an allocated Fortran ",&
     "array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
@@ -316,7 +316,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Creating an Array from allocated F90 array pointer"
+  write(name, *) "Creating an Array from allocated Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array = ESMF_ArrayCreate(fdataSlice, distgrid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -324,7 +324,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(name, *) "Printing Array created from allocated Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -332,7 +332,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Obtaining access to data in Array via F90 array pointer"
+  write(name, *) "Obtaining access to data in Array via Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, localDe=0, farrayPtr=fptr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -340,7 +340,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(name, *) "Verifying data in Array via Fortran array pointer access"
   write(failMsg, *) "Incorrect data detected"
   looptest = .true.
   do i = -12, -6
@@ -360,7 +360,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(name, *) "Printing Array created from allocated Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -368,7 +368,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(name, *) "Verifying data in Array via Fortran array pointer access"
   write(failMsg, *) "Incorrect data detected"
   looptest = .true.
   do i = -12, -6
@@ -381,7 +381,7 @@ program ESMF_ArrayDataUTest
   
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Destroying Array created from an allocated F90 ",&
+  write(name, *) "Destroying Array created from an allocated Fortran ",&
     "array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
@@ -390,7 +390,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Creating an Array from allocated F90 array pointer"
+  write(name, *) "Creating an Array from allocated Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array = ESMF_ArrayCreate(fdataSlice, distgrid, copyflag=ESMF_DATA_COPY, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -398,7 +398,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(name, *) "Printing Array created from allocated Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -406,7 +406,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Obtaining access to data in Array via F90 array pointer"
+  write(name, *) "Obtaining access to data in Array via Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, localDe=0, farrayPtr=fptr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -414,7 +414,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(name, *) "Verifying data in Array via Fortran array pointer access"
   write(failMsg, *) "Incorrect data detected"
   looptest = .true.
   do i = -12, -6
@@ -434,7 +434,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Printing Array created from allocated F90 array pointer"
+  write(name, *) "Printing Array created from allocated Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -442,7 +442,7 @@ program ESMF_ArrayDataUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verifying data in Array via F90 array pointer access"
+  write(name, *) "Verifying data in Array via Fortran array pointer access"
   write(failMsg, *) "Incorrect data detected"
   looptest = .true.
   do i = -12, -6
@@ -455,7 +455,7 @@ program ESMF_ArrayDataUTest
   
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Destroying Array created from an allocated F90 ",&
+  write(name, *) "Destroying Array created from an allocated Fortran ",&
     "array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
