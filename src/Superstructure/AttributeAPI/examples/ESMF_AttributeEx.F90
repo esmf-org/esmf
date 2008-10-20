@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.1 2008/10/09 17:01:02 rokuingh Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.2 2008/10/20 22:14:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -405,14 +405,19 @@ program ESMF_AttributeEx
 !BOE
 !     It is possible to customize an Attribute package by adding Attributes.  
 !     One could also specify a whole new convention and purpose, to make an
-!     Attribute package completely composed of customized Attributes.  In 
-!     this example we add one Attribute of each available ESMF type to 
-!     the standard Attribute package on the Component.  We must first make a
-!     list of the Attribute names so that we can add them to the Attribute
-!     package.  Afterwards, we can go through and set their values individually.
+!     Attribute package completely composed of customized Attributes.  This is
+!     the recommended practice, as it will allow the customized Attribute package
+!     to be nested inside the standard Attribute package.  Accordingly, in 
+!     this example we add one Attribute of each available ESMF Attribute value type 
+!     to a nested Attribute package, inside the standard Attribute package on the 
+!     Component.  We must first make a list of the Attribute names so that we can 
+!     add them to the Attribute package.  Afterwards, we can go through and set 
+!     their values individually.
 !EOE
 
 !BOC
+      conv = "Custom"
+      
       attpackListTNames(1) = "ESMF_I4name"
       attpackListTNames(2) = "ESMF_I4namelist"
       attpackListTNames(3) = "ESMF_I8name"
@@ -468,6 +473,8 @@ program ESMF_AttributeEx
         convention=conv, purpose=purp, rc=rc)
       call ESMF_AttributeSet(gridcomp, name="Logical_namelist", &
         valueList=inLogl, convention=conv, purpose=purp, rc=rc)
+
+      conv = "ESG"
 !EOC
 
 !BOE
