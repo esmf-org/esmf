@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.9 2008/10/13 17:40:14 oehmke Exp $
+! $Id: ESMF_LocStream.F90,v 1.10 2008/10/20 19:26:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.9 2008/10/13 17:40:14 oehmke Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.10 2008/10/20 19:26:08 oehmke Exp $'
 
 !==============================================================================
 !
@@ -504,7 +504,7 @@ contains
 ! \item [keyName]
 ! The name of the key to add. 
 ! \item[farray] 
-! Valid native Fortran90 array, i.e. memory must be associated with the 
+! Valid native Fortran array, i.e. memory must be associated with the 
 ! actual argument. The type/kind/rank information of {\tt farray} will be 
 ! used to set the key Array's properties accordingly. 
 ! \item[{[copyflag]}] 
@@ -594,7 +594,7 @@ contains
 ! \item [keyName]
 ! The name of the key to add. 
 ! \item[farray] 
-! Valid native Fortran90 array, i.e. memory must be associated with the 
+! Valid native Fortran array, i.e. memory must be associated with the 
 ! actual argument. The type/kind/rank information of {\tt farray} will be 
 ! used to set the key Array's properties accordingly. 
 ! \item[{[copyflag]}] 
@@ -684,7 +684,7 @@ contains
 ! \item [keyName]
 ! The name of the key to add. 
 ! \item[farray] 
-! Valid native Fortran90 array, i.e. memory must be associated with the 
+! Valid native Fortran array, i.e. memory must be associated with the 
 ! actual argument. The type/kind/rank information of {\tt farray} will be 
 ! used to set the key Array's properties accordingly. 
 ! \item[{[copyflag]}] 
@@ -1904,7 +1904,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
                          ESMF_CONTEXT, rcToReturn=rc)) return
 
  
- ! Obtain the native F90 array pointer via the LocalArray interface 
+ ! Obtain the native array pointer via the LocalArray interface 
  call ESMF_ArrayGet(array, localDE=localDE, larray=larray, rc=localrc) 
  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2070,7 +2070,7 @@ end subroutine ESMF_LocStreamGetKeyI4
                          ESMF_CONTEXT, rcToReturn=rc)) return
 
  
- ! Obtain the native F90 array pointer via the LocalArray interface 
+ ! Obtain the native array pointer via the LocalArray interface 
  call ESMF_ArrayGet(array, localDE=localDE, larray=larray, rc=localrc) 
  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2236,7 +2236,7 @@ end subroutine ESMF_LocStreamGetKeyR4
  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                          ESMF_CONTEXT, rcToReturn=rc)) return
 
- ! Obtain the native F90 array pointer via the LocalArray interface 
+ ! Obtain the native array pointer via the LocalArray interface 
  call ESMF_ArrayGet(array, localDE=localDE, larray=larray, rc=localrc) 
  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
