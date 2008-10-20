@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.11 2008/09/23 13:59:36 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.12 2008/10/20 22:13:28 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -95,7 +95,13 @@ The standard Attribute package for the Components is only partially based on the
 \item model\_component\_framework
 \end{itemize}
 
+The ESMF also allows nesting of Attribute packages.  This capability is meant to be used to organize different metadata compliance levels, such as CF and ESG.  The nesting of Attribute packages is also very helpful when adding customized Attributes to a package.  
 
+The main use of the nesting capabilities of Attribute packages is geared towards organizing different metadata compliance levels.  For instance, the CF metadata standard for Fields requires that there be Attributes to track the {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units} of the Field.  The ESG standard, on the other hand, requires two additional Attributes called {\it import} and {\it export}.  In this case the ESMF representation of the ESG compliant Attribute package for a Field would involve a nested Attribute package structure.  This would involve the ESG-specific Attribute package, containing the Attributes {\it import} and {\it export} nested inside the CF-specific Attribute package, containing the Attributes {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units}.  A UML diagram will make this more clear.  
+
+[UML diagram goes here]
+
+The nesting capabilities of Attribute packages are also very useful for organizing the customized metadata supplied by a user.  For example, if a user was not satisfied with the metadata support required in the ESG convention for Field they could supply a list of Attributes they would like to support.  This new Attribute package would then be nested, in one additional layer, inside the Attribute package of ESG, which itself is nested inside the CF Attribute package.  This capability of nesting Attribute packages allows for a multitude of metadata organization strategies, and will also aid in the enforcement of metadata compliance when it is implemented in a future ESMF release.
 
 
 

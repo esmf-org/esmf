@@ -1,4 +1,4 @@
-% $Id: Attribute_implnotes.tex,v 1.6 2008/09/19 03:31:18 rokuingh Exp $
+% $Id: Attribute_implnotes.tex,v 1.7 2008/10/20 22:13:28 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,7 +8,7 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-This section covers the current development on Attribute consistency in a distributed environment, Attribute memory deallocation, and Attribute copying capabilities.  The {\tt ESMF\_Attribute} class currently has limited ability to communicate the current state of an Attribute hierarchy, which is only available in the initialization phase of a model component.  Upcoming design and development involves a routine that will allow the state of the Attribute hierarchy to be updated during the run phase of a model component.  Issues and procedures dealing with Attribute memory deallocation and copying of Attribute hierarchies are also discussed. 
+This section covers the current development on Attribute consistency in a distributed environment, Attribute memory deallocation, and Attribute copying capabilities.  The {\tt ESMF\_Attribute} class currently has limited ability to communicate the current state of an Attribute hierarchy, which is only available in the initialization phase of a model component.  Upcoming design and development involves a routine that will allow the state of the Attribute hierarchy to be updated during the run phase of a model component.  Issues and procedures dealing with Attribute memory deallocation, copying of Attribute hierarchies, using {\tt ESMF\_AttributeGet()} to retrieve Attribute lists, and nested Attribute package capabilities are also discussed. 
 
 \subsubsection{Attributes in a Distributed Environment} 
 \label{sec:Att:Dist}
@@ -26,3 +26,21 @@ The {\tt ESMF\_Attribute} class presents a somewhat different paradigm with resp
 \subsubsection{Copying Attribute hierarchies}
 
 The ability to copy an Attribute hierarchy is limited at this time.  The {\tt ESMF\_AttributeCopy()} routine can be used to {\it locally} copy an Attribute hierarchy between States.  It is important to note that this is a local copy, and no inter-PET communication is carried out.  Another feature of note is that this functionality is based on a soft copy, and therefore further changes made to the original Attribute hierarchy will also affect the new Attribute hierarchy, and vice versa.  The option for a deep copy in this routine is in development, as well as the option for copying between other ESMF objects besides State.  
+
+\subsubsection{Using {\tt ESMF\_AttributeGet()} to retrieve Attribute lists}
+
+The behavior of the {\tt ESMF\_AttributeGet()} routine,when retrieving an Attribute containing a value list, follows a slightly different convention than other similar ESMF routines.  This routine requires the input of a Fortran array as a place to store the retrieved values of the Attribute list.  If the array that is given is longer that the list of Attribute values, the first part of the array will be filled, leaving the extra space untouched.  If, however the array passed in, is shorter than the number of Attribute values, the routine will exit with an {\bf ESMF\_FAILURE} return code.  It is suggested that if it is required by the user to use a Fortran array that is longer than the number of Attribute values returned, only the indices of the array which the user desires to be filleds should be passed into the routine.  
+  
+\subsubsection{Using Attribute package nesting capabilites}
+
+Considering that nested Attribute packages are meant to be used to help organize metadata conventions, there is a recommended practice when using them.  The most general Attribute packages should always be added first, followed by the more specific ones.  For instance, when adding Attribute packages to a Field, it is recommend that the CF convention be added first, followed by the ESG convention, followed by any additional customized Attribute packages.  In a future release the standardized Attribute packages will be added automatically by the ESMF, but until that time this recommendation stands.
+
+Another consideration when using nested Attribute packages is that there is no way of adding additional Attribute packages to an ESMF object, other than having them nested at this point.  There will a flag in the {\tt ESMF\_AttributeAdd()} routine in a future release to allow the user to specify whether they want this additional Attribute package nested or not.  Accordingly, this means that whenever an Attribute package is removed, every nested Attribute package below the point of removal will also be removed.  Thus, by removing the CF Attribute package on a Field, the ESG and any other customized Attribute packages will also be removed.
+
+
+
+
+
+
+
+

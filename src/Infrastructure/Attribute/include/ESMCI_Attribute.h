@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.2 2008/10/17 20:07:49 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.3 2008/10/20 22:13:28 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -54,10 +54,11 @@ class ESMCI_Attribute
     int slen;                   // for string, length, inc trailing NULL.
     ESMC_Logical attrRoot;
   
-    string attrConvention;             // for att packages
-    string attrPurpose;                // for att packages
-    string attrObject;                 // for att packages
-    ESMC_Logical attrPack;                         // for att packages
+    string attrConvention;             // Convention of Attpack
+    string attrPurpose;                // Purpose of Attpack
+    string attrObject;                 // Object of Attpack
+    ESMC_Logical attrPack;             // an Attribute in an Attpack
+    ESMC_Logical attrPackHead;         // the head of an Attpack
 
     int attrID;                 // ID of the attribute
     int attrCount;              // number of attributes in use in list
@@ -93,6 +94,7 @@ class ESMCI_Attribute
       const string &object) const;
     int ESMCI_AttPackGetIndex(const string &convention, 
       const string &purpose, const string &object) const;
+    ESMCI_Attribute *ESMCI_AttPackGetNested(bool &done) const;
     int ESMCI_AttPackIsPresent(const string &name, const string &convention, 
       const string &purpose, const string &object, ESMC_Logical *present) const;
     int ESMCI_AttPackRemove(const string &convention, 
@@ -183,6 +185,7 @@ class ESMCI_Attribute
     int ESMC_Print(void) const;
 
     // Modifiers, Constructors, Destructors, Serializers, Operators
+    ESMCI_Attribute(const string &conv, const string &purp, const string &obj);
     ESMCI_Attribute(const string &name, const string &conv, const string &purp, 
       const string &obj);
     ESMCI_Attribute(void);
