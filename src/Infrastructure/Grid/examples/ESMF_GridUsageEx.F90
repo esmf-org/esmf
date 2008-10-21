@@ -978,7 +978,7 @@ endif
 ! the coordinate storage.  The following example
 ! adds coordinate storage to the corner stagger location in {\tt grid}, plus sets
 ! the associated coordinate data. Note, the input coordinate arrays (CoordX, CoordY)
-! may be either F90 or ESMF Array's (The F90 arrays are restricted to single DE to
+! may be either Fortran or ESMF Array's (The Fortran arrays are restricted to single DE to
 ! PET mappings). They also need to be of the proper size and dimension to correspond to the Grid. 
 !EOEI
 
@@ -1977,11 +1977,11 @@ endif
 
 #ifdef LOCAL_NOT_IMPL
 !removeBOE
-! \subsubsection{Creating a Grid from Existing F90 Arrays}~\label{sec:example5}
+! \subsubsection{Creating a Grid from Existing Fortran Arrays}~\label{sec:example5}
 !
 ! This example illustrates the creation of a simple 2D Grid from coordinate data
 !  contained in 4 byte real fortan arrays.  The new Grid contains just the center stagger location.
-!  Each PET contains a pair of 10x10 Fortran 90 arrays named fptrX and fptrY. 
+!  Each PET contains a pair of 10x10 Fortran arrays named fptrX and fptrY. 
 !  These arrays contain the coordinates for the piece of the global Grid held by each
 !  PET. The final global Grid will be 20x20 and the pieces of this Grid held
 !  by each PET are as follows:
@@ -2058,7 +2058,7 @@ endif
 
 
 !removeBOE
-! \subsubsection{Example: Grid Creation from Existing F90 Arrays Using CreateEmpty/Set}
+! \subsubsection{Example: Grid Creation from Existing Fortran Arrays Using CreateEmpty/Set}
 !
 !  This example illustrates the use of the CreateEmpty/Set paradigm.
 !  It repeats the above example using this grid creation technique.

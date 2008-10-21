@@ -194,7 +194,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.92 2008/10/18 16:11:08 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.93 2008/10/21 19:13:43 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -5077,7 +5077,7 @@ end subroutine ESMF_GridGetDefault
 !  array may only occupy a subset of the Grid's dimensions, and
 !  so these calls may not give all the bounds of the stagger location. 
 !  The bounds from this call are the full bounds, and so
-!  for example, give the appropriate bounds for allocating a F90 array to hold 
+!  for example, give the appropriate bounds for allocating a Fortran array to hold 
 !  data residing on the stagger location.
 !  Note that unlike the output from the Array, these values also include the 
 !  undistributed dimensions and are
@@ -5354,7 +5354,7 @@ end subroutine ESMF_GridGetDefault
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGetCoord - Get Grid coordinate bounds and an F90 pointer to coordinate data
+! !IROUTINE: ESMF_GridGetCoord - Get Grid coordinate bounds and a Fortran pointer to coordinate data
 
 ! !INTERFACE:
 !      subroutine ESMF_GridGetCoord(grid, localDE, coordDim, staggerloc, &
