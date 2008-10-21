@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.4 2008/10/17 18:43:58 rosalind Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.5 2008/10/21 21:36:36 rosalind Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.4 2008/10/17 18:43:58 rosalind Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.5 2008/10/21 21:36:36 rosalind Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -75,11 +75,13 @@ program ESMF_MeshUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
+  !  to be called until then".
+  !UTest
   write(name, *) "MeshWrite Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_MeshWrite(meshSrc, filename="mesh_out", rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
