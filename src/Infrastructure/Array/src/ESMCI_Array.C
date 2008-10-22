@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.40 2008/10/22 04:26:27 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.41 2008/10/22 17:25:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.40 2008/10/22 04:26:27 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.41 2008/10/22 17:25:46 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4154,15 +4154,19 @@ namespace ArrayHelper{
     int tag = 0;  // no need for special tags - messages are ordered to match
     // determine bufferItemCount according to srcTermProcessing
     int bufferItemCount = 0; // reset
-    vector<ArrayHelper::DstInfo>::iterator pp = dstInfoTable.begin();
-    while (pp != dstInfoTable.end()){
-      SeqIndex seqIndex = pp->seqIndex;
-      for (int term=0; term<srcTermProcessing; term++){
-        ++pp;
-        if ((pp == dstInfoTable.end()) || !(seqIndex == pp->seqIndex)) break;
-        // still the same dst element
-      } // for srcTermProcessing
-      ++bufferItemCount;
+    if (srcTermProcessing == 0)
+      bufferItemCount = partnerDeDataCount;
+    else{
+      vector<ArrayHelper::DstInfo>::iterator pp = dstInfoTable.begin();
+      while (pp != dstInfoTable.end()){
+        SeqIndex seqIndex = pp->seqIndex;
+        for (int term=0; term<srcTermProcessing; term++){
+          ++pp;
+          if ((pp == dstInfoTable.end()) || !(seqIndex == pp->seqIndex)) break;
+          // still the same dst element
+        } // for srcTermProcessing
+        ++bufferItemCount;
+      }
     }
     // append the recvnb operation
     localrc = xxe->appendRecvnb(0x0, buffer, bufferItemCount * dataSizeSrc,
@@ -8027,276 +8031,134 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   // --------------------------------------------------------------
   
   // sort recv and send vectors to lower communication contention
+  // sorting also ensures correct ordering of sendnb and recvnb calls w/o tags
   sort(recvnbVector.begin(), recvnbVector.end());
   sort(sendnbVector.begin(), sendnbVector.end());
 
-  
-#define ASMMOVERKILL___disable
-#ifdef ASMMOVERKILL
-//////////////////////////////////////////////////////////////////////////////
-    
-#ifdef ASMMPROFILE
-  localrc = xxe->appendWtimer(0x0, "Wtimer 0", 0, 0);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-  
-  // apply recv pattern for all localDEs on dst side and issue XXE::recvnb
-  
-#ifdef ASMMPROFILE
-  localrc = xxe->appendWtimer(0x0, "Wt: recnbL", xxe->count, xxe->count);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-    
-  for (vector<ArrayHelper::RecvnbElement>::iterator p = recvnbVector.begin();
-    p != recvnbVector.end(); ++p){
-    // fill in XXE StreamElements for dst side side
-    int k = p - recvnbVector.begin();
-    localrc = p->appendRecvnb(xxe, dataSizeSrc, k);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  } // iteration over recvnbVector elements
-
-#ifdef ASMMPROFILE
-  localrc = xxe->appendWtimer(0x0, "Wt: /recnbL", xxe->count, xxe->count);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-  
-#ifdef ASMMSTORETIMING
-  VMK::wtime(t11);   //gjt - profile
-#endif
-  
-  // apply send pattern for all localDEs on src side and issue XXE::sendnb
-
-#ifdef ASMMPROFILE
-  localrc = xxe->appendWtimer(0x0, "Wt: sendnbL", xxe->count, xxe->count);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-        
-  for (vector<ArrayHelper::SendnbElement>::iterator p = sendnbVector.begin();
-    p != sendnbVector.end(); ++p){
-    // fill in XXE StreamElements for src side
-    int k = p - sendnbVector.begin();
-    localrc = p->appendSendnb(xxe, dataSizeSrc, valueTK, rraList, rraCount, k);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }// iteration over sendnbVector elements
-
-#ifdef ASMMPROFILE
-  localrc = xxe->appendWtimer(0x0, "Wt: /sendnbL", xxe->count, xxe->count);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-
-#ifdef ASMMSTORETIMING
-  VMK::wtime(t12);   //gjt - profile
-  double t13a, t13b; //gjt - profile
-#endif
-
-  // apply recv pattern for all localDEs in dst side and issue XXE::"zero"
-  
-#ifdef ASMMPROFILE
-  localrc = xxe->appendWtimer(0x1, "Wt: zero", xxe->count, xxe->count);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-  
-  for (vector<ArrayHelper::RecvnbElement>::iterator p = recvnbVector.begin();
-    p != recvnbVector.end(); ++p){
-    // fill in XXE StreamElements for dst side
-    localrc = p->appendZeroSuperScalar(xxe, srcLocalDeCount, elementTK);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  } // iteration over recvnbVector elements
-  
-#ifdef ASMMPROFILE
-  localrc = xxe->appendWtimer(0x1, "Wt: /zero", xxe->count, xxe->count);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-  
-    
-  // apply recv pattern for all localDEs on dst side and issue XXE::"+=*"
-  
-#ifdef ASMMPROFILE
-  localrc = xxe->appendWtimer(0x0, "Wt: w+=*L", xxe->count, xxe->count);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-  
-#define ASMM_NEWSTYLE
-#ifdef ASMM_NEWSTYLE
-// ASMM_NEWSTYLE //////////////////////////////////////////////////////////
-  for (vector<ArrayHelper::RecvnbElement>::iterator p = recvnbVector.begin();
-    p != recvnbVector.end(); ++p){
-    localrc = p->appendWaitProductSum(xxe, srcLocalDeCount, elementTK, valueTK,
-      factorTK, dataSizeDst, dataSizeSrc, dataSizeFactors,
-      rraList, rraCount, p-recvnbVector.begin());
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  } // iteration over recvnbVector elements
-  
-#else
-// not ASMM_NEWSTYLE => this is the oldstyle way of doing ASMM //////////////
-  
-  // use waitOnAnyIndexSub to wait on and process the incoming data
-  int xxeIndex = xxe->count;  // need this beyond the increment
-  localrc = xxe->appendWaitOnAnyIndexSub(0x0, recvnbVector.size());
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-  XXE::WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo =
-    (XXE::WaitOnAnyIndexSubInfo *)&(xxe->stream[xxeIndex]);
-  
-  int k=0;  // reset
-  for (vector<ArrayHelper::RecvnbElement>::iterator p = recvnbVector.begin();
-    p != recvnbVector.end(); ++p){
-    // register the associated recvnb XXE element in xxeWaitOnAnyIndexSubInfo
-    xxeWaitOnAnyIndexSubInfo->index[k] = p->recvnbIndex;
-    // allocate sub XXE stream and attach to xxeWaitOnAnyIndexSubInfo
-    xxeWaitOnAnyIndexSubInfo->xxe[k] = new XXE(vm, 1000, 1000, 1000);
-    XXE *xxeSub = xxeWaitOnAnyIndexSubInfo->xxe[k];
-    localrc = xxe->appendXxeSub(xxeSub); // XXE garbage collec.
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-#ifdef ASMMPROFILE
-    char *tempString = new char[80];
-    sprintf(tempString, "xxeSub k=%d", p-recvnbVector.begin());
-    localrc = xxeSub->appendWtimer(0x0, tempString, 0, 0, 0, xxe);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-    delete [] tempString;
-#endif
-#ifdef ASMMPROFILE
-    localrc = xxeSub->appendWtimer(0x0, "Wt: pSSRRA", xxeSub->count,
-      xxeSub->count, 0, xxe);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-    localrc = p->appendProductSum(xxeSub, srcLocalDeCount, elementTK, valueTK,
-      factorTK, dataSizeDst, dataSizeSrc, dataSizeFactors,
-      rraList, rraCount);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-#ifdef ASMMPROFILE
-    localrc = xxeSub->appendWtimer(0x0, "Wt: /pSSRRA", xxeSub->count,
-      xxeSub->count, 0, xxe);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-    ++k;  // increment counter
-  } // iteration over recvnbVector elements
-
-#endif
-// done with ASMM_NEWSTYLE, oldstyle ASMM //////////////////////////////////
-  
-#ifdef ASMMSTORETIMING
-    VMK::wtime(&t13a);   //gjt - profile
-#endif
-#ifdef ASMMSTORETIMING
-    VMK::wtime(&t13b);   //gjt - profile
-    printf("gjt - profile for PET %d:\n"
-      " t13a=%g\n t13b=%g\n", localPet, t13a-*t12, t13b-*t12);
-#endif
-    
-#ifdef ASMMPROFILE
-  localrc = xxe->appendWtimer(0x0, "Wt: /w+=*L", xxe->count, xxe->count);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-    
-#ifdef ASMMSTORETIMING
-  VMK::wtime(t13);   //gjt - profile
-#endif
-
-#ifdef ASMMPROFILE
-  localrc = xxe->appendWtimer(0x0, "Wt: bef wOAS", xxe->count, xxe->count);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-  
-#define WAITONALLSENDNB___disable
-#ifdef WAITONALLSENDNB
-  // post XXE::waitOnAllSendnb
-  localrc = xxe->appendWaitOnAllSendnb(0x0);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-#else
-  // post individual XXE::waitOnIndex
-  for (vector<ArrayHelper::SendnbElement>::iterator p = sendnbVector.begin();
-    p != sendnbVector.end(); ++p){
-    // fill in XXE StreamElements for src side
-    localrc = xxe->appendWaitOnIndex(0x0, p->sendnbIndex);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU, &rc)) return rc;
-  }// iteration over sendnbVector elements
-#endif
-
-#ifdef ASMMPROFILE
-  localrc = xxe->appendWtimer(0x0, "Wtimer End", xxe->count, xxe->count);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-  
-#ifdef ASMMPROFILE
-  localrc = xxe->appendWtimer(0x0, "Wtimer End2", xxe->count, xxe->count);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMF_ERR_PASSTHRU, &rc)) return rc;
-#endif
-  
-#if 0  
-  // optimize the XXE entire stream
-  localrc = xxe->optimize();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-#endif 
-  
-  // get XXE ready for execution
-  localrc = xxe->execReady();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;
-  
-//////////////////////////////////////////////////////////////////////////////
-#else
-//////////////////////////////////////////////////////////////////////////////
-
+  // store current XXE parameter in order to efficiently rewrite multiple times
   const int startCount = xxe->count;
   const int startStorageCount = xxe->storageCount;
   const int startCommhandleCount = xxe->commhandleCount;
   const int startXxeSubCount = xxe->xxeSubCount;
   
   double dtMin;           // to find minimum time
-  int pipelineDepthOpt;   // optimium pipeline depth
   
-#ifdef PIPEOPT
-  
-  for (int pipelineDepth=1; pipelineDepth<=petCount; pipelineDepth*=2){
-  
+  // optimize srcTermProcessing
+  int pipelineDepth = 4;  // safe value during srcTermProcessing optimization
+  int srcTermProcessingOpt = 20;
+  const int srcTermProcessingMax = 9;
+  for (int srcTermProcessing=0; srcTermProcessing<srcTermProcessingMax;
+    srcTermProcessing++){
     // start writing a fresh XXE stream
     xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
       startXxeSubCount);
-  
     localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
-      pipelineDepth, elementTK, valueTK, factorTK, dataSizeSrc, dataSizeDst, 
-      dataSizeFactors, srcLocalDeCount, rraList, rraCount,
-      xxe);
+      srcTermProcessing, pipelineDepth, elementTK, valueTK, factorTK,
+      dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount, rraList,
+      rraCount, xxe);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
-    
 #if 0  
     // optimize the XXE entire stream
     localrc = xxe->optimize();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
 #endif 
-    
     // get XXE ready for execution
     localrc = xxe->execReady();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
+    // obtain timing
+    double dtAverage = 0.;
+    double dtStart, dtEnd;
+    const int dtCount = 10;
+    for (int i=0; i<dtCount; i++){
+      vm->barrier();
+      vm->wtime(&dtStart);
+        localrc = xxe->exec(rraCount, rraList, 0x0);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          &rc)) return rc;
+      vm->barrier();
+      vm->wtime(&dtEnd);
+      dtAverage += dtEnd - dtStart;
+    }
+    dtAverage /= dtCount;
+    printf("localPet: %d, srcTermProcessing=%d -> dtAverage=%gs\n", 
+      localPet, srcTermProcessing, dtAverage);
+    // determine optimum srcTermProcessing  
+    if (srcTermProcessing==0){
+      // first time through -> initialize to find minimum
+      dtMin = dtAverage;
+      srcTermProcessingOpt = srcTermProcessing;
+    }else{
+      // compare to current minimum
+      if (dtAverage < dtMin){
+        // found better time
+        dtMin = dtAverage;
+        srcTermProcessingOpt = srcTermProcessing;
+      }
+    }
+  } // srcTermProcessing
   
+  printf("localPet: %d, srcTermProcessingOpt=%d -> dtMin=%gs\n", 
+    localPet, srcTermProcessingOpt, dtMin);
+  
+  // all PETs vote on srcTermProcessingOpt
+  vector<int> srcTermProcessingOptList(petCount);
+  vm->allgather(&srcTermProcessingOpt, &srcTermProcessingOptList[0],
+    sizeof(int));
+  sort(srcTermProcessingOptList.begin(), srcTermProcessingOptList.end());
+  int votes = 1; // initialize
+  int votesMax = 0; // initialize
+  for (int i=1; i<petCount; i++){
+    if (srcTermProcessingOptList[i-1] == srcTermProcessingOptList[i]){
+      // same vote
+      ++votes;
+    }else{
+      // different vote
+      if (votes > votesMax){
+        // new high vote found
+        votesMax = votes;
+        srcTermProcessingOpt = srcTermProcessingOptList[i-1];
+      }
+      votes = 1;
+    }
+  }
+  // check last votes
+  if (votes > votesMax){
+    // new high vote found
+    srcTermProcessingOpt = srcTermProcessingOptList[petCount-1];
+  }
+
+  printf("localPet: %d, srcTermProcessingOpt=%d -> dtMin=%gs (after vote)\n", 
+    localPet, srcTermProcessingOpt, dtMin);
+  
+#ifdef ASMMSTORETIMING
+  VMK::wtime(t11);   //gjt - profile
+#endif
+
+  // optimize pipeline depth
+  int pipelineDepthOpt;   // optimium pipeline depth
+  for (pipelineDepth=1; pipelineDepth<=petCount; pipelineDepth*=2){
+    // start writing a fresh XXE stream
+    xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
+      startXxeSubCount);
+    localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
+      srcTermProcessingOpt, pipelineDepth, elementTK, valueTK, factorTK,
+      dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount, rraList,
+      rraCount, xxe);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+#if 0  
+    // optimize the XXE entire stream
+    localrc = xxe->optimize();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
+#endif 
+    // get XXE ready for execution
+    localrc = xxe->execReady();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      return rc;
     // obtain timing
     double dtAverage = 0.;
     double dtStart, dtEnd;
@@ -8336,8 +8198,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   vector<int> pipelineDepthOptList(petCount);
   vm->allgather(&pipelineDepthOpt, &pipelineDepthOptList[0], sizeof(int));
   sort(pipelineDepthOptList.begin(), pipelineDepthOptList.end());
-  int votes = 1; // initialize
-  int votesMax = 0; // initialize
+  votes = 1; // initialize
+  votesMax = 0; // initialize
   for (int i=1; i<petCount; i++){
     if (pipelineDepthOptList[i-1] == pipelineDepthOptList[i]){
       // same vote
@@ -8360,18 +8222,16 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 
   printf("localPet: %d, pipelineDepthOpt=%d -> dtMin=%gs (after vote)\n", 
     localPet, pipelineDepthOpt, dtMin);
-  
-#else
-  pipelineDepthOpt = 4; // hardcoded for testing of srcTermProcessing feature
+    
+#ifdef ASMMSTORETIMING
+  VMK::wtime(t12);   //gjt - profile
 #endif
-  
-  const int srcTermProcessing = 20;  //TODO: find by optimization
-  
+
   // encode with the majority voted pipelineDepthOpt
   xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
     startXxeSubCount);
   localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
-    srcTermProcessing, pipelineDepthOpt, elementTK, valueTK, factorTK,
+    srcTermProcessingOpt, pipelineDepthOpt, elementTK, valueTK, factorTK,
     dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
     rraList, rraCount, xxe);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
@@ -8389,10 +8249,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
-#endif  
-//////////////////////////////////////////////////////////////////////////////
-    
-  
+#ifdef ASMMSTORETIMING
+  VMK::wtime(t13);   //gjt - profile
+#endif
+
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
