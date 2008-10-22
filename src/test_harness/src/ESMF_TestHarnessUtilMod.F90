@@ -35,7 +35,7 @@
 !-------------------------------------------------------------------------------
 ! !USES:
 
-  use ESMF_Mod
+! use ESMF_Mod
   use ESMF_TestHarnessTypesMod
 
 

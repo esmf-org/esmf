@@ -34,10 +34,10 @@
 !-------------------------------------------------------------------------------
 ! !USES:
 
-  use ESMF_Mod
-  use ESMF_TestHarnessTypesMod
+! use ESMF_Mod
+! use ESMF_TestHarnessTypesMod
   use ESMF_TestHarnessReportMod
-  use ESMF_TestHarnessUtilMod
+! use ESMF_TestHarnessUtilMod
 
 
   implicit none
