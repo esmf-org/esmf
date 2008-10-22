@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.41 2008/10/22 17:25:46 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.42 2008/10/22 19:12:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.41 2008/10/22 17:25:46 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.42 2008/10/22 19:12:23 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4194,12 +4194,12 @@ namespace ArrayHelper{
     int rraIndex = srcLocalDeCount + j; // localDe index into dstArray shifted 
                                         // by srcArray localDeCount
 #ifdef ASMMPROFILE
-    localrc = xxe->appendWtimer(0x1, "Wt: zero", xxe->count, xxe->count);
+    localrc = xxe->appendWtimer(0x2, "Wt: select zero", xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
 #endif
     int xxeIndex = xxe->count;  // need this beyond the increment
-    localrc = xxe->appendZeroSuperScalarRRA(0x1, elementTK, dstInfoTable.size(),
+    localrc = xxe->appendZeroSuperScalarRRA(0x2, elementTK, dstInfoTable.size(),
       rraIndex);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -4213,7 +4213,8 @@ namespace ArrayHelper{
       ++k;
     }
 #ifdef ASMMPROFILE
-    localrc = xxe->appendWtimer(0x1, "Wt: /zero", xxe->count, xxe->count);
+    localrc = xxe->appendWtimer(0x2, "Wt: /select zero", xxe->count,
+      xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
 #endif
@@ -5391,6 +5392,7 @@ int sparseMatMulStoreEncodeXXE(VM *vm, DELayout *srcDelayout,
   const int *srcLocalDeElementCount, const int *dstLocalDeElementCount,
   DD::AssociationElement **srcLinSeqList,
   DD::AssociationElement **dstLinSeqList,
+  const int *dstLocalDeTotalElementCount,
   char **rraList, int rraCount, ESMC_RouteHandle **routehandle
 #ifdef ASMMSTORETIMING
   , double *t8, double *t9, double *t10, double *t11, double *t12, double *t13
@@ -7487,13 +7489,20 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   ESMC_TypeKind typekindSrc = srcArray->getTypekind();
   // obtain typekindDst
   ESMC_TypeKind typekindDst = dstArray->getTypekind();
+  
+  // prepare dstLocalDeTotalElementCount
+  int *dstLocalDeTotalElementCount = new int[dstLocalDeCount];
+  for (int i=0; i<dstLocalDeCount; i++)
+    dstLocalDeTotalElementCount[i] = 
+      dstArray->totalElementCountPLocalDe[i] * dstArray->tensorElementCount;
 
   // encode sparseMatMul communication pattern into XXE stream
   localrc = sparseMatMulStoreEncodeXXE(vm,
     srcArray->delayout, dstArray->delayout,
     tensorMixFlag, typekindFactors, typekindSrc, typekindDst,
     srcLocalDeElementCount, dstLocalDeElementCount,
-    srcLinSeqList, dstLinSeqList, rraList, rraCount, routehandle
+    srcLinSeqList, dstLinSeqList, dstLocalDeTotalElementCount,
+    rraList, rraCount, routehandle
 #ifdef ASMMSTORETIMING
     , &t8, &t9, &t10, &t11, &t12, &t13
 #endif
@@ -7511,6 +7520,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
     delete [] dstLinSeqList[i];
   delete [] dstLinSeqList;
   delete [] dstLocalDeElementCount;
+  delete [] dstLocalDeTotalElementCount;
   delete memHelper;  
 
 #ifdef ASMMSTORETIMING
@@ -7553,7 +7563,8 @@ int sparseMatMulStoreEncodeXXEStream(VM *vm,
   int srcTermProcessing, int pipelineDepth, XXE::TKId elementTK,
   XXE::TKId valueTK, XXE::TKId factorTK,
   int dataSizeSrc, int dataSizeDst, int dataSizeFactors, int srcLocalDeCount,
-  char **rraList, int rraCount, XXE *xxe);
+  int dstLocalDeCount, const int *dstLocalDeTotalElementCount, char **rraList,
+  int rraCount, XXE *xxe);
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -7580,6 +7591,7 @@ int sparseMatMulStoreEncodeXXE(
   const int *dstLocalDeElementCount,      // in
   DD::AssociationElement **srcLinSeqList, // in
   DD::AssociationElement **dstLinSeqList, // in
+  const int *dstLocalDeTotalElementCount, // in
   char **rraList,                         // in
   int rraCount,                           // in
   ESMC_RouteHandle **routehandle          // inout - handle to precomputed comm
@@ -8054,8 +8066,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       startXxeSubCount);
     localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
       srcTermProcessing, pipelineDepth, elementTK, valueTK, factorTK,
-      dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount, rraList,
-      rraCount, xxe);
+      dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
+      dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, xxe);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
 #if 0  
@@ -8145,8 +8157,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       startXxeSubCount);
     localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
       srcTermProcessingOpt, pipelineDepth, elementTK, valueTK, factorTK,
-      dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount, rraList,
-      rraCount, xxe);
+      dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
+      dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, xxe);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
 #if 0  
@@ -8233,7 +8245,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
     srcTermProcessingOpt, pipelineDepthOpt, elementTK, valueTK, factorTK,
     dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
-    rraList, rraCount, xxe);
+    dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, xxe);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -8292,6 +8304,8 @@ int sparseMatMulStoreEncodeXXEStream(
   int dataSizeDst,                        // in
   int dataSizeFactors,                    // in
   int srcLocalDeCount,                    // in
+  int dstLocalDeCount,                    // in
+  const int *dstLocalDeTotalElementCount, // in
   char **rraList,                         // in
   int rraCount,                           // in
   XXE *xxe                                // inout - XXE stream
@@ -8312,7 +8326,7 @@ int sparseMatMulStoreEncodeXXEStream(
   try{
 
 #ifdef ASMMPROFILE
-    localrc = xxe->appendWtimer(0x0, "Wtimer 0", 0, 0);
+    localrc = xxe->appendWtimer(0x0, "Wtimer 0", xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
 #endif
@@ -8341,6 +8355,24 @@ int sparseMatMulStoreEncodeXXEStream(
         ++pSend;
       }
     }
+    
+    // append predicated zero operations for the total region
+#ifdef ASMMPROFILE
+    localrc = xxe->appendWtimer(0x1, "Wt: total zero", xxe->count, xxe->count);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+#endif
+    for (int i=0; i<dstLocalDeCount; i++){
+      localrc = xxe->appendZeroVectorRRA(0x1,
+        dstLocalDeTotalElementCount[i] * dataSizeDst, srcLocalDeCount + i);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMF_ERR_PASSTHRU, &rc)) return rc;
+    }
+#ifdef ASMMPROFILE
+    localrc = xxe->appendWtimer(0x1, "Wt: /total zero", xxe->count, xxe->count);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU, &rc)) return rc;
+#endif
   
     // fill pipeline
     bool recvnbOK = true; // initialize
@@ -8584,36 +8616,6 @@ int Array::sparseMatMul(
   VMK::wtime(&t2);      //gjt - profile
 #endif
   
-  // conditionally zero out total regions of the dstArray for all localDEs
-  if (dstArrayFlag && (zeroflag==ESMF_REGION_TOTAL)){
-    for (int i=0; i<dstArray->delayout->getLocalDeCount(); i++){
-      char *start = (char *)(dstArray->larrayBaseAddrList[i]);
-      int elementCount =
-        dstArray->totalElementCountPLocalDe[i] * dstArray->tensorElementCount;
-      if (dstArray->typekind == ESMC_TYPEKIND_R4){
-        ESMC_R4 *total = (ESMC_R4 *)start;
-        for (int j=0; j<elementCount; j++)
-          total[j] = 0.;
-      }else if(dstArray->typekind == ESMC_TYPEKIND_R8){
-        ESMC_R8 *total = (ESMC_R8 *)start;
-        for (int j=0; j<elementCount; j++)
-          total[j] = 0.;
-      }else if(dstArray->typekind == ESMC_TYPEKIND_I4){
-        ESMC_I4 *total = (ESMC_I4 *)start;
-        for (int j=0; j<elementCount; j++)
-          total[j] = 0;
-      }else if(dstArray->typekind == ESMC_TYPEKIND_I8){
-        ESMC_I8 *total = (ESMC_I8 *)start;
-        for (int j=0; j<elementCount; j++)
-          total[j] = 0;
-      }
-    }
-  }
-  
-#ifdef ASMMTIMING
-  VMK::wtime(&t3);      //gjt - profile
-#endif
-  
   // prepare for relative run-time addressing (RRA)
   int rraCount = 0; // init
   if (srcArrayFlag)
@@ -8632,7 +8634,7 @@ int Array::sparseMatMul(
       dstArray->delayout->getLocalDeCount() * sizeof(char *));
 
 #ifdef ASMMTIMING
-  VMK::wtime(&t4);      //gjt - profile
+  VMK::wtime(&t3);      //gjt - profile
 #endif
   
   int filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
@@ -8640,9 +8642,16 @@ int Array::sparseMatMul(
   //TODO: determine XXE filterBitField for XXE exec(),
   // considering src vs. dst, DE, phase of nb-call...
   
+  if (zeroflag!=ESMF_REGION_TOTAL)
+    filterBitField |= 1;  // filter the region_total zero operations
+
   if (zeroflag!=ESMF_REGION_SELECT)
-    filterBitField |= 1;  // filter the zero operations (always on lowest bit)
+    filterBitField |= 2;  // filter the region_select zero operations
   
+#ifdef ASMMTIMING
+  VMK::wtime(&t4);      //gjt - profile
+#endif
+
   // execute XXE stream
   localrc = xxe->exec(rraCount, rraList, filterBitField);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))

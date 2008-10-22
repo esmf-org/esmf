@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.1.2.7 2008/10/20 21:06:07 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.1.2.8 2008/10/22 19:12:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@ class XXE{
       productSumSuperScalarDstRRA,
       productSumSuperScalarSrcRRA,
       productSumSuperScalarContigRRA,
-      zeroScalarRRA, zeroSuperScalarRRA, zeroVector,
+      zeroScalarRRA, zeroSuperScalarRRA, zeroVector, zeroVectorRRA,
       memCpy, memCpySrcRRA,
       memGatherSrcRRA,
       // --- subs
@@ -347,6 +347,7 @@ class XXE{
     int appendZeroSuperScalarRRA(int predicateBitField, TKId elementTK,
       int termCount, int rraIndex);
     int appendZeroVector(int predicateBitField, char *buffer, int byteCount);
+    int appendZeroVectorRRA(int predicateBitField, int byteCount, int rraIndex);
     int appendProductSumScalarRRA(int predicateBitField, TKId elementTK,
       TKId valueTK, TKId factorTK, int rraOffset, void *factor, void *value,
       int rraIndex);
@@ -560,6 +561,13 @@ class XXE{
       char *buffer;
       int byteCount;
     }ZeroVectorInfo;
+
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      int byteCount;
+      int rraIndex;
+    }ZeroVectorRRAInfo;
 
     typedef struct{
       OpId opId;

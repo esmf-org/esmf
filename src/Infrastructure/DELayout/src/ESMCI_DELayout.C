@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.1.2.11 2008/10/22 17:17:27 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.1.2.12 2008/10/22 19:12:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.11 2008/10/22 17:17:27 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.12 2008/10/22 19:12:23 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2468,6 +2468,7 @@ int XXE::exec(
   ZeroScalarRRAInfo *xxeZeroScalarRRAInfo;
   ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo;
   ZeroVectorInfo *xxeZeroVectorInfo;
+  ZeroVectorRRAInfo *xxeZeroVectorRRAInfo;
   MemCpyInfo *xxeMemCpyInfo;
   MemCpySrcRRAInfo *xxeMemCpySrcRRAInfo;
   MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo;
@@ -2811,6 +2812,15 @@ int XXE::exec(
         char *buffer = xxeZeroVectorInfo->buffer;
         int byteCount = xxeZeroVectorInfo->byteCount;
         memset(buffer, 0, byteCount);
+      }
+      break;
+    case zeroVectorRRA:
+      {
+        xxeZeroVectorRRAInfo =
+          (ZeroVectorRRAInfo *)xxeElement;
+        char *rraBase = rraList[xxeZeroVectorRRAInfo->rraIndex];;
+        int byteCount = xxeZeroVectorRRAInfo->byteCount;
+        memset(rraBase, 0, byteCount);
       }
       break;
     case memCpy:
@@ -5859,6 +5869,50 @@ int XXE::appendZeroVector(
     (ZeroVectorInfo *)&(stream[count]);
   xxeZeroVectorInfo->buffer = buffer;
   xxeZeroVectorInfo->byteCount = byteCount;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendZeroVectorRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendZeroVectorRRA
+//
+// !INTERFACE:
+int XXE::appendZeroVectorRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  int byteCount,
+  int rraIndex
+  ){
+//
+// !DESCRIPTION:
+//  Append a zeroVectorRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = zeroVectorRRA;
+  stream[count].predicateBitField = predicateBitField;
+  ZeroVectorRRAInfo *xxeZeroVectorRRAInfo =
+    (ZeroVectorRRAInfo *)&(stream[count]);
+  xxeZeroVectorRRAInfo->byteCount = byteCount;
+  xxeZeroVectorRRAInfo->rraIndex = rraIndex;
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
