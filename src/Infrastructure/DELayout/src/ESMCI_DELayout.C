@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.1.2.10 2008/10/22 04:23:12 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.1.2.11 2008/10/22 17:17:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.10 2008/10/22 04:23:12 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.11 2008/10/22 17:17:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2547,11 +2547,17 @@ int XXE::exec(
     case productSumVector:
       {
         xxeProductSumVectorInfo = (ProductSumVectorInfo *)xxeElement;
-        // the following typecasts to char pointer types are necessary to 
-        // provide a valid TK combination to call into the recursive function
+        // the following typecasts are necessary to provide a valid TK
+        // combination to call into the recursive function
+#ifdef BGLWORKAROUND
         char *element = (char *)xxeProductSumVectorInfo->element;
         char *factorList = (char *)xxeProductSumVectorInfo->factorList;
         char *valueList = (char *)xxeProductSumVectorInfo->valueList;
+#else
+        int *element = (int *)xxeProductSumVectorInfo->element;
+        int *factorList = (int *)xxeProductSumVectorInfo->factorList;
+        int *valueList = (int *)xxeProductSumVectorInfo->valueList;
+#endif
         // recursively resolve the TKs of the arguments and execute operation
         psv(element, xxeProductSumVectorInfo->elementTK,
           factorList, xxeProductSumVectorInfo->factorTK,
@@ -2562,11 +2568,17 @@ int XXE::exec(
     case productSumScalar:
       {
         xxeProductSumScalarInfo = (ProductSumScalarInfo *)xxeElement;
-        // the following typecasts to char pointer types are necessary to 
-        // provide a valid TK combination to call into the recursive function
+        // the following typecasts are necessary to  provide a valid TK
+        // combination to call into the recursive function
+#ifdef BGLWORKAROUND
         char *element = (char *)xxeProductSumScalarInfo->element;
         char *factor = (char *)xxeProductSumScalarInfo->factor;
         char *value = (char *)xxeProductSumScalarInfo->value;
+#else
+        int *element = (int *)xxeProductSumScalarInfo->element;
+        int *factor = (int *)xxeProductSumScalarInfo->factor;
+        int *value = (int *)xxeProductSumScalarInfo->value;
+#endif
         // recursively resolve the TKs of the arguments and execute operation
         pss(element, xxeProductSumScalarInfo->elementTK,
           factor, xxeProductSumScalarInfo->factorTK,
@@ -2577,12 +2589,19 @@ int XXE::exec(
       {
         xxeProductSumScalarRRAInfo = (ProductSumScalarRRAInfo *)xxeElement;
         char *rraBase = rraList[xxeProductSumScalarRRAInfo->rraIndex];
-        // the following typecasts to char pointer types are necessary to 
-        // provide a valid TK combination to call into the recursive function
+        // the following typecasts are necessary to provide a valid TK
+        // combination to call into the recursive function
+#ifdef BGLWORKAROUND
         char *element =
           (char *)(rraBase + xxeProductSumScalarRRAInfo->rraOffset);
         char *factor = (char *)xxeProductSumScalarRRAInfo->factor;
         char *value = (char *)xxeProductSumScalarRRAInfo->value;
+#else
+        int *element =
+          (int *)(rraBase + xxeProductSumScalarRRAInfo->rraOffset);
+        int *factor = (int *)xxeProductSumScalarRRAInfo->factor;
+        int *value = (int *)xxeProductSumScalarRRAInfo->value;
+#endif
         // recursively resolve the TKs of the arguments and execute operation
         pss(element, xxeProductSumScalarRRAInfo->elementTK,
           factor, xxeProductSumScalarRRAInfo->factorTK,
@@ -2595,11 +2614,15 @@ int XXE::exec(
           (SumSuperScalarDstRRAInfo *)xxeElement;
         int *rraOffsetList = xxeSumSuperScalarDstRRAInfo->rraOffsetList;
         int termCount = xxeSumSuperScalarDstRRAInfo->termCount;
-        // the following typecasts to char pointer types are necessary to 
-        // provide a valid TK combination to call into the recursive function
-        char *rraBase =
-          (char *)rraList[xxeSumSuperScalarDstRRAInfo->rraIndex];
+        // the following typecasts are necessary to provide a valid TK
+        // combination to call into the recursive function
+#ifdef BGLWORKAROUND
+        char *rraBase = (char *)rraList[xxeSumSuperScalarDstRRAInfo->rraIndex];
         char **valueList = (char **)xxeSumSuperScalarDstRRAInfo->valueList;
+#else
+        int *rraBase = (int *)rraList[xxeSumSuperScalarDstRRAInfo->rraIndex];
+        int **valueList = (int **)xxeSumSuperScalarDstRRAInfo->valueList;
+#endif
         // recursively resolve the TKs of the arguments and execute operation
         sssDstRra(rraBase, xxeSumSuperScalarDstRRAInfo->elementTK,
           rraOffsetList, valueList, xxeSumSuperScalarDstRRAInfo->valueTK,
@@ -2612,14 +2635,23 @@ int XXE::exec(
           (ProductSumSuperScalarDstRRAInfo *)xxeElement;
         int *rraOffsetList = xxeProductSumSuperScalarDstRRAInfo->rraOffsetList;
         int termCount = xxeProductSumSuperScalarDstRRAInfo->termCount;
-        // the following typecasts to char pointer types are necessary to 
-        // provide a valid TK combination to call into the recursive function
+        // the following typecasts are necessary to provide a valid TK
+        // combination to call into the recursive function
+#ifdef BGLWORKAROUND
         char *rraBase =
           (char *)rraList[xxeProductSumSuperScalarDstRRAInfo->rraIndex];
         char **factorList =
           (char **)xxeProductSumSuperScalarDstRRAInfo->factorList;
         char **valueList =
           (char **)xxeProductSumSuperScalarDstRRAInfo->valueList;
+#else
+        int *rraBase =
+          (int *)rraList[xxeProductSumSuperScalarDstRRAInfo->rraIndex];
+        int **factorList =
+          (int **)xxeProductSumSuperScalarDstRRAInfo->factorList;
+        int **valueList =
+          (int **)xxeProductSumSuperScalarDstRRAInfo->valueList;
+#endif
         // recursively resolve the TKs of the arguments and execute operation
         psssDstRra(rraBase, xxeProductSumSuperScalarDstRRAInfo->elementTK,
           rraOffsetList, factorList,
@@ -2633,14 +2665,23 @@ int XXE::exec(
           (ProductSumSuperScalarSrcRRAInfo *)xxeElement;
         int *rraOffsetList = xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList;
         int termCount = xxeProductSumSuperScalarSrcRRAInfo->termCount;
-        // the following typecasts to char pointer types are necessary to 
-        // provide a valid TK combination to call into the recursive function
+        // the following typecasts are necessary to provide a valid TK
+        // combination to call into the recursive function
+#ifdef BGLWORKAROUND
         char *rraBase =
           (char *)rraList[xxeProductSumSuperScalarSrcRRAInfo->rraIndex];
         char **factorList =
           (char **)xxeProductSumSuperScalarSrcRRAInfo->factorList;
         char **elementList =
           (char **)xxeProductSumSuperScalarSrcRRAInfo->elementList;
+#else
+        int *rraBase =
+          (int *)rraList[xxeProductSumSuperScalarSrcRRAInfo->rraIndex];
+        int **factorList =
+          (int **)xxeProductSumSuperScalarSrcRRAInfo->factorList;
+        int **elementList =
+          (int **)xxeProductSumSuperScalarSrcRRAInfo->elementList;
+#endif
         // recursively resolve the TKs of the arguments and execute operation
         psssSrcRra(rraBase, xxeProductSumSuperScalarSrcRRAInfo->valueTK,
           rraOffsetList, factorList,
@@ -2656,14 +2697,23 @@ int XXE::exec(
         int *rraOffsetList =
           xxeProductSumSuperScalarContigRRAInfo->rraOffsetList;
         int termCount = xxeProductSumSuperScalarContigRRAInfo->termCount;
-        // the following typecasts to char pointer types are necessary to 
-        // provide a valid TK combination to call into the recursive function
+        // the following typecasts are necessary to provide a valid TK
+        // combination to call into the recursive function
+#ifdef BGLWORKAROUND
         char *rraBase =
           (char *)rraList[xxeProductSumSuperScalarContigRRAInfo->rraIndex];
         char **factorList =
           (char **)xxeProductSumSuperScalarContigRRAInfo->factorList;
         char *valueList =
           (char *)xxeProductSumSuperScalarContigRRAInfo->valueList;
+#else
+        int *rraBase =
+          (int *)rraList[xxeProductSumSuperScalarContigRRAInfo->rraIndex];
+        int **factorList =
+          (int **)xxeProductSumSuperScalarContigRRAInfo->factorList;
+        int *valueList =
+          (int *)xxeProductSumSuperScalarContigRRAInfo->valueList;
+#endif
         // recursively resolve the TKs of the arguments and execute operation
         pssscRra(rraBase, xxeProductSumSuperScalarContigRRAInfo->elementTK,
           rraOffsetList, factorList,

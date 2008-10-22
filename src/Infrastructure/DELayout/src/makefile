@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7.6.5 2008/10/22 04:23:12 theurich Exp $
+# $Id: makefile,v 1.7.6.6 2008/10/22 17:17:27 theurich Exp $
 
 # leave alone.
 ALL: build_here 
@@ -7,6 +7,14 @@ ALL: build_here
 ifeq ($(ESMF_OS),Unicos)
 ifeq ($(ESMF_COMPILER),default)
 ESMF_CXXCOMPILEOPTS += -h simple_templates
+endif
+endif
+
+# XLC++ 8.0 on BGL systems has trouble with templates of recursive funcs
+# in -O mode => use work-around in code.
+ifeq ($(ESMF_OS),Linux)
+ifeq ($(ESMF_COMPILER),xlf)
+ESMF_CXXCOMPILEOPTS += -DBGLWORKAROUND
 endif
 endif
 
