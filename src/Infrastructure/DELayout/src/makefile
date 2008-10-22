@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7.6.4 2008/03/14 22:51:37 theurich Exp $
+# $Id: makefile,v 1.7.6.5 2008/10/22 04:23:12 theurich Exp $
 
 # leave alone.
 ALL: build_here 
@@ -38,12 +38,3 @@ include ${ESMF_DIR}/makefile
 
 # Leave the following line blank.
 DIRS	  = 
-
-# XLC++ on BGL systems has trouble with templates of recursive funcs in -O mode
-# -> this seems to be a compiler bug and we may be able to take this out once
-# IBM has it fixed.
-ifeq ($(ESMF_OS),Linux)
-ifeq ($(ESMF_COMPILER),xlf)
-ESMF_OPTLEVEL = 0
-endif
-endif

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.1.2.9 2008/10/20 21:06:08 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.1.2.10 2008/10/22 04:23:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.9 2008/10/20 21:06:08 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.10 2008/10/22 04:23:12 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2547,11 +2547,11 @@ int XXE::exec(
     case productSumVector:
       {
         xxeProductSumVectorInfo = (ProductSumVectorInfo *)xxeElement;
-        // the following typecasts to int pointer types are necessary to 
+        // the following typecasts to char pointer types are necessary to 
         // provide a valid TK combination to call into the recursive function
-        int *element = (int *)xxeProductSumVectorInfo->element;
-        int *factorList = (int *)xxeProductSumVectorInfo->factorList;
-        int *valueList = (int *)xxeProductSumVectorInfo->valueList;
+        char *element = (char *)xxeProductSumVectorInfo->element;
+        char *factorList = (char *)xxeProductSumVectorInfo->factorList;
+        char *valueList = (char *)xxeProductSumVectorInfo->valueList;
         // recursively resolve the TKs of the arguments and execute operation
         psv(element, xxeProductSumVectorInfo->elementTK,
           factorList, xxeProductSumVectorInfo->factorTK,
@@ -2562,11 +2562,11 @@ int XXE::exec(
     case productSumScalar:
       {
         xxeProductSumScalarInfo = (ProductSumScalarInfo *)xxeElement;
-        // the following typecasts to int pointer types are necessary to 
+        // the following typecasts to char pointer types are necessary to 
         // provide a valid TK combination to call into the recursive function
-        int *element = (int *)xxeProductSumScalarInfo->element;
-        int *factor = (int *)xxeProductSumScalarInfo->factor;
-        int *value = (int *)xxeProductSumScalarInfo->value;
+        char *element = (char *)xxeProductSumScalarInfo->element;
+        char *factor = (char *)xxeProductSumScalarInfo->factor;
+        char *value = (char *)xxeProductSumScalarInfo->value;
         // recursively resolve the TKs of the arguments and execute operation
         pss(element, xxeProductSumScalarInfo->elementTK,
           factor, xxeProductSumScalarInfo->factorTK,
@@ -2577,11 +2577,12 @@ int XXE::exec(
       {
         xxeProductSumScalarRRAInfo = (ProductSumScalarRRAInfo *)xxeElement;
         char *rraBase = rraList[xxeProductSumScalarRRAInfo->rraIndex];
-        // the following typecasts to int pointer types are necessary to 
+        // the following typecasts to char pointer types are necessary to 
         // provide a valid TK combination to call into the recursive function
-        int *element = (int *)(rraBase + xxeProductSumScalarRRAInfo->rraOffset);
-        int *factor = (int *)xxeProductSumScalarRRAInfo->factor;
-        int *value = (int *)xxeProductSumScalarRRAInfo->value;
+        char *element =
+          (char *)(rraBase + xxeProductSumScalarRRAInfo->rraOffset);
+        char *factor = (char *)xxeProductSumScalarRRAInfo->factor;
+        char *value = (char *)xxeProductSumScalarRRAInfo->value;
         // recursively resolve the TKs of the arguments and execute operation
         pss(element, xxeProductSumScalarRRAInfo->elementTK,
           factor, xxeProductSumScalarRRAInfo->factorTK,
@@ -2594,11 +2595,11 @@ int XXE::exec(
           (SumSuperScalarDstRRAInfo *)xxeElement;
         int *rraOffsetList = xxeSumSuperScalarDstRRAInfo->rraOffsetList;
         int termCount = xxeSumSuperScalarDstRRAInfo->termCount;
-        // the following typecasts to int pointer types are necessary to 
+        // the following typecasts to char pointer types are necessary to 
         // provide a valid TK combination to call into the recursive function
-        int *rraBase =
-          (int *)rraList[xxeSumSuperScalarDstRRAInfo->rraIndex];
-        int **valueList = (int **)xxeSumSuperScalarDstRRAInfo->valueList;
+        char *rraBase =
+          (char *)rraList[xxeSumSuperScalarDstRRAInfo->rraIndex];
+        char **valueList = (char **)xxeSumSuperScalarDstRRAInfo->valueList;
         // recursively resolve the TKs of the arguments and execute operation
         sssDstRra(rraBase, xxeSumSuperScalarDstRRAInfo->elementTK,
           rraOffsetList, valueList, xxeSumSuperScalarDstRRAInfo->valueTK,
@@ -2611,13 +2612,14 @@ int XXE::exec(
           (ProductSumSuperScalarDstRRAInfo *)xxeElement;
         int *rraOffsetList = xxeProductSumSuperScalarDstRRAInfo->rraOffsetList;
         int termCount = xxeProductSumSuperScalarDstRRAInfo->termCount;
-        // the following typecasts to int pointer types are necessary to 
+        // the following typecasts to char pointer types are necessary to 
         // provide a valid TK combination to call into the recursive function
-        int *rraBase =
-          (int *)rraList[xxeProductSumSuperScalarDstRRAInfo->rraIndex];
-        int **factorList =
-          (int **)xxeProductSumSuperScalarDstRRAInfo->factorList;
-        int **valueList = (int **)xxeProductSumSuperScalarDstRRAInfo->valueList;
+        char *rraBase =
+          (char *)rraList[xxeProductSumSuperScalarDstRRAInfo->rraIndex];
+        char **factorList =
+          (char **)xxeProductSumSuperScalarDstRRAInfo->factorList;
+        char **valueList =
+          (char **)xxeProductSumSuperScalarDstRRAInfo->valueList;
         // recursively resolve the TKs of the arguments and execute operation
         psssDstRra(rraBase, xxeProductSumSuperScalarDstRRAInfo->elementTK,
           rraOffsetList, factorList,
@@ -2631,14 +2633,14 @@ int XXE::exec(
           (ProductSumSuperScalarSrcRRAInfo *)xxeElement;
         int *rraOffsetList = xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList;
         int termCount = xxeProductSumSuperScalarSrcRRAInfo->termCount;
-        // the following typecasts to int pointer types are necessary to 
+        // the following typecasts to char pointer types are necessary to 
         // provide a valid TK combination to call into the recursive function
-        int *rraBase =
-          (int *)rraList[xxeProductSumSuperScalarSrcRRAInfo->rraIndex];
-        int **factorList =
-          (int **)xxeProductSumSuperScalarSrcRRAInfo->factorList;
-        int **elementList =
-          (int **)xxeProductSumSuperScalarSrcRRAInfo->elementList;
+        char *rraBase =
+          (char *)rraList[xxeProductSumSuperScalarSrcRRAInfo->rraIndex];
+        char **factorList =
+          (char **)xxeProductSumSuperScalarSrcRRAInfo->factorList;
+        char **elementList =
+          (char **)xxeProductSumSuperScalarSrcRRAInfo->elementList;
         // recursively resolve the TKs of the arguments and execute operation
         psssSrcRra(rraBase, xxeProductSumSuperScalarSrcRRAInfo->valueTK,
           rraOffsetList, factorList,
@@ -2654,14 +2656,14 @@ int XXE::exec(
         int *rraOffsetList =
           xxeProductSumSuperScalarContigRRAInfo->rraOffsetList;
         int termCount = xxeProductSumSuperScalarContigRRAInfo->termCount;
-        // the following typecasts to int pointer types are necessary to 
+        // the following typecasts to char pointer types are necessary to 
         // provide a valid TK combination to call into the recursive function
-        int *rraBase =
-          (int *)rraList[xxeProductSumSuperScalarContigRRAInfo->rraIndex];
-        int **factorList =
-          (int **)xxeProductSumSuperScalarContigRRAInfo->factorList;
-        int *valueList =
-          (int *)xxeProductSumSuperScalarContigRRAInfo->valueList;
+        char *rraBase =
+          (char *)rraList[xxeProductSumSuperScalarContigRRAInfo->rraIndex];
+        char **factorList =
+          (char **)xxeProductSumSuperScalarContigRRAInfo->factorList;
+        char *valueList =
+          (char *)xxeProductSumSuperScalarContigRRAInfo->valueList;
         // recursively resolve the TKs of the arguments and execute operation
         pssscRra(rraBase, xxeProductSumSuperScalarContigRRAInfo->elementTK,
           rraOffsetList, factorList,
@@ -2935,6 +2937,7 @@ int XXE::exec(
 //-----------------------------------------------------------------------------
 // templated XXE operations used in XXE::exec()
 //-----------------------------------------------------------------------------
+#define XXE_RECURSIVE_DEBUG___disable
 
 template<typename T, typename U, typename V>
 void XXE::psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
@@ -3049,8 +3052,10 @@ void XXE::psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
     }
     return;
   }
-  //printf("Arrived in psv kernel with %s, %s, %s\n", typeid(T).name(), 
-  //  typeid(U).name(), typeid(V).name());
+#ifdef XXE_RECURSIVE_DEBUG
+  printf("Arrived in psv kernel with %s, %s, %s\n", typeid(T).name(), 
+    typeid(U).name(), typeid(V).name());
+#endif
   for (int i=0; i<factorCount; i++)
     *element += factorList[i] * valueList[i];
 }
@@ -3158,8 +3163,10 @@ void XXE::pss(T *element, TKId elementTK, U *factor, TKId factorTK,
     }
     return;
   }
-  //printf("Arrived in pss kernel with %s, %s, %s\n", typeid(T).name(), 
-  //  typeid(U).name(), typeid(V).name());
+#ifdef XXE_RECURSIVE_DEBUG
+  printf("Arrived in pss kernel with %s, %s, %s\n", typeid(T).name(), 
+    typeid(U).name(), typeid(V).name());
+#endif
   *element += *factor * *value;
 }
 
@@ -3172,6 +3179,10 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
   // before executing psssDstRra operation on the data.
   T *element;
   V *value;
+#ifdef XXE_RECURSIVE_DEBUG
+  printf("Entering sssDstRra with %s, %s, resolved=%d\n", typeid(T).name(), 
+    typeid(V).name(), resolved);
+#endif
   if (resolved==0){
     ++resolved;
     switch (elementTK){
@@ -3244,9 +3255,11 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     }
     return;
   }
+#ifdef XXE_RECURSIVE_DEBUG
+  printf("Arrived in sssDstRra kernel with %s, %s\n", typeid(T).name(), 
+    typeid(V).name());
+#endif
   char *rraBaseT = (char *)rraBase;
-  //printf("Arrived in sssDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
-  //  typeid(U).name(), typeid(V).name());
   for (int i=0; i<termCount; i++){
     element = (T *)(rraBaseT + rraOffsetList[i]);
     value = valueList[i];
@@ -3373,9 +3386,11 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     }
     return;
   }
+#ifdef XXE_RECURSIVE_DEBUG
+  printf("Arrived in psssDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
+    typeid(U).name(), typeid(V).name());
+#endif
   char *rraBaseT = (char *)rraBase;
-  //printf("Arrived in psssDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
-  //  typeid(U).name(), typeid(V).name());
   for (int i=0; i<termCount; i++){
     element = (T *)(rraBaseT + rraOffsetList[i]);
     factor = factorList[i];
@@ -3395,6 +3410,10 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
   T *value;
   U *factor;
   V *element;
+#ifdef XXE_RECURSIVE_DEBUG
+  printf("Entering psssSrcRra kernel with %s, %s, %s, resolved=%d\n",
+    typeid(T).name(), typeid(U).name(), typeid(V).name(), resolved);
+#endif
   if (resolved==0){
     ++resolved;
     switch (valueTK){
@@ -3503,9 +3522,11 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
     }
     return;
   }
+#ifdef XXE_RECURSIVE_DEBUG
+  printf("Arrived in psssSrcRra kernel with %s, %s, %s\n", typeid(T).name(), 
+    typeid(U).name(), typeid(V).name());
+#endif
   char *rraBaseT = (char *)rraBase;
-  //printf("Arrived in psssSrcRra kernel with %s, %s, %s\n", typeid(T).name(), 
-  //  typeid(U).name(), typeid(V).name());
   for (int i=0; i<termCount; i++){
     value = (T *)(rraBaseT + rraOffsetList[i]);
     factor = factorList[i];
@@ -3632,9 +3653,11 @@ void XXE::pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     }
     return;
   }
+#ifdef XXE_RECURSIVE_DEBUG
+  printf("Arrived in pssscRra kernel with %s, %s, %s\n", typeid(T).name(), 
+    typeid(U).name(), typeid(V).name());
+#endif
   char *rraBaseT = (char *)rraBase;
-  //printf("Arrived in pssscRra kernel with %s, %s, %s\n", typeid(T).name(), 
-  //  typeid(U).name(), typeid(V).name());
   for (int i=0; i<termCount; i++){
     element = (T *)(rraBaseT + rraOffsetList[i]);
     factor = factorList[i];
