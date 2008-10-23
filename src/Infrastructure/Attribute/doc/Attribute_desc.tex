@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.12 2008/10/20 22:13:28 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.13 2008/10/23 20:58:29 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -97,7 +97,7 @@ The standard Attribute package for the Components is only partially based on the
 
 The ESMF also allows nesting of Attribute packages.  This capability is meant to be used to organize different metadata compliance levels, such as CF and ESG.  The nesting of Attribute packages is also very helpful when adding customized Attributes to a package.  
 
-The main use of the nesting capabilities of Attribute packages is geared towards organizing different metadata compliance levels.  For instance, the CF metadata standard for Fields requires that there be Attributes to track the {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units} of the Field.  The ESG standard, on the other hand, requires two additional Attributes called {\it import} and {\it export}.  In this case the ESMF representation of the ESG compliant Attribute package for a Field would involve a nested Attribute package structure.  This would involve the ESG-specific Attribute package, containing the Attributes {\it import} and {\it export} nested inside the CF-specific Attribute package, containing the Attributes {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units}.  A UML diagram will make this more clear.  
+The main use of the nesting capabilities of Attribute packages is geared towards organizing different metadata compliance levels.  For instance, the CF metadata standard for Fields requires that there be Attributes to track the {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units} of the Field.  The ESG standard, on the other hand, requires two additional Attributes called {\it import} and {\it export}.  In this case the ESMF representation of the ESG compliant Attribute package for a Field would involve a nested Attribute package structure.  This would involve the ESG-specific Attribute package, containing the Attributes {\it import} and {\it export} nested inside the CF-specific Attribute package, containing the Attributes {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units}.  An Attribute package can be nested by passing in a value of {\bf ESMF\_ATTPACKNEST\_ON} for the {\it attpacknestflag} argument of the {\tt ESMF\_AttributeAdd()} interface call.  The default value of the optional {\it attpacknestflag} argument is {\bf ESMF\_ATTPACKNEST\_OFF}.
 
 [UML diagram goes here]
 

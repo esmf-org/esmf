@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.4 2008/10/20 22:13:28 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.5 2008/10/23 20:58:29 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.4 2008/10/20 22:13:28 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.5 2008/10/23 20:58:29 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -94,10 +94,11 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      const string &name,             // in - Attribute name
-      const string &convention,       // in - Attribute convention
-      const string &purpose,          // in - Attribute purpose
-      const string &object) {         // in - Attribute object type
+      const string &name,                    // in - Attribute name
+      const string &convention,              // in - Attribute convention
+      const string &purpose,                 // in - Attribute purpose
+      const string &object,                  // in - Attribute object type
+      const ESMC_AttPackNestFlag &flag) {    // in - flag to nest or not  
 // 
 // !DESCRIPTION:
 //     Setup the name, convention and purpose of an attpack and add
@@ -115,9 +116,6 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   // Search for the attpack, make it if not found
   attpack = ESMCI_AttPackGet(convention, purpose, object);
   if(!attpack) {
-    // look for the lowest down nested attpack to attach this new one to
-    nestedpack = ESMCI_AttPackGetNested(stop);
-    
     // name the attribute package using convention, purpose, and object
     attpack = new ESMCI_Attribute(convention, purpose, object);
     if (!attpack) {
@@ -126,8 +124,24 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       return ESMF_FAILURE;
     }
     
-    // set the attpack on the nestedpack, here or elsewhere
-    localrc = nestedpack->ESMCI_AttributeSet(attpack);
+    if (flag == ESMF_ATTPACKNEST_ON) {
+      // look for the lowest down nested attpack to attach this new one to
+      nestedpack = ESMCI_AttPackGetNested(stop);
+    
+      // set attrNested
+      attpack->attrNested = ESMF_TRUE;
+      // set the attpack on the nestedpack, here or elsewhere
+      localrc = nestedpack->ESMCI_AttributeSet(attpack);
+    }
+    else if (flag == ESMF_ATTPACKNEST_OFF) {
+      // set the attpack here
+      localrc = ESMCI_AttributeSet(attpack);
+    }
+    else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "failed adding attpack", &localrc);
+      return ESMF_FAILURE;
+    }
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                "failed adding an attpack to an Attribute", &localrc);
@@ -178,6 +192,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   unsigned int i;
   ESMCI_Attribute *attpack;
+  
+  attpack = NULL;
 
   // look for the attpack on this Attribute
   for (i=0; i<attrCount; i++) {
@@ -191,12 +207,10 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     // else if this is the head of a nested attpack hierarchy
     else if (attrList[i]->attrPackHead == ESMF_TRUE) {
       attpack = attrList[i]->ESMCI_AttPackGet(convention, purpose, object);
-      return attpack;
     }
   }
- 
-  // if you got here, no match
-  return NULL;
+
+  return attpack;
 
 }  // end ESMCI_AttPackGet
 //-----------------------------------------------------------------------------
@@ -422,11 +436,16 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
                   msgbuf, &localrc);
     return ESMF_FAILURE;
   }
-
-  // unset the attrPackHead variable so GetNested finds the Attpack holding this one
-  attpack->attrPackHead = ESMF_FALSE;
-  // then get the last possible parent attpack 
-  nestedpack = ESMCI_AttPackGetNested(stop);
+  
+  // if this is nested, find the attPack holding it
+  if (attpack->attrNested) {
+    // unset the attrPackHead variable so GetNested finds the Attpack holding this one
+    attpack->attrPackHead = ESMF_FALSE;
+    // then get the last possible parent attpack 
+    nestedpack = ESMCI_AttPackGetNested(stop);
+  }
+  // else this is it
+  else nestedpack = this;
   // then find the index of the attpack we're removing
   int ind = nestedpack->ESMCI_AttPackGetIndex(convention, purpose, object);
   if (ind >= 0) {
@@ -3133,6 +3152,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   attrObject = obj;
   attrPack = ESMF_TRUE;
   attrPackHead = ESMF_TRUE;
+  attrNested = ESMF_FALSE;
 
   attrID = globalCount++;
   attrCount = 0;
@@ -3189,6 +3209,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   attrObject = obj;
   attrPack = ESMF_TRUE;
   attrPackHead = ESMF_FALSE;
+  attrNested = ESMF_FALSE;
 
   attrID = globalCount++;
   attrCount = 0;
@@ -3237,6 +3258,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   attrObject = '\0';
   attrPack = ESMF_FALSE;
   attrPackHead = ESMF_FALSE;
+  attrNested = ESMF_FALSE;
 
   attrID = globalCount++;
   attrCount = 0;
@@ -3285,6 +3307,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   attrObject = '\0';
   attrPack = ESMF_FALSE;
   attrPackHead = ESMF_FALSE;
+  attrNested = ESMF_FALSE;
 
   attrID = globalCount++;
   attrCount = 0;
@@ -3337,6 +3360,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   attrObject = '\0';
   attrPack = ESMF_FALSE;
   attrPackHead = ESMF_FALSE;
+  attrNested = ESMF_FALSE;
 
   attrID = globalCount++;
   attrCount = 0;
@@ -3529,6 +3553,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   attrObject = source.attrObject;
   attrPack = source.attrPack;
   attrPackHead = source.attrPackHead;
+  attrNested = source.attrNested;
 
   if (items == 1) {
         if (tk == ESMC_TYPEKIND_I4)
@@ -3683,6 +3708,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       
     DESERIALIZE_VAR(buffer,loffset,attrPack,ESMC_Logical);
     DESERIALIZE_VAR(buffer,loffset,attrPackHead,ESMC_Logical);
+    DESERIALIZE_VAR(buffer,loffset,attrNested,ESMC_Logical);
     
     DESERIALIZE_VAR(buffer,loffset,attrCount,int);
         
@@ -3875,6 +3901,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       
       SERIALIZE_VAR(cc,buffer,offset,attrPack,ESMC_Logical);
       SERIALIZE_VAR(cc,buffer,offset,attrPackHead,ESMC_Logical);
+      SERIALIZE_VAR(cc,buffer,offset,attrNested,ESMC_Logical);
            
       SERIALIZE_VAR(cc,buffer,offset,attrCount,int);
 

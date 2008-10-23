@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.3 2008/10/20 22:13:28 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.4 2008/10/23 20:58:29 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -59,6 +59,7 @@ class ESMCI_Attribute
     string attrObject;                 // Object of Attpack
     ESMC_Logical attrPack;             // an Attribute in an Attpack
     ESMC_Logical attrPackHead;         // the head of an Attpack
+    ESMC_Logical attrNested;           // a nested Attpack
 
     int attrID;                 // ID of the attribute
     int attrCount;              // number of attributes in use in list
@@ -86,7 +87,7 @@ class ESMCI_Attribute
  public:
     // attpack methods
     int ESMCI_AttPackCreate(const string &name, const string &convention, 
-      const string &purpose, const string &object);
+      const string &purpose, const string &object, const ESMC_AttPackNestFlag &flag);
     ESMCI_Attribute *ESMCI_AttPackGet(const string &convention, 
       const string &purpose, const string &object) const;
     ESMCI_Attribute *ESMCI_AttPackGetAttribute(const string &name, 
@@ -205,7 +206,8 @@ class ESMCI_Attribute
 // fortran interface functions to attribute objects
 extern "C" {
   void FTN(c_esmci_attpackcreate)(ESMC_Base **base, char *name, char *convention, char *purpose, 
-                                 char *object, int *rc, int nlen, int clen, int plen, int olen);
+                                 char *object, ESMC_AttPackNestFlag *flag, int *rc, int nlen, 
+                                 int clen, int plen, int olen);
   void FTN(c_esmci_attpackdestroy)(ESMC_Base **base, char *name, char *convention, char *purpose,
                                     char *object, int *rc, int nlen, int clen, int plen, int olen);
   void FTN(c_esmci_attpackgetchar)(ESMC_Base **base, char *name, char *value, 
