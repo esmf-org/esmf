@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.43 2008/10/23 03:43:07 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.44 2008/10/23 03:50:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.43 2008/10/23 03:43:07 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.44 2008/10/23 03:50:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -8099,8 +8099,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       dtAverage += dtEnd - dtStart;
     }
     dtAverage /= dtCount;
+#ifdef ASMMSTOREPRINT
     printf("localPet: %d, srcTermProcessing=%d -> dtAverage=%gs\n", 
       localPet, srcTermProcessing, dtAverage);
+#endif
     // determine optimum srcTermProcessing  
     if (srcTermProcessing==0){
       // first time through -> initialize to find minimum
@@ -8115,10 +8117,12 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       }
     }
   } // srcTermProcessing
-  
+
+#ifdef ASMMSTOREPRINT
   printf("localPet: %d, srcTermProcessingOpt=%d -> dtMin=%gs\n", 
     localPet, srcTermProcessingOpt, dtMin);
-  
+#endif
+    
   // all PETs vote on srcTermProcessingOpt
   vector<int> srcTermProcessingOptList(petCount);
   vm->allgather(&srcTermProcessingOpt, &srcTermProcessingOptList[0],
@@ -8146,9 +8150,11 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     srcTermProcessingOpt = srcTermProcessingOptList[petCount-1];
   }
 
+#ifdef ASMMSTOREPRINT
   printf("localPet: %d, srcTermProcessingOpt=%d -> dtMin=%gs (after vote)\n", 
     localPet, srcTermProcessingOpt, dtMin);
-  
+#endif
+    
 #ifdef ASMMSTORETIMING
   VMK::wtime(t11);   //gjt - profile
 #endif
@@ -8190,8 +8196,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       dtAverage += dtEnd - dtStart;
     }
     dtAverage /= dtCount;
+#ifdef ASMMSTOREPRINT
     printf("localPet: %d, pipelineDepth=%d -> dtAverage=%gs\n", 
       localPet, pipelineDepth, dtAverage);
+#endif
     // determine optimum pipelineDepth  
     if (pipelineDepth==1){
       // first time through -> initialize to find minimum
@@ -8207,9 +8215,11 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     }
   } // pipelineDepth
   
+#ifdef ASMMSTOREPRINT
   printf("localPet: %d, pipelineDepthOpt=%d -> dtMin=%gs\n", 
     localPet, pipelineDepthOpt, dtMin);
-  
+#endif
+    
   // all PETs vote on pipelineDepthOpt
   vector<int> pipelineDepthOptList(petCount);
   vm->allgather(&pipelineDepthOpt, &pipelineDepthOptList[0], sizeof(int));
@@ -8236,9 +8246,11 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     pipelineDepthOpt = pipelineDepthOptList[petCount-1];
   }
 
+#ifdef ASMMSTOREPRINT
   printf("localPet: %d, pipelineDepthOpt=%d -> dtMin=%gs (after vote)\n", 
     localPet, pipelineDepthOpt, dtMin);
-    
+#endif
+      
 #ifdef ASMMSTORETIMING
   VMK::wtime(t12);   //gjt - profile
 #endif
