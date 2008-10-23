@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.42 2008/10/22 19:12:23 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.43 2008/10/23 03:43:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.42 2008/10/22 19:12:23 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.43 2008/10/23 03:43:07 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4061,7 +4061,6 @@ bool operator<(SeqIndex a, SeqIndex b){
 
 
 #define ASMMPROFILE___disable
-#define ASMMPROFILE
 
 namespace ArrayHelper{
   
@@ -5384,7 +5383,6 @@ void serverUpdate(FillSelfDeInfo *fillSelfDeInfo, int count,
 
 
 #define ASMMSTORETIMING___disable
-#define ASMMSTORETIMING
 
 int sparseMatMulStoreEncodeXXE(VM *vm, DELayout *srcDelayout,
   DELayout *dstDelayout, bool tensorMixFlag, ESMC_TypeKind typekindFactors,
@@ -5426,7 +5424,7 @@ int Array::sparseMatMulStore(
 //  Precompute and store communication pattern for sparse matrix multiplication
 //  from srcArray to dstArray.
 //
-//  The implementation consists of three main phases:
+//  The implementation consists of four main phases:
 //
 //  - Phase I:    Check input for consistency. The sparse matrix is provided in
 //                "input" distribution 
@@ -5434,10 +5432,12 @@ int Array::sparseMatMulStore(
 //                elements, one indexed by srcSeqIndex, one indexed by
 //                dstSeqIndex. This takes the matrix from "input" to "work"
 //                distribution.
-//  - Phase III:  Use the information in "work" distribution to precompute the
-//                XXE stream and take associated data into "run" distribution
-//                according to the "execution pattern". Currently the
-//                "dstArray execution pattern" has been implemented.
+//  - Phase III:  Use the information in "work" distribution and take it into 
+//                "run" distribution, i.e. src and dst DEs have access to all
+//                the local data they may operate on.
+//  - Phase IV:   Use the information in "run" distribution to encode an
+//                optimized XXE stream, balancing src/dst work-loads and
+//                pipelining overlapping communications and computation.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -7269,7 +7269,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   VMK::wtime(&t5);   //gjt - profile
 #endif
   
-  // prepare count arrays for src partner loop-up in dstSeqIndexFactorLookup
+  // prepare count arrays for src partner look-up in dstSeqIndexFactorLookup
   int *srcLocalPartnerElementsPerIntervalCount = new int[petCount];
   for (int i=0; i<petCount; i++){
     // Pet "i" is the active srcSeqIndex interval
@@ -7309,7 +7309,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   delete [] srcLocalPartnerElementsPerIntervalCount;
   delete [] dstLocalPartnerIntervalPerPetCount;
       
-  // prepare count arrays for dst partner loop-up in srcSeqIndexFactorLookup
+  // prepare count arrays for dst partner look-up in srcSeqIndexFactorLookup
   int *dstLocalPartnerElementsPerIntervalCount = new int[petCount];
   for (int i=0; i<petCount; i++){
     // Pet "i" is the active dstSeqIndex interval
@@ -7386,6 +7386,10 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   VMK::wtime(&t6);   //gjt - profile
 #endif
   
+  //---------------------------------------------------------------------------
+  // Phase III
+  //---------------------------------------------------------------------------
+
   ArrayHelper::MemHelper *memHelper = new ArrayHelper::MemHelper();
 
   // access srcSeqIndexFactorLookup to obtain complete srcLinSeqList
@@ -7472,7 +7476,7 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
 #endif
   
   //---------------------------------------------------------------------------
-  // Phase III
+  // Phase IV
   //---------------------------------------------------------------------------
 
   // prepare for relative run-time addressing (RRA)
