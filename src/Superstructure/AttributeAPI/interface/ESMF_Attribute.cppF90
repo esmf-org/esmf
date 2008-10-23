@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.4 2008/10/18 14:47:19 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.5 2008/10/23 20:59:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.4 2008/10/18 14:47:19 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.5 2008/10/23 20:59:53 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -386,12 +386,13 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
-!     subroutine ESMF_AttAddPack(<object>, convention, purpose, rc)
+!     subroutine ESMF_AttAddPack(<object>, convention, purpose, attpacknestflag, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character (len = *), intent(in) :: convention
 !     character (len = *), intent(in) :: purpose
+!     type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -416,6 +417,9 @@ contains
 !           The convention of the Attribute package.
 !     \item [purpose]
 !           The purpose of the Attribute package.
+!     \item [attpacknestflag]
+!           The flag to tell whether this Attribute package is to be nested or not, possible values 
+!           are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -429,7 +433,7 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
 !     subroutine ESMF_AttAddPackCstm(<object>, attrList, convention, purpose, &
-!     count, rc)
+!     count, attpacknestflag, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
@@ -437,6 +441,7 @@ contains
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
 !     integer, intent(in), optional :: count   
+!     type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -464,6 +469,9 @@ contains
 !           The purpose of the Attribute package.
 !     \item [count]
 !           The number of Attributes to add to the custom Attribute package.
+!     \item [attpacknestflag]
+!           The flag to tell whether this Attribute package is to be nested or not, possible values
+!           are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -857,7 +865,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
       subroutine mclass##AttAddPackCstm(mthis, attrList, convention, & @\
-      purpose, count, rc) @\
+      purpose, count, attpacknestflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -865,6 +873,7 @@ contains
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       integer, intent(in), optional :: count @\
+      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -883,7 +892,10 @@ contains
 !     \item [attrList] @\
 !      An array of character strings specifying the names of the user defined Attributes @\
 !     \item [count] @\
-!      The count of the number of Attributes to add to the package@\
+!      The count of the number of Attributes to add to the package @\
+!     \item [attpacknestflag] @\
+!      The flag to tell whether this Attribute package is to be nested or not, possible values @\
+!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}. @\
 !     \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -895,6 +907,7 @@ contains
       character(len=*), parameter :: fconvention='N/A' @\
       character(len=*), parameter :: fpurpose='N/A' @\
       character(len=*), parameter :: fobject=#mthis @\
+      type(ESMF_AttPackNestFlag) :: attpacknest @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -907,6 +920,12 @@ contains
       else @\
 	localCount = size(attrList) @\
       end if @\
+ @\
+      if (present(attpacknestflag)) then @\
+        attpacknest = attpacknestflag @\
+      else @\
+        attpacknest = ESMF_ATTPACKNEST_OFF @\
+      endif @\
  @\
       limit = size(attrList) @\
       if (localCount > limit .OR. localCount .le. 0) then @\
@@ -933,25 +952,25 @@ contains
        @\
         if (directional == 0) then @\
         call c_ESMCI_AttPackCreate(mthisfield, attrList(i), fconvention, & @\
-          fpurpose, fobject, localrc) @\
+          fpurpose, fobject, attpacknest, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
         else if (directional == 1) then @\
         call c_ESMCI_AttPackCreate(mthisfield, attrList(i), convention, & @\
-          fpurpose, fobject, localrc) @\
+          fpurpose, fobject, attpacknest, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
         else if (directional == 2) then @\
         call c_ESMCI_AttPackCreate(mthisfield, attrList(i), fconvention, & @\
-          purpose, fobject, localrc) @\
+          purpose, fobject, attpacknest, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
         else if (directional == 3) then @\
         call c_ESMCI_AttPackCreate(mthisfield, attrList(i), convention, & @\
-          purpose, fobject, localrc) @\
+          purpose, fobject, attpacknest, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
@@ -3169,12 +3188,14 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_ArrayAttAddPack(array, convention, purpose, rc)
+      subroutine ESMF_ArrayAttAddPack(array, convention, purpose, &
+        attpacknestflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array  
       character (len = *), intent(in) :: convention
       character (len = *), intent(in) :: purpose
+      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
       integer, intent(out), optional :: rc   
 
 !
@@ -3191,6 +3212,9 @@ contains
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!     \item [attpacknestflag]
+!      The flag to tell whether this Attribute package is to be nested or not, possible values
+!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3208,6 +3232,7 @@ contains
       character (len=*), parameter :: name4 = 'units'
       character (len=*), parameter :: name5 = 'import'
       character (len=*), parameter :: name6 = 'export'
+      type(ESMF_AttPackNestFlag) :: attpacknest
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3218,18 +3243,24 @@ contains
       fconvention = convention
       fpurpose = purpose
 
-      call c_ESMCI_AttPackCreate(array, name1, fconvention, &
-        fpurpose, fobject, localrc)
+       if (present(attpacknestflag)) then
+        attpacknest = attpacknestflag
+      else
+        attpacknest = ESMF_ATTPACKNEST_OFF
+      endif
+
+     call c_ESMCI_AttPackCreate(array, name1, fconvention, &
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(array, name2, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(array, name3, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(array, name4, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(array, name5, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(array, name6, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3406,12 +3437,14 @@ AttSetCharacterMacro(ESMF_Array, array, array)
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_CplCompAttAddPack(comp, convention, purpose, rc)
+      subroutine ESMF_CplCompAttAddPack(comp, convention, purpose, &
+        attpacknestflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp  
       character (len = *), intent(in) :: convention
       character (len = *), intent(in) :: purpose
+      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
       integer, intent(out), optional :: rc   
 
 !
@@ -3428,6 +3461,9 @@ AttSetCharacterMacro(ESMF_Array, array, array)
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!     \item [attpacknestflag]
+!      The flag to tell whether this Attribute package is to be nested or not, possible values
+!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3449,6 +3485,7 @@ AttSetCharacterMacro(ESMF_Array, array, array)
       character (len=*), parameter :: name8 = 'author'
       character (len=*), parameter :: name9 = 'coding_language'
       character (len=*), parameter :: name10 = 'model_component_framework'
+      type(ESMF_AttPackNestFlag) :: attpacknest
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3459,26 +3496,32 @@ AttSetCharacterMacro(ESMF_Array, array, array)
       fconvention = convention
       fpurpose = purpose
 
+       if (present(attpacknestflag)) then
+        attpacknest = attpacknestflag
+      else
+        attpacknest = ESMF_ATTPACKNEST_OFF
+      endif
+
       call c_ESMCI_AttPackCreate(comp%compp%base, name1, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name2, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name3, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name4, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name5, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name6, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name7, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name8, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name9, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name10, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3874,12 +3917,14 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_GridCompAttAddPack(comp, convention, purpose, rc)
+      subroutine ESMF_GridCompAttAddPack(comp, convention, purpose, &
+        attpacknestflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp  
       character (len = *), intent(in) :: convention
       character (len = *), intent(in) :: purpose
+      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
       integer, intent(out), optional :: rc   
 
 !
@@ -3896,6 +3941,8 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!      The flag to tell whether this Attribute package is to be nested or not, possible values
+!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3917,6 +3964,7 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
       character (len=*), parameter :: name8 = 'author'
       character (len=*), parameter :: name9 = 'coding_language'
       character (len=*), parameter :: name10 = 'model_component_framework'
+      type(ESMF_AttPackNestFlag) :: attpacknest
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3927,26 +3975,32 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
       fconvention = convention
       fpurpose = purpose
 
+       if (present(attpacknestflag)) then
+        attpacknest = attpacknestflag
+      else
+        attpacknest = ESMF_ATTPACKNEST_OFF
+      endif
+
       call c_ESMCI_AttPackCreate(comp%compp%base, name1, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name2, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name3, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name4, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name5, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name6, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name7, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name8, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name9, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(comp%compp%base, name10, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4299,12 +4353,14 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_FieldAttAddPack(field, convention, purpose, rc)
+      subroutine ESMF_FieldAttAddPack(field, convention, purpose, &
+        attpacknestflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: convention
       character (len = *), intent(in) :: purpose
+      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
       integer, intent(out), optional :: rc   
 
 !
@@ -4321,6 +4377,9 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!     \item [attpacknestflag]
+!      The flag to tell whether this Attribute package is to be nested or not, possible values
+!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4338,6 +4397,7 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
       character (len=*), parameter :: name4 = 'units'
       character (len=*), parameter :: name5 = 'import'
       character (len=*), parameter :: name6 = 'export'
+      type(ESMF_AttPackNestFlag) :: attpacknest
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -4348,18 +4408,24 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
       fconvention = convention
       fpurpose = purpose
 
+       if (present(attpacknestflag)) then
+        attpacknest = attpacknestflag
+      else
+        attpacknest = ESMF_ATTPACKNEST_OFF
+      endif
+
       call c_ESMCI_AttPackCreate(field%ftypep%base, name1, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(field%ftypep%base, name2, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(field%ftypep%base, name3, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(field%ftypep%base, name4, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(field%ftypep%base, name5, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(field%ftypep%base, name6, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4536,12 +4602,14 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_FBundleAttAddPack(fieldbundle, convention, purpose, rc)
+      subroutine ESMF_FBundleAttAddPack(fieldbundle, convention, purpose, &
+        attpacknestflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
       character (len = *), intent(in) :: convention
       character (len = *), intent(in) :: purpose
+      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
       integer, intent(out), optional :: rc   
 
 !
@@ -4558,6 +4626,9 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!     \item [attpacknestflag]
+!      The flag to tell whether this Attribute package is to be nested or not, possible values
+!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4569,6 +4640,7 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
       character (len=len_trim(convention)) :: fconvention
       character (len=len_trim(purpose)) :: fpurpose
       character (len=*), parameter :: fobject='fieldbundle'
+      type(ESMF_AttPackNestFlag) :: attpacknest
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -4579,6 +4651,12 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
       fconvention = convention
       fpurpose = purpose
       
+       if (present(attpacknestflag)) then
+        attpacknest = attpacknestflag
+      else
+        attpacknest = ESMF_ATTPACKNEST_OFF
+      endif
+
       ! no standard attribute package for FieldBundle at this time
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -4808,12 +4886,14 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_GridAttAddPack(grid, convention, purpose, rc)
+      subroutine ESMF_GridAttAddPack(grid, convention, purpose, &
+        attpacknestflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid  
       character (len = *), intent(in) :: convention
       character (len = *), intent(in) :: purpose
+      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
       integer, intent(out), optional :: rc   
 
 !
@@ -4830,6 +4910,9 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!     \item [attpacknestflag]
+!      The flag to tell whether this Attribute package is to be nested or not, possible values
+!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4841,6 +4924,7 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
       character (len=len_trim(convention)) :: fconvention
       character (len=len_trim(purpose)) :: fpurpose
       character (len=*), parameter :: fobject='grid'
+      type(ESMF_AttPackNestFlag) :: attpacknest
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -4850,6 +4934,12 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
       fconvention = convention
       fpurpose = purpose
+
+       if (present(attpacknestflag)) then
+        attpacknest = attpacknestflag
+      else
+        attpacknest = ESMF_ATTPACKNEST_OFF
+      endif
 
       ! no standard attribute package for Grid at this time
 
@@ -5019,12 +5109,14 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_StateAttAddPack(state, convention, purpose, rc)
+      subroutine ESMF_StateAttAddPack(state, convention, purpose, &
+        attpacknestflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state  
       character (len = *), intent(in) :: convention
       character (len = *), intent(in) :: purpose
+      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
       integer, intent(out), optional :: rc   
 
 !
@@ -5041,6 +5133,9 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
 !      The convention of the Attribute package.
 !     \item [purpose]
 !      The purpose of the Attribute package.
+!     \item [attpacknestflag]
+!      The flag to tell whether this Attribute package is to be nested or not, possible values
+!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5055,6 +5150,7 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
       character (len=*), parameter :: name1 = 'import'
       character (len=*), parameter :: name2 = 'export'
       type(ESMF_Logical) :: lvalue
+      type(ESMF_AttPackNestFlag) :: attpacknest
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -5065,10 +5161,16 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
       fconvention = convention
       fpurpose = purpose
 
+       if (present(attpacknestflag)) then
+        attpacknest = attpacknestflag
+      else
+        attpacknest = ESMF_ATTPACKNEST_OFF
+      endif
+
       call c_ESMCI_AttPackCreate(state%statep%base, name1, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
       call c_ESMCI_AttPackCreate(state%statep%base, name2, fconvention, &
-        fpurpose, fobject, localrc)
+        fpurpose, fobject, attpacknest, localrc)
 
       lvalue = .true.
       if (state%statep%st == ESMF_STATE_IMPORT) then

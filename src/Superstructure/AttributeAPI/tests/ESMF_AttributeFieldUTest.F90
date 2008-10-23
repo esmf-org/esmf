@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.2 2008/10/17 20:08:45 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.3 2008/10/23 20:59:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.2 2008/10/17 20:08:45 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.3 2008/10/23 20:59:53 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -720,7 +720,8 @@ program ESMF_AttributeFieldUTest
       
       !NEX_UTest
       ! Create an Attribute package on a Field Test
-      call ESMF_AttributeAdd(field, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeAdd(field, convention=conv, purpose=purp, &
+        attpacknestflag=ESMF_ATTPACKNEST_OFF, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a standard Attribute package on a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -756,7 +757,7 @@ program ESMF_AttributeFieldUTest
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on a Field Test
       call ESMF_AttributeAdd(field, convention=conv, purpose=purp, &
-        attrList=attpackListTNames, rc=rc)
+        attrList=attpackListTNames, attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a standard Attribute package on a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

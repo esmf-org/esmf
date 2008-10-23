@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.2 2008/10/20 22:14:09 rokuingh Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.3 2008/10/23 20:59:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -376,9 +376,9 @@ program ESMF_AttributeEx
 !     Attribute hierarchy which contains Attribute packages will any 
 !     relevant information be written.  In the the tab-delimited case 
 !     relevant information will only be written if the Attribute hierarchy
-!     contains ESMF-supplied Attribute packages.  The AttributeWrite
-!     capability is in a developmental stage, present work is focusing
-!     on making it more robust in future releases.  A flag is used to 
+!     contains ESMF-supplied Attribute packages.  The {\tt ESMF\_AttributeWrite()}
+!     capability is only functional for single-item Attributes at this point, it
+!     will be more robust in future releases.  A flag is used to 
 !     specify which format to write, the default is tab-delimited.
 !EOE
 
@@ -432,7 +432,7 @@ program ESMF_AttributeEx
       attpackListTNames(12) = "Character_namelist"
       
       call ESMF_AttributeAdd(gridcomp, convention=conv, purpose=purp, &
-        attrList=attpackListTNames, rc=rc)
+        attrList=attpackListTNames, attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
       
       inI4 = 4
       inI4l = (/1,2,3/)
