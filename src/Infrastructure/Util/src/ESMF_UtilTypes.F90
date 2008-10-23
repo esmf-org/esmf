@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.69 2008/09/17 22:15:24 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.70 2008/10/23 20:57:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -499,6 +499,21 @@
         ESMF_ATTWRITE_XML = ESMF_AttWriteFlag(1)
 
 !------------------------------------------------------------------------------
+!     ! ESMF_AttPackNestFlag
+!
+!     ! Interface flag for Attribute package nesting
+
+      type ESMF_AttPackNestFlag
+      sequence
+      !private
+        integer :: value
+      end type
+
+      type(ESMF_AttPackNestFlag), parameter ::  &
+        ESMF_ATTPACKNEST_OFF = ESMF_AttPackNestFlag(0), &
+        ESMF_ATTPACKNEST_ON = ESMF_AttPackNestFlag(1)
+
+!------------------------------------------------------------------------------
 !BOPI
 !
 ! !PUBLIC TYPES:
@@ -548,6 +563,7 @@
       public ESMF_TerminationFlag, ESMF_FINAL, ESMF_KEEPMPI, ESMF_ABORT
       public ESMF_DePinFlag, ESMF_DE_PIN_PET, ESMF_DE_PIN_VAS
       public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
+      public ESMF_AttPackNestFlag, ESMF_ATTPACKNEST_OFF, ESMF_ATTPACKNEST_ON
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR

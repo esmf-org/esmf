@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.10 2008/09/17 22:15:24 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.11 2008/10/23 20:57:34 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -89,6 +89,10 @@ enum ESMC_RegionFlag { ESMF_REGION_TOTAL=0,
 // attwrite flag type
 enum ESMC_AttWriteFlag { ESMF_ATTWRITE_TAB=0,
                          ESMF_ATTWRITE_XML};
+                        
+// nested Attribute package flag type
+enum ESMC_AttPackNestFlag { ESMF_ATTPACKNEST_OFF=0,
+                            ESMF_ATTPACKNEST_ON};
 
 // are the index numbers relative to a local chunk or the overall
 // combined igrid?
