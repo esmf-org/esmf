@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.15 2008/09/15 22:57:44 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.16 2008/10/27 22:18:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.15 2008/09/15 22:57:44 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.16 2008/10/27 22:18:03 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -732,25 +732,32 @@ DistGrid *DistGrid::create(
       // determine min and max
       minIndexPDimPDe[extentIndex] = deBlockList->array[deBlockIndexMin];
       maxIndexPDimPDe[extentIndex] = deBlockList->array[deBlockIndexMax];
-      if (minIndexPDimPDe[extentIndex] < min ||
-        minIndexPDimPDe[extentIndex] > max){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-          "- deBlockList contains out-of-bounds elements", rc);
-        delete distgrid;
-        distgrid = ESMC_NULL_POINTER;
-        return ESMC_NULL_POINTER;
+      // check min and max
+      if (maxIndexPDimPDe[extentIndex] < minIndexPDimPDe[extentIndex]){
+        // zero elements case -> skip bounds checks
+        indexCountPDimPDe[extentIndex] = 0;
+      }else{
+        // normal case -> do normal bounds checks
+        if (minIndexPDimPDe[extentIndex] < min ||
+          minIndexPDimPDe[extentIndex] > max){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "- deBlockList contains out-of-bounds elements", rc);
+          delete distgrid;
+          distgrid = ESMC_NULL_POINTER;
+          return ESMC_NULL_POINTER;
+        }
+        if (maxIndexPDimPDe[extentIndex] < min ||
+          maxIndexPDimPDe[extentIndex] > max){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "- deBlockList contains out-of-bounds elements", rc);
+          delete distgrid;
+          distgrid = ESMC_NULL_POINTER;
+          return ESMC_NULL_POINTER;
+        }
+        // determine count
+        indexCountPDimPDe[extentIndex] = maxIndexPDimPDe[extentIndex]
+          - minIndexPDimPDe[extentIndex] + 1;
       }
-      if (maxIndexPDimPDe[extentIndex] < min ||
-        maxIndexPDimPDe[extentIndex] > max){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-          "- deBlockList contains out-of-bounds elements", rc);
-        delete distgrid;
-        distgrid = ESMC_NULL_POINTER;
-        return ESMC_NULL_POINTER;
-      }
-      // determine count
-      indexCountPDimPDe[extentIndex] = maxIndexPDimPDe[extentIndex]
-        - minIndexPDimPDe[extentIndex] + 1;
       // fill indexListPDimPLocalDe
       if (deList[j] > -1){
         // de is local

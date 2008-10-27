@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2008/09/26 05:53:53 cdeluca Exp $
+# $Id: makefile,v 1.13 2008/10/27 22:18:03 theurich Exp $
 
 ALL: build_here 
 
@@ -9,6 +9,15 @@ ESMF_CXXCOMPILEOPTS += -h simple_templates
 endif
 endif
 
+# XLC++ 8.0 on BGL systems has trouble with templates of recursive funcs
+# in -O mode => use work-around in code.
+ifeq ($(ESMF_OS),Linux)
+ifeq ($(ESMF_COMPILER),xlf)
+ESMF_CXXCOMPILEOPTS += -DBGLWORKAROUND
+endif
+endif
+
+# If you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMCI_DELayout.C
 SOURCEF	  = 
 SOURCEH	  = 
@@ -30,12 +39,3 @@ include ${ESMF_DIR}/makefile
 
 # Leave the following line blank.
 DIRS	  = 
-
-# XLC++ on BGL systems has trouble with templates of recursive funcs in -O mode
-# -> this seems to be a compiler bug and we may be able to take this out once
-# IBM has it fixed.
-ifeq ($(ESMF_OS),Linux)
-ifeq ($(ESMF_COMPILER),xlf)
-ESMF_OPTLEVEL = 0
-endif
-endif
