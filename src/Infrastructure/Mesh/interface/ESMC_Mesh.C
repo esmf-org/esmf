@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.1 2008/10/29 14:52:39 rosalind Exp $
+// $Id: ESMC_Mesh.C,v 1.2 2008/10/29 16:38:42 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -12,8 +12,13 @@
 #define ESMC_FILENAME "ESMC_Mesh.C"
 //==============================================================================
 //
-// This file contains the C interfaces' code for the Mesh class.
+//------------------------------------------------------------------------------
+//BOP
+// !DESCRIPTION:
 //
+// This file contains the C interfaces' code for the {\tt Mesh} class functions.
+//
+//EOP
 //------------------------------------------------------------------------------
 // INCLUDES
 

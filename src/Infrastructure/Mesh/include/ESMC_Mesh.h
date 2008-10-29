@@ -12,6 +12,19 @@
 #ifndef ESMC_Mesh_h
 #define ESMC_Mesh_h
 
+//-----------------------------------------------------------------------------
+//BOP
+// !CLASS:  ESMC_Mesh - Public C interface to the ESMF Array class
+//
+// !DESCRIPTION:
+//
+// The code in this file defines the public C Mesh class and declares method
+// signatures (prototypes).  The companion file {\tt ESMC\_Mesh.C} contains
+// the definitions (full code bodies) for the Mesh methods.
+//
+//EOP
+//-----------------------------------------------------------------------------
+
 #include "ESMCI_Util.h"
 #include "ESMCI_Mesh.h"
 
