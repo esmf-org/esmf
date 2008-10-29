@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.48 2008/10/08 01:30:43 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.49 2008/10/29 23:59:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
     ! inherit from ESMF base class
-    use ESMF_FIOUtilMod
+    use ESMF_IOUtilMod
     use ESMF_UtilTypesMod
  !!  use ESMF_InitMacrosMod Commented out to prevent circular dependency
  !!                         this is possible because since all the checks
@@ -770,7 +770,7 @@ end subroutine ESMF_LogFinalize
       132  FORMAT(a8,a,3i2.2,a,i6.6,8a)
       133  FORMAT(a8,a,3i2.2,a,i6.6,6a)
   
-      call ESMF_FIOUnitFlush (alog%unitNumber, localrc)
+      call ESMF_IOUnitFlush (alog%unitNumber, localrc)
  
       alog%flushed = ESMF_TRUE
       alog%dirty = ESMF_FALSE
@@ -1518,7 +1518,7 @@ end subroutine ESMF_LogMsgSetError
     endif
 
     ! find an available unit number
-    call ESMF_FIOUnitGet (alog%unitNumber, status)
+    call ESMF_IOUnitGet (alog%unitNumber, status)
     if (status /= 0) then
         if (present(rc)) then
             rc=ESMF_FAILURE
