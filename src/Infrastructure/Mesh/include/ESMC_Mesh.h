@@ -9,16 +9,16 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMCI_Mesh_h
-#define ESMCI_Mesh_h
+#ifndef ESMC_Mesh_h
+#define ESMC_Mesh_h
 
 #include "ESMCI_Util.h"
-#include "ESMCI_F90Interface.h"
+#include "ESMCI_Mesh.h"
 
 extern "C" {
 
 typedef struct {
-  ESMCI::F90ClassHolder *f90this;
+  void* ptr;
 } ESMC_Mesh;
 
 typedef enum {ESMC_MESHELEMENT_QUAD=0, ESMC_MESHELEMENT_TRI=1,
@@ -30,12 +30,15 @@ int ESMC_MeshAddNodes(ESMC_Mesh *mesh, int *nodeIds, double *nodeCoords, int *no
 
 int ESMC_MeshAddElements(ESMC_Mesh *mesh, int *elementIds, int *elementTypes, int *elementConn);
 
-int ESMC_MeshCreateAll(ESMC_Mesh *mesh, parametricDim, int *nodeIds, double *nodeCoords,
+int ESMC_MeshCreateAll(ESMC_Mesh *mesh, int parametricDim, int *nodeIds, double *nodeCoords,
              int *nodeOwners, int *elementIds, int *elementTypes, int *elementConn);
 
 int ESMC_MeshDestroy(ESMC_Mesh *mesh);
 
 
 } // extern "C"
+
+extern "C" void FTN(c_esmc_meshcreate)(ESMCI::Mesh**,
+                         int*, int*, int*);
 
 #endif

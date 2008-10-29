@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.21 2008/10/16 20:36:47 rosalind Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.22 2008/10/29 14:52:39 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMC_Mesh_F.C"
+#define ESMC_FILENAME "ESMCI_Mesh_F.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
@@ -35,7 +35,6 @@
 #include "ESMCI_MeshUtils.h"
 #include "ESMCI_GlobalIds.h"
 
-#include "ESMC_MeshCAPI.h"
 
 
 
@@ -52,41 +51,6 @@ using namespace ESMCI;
 //EOP
 //-------------------------------------------------------------------------
 
-/*----------------------------------------------------------------------------
- *  Implementation of C api
- *----------------------------------------------------------------------------*/
-#ifdef NOTYET
-extern "C" {
-
-ESMC_Mesh *ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc) {
-  int localrc;
-  ESMC_Mesh *mesh;
-
-  mesh = new ESMC_Mesh();
-
-  c_esmc_meshcreate(&mesh, &parametricDim, &spatialDim, &localrc);
-
-  if (rc) *rc = localrc;
-
-  return mesh;
-}
-
-int ESMC_MeshAddNodes(ESMC_Mesh *mesh, int *nodeIds, double *nodeCoords, int *nodeOwners) {
-}
-
-int ESMC_MeshAddElements(ESMC_Mesh *mesh, int *elementIds, int *elementTypes, int *elementConn) {
-}
-
-int ESMC_MeshCreateAll(ESMC_Mesh *mesh, parametricDim, int *nodeIds, double *nodeCoords,
-             int *nodeOwners, int *elementIds, int *elementTypes, int *elementConn)
-{
-}
-
-int ESMC_MeshDestroy(ESMC_Mesh *mesh) {
-}
-
-} // extern "C" 
-#endif // NOTEYET
 
 /*----------------------------------------------------------------------------
  *  Low level helper functions: translate from F90 to C++.
