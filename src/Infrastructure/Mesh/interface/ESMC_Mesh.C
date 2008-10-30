@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.2 2008/10/29 16:38:42 rosalind Exp $
+// $Id: ESMC_Mesh.C,v 1.3 2008/10/30 15:46:46 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -21,6 +21,7 @@
 //EOP
 //------------------------------------------------------------------------------
 // INCLUDES
+#include "ESMCI_Mesh.h"
 
 #include "ESMC_Mesh.h"
 
@@ -30,6 +31,7 @@ extern "C" {
 ESMC_Mesh *ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc) {
   int localrc;
   ESMC_Mesh *mesh;
+  mesh = new ESMC_Mesh();
 
   Mesh* me;
   me = new Mesh();
@@ -42,6 +44,42 @@ ESMC_Mesh *ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc) {
   return mesh;
 
 } // ESMC_MeshCreate
+
+//--------------------------------------------------------------------------
+// !BOP 
+// !IROUTINE: ESMC_MeshAddNodes
+//
+// !EOP
+int ESMC_MeshAddNodes(ESMC_Mesh *mesh, int *num_nodes, int *nodeIds, 
+                      double *nodeCoords, int *nodeOwners) {
+   int localrc;
+
+   Mesh* me = (Mesh*)(mesh->ptr);
+
+   FTN(c_esmc_meshaddnodes)(&me, num_nodes, nodeIds, nodeCoords,
+                            nodeOwners, &localrc);
+
+   return localrc;
+
+} // ESMC_MeshAddNodes
+
+//--------------------------------------------------------------------------
+// !BOP
+// !IROUTINE: ESMC_MeshAddElements
+//
+// !EOP
+int ESMC_MeshAddElements(ESMC_Mesh *mesh, int *num_elems, int *elementIds, 
+                         int *elementTypes, int *elementConn){
+   int localrc;
+
+   Mesh* me = (Mesh*)(mesh->ptr);
+
+   FTN(c_esmc_meshaddelements)(&me, num_elems, elementIds, elementTypes,
+                               elementConn, &localrc);
+
+   return localrc;
+
+}  // ESMC_MeshAddElements
 
 } // extern "C"
 

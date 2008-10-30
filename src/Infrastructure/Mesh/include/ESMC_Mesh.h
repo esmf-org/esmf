@@ -25,8 +25,8 @@
 //EOP
 //-----------------------------------------------------------------------------
 
-#include "ESMCI_Util.h"
 #include "ESMCI_Mesh.h"
+#include "ESMCI_Util.h"
 
 extern "C" {
 
@@ -39,9 +39,11 @@ typedef enum {ESMC_MESHELEMENT_QUAD=0, ESMC_MESHELEMENT_TRI=1,
 
 ESMC_Mesh *ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc);
 
-int ESMC_MeshAddNodes(ESMC_Mesh *mesh, int *nodeIds, double *nodeCoords, int *nodeOwners);
+int ESMC_MeshAddNodes(ESMC_Mesh *mesh, int *num_nodes, int *nodeIds, 
+                      double *nodeCoords, int *nodeOwners);
 
-int ESMC_MeshAddElements(ESMC_Mesh *mesh, int *elementIds, int *elementTypes, int *elementConn);
+int ESMC_MeshAddElements(ESMC_Mesh *mesh, int *num_elems, int *elementIds, 
+                         int *elementTypes, int *elementConn);
 
 int ESMC_MeshCreateAll(ESMC_Mesh *mesh, int parametricDim, int *nodeIds, double *nodeCoords,
              int *nodeOwners, int *elementIds, int *elementTypes, int *elementConn);
@@ -53,5 +55,10 @@ int ESMC_MeshDestroy(ESMC_Mesh *mesh);
 
 extern "C" void FTN(c_esmc_meshcreate)(ESMCI::Mesh**,
                          int*, int*, int*);
+extern "C" void FTN(c_esmc_meshaddnodes)(ESMCI::Mesh**, int*, int*,
+               double*, int*, int*);
+
+extern "C" void FTN(c_esmc_meshaddelements)(ESMCI::Mesh**, int*, int*,
+               int*, int*, int*);
 
 #endif
