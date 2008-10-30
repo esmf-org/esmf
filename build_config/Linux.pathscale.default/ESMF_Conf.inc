@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.4 2008/04/05 03:37:49 cdeluca Exp $
+$Id: ESMF_Conf.inc,v 1.5 2008/10/30 00:01:45 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -9,6 +9,18 @@ Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 NASA Goddard Space Flight Center.
 Licensed under the University of Illinois-NCSA License.
 #endif
+
+#if 0
+Define the proper way to flush Fortran units.  Typically this will
+be one of the following:
+
+  * Fortran-2003 FLUSH statement (preferred)
+  * Two argument FLUSH call
+  * One argument FLUSH call
+
+#endif
+
+#define ESMF_IOFlushMacro(unit,status) call flush (unit, status)
 
 #if 0
 in theory absoft supports initializers, but in practice with the number

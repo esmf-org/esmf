@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.8 2008/10/14 21:30:31 w6ws Exp $
+$Id: ESMF_Conf.inc,v 1.9 2008/10/30 00:01:45 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -10,17 +10,17 @@ NASA Goddard Space Flight Center.
 Licensed under the University of Illinois-NCSA License.
 #endif
 
-
 #if 0
-Define the proper way to flush Fortran units.  Choices include:
+Define the proper way to flush Fortran units.  Typically this will
+be one of the following:
 
-  ESMF_HAS_F2003_FLUSH (preferred)
-  ESMF_HAS_1ARG_FLUSH
-  ESMF_HAS_2ARG_FLUSH
+  * Fortran-2003 FLUSH statement (preferred)
+  * Two argument FLUSH call
+  * One argument FLUSH call
 
 #endif
 
-#define ESMF_HAS_1ARG_FLUSH
+#define ESMF_IOFlushMacro(unit,status) call flush (unit)
 
 #if 0
 the PGI compiler is strict F90, which does not allow members of a type
