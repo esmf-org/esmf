@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.50 2008/10/16 21:26:19 peggyli Exp $
+// $Id: ESMCI_Grid.h,v 1.51 2008/10/30 20:06:14 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -32,19 +32,26 @@
 ///EOP
 //-------------------------------------------------------------------------
 
-
 #include "ESMC_Base.h"
 #include "ESMCI_DistGrid.h"
 #include "ESMCI_Array.h"
 
 
-// Eventually move this to ESMCI_Util.h
+
 // Eventually move this to ESMCI_Util.h
 enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
                       ESMC_GRIDSTATUS_UNINIT,
                       ESMC_GRIDSTATUS_NOT_READY,
 		      ESMC_GRIDSTATUS_SHAPE_READY
 };
+
+// Eventually move this to ESMCI_Util.h
+enum ESMC_GridItem {ESMC_GRIDITEM_INVALID=-2,
+                    ESMC_GRIDITEM_UNINIT,
+                    ESMC_GRIDITEM_MASK,
+                    ESMC_GRIDITEM_AREA
+};
+#define ESMC_GRIDITEM_COUNT 2
 
 enum ESMC_GridDecompType {ESMC_GRID_INVALID=1, 
 			ESMC_GRID_NONARBITRARY,
@@ -114,9 +121,11 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   int   **staggerAlignList;     // hold alignment info [staggerloc][dim]
   int   **staggerEdgeLWidthList;     // hold LWidth info [staggerloc][dim]
   int   **staggerEdgeUWidthList;     // hold UWidth info [staggerloc][dim]
-  bool  **didIAllocList;        // if true, I allocated this Array [staggerloc][coord]
+  bool  **coordDidIAllocList;        // if true, I allocated this Array [staggerloc][coord]
 
-  Array *maskArray; // TODO: this needs to be a list per staggerloc, but while DAvid is finishing up....
+  Array ***itemArrayList; // holds item Arrays [staggerloc][GRIDITEM_COUNT]
+  bool   **itemDidIAllocList; // holds item Arrays [staggerloc][GRIDITEM_COUNT]
+
 
   // map grid dim to distgrid dim and grid bounds dim
   bool *gridIsDist;  // size=dimCount [grid-dim]
@@ -160,6 +169,24 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 		    int _coord,      // (in)
 		    Array **_array   // (in)
 		    );
+
+
+  // Private methods:
+  // Set internal array
+  int setItemArrayInternal(
+		    int _staggerloc, // (in)
+		    int item,       // (in)
+		    Array *_array,   // (in)
+		    bool _self_alloc // (in)
+		    );
+
+  // Get Array holding coordinates
+ int getItemArrayInternal(
+		    int _staggerloc, // (in)
+		    int item,       // (in)
+		    Array **_array   // (in)
+		    );
+
 
   // add/delete protogrid  
   int addProtoGrid();
@@ -238,9 +265,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const int   *getMaxIndex(int tileno) const { return maxIndex; }
         int  **getLocalIndices(void) const { return coordLocalIndices;}
 
-  Array *getMaskArray() {return maskArray;}
 
-  int setMaskArray(Array *array) {maskArray=array; return ESMF_SUCCESS;}
 
   // Use these when DistGrid topology stuff is in place
   // bool isLBnd(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}
@@ -260,8 +285,11 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   void setSphere() {connL[0]=ESMC_GRIDCONN_PERIODIC; connU[0]=ESMC_GRIDCONN_PERIODIC; connL[1]=ESMC_GRIDCONN_POLE; connU[1]=ESMC_GRIDCONN_POLE;}
 
 
-  // detect if a given staggerloc is present in the Grid
-  bool hasStaggerLoc(int staggerloc);
+  // detect if a given staggerloc has coordinates
+  bool hasCoordStaggerLoc(int staggerloc);
+
+  // detect if a given staggerloc has a item
+  bool hasItemStaggerLoc(int staggerloc, int item);
 
   // Set data in an empty grid before commit
   int set(
@@ -396,6 +424,34 @@ int getComputationalUBound(
                            );
 
 
+ int setItemArray(
+                   int *_staggerloc,
+		   int *item,    
+                   Array *_array,
+                   ESMC_DataCopy *_docopy
+                   );
+
+
+ // Get the Array containing the coordinates
+ Array *getItemArray(
+                      int *_staggerloc,
+                      int *item, 
+                      ESMC_DataCopy *_docopy,
+                      int *rcArg
+                      );
+
+ // Allocate item Arrays for a staggerloc
+ int addItemArray(
+                     int *_staggerloc,
+		     int *item,
+		     ESMC_TypeKind *typekind,          
+                     InterfaceInt *_staggerEdgeLWidthArg,
+                     InterfaceInt *_staggerEdgeUWidthArg,
+                     InterfaceInt *_staggerAlign
+                     );
+
+
+
  // Set Array for holding coordinates
 // This needs to make sure the Coord has already been allocated
  int setCoordArray(
@@ -404,6 +460,8 @@ int getComputationalUBound(
                    Array *_array,
                    ESMC_DataCopy *_docopy
                    );
+
+
 
  int addCoordFromArrayList(
                        int *staggerlocArg,        // (in) optional

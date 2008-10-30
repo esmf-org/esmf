@@ -86,6 +86,24 @@
 
 
 !------------------------------------------------------------------------------
+! ! ESMF_GridItem
+!
+!------------------------------------------------------------------------------
+  type ESMF_GridItem
+  sequence
+!  private
+     integer :: gridItem
+  end type
+
+  type(ESMF_GridItem), parameter :: &
+                      ESMF_GRIDITEM_INVALID=ESMF_GridItem(-2), &
+                      ESMF_GRIDITEM_UNINIT=ESMF_GridItem(-1), &
+                      ESMF_GRIDITEM_MASK=ESMF_GridItem(0), &
+                      ESMF_GRIDITEM_AREA=ESMF_GridItem(1)
+
+
+
+!------------------------------------------------------------------------------
 ! ! ESMF_GridConn
 !
 !------------------------------------------------------------------------------
@@ -141,6 +159,8 @@ public  ESMF_GridConn,  ESMF_GRIDCONN_NONE, ESMF_GRIDCONN_PERIODIC, &
                         ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_BIPOLE
 public  ESMF_GridStatus,  ESMF_GRIDSTATUS_INVALID, ESMF_GRIDSTATUS_UNINIT, &
                       ESMF_GRIDSTATUS_NOT_READY,  ESMF_GRIDSTATUS_SHAPE_READY
+public  ESMF_GridItem,  ESMF_GRIDITEM_INVALID, ESMF_GRIDITEM_UNINIT, &
+                      ESMF_GRIDITEM_MASK, ESMF_GRIDITEM_AREA
 public  ESMF_DefaultFlag
 public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRID_ARBITRARY
 
@@ -169,6 +189,10 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
   public ESMF_GridSet
   public ESMF_GridSetCoord
 
+  public ESMF_GridAddItem
+  public ESMF_GridGetItem
+  public ESMF_GridSetItem
+
   public ESMF_GridSetCommitShapeTile
   public ESMF_GridSerialize
   public ESMF_GridDeserialize
@@ -194,7 +218,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.93 2008/10/21 19:13:43 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.94 2008/10/30 20:06:14 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -222,6 +246,26 @@ interface ESMF_GridAddCoord
 !  types of {\tt ESMF\_GridAddCoord} functions.   
 !EOPI 
 end interface
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridAddItem -- Generic interface
+
+! !INTERFACE:
+interface ESMF_GridAddItem
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_GridAddItemNoValues
+      
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_GridAddItem} functions.   
+!EOPI 
+end interface
+
+
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -311,6 +355,34 @@ interface ESMF_GridGetCoord
 end interface
 
 ! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridGetItem -- Generic interface
+
+! !INTERFACE:
+interface ESMF_GridGetItem
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_GridGetItem1DI4
+      module procedure ESMF_GridGetItem2DI4
+      module procedure ESMF_GridGetItem3DI4
+      module procedure ESMF_GridGetItem1DR4
+      module procedure ESMF_GridGetItem2DR4
+      module procedure ESMF_GridGetItem3DR4
+      module procedure ESMF_GridGetItem1DR8
+      module procedure ESMF_GridGetItem2DR8
+      module procedure ESMF_GridGetItem3DR8
+      module procedure ESMF_GridGetItemBounds
+      module procedure ESMF_GridGetItemIntoArray
+      
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+! types of {\tt ESMF\_GridGetItem} functions.   
+!EOPI 
+end interface
+
+
+! -------------------------- ESMF-public method -------------------------------
 !TODO: Temporary until I work out the proper overloading
 !BOPI
 ! !IROUTINE: ESMF_GridGetIndCoord -- Generic interface
@@ -365,22 +437,24 @@ interface ESMF_GridSetCoord
 !EOPI 
 end interface
 
+
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridSetMask -- Generic interface
+! !IROUTINE: ESMF_GridSetItem -- Generic interface
 
 ! !INTERFACE:
-interface ESMF_GridSetMask
+interface ESMF_GridSetItem
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_GridSetMaskFromArray
+      module procedure ESMF_GridSetItemFromArray
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_GridSetMask} functions.   
+!  types of {\tt ESMF\_GridSetItem} functions.   
 !EOPI 
 end interface
+
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
@@ -884,6 +958,160 @@ end interface
     if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridAddCoordArrayList
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAddItem"
+
+!BOP
+! !IROUTINE: ESMF_GridAddItem - Allocate item array but don't set their values
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridAddItem()
+     subroutine ESMF_GridAddItemNoValues(grid, staggerloc, item, itemTypeKind, &
+                staggerEdgeLWidth, staggerEdgeUWidth, staggerAlign,            &
+                totalLWidth, totalUWidth,rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in)              :: grid 
+      type (ESMF_StaggerLoc), intent(in),optional     :: staggerloc
+      type (ESMF_GridItem),   intent(in)              :: item
+      type (ESMF_TypeKind),   intent(in),optional     :: itemTypeKind
+      integer,                intent(in),optional     :: staggerEdgeLWidth(:)
+      integer,                intent(in),optional     :: staggerEdgeUWidth(:)
+      integer,                intent(in),optional     :: staggerAlign(:)
+      integer,                intent(out), optional   :: totalLWidth(:)         ! N. IMP
+      integer,                intent(out), optional   :: totalUWidth(:)         ! N. IMP
+      integer,                intent(out),optional    :: rc
+!
+! !DESCRIPTION:
+! 
+!  When a Grid is created all of its potential stagger locations can hold item
+!  data, but none of them have storage allocated. This call allocates item
+!  storage (creates an internal ESMF\_Array and associated memory) for  a particular
+!  stagger location. Note that this
+!  call doesn't assign any values to the storage, it only allocates it. The
+!  remaining options {\tt staggerEdgeLWidth}, etc. allow the user to adjust the 
+!  padding on the item array.
+!
+! The arguments are:
+! \begin{description}
+!     \item[{grid}]
+!       Grid to allocate coordinate storage in.  
+! \item[{[staggerloc]}]
+!      The stagger location to add. Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+! \item[{item}]
+!      The grid item to add. 
+! \item[{itemTypeKind}]
+!      The typekind of the  item to add. 
+! \item[{[staggerEdgeLWidth]}] 
+!      This array should be the same dimCount as the grid. It specifies the lower corner of the stagger
+!      region with respect to the lower corner of the exclusive region.
+! \item[{[staggerEdgeUWidth]}] 
+!      This array should be the same dimCount as the grid. It specifies the upper corner of the stagger
+!      region with respect to the upper corner of the exclusive region.
+! \item[{[staggerAlign]}] 
+!      This array is of size  grid dimCount.
+!      For this stagger location, it specifies which element
+!      has the same index value as the center. For example, 
+!      for a 2D cell with corner stagger it specifies which 
+!      of the 4 corners has the same index as the center. 
+!      If this is set and either staggerEdgeUWidth or staggerEdgeLWidth is not,
+!      this determines the default array padding for a stagger. 
+!      If not set, then this defaults to all negative. (e.g. 
+!      The most negative part of the stagger in a cell is aligned with the 
+!      center and the padding is all on the postive side.) 
+!\item[{[totalLWidth]}]
+!     The lower boundary of the computatational region in reference to the computational region. 
+!     Note, the computational region includes the extra padding specified by {\tt ccordLWidth}.
+!     [CURRENTLY NOT IMPLEMENTED]
+!\item[{[totalUWidth]}]
+!     The lower boundary of the computatational region in reference to the computational region. 
+!     Note, the computational region includes the extra padding specified by {\tt staggerEdgeLWidth}.
+!     [CURRENTLY NOT IMPLEMENTED]
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+
+    integer :: tmp_staggerloc
+    integer :: localrc ! local error status
+    type(ESMF_InterfaceInt) :: staggerEdgeLWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: staggerEdgeUWidthArg  ! Language Interface Helper Var
+    type(ESMF_InterfaceInt) :: staggerAlignArg  ! Language Interface Helper Var
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+
+    ! check for not implemented parameters
+    if (present(totalLWidth)) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- totalLWidth specification not yet implemented", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    if (present(totalUWidth)) then
+       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+                 "- totalUWidth specification not yet implemented", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
+    endif
+
+    !! staggerEdgeLWidth
+    staggerEdgeLWidthArg = ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !! staggerEdgeUWidth
+    staggerEdgeUWidthArg = ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !! staggerAlign
+    staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call C++ Subroutine to do the create
+    call c_ESMC_gridadditem(grid%this,tmp_staggerloc, item, itemTypeKind, &
+      staggerEdgeLWidthArg, staggerEdgeUWidthArg, staggerAlignArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate helper variables
+    call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridAddItemNoValues
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -7869,6 +8097,2993 @@ endif
 
     end subroutine ESMF_GridGetCoordR8
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridGetItem - Get Grid coordinate bounds and an F90 pointer to coordinate data
+
+! !INTERFACE:
+!      subroutine ESMF_GridGetItem(grid, localDE, staggerloc, item,      &
+!         exclusiveLBound, exclusiveUBound, exclusiveCount,              &
+!         computationalLBound, computationalUBound, computationalCount,  &
+!         totalLBound, totalUBound, totalCount,                          &
+!         <pointer argument>, doCopy, rc)
+! 
+! !ARGUMENTS:
+!     type(ESMF_Grid),        intent(in) :: grid
+!     integer,                intent(in) :: localDE
+!     type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+!     type (ESMF_GridItem),   intent(in)            :: item
+!     integer,                intent(out), optional :: exclusiveLBound(:)
+!     integer,                intent(out), optional :: exclusiveUBound(:)
+!     integer,                intent(out), optional :: exclusiveCount(:)
+!     integer,                intent(out), optional :: computationalLBound(:)
+!     integer,                intent(out), optional :: computationalUBound(:)
+!     integer,                intent(out), optional :: computationalCount(:)
+!     integer,                intent(out), optional :: totalLBound(:)
+!     integer,                intent(out), optional :: totalUBound(:)
+!     integer,                intent(out), optional :: totalCount(:)
+!     <pointer argument>, see below for supported values
+!     type(ESMF_CopyFlag),    intent(in), optional :: docopy
+!     integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This method gets a Fortran pointer to the piece of memory which holds the 
+!     item data on the local DE for the given stagger locations. 
+!     This is useful, for example, for setting the item values in a Grid, or
+!     for reading the item values.  Currently this method supports up to three
+!     grid dimensions, but is limited to the I4 datatype.  See below for specific 
+!     supported values.  If the item values that you are trying to retrieve are of
+!     higher dimension, use the {\tt ESMF\_GetItem()} interface that returns coordinate
+!     values in an {\tt ESMF\_Array} instead.  That interface supports the retrieval of
+!     coordinates up to 7D. 
+!
+!     Supported values for the <pointer argument> are: 
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), pointer :: fptr(:)
+!     \item integer(ESMF\_KIND\_I4), pointer :: fptr(:,:)     
+!     \item integer(ESMF\_KIND\_I4), pointer :: fptr(:,:,:)
+!     \item real(ESMF\_KIND\_R4), pointer :: fptr(:)
+!     \item real(ESMF\_KIND\_R4), pointer :: fptr(:,:)     
+!     \item real(ESMF\_KIND\_R4), pointer :: fptr(:,:,:)
+!     \item real(ESMF\_KIND\_R8), pointer :: fptr(:)
+!     \item real(ESMF\_KIND\_R8), pointer :: fptr(:,:)     
+!     \item real(ESMF\_KIND\_R8), pointer :: fptr(:,:,:)
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
+!     \item[{staggerloc}]
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+!     \item[{item}]
+!          The item to get the information for. 
+!     \item[{[exclusiveLBound]}]
+!          Upon return this holds the lower bounds of the exclusive region.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the grid dimCount.
+!     \item[{[exclusiveUBound]}]
+!          Upon return this holds the upper bounds of the exclusive region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the grid dimCount.
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the grid dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalLBound]}]
+!          Upon return this holds the lower bounds of the stagger region.
+!          {\tt computationalLBound} must be allocated to be of size equal to the grid dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalUBound]}]
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the grid dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the grid dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalLBound]}]
+!          Upon return this holds the lower bounds of the total region.
+!          {\tt totalLBound} must be allocated to be of size equal to the grid dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalUBound]}]
+!          Upon return this holds the upper bounds of the total region.
+!          {\tt totalUBound} must be allocated to be of size equal to the grid dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the grid dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{fptr}]
+!          The pointer to the item data.
+!     \item[{[doCopy]}]
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetItem1DI4"
+!BOPI
+! !IROUTINE: ESMF_GridGetItem - Get pointer to 1DI4 coordinates
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetItem()
+      subroutine ESMF_GridGetItem1DI4(grid, localDE, staggerloc, item,      & 
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &
+          fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in) :: grid
+      integer,                intent(in) :: localDE
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      type (ESMF_GridItem),   intent(in)            :: item
+      integer,                intent(out), optional :: exclusiveLBound(:)
+      integer,                intent(out), optional :: exclusiveUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
+      integer,                intent(out), optional :: computationalLBound(:)
+      integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
+      integer,                intent(out), optional :: totalLBound(:)
+      integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
+      integer(ESMF_KIND_I4), pointer                   :: fptr(:)
+      type(ESMF_CopyFlag),    intent(in), optional :: docopy
+      integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method gets a Fortran pointer to the piece of memory which holds the 
+!    item data for the stagger locations on the given local DE. 
+!    This is useful, for example, for setting the item values in a Grid, or
+!    for reading the item values.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
+!     \item[{staggerloc}]
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+!     \item[{item}]
+!          The item to get the information for. 
+!     \item[{[exclusiveLBound]}]
+!          Upon return this holds the lower bounds of the exclusive region.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveUBound]}]
+!          Upon return this holds the upper bounds of the exclusive region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalLBound]}]
+!          Upon return this holds the lower bounds of the stagger region.
+!          {\tt computationalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalUBound]}]
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalLBound]}]
+!          Upon return this holds the lower bounds of the total region.
+!          {\tt totalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalUBound]}]
+!          Upon return this holds the upper bounds of the total region.
+!          {\tt totalUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{fptr}]
+!          The pointer to the item data.
+!     \item[{[doCopy]}]
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+    ! Local variables 
+    type(ESMF_Array) :: array 
+    integer :: localrc ! local error status 
+    integer :: localDeCount, dimCount 
+    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_CopyFlag) :: docopyInt
+    integer :: coordDimCount(ESMF_MAXDIM)
+    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    integer :: tmp_staggerloc
+
+    ! Initialize return code 
+    localrc = ESMF_RC_NOT_IMPL 
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+    ! Check init status of arguments 
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
+
+    ! Check consistency 
+    call ESMF_GridGet(grid, dimCount=dimCount, &
+                      localDECount=localDECount, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Require farrayPtr dimCount to match grid dimCount 
+    if (dimCount .ne. 1) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+        "- farrayPtr dimCount does not match requested item dimCount", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    ! Set Defaults
+    if (present(docopy)) then
+      docopyInt=docopy
+    else
+      docopyInt=ESMF_DATA_REF
+    endif
+
+
+    ! Require DELayout to be 1 DE per PET 
+    if (localDeCount < 0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+        "- negative number of localDeCount prohibits request", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    if (localDeCount == 0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+        "- localDeCount == 0 prohibits request", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif
+ 
+    if (localDE>=localDeCount) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        "- localDE too big", ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    if (localDE<0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        "- localDE can't be less than 0", ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+    endif
+
+    ! Get the Array 
+    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
+                                    ESMF_DATA_REF, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Obtain the native F90 array pointer via the LocalArray interface 
+    allocate(larrayList(localDeCount))
+ 
+    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      ESMF_CONTEXT, rcToReturn=rc)) return 
+    deallocate(larrayList) 
+
+    ! process optional arguments
+    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate interface ints
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully 
+    if (present(rc)) rc = ESMF_SUCCESS 
+
+    end subroutine ESMF_GridGetItem1DI4
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetItem2DI4"
+!BOPI
+! !IROUTINE: ESMF_GridGetItem - Get pointer to 2DI4 item
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetItem()
+      subroutine ESMF_GridGetItem2DI4(grid, localDE, staggerloc, item, &
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &
+          fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in) :: localDE
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
+      type (ESMF_GridItem),   intent(in)            :: item
+      integer,                intent(out), optional :: exclusiveLBound(:)
+      integer,                intent(out), optional :: exclusiveUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
+      integer,                intent(out), optional :: computationalLBound(:)
+      integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
+      integer,                intent(out), optional :: totalLBound(:)
+      integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
+      integer(ESMF_KIND_I4), pointer :: fptr(:,:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method gets a Fortran pointer to the piece of memory which holds the 
+!    item data for the stagger locations on the given local DE. 
+!    This is useful, for example, for setting the item values in a Grid, or
+!    for reading the item values.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
+!     \item[{staggerloc}]
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{item}]
+!          The item to get the information for. 
+!     \item[{[exclusiveLBound]}]
+!          Upon return this holds the lower bounds of the exclusive region.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveUBound]}]
+!          Upon return this holds the upper bounds of the exclusive region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalLBound]}]
+!          Upon return this holds the lower bounds of the stagger region.
+!          {\tt computationalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalUBound]}]
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalLBound]}]
+!          Upon return this holds the lower bounds of the total region.
+!          {\tt totalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalUBound]}]
+!          Upon return this holds the upper bounds of the total region.
+!          {\tt totalUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{fptr}]
+!          The pointer to the item data.
+!     \item[{[doCopy]}]
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+
+    ! Local variables 
+    type(ESMF_Array) :: array 
+    integer :: localrc ! local error status 
+    integer :: localDeCount, dimCount 
+    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_CopyFlag) :: docopyInt
+    integer :: coordDimCount(ESMF_MAXDIM)
+    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    integer :: tmp_staggerloc
+
+    ! Initialize return code 
+    localrc = ESMF_RC_NOT_IMPL 
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+    ! Check init status of arguments 
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
+
+    ! Check consistency 
+    call ESMF_GridGet(grid, dimCount=dimCount, &
+                      localDECount=localDECount, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+
+    ! Require farrayPtr dimCount to match grid dimCount 
+    if (dimCount .ne. 2) then 
+    call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+      "- farrayPtr dimCount does not match requested item dimCount", & 
+      ESMF_CONTEXT, rc) 
+    return 
+    endif 
+
+    ! Set Defaults
+    if (present(docopy)) then
+      docopyInt=docopy
+    else
+      docopyInt=ESMF_DATA_REF
+    endif
+
+    ! Require DELayout to be 1 DE per PET 
+    if (localDeCount < 0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+        "- Negative number of localDeCount prohibits request", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    if (localDeCount == 0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+        "- localDeCount == 0 prohibits request", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif
+ 
+    if (localDE>=localDeCount) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        "- localDE too big", ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    if (localDE<0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        "- localDE can't be less than 0", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+    endif
+
+    ! Get the Array 
+    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
+                                    ESMF_DATA_REF, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Obtain the native F90 array pointer via the LocalArray interface 
+    allocate(larrayList(localDeCount))
+ 
+    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return 
+    deallocate(larrayList) 
+
+    ! process optional arguments
+    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate interface ints
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully 
+    if (present(rc)) rc = ESMF_SUCCESS 
+
+    end subroutine ESMF_GridGetItem2DI4
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetItem3DI4"
+!BOPI
+! !IROUTINE: ESMF_GridGetItem - Get pointer to 3DI4 item
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetItem()
+      subroutine ESMF_GridGetItem3DI4(grid, localDE, staggerloc, item, &
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &      
+          fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in) :: localDE
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      type (ESMF_GridItem),   intent(in)            :: item
+      integer,                intent(out), optional :: exclusiveLBound(:)
+      integer,                intent(out), optional :: exclusiveUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
+      integer,                intent(out), optional :: computationalLBound(:)
+      integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
+      integer,                intent(out), optional :: totalLBound(:)
+      integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
+      integer(ESMF_KIND_I4), pointer :: fptr(:,:,:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method gets a Fortran pointer to the piece of memory which holds the 
+!    maks data and stagger locations on the given local DE. 
+!    This is useful, for example, for setting the item values in a Grid, or
+!    for reading the item values. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
+!     \item[{staggerloc}]
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{item}]
+!          The item to get the information for. 
+!     \item[{[exclusiveLBound]}]
+!          Upon return this holds the lower bounds of the exclusive region.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveUBound]}]
+!          Upon return this holds the upper bounds of the exclusive region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalLBound]}]
+!          Upon return this holds the lower bounds of the stagger region.
+!          {\tt computationalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalUBound]}]
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalLBound]}]
+!          Upon return this holds the lower bounds of the total region.
+!          {\tt totalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalUBound]}]
+!          Upon return this holds the upper bounds of the total region.
+!          {\tt totalUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{fptr}]
+!          The pointer to the item data.
+!     \item[{[doCopy]}]
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+
+ ! Local variables 
+ type(ESMF_Array) :: array 
+ integer :: localrc ! local error status 
+ integer :: localDeCount, dimCount 
+ type(ESMF_TypeKind) :: typekind 
+ type(ESMF_LocalArray), allocatable :: larrayList(:) 
+ type(ESMF_CopyFlag) :: docopyInt
+ integer :: coordDimCount(ESMF_MAXDIM)
+ type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
+ type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ integer :: tmp_staggerloc
+
+ ! Initialize return code 
+ localrc = ESMF_RC_NOT_IMPL 
+ if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+ ! Check init status of arguments 
+ ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
+
+ ! Check consistency 
+ call ESMF_GridGet(grid, dimCount=dimCount, &
+                   localDECount=localDECount, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+ ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+ ! Require farrayPtr dimCount to match coordinate dimCount 
+ if (dimCount .ne. 3) then 
+ call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ "- farrayPtr dimCount does not match requested item dimCount", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif 
+
+! Set Defaults
+if (present(docopy)) then
+   docopyInt=docopy
+else
+  docopyInt=ESMF_DATA_REF
+endif
+
+
+ ! Require DELayout to be 1 DE per PET 
+ if (localDeCount < 0) then 
+ call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ "- Negative number of localDeCount prohibits request", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif 
+
+ if (localDeCount == 0) then 
+ call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ "- localDeCount == 0 prohibits request", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif
+ 
+ if (localDE>=localDeCount) then 
+ call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ "- localDE too big", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif 
+
+ if (localDE<0) then 
+ call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ "- localDE can't be less than 0", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif 
+
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+    endif
+
+    ! Get the Array 
+
+    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
+                                    ESMF_DATA_REF, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Obtain the native F90 array pointer via the LocalArray interface 
+    allocate(larrayList(localDeCount))
+ 
+    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return 
+    deallocate(larrayList) 
+
+
+    ! process optional arguments
+    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate interface ints
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully 
+    if (present(rc)) rc = ESMF_SUCCESS 
+
+    end subroutine ESMF_GridGetItem3DI4
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetItem1DR4"
+!BOPI
+! !IROUTINE: ESMF_GridGetItem - Get pointer to 1DR4 coordinates
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetItem()
+      subroutine ESMF_GridGetItem1DR4(grid, localDE, staggerloc, item,      & 
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &
+          fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in) :: grid
+      integer,                intent(in) :: localDE
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      type (ESMF_GridItem),   intent(in)            :: item
+      integer,                intent(out), optional :: exclusiveLBound(:)
+      integer,                intent(out), optional :: exclusiveUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
+      integer,                intent(out), optional :: computationalLBound(:)
+      integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
+      integer,                intent(out), optional :: totalLBound(:)
+      integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
+      real(ESMF_KIND_R4), pointer                   :: fptr(:)
+      type(ESMF_CopyFlag),    intent(in), optional :: docopy
+      integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method gets a Fortran pointer to the piece of memory which holds the 
+!    item data for the stagger locations on the given local DE. 
+!    This is useful, for example, for setting the item values in a Grid, or
+!    for reading the item values.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
+!     \item[{staggerloc}]
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+!     \item[{item}]
+!          The item to get the information for. 
+!     \item[{[exclusiveLBound]}]
+!          Upon return this holds the lower bounds of the exclusive region.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveUBound]}]
+!          Upon return this holds the upper bounds of the exclusive region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalLBound]}]
+!          Upon return this holds the lower bounds of the stagger region.
+!          {\tt computationalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalUBound]}]
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalLBound]}]
+!          Upon return this holds the lower bounds of the total region.
+!          {\tt totalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalUBound]}]
+!          Upon return this holds the upper bounds of the total region.
+!          {\tt totalUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{fptr}]
+!          The pointer to the item data.
+!     \item[{[doCopy]}]
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+    ! Local variables 
+    type(ESMF_Array) :: array 
+    integer :: localrc ! local error status 
+    integer :: localDeCount, dimCount 
+    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_CopyFlag) :: docopyInt
+    integer :: coordDimCount(ESMF_MAXDIM)
+    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    integer :: tmp_staggerloc
+
+    ! Initialize return code 
+    localrc = ESMF_RC_NOT_IMPL 
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+    ! Check init status of arguments 
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
+
+    ! Check consistency 
+    call ESMF_GridGet(grid, dimCount=dimCount, &
+                      localDECount=localDECount, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Require farrayPtr dimCount to match grid dimCount 
+    if (dimCount .ne. 1) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+        "- farrayPtr dimCount does not match requested item dimCount", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    ! Set Defaults
+    if (present(docopy)) then
+      docopyInt=docopy
+    else
+      docopyInt=ESMF_DATA_REF
+    endif
+
+
+    ! Require DELayout to be 1 DE per PET 
+    if (localDeCount < 0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+        "- negative number of localDeCount prohibits request", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    if (localDeCount == 0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+        "- localDeCount == 0 prohibits request", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif
+ 
+    if (localDE>=localDeCount) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        "- localDE too big", ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    if (localDE<0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        "- localDE can't be less than 0", ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+    endif
+
+    ! Get the Array 
+    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
+                                    ESMF_DATA_REF, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Obtain the native F90 array pointer via the LocalArray interface 
+    allocate(larrayList(localDeCount))
+ 
+    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      ESMF_CONTEXT, rcToReturn=rc)) return 
+    deallocate(larrayList) 
+
+    ! process optional arguments
+    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate interface ints
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully 
+    if (present(rc)) rc = ESMF_SUCCESS 
+
+    end subroutine ESMF_GridGetItem1DR4
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetItem2DR4"
+!BOPI
+! !IROUTINE: ESMF_GridGetItem - Get pointer to 2DR4 item
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetItem()
+      subroutine ESMF_GridGetItem2DR4(grid, localDE, staggerloc, item, &
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &
+          fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in) :: localDE
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
+      type (ESMF_GridItem),   intent(in)            :: item
+      integer,                intent(out), optional :: exclusiveLBound(:)
+      integer,                intent(out), optional :: exclusiveUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
+      integer,                intent(out), optional :: computationalLBound(:)
+      integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
+      integer,                intent(out), optional :: totalLBound(:)
+      integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
+      real(ESMF_KIND_R4), pointer :: fptr(:,:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method gets a Fortran pointer to the piece of memory which holds the 
+!    item data for the stagger locations on the given local DE. 
+!    This is useful, for example, for setting the item values in a Grid, or
+!    for reading the item values.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
+!     \item[{staggerloc}]
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{item}]
+!          The item to get the information for. 
+!     \item[{[exclusiveLBound]}]
+!          Upon return this holds the lower bounds of the exclusive region.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveUBound]}]
+!          Upon return this holds the upper bounds of the exclusive region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalLBound]}]
+!          Upon return this holds the lower bounds of the stagger region.
+!          {\tt computationalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalUBound]}]
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalLBound]}]
+!          Upon return this holds the lower bounds of the total region.
+!          {\tt totalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalUBound]}]
+!          Upon return this holds the upper bounds of the total region.
+!          {\tt totalUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{fptr}]
+!          The pointer to the item data.
+!     \item[{[doCopy]}]
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+
+    ! Local variables 
+    type(ESMF_Array) :: array 
+    integer :: localrc ! local error status 
+    integer :: localDeCount, dimCount 
+    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_CopyFlag) :: docopyInt
+    integer :: coordDimCount(ESMF_MAXDIM)
+    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    integer :: tmp_staggerloc
+
+    ! Initialize return code 
+    localrc = ESMF_RC_NOT_IMPL 
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+    ! Check init status of arguments 
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
+
+    ! Check consistency 
+    call ESMF_GridGet(grid, dimCount=dimCount, &
+                      localDECount=localDECount, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+
+    ! Require farrayPtr dimCount to match grid dimCount 
+    if (dimCount .ne. 2) then 
+    call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+      "- farrayPtr dimCount does not match requested item dimCount", & 
+      ESMF_CONTEXT, rc) 
+    return 
+    endif 
+
+    ! Set Defaults
+    if (present(docopy)) then
+      docopyInt=docopy
+    else
+      docopyInt=ESMF_DATA_REF
+    endif
+
+    ! Require DELayout to be 1 DE per PET 
+    if (localDeCount < 0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+        "- Negative number of localDeCount prohibits request", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    if (localDeCount == 0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+        "- localDeCount == 0 prohibits request", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif
+ 
+    if (localDE>=localDeCount) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        "- localDE too big", ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    if (localDE<0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        "- localDE can't be less than 0", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+    endif
+
+    ! Get the Array 
+    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
+                                    ESMF_DATA_REF, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Obtain the native F90 array pointer via the LocalArray interface 
+    allocate(larrayList(localDeCount))
+ 
+    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return 
+    deallocate(larrayList) 
+
+    ! process optional arguments
+    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate interface ints
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully 
+    if (present(rc)) rc = ESMF_SUCCESS 
+
+    end subroutine ESMF_GridGetItem2DR4
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetItem3DR4"
+!BOPI
+! !IROUTINE: ESMF_GridGetItem - Get pointer to 3DR4 item
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetItem()
+      subroutine ESMF_GridGetItem3DR4(grid, localDE, staggerloc, item, &
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &      
+          fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in) :: localDE
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      type (ESMF_GridItem),   intent(in)            :: item
+      integer,                intent(out), optional :: exclusiveLBound(:)
+      integer,                intent(out), optional :: exclusiveUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
+      integer,                intent(out), optional :: computationalLBound(:)
+      integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
+      integer,                intent(out), optional :: totalLBound(:)
+      integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
+      real(ESMF_KIND_R4), pointer :: fptr(:,:,:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method gets a Fortran pointer to the piece of memory which holds the 
+!    maks data and stagger locations on the given local DE. 
+!    This is useful, for example, for setting the item values in a Grid, or
+!    for reading the item values. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
+!     \item[{staggerloc}]
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{item}]
+!          The item to get the information for. 
+!     \item[{[exclusiveLBound]}]
+!          Upon return this holds the lower bounds of the exclusive region.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveUBound]}]
+!          Upon return this holds the upper bounds of the exclusive region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalLBound]}]
+!          Upon return this holds the lower bounds of the stagger region.
+!          {\tt computationalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalUBound]}]
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalLBound]}]
+!          Upon return this holds the lower bounds of the total region.
+!          {\tt totalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalUBound]}]
+!          Upon return this holds the upper bounds of the total region.
+!          {\tt totalUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{fptr}]
+!          The pointer to the item data.
+!     \item[{[doCopy]}]
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+
+ ! Local variables 
+ type(ESMF_Array) :: array 
+ integer :: localrc ! local error status 
+ integer :: localDeCount, dimCount 
+ type(ESMF_TypeKind) :: typekind 
+ type(ESMF_LocalArray), allocatable :: larrayList(:) 
+ type(ESMF_CopyFlag) :: docopyInt
+ integer :: coordDimCount(ESMF_MAXDIM)
+ type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
+ type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ integer :: tmp_staggerloc
+
+ ! Initialize return code 
+ localrc = ESMF_RC_NOT_IMPL 
+ if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+ ! Check init status of arguments 
+ ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
+
+ ! Check consistency 
+ call ESMF_GridGet(grid, dimCount=dimCount, &
+                   localDECount=localDECount, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+ ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+ ! Require farrayPtr dimCount to match coordinate dimCount 
+ if (dimCount .ne. 3) then 
+ call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ "- farrayPtr dimCount does not match requested item dimCount", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif 
+
+! Set Defaults
+if (present(docopy)) then
+   docopyInt=docopy
+else
+  docopyInt=ESMF_DATA_REF
+endif
+
+
+ ! Require DELayout to be 1 DE per PET 
+ if (localDeCount < 0) then 
+ call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ "- Negative number of localDeCount prohibits request", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif 
+
+ if (localDeCount == 0) then 
+ call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ "- localDeCount == 0 prohibits request", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif
+ 
+ if (localDE>=localDeCount) then 
+ call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ "- localDE too big", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif 
+
+ if (localDE<0) then 
+ call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ "- localDE can't be less than 0", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif 
+
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+    endif
+
+    ! Get the Array 
+
+    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
+                                    ESMF_DATA_REF, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Obtain the native F90 array pointer via the LocalArray interface 
+    allocate(larrayList(localDeCount))
+ 
+    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return 
+    deallocate(larrayList) 
+
+
+    ! process optional arguments
+    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate interface ints
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully 
+    if (present(rc)) rc = ESMF_SUCCESS 
+
+    end subroutine ESMF_GridGetItem3DR4
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetItem1DR8"
+!BOPI
+! !IROUTINE: ESMF_GridGetItem - Get pointer to 1DR8 coordinates
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetItem()
+      subroutine ESMF_GridGetItem1DR8(grid, localDE, staggerloc, item,      & 
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &
+          fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in) :: grid
+      integer,                intent(in) :: localDE
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      type (ESMF_GridItem),   intent(in)            :: item
+      integer,                intent(out), optional :: exclusiveLBound(:)
+      integer,                intent(out), optional :: exclusiveUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
+      integer,                intent(out), optional :: computationalLBound(:)
+      integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
+      integer,                intent(out), optional :: totalLBound(:)
+      integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
+      real(ESMF_KIND_R8), pointer                   :: fptr(:)
+      type(ESMF_CopyFlag),    intent(in), optional :: docopy
+      integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method gets a Fortran pointer to the piece of memory which holds the 
+!    item data for the stagger locations on the given local DE. 
+!    This is useful, for example, for setting the item values in a Grid, or
+!    for reading the item values.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
+!     \item[{staggerloc}]
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+!     \item[{item}]
+!          The item to get the information for. 
+!     \item[{[exclusiveLBound]}]
+!          Upon return this holds the lower bounds of the exclusive region.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveUBound]}]
+!          Upon return this holds the upper bounds of the exclusive region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalLBound]}]
+!          Upon return this holds the lower bounds of the stagger region.
+!          {\tt computationalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalUBound]}]
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalLBound]}]
+!          Upon return this holds the lower bounds of the total region.
+!          {\tt totalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalUBound]}]
+!          Upon return this holds the upper bounds of the total region.
+!          {\tt totalUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{fptr}]
+!          The pointer to the item data.
+!     \item[{[doCopy]}]
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+    ! Local variables 
+    type(ESMF_Array) :: array 
+    integer :: localrc ! local error status 
+    integer :: localDeCount, dimCount 
+    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_CopyFlag) :: docopyInt
+    integer :: coordDimCount(ESMF_MAXDIM)
+    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    integer :: tmp_staggerloc
+
+    ! Initialize return code 
+    localrc = ESMF_RC_NOT_IMPL 
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+    ! Check init status of arguments 
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
+
+    ! Check consistency 
+    call ESMF_GridGet(grid, dimCount=dimCount, &
+                      localDECount=localDECount, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Require farrayPtr dimCount to match grid dimCount 
+    if (dimCount .ne. 1) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+        "- farrayPtr dimCount does not match requested item dimCount", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    ! Set Defaults
+    if (present(docopy)) then
+      docopyInt=docopy
+    else
+      docopyInt=ESMF_DATA_REF
+    endif
+
+
+    ! Require DELayout to be 1 DE per PET 
+    if (localDeCount < 0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+        "- negative number of localDeCount prohibits request", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    if (localDeCount == 0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+        "- localDeCount == 0 prohibits request", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif
+ 
+    if (localDE>=localDeCount) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        "- localDE too big", ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    if (localDE<0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        "- localDE can't be less than 0", ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+    endif
+
+    ! Get the Array 
+    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
+                                    ESMF_DATA_REF, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Obtain the native F90 array pointer via the LocalArray interface 
+    allocate(larrayList(localDeCount))
+ 
+    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      ESMF_CONTEXT, rcToReturn=rc)) return 
+    deallocate(larrayList) 
+
+    ! process optional arguments
+    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate interface ints
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully 
+    if (present(rc)) rc = ESMF_SUCCESS 
+
+    end subroutine ESMF_GridGetItem1DR8
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetItem2DR8"
+!BOPI
+! !IROUTINE: ESMF_GridGetItem - Get pointer to 2DR8 item
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetItem()
+      subroutine ESMF_GridGetItem2DR8(grid, localDE, staggerloc, item, &
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &
+          fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in) :: localDE
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
+      type (ESMF_GridItem),   intent(in)            :: item
+      integer,                intent(out), optional :: exclusiveLBound(:)
+      integer,                intent(out), optional :: exclusiveUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
+      integer,                intent(out), optional :: computationalLBound(:)
+      integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
+      integer,                intent(out), optional :: totalLBound(:)
+      integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
+      real(ESMF_KIND_R8), pointer :: fptr(:,:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method gets a Fortran pointer to the piece of memory which holds the 
+!    item data for the stagger locations on the given local DE. 
+!    This is useful, for example, for setting the item values in a Grid, or
+!    for reading the item values.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
+!     \item[{staggerloc}]
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{item}]
+!          The item to get the information for. 
+!     \item[{[exclusiveLBound]}]
+!          Upon return this holds the lower bounds of the exclusive region.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveUBound]}]
+!          Upon return this holds the upper bounds of the exclusive region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalLBound]}]
+!          Upon return this holds the lower bounds of the stagger region.
+!          {\tt computationalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalUBound]}]
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalLBound]}]
+!          Upon return this holds the lower bounds of the total region.
+!          {\tt totalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalUBound]}]
+!          Upon return this holds the upper bounds of the total region.
+!          {\tt totalUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{fptr}]
+!          The pointer to the item data.
+!     \item[{[doCopy]}]
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+
+    ! Local variables 
+    type(ESMF_Array) :: array 
+    integer :: localrc ! local error status 
+    integer :: localDeCount, dimCount 
+    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_CopyFlag) :: docopyInt
+    integer :: coordDimCount(ESMF_MAXDIM)
+    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    integer :: tmp_staggerloc
+
+    ! Initialize return code 
+    localrc = ESMF_RC_NOT_IMPL 
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+    ! Check init status of arguments 
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
+
+    ! Check consistency 
+    call ESMF_GridGet(grid, dimCount=dimCount, &
+                      localDECount=localDECount, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+
+    ! Require farrayPtr dimCount to match grid dimCount 
+    if (dimCount .ne. 2) then 
+    call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+      "- farrayPtr dimCount does not match requested item dimCount", & 
+      ESMF_CONTEXT, rc) 
+    return 
+    endif 
+
+    ! Set Defaults
+    if (present(docopy)) then
+      docopyInt=docopy
+    else
+      docopyInt=ESMF_DATA_REF
+    endif
+
+    ! Require DELayout to be 1 DE per PET 
+    if (localDeCount < 0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+        "- Negative number of localDeCount prohibits request", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    if (localDeCount == 0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+        "- localDeCount == 0 prohibits request", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif
+ 
+    if (localDE>=localDeCount) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        "- localDE too big", ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+    if (localDE<0) then 
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        "- localDE can't be less than 0", & 
+        ESMF_CONTEXT, rc) 
+      return 
+    endif 
+
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+    endif
+
+    ! Get the Array 
+    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
+                                    ESMF_DATA_REF, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Obtain the native F90 array pointer via the LocalArray interface 
+    allocate(larrayList(localDeCount))
+ 
+    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return 
+    deallocate(larrayList) 
+
+    ! process optional arguments
+    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate interface ints
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully 
+    if (present(rc)) rc = ESMF_SUCCESS 
+
+    end subroutine ESMF_GridGetItem2DR8
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetItem3DR8"
+!BOPI
+! !IROUTINE: ESMF_GridGetItem - Get pointer to 3DR8 item
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetItem()
+      subroutine ESMF_GridGetItem3DR8(grid, localDE, staggerloc, item, &
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
+          computationalLBound, computationalUBound, computationalCount,     &
+          totalLBound, totalUBound, totalCount,                             &      
+          fptr, doCopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in) :: localDE
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      type (ESMF_GridItem),   intent(in)            :: item
+      integer,                intent(out), optional :: exclusiveLBound(:)
+      integer,                intent(out), optional :: exclusiveUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
+      integer,                intent(out), optional :: computationalLBound(:)
+      integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
+      integer,                intent(out), optional :: totalLBound(:)
+      integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
+      real(ESMF_KIND_R8), pointer :: fptr(:,:,:)
+      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method gets a Fortran pointer to the piece of memory which holds the 
+!    maks data and stagger locations on the given local DE. 
+!    This is useful, for example, for setting the item values in a Grid, or
+!    for reading the item values. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{localDE}]
+!          The local DE to get the information for (localDE starts at 0).
+!     \item[{staggerloc}]
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{item}]
+!          The item to get the information for. 
+!     \item[{[exclusiveLBound]}]
+!          Upon return this holds the lower bounds of the exclusive region.
+!          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveUBound]}]
+!          Upon return this holds the upper bounds of the exclusive region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region per dimension
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalLBound]}]
+!          Upon return this holds the lower bounds of the stagger region.
+!          {\tt computationalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalUBound]}]
+!          Upon return this holds the upper bounds of the stagger region.
+!          {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region per dimension
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!          must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalLBound]}]
+!          Upon return this holds the lower bounds of the total region.
+!          {\tt totalLBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalUBound]}]
+!          Upon return this holds the upper bounds of the total region.
+!          {\tt totalUBound} must be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region per dimension
+!          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!          be allocated to be of size equal to the item dimCount.
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
+!          of the regions and their associated bounds and counts. 
+!     \item[{fptr}]
+!          The pointer to the item data.
+!     \item[{[doCopy]}]
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          fptr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+
+ ! Local variables 
+ type(ESMF_Array) :: array 
+ integer :: localrc ! local error status 
+ integer :: localDeCount, dimCount 
+ type(ESMF_TypeKind) :: typekind 
+ type(ESMF_LocalArray), allocatable :: larrayList(:) 
+ type(ESMF_CopyFlag) :: docopyInt
+ integer :: coordDimCount(ESMF_MAXDIM)
+ type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
+ type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
+ type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+ type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+ integer :: tmp_staggerloc
+
+ ! Initialize return code 
+ localrc = ESMF_RC_NOT_IMPL 
+ if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+ ! Check init status of arguments 
+ ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
+
+ ! Check consistency 
+ call ESMF_GridGet(grid, dimCount=dimCount, &
+                   localDECount=localDECount, rc=localrc) 
+ if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+ ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+ ! Require farrayPtr dimCount to match coordinate dimCount 
+ if (dimCount .ne. 3) then 
+ call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ "- farrayPtr dimCount does not match requested item dimCount", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif 
+
+! Set Defaults
+if (present(docopy)) then
+   docopyInt=docopy
+else
+  docopyInt=ESMF_DATA_REF
+endif
+
+
+ ! Require DELayout to be 1 DE per PET 
+ if (localDeCount < 0) then 
+ call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ "- Negative number of localDeCount prohibits request", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif 
+
+ if (localDeCount == 0) then 
+ call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ "- localDeCount == 0 prohibits request", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif
+ 
+ if (localDE>=localDeCount) then 
+ call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ "- localDE too big", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif 
+
+ if (localDE<0) then 
+ call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ "- localDE can't be less than 0", & 
+ ESMF_CONTEXT, rc) 
+ return 
+ endif 
+
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+    endif
+
+    ! Get the Array 
+
+    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
+                                    ESMF_DATA_REF, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Obtain the native F90 array pointer via the LocalArray interface 
+    allocate(larrayList(localDeCount))
+ 
+    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                              ESMF_CONTEXT, rcToReturn=rc)) return 
+    deallocate(larrayList) 
+
+
+    ! process optional arguments
+    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate interface ints
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully 
+    if (present(rc)) rc = ESMF_SUCCESS 
+
+    end subroutine ESMF_GridGetItem3DR8
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetItemBounds"
+!BOP
+! !IROUTINE: ESMF_GridGetItem -  Get Grid item bounds
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetItem()
+      subroutine ESMF_GridGetItemBounds(grid, localDE, staggerloc, item, &
+          exclusiveLBound, exclusiveUBound, exclusiveCount,                   &
+          computationalLBound, computationalUBound, computationalCount,       &
+          totalLBound, totalUBound, totalCount, rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in)            :: grid
+      integer,                intent(in)            :: localDE
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      type (ESMF_GridItem),   intent(in)            :: item
+      integer,                intent(out), optional :: exclusiveLBound(:)
+      integer,                intent(out), optional :: exclusiveUBound(:)
+      integer,                intent(out), optional :: exclusiveCount(:)
+      integer,                intent(out), optional :: computationalLBound(:)
+      integer,                intent(out), optional :: computationalUBound(:)
+      integer,                intent(out), optional :: computationalCount(:)
+      integer,                intent(out), optional :: totalLBound(:)
+      integer,                intent(out), optional :: totalUBound(:)
+      integer,                intent(out), optional :: totalCount(:)
+      integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!  This method gets information about the range of index space which a particular
+!  piece of item data occupies.  In other words, this method returns the 
+!  bounds of the item arrays.  Note that unlike the output from the 
+!  Array, these values also include the undistributed dimensions and are
+!  ordered to reflect the order of the indices in the item. So, for example,
+!  {\tt totalLBound} and {\tt totalUBound} should match the bounds of the Fortran array
+!  retrieved by {\tt ESMF\_GridGetItem}. 
+!
+!The arguments are:
+!\begin{description}
+!\item[{grid}]
+!    Grid to get the information from.
+!\item[{localDE}]
+!     The local DE from which to get the information (localDE starts at 0).
+!\item[{staggerloc}]
+!     The stagger location to get the information for. 
+!     Please see Section~\ref{sec:opt:staggerloc} for a list 
+!     of predefined stagger locations. If not present, defaults to
+!     ESMF\_STAGGERLOC\_CENTER.
+!\item[{item}]
+!     The item to get the information for. 
+!\item[{[exclusiveLBound]}]
+!     Upon return this holds the lower bounds of the exclusive region.
+!     {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[exclusiveUBound]}]
+!     Upon return this holds the upper bounds of the exclusive region.
+!     {\tt exclusiveUBound} must be allocated to be of size equal to the item dimCount.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[exclusiveCount]}]
+!     Upon return this holds the number of items in the exclusive region per dimension
+!     (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!     be allocated to be of size equal to the item dimCount.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[computationalLBound]}]
+!     Upon return this holds the lower bounds of the stagger region.
+!     {\tt computationalLBound} must be allocated to be of size equal to the item dimCount.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[computationalUBound]}]
+!     Upon return this holds the upper bounds of the stagger region.
+!     {\tt computationalUBound} must be allocated to be of size equal to the item dimCount.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[computationalCount]}]
+!     Upon return this holds the number of items in the computational region per dimension
+!     (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
+!      must be allocated to be of size equal to the item dimCount.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[totalLBound]}]
+!     Upon return this holds the lower bounds of the total region.
+!     {\tt totalLBound} must be allocated to be of size equal to the item dimCount.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[totalUBound]}]
+!     Upon return this holds the upper bounds of the total region.
+!     {\tt totalUBound} must be allocated to be of size equal to the item dimCount.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[totalCount]}]
+!     Upon return this holds the number of items in the total region per dimension
+!     (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
+!      be allocated to be of size equal to the item dimCount.
+!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     of the regions and their associated bounds and counts. 
+!\item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!\end{description}
+!
+!EOP
+
+    integer :: localrc ! local error status
+    type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: exclusiveCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: computationalCountArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalLBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalUBoundArg ! helper variable
+    type(ESMF_InterfaceInt) :: totalCountArg ! helper variable
+    integer :: tmp_staggerloc
+
+    ! Initialize return code
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+    endif
+
+    ! process optional arguments
+    exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item,  &
+      exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
+      computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
+      totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate interface ints
+    call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetItemBounds
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetItemIntoArray"
+!BOP
+! !IROUTINE: ESMF_GridGetItem - Get item and put into an ESMF Array
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetItem()
+      subroutine ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
+                            docopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type (ESMF_StaggerLoc), intent(in),optional  :: staggerloc
+      type (ESMF_GridItem), intent(in)   :: item
+      type(ESMF_Array), intent(out) :: array
+      type(ESMF_CopyFlag), intent(in), optional :: docopy ! NOT IMPLEMENTED
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method allows the user to get access to the ESMF Array holding
+!    item data at a particular stagger location. This is useful, for example, 
+!    to set the item values. To have an Array to access, the item Array
+!    must have already been allocated, for example by {\tt ESMF\_GridAddItem} or
+!    {\tt ESMF\_GridSetItem}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{staggerloc}]
+!          The stagger location from which to get the arrays. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+!     \item[{item}]
+!          The item from which to get the arrays. 
+!     \item[{array}]
+!          An array into which to put the item infomation. 
+!     \item[{[doCopy]}]
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case 
+!          {\tt array} will contain a reference to the Grid item Arrays.
+!           Please see Section~\ref{opt:copyflag} for
+!          further description and a list of valid values. 
+!          [THE ESMF\_DATA\_COPY OPTION IS CURRENTLY NOT IMPLEMENTED] 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+    integer :: tmp_staggerloc
+    integer :: localrc ! local error status
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
+    endif
+
+    ! Call C++ Subroutine
+    call c_ESMC_gridgetitemintoarray(grid%this,tmp_staggerloc, item, &
+      array, docopy, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Set Array as created
+    call ESMF_ArraySetInitCreated(array,localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetItemIntoArray
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetStatus"
@@ -10807,25 +14022,27 @@ endif
     if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_GridSetCmmitShapeTileArb
 
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridSetMaskFromArray"
+#define ESMF_METHOD "ESMF_GridSetItemFromArray"
 !BOP
-! !IROUTINE: ESMF_GridSetMask - Set mask using ESMF Array
+! !IROUTINE: ESMF_GridSetItem - Set item using ESMF Array
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetMaskFromArray(grid, staggerloc, &
+      subroutine ESMF_GridSetItemFromArray(grid, staggerloc, item, &
                             array, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc ! NOT IMPLEMENTED
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc 
+      type (ESMF_GridItem),   intent(in)            :: item
       type(ESMF_Array),       intent(in)            :: array
       type(ESMF_CopyFlag),    intent(in), optional  :: docopy ! NOT IMPLEMENTED
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   This method sets the passed in Array as the holder of the mask data
+!   This method sets the passed in Array as the holder of the item data
 !   for stagger location {\tt staggerloc} and coordinate {\tt coord}. If the location
 !   already contains an Array, then this one overwrites it. 
 !    
@@ -10839,8 +14056,10 @@ endif
 !    Please see Section~\ref{sec:opt:staggerloc} for a list 
 !    of predefined stagger locations. If not present, defaults to
 !    ESMF\_STAGGERLOC\_CENTER.
+!\item[{item}]
+!    The item into which to copy the arrays. 
 !\item[{array}]
-!    An array to set the grid mask information from.
+!    An array to set the grid item information from.
 !\item[{[doCopy]}]
 !    If not specified, default to {\tt ESMF\_DATA\_REF}, in this case the Grid 
 !    coordinate Array will be set to a reference to {\tt array}. Please see 
@@ -10871,14 +14090,14 @@ endif
     endif
 
     ! Call C++ Subroutine 
-    call c_ESMC_gridsetmaskfromarray(grid%this,tmp_staggerloc, &
+    call c_ESMC_gridsetitemfromarray(grid%this,tmp_staggerloc, item, &
       array, docopy, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridSetMaskFromArray
+      end subroutine ESMF_GridSetItemFromArray
 
 
 ! -------------------------- ESMF-public method -------------------------------
