@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.7 2008/10/30 00:01:45 w6ws Exp $
+$Id: ESMF_Conf.inc,v 1.8 2008/10/30 00:20:03 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@ be one of the following:
 
 #endif
 
-#define ESMF_IOFlushMacro(unit,status) flush (unit, status)
+#define ESMF_IOFlushMacro(unit,status) flush (unit, iostat=status)
 
 #if 0
 the GNU G95 compiler has a bug which prevents forward pointer references from
