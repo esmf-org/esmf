@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.51 2008/10/16 21:31:32 w6ws Exp $
+! $Id: ESMF_Init.F90,v 1.52 2008/10/30 00:25:19 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 ! !USES: 
       use ESMF_UtilTypesMod
       use ESMF_BaseMod
-      use ESMF_FIOUtilMod
+      use ESMF_IOUtilMod
       use ESMF_IOSpecMod
       use ESMF_LogErrMod
       use ESMF_ConfigMod
@@ -97,7 +97,7 @@
 ! !INTERFACE:
       subroutine ESMF_Initialize(defaultConfigFileName, defaultCalendar, &
         defaultLogFileName, defaultLogType, mpiCommunicator,  &
-        FIOUnitLower, FIOUnitUpper, vm, rc)
+        IOUnitLower, IOUnitUpper, vm, rc)
 !
 ! !ARGUMENTS:
       character(len=*),        intent(in),  optional :: defaultConfigFileName
@@ -105,8 +105,8 @@
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_LogType),      intent(in),  optional :: defaultLogType
       integer,                 intent(in),  optional :: mpiCommunicator
-      integer,                 intent(in),  optional :: FIOUnitLower
-      integer,                 intent(in),  optional :: FIOUnitUpper
+      integer,                 intent(in),  optional :: IOUnitLower
+      integer,                 intent(in),  optional :: IOUnitUpper
       type(ESMF_VM),           intent(out), optional :: vm
       integer,                 intent(out), optional :: rc
 
@@ -165,11 +165,11 @@
 !           MPI communicator defining the group of processes on which the
 !           ESMF application is running.
 !           If not specified, defaults to {\tt MPI\_COMM\_WORLD}
-!     \item [{[FIOUnitLower]}]
+!     \item [{[IOUnitLower]}]
 !           Lower bound for Fortran unit numbers used within the ESMF library.
 !           Fortran units are primarily used for log files.
 !           If not specified, defaults to {\tt ESMF\_LOG\_FORT\_UNIT\_NUMBER}
-!     \item [{[FIOUnitUpper]}]
+!     \item [{[IOUnitUpper]}]
 !           Upper bound for Fortran unit numbers used within the ESMF library.
 !           If not specified, defaults to {\tt ESMF\_LOG\_UPPER}
 !     \item [{[vm]}]
@@ -192,7 +192,7 @@
         defaultConfigFileName=defaultConfigFileName, &
         defaultCalendar=defaultCalendar, defaultLogFileName=defaultLogFileName,&
         defaultLogType=defaultLogType, mpiCommunicator=mpiCommunicator, &
-        FIOUnitLower=FIOUnitLower, FIOUnitUpper=FIOUnitUpper,  &
+        IOUnitLower=IOUnitLower, IOUnitUpper=IOUnitUpper,  &
         rc=localrc)
                                       
       ! on failure LogErr is not initialized -> explicit print on error
@@ -225,7 +225,7 @@
 ! !INTERFACE:
       subroutine ESMF_FrameworkInternalInit(lang, defaultConfigFileName, &
         defaultCalendar, defaultLogFileName, defaultLogType, &
-        mpiCommunicator, FIOUnitLower, FIOUnitUpper, rc)
+        mpiCommunicator, IOUnitLower, IOUnitUpper, rc)
 !
 ! !ARGUMENTS:
       integer,                 intent(in)            :: lang     
@@ -234,8 +234,8 @@
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_LogType),      intent(in),  optional :: defaultLogType  
       integer,                 intent(in),  optional :: mpiCommunicator
-      integer,                 intent(in),  optional :: FIOUnitLower
-      integer,                 intent(in),  optional :: FIOUnitUpper
+      integer,                 intent(in),  optional :: IOUnitLower
+      integer,                 intent(in),  optional :: IOUnitUpper
       integer,                 intent(out), optional :: rc     
 
 !
@@ -262,11 +262,11 @@
 !           MPI communicator defining the group of processes on which the
 !           ESMF application is running.
 !           If not sepcified, defaults to {\tt MPI\_COMM\_WORLD}
-!     \item [{[FIOUnitLower]}]
+!     \item [{[IOUnitLower]}]
 !           Lower bound for Fortran unit numbers used within the ESMF library.
 !           Fortran units are primarily used for log files.
 !           If not specified, defaults to {\tt ESMF\_LOG\_FORT\_UNIT\_NUMBER}
-!     \item [{[FIOUnitUpper]}]
+!     \item [{[IOUnitUpper]}]
 !           Upper bound for Fortran unit numbers used within the ESMF library.
 !           If not specified, defaults to {\tt ESMF\_LOG\_UPPER}
 !     \item [{[rc]}]
@@ -295,8 +295,8 @@
       ! If non-default Fortran unit numbers are to be used, set them
       ! prior to log files being created.
 
-      if (present (FIOUnitLower) .or. present (FIOUnitUpper)) then
-          call ESMF_FIOUnitInit (lower=FIOUnitLower, upper=FIOUnitUpper, rc=status)
+      if (present (IOUnitLower) .or. present (IOUnitUpper)) then
+          call ESMF_IOUnitInit (lower=IOUnitLower, upper=IOUnitUpper, rc=status)
           if (status /= ESMF_SUCCESS) then
               if (rcpresent) rc = status
               print *, "Error setting unit number bounds"
