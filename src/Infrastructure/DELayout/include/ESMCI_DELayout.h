@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.1.2.8 2008/10/22 19:12:23 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.1.2.9 2008/11/01 00:13:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -341,22 +341,27 @@ class XXE{
     int appendMemCpySrcRRA(int predicateBitField, int rraOffset, int size,
       void *dstMem, int rraIndex);
     int appendMemGatherSrcRRA(int predicateBitField, void *dstBase,
-      TKId dstBaseTK, int rraIndex, int chunkCount);
+      TKId dstBaseTK, int rraIndex, int chunkCount,
+      int vectorLength=1);
     int appendZeroScalarRRA(int predicateBitField, TKId elementTK,
       int rraOffset, int rraIndex);
     int appendZeroSuperScalarRRA(int predicateBitField, TKId elementTK,
-      int termCount, int rraIndex);
+      int rraIndex, int termCount,
+      int vectorLength=1);
     int appendZeroVector(int predicateBitField, char *buffer, int byteCount);
     int appendZeroVectorRRA(int predicateBitField, int byteCount, int rraIndex);
     int appendProductSumScalarRRA(int predicateBitField, TKId elementTK,
       TKId valueTK, TKId factorTK, int rraOffset, void *factor, void *value,
       int rraIndex);
     int appendSumSuperScalarDstRRA(int predicateBitField, TKId elementTK,
-      TKId valueTK, int rraIndex, int termCount);
+      TKId valueTK, int rraIndex, int termCount,
+      int vectorLength=1);
     int appendProductSumSuperScalarDstRRA(int predicateBitField, TKId elementTK,
-      TKId valueTK, TKId factorTK, int rraIndex, int termCount);
+      TKId valueTK, TKId factorTK, int rraIndex, int termCount,
+      int vectorLength=1);
     int appendProductSumSuperScalarSrcRRA(int predicateBitField, TKId elementTK,
-      TKId valueTK, TKId factorTK, int rraIndex, int termCount);
+      TKId valueTK, TKId factorTK, int rraIndex, int termCount,
+      int vectorLength=1);
     int appendWaitOnIndex(int predicateBitField, int index);
     int appendWaitOnAnyIndexSub(int predicateBitField, int count);
     int appendWaitOnAllSendnb(int predicateBitField);
@@ -372,19 +377,20 @@ class XXE{
       V *value, TKId valueTK, int resolved);
     template<typename T, typename V>
     static void sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
-      V **valueList, TKId valueTK, int termCount, int resolved);
+      V **valueList, TKId valueTK, int termCount, int vectorLength,
+      int resolved);
     template<typename T, typename U, typename V>
     static void psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       U **factorList, TKId factorTK, V **valueList, TKId valueTK,
-      int termCount, int resolved);
+      int termCount, int vectorLength, int resolved);
     template<typename T, typename U, typename V>
     static void psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
       U **factorList, TKId factorTK, V **elementList, TKId elementTK,
-      int termCount, int resolved);
+      int termCount, int vectorLength, int resolved);
     template<typename T, typename U, typename V>
     static void pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       U **factorList, TKId factorTK, V *valueList, TKId valueTK,
-      int termCount, int resolved);
+      int termCount, int vectorLength, int resolved);
 
   // types with which to interpret the StreamElement elements
   public:
@@ -497,6 +503,7 @@ class XXE{
       void **valueList;
       int rraIndex;
       int termCount;
+      int vectorLength;
     }SumSuperScalarDstRRAInfo;
 
     typedef struct{
@@ -510,6 +517,7 @@ class XXE{
       void **valueList;
       int rraIndex;
       int termCount;
+      int vectorLength;
     }ProductSumSuperScalarDstRRAInfo;
 
     typedef struct{
@@ -523,6 +531,7 @@ class XXE{
       void **elementList;
       int rraIndex;
       int termCount;
+      int vectorLength;
     }ProductSumSuperScalarSrcRRAInfo;
 
     typedef struct{
@@ -536,6 +545,7 @@ class XXE{
       void *valueList;
       int rraIndex;
       int termCount;
+      int vectorLength;
     }ProductSumSuperScalarContigRRAInfo;
 
     typedef struct{
@@ -553,6 +563,7 @@ class XXE{
       int *rraOffsetList;
       int rraIndex;
       int termCount;
+      int vectorLength;
     }ZeroSuperScalarRRAInfo;
 
     typedef struct{
@@ -595,6 +606,7 @@ class XXE{
       int *countList;
       int rraIndex;
       int chunkCount;
+      int vectorLength;
     }MemGatherSrcRRAInfo;
     
     // --- sub-streams
