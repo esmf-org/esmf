@@ -66,22 +66,22 @@ distgrid_block_2d2d::
  '(1,1)-->(2*n,1)'    'SRC' 2  'D1==' 1  'D2==' 1     'DST' 2  'D1=*' 2    'D2==' 1  'END'  
 
 # 1D to 1D distribution (DEs = PETS)
- '(1,n)-->(1,n)'      'SRC' 2  'D1==' 1  'D2=*' 1     'DST' 2  'D1==' 1    'D2=*' 1  'END'  
+#'(1,n)-->(1,n)'      'SRC' 2  'D1==' 1  'D2=*' 1     'DST' 2  'D1==' 1    'D2=*' 1  'END'  
 
 # reverse 1D to 1D distribution (DEs = PETS)
- '(1,n)-->(n,1)'      'SRC' 2  'D1==' 1  'D2=*' 1     'DST' 2  'D1=*' 1    'D2==' 1  'END'  
+#'(1,n)-->(n,1)'      'SRC' 2  'D1==' 1  'D2=*' 1     'DST' 2  'D1=*' 1    'D2==' 1  'END'  
 
 # 1D to 1D distribution (DEs > PETS)
- '(1,2*n)-->(1,2*n)'  'SRC' 2  'D1==' 1  'D2=*' 2  'DST' 2  'D1==' 1  'D2=*' 2  'END'  
+#'(1,2*n)-->(1,2*n)'  'SRC' 2  'D1==' 1  'D2=*' 2  'DST' 2  'D1==' 1  'D2=*' 2  'END'  
 
 # reverse 1D to 1D distribution (DEs > PETS)
- '(1,2*n)-->(2*n,1)'  'SRC' 2  'D1==' 1  'D2=*' 2  'DST' 2  'D1=*' 2  'D2==' 1  'END'  
+#'(1,2*n)-->(2*n,1)'  'SRC' 2  'D1==' 1  'D2=*' 2  'DST' 2  'D1=*' 2  'D2==' 1  'END'  
 
 # 2D to 2D distribution (DEs = PETS)
- '(n/2,2*n)-->(n/2,2*n)'  'SRC' 2  'D1=*' 0.5  'D2=*' 2  'DST' 2  'D1=*' 0.5  'D2=*' 2  'END'  
+#'(n/2,2*n)-->(n/2,2*n)'  'SRC' 2  'D1=*' 0.5  'D2=*' 2  'DST' 2  'D1=*' 0.5  'D2=*' 2  'END'  
 
 # 2D to 2D distribution (DEs = PETS)
- '(n/2,2*n)-->(2*n,n/2)'  'SRC' 2  'D1=*' 0.5  'D2=*' 2  'DST' 2  'D1=*' 2  'D2=*' 0.5  'END'  
+#'(n/2,2*n)-->(2*n,n/2)'  'SRC' 2  'D1=*' 0.5  'D2=*' 2  'DST' 2  'D1=*' 2  'D2=*' 0.5  'END'  
 
 ::
 

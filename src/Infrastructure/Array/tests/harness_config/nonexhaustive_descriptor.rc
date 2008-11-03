@@ -34,8 +34,8 @@ problem_descriptor_string::
 '[B1G1;B2G2] --> [B1G1;B2G2]' -d DistGrid2D2D.rc 
  &  -g RedistGrid2D.rc     
 #
-'[B1G1;B2G2;B3G3] --> [B1G1;B2G2;B3G3]' -d DistGrid3D3D.rc 
- &  -g RedistGrid3D.rc     
+#'[B1G1;B2G2;B3G3] --> [B1G1;B2G2;B3G3]' -d DistGrid3D3D.rc 
+# &  -g RedistGrid3D.rc     
 #
 ::   # end of list
 ~                     
