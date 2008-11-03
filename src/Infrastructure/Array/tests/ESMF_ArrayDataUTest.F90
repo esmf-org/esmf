@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.8.2.4 2008/04/05 03:12:30 cdeluca Exp $
+! $Id: ESMF_ArrayDataUTest.F90,v 1.8.2.5 2008/11/03 22:25:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayDataUTest.F90,v 1.8.2.4 2008/04/05 03:12:30 cdeluca Exp $'
+    '$Id: ESMF_ArrayDataUTest.F90,v 1.8.2.5 2008/11/03 22:25:54 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -101,7 +101,7 @@ program ESMF_ArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in Array via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=fptr, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=fptr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -175,7 +175,7 @@ program ESMF_ArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in Array via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=fptr, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=fptr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -252,7 +252,7 @@ program ESMF_ArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in Array via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=fptr, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=fptr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -334,7 +334,7 @@ program ESMF_ArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in Array via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=fptr, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=fptr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -408,7 +408,7 @@ program ESMF_ArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in Array via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=fptr, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=fptr, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 

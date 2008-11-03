@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistEx.F90,v 1.1.2.7 2008/04/05 03:12:28 cdeluca Exp $
+! $Id: ESMF_ArrayRedistEx.F90,v 1.1.2.8 2008/11/03 22:28:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -146,7 +146,7 @@ program ESMF_ArrayRedistEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_ArrayGet(srcArray, localDe=0, farrayPtr=farray2d, rc=rc)
+  call ESMF_ArrayGet(srcArray, farrayPtr=farray2d, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   counter = localPet*100
   do j=lbound(farray2d,2),ubound(farray2d,2)

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.7 2008/07/31 20:21:56 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.8 2008/11/03 22:25:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.7 2008/07/31 20:21:56 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.8 2008/11/03 22:25:54 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -138,7 +138,7 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet F90 array pointer, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -202,7 +202,7 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr3Dx, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3Dx, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -426,14 +426,14 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet F90 array pointer, 1D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr1D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr1D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet w/ incompatible F90 array pointer, 1D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -493,14 +493,14 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet F90 array pointer, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet w/ incompatible F90 array pointer, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr3D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3D, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -532,7 +532,7 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet F90 array pointer, 3D ESMF_TYPEKIND_R4 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr3D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -564,7 +564,7 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet F90 array pointer, 4D ESMF_TYPEKIND_I4 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr4D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr4D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 
