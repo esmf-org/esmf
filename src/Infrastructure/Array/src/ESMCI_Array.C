@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.45 2008/11/01 00:13:55 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.46 2008/11/03 20:24:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.45 2008/11/01 00:13:55 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.46 2008/11/03 20:24:06 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4061,7 +4061,6 @@ bool operator<(SeqIndex a, SeqIndex b){
 
 
 #define ASMMPROFILE___disable
-#define ASMMPROFILE
 
 namespace ArrayHelper{
   
@@ -5378,11 +5377,12 @@ void serverUpdate(FillSelfDeInfo *fillSelfDeInfo, int count,
 
 
 #define ASMMSTORETIMING___disable
-#define ASMMSTORETIMING
 
 int sparseMatMulStoreEncodeXXE(VM *vm, DELayout *srcDelayout,
-  DELayout *dstDelayout, bool tensorMixFlag, ESMC_TypeKind typekindFactors,
-  ESMC_TypeKind typekindSrc, ESMC_TypeKind typekindDst,
+  DELayout *dstDelayout, bool tensorMixFlag, 
+  int srcTensorContigLength, int dstTensorContigLength,
+  ESMC_TypeKind typekindFactors, ESMC_TypeKind typekindSrc,
+  ESMC_TypeKind typekindDst,
   const int *srcLocalDeElementCount, const int *dstLocalDeElementCount,
   DD::AssociationElement **srcLinSeqList,
   DD::AssociationElement **dstLinSeqList,
@@ -7496,11 +7496,34 @@ printf("dstArray: %d, %d, rootPet-NOTrootPet R8: partnerSeqIndex %d, factor: %g\
   for (int i=0; i<dstLocalDeCount; i++)
     dstLocalDeTotalElementCount[i] = 
       dstArray->totalElementCountPLocalDe[i] * dstArray->tensorElementCount;
-
+  
+  // prepare tensorContigLength arguments
+  int srcTensorContigLength = 1;  // init
+  for (int jj=0; jj<srcRank; jj++){
+    if (srcArray->arrayToDistGridMap[jj])
+      // decomposed dimension
+      break;
+    else
+      // tensor dimension
+      srcTensorContigLength *= srcArray->undistUBound[jj]
+        - srcArray->undistLBound[jj] + 1;
+  }
+  int dstTensorContigLength = 1;  // init
+  for (int jj=0; jj<dstRank; jj++){
+    if (dstArray->arrayToDistGridMap[jj])
+      // decomposed dimension
+      break;
+    else
+      // tensor dimension
+      dstTensorContigLength *= dstArray->undistUBound[jj]
+        - dstArray->undistLBound[jj] + 1;
+  }
+  
   // encode sparseMatMul communication pattern into XXE stream
   localrc = sparseMatMulStoreEncodeXXE(vm,
     srcArray->delayout, dstArray->delayout,
-    tensorMixFlag, typekindFactors, typekindSrc, typekindDst,
+    tensorMixFlag, srcTensorContigLength, dstTensorContigLength,
+    typekindFactors, typekindSrc, typekindDst,
     srcLocalDeElementCount, dstLocalDeElementCount,
     srcLinSeqList, dstLinSeqList, dstLocalDeTotalElementCount,
     rraList, rraCount, routehandle
@@ -7587,6 +7610,8 @@ int sparseMatMulStoreEncodeXXE(
   DELayout *srcDelayout,                  // in
   DELayout *dstDelayout,                  // in
   bool tensorMixFlag,                     // in
+  int srcTensorContigLength,              // in
+  int dstTensorContigLength,              // in
   ESMC_TypeKind typekindFactors,          // in
   ESMC_TypeKind typekindSrc,              // in
   ESMC_TypeKind typekindDst,              // in
@@ -7830,51 +7855,48 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     VMK::wtime(&t9c2);   //gjt - profile
 #endif    
     // sort each "recvnbDiffPartnerDeCount group" (opposite of src)
-    //TODO: replace the following preproc. switch by runtime conditional!!!!
-#define SCALARORDER___disable
-#ifdef SCALARORDER
-    for (int i=0; i<recvnbDiffPartnerDeCount; i++)
-      sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
-        ArrayHelper::scalarOrderDstInfo);
-#else
-    for (int i=0; i<recvnbDiffPartnerDeCount; i++){
-      // sort for vectorization
-      sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
-        ArrayHelper::vectorOrderDstInfo);
-#define SHRINK
-#ifdef SHRINK
-      // vectorize -> shrink dstInfoTable 
-      vector<ArrayHelper::DstInfo>::iterator rangeStart =
-        dstInfoTable[i].begin();
-      vector<ArrayHelper::DstInfo>::iterator rangeStop = rangeStart;
-      vector<ArrayHelper::DstInfo>::iterator rangeWrite = rangeStart;
-      while (rangeStart != dstInfoTable[i].end()){
-        int vectorLength = 1; // initialize
-        int decompSeqIndex = rangeStart->seqIndex.decompSeqIndex;
-        int linIndex = rangeStart->linIndex;
-        rangeStop++;
-        while((rangeStop != dstInfoTable[i].end())
-          && (rangeStop->seqIndex.decompSeqIndex == decompSeqIndex)
-          && (rangeStop->linIndex == (linIndex + 1))){
-          linIndex = rangeStop->linIndex;
-          ++vectorLength;
+    if (tensorMixFlag || (srcTensorContigLength != dstTensorContigLength) ||
+      (srcTensorContigLength == 1)){
+      // sort for scalar optimization
+      for (int i=0; i<recvnbDiffPartnerDeCount; i++)
+        sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
+          ArrayHelper::scalarOrderDstInfo);
+    }else{
+      // sort vector optimization
+      for (int i=0; i<recvnbDiffPartnerDeCount; i++){
+        sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
+          ArrayHelper::vectorOrderDstInfo);
+        // vectorize -> deflate dstInfoTable 
+        vector<ArrayHelper::DstInfo>::iterator rangeStart =
+          dstInfoTable[i].begin();
+        vector<ArrayHelper::DstInfo>::iterator rangeStop = rangeStart;
+        vector<ArrayHelper::DstInfo>::iterator rangeWrite = rangeStart;
+        while (rangeStart != dstInfoTable[i].end()){
+          int vectorLength = 1; // initialize
+          int decompSeqIndex = rangeStart->seqIndex.decompSeqIndex;
+          int linIndex = rangeStart->linIndex;
           rangeStop++;
+          while((rangeStop != dstInfoTable[i].end())
+            && (rangeStop->seqIndex.decompSeqIndex == decompSeqIndex)
+            && (rangeStop->linIndex == (linIndex + 1))){
+            linIndex = rangeStop->linIndex;
+            ++vectorLength;
+            rangeStop++;
+          }
+          if ((rangeWrite != dstInfoTable[i].begin())
+            && ((rangeWrite-1)->vectorLength != vectorLength)){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_INCONS,
+            "- vectorization failed", &rc);
+            return rc;
+          }
+          *rangeWrite = *rangeStart;  // copy table element
+          rangeWrite->vectorLength = vectorLength;
+          rangeWrite++;
+          rangeStart = rangeStop;
         }
-        if ((rangeWrite != dstInfoTable[i].begin())
-          && ((rangeWrite-1)->vectorLength != vectorLength)){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_INCONS,
-          "- vectorization failed", &rc);
-          return rc;
-        }
-        *rangeWrite = *rangeStart;  // copy table element
-        rangeWrite->vectorLength = vectorLength;
-        rangeWrite++;
-        rangeStart = rangeStop;
+        dstInfoTable[i].erase(rangeWrite, dstInfoTable[i].end());
       }
-      dstInfoTable[i].erase(rangeWrite, dstInfoTable[i].end());
-#endif
     }
-#endif
 
 #ifdef ASMMSTOREPRINT
     // print:
@@ -7918,12 +7940,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       recvnbElement.localPet = localPet;
       recvnbElement.petCount = petCount;
       recvnbVector.push_back(recvnbElement);
-#define ASMMSTOREPRINT
 #ifdef ASMMSTOREPRINT
-      printf("gjt: recvnbElement localPet %d, srcPet %d, vectorLenth=%d\n",
+      printf("gjt: recvnbElement localPet %d, srcPet %d, vectorLength=%d\n",
         localPet, srcPet, recvnbElement.vectorLength);
 #endif
-#undef ASMMSTOREPRINT
     } // for i - recvnbDiffPartnerDeCount
     
 #ifdef ASMMSTORETIMING
@@ -8024,49 +8044,49 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     delete [] partnerDeRef;
     
     // sort each "sendnbDiffPartnerDeCount group" (opposite of dst)
-    //TODO: replace the following preproc. switch by runtime conditional!!!!
-#ifdef SCALARORDER
-    for (int i=0; i<sendnbDiffPartnerDeCount; i++)
-      sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
-        ArrayHelper::scalarOrderSrcInfo);
-#else
-    for (int i=0; i<sendnbDiffPartnerDeCount; i++){
-      sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
-        ArrayHelper::vectorOrderSrcInfo);
-#ifdef SHRINK
-      // vectorize -> shrink srcInfoTable 
-      vector<ArrayHelper::SrcInfo>::iterator rangeStart =
-        srcInfoTable[i].begin();
-      vector<ArrayHelper::SrcInfo>::iterator rangeStop = rangeStart;
-      vector<ArrayHelper::SrcInfo>::iterator rangeWrite = rangeStart;
-      while (rangeStart != srcInfoTable[i].end()){
-        int vectorLength = 1; // initialize
-        int decompSeqIndex = rangeStart->seqIndex.decompSeqIndex;
-        int linIndex = rangeStart->linIndex;
-        rangeStop++;
-        while((rangeStop != srcInfoTable[i].end())
-          && (rangeStop->seqIndex.decompSeqIndex == decompSeqIndex)
-          && (rangeStop->linIndex == (linIndex + 1))){
-          linIndex = rangeStop->linIndex;
-          ++vectorLength;
+    if (tensorMixFlag || (srcTensorContigLength != dstTensorContigLength) ||
+      (srcTensorContigLength == 1)){
+      // sort for scalar optimization
+      for (int i=0; i<sendnbDiffPartnerDeCount; i++)
+        sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
+          ArrayHelper::scalarOrderSrcInfo);
+    }else{
+      // sort vector optimization
+      for (int i=0; i<sendnbDiffPartnerDeCount; i++){
+        sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
+          ArrayHelper::vectorOrderSrcInfo);
+        // vectorize -> deflate srcInfoTable 
+        vector<ArrayHelper::SrcInfo>::iterator rangeStart =
+          srcInfoTable[i].begin();
+        vector<ArrayHelper::SrcInfo>::iterator rangeStop = rangeStart;
+        vector<ArrayHelper::SrcInfo>::iterator rangeWrite = rangeStart;
+        while (rangeStart != srcInfoTable[i].end()){
+          int vectorLength = 1; // initialize
+          int decompSeqIndex = rangeStart->seqIndex.decompSeqIndex;
+          int linIndex = rangeStart->linIndex;
           rangeStop++;
+          while((rangeStop != srcInfoTable[i].end())
+            && (rangeStop->seqIndex.decompSeqIndex == decompSeqIndex)
+            && (rangeStop->linIndex == (linIndex + 1))){
+            linIndex = rangeStop->linIndex;
+            ++vectorLength;
+            rangeStop++;
+          }
+          if ((rangeWrite != srcInfoTable[i].begin())
+            && ((rangeWrite-1)->vectorLength != vectorLength)){
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_INCONS,
+            "- vectorization failed", &rc);
+            return rc;
+          }
+          *rangeWrite = *rangeStart;  // copy table element
+          rangeWrite->vectorLength = vectorLength;
+          rangeWrite++;
+          rangeStart = rangeStop;
         }
-        if ((rangeWrite != srcInfoTable[i].begin())
-          && ((rangeWrite-1)->vectorLength != vectorLength)){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_INCONS,
-          "- vectorization failed", &rc);
-          return rc;
-        }
-        *rangeWrite = *rangeStart;  // copy table element
-        rangeWrite->vectorLength = vectorLength;
-        rangeWrite++;
-        rangeStart = rangeStop;
+        srcInfoTable[i].erase(rangeWrite, srcInfoTable[i].end());
       }
-      srcInfoTable[i].erase(rangeWrite, srcInfoTable[i].end());
-#endif
     }
-#endif
-    
+        
 #ifdef ASMMSTOREPRINT
     // print:
     for (int i=0; i<sendnbDiffPartnerDeCount; i++)
@@ -8124,12 +8144,10 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       sendnbElement.localPet = localPet;
       sendnbElement.petCount = petCount;
       sendnbVector.push_back(sendnbElement);
-#define ASMMSTOREPRINT
 #ifdef ASMMSTOREPRINT
-      printf("gjt: sendnbElement localPet %d, dstPet %d, vectorLenth=%d\n",
+      printf("gjt: sendnbElement localPet %d, dstPet %d, vectorLength=%d\n",
         localPet, dstPet, sendnbElement.vectorLength);
 #endif
-#undef ASMMSTOREPRINT
     } // for i - sendnbDiffPartnerDeCount
     // garbage collection
     delete [] sendnbPartnerDeList;
@@ -8164,7 +8182,6 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   double dtMin;           // to find minimum time
   
 #define ASMMSTOREOPTPRINT___disable
-#define ASMMSTOREOPTPRINT
 
   // optimize srcTermProcessing
   int pipelineDepth = 4;  // safe value during srcTermProcessing optimization
@@ -8684,6 +8701,7 @@ int Array::sparseMatMul(
   try{
 
 #define ASMMTIMING___disable
+
 #ifdef ASMMTIMING
   double t0, t1, t2, t3, t4, t5, t6;            //gjt - profile
   VMK::wtime(&t0);      //gjt - profile
