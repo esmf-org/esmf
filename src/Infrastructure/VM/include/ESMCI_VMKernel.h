@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.h,v 1.3 2008/09/15 20:53:14 theurich Exp $
+// $Id: ESMCI_VMKernel.h,v 1.4 2008/11/04 22:15:52 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -16,6 +16,12 @@
 #ifndef MPICH_IGNORE_CXX_SEEK
 #define MPICH_IGNORE_CXX_SEEK
 #endif
+
+#if defined (ESMF_OS_Cygwin)
+// Needed for Microsofts <mpi.h> when using gcc, instead of Visual Studio C++
+typedef long long __int64;
+#endif
+
 #include <mpi.h>
 
 #ifdef VMK_STANDALONE
