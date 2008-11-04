@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.32 2008/11/04 19:08:24 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.33 2008/11/04 20:06:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.32 2008/11/04 19:08:24 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.33 2008/11/04 20:06:10 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -8602,7 +8602,7 @@ int sparseMatMulStoreEncodeXXEStream(
     }
     
     // drain pipeline
-    for (int i=0; i<pipelineDepth; i++){
+    while ((pRecvWait!=recvnbVector.end()) || (pSendWait!=sendnbVector.end())){
       if (pRecvWait != recvnbVector.end()){
         // prevent deadlock by staging waits correctly
         int recvnbStage = (localPet - pRecvWait->srcPet + petCount) % petCount;
