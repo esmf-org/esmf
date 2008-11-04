@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.46 2008/11/03 20:24:06 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.47 2008/11/04 18:21:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.46 2008/11/03 20:24:06 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.47 2008/11/04 18:21:13 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -8557,9 +8557,11 @@ int sparseMatMulStoreEncodeXXEStream(
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMF_ERR_PASSTHRU, &rc)) return rc;
           ++pRecvWait;
-          recvnbOK = true; // o.k. to post next recvnb call next iteration
-        }else
-          recvnbOK = false;// not o.k. to post next recvnb call next iteration
+          recvnbOK = true;  // o.k. to post next recvnb call next iteration
+        }else if (recvnbStage == sendnbStage)
+          recvnbOK = true;  // this prevents multi DE/PET case from hanging
+        else
+          recvnbOK = false; // not o.k. to post next recvnb call next iteration
       }
       if (pSendWait != sendnbVector.end()){
         // prevent deadlock by staging waits correctly
@@ -8582,9 +8584,11 @@ int sparseMatMulStoreEncodeXXEStream(
           delete [] tempString;
 #endif
           ++pSendWait;
-          sendnbOK = true; // o.k. to post next sendnb call next iteration
-        }else
-          sendnbOK = false;// not o.k. to post next sendnb call next iteration
+          sendnbOK = true;  // o.k. to post next sendnb call next iteration
+        }else if (sendnbStage == recvnbStage)
+          sendnbOK = true;  // this prevents multi DE/PET case from hanging
+        else
+          sendnbOK = false; // not o.k. to post next sendnb call next iteration
       }
     }
     
