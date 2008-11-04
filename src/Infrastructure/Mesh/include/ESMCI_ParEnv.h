@@ -19,6 +19,10 @@
 #include <streambuf>
 #include <map>
 
+#ifndef MPICH_IGNORE_CXX_SEEK
+#define MPICH_IGNORE_CXX_SEEK
+#endif
+
 #include <mpi.h>
 
 namespace ESMCI {

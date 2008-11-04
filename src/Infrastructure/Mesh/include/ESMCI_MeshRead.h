@@ -12,6 +12,10 @@
 #ifndef ESMCI_MeshRead
 #define ESMCI_MeshRead
 
+#ifndef MPICH_IGNORE_CXX_SEEK
+#define MPICH_IGNORE_CXX_SEEK
+#endif
+
 #include <mpi.h>
 
 #include <Mesh/include/ESMCI_Mesh.h>
