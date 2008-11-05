@@ -1,6 +1,9 @@
-# $Id: makefile,v 1.4 2008/10/29 14:52:39 rosalind Exp $
+# $Id: makefile,v 1.5 2008/11/05 16:16:22 rosalind Exp $
 
 ALL: build_here 
+
+# Workaround an MPICH(2) issue
+ESMF_CXXCOMPILECPPFLAGS += -DMPICH_IGNORE_CXX_SEEK
 
 SOURCEC	  = ESMCI_Mesh_F.C ESMC_Mesh.C
 SOURCEF	  = ESMF_Mesh.F90 ESMF_Mesh_C.F90

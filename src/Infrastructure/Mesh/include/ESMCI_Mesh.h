@@ -17,10 +17,6 @@
 #include <Mesh/include/ESMCI_FieldReg.h>
 #include <Mesh/include/ESMCI_CommReg.h>
 
-#ifndef MPICH_IGNORE_CXX_SEEK
-#define MPICH_IGNORE_CXX_SEEK
-#endif
-
 #include <mpi.h>
 
 /**
