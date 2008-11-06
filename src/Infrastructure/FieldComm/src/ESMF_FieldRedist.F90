@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.9 2008/06/24 18:43:56 feiliu Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.10 2008/11/06 16:44:43 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.9 2008/06/24 18:43:56 feiliu Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.10 2008/11/06 16:44:43 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -523,12 +523,12 @@ contains
 
 !---------------------------------------------------------------------------- 
 !BOP 
-! !IROUTINE: ESMF_FieldRedistStore - Precompute Field redistribution with local factor argument 
+! !IROUTINE: ESMF_FieldRedistStore - Precompute Field redistribution without local factor argument 
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldRedistStore() 
 ! subroutine ESMF_FieldRedistStoreNF(srcField, dstField, & 
-!        routehandle, factor, srcToDstTransposeMap, rc) 
+!        routehandle, srcToDstTransposeMap, rc) 
 ! 
 ! !ARGUMENTS: 
 !   type(ESMF_Field),         intent(inout)         :: srcField  
