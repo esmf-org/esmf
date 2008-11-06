@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.48 2008/11/04 20:06:32 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.49 2008/11/06 19:22:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.48 2008/11/04 20:06:32 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.49 2008/11/06 19:22:39 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4840,7 +4840,7 @@ void accessLookup(
   // localPet locally acts as server and client to fill its own request
   // t-specific client-server routine
   localClientServerExchange(t);
-  // localPet acts as server, processing requests from clients, send responses
+  // localPet acts as server, processing requests from clients, send response sz
   for (int ii=localPet+1; ii<localPet+petCount; ii++){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -4856,22 +4856,10 @@ void accessLookup(
       send2commhList[i] = NULL;
       vm->send(&(responseStreamSizeServer[i]), sizeof(int), i,
         &(send2commhList[i]));
-      if (responseStreamSize>0){
-        // construct response stream
-        responseStreamServer[i] = new char[responseStreamSize];
-        // t-specific server routine
-        serverResponse(t, count, i, requestStreamServer, responseStreamServer);
-        // send response stream to client Pet "i"
-        send3commhList[i] = NULL;
-        vm->send(responseStreamServer[i], responseStreamSize, i,
-          &(send3commhList[i]));
-        // garbage collection
-        delete [] requestStreamServer[i];
-      }
     }
   }
   // localPet acts as a client, waits for response size from server and posts
-  // 2nd receive for response stream
+  // receive for response stream
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -4885,6 +4873,27 @@ void accessLookup(
         recv2commhList[i] = NULL;
         vm->recv(responseStreamClient[i], responseStreamSize, i,
           &(recv2commhList[i]));
+      }
+    }
+  }
+  // localPet acts as server, send response stream
+  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+    // localPet-dependent shifted loop reduces communication contention
+    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+    int count = localIntervalPerPetCount[i];
+    if (count>0){
+      int responseStreamSize = responseStreamSizeServer[i];
+      if (responseStreamSize>0){
+        // construct response stream
+        responseStreamServer[i] = new char[responseStreamSize];
+        // t-specific server routine
+        serverResponse(t, count, i, requestStreamServer, responseStreamServer);
+        // send response stream to client Pet "i"
+        send3commhList[i] = NULL;
+        vm->send(responseStreamServer[i], responseStreamSize, i,
+          &(send3commhList[i]));
+        // garbage collection
+        delete [] requestStreamServer[i];
       }
     }
   }
