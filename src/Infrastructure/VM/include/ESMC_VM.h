@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.49 2008/11/04 22:15:52 w6ws Exp $
+// $Id: ESMC_VM.h,v 1.50 2008/11/06 19:49:40 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,11 +38,6 @@
 
 #ifndef MPICH_IGNORE_CXX_SEEK
 #define MPICH_IGNORE_CXX_SEEK
-#endif
-
-#if defined (ESMF_OS_Cygwin)
-// Needed for Microsofts <mpi.h> when using gcc, instead of Visual Studio C++
-typedef long long __int64;
 #endif
 
 #include <mpi.h>
