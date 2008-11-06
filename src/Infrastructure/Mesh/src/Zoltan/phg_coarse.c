@@ -6,8 +6,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: phg_coarse.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:53 $
+ *    $Author: w6ws $
+ *    $Date: 2008/11/06 19:55:28 $
  *    Revision: 1.73 $
  ****************************************************************************/
 #include "zz_sort.h"    
@@ -161,6 +161,10 @@ static unsigned int hashValue(HGraph *hg, int n, int *ar)
 
 static int *idenOperandBuf=NULL;
 
+#if defined (ESMF_OS_Cygwin) && defined (MPIAPI)
+// __stdcall needed to make Microsoft MSMPI happy
+MPIAPI
+#endif
 static void identicalOperator(void *va, void *vb, int *len, MPI_Datatype *dt)
 {
     int *a=(int *)va, *b=(int *)vb; 

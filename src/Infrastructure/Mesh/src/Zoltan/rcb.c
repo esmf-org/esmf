@@ -6,8 +6,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: rcb.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:54 $
+ *    $Author: w6ws $
+ *    $Date: 2008/11/06 19:55:28 $
  *    Revision: 1.131.2.1 $
  ****************************************************************************/
 
@@ -1147,6 +1147,10 @@ End:
 
 /* min/max merge of each component of a rcb_box */
 
+#if defined (ESMF_OS_Cygwin) && defined (MPIAPI)
+// Make MS MPI <mpi.h> happy
+MPIAPI
+#endif
 void Zoltan_RCB_box_merge(void *in, void *inout, int *len, MPI_Datatype *dptr)
 
 {

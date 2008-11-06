@@ -6,8 +6,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: phg_match.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:53 $
+ *    $Author: w6ws $
+ *    $Date: 2008/11/06 19:55:28 $
  *    Revision: 1.180.2.2 $
  ****************************************************************************/
 
@@ -25,6 +25,10 @@ static ZOLTAN_PHG_MATCHING_FN pmatching_local_ipm;   /* local ipm */
 static ZOLTAN_PHG_MATCHING_FN pmatching_alt_ipm;     /* alternating ipm */
 static ZOLTAN_PHG_MATCHING_FN pmatching_hybrid_ipm;  /* hybrid ipm */
 
+#if defined (ESMF_OS_Cygwin) && defined (MPIAPI)
+// __stdcall needed to make Microsoft MSMPI happy
+MPIAPI
+#endif
 static void phasethreereduce (void*, void*, int*, MPI_Datatype*);
 static int Zoltan_PHG_match_isolated(ZZ* zz, HGraph* hg, Matching match, 
                                      int small_degree);
