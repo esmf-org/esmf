@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1.2.4 2008/05/06 04:31:45 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.1.2.5 2008/11/07 22:58:18 theurich Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -12,7 +12,7 @@
 !
 !
 !\begin{verbatim}
-#include <ESMF.h>
+#include "ESMF.h"
 
     module user_coupler
 

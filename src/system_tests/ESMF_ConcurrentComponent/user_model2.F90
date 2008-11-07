@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1.2.5 2008/05/06 04:31:45 cdeluca Exp $
+! $Id: user_model2.F90,v 1.1.2.6 2008/11/07 22:58:18 theurich Exp $
 !
 ! System test for Concurrent Components, user-written component 2.
 
@@ -12,7 +12,7 @@
 !
 !
 !\begin{verbatim}
-#include <ESMF.h>
+#include "ESMF.h"
 
     module user_model2
 
