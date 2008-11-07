@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.154 2008/10/08 23:39:29 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.155 2008/11/07 21:50:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.154 2008/10/08 23:39:29 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.155 2008/11/07 21:50:35 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -5739,9 +5739,27 @@
           select case (sip%otype%ot)
             case (ESMF_STATEITEM_FIELDBUNDLE%ot)
               sip%datap%fbp = ESMF_FieldBundleDeserialize(vm, buffer, offset, localrc)
+              !  here we relink the State Attribute hierarchy to the FieldBundle
+              !  Attribute hierarchy, as they were linked before
+              call c_ESMCI_AttributeSetLink(sp%base, sip%datap%fbp%btypep%base, localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) then
+                deallocate(sp%datalist)
+                return
+              endif
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_FIELD%ot)
               sip%datap%fp = ESMF_FieldDeserialize(vm, buffer, offset, localrc)
+              !  here we relink the State Attribute hierarchy to the Field
+              !  Attribute hierarchy, as they were linked before
+              call c_ESMCI_AttributeSetLink(sp%base, sip%datap%fp%ftypep%base, localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) then
+                deallocate(sp%datalist)
+                return
+              endif
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_ARRAY%ot)
               call c_ESMC_ArrayDeserialize(sip%datap%ap, buffer, offset, &
@@ -5754,6 +5772,15 @@
             case (ESMF_STATEITEM_STATE%ot)
               subsubstate = ESMF_StateDeserialize(vm, buffer, offset, localrc)
               sip%datap%spp => subsubstate%statep
+              !  here we relink the State Attribute hierarchy to the subState
+              !  Attribute hierarchy, as they were linked before
+              call c_ESMCI_AttributeSetLink(sp%base, sip%datap%spp%base, localrc)
+              if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) then
+                deallocate(sp%datalist)
+                return
+              endif
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_NAME%ot)
               call c_ESMC_StringDeserialize(sip%namep, buffer(1), offset, localrc)
