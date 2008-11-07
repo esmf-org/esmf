@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.5 2008/10/23 20:58:29 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.6 2008/11/07 21:55:36 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.5 2008/10/23 20:58:29 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.6 2008/11/07 21:55:36 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3902,8 +3902,13 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       SERIALIZE_VAR(cc,buffer,offset,attrPack,ESMC_Logical);
       SERIALIZE_VAR(cc,buffer,offset,attrPackHead,ESMC_Logical);
       SERIALIZE_VAR(cc,buffer,offset,attrNested,ESMC_Logical);
-           
-      SERIALIZE_VAR(cc,buffer,offset,attrCount,int);
+          
+      // we don't serialize through links, so we must compute attrCount - linkAttrs
+      int adjustedCount = 0;
+      for (i=0; i<attrCount; ++i)
+        if (!(attrList[i]->attrRoot)) ++adjustedCount;
+
+      SERIALIZE_VAR(cc,buffer,offset,adjustedCount,int);
 
       if (items == 1) {
         if (tk == ESMC_TYPEKIND_I4) {
@@ -3955,7 +3960,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       if (nbytes!=0) offset += 8-nbytes;
     
       // Serialize the Attribute hierarchy
-      for (int i=0; i<attrCount; i++) {
+      for (i=0; i<attrCount; i++) {
+        if (!(attrList[i]->attrRoot))
         attrList[i]->ESMC_SerializeCC(buffer,length,offset,cc);
       }
   
