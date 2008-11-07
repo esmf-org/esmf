@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.6 2008/11/06 19:45:38 w6ws Exp $
+# $Id: build_rules.mk,v 1.7 2008/11/07 03:26:57 w6ws Exp $
 #
 # Cygwin.gfortran.default
 #
@@ -57,6 +57,7 @@ ifeq ($(ESMF_COMM),msmpi)
 ESMF_CXXCOMPILECPPFLAGS+= -D__int64="long long"
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_MSMPIDIR)/Include
 ESMF_F90LINKLIBS       += $(ESMF_MSMPIDIR)/Lib/i386/msmpi.lib
+ESMF_CXXLINKLIBS       += $(ESMF_MSMPIDIR)/Lib/i386/msmpi.lib
 ESMF_MPIRUNDEFAULT      = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
