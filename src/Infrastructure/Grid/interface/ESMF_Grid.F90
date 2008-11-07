@@ -195,7 +195,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.29 2008/08/12 20:34:14 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.30 2008/11/07 22:02:14 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1679,10 +1679,9 @@ end interface
 ! !DESCRIPTION:
 ! Partially create an {\tt ESMF\_Grid} object. This function allocates 
 ! an {\tt ESMF\_Grid} object, but doesn't allocate any coordinate storage or other
-! internal structures. The {\tt ESMF\_GridSet}  calls
-! can be used to set the values in the grid object. Before using the grid,
-! {\tt ESMF\_GridCommit} needs to be called to validate the internal state and
-! construct internal structures. 
+! internal structures. The {\tt ESMF\_GridSetCommitShapeTile} calls
+! can be used to set the values in the grid object and to construct the 
+! internal structure. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -7206,6 +7205,12 @@ endif
 ! coordinates.  This creation method can also be used as the basis for
 ! grids with rectilinear coordinates or curvilinear coordinates.
 !
+! For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()} call
+! should be executed in the same set or a subset of the PETs in which the
+! {\tt ESMF\_GridCreateEmpty()} call was made. If the call
+! is made in a subset, the Grid objects outside that subset will
+! still be "empty" and not usable. 
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[{grid}]
@@ -8341,6 +8346,12 @@ endif
 ! dimension into.  The array {\tt decompFlag} indicates how the division into DEs is to
 ! occur.  The default is to divide the range as evenly as possible.
 !
+! For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()} call
+! should be executed in the same set or a subset of the PETs in which the
+! {\tt ESMF\_GridCreateEmpty()} call was made. If the call
+! is made in a subset, the Grid objects outside that subset will
+! still be "empty" and not usable. 
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[{grid}]
@@ -9341,7 +9352,8 @@ endif
 !      an error if the grid is not at least 
 !      {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}. This means 
 !      if a Grid was created with {\tt ESMF\_GridCreateEmpty}
-!      it must also have been commited with {\tt ESMF\_GridCommit}
+!      it must also have been finished with 
+!      {\tt ESMF\_GridSetCommitShapeTile}
 !      to be valid. If a Grid was created with another create
 !      call it should automatically have the correct status level
 !      to pass the status part of the validate. 
