@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.21.2.2 2008/04/05 03:14:19 cdeluca Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.21.2.3 2008/11/07 23:52:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 
 !------------------------------------------------------------------------------
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
 !==============================================================================
 !BOP

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.7.2.6 2008/06/18 19:14:53 theurich Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.7.2.7 2008/11/07 23:52:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 
 !==============================================================================
 !
-#include <ESMF.h>
+#include "ESMF.h"
 !
 !BOP
 ! !PROGRAM: ESMF_StateCreateUTest - Test code which creates new States.  
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.7.2.6 2008/06/18 19:14:53 theurich Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.7.2.7 2008/11/07 23:52:12 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayDataUTest.F90,v 1.3.2.2 2008/04/05 03:13:00 cdeluca Exp $
+! $Id: ESMF_LocalArrayDataUTest.F90,v 1.3.2.3 2008/11/07 23:52:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@ program ESMF_LocalArrayDataUTest
 
 !------------------------------------------------------------------------------
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
 !==============================================================================
 !BOP
@@ -36,7 +36,7 @@ program ESMF_LocalArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_LocalArrayDataUTest.F90,v 1.3.2.2 2008/04/05 03:13:00 cdeluca Exp $'
+    '$Id: ESMF_LocalArrayDataUTest.F90,v 1.3.2.3 2008/11/07 23:52:08 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"

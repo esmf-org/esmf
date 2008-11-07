@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.32.2.7 2008/09/15 05:59:06 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.32.2.8 2008/11/07 23:52:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -15,7 +15,7 @@
 !------------------------------------------------------------------------------
 !
 
-#include <ESMF.h>
+#include "ESMF.h"
  
 !==============================================================================
 !BOP
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.32.2.7 2008/09/15 05:59:06 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.32.2.8 2008/11/07 23:52:08 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"

@@ -1,8 +1,8 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.12.2.1 2008/04/04 16:17:48 theurich Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.12.2.2 2008/11/07 23:52:12 theurich Exp $
 !
 ! Test code which creates a new Component.
 
-#include <ESMF.h>
+#include "ESMF.h"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

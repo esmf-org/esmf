@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.9.2.7 2008/08/21 21:17:13 theurich Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.9.2.8 2008/11/07 23:52:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -151,7 +151,7 @@ program ESMF_DELayoutWQUTest
 
   !---------------------------------------------------------------------------
  
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
   !============================================================================
   !BOP

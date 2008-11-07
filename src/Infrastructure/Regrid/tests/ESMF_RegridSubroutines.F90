@@ -1,12 +1,12 @@
-! $Id: ESMF_RegridSubroutines.F90,v 1.27 2007/06/27 20:36:09 cdeluca Exp $
+! $Id: ESMF_RegridSubroutines.F90,v 1.27.2.1 2008/11/07 23:52:08 theurich Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
 #define ESMF_FILENAME "ESMF_RegridSubroutines.F90"
 
 module ESMF_RegridSubroutines
-#include <ESMF_Macros.inc>
-#include <ESMF.h>
+#include "ESMF_Macros.inc"
+#include "ESMF.h"
 	use ESMF_Mod
 	use ESMF_TestMod  ! test methods
 

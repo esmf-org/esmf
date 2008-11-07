@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldStressUTest.F90,v 1.1.2.3 2008/04/22 17:47:18 feiliu Exp $
+! $Id: ESMF_FieldStressUTest.F90,v 1.1.2.4 2008/11/07 23:52:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 
 !------------------------------------------------------------------------------
 
-#include <ESMF.h>
+#include "ESMF.h"
 
 !==============================================================================
 !BOPI

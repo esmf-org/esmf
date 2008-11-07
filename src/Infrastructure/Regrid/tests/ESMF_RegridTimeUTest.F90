@@ -13,7 +13,7 @@
 
 !------------------------------------------------------------------------------
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
 !==============================================================================
 !BOC
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridTimeUTest.F90,v 1.10.2.2 2008/04/05 03:13:24 cdeluca Exp $'
+      '$Id: ESMF_RegridTimeUTest.F90,v 1.10.2.3 2008/11/07 23:52:08 theurich Exp $'
 !------------------------------------------------------------------------------
 
     integer :: lrc,iFunction

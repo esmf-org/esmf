@@ -1,4 +1,4 @@
-! $Id: ESMF_F95PtrUTest.F90,v 1.2.2.6 2008/05/07 03:51:01 theurich Exp $
+! $Id: ESMF_F95PtrUTest.F90,v 1.2.2.7 2008/11/07 23:52:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@ program ESMF_F95PTRUTest
 
 !------------------------------------------------------------------------------
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
 !==============================================================================
 !BOP
@@ -37,7 +37,7 @@ program ESMF_F95PTRUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_F95PtrUTest.F90,v 1.2.2.6 2008/05/07 03:51:01 theurich Exp $'
+    '$Id: ESMF_F95PtrUTest.F90,v 1.2.2.7 2008/11/07 23:52:12 theurich Exp $'
 !------------------------------------------------------------------------------
 
   integer, parameter :: int8_k = selected_int_kind (12)		! 8-byte integer

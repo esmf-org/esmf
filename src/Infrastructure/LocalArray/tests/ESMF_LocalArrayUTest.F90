@@ -1,10 +1,10 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.46.2.6 2008/04/04 16:17:31 theurich Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.46.2.7 2008/11/07 23:52:08 theurich Exp $
 !
 ! Example/test code which creates new arrays.
 
 !-------------------------------------------------------------------------------
-#include <ESMF.h>
-#include <ESMF_Macros.inc>
+#include "ESMF.h"
+#include "ESMF_Macros.inc"
 !-------------------------------------------------------------------------------
 
 !BOP

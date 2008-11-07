@@ -1,4 +1,4 @@
-! $Id: ESMF_InternArrayUTest.F90,v 1.15.2.2 2008/04/05 03:12:53 cdeluca Exp $
+! $Id: ESMF_InternArrayUTest.F90,v 1.15.2.3 2008/11/07 23:52:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -15,8 +15,8 @@
 !------------------------------------------------------------------------------
 !
 
-#include <ESMF_Macros.inc>
-#include <ESMF.h>
+#include "ESMF_Macros.inc"
+#include "ESMF.h"
 
 !==============================================================================
 !BOP
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_InternArrayUTest.F90,v 1.15.2.2 2008/04/05 03:12:53 cdeluca Exp $'
+      '$Id: ESMF_InternArrayUTest.F90,v 1.15.2.3 2008/11/07 23:52:08 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables

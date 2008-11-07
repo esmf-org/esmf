@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridToolUTest.F90,v 1.10.2.2 2008/04/05 03:13:25 cdeluca Exp $
+! $Id: ESMF_RegridToolUTest.F90,v 1.10.2.3 2008/11/07 23:52:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@
 !================================================================================
 
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
     ! USES:Framework module
     use ESMF_TestMod  ! test methods

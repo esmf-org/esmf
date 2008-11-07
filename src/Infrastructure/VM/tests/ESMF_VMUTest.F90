@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.27.2.2 2008/04/05 03:13:59 cdeluca Exp $
+! $Id: ESMF_VMUTest.F90,v 1.27.2.3 2008/11/07 23:52:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -9,8 +9,8 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#include <ESMF_Macros.inc>
-#include <ESMF.h>
+#include "ESMF_Macros.inc"
+#include "ESMF.h"
 !
 
 
@@ -964,7 +964,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.27.2.2 2008/04/05 03:13:59 cdeluca Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.27.2.3 2008/11/07 23:52:12 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
