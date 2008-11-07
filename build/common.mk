@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201.2.21 2008/07/28 23:15:47 theurich Exp $
+#  $Id: common.mk,v 1.201.2.22 2008/11/07 21:12:24 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -722,6 +722,16 @@ ESMF_CXXLINKLIBS     += -lnetcdf
 ESMF_F90COMPILEPATHS += -I$(ESMF_NETCDF_INCLUDE)
 ESMF_F90LINKPATHS    += -L$(ESMF_NETCDF_LIBPATH)
 ESMF_F90LINKLIBS     += -lnetcdf
+endif
+
+#-------------------------------------------------------------------------------
+# Override default pointer size macros if specified in the user environment
+#-------------------------------------------------------------------------------
+ifeq ($(origin ESMF_F90_PTR_BASE_SIZE), environment)
+CPPFLAGS       += -DESMF_F90_PTR_BASE_SIZE=$(ESMF_F90_PTR_BASE_SIZE)
+endif
+ifeq ($(origin ESMF_F90_PTR_PLUS_RANK), environment)
+CPPFLAGS       += -DESMF_F90_PTR_BASE_SIZE=$(ESMF_F90_PTR_PLUS_RANK)
 endif
 
 #-------------------------------------------------------------------------------
