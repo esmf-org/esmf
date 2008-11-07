@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.7 2008/11/07 03:26:57 w6ws Exp $
+# $Id: build_rules.mk,v 1.8 2008/11/07 18:23:40 w6ws Exp $
 #
 # Cygwin.gfortran.default
 #
@@ -55,6 +55,7 @@ ifeq ($(ESMF_COMM),msmpi)
 # and on HPC 2008:
 # ESMF_MSMPIDIR        = /cygdrive/c/"Program Files"/"Microsoft HPC Pack 2008 SDK"
 ESMF_CXXCOMPILECPPFLAGS+= -D__int64="long long"
+ESMF_F90COMPILEPATHS   += -I$(ESMF_MSMPIDIR)/Include
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_MSMPIDIR)/Include
 ESMF_F90LINKLIBS       += $(ESMF_MSMPIDIR)/Lib/i386/msmpi.lib
 ESMF_CXXLINKLIBS       += $(ESMF_MSMPIDIR)/Lib/i386/msmpi.lib
