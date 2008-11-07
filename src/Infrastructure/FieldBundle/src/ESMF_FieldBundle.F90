@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.11 2008/10/08 23:40:03 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.12 2008/11/07 21:54:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -2510,6 +2510,15 @@ end function
 
       do i = 1, bp%field_count
           bp%flist(i) = ESMF_FieldDeserialize(vm, buffer, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) then
+              deallocate(bp%flist)
+              return
+          endif
+          !  here we relink the Field Attribute hierarchies to the FieldBundle
+          !  Attribute hierarchies, as they were before
+          call c_ESMCI_AttributeSetLink(bp%base, bp%flist(i)%ftypep%base, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
