@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.32.2.2 2008/08/28 22:17:42 theurich Exp $
+// $Id: ESMC_BaseTime.h,v 1.32.2.3 2008/11/07 22:44:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -25,8 +25,8 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_Start.h>
- #include <ESMF_TimeMgr.inc>
+#include "ESMC_Start.h"
+#include "ESMF_TimeMgr.inc"
 
 //-------------------------------------------------------------------------
 //BOP
@@ -107,9 +107,9 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
-#include <ESMC_Base.h>   // all classes inherit from the ESMC Base class.
-#include <ESMC_IOSpec.h> // IOSpec class for ReadRestart()/WriteRestart()
-#include <ESMC_Fraction.h>
+#include "ESMC_Base.h"   // all classes inherit from the ESMC Base class.
+#include "ESMC_IOSpec.h" // IOSpec class for ReadRestart()/WriteRestart()
+#include "ESMC_Fraction.h"
 
 // !PUBLIC TYPES:
  class ESMC_BaseTime;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.35.2.3 2008/09/15 05:48:54 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.35.2.4 2008/11/07 22:44:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -25,8 +25,8 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_Start.h>
- #include <ESMF_TimeMgr.inc>
+#include "ESMC_Start.h"
+#include "ESMF_TimeMgr.inc"
 
 //-------------------------------------------------------------------------
 //BOP
@@ -74,10 +74,10 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
- #include <ESMC_Base.h>
- #include <ESMC_IOSpec.h>    // IOSpec class for ReadRestart()/WriteRestart()
- #include <ESMC_TimeInterval.h>
- #include <ESMC_Time.h>
+#include "ESMC_Base.h"
+#include "ESMC_IOSpec.h"    // IOSpec class for ReadRestart()/WriteRestart()
+#include "ESMC_TimeInterval.h"
+#include "ESMC_Time.h"
  class ESMC_Clock;
 
  // alarm list types to query from clock

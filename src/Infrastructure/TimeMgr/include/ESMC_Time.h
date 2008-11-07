@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.47.2.1 2008/04/05 03:13:36 cdeluca Exp $
+// $Id: ESMC_Time.h,v 1.47.2.2 2008/11/07 22:44:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -17,16 +17,16 @@
  // these lines prevent this file from being read more than once if it
  // ends up being included multiple times
 
- #ifndef ESMC_TIME_H
- #define ESMC_TIME_H
+#ifndef ESMC_TIME_H
+#define ESMC_TIME_H
 
 //-------------------------------------------------------------------------
 
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_Start.h>
- #include <ESMF_TimeMgr.inc>
+#include "ESMC_Start.h"
+#include "ESMF_TimeMgr.inc"
 
 //-------------------------------------------------------------------------
 //BOP
@@ -56,9 +56,9 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
- #include <ESMC_Base.h>           // inherited Base class
- #include <ESMC_BaseTime.h>       // inherited BaseTime class
- #include <ESMC_Calendar.h>       // associated Calendar class
+#include "ESMC_Base.h"           // inherited Base class
+#include "ESMC_BaseTime.h"       // inherited BaseTime class
+#include "ESMC_Calendar.h"       // associated Calendar class
  class ESMC_TimeInterval;
 
 // !PUBLIC TYPES:

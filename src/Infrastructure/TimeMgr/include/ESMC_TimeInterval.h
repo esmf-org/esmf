@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.47.2.1 2008/04/05 03:13:37 cdeluca Exp $
+// $Id: ESMC_TimeInterval.h,v 1.47.2.2 2008/11/07 22:44:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -25,9 +25,9 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
-#include <ESMC_Start.h>
-#include <ESMF_TimeMgr.inc>
-#include <ESMC_Fraction.h>
+#include "ESMC_Start.h"
+#include "ESMF_TimeMgr.inc"
+#include "ESMC_Fraction.h"
 class ESMC_TimeInterval;
 
 //-------------------------------------------------------------------------
@@ -66,9 +66,9 @@ class ESMC_TimeInterval;
 //-------------------------------------------------------------------------
 
 // !USES:
- #include <ESMC_Base.h>           // inherited Base class
- #include <ESMC_BaseTime.h>       // inherited BaseTime class
- #include <ESMC_Time.h>
+#include "ESMC_Base.h"           // inherited Base class
+#include "ESMC_BaseTime.h"       // inherited BaseTime class
+#include "ESMC_Time.h"
 
 enum ESMC_ComparisonType {ESMC_EQ, ESMC_NE,
                           ESMC_LT, ESMC_GT,

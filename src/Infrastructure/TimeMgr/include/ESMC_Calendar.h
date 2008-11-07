@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.51.2.1 2008/04/05 03:13:36 cdeluca Exp $
+// $Id: ESMC_Calendar.h,v 1.51.2.2 2008/11/07 22:44:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -25,8 +25,8 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_Start.h>
- #include <ESMF_TimeMgr.inc>
+#include "ESMC_Start.h"
+#include "ESMF_TimeMgr.inc"
 
 //-------------------------------------------------------------------------
 //BOP
@@ -67,8 +67,8 @@
 //-------------------------------------------------------------------------
 //  
 // !USES:
- #include <ESMC_Base.h>           // inherited Base class
- #include <ESMC_BaseTime.h>       // inherited BaseTime class
+#include "ESMC_Base.h"           // inherited Base class
+#include "ESMC_BaseTime.h"       // inherited BaseTime class
 
 // forward reference to prevent #include recursion
 class ESMC_Time;
