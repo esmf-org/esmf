@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.4 2008/11/04 21:39:28 rosalind Exp $
+// $Id: ESMC_Mesh.C,v 1.5 2008/11/08 00:05:30 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,18 +32,53 @@ ESMC_Mesh *ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc) {
   ESMC_Mesh *mesh;
   mesh = new ESMC_Mesh();
 
-  Mesh* me;
-  me = new Mesh();
+  MeshCXX* mep;
+  mep = new MeshCXX();
 
-  FTN(c_esmc_meshcreate)(&me, &parametricDim, &spatialDim, &localrc);
+  (mep)->create(&parametricDim, &spatialDim, &localrc);
 
   if (rc) *rc = localrc;
-  mesh->ptr = (void*)me;
+  mesh->ptr = (void*)mep;
 
   return mesh;
 
 } // ESMC_MeshCreate
 
+//--------------------------------------------------------------------------
+// !BOP
+// !IROUTINE: ESMC_MeshAddElements
+//
+// !EOP
+int ESMC_MeshAddElements(ESMC_Mesh *mesh, int *num_elems, int *elementIds,
+                         int *elementTypes, int *elementConn){
+   int localrc;
+
+   MeshCXX* mep = (MeshCXX*)(mesh->ptr);
+   
+   localrc = mep->addElements(num_elems, elementIds, elementTypes,
+                  elementConn);
+
+   return localrc;
+} // ESMC_MeshAddElements
+
+//--------------------------------------------------------------------------
+// !BOP
+// !IROUTINE: ESMC_MeshCreateDistGrids
+//
+// !EOP
+int ESMC_MeshCreateDistGrids(ESMC_Mesh *mesh, int *num_nodes, int *num_elements)
+{
+   int localrc;
+
+   MeshCXX* mep = (MeshCXX*)(mesh->ptr);
+
+   localrc = mep->createDistGrids(num_nodes, num_elements);
+
+   return localrc;
+
+}  // ESMC_MeshCreateDistGrids
+
+/* The rest need to be re-engineered to call MeshCXX methods
 //--------------------------------------------------------------------------
 // !BOP 
 // !IROUTINE: ESMC_MeshAddNodes
@@ -79,6 +114,8 @@ int ESMC_MeshAddElements(ESMC_Mesh *mesh, int *num_elems, int *elementIds,
    return localrc;
 
 }  // ESMC_MeshAddElements
+
+*/
 
 } // extern "C"
 

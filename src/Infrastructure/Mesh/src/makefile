@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2008/10/17 17:48:27 rosalind Exp $
+# $Id: makefile,v 1.13 2008/11/08 00:05:30 rosalind Exp $
 
 # leave alone.
 ALL: build_here 
@@ -64,13 +64,14 @@ SOURCEC	  = \
            ESMCI_SparseMsg.C \
            ESMCI_WMat.C \
            ESMCI_WriteWeights.C \
-           ESMCI_WriteWeightsPar.C 
+           ESMCI_WriteWeightsPar.C \
+           ESMCI_MeshCXX.C
 
 SOURCEF	  = 
-SOURCEH	  = 
+SOURCEH	  = ESMCI_MeshCXX.h
 
 # List all .h files which should be copied to common include dir
-STOREH	  = 
+STOREH	  = ESMCI_MeshCXX.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

@@ -25,7 +25,7 @@
 //EOP
 //-----------------------------------------------------------------------------
 
-#include "ESMCI_Mesh.h"
+#include "ESMCI_MeshCXX.h"
 #include "ESMCI_Util.h"
 
 extern "C" {
@@ -38,6 +38,8 @@ typedef enum {ESMC_MESHELEMENT_QUAD=0, ESMC_MESHELEMENT_TRI=1,
      ESMC_MESHELEMENT_HEX=2, ESMC_MESHELEMENT_TET=3} ESMF_MeshElement;
 
 ESMC_Mesh *ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc);
+
+int ESMC_MeshCreateDistGrids(ESMC_Mesh *mesh, int *num_nodes, int *num_elements);
 
 int ESMC_MeshAddNodes(ESMC_Mesh *mesh, int *num_nodes, int *nodeIds, 
                       double *nodeCoords, int *nodeOwners);
