@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.30.2.8 2008/11/03 22:25:11 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.30.2.9 2008/11/08 00:17:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.30.2.8 2008/11/03 22:25:11 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.30.2.9 2008/11/08 00:17:36 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -632,7 +632,7 @@ contains
 !   \item[{[localDe]}] @\
 !     Local DE for which information is requested. {\tt [0,..,localDeCount-1]}. @\
 !     For {\tt localDeCount==1} the {\tt localDe} argument may be omitted, @\
-!     in which case it will default to {\tt localDe=0}.
+!     in which case it will default to {\tt localDe=0}. @\
 !   \item[farrayPtr] @\
 !     Upon return {\tt farrayPtr} points to the DE-local data allocation of @\
 !     {\tt array}. @\
