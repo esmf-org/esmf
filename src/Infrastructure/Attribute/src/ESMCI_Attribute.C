@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.6 2008/11/07 21:55:36 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.7 2008/11/10 21:22:03 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.6 2008/11/07 21:55:36 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.7 2008/11/10 21:22:03 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2402,7 +2402,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   localrc = ESMC_RC_NOT_IMPL;
     
   for (unsigned int i=0; i<attrCount; i++) {
-    if (attrList[i]->attrRoot) {
+    if (attrList[i]->attrRoot == ESMF_TRUE) {
       if (destination->root.attrID == attrList[i]->attrID) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeSetLink tried to double set a link", &localrc);
@@ -3904,11 +3904,11 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       SERIALIZE_VAR(cc,buffer,offset,attrNested,ESMC_Logical);
           
       // we don't serialize through links, so we must compute attrCount - linkAttrs
-      int adjustedCount = 0;
+      int linkCount = 0;
       for (i=0; i<attrCount; ++i)
-        if (!(attrList[i]->attrRoot)) ++adjustedCount;
+        if (attrList[i]->attrRoot == ESMF_TRUE) ++linkCount;
 
-      SERIALIZE_VAR(cc,buffer,offset,adjustedCount,int);
+      SERIALIZE_VAR(cc,buffer,offset,attrCount-linkCount,int);
 
       if (items == 1) {
         if (tk == ESMC_TYPEKIND_I4) {
@@ -3961,8 +3961,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     
       // Serialize the Attribute hierarchy
       for (i=0; i<attrCount; i++) {
-        if (!(attrList[i]->attrRoot))
-        attrList[i]->ESMC_SerializeCC(buffer,length,offset,cc);
+        if (attrList[i]->attrRoot==ESMF_FALSE) 
+          attrList[i]->ESMC_SerializeCC(buffer,length,offset,cc);
       }
   
       // make sure offset is aligned correctly
