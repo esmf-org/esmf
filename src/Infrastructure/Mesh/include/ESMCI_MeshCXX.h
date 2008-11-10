@@ -23,16 +23,10 @@ MeshCXX();
 
 MeshCXX* create(int*, int*, int*);
 int addElements(int*, int*, int*, int*);
+int addNodes(int*, int*, double*, int*);
 int createDistGrids(int*, int*);
-
-/* not ready**********
-// -> these are in Mesh already!!! void addElements(  );
-// -> these are in Mesh already!!! void addNodes(  );
-void createDistGrids(  );
-// -> these are in Mesh already!!! void write(  );
-void destroy();
-void freeMemory( );
-.......not ready    */
+int destroy();
+int freeMemory();
 
 
 private:

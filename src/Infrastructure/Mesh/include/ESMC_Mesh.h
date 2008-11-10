@@ -14,7 +14,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC_Mesh - Public C interface to the ESMF Array class
+// !CLASS:  ESMC_Mesh - Public C interface to the ESMF Mesh class
 //
 // !DESCRIPTION:
 //
@@ -25,8 +25,6 @@
 //EOP
 //-----------------------------------------------------------------------------
 
-#include "ESMCI_MeshCXX.h"
-#include "ESMCI_Util.h"
 
 extern "C" {
 
@@ -47,20 +45,13 @@ int ESMC_MeshAddNodes(ESMC_Mesh *mesh, int *num_nodes, int *nodeIds,
 int ESMC_MeshAddElements(ESMC_Mesh *mesh, int *num_elems, int *elementIds, 
                          int *elementTypes, int *elementConn);
 
-int ESMC_MeshCreateAll(ESMC_Mesh *mesh, int parametricDim, int *nodeIds, double *nodeCoords,
-             int *nodeOwners, int *elementIds, int *elementTypes, int *elementConn);
-
 int ESMC_MeshDestroy(ESMC_Mesh *mesh);
 
+int ESMC_MeshFreeMemory(ESMC_Mesh *mesh);
+
+
+//int ESMC_MeshCreateAll(ESMC_Mesh *mesh, int parametricDim, int *nodeIds, double *nodeCoords,
+//             int *nodeOwners, int *elementIds, int *elementTypes, int *elementConn);
 
 } // extern "C"
-
-extern "C" void FTN(c_esmc_meshcreate)(ESMCI::Mesh**,
-                         int*, int*, int*);
-extern "C" void FTN(c_esmc_meshaddnodes)(ESMCI::Mesh**, int*, int*,
-               double*, int*, int*);
-
-extern "C" void FTN(c_esmc_meshaddelements)(ESMCI::Mesh**, int*, int*,
-               int*, int*, int*);
-
 #endif

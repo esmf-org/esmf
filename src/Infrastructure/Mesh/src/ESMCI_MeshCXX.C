@@ -54,23 +54,72 @@ MeshCXX* MeshCXX::create( int *pdim, int *sdim, int *rc){
  
 
 int MeshCXX::addElements(int *numElems, int *elemId, 
-                         int *elemType, int *elemConn)
-{
-// Local variables
-int localrc;
+                         int *elemType, int *elemConn){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::MeshCXX::addElements()"
 
-return localrc;
+   int localrc;
+   //Initialize localrc; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+   
+
+   return localrc;
 } // MeshCXX::addElements
 
 
-int MeshCXX::createDistGrids(int *numLNodes, int *numLElems)
-{
-// Local variables
-int localrc;
-int* ngrids;
-int* egrids;
+int MeshCXX::addNodes(int *numNodes, int *nodeId, double *nodeCoord,
+                      int *nodeOwner){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::MeshCXX::addNodes()"
 
-return localrc;
+   int localrc;
+   //Initialize localrc; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
+
+   return localrc;
+} // MeshCXX::addNodes
+
+
+int MeshCXX::createDistGrids(int *numLNodes, int *numLElems){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::MeshCXX::createDistGrids()"
+
+   int localrc;
+   //Initialize localrc; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
+   // Local variables
+   int* ngrids;
+   int* egrids;
+
+   return localrc;
 } // MeshCXX::createDistGrids
+
+
+int MeshCXX::destroy(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::MeshCXX::destroy()"
+
+   int localrc;
+   //Initialize localrc; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+  
+   return localrc;
+} // MeshCXX::destroy
+
+
+int MeshCXX::freeMemory(){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::MeshCXX::freeMemory()"
+// Free Mesh memory, but leave the rest of MeshCXX members intact.
+
+   int localrc;
+   //Initialize localrc; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
+   return localrc;
+} // MeshCXX::freeMemory
+
 
 } // namespace ESMCI

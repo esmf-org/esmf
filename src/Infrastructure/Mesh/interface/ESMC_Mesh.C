@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.5 2008/11/08 00:05:30 rosalind Exp $
+// $Id: ESMC_Mesh.C,v 1.6 2008/11/10 19:54:34 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -22,13 +22,24 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 
+#include "ESMCI_LogErr.h"                  // for LogErr
+#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_MeshCXX.h"
 #include "ESMC_Mesh.h"
 
 using namespace ESMCI;
 
 extern "C" {
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshCreate()"
 ESMC_Mesh *ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc) {
   int localrc;
+   // Initialize return code. Assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+   if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
   ESMC_Mesh *mesh;
   mesh = new ESMC_Mesh();
 
@@ -46,12 +57,38 @@ ESMC_Mesh *ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc) {
 
 //--------------------------------------------------------------------------
 // !BOP
+// !IROUTINE: ESMC_MeshAddNodes
+//
+// !EOP
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshAddNodes"
+int ESMC_MeshAddNodes(ESMC_Mesh *mesh, int *num_nodes, int *nodeIds,
+                      double *nodeCoords, int *nodeOwners) {
+   int localrc;
+   // Initialize return code. Assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
+   MeshCXX* mep = (MeshCXX*)(mesh->ptr);
+   localrc = mep->addNodes(num_nodes, nodeIds, nodeCoords, nodeOwners);
+   return localrc;
+
+} // ESMC_MeshAddNodes
+
+//--------------------------------------------------------------------------
+// !BOP
 // !IROUTINE: ESMC_MeshAddElements
 //
 // !EOP
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshAddElements()"
 int ESMC_MeshAddElements(ESMC_Mesh *mesh, int *num_elems, int *elementIds,
                          int *elementTypes, int *elementConn){
    int localrc;
+   // Initialize return code. Assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
 
    MeshCXX* mep = (MeshCXX*)(mesh->ptr);
    
@@ -66,9 +103,14 @@ int ESMC_MeshAddElements(ESMC_Mesh *mesh, int *num_elems, int *elementIds,
 // !IROUTINE: ESMC_MeshCreateDistGrids
 //
 // !EOP
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshCreateDistGrids()"
 int ESMC_MeshCreateDistGrids(ESMC_Mesh *mesh, int *num_nodes, int *num_elements)
 {
    int localrc;
+   // Initialize return code. Assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
 
    MeshCXX* mep = (MeshCXX*)(mesh->ptr);
 
@@ -78,44 +120,52 @@ int ESMC_MeshCreateDistGrids(ESMC_Mesh *mesh, int *num_nodes, int *num_elements)
 
 }  // ESMC_MeshCreateDistGrids
 
-/* The rest need to be re-engineered to call MeshCXX methods
-//--------------------------------------------------------------------------
-// !BOP 
-// !IROUTINE: ESMC_MeshAddNodes
-//
-// !EOP
-int ESMC_MeshAddNodes(ESMC_Mesh *mesh, int *num_nodes, int *nodeIds, 
-                      double *nodeCoords, int *nodeOwners) {
-   int localrc;
-
-   Mesh* me = (Mesh*)(mesh->ptr);
-
-   FTN(c_esmc_meshaddnodes)(&me, num_nodes, nodeIds, nodeCoords,
-                            nodeOwners, &localrc);
-
-   return localrc;
-
-} // ESMC_MeshAddNodes
 
 //--------------------------------------------------------------------------
 // !BOP
-// !IROUTINE: ESMC_MeshAddElements
+// !IROUTINE: ESMC_MeshDestroy
 //
 // !EOP
-int ESMC_MeshAddElements(ESMC_Mesh *mesh, int *num_elems, int *elementIds, 
-                         int *elementTypes, int *elementConn){
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshDestroy()"
+int ESMC_MeshDestroy(ESMC_Mesh *mesh){
    int localrc;
+   // Initialize return code. Assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+   
 
-   Mesh* me = (Mesh*)(mesh->ptr);
+   MeshCXX* mep = (MeshCXX*)(mesh->ptr);
 
-   FTN(c_esmc_meshaddelements)(&me, num_elems, elementIds, elementTypes,
-                               elementConn, &localrc);
+   localrc = mep->destroy();
 
    return localrc;
 
-}  // ESMC_MeshAddElements
+} // ESMC_MeshDestroy
 
-*/
+
+//--------------------------------------------------------------------------
+// !BOP
+// !IROUTINE: ESMC_MeshFreeMemory
+//
+// !EOP
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshFreeMemory()"
+int ESMC_MeshFreeMemory(ESMC_Mesh *mesh){
+   int localrc;
+   // Initialize return code. Assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
+
+   MeshCXX* mep = (MeshCXX*)(mesh->ptr);
+
+   localrc = mep->freeMemory();
+
+   return localrc;
+
+} // ESMC_MeshDestroy
+
 
 } // extern "C"
 
