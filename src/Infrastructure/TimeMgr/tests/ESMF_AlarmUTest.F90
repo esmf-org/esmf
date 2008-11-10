@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.38 2008/09/19 05:56:11 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.39 2008/11/10 23:58:45 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.38 2008/09/19 05:56:11 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.39 2008/11/10 23:58:45 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -61,8 +61,8 @@
       logical :: enabled, isringing, sticky, alarmsEqual, alarmsNotEqual
       logical :: willRingNext, testPass, alarmCountPass
       integer(ESMF_KIND_I8) :: forwardCount, reverseCount
-      integer :: alarmCount, nclock, nstep, sstep, i, iteration
-      integer :: expectedCount
+      integer :: alarmCount, ringCount, nring, nclock, nstep, sstep
+      integer :: expectedCount, i, iteration
       integer :: yy, mm, dd, h, m
 
       ! instantiate a calendar
@@ -71,10 +71,11 @@
 
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep, alarmStep, alarmStep2, ringDuration
-      type(ESMF_Time) :: startTime, stopTime, nextTime
+      type(ESMF_TimeInterval) :: runDuration
+      type(ESMF_Time) :: startTime, stopTime, nextTime, prevTime
       type(ESMF_Time) :: alarmTime, alarmStopTime
       type(ESMF_Time) :: beforeAlarmTime, afterAlarmTime
-      type(ESMF_Time) :: currentTime
+      type(ESMF_Time) :: currentTime, currentTime2
       character(ESMF_MAXSTR) :: aName
 
 
@@ -1704,6 +1705,205 @@
 
       call ESMF_Test((bool.and.rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Alarm ringTime = clock startTime *and* ringInterval specified
+      !  upon alarm creation => should ring immediately.  Test 1
+      !  From Tom Black in Support ticket 1989990.
+      write(failMsg, *) " Did not return alarm ringing and ESMF_SUCCESS"
+      write(name, *) "Alarm ringTime = Clock startTime with ringInterval, test 1"
+      call ESMF_TimeIntervalSet(timeStep, m=2, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, s=60, rc=rc)
+      call ESMF_TimeSet(startTime, yy=2007, mm=9, dd=18, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2007, mm=9, dd=19, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=startTime, &
+                                ringInterval=alarmStep, rc=rc)
+
+      call ESMF_AlarmGet(alarm4, ringTime=alarmTime, rc=rc)
+      bool = ESMF_AlarmIsRinging(alarm4)
+
+      call ESMF_Test(((alarmTime==startTime+alarmStep).and.bool.and. &
+                       rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Alarm ringTime = clock startTime *and* ringInterval specified
+      !  upon alarm creation => should ring immediately.  Test 2
+      !  From Tom Black in Support ticket 1989990.
+      write(failMsg, *) " Did not return alarm ringing 21 times and ESMF_SUCCESS"
+      write(name, *) "Alarm ringTime = Clock startTime with ringInterval, test 2"
+
+      ! any single failure will cause the whole test to fail
+      testPass = .true.
+
+      call ESMF_TimeIntervalSet(timeStep, s=60, rc=rc)
+      call ESMF_TimeIntervalSet(runDuration, s=3600, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, s=180, rc=rc)
+      call ESMF_TimeSet(startTime, yy=2007, mm=9, dd=18, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, &
+                              runDuration=runDuration, rc=rc)
+
+      ! Tom Black's AlarmCreate() ...
+      alarm4=ESMF_AlarmCreate(       &
+         name             ='ALARM Recv from Parent'  &  !<-- Name of Alarm
+        ,clock            =clock2    &  !<-- Each domain's ATM Driver Clock
+        ,ringTime         =startTime &  !<-- First time the Alarm rings (ESMF)
+        ,ringInterval     =alarmStep &  !<-- Recv from my parent at this
+                                        !    frequency (ESMF)
+        ,ringTimeStepCount=1       &  !<-- The Alarm rings for this many
+                                      !    timesteps
+        ,sticky           =.false. &  !<-- Alarm does not ring until turned off
+        ,rc               =rc)
+
+      ! run the clock
+      ringCount = 0
+      do while (.not. ESMF_ClockIsStopTime(clock2, rc=rc))
+        call ESMF_ClockGet(clock2, advanceCount=forwardCount, rc=rc)        
+        !print *, "At clock timestep #", forwardCount
+
+        call ESMF_AlarmGet(alarm4, clock=clock1, rc=rc)
+        call ESMF_ClockGet(clock1, currTime=currentTime2, rc=rc)
+        !print *, "Alarm's clock's currTime ..."
+        !call ESMF_TimePrint(currentTime2, "string", rc=rc)
+        if (clock2 /= clock1) then
+           testPass = .false.
+           print *, "Alarm's clock and domain clock are *not* the same"
+        endif
+
+        call ESMF_ClockGet(clock2, currTime=currentTime, prevTime=prevTime, &
+                           rc=rc)
+        !print *, "Clock's currTime and prevTime ..."
+        !call ESMF_TimePrint(currentTime, "string", rc=rc)
+        !call ESMF_TimePrint(prevTime, "string", rc=rc)
+
+        if (currentTime /= currentTime2) then
+           testPass = .false.
+           print *, "Alarm's clock's currTime is *not* the same as the domain clock's currTime"
+        endif
+
+        call ESMF_AlarmGet(alarm4, ringTime=alarmTime, rc=rc)
+        !print *, "Alarm's ringTime ..."
+        !call ESMF_TimePrint(alarmTime, "string", rc=rc)
+
+        if (ESMF_AlarmIsRinging(alarm=alarm4, rc=rc)) then
+            ringCount = ringCount + 1
+            !print *, " Alarm is ringing"
+            if (alarmTime /= currentTime+alarmStep) then
+               testPass = .false.
+               print *, "  Alarm ringTime *not* equal to clock currTime + alarmStep"
+            endif
+        endif
+        call ESMF_ClockAdvance(clock2, rc=rc)
+      enddo
+
+      call ESMF_ClockGet(clock2, advanceCount=forwardCount, rc=rc)        
+      print *, "End of clock run: At clock timestep #", forwardCount
+      if (ESMF_AlarmIsRinging(alarm=alarm4, rc=rc)) then
+          !print *, " Alarm is ringing"
+          ringCount = ringCount + 1
+      endif
+
+      ! Alarm should have rung 21 times, including from timestep 0 (upon alarm
+      ! creation) through timestep 60 (end of clock run) inclusive.
+      ! Final ringTime should be one alarmStep past the clock end time.
+      call ESMF_AlarmGet(alarm4, ringTime=alarmTime, rc=rc)
+      call ESMF_Test(((alarmTime==startTime+runDuration+alarmStep).and. &
+                       ringCount==21.and.testPass.and. &
+                       rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, "Alarm rang ", ringCount, " times."
+      !print *, "Alarm's final ringTime, after final clockAdvance() ..."
+      !call ESMF_TimePrint(alarmTime, "string", rc=rc)
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Alarm ringTime = clock startTime *and* ringInterval specified
+      !  upon alarm creation => should ring immediately.  Test 3, test REVERSE
+      !  back to clock starttime.  Robustness test for solution to
+      !  Tom Black problem in Support ticket 1989990.
+      write(failMsg, *) " Did not return alarm ringing 41 times and ESMF_SUCCESS"
+      write(name, *) "Alarm ringTime = Clock startTime with ringInterval, test 3 (reverse)"
+
+      call ESMF_TimeIntervalSet(timeStep, s=60, rc=rc)
+      call ESMF_TimeIntervalSet(runDuration, s=3600, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, s=180, rc=rc)
+      call ESMF_TimeSet(startTime, yy=2007, mm=9, dd=18, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, &
+                              runDuration=runDuration, rc=rc)
+
+      ! like Tom Black's AlarmCreate(), but sticky
+      alarm4=ESMF_AlarmCreate(       &
+         name             ='ALARM Recv from Parent'  &  !<-- Name of Alarm
+        ,clock            =clock2    &  !<-- Each domain's ATM Driver Clock
+        ,ringTime         =startTime &  !<-- First time the Alarm rings (ESMF)
+        ,ringInterval     =alarmStep &  !<-- Recv from my parent at this
+                                        !    frequency (ESMF)
+        ,rc               =rc)
+
+      ! number of clock time steps alarm rings for
+      nring = 0
+
+      ! number of times the clock has been run
+      nclock = 0
+
+      do while (nclock < 2)
+        ! run the clock
+        do while (.not. ESMF_ClockIsDone(clock2, rc=rc))
+          if (ESMF_AlarmIsRinging(alarm4)) then
+            nring = nring + 1
+            !print *, "on"
+            call ESMF_AlarmRingerOff(alarm4, rc=rc)
+          else
+            !print *, "off"
+          endif
+          call ESMF_ClockAdvance(clock2, rc=rc)
+        enddo
+
+        if (nclock.eq.0) then
+          call ESMF_ClockGet(clock2, direction=forwardDirection, &
+                                     advanceCount=forwardCount, rc=rc)
+          print *, "forwardCount = ", forwardCount
+        else
+          call ESMF_ClockGet(clock2, direction=reverseDirection, &
+                             advanceCount=reverseCount, rc=rc)
+          print *, "reverseCount = ", reverseCount
+        endif
+
+        call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
+        nclock = nclock + 1
+      enddo
+
+      ! count ring at the end point
+      if (ESMF_AlarmIsRinging(alarm4)) then
+        nring = nring + 1
+        !print *, "on"
+        call ESMF_AlarmRingerOff(alarm4, rc=rc)
+      else
+        !print *, "off"
+      endif
+
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nring.eq.41).and. &
+                     (forwardCount.eq.60).and.(reverseCount.eq.0).and. &
+                     (forwardDirection.eq.ESMF_MODE_FORWARD).and. &
+                     (reverseDirection.eq.ESMF_MODE_REVERSE).and. &
+                     ESMF_ClockIsReverse(clock2), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "nring = ", nring, " nclock = ", nclock
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)

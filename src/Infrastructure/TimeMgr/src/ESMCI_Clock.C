@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.7 2008/09/19 05:56:09 eschwab Exp $
+// $Id: ESMCI_Clock.C,v 1.8 2008/11/10 23:58:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.7 2008/09/19 05:56:09 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.8 2008/11/10 23:58:45 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -153,16 +153,7 @@ int Clock::count=0;
     if (refTime != ESMC_NULL_POINTER) clock->refTime = *refTime;
     else clock->refTime = clock->startTime;
 
-    clock->currTime = clock->startTime;
-
-    // Initialize previous time a fraction of second before the current time
-    //   so any alarm defined to ring at the clock start time will ring before
-    //   the first clock advance (timestep).  See Alarm::checkRingTime().
-    // This does not break the lower limit of the Fliegel or Hatcher 
-    // algorithms (for Gregorian or Julian calendars) since those are based on
-    //   whole seconds.
-    TimeInterval oneNanosecond(0, 1, 1000000000);
-    clock->prevTime = clock->currTime - oneNanosecond;
+    clock->prevTime = clock->currTime = clock->startTime;
 
     returnCode = clock->validate();
     ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
@@ -1802,7 +1793,10 @@ int Clock::count=0;
       }
 
 
-    } else {
+    }
+
+    if (options == ESMC_NULL_POINTER || strncmp(options, "string", 6) == 0) {
+
       // default:  print out all properties
 
       printf("name = %s\n", name);
