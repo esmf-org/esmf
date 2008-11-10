@@ -221,7 +221,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.95 2008/11/10 18:28:11 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.96 2008/11/10 23:10:13 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -2008,14 +2008,14 @@ end subroutine ESMF_GridConvertIndex
 !      List that has as many elements as the grid dimCount .
 !      Gives the dimension of each component (e.g. x) array. This is 
 !      to allow factorization of the coordinate arrays. If not specified
-!      all arrays are the same size as the grid. [NOTE FACTORIZATION HAS
-!      NOT CURRENTLY BEEN IMPLEMENTED].
+!      all arrays are the same size as the grid. 
 ! \item[{[coordDimMap]}]
 !      2D list of size grid dimCount x grid dimCount. This array describes the
 !      map of each component array's dimensions onto the grids
 !      dimensions. Each entry {\tt coordDimMap(i,j)} tells which
 !      grid dimension component i's, jth dimension maps to. 
 !      Note that if j is bigger than {\tt coordDimCount(i)} than its ignored.        
+!      The default for each row i is {\tt coordDimMap(i,:)=(1,2,3,4,...)}.        
 ! \item[{[gridEdgeLWidth]}] 
 !      The padding around the lower edges of the grid. This padding is between
 !      the index space corresponding to the cells and the boundary of the 
