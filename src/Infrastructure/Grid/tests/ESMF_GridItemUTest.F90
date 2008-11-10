@@ -1,4 +1,4 @@
-! $Id: ESMF_GridItemUTest.F90,v 1.1 2008/10/30 20:06:14 oehmke Exp $
+! $Id: ESMF_GridItemUTest.F90,v 1.2 2008/11/10 18:28:12 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridItemUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridItemUTest.F90,v 1.1 2008/10/30 20:06:14 oehmke Exp $'
+    '$Id: ESMF_GridItemUTest.F90,v 1.2 2008/11/10 18:28:12 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -48,7 +48,7 @@ program ESMF_GridItemUTest
 
   logical :: correct
   type(ESMF_TypeKind) :: typekind
-  type(ESMF_Grid) :: grid2D
+  type(ESMF_Grid) :: grid
   type(ESMF_VM) :: vm
   type(ESMF_DistGrid) :: distgrid2D, distgrid3D,tmpDistgrid
   integer :: dimCount
@@ -105,7 +105,7 @@ program ESMF_GridItemUTest
   rc=ESMF_SUCCESS
 
   ! create 2D test Grid
-  grid2D=ESMF_GridCreate(distgrid=distgrid2D, coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid=ESMF_GridCreate(distgrid=distgrid2D, coordTypeKind=ESMF_TYPEKIND_R8, &
          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -115,13 +115,13 @@ program ESMF_GridItemUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Set Coord From Array
-  call ESMF_GridSetItem(grid2D, &
+  call ESMF_GridSetItem(grid, &
                staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
                array=array2D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get Coord From Array
-  call ESMF_GridGetItem(grid2D, &
+  call ESMF_GridGetItem(grid, &
                staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
                array=array2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -135,7 +135,7 @@ program ESMF_GridItemUTest
   if (typekind .ne. ESMF_TYPEKIND_I4) correct=.false. 
 
   ! Destroy Test Grid
-  call ESMF_GridDestroy(grid2D, rc=localrc)
+  call ESMF_GridDestroy(grid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! destroy test array
@@ -156,18 +156,18 @@ program ESMF_GridItemUTest
   rc=ESMF_SUCCESS
 
   ! create 2D test Grid
-  grid2D=ESMF_GridCreate(distgrid=distgrid2D, distgridToGridMap=(/2,1/), &
+  grid=ESMF_GridCreate(distgrid=distgrid2D, distgridToGridMap=(/2,1/), &
              rc=rc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Add Item
-  call ESMF_GridAddItem(grid2D, &
+  call ESMF_GridAddItem(grid, &
                staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
                rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get Item Into Array
-  call ESMF_GridGetItem(grid2D, &
+  call ESMF_GridGetItem(grid, &
                staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
                array=array2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -185,7 +185,7 @@ program ESMF_GridItemUTest
   if (distgridToArrayMap(2) .ne. 1)  correct=.false. 
 
   ! Destroy Test Grid
-  call ESMF_GridDestroy(grid2D, rc=localrc)
+  call ESMF_GridDestroy(grid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -201,7 +201,7 @@ program ESMF_GridItemUTest
   rc=ESMF_SUCCESS
 
   ! create 2D test Grid
-  grid2D=ESMF_GridCreate(distgrid=distgrid2D, coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid=ESMF_GridCreate(distgrid=distgrid2D, coordTypeKind=ESMF_TYPEKIND_R8, &
          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -212,7 +212,7 @@ program ESMF_GridItemUTest
 
 
   ! Set Coord From Array
-  call ESMF_GridSetItem(grid2D, &
+  call ESMF_GridSetItem(grid, &
                staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
                 array=array2D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -221,7 +221,7 @@ program ESMF_GridItemUTest
   nullify(fptr)
 
   ! Get Coord From Grid
-  call ESMF_GridGetItem(grid2D, localDE=0, &
+  call ESMF_GridGetItem(grid, localDE=0, &
             staggerLoc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
             fptr=fptr, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -232,7 +232,7 @@ program ESMF_GridItemUTest
   if (.not. associated(fptr)) correct=.false.
 
  ! Destroy Test Grid
-  call ESMF_GridDestroy(grid2D, rc=localrc)
+  call ESMF_GridDestroy(grid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! destroy test array
@@ -254,25 +254,25 @@ program ESMF_GridItemUTest
 
 
   ! create 2D test Grid
-  grid2D=ESMF_GridCreate(distgrid=distgrid2D, coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid=ESMF_GridCreate(distgrid=distgrid2D, coordTypeKind=ESMF_TYPEKIND_R8, &
          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Add Item to bad item value
-  call ESMF_GridAddItem(grid2D, &
+  call ESMF_GridAddItem(grid, &
                staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_INVALID, &
                rc=localrc)
   if (localrc .eq. ESMF_SUCCESS) correct=.false.
 
   ! Add item with wrong type
-  call ESMF_GridAddItem(grid2D, &
+  call ESMF_GridAddItem(grid, &
                staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
                itemTypeKind=ESMF_TYPEKIND_R8, rc=localrc)
   if (localrc .eq. ESMF_SUCCESS) correct=.false.
 
 
  ! Destroy Test Grid
-  call ESMF_GridDestroy(grid2D, rc=localrc)
+  call ESMF_GridDestroy(grid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -293,7 +293,7 @@ program ESMF_GridItemUTest
      petMap2D(:,1,1)=(/0,1/)
      petMap2D(:,2,1)=(/2,3/)
 
-     grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  &
                               indexflag=ESMF_INDEX_GLOBAL, &
@@ -302,7 +302,7 @@ program ESMF_GridItemUTest
                               petMap=petMap2D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   else
-     grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  & 
                               indexflag=ESMF_INDEX_GLOBAL, &
@@ -313,13 +313,13 @@ program ESMF_GridItemUTest
   endif
 
   ! Allocate coordinates
-  call ESMF_GridAddItem(grid2D, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
+  call ESMF_GridAddItem(grid, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
                staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, item=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
   ! check allocated staggerloc bounds
-  call check2DP1Bnds2x2UsingSLoc(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
+  call check2DP1Bnds2x2UsingSLoc(grid, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
            item=ESMF_GRIDITEM_MASK, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,6/), &
@@ -329,7 +329,7 @@ program ESMF_GridItemUTest
            correct=correct, rc=rc) 
 
   ! check unallocated staggerloc bounds
-  call check2DP1Bnds2x2UsingSLoc(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
+  call check2DP1Bnds2x2UsingSLoc(grid, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
            item=ESMF_GRIDITEM_MASK, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,6/), &
@@ -340,7 +340,7 @@ program ESMF_GridItemUTest
 
 
  ! Destroy Test Grid
-  call ESMF_GridDestroy(grid2D, rc=localrc)
+  call ESMF_GridDestroy(grid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
@@ -361,14 +361,14 @@ program ESMF_GridItemUTest
      petMap2D(:,1,1)=(/0,1/)
      petMap2D(:,2,1)=(/2,3/)
 
-     grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               petMap=petMap2D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   else
-     grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  & 
                               indexflag=ESMF_INDEX_GLOBAL, &
@@ -377,13 +377,13 @@ program ESMF_GridItemUTest
   endif
 
   ! Add Item
-  call ESMF_GridAddItem(grid2D, &
-               staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, item=ESMF_GRIDITEM_AREA, rc=localrc)
+  call ESMF_GridAddItem(grid, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
   ! Get number of localDEs
-  call ESMF_GridGet(grid2D, localDECount=localDECount, rc=localrc)
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! loop through localDEs
@@ -392,7 +392,7 @@ program ESMF_GridItemUTest
      nullify(fptrR8) 
 
      ! Get Item pointer
-     call ESMF_GridGetItem(grid2d, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, item=ESMF_GRIDITEM_AREA, &
+     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, &
                         localDE=lDE, fptr=fptrR8, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -401,7 +401,7 @@ program ESMF_GridItemUTest
   enddo
 
  ! Destroy Test Grid
-  call ESMF_GridDestroy(grid2D, rc=localrc)
+  call ESMF_GridDestroy(grid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
@@ -423,13 +423,13 @@ program ESMF_GridItemUTest
      petMap2D(:,1,1)=(/0,1/)
      petMap2D(:,2,1)=(/2,3/)
 
-     grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               petMap=petMap2D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   else
-     grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
@@ -437,13 +437,13 @@ program ESMF_GridItemUTest
   endif
 
   ! Add Item
-  call ESMF_GridAddItem(grid2D, itemTypeKind=ESMF_TYPEKIND_R4, &
+  call ESMF_GridAddItem(grid, itemTypeKind=ESMF_TYPEKIND_R4, &
                staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
   ! Get number of localDEs
-  call ESMF_GridGet(grid2D, localDECount=localDECount, rc=localrc)
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! loop through localDEs
@@ -452,7 +452,7 @@ program ESMF_GridItemUTest
      nullify(fptrR4) 
 
      ! Get Item pointer
-     call ESMF_GridGetItem(grid2d, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, &
+     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, &
                         localDE=lDE, fptr=fptrR4, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -461,13 +461,120 @@ program ESMF_GridItemUTest
   enddo
 
  ! Destroy Test Grid
-  call ESMF_GridDestroy(grid2D, rc=localrc)
+  call ESMF_GridDestroy(grid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Adding and Getting each grid item"
+  write(failMsg, *) "Incorrect result"
+
+  ! init success flag
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! if petCount >1, setup petMap
+  if (petCount .gt. 1) then
+     petMap2D(:,1,1)=(/0,1/)
+     petMap2D(:,2,1)=(/2,3/)
+
+     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+                              countsPerDeDim2=(/3,4/),  &
+                              countsPerDeDim3=(/5/),  &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              petMap=petMap2D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  else
+     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+                              countsPerDeDim2=(/3,4/),  &
+                              countsPerDeDim3=(/5/),  & 
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  endif
+
+  ! Add Items
+  call ESMF_GridAddItem(grid, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_MASK, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridAddItem(grid, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridAddItem(grid, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREAM, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridAddItem(grid, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_FRAC, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Get number of localDEs
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! loop through localDEs
+  do lDE=0,localDECount-1
+
+     ! init pointer 
+     nullify(fptr3D) 
+
+     ! Get Item pointer
+     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_MASK, &
+                        localDE=lDE, fptr=fptr3D, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     ! check pointer
+     if (.not. associated(fptr3D)) correct=.false.
+
+     ! init pointer 
+     nullify(fptrR8) 
+
+     ! Get Item pointer
+     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, &
+                        localDE=lDE, fptr=fptrR8, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     ! check pointer
+     if (.not. associated(fptrR8)) correct=.false.
+
+     ! init pointer 
+     nullify(fptrR8) 
+
+     ! Get Item pointer
+     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREAM, &
+                        localDE=lDE, fptr=fptrR8, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     ! check pointer
+     if (.not. associated(fptrR8)) correct=.false.
+
+     ! init pointer 
+     nullify(fptrR8) 
+
+     ! Get Item pointer
+     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_FRAC, &
+                        localDE=lDE, fptr=fptrR8, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     ! check pointer
+     if (.not. associated(fptrR8)) correct=.false.
+  enddo
+
+ ! Destroy Test Grid
+  call ESMF_GridDestroy(grid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
 
 
@@ -536,7 +643,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
      if (ccnt(3) .ne. ieubnd0(3)-ielbnd0(3)+1+iloff0(3)+iuoff0(3)) correct=.false.
  
       ! check DE 1
-      call ESMF_GridGetItem(grid2D, localDE=1, &
+      call ESMF_GridGetItem(grid, localDE=1, &
              staggerLoc=staggerloc, item=item,                 &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,  exclusiveCount=ecnt,     &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt, rc=localrc)

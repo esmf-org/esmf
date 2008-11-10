@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.51 2008/10/30 20:06:14 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.52 2008/11/10 18:28:11 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -48,10 +48,12 @@ enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
 // Eventually move this to ESMCI_Util.h
 enum ESMC_GridItem {ESMC_GRIDITEM_INVALID=-2,
                     ESMC_GRIDITEM_UNINIT,
-                    ESMC_GRIDITEM_MASK,
-                    ESMC_GRIDITEM_AREA
+                    ESMC_GRIDITEM_MASK,  // 0
+                    ESMC_GRIDITEM_AREA,  // 1
+                    ESMC_GRIDITEM_AREAM, // 2
+                    ESMC_GRIDITEM_FRAC   // 3
 };
-#define ESMC_GRIDITEM_COUNT 2
+#define ESMC_GRIDITEM_COUNT 4
 
 enum ESMC_GridDecompType {ESMC_GRID_INVALID=1, 
 			ESMC_GRID_NONARBITRARY,

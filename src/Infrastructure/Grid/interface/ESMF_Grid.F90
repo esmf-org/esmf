@@ -99,7 +99,9 @@
                       ESMF_GRIDITEM_INVALID=ESMF_GridItem(-2), &
                       ESMF_GRIDITEM_UNINIT=ESMF_GridItem(-1), &
                       ESMF_GRIDITEM_MASK=ESMF_GridItem(0), &
-                      ESMF_GRIDITEM_AREA=ESMF_GridItem(1)
+                      ESMF_GRIDITEM_AREA=ESMF_GridItem(1), &
+                      ESMF_GRIDITEM_AREAM=ESMF_GridItem(2), &
+                      ESMF_GRIDITEM_FRAC=ESMF_GridItem(3)
 
 
 
@@ -160,7 +162,8 @@ public  ESMF_GridConn,  ESMF_GRIDCONN_NONE, ESMF_GRIDCONN_PERIODIC, &
 public  ESMF_GridStatus,  ESMF_GRIDSTATUS_INVALID, ESMF_GRIDSTATUS_UNINIT, &
                       ESMF_GRIDSTATUS_NOT_READY,  ESMF_GRIDSTATUS_SHAPE_READY
 public  ESMF_GridItem,  ESMF_GRIDITEM_INVALID, ESMF_GRIDITEM_UNINIT, &
-                      ESMF_GRIDITEM_MASK, ESMF_GRIDITEM_AREA
+                      ESMF_GRIDITEM_MASK, ESMF_GRIDITEM_AREA, &
+                      ESMF_GRIDITEM_AREAM, ESMF_GRIDITEM_FRAC
 public  ESMF_DefaultFlag
 public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRID_ARBITRARY
 
@@ -218,7 +221,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.94 2008/10/30 20:06:14 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.95 2008/11/10 18:28:11 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1116,7 +1119,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCommit"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCommit - Commit a Grid to a specified completion level
 
 ! !INTERFACE:
@@ -1173,7 +1176,7 @@ end interface
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
     integer :: localrc ! local error status
 
     ! Initialize return code; assume failure until success is certain
@@ -2557,10 +2560,9 @@ end subroutine ESMF_GridConvertIndex
 ! !DESCRIPTION:
 ! Partially create an {\tt ESMF\_Grid} object. This function allocates 
 ! an {\tt ESMF\_Grid} object, but doesn't allocate any coordinate storage or other
-! internal structures. The {\tt ESMF\_GridSet}  calls
-! can be used to set the values in the grid object. Before using the grid,
-! {\tt ESMF\_GridCommit} needs to be called to validate the internal state and
-! construct internal structures. 
+! internal structures.  The {\tt ESMF\_GridSetCommitShapeTile}  calls
+! can be used to set the values in the grid object and to construct the
+! internal structure.
 !
 ! The arguments are:
 ! \begin{description}
@@ -11719,6 +11721,12 @@ endif
 ! coordinates.  This creation method can also be used as the basis for
 ! grids with rectilinear coordinates or curvilinear coordinates.
 !
+! For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()} call
+! should be executed in the same set or a subset of the PETs in which the
+! {\tt ESMF\_GridCreateEmpty()} call was made. If the call
+! is made in a subset, the Grid objects outside that subset will
+! still be "empty" and not usable. 
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[{grid}]
@@ -12667,6 +12675,12 @@ endif
 ! The array {\tt decompFlag} indicates how the division into DEs is to
 ! occur.  The default is to divide the range as evenly as possible.
 !
+! For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()} call
+! should be executed in the same set or a subset of the PETs in which the
+! {\tt ESMF\_GridCreateEmpty()} call was made. If the call
+! is made in a subset, the Grid objects outside that subset will
+! still be "empty" and not usable. 
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[{grid}]
@@ -13500,6 +13514,12 @@ endif
 ! size of {\tt distDim} has to agree with the size of the second dimension of 
 ! {\tt localIndices}. 
 !
+! For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()} call
+! should be executed in the same set or a subset of the PETs in which the
+! {\tt ESMF\_GridCreateEmpty()} call was made. If the call
+! is made in a subset, the Grid objects outside that subset will
+! still be "empty" and not usable. 
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[{[grid]}]
@@ -14121,7 +14141,8 @@ endif
 !      an error if the grid is not at least 
 !      {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}. This means 
 !      if a Grid was created with {\tt ESMF\_GridCreateEmpty}
-!      it must also have been commited with {\tt ESMF\_GridCommit}
+!      it must also have been finished with 
+!      {\tt ESMF\_GridSetCommitShapeTile}
 !      to be valid. If a Grid was created with another create
 !      call it should automatically have the correct status level
 !      to pass the status part of the validate. 
