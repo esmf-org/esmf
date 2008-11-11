@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.76 2008/10/30 20:06:14 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.77 2008/11/11 00:48:27 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.76 2008/10/30 20:06:14 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.77 2008/11/11 00:48:27 peggyli Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -5589,8 +5589,8 @@ int construct(
   distGridMaxIndex = distgridArg->getMaxIndexPDimPDe(0, &rc);
 
   // allocate minIndex and maxIndex and fill them
-  minIndex = new int(dimCount);
-  maxIndex = new int(dimCount);
+  minIndex = new int[dimCount];
+  maxIndex = new int[dimCount];
   // initialize them to 0
   for (int i = 0; i < dimCount; i++) {
     minIndex[i]=maxIndex[i]=0;
