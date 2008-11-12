@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.49 2008/11/06 19:22:39 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.50 2008/11/12 03:03:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.49 2008/11/06 19:22:39 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.50 2008/11/12 03:03:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -7657,10 +7657,10 @@ int sparseMatMulStoreEncodeXXE(
   // todo: from what I saw being set in ESMF_IArrayHaloStoreIndex()
   // todo: All I need here is a valid RouteHandle so I can attach an XXE object.
   localrc =
-    (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYSPARSEMATMULHANDLE);
+    (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYXXE);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  localrc = (*routehandle)->ESMC_RouteHandleSetRouteCount(1);
+  localrc = (*routehandle)->ESMC_RouteHandleSetRouteCount(0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   localrc = (*routehandle)->ESMC_RouteHandleSetRMapType(ESMC_1TO1HANDLEMAP);
@@ -7823,7 +7823,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       dstInfoTableInit[i] = 0;   // reset
     }
     char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
-    localrc = xxe->appendStorage(localDeFactorBuffer); // XXE garbage collec.
+    localrc = xxe->storeStorage(localDeFactorBuffer); // XXE garbage collec.
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMSTORETIMING
@@ -7928,7 +7928,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     for (int i=0; i<recvnbDiffPartnerDeCount; i++){
       // large contiguous 1st level receive buffer
       char *buffer = new char[recvnbPartnerDeCount[i] * dataSizeSrc];
-      localrc = xxe->appendStorage(buffer); // XXE garbage collec.
+      localrc = xxe->storeStorage(buffer); // XXE garbage collec.
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       int srcDe = recvnbPartnerDeList[i];
@@ -8018,7 +8018,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       srcInfoTableInit[i] = 0;   // reset
     }
     char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
-    localrc = xxe->appendStorage(localDeFactorBuffer); // XXE garbage collec.
+    localrc = xxe->storeStorage(localDeFactorBuffer); // XXE garbage collec.
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     for (int i=0; i<localDeFactorCount; i++){
@@ -8131,7 +8131,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       }
       // intermediate buffer (in case it is needed)
       char *buffer = new char[sendnbPartnerDeCount[i] * dataSizeSrc];
-      localrc = xxe->appendStorage(buffer); // XXE garbage collec.
+      localrc = xxe->storeStorage(buffer); // XXE garbage collec.
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       int srcDe = srcLocalDeList[j];
@@ -8792,14 +8792,14 @@ int Array::sparseMatMul(
   VMK::wtime(&t3);      //gjt - profile
 #endif
   
+  // set filterBitField  
   int filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
   
   //TODO: determine XXE filterBitField for XXE exec(),
-  // considering src vs. dst, DE, phase of nb-call...
+  //TODO: considering src vs. dst, DE, phase of nb-call...
   
   if (zeroflag!=ESMF_REGION_TOTAL)
     filterBitField |= 1;  // filter the region_total zero operations
-
   if (zeroflag!=ESMF_REGION_SELECT)
     filterBitField |= 2;  // filter the region_select zero operations
   

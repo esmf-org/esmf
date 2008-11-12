@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.1.2.18 2008/09/24 00:25:08 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.1.2.19 2008/11/12 03:03:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -167,6 +167,7 @@ namespace ESMCI {
     int getRank()                           const {return rank;}
     ESMC_IndexFlag getIndexflag()           const {return indexflag;}
     ESMC_LocalArray **getLocalarrayList()   const {return larrayList;}
+    void **getLarrayBaseAddrList()          const {return larrayBaseAddrList;}
     const int *getExclusiveLBound()         const {return exclusiveLBound;}
     const int *getExclusiveUBound()         const {return exclusiveUBound;}
     const int *getComputationalLBound()     const {return computationalLBound;}

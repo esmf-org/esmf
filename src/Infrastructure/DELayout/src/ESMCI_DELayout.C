@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.1.2.13 2008/11/01 00:13:55 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.1.2.14 2008/11/12 03:03:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.13 2008/11/01 00:13:55 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.1.2.14 2008/11/12 03:03:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2928,7 +2928,8 @@ int XXE::exec(
       {
         xxeSubInfo = (XxeSubInfo *)xxeElement;
         // recursive call:
-        xxeSubInfo->xxe->exec(rraCount, rraList, filterBitField);
+        xxeSubInfo->xxe->exec(rraCount, rraList + xxeSubInfo->rraShift,
+          filterBitField);
       }
       break;
     case xxeSubMulti:
@@ -3996,7 +3997,7 @@ int XXE::print(
       {
         xxeSubInfo = (XxeSubInfo *)xxeElement;
         printf("XXE::xxeSub <localPet=%d>\n", vm->getLocalPet());
-        xxeSubInfo->xxe->exec(rraCount, rraList); // recursive call
+        xxeSubInfo->xxe->print(rraCount, rraList); // recursive call
       }
       break;
     case xxeSubMulti:
@@ -5370,12 +5371,12 @@ int XXE::incXxeSubCount(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::XXE::appendStorage()"
+#define ESMC_METHOD "ESMCI::XXE::storeStorage()"
 //BOPI
-// !IROUTINE:  ESMCI::XXE::appendStorage
+// !IROUTINE:  ESMCI::XXE::storeStorage
 //
 // !INTERFACE:
-int XXE::appendStorage(
+int XXE::storeStorage(
 //
 // !RETURN VALUE:
 //    int return code
@@ -5407,12 +5408,12 @@ int XXE::appendStorage(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::XXE::appendCommhandle()"
+#define ESMC_METHOD "ESMCI::XXE::storeCommhandle()"
 //BOPI
-// !IROUTINE:  ESMCI::XXE::appendCommhandle
+// !IROUTINE:  ESMCI::XXE::storeCommhandle
 //
 // !INTERFACE:
-int XXE::appendCommhandle(
+int XXE::storeCommhandle(
 //
 // !RETURN VALUE:
 //    int return code
@@ -5444,6 +5445,43 @@ int XXE::appendCommhandle(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::storeXxeSub()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::storeXxeSub
+//
+// !INTERFACE:
+int XXE::storeXxeSub(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  XXE *xxe
+  ){
+//
+// !DESCRIPTION:
+//  Append an xxeSub at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  xxeSubList[xxeSubCount] = xxe;
+  localrc = incXxeSubCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    ESMF_ERR_PASSTHRU, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::appendXxeSub()"
 //BOPI
 // !IROUTINE:  ESMCI::XXE::appendXxeSub
@@ -5456,7 +5494,9 @@ int XXE::appendXxeSub(
 //
 // !ARGUMENTS:
 //
-  XXE *xxeSub
+  int predicateBitField,
+  XXE *xxe,
+  int rraShift
   ){
 //
 // !DESCRIPTION:
@@ -5467,9 +5507,13 @@ int XXE::appendXxeSub(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  xxeSubList[xxeSubCount] = xxeSub;
-  localrc = incXxeSubCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+  stream[count].opId = xxeSub;
+  stream[count].predicateBitField = predicateBitField;
+  XxeSubInfo *xxeSubInfo = (XxeSubInfo *)&(stream[count]);
+  xxeSubInfo->xxe = xxe;
+  xxeSubInfo->rraShift = rraShift;
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
   // return successfully
@@ -5523,7 +5567,7 @@ int XXE::appendWtimer(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // keep track of strings for xxe garbage collection
-  localrc = appendStorage(xxeWtimerInfo->timerString);
+  localrc = storeStorage(xxeWtimerInfo->timerString);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
@@ -5576,7 +5620,7 @@ int XXE::appendRecvnb(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // keep track of commhandles for xxe garbage collection
-  localrc = appendCommhandle(xxeRecvnbInfo->commhandle);
+  localrc = storeCommhandle(xxeRecvnbInfo->commhandle);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
@@ -5629,7 +5673,7 @@ int XXE::appendSendnb(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // keep track of commhandles for xxe garbage collection
-  localrc = appendCommhandle(xxeSendnbInfo->commhandle);
+  localrc = storeCommhandle(xxeSendnbInfo->commhandle);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
@@ -5684,7 +5728,7 @@ int XXE::appendSendnbRRA(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // keep track of commhandles for xxe garbage collection
-  localrc = appendCommhandle(xxeSendnbRRAInfo->commhandle);
+  localrc = storeCommhandle(xxeSendnbRRAInfo->commhandle);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
@@ -5789,10 +5833,10 @@ int XXE::appendMemGatherSrcRRA(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // keep track of allocations for xxe garbage collection
-  localrc = appendStorage(rraOffsetListChar);  // for xxe garb. coll.
+  localrc = storeStorage(rraOffsetListChar);  // for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  localrc = appendStorage(countListChar);  // for xxe garb. coll.
+  localrc = storeStorage(countListChar);  // for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
@@ -5892,7 +5936,7 @@ int XXE::appendZeroSuperScalarRRA(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // keep track of allocations for xxe garbage collection
-  localrc = appendStorage(rraOffsetListChar);  // for xxe garb. coll.
+  localrc = storeStorage(rraOffsetListChar);  // for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
@@ -6092,10 +6136,10 @@ int XXE::appendSumSuperScalarDstRRA(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // keep track of allocations for xxe garbage collection
-  localrc = appendStorage(rraOffsetListChar);// for xxe garb. coll.
+  localrc = storeStorage(rraOffsetListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  localrc = appendStorage(valueListChar);// for xxe garb. coll.
+  localrc = storeStorage(valueListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
@@ -6157,13 +6201,13 @@ int XXE::appendProductSumSuperScalarDstRRA(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // keep track of allocations for xxe garbage collection
-  localrc = appendStorage(rraOffsetListChar);// for xxe garb. coll.
+  localrc = storeStorage(rraOffsetListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  localrc = appendStorage(factorListChar);// for xxe garb. coll.
+  localrc = storeStorage(factorListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  localrc = appendStorage(valueListChar);// for xxe garb. coll.
+  localrc = storeStorage(valueListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
@@ -6225,13 +6269,13 @@ int XXE::appendProductSumSuperScalarSrcRRA(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // keep track of allocations for xxe garbage collection
-  localrc = appendStorage(rraOffsetListChar);// for xxe garb. coll.
+  localrc = storeStorage(rraOffsetListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  localrc = appendStorage(factorListChar);// for xxe garb. coll.
+  localrc = storeStorage(factorListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  localrc = appendStorage(elementListChar);// for xxe garb. coll.
+  localrc = storeStorage(elementListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
@@ -6325,13 +6369,13 @@ int XXE::appendWaitOnAnyIndexSub(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // keep track of allocations for xxe garbage collection
-  localrc = appendStorage(xxeChar);  // for xxe garb. coll.
+  localrc = storeStorage(xxeChar);  // for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  localrc = appendStorage(indexChar);  // for xxe garb. coll.
+  localrc = storeStorage(indexChar);  // for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
-  localrc = appendStorage(completeFlagChar);  // for xxe garb. coll.
+  localrc = storeStorage(completeFlagChar);  // for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
@@ -6417,7 +6461,7 @@ int XXE::appendProfileMessage(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // keep track of strings for xxe garbage collection
-  localrc = appendStorage(xxeProfileMessageInfo->messageString);
+  localrc = storeStorage(xxeProfileMessageInfo->messageString);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
@@ -6465,7 +6509,7 @@ int XXE::appendMessage(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   // keep track of strings for xxe garbage collection
-  localrc = appendStorage(xxeMessageInfo->messageString);
+  localrc = storeStorage(xxeMessageInfo->messageString);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMF_ERR_PASSTHRU, &rc)) return rc;
   
