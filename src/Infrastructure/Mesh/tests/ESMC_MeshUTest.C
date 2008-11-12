@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.1 2008/10/29 14:52:39 rosalind Exp $
+// $Id: ESMC_MeshUTest.C,v 1.2 2008/11/12 21:46:34 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,13 +30,14 @@
 //EOP
 //-----------------------------------------------------------------------------
 
+
 int main(void){
 
   char name[80];
   char failMsg[80];
   int result = 0;
   int rc;
-
+  int num_elem, num_node, conn_size;
   ESMC_Mesh *mesh;
 
   //----------------------------------------------------------------------------
@@ -49,6 +50,34 @@ int main(void){
   strcpy(name, "MeshCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   mesh = ESMC_MeshCreate(2,3,&rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Read input files' header data
+  strcpy(name, "MeshVTKHeader");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshVTKHeader("data/testmesh", &num_elem, &num_node, &conn_size);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  // Allocate the arrays to describe Mesh
+  int nodeId[num_node];
+  double nodeCoord[3*num_node];
+  int nodeOwner[num_node];
+
+  int elemId[num_elem];
+  int elemType[num_elem];
+  int elemConn[conn_size];
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Read input files
+  strcpy(name, "MeshVTKBody");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshVTKBody("data/testmesh", nodeId, nodeCoord, nodeOwner,
+                        elemId, elemType, elemConn);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

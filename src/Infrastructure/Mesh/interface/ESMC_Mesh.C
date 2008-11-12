@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.6 2008/11/10 19:54:34 rosalind Exp $
+// $Id: ESMC_Mesh.C,v 1.7 2008/11/12 21:46:34 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -166,6 +166,47 @@ int ESMC_MeshFreeMemory(ESMC_Mesh *mesh){
 
 } // ESMC_MeshDestroy
 
+
+//--------------------------------------------------------------------------
+// !BOP
+// !IROUTINE: ESMC_MeshVTKHeader
+//
+// !EOP
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshVTKHeader()"
+int ESMC_MeshVTKHeader(char *fname, int *num_elem, int *num_node, int *conn_size){
+
+   int localrc;
+   //Initialize localrc; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
+   localrc = MeshVTKHeader(fname, num_elem, num_node, conn_size);
+
+   return localrc;
+} // ESMC_MeshVTKHeader
+
+
+//--------------------------------------------------------------------------
+// !BOP 
+// !IROUTINE: ESMC_MeshVTKHeader
+//
+// !EOP
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshVTKHeader()"
+int ESMC_MeshVTKBody(char *fname, int *nodeId, double *nodeCoord, int *nodeOwner,
+                int *elemId, int *elemType, int *elemConn){
+
+   int localrc;
+   //Initialize localrc; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
+   localrc = MeshVTKBody(fname, nodeId, nodeCoord, nodeOwner,
+                elemId, elemType, elemConn);
+
+   return localrc;
+} // ESMC_MeshVTKBody
 
 } // extern "C"
 

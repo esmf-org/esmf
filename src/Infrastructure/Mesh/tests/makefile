@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2008/10/29 14:52:39 rosalind Exp $ 
+# $Id: makefile,v 1.5 2008/11/12 21:46:34 rosalind Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -40,8 +40,10 @@ RUN_ESMF_MeshUTestUNI:
 	$(MAKE) TNAME=Mesh NP=1 ftest
 
 RUN_ESMC_MeshUTest:
-	$(MAKE) TNAME=Mesh NP=4 ctest
+	cp -r data $(ESMF_TESTDIR)
+	$(MAKE) TNAME=Mesh NP=6 ctest
 
 RUN_ESMC_MeshUTestUNI:
-	$(MAKE) TNAME=Mesh NP=1 ctest
+	echo "PASS: ESMC_MeshUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMC_MeshUTest.stdout
+	# $(MAKE) TNAME=Mesh NP=1 ctest
 

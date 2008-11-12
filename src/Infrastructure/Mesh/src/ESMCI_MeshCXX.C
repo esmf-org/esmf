@@ -16,6 +16,10 @@
 #include "ESMCI_F90Interface.h"
 
 #include <Mesh/include/ESMCI_MeshCXX.h>
+#include "ESMCI_MeshRead.h"
+#include "ESMCI_MeshVTK.h"
+#include "ESMCI_ParEnv.h"
+#include "ESMCI_MeshUtils.h"
 
 namespace ESMCI {
 
@@ -76,10 +80,49 @@ int MeshCXX::addNodes(int *numNodes, int *nodeId, double *nodeCoord,
    //Initialize localrc; assume routine not implemented
    localrc = ESMC_RC_NOT_IMPL;
 
+   try{
+
+      Mesh &mesh = *this;
+       for (int n = 0; n < *numNodes; ++n) {
+
+      MeshObj *node = new MeshObj(MeshObj::NODE, nodeId[n], n);
+
+      node->set_owner(nodeOwner[n]);
+//Par::Out() << "node:" << node->get_id() << " has owner:" << nodeOwner[n] << std::endl;
+
+      mesh.add_node(node, 0);
+
+    }
+
+    // Register the nodal coordinate field.
+    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", mesh.spatial_dim());
+
+    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+
+    UInt sdim = mesh.spatial_dim();
+
+    for (UInt nc = 0; ni != ne; ++ni) {
+
+      MeshObj &node = *ni;
+
+      double *coord = node_coord->data(node);
+
+      for (UInt c = 0; c < sdim; ++c)
+        coord[c] = nodeCoord[nc+c];
+
+      nc += sdim;
+
+    }
+
+//meshp->Print(Par::Out());
+
+     localrc=ESMF_SUCCESS;
+   } catch(...) {
+     localrc = ESMF_FAILURE;
+   }
 
    return localrc;
 } // MeshCXX::addNodes
-
 
 int MeshCXX::createDistGrids(int *numLNodes, int *numLElems){
 #undef ESMC_METHOD
@@ -121,5 +164,78 @@ int MeshCXX::freeMemory(){
    return localrc;
 } // MeshCXX::freeMemory
 
+
+int MeshVTKHeader(char *fname, int *num_elem, int *num_node, int *conn_size){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::MeshVTKHeader()"
+
+   int localrc;
+   //Initialize localrc; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
+    std::string fnames(fname);
+    int rank = Par::Rank();
+    int psize = Par::Size();
+
+    std::string newname;
+
+    std::string extension = ".vtk";
+
+  // If csize = 1, read fbase.g
+     if (psize > 1) {
+       std::ostringstream newname_str;
+       int ndec = numDecimal(psize);
+       newname_str << fname << "." << psize << ".";
+       newname_str << std::setw(ndec) << std::setfill('0') << rank;
+       newname = newname_str.str() + extension;
+     } else newname = fname + extension;
+
+    ReadVTKMeshHeader(newname, *num_elem, *num_node, *conn_size);
+
+    localrc = ESMF_SUCCESS;
+
+   return localrc;
+} // MeshVTKHeader
+
+int MeshVTKBody(char *fname, int *nodeId, double *nodeCoord, int *nodeOwner, 
+                int *elemId, int *elemType, int *elemConn){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::MeshVTKBody()"
+
+   int localrc;
+   //Initialize localrc; assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
+   try{
+    std::string fnames(fname);
+    int rank = Par::Rank();
+    int psize = Par::Size();
+
+    std::string newname;
+
+    std::string extension = ".vtk";
+
+  // If csize = 1, read fbase.g
+     if (psize > 1) {
+       std::ostringstream newname_str;
+       int ndec = numDecimal(psize);
+       newname_str << fname << "." << psize << ".";
+       newname_str << std::setw(ndec) << std::setfill('0') << rank;
+       newname = newname_str.str() + extension;
+     } else newname = fname + extension;
+
+    ReadVTKMeshBody(newname, nodeId, nodeCoord, nodeOwner, elemId, elemType, elemConn);
+
+    localrc = ESMF_SUCCESS;
+
+  } catch(...) {
+
+    localrc = ESMF_FAILURE;
+
+  }
+
+  return localrc;
+
+} //MeshVTKBody
 
 } // namespace ESMCI

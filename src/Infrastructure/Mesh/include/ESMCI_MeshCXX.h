@@ -15,28 +15,33 @@
 #include "ESMCI_Mesh.h"
 
 namespace ESMCI {
-class MeshCXX : public Mesh {
+ int MeshVTKHeader(char*, int*, int*, int*);
+ int MeshVTKBody(char*, int*, double*, int*, int*, int*, int*);
 
-public:
-MeshCXX();
-~MeshCXX();
+  class MeshCXX : public Mesh {
 
-MeshCXX* create(int*, int*, int*);
-int addElements(int*, int*, int*, int*);
-int addNodes(int*, int*, double*, int*);
-int createDistGrids(int*, int*);
-int destroy();
-int freeMemory();
+    public:
+    MeshCXX();
+    ~MeshCXX();
 
+    MeshCXX* create(int*, int*, int*);
+    int addElements(int*, int*, int*, int*);
+    int addNodes(int*, int*, double*, int*);
+    int createDistGrids(int*, int*);
+    int destroy();
+    int freeMemory();
 
-private:
-int isMeshFreed();
-int* nodalDistGrid;
-int* elementDistGrid;
-int numLNodes;
-int num_LElements;
-int meshFreed;
-};
+    friend int MeshVTKHeader(char*, int*, int*, int*);
+    friend int MeshVTKBody(char*, int*, double*, int*, int*, int*, int*);
+
+    private:
+    int isMeshFreed();
+    int* nodalDistGrid;
+    int* elementDistGrid;
+    int numLNodes;
+    int num_LElements;
+    int meshFreed;
+  };
 
 } // namespace 
 

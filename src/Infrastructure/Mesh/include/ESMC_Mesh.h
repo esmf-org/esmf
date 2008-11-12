@@ -49,6 +49,11 @@ int ESMC_MeshDestroy(ESMC_Mesh *mesh);
 
 int ESMC_MeshFreeMemory(ESMC_Mesh *mesh);
 
+int ESMC_MeshVTKHeader(char *fname, int *num_elem, int *num_node, int *conn_size);
+
+int ESMC_MeshVTKBody(char *fname, int *nodeId, double *nodeCoord, int *nodeOwner,
+                int *elemId, int *elemType, int *elemConn);
+
 
 //int ESMC_MeshCreateAll(ESMC_Mesh *mesh, int parametricDim, int *nodeIds, double *nodeCoords,
 //             int *nodeOwners, int *elementIds, int *elementTypes, int *elementConn);
