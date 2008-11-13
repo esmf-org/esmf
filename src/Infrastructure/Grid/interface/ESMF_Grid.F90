@@ -195,7 +195,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.31 2008/11/10 22:12:53 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.32 2008/11/13 22:15:43 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -8355,7 +8355,7 @@ endif
 ! The arguments are:
 ! \begin{description}
 ! \item[{grid}]
-!     {\tt ESMF\_Grid} to set information into in preparation for commit.  
+!     {\tt ESMF\_Grid} to set information into and then commit.  
 ! \item[{[name]}]
 !      {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}] 
