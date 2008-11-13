@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.1.2.10 2008/11/12 03:03:19 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.1.2.11 2008/11/13 04:46:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -23,14 +23,14 @@
 //
 //-----------------------------------------------------------------------------
 
-// include associated header file
-#include "ESMCI_ArrayBundle.h"
-
 // include higher level, 3rd party or system headers
 #include <cstdio>
 #include <cstring>
 #include <vector>
 #include <algorithm>
+
+// include associated header file
+#include "ESMCI_ArrayBundle.h"
 
 // include ESMF headers
 #include "ESMC_Start.h"
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.1.2.10 2008/11/12 03:03:19 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.1.2.11 2008/11/13 04:46:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
