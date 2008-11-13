@@ -6,16 +6,21 @@ cygwin setup installer.
 
 Requires the following environment settings:
 
-ESMF_COMPILER gfortran
+  ESMF_COMPILER gfortran
+
 
 Windows Compute Cluster Server (CCS) 2003 notes:
 
-ESMF has been tested on Windows CCS using the Microsoft MPI.
-Two issues need to be corrected, prior to compiling ESMF:
+ESMF has been tested on Windows CCS using the Microsoft MPI.  To
+use MSMPI, set:
+
+  ESMF_COMM msmpi.
+
+Two issues need to be addressed, prior to compiling ESMF:
 
 1.) Typically, the CCS MSMPI header and library files reside
 in /cygdrive/c/"Program Files"/"Microsoft Compute Cluster Pack".
-However the spaces in the path name can confuse the ESMF build
+However the spaces in the path name can confuse the ESMF makefile
 system.
 
 To work around this problem, create a symbolic link from the
@@ -27,18 +32,19 @@ ESMF_DIR directory which points to the CCS directory:
 Then set the ESMF_MSMPIDIR environment variable to point to the
 symbolic link:
 
-  export ESMF_MSMPIDIR=$ESMF_DIR/ccsdir
+  ESMF_MSMPIDIR $ESMF_DIR/ccsdir
 
 2.) The Microsoft mpif.h header file contains conditional code
 which is written for the Intel Fortran compiler.  Gfortran does
 not know about the !DEC$ directives which are used to implement
 the conditional code.  A local copy of mpif.h must be created
-in this directory (build_config/Cygwin.gfortran.default) with
-the necessary corrections.
+in this directory ($ESMF_DIR/build_config/Cygwin.gfortran.default)
+with the necessary corrections.
 
   cp $ESMF_MSMPIDIR/Include/mpif.h .
 
-Find the following statements, near line 308:
+Using the editor of your choice, find the following statements,
+near line 308:
 
 !DEC$ IF DEFINED(_WIN64)
        PARAMETER (MPI_ADDRESS_KIND=8)
