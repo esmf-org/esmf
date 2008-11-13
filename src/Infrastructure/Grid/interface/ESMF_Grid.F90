@@ -221,7 +221,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.96 2008/11/10 23:10:13 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.97 2008/11/13 22:21:02 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -11730,7 +11730,7 @@ endif
 ! The arguments are:
 ! \begin{description}
 ! \item[{grid}]
-!     {\tt ESMF\_Grid} to set information into in preparation for commit.  
+!     The empty {\tt ESMF\_Grid} to set information into and then commit.
 ! \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}] 
@@ -12684,7 +12684,7 @@ endif
 ! The arguments are:
 ! \begin{description}
 ! \item[{grid}]
-!     {\tt ESMF\_Grid} to set information into in preparation for commit.  
+!     The empty {\tt ESMF\_Grid} to set information into and then commit.
 ! \item[{[name]}]
 !      {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}] 
@@ -13523,7 +13523,7 @@ endif
 ! The arguments are:
 ! \begin{description}
 ! \item[{[grid]}]
-!          the empty grid created earlier
+!     The empty {\tt ESMF\_Grid} to set information into and then commit.
 ! \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}] 
