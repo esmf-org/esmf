@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2008/11/12 21:46:34 rosalind Exp $ 
+# $Id: makefile,v 1.6 2008/11/13 22:17:08 rosalind Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -41,6 +41,7 @@ RUN_ESMF_MeshUTestUNI:
 
 RUN_ESMC_MeshUTest:
 	cp -r data $(ESMF_TESTDIR)
+	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=Mesh NP=6 ctest
 
 RUN_ESMC_MeshUTestUNI:
