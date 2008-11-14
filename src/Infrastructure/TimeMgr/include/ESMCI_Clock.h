@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.h,v 1.7 2008/09/19 05:56:07 eschwab Exp $
+// $Id: ESMCI_Clock.h,v 1.8 2008/11/14 04:05:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -25,8 +25,8 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_Start.h>
- #include <ESMF_TimeMgr.inc>
+#include "ESMC_Start.h
+#include "ESMF_TimeMgr.inc"
 
 //-------------------------------------------------------------------------
 //BOP
@@ -64,11 +64,11 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
- #include <ESMC_Base.h>    // all classes inherit from the ESMC Base class.
- #include <ESMC_IOSpec.h>  // IOSpec class for ReadRestart()/WriteRestart()
- #include <ESMCI_TimeInterval.h>
- #include <ESMCI_Time.h>
- #include <ESMCI_Alarm.h>
+#include "ESMC_Base.h"    // all classes inherit from the ESMC Base class.
+#include "ESMC_IOSpec.h"  // IOSpec class for ReadRestart()/WriteRestart()
+#include "ESMCI_TimeInterval.h"
+#include "ESMCI_Time.h"
+#include "ESMCI_Alarm.h"
 
 namespace ESMCI{
 
