@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.133 2008/09/23 16:17:22 dneckels Exp $
+! $Id: ESMF_Regrid.F90,v 1.134 2008/11/14 04:16:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include <ESMF.h>
+#include "ESMF.h"
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_RegridMod - Regridding and interpolation
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.133 2008/09/23 16:17:22 dneckels Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.134 2008/11/14 04:16:23 theurich Exp $'
 
 !==============================================================================
 !
