@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.h,v 1.6 2008/09/03 05:56:37 eschwab Exp $
+// $Id: ESMCI_Calendar.h,v 1.7 2008/11/14 04:05:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -25,8 +25,8 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_Start.h>
- #include <ESMF_TimeMgr.inc>
+#include "ESMC_Start.h"
+#include "ESMF_TimeMgr.inc"
 
 //-------------------------------------------------------------------------
 //BOP
@@ -67,9 +67,9 @@
 //-------------------------------------------------------------------------
 //  
 // !USES:
- #include <ESMC_Base.h>           // inherited Base class
- #include <ESMCI_BaseTime.h>       // inherited BaseTime class
- #include "ESMC_Calendar.h"
+#include "ESMC_Base.h"           // inherited Base class
+#include "ESMCI_BaseTime.h"       // inherited BaseTime class
+#include "ESMC_Calendar.h"
 
 // TODO: replace with monthsPerYear property
 #define MONTHS_PER_YEAR 12

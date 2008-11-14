@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.h,v 1.8 2008/11/14 04:05:57 theurich Exp $
+// $Id: ESMCI_Clock.h,v 1.9 2008/11/14 04:08:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
-#include "ESMC_Start.h
+#include "ESMC_Start.h"
 #include "ESMF_TimeMgr.inc"
 
 //-------------------------------------------------------------------------

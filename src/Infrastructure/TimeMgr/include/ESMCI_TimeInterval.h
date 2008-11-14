@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.h,v 1.10 2008/10/19 03:53:58 eschwab Exp $
+// $Id: ESMCI_TimeInterval.h,v 1.11 2008/11/14 04:05:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -25,9 +25,9 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
-#include <ESMC_Start.h>
-#include <ESMF_TimeMgr.inc>
-#include <ESMCI_Fraction.h>
+#include "ESMC_Start.h"
+#include "ESMF_TimeMgr.inc"
+#include "ESMCI_Fraction.h"
 
 //-------------------------------------------------------------------------
 //BOP
@@ -65,11 +65,11 @@
 //-------------------------------------------------------------------------
 
 // !USES:
- #include <ESMC_Base.h>           // inherited Base class
- #include <ESMCI_BaseTime.h>       // inherited BaseTime class
- #include <ESMCI_Time.h>
- #include <ESMCI_Calendar.h>
- #include <ESMC_TimeInterval.h>    // for use of enumerated types
+#include "ESMC_Base.h"           // inherited Base class
+#include "ESMCI_BaseTime.h"       // inherited BaseTime class
+#include "ESMCI_Time.h"
+#include "ESMCI_Calendar.h"
+#include "ESMC_TimeInterval.h"    // for use of enumerated types
 
 namespace ESMCI {
 
