@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.22 2008/11/14 21:26:26 theurich Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.23 2008/11/14 22:13:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.22 2008/11/14 21:26:26 theurich Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.23 2008/11/14 22:13:00 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1232,7 +1232,7 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
         ESMF_CONTEXT, rc)) return @\
 @\
     ! Create Array with undistributed dimensions                                @\
-    array = ESMF_ArrayCreateFromPtr(farrayPtr, distgrid=distgrid, & @\
+    array = ESMF_ArrayCreate(farrayPtr, distgrid=distgrid, & @\
             copyflag=copyflag, & @\
             distgridToArrayMap=distgridToArrayMap (1:gridDimCount), & @\
             computationalEdgeLWidth=compELWidth(1:gridDimCount), & @\

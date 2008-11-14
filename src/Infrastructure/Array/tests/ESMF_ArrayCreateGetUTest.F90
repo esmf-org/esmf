@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.10 2008/11/14 21:26:26 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.11 2008/11/14 22:13:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.10 2008/11/14 21:26:26 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.11 2008/11/14 22:13:00 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -184,16 +184,16 @@ program ESMF_ArrayCreateGetUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayCreateFromPtr with 3D farray on 2D DistGrid Test as Ptr"
+  write(name, *) "ArrayCreate from Ptr with 3D farray on 2D DistGrid Test as Ptr"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   allocate(farrayPtr3D(-2:6,12,3:10))
-  array = ESMF_ArrayCreateFromPtr(farrayPtr=farrayPtr3D, distgrid=distgrid, &
+  array = ESMF_ArrayCreate(farrayPtr=farrayPtr3D, distgrid=distgrid, &
     name="MyArray", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayPrint for ArrayCreateFromPtr Test"
+  write(name, *) "ArrayPrint for ArrayCreate from Ptr Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

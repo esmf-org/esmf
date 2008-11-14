@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.50 2008/11/14 21:26:26 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.51 2008/11/14 22:13:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -4922,7 +4922,7 @@ contains
             distgridToArrayMap(i) = l_g2fm(l_dg2gm(i))
         enddo
         ! create array
-        array = ESMF_ArrayCreateFromPtr(farray, distgrid, copyflag, distgridToArrayMap, &
+        array = ESMF_ArrayCreate(farray, distgrid, copyflag, distgridToArrayMap, &
 !            computationalEdgeLWidth=celw, computationalEdgeUWidth=ceuw, &
             totalLWidth=maxHaloLWidth, totalUWidth=maxHaloUWidth, & 
             rc=localrc)

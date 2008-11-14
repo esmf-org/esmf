@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.22.2.14 2008/11/14 21:26:26 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.22.2.15 2008/11/14 22:13:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -78,7 +78,6 @@ module ESMF_ArrayCreateMod
 
 ! - ESMF-public methods:
   public ESMF_ArrayCreate
-  public ESMF_ArrayCreateFromPtr
   public ESMF_ArrayDestroy
 
 ! - ESMF-internal methods:
@@ -95,30 +94,13 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.22.2.14 2008/11/14 21:26:26 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.22.2.15 2008/11/14 22:13:00 theurich Exp $'
 
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-
-! -------------------------- ESMF-public method -------------------------------
-!BOPI
-! !IROUTINE: ESMF_ArrayCreateFromPtr -- Generic interface
-
-! !INTERFACE:
-  interface ESMF_ArrayCreateFromPtr
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-    TypeKindRankInterfaceMacro(ArrayCreateFromPtr)
-    
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-! types of {\tt ESMF\_ArrayCreateFromPtr} functions.   
-!EOPI 
-  end interface
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -131,6 +113,7 @@ module ESMF_ArrayCreateMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     TypeKindRankInterfaceMacro(ArrayCreateAssmdShape)
+    TypeKindRankInterfaceMacro(ArrayCreateFromPtr)
     module procedure ESMF_ArrayCreateLocalArray
     module procedure ESMF_ArrayCreateAllocate
     module procedure ESMF_ArrayCreateCopy
@@ -161,10 +144,10 @@ contains
 #define ArrayCreateFromPtrDoc() \
 ! -------------------------- ESMF-public method ----------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayCreateFromPtr - Create Array object from Fortran array pointer @\
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from Fortran array pointer @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_ArrayCreateFromPtr() @\
+! ! Private name; call using ESMF_ArrayCreate() @\
 ! function ESMF_ArrayCreateFromPtr<rank><type><kind>(farrayPtr, & @\
 !   distgrid, copyflag, distgridToArrayMap, computationalEdgeLWidth, & @\
 !   computationalEdgeUWidth, computationalLWidth, & @\
