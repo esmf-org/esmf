@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.6.2.5 2008/11/03 22:25:54 theurich Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.6.2.6 2008/11/14 21:26:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -146,7 +146,8 @@ program ESMF_ArrayFarrayEx
 ! just created.
 !EOE
 !BOC
-  array = ESMF_ArrayCreate(farray=farrayE, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farrayE, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array)
@@ -224,7 +225,8 @@ program ESMF_ArrayFarrayEx
 !BOC
   allocate(farrayA(10,10))    ! user controlled allocation
   farrayA = 23.67d0           ! initialize to some value
-  array = ESMF_ArrayCreate(farray=farrayA, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farrayA, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
@@ -240,7 +242,8 @@ program ESMF_ArrayFarrayEx
 !BOC
   allocate(farrayP(10,10))    ! user controlled allocation
   farrayP = 56.81d0           ! initialize to some value
-  array = ESMF_ArrayCreate(farray=farrayP, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farrayP, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC

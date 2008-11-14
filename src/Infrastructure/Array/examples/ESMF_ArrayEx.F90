@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.35.2.6 2008/09/18 21:04:16 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.35.2.7 2008/11/14 21:26:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1924,7 +1924,7 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   array = ESMF_ArrayCreate(farray=myF90Array2D, distgrid=distgrid, &
-    distgridToArrayMap=(/0,2/), rc=rc)
+    indexflag=ESMF_INDEX_DELOCAL, distgridToArrayMap=(/0,2/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE

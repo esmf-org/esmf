@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.22.2.13 2008/09/18 21:04:21 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.22.2.14 2008/11/14 21:26:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.22.2.13 2008/09/18 21:04:21 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.22.2.14 2008/11/14 21:26:26 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -362,10 +362,10 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Create the Array object by calling into overloaded ArrayCreate() interf. @\
-    array = ESMF_ArrayCreate(larrayList, distgrid, copyflag_opt, & @\
-      distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
-      computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, & @\
-      ESMF_INDEX_USER, staggerLoc, vectorDim, name=name, rc=localrc) @\
+    array = ESMF_ArrayCreate(larrayList, distgrid, ESMF_INDEX_USER, & @\
+      copyflag_opt, distgridToArrayMap, computationalEdgeLWidth, & @\
+      computationalEdgeUWidth, computationalLWidth, computationalUWidth, & @\
+      totalLWidth, totalUWidth, staggerLoc, vectorDim, name=name, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
@@ -395,15 +395,16 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayCreate() @\
 ! function ESMF_ArrayCreateAssmdShape<rank><type><kind>(farray, & @\
-!   distgrid, copyflag, distgridToArrayMap, computationalEdgeLWidth, & @\
-!   computationalEdgeUWidth, computationalLWidth, & @\
+!   distgrid, indexflag, copyflag, distgridToArrayMap, & @\
+!   computationalEdgeLWidth, computationalEdgeUWidth, computationalLWidth, & @\
 !   computationalUWidth, totalLWidth, & @\
-!   totalUWidth, indexflag, staggerLoc, vectorDim, & @\
+!   totalUWidth, staggerLoc, vectorDim, & @\
 !   undistLBound, undistUBound, name, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),intent(in),target :: farray @\
 !   type(ESMF_DistGrid),   intent(in)              :: distgrid @\
+!   type(ESMF_IndexFlag),  intent(in)              :: indexflag @\
 !   type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
 !   integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
 !   integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
@@ -412,7 +413,6 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 !   integer,               intent(in),   optional  :: computationalUWidth(:) @\
 !   integer,               intent(in),   optional  :: totalLWidth(:) @\
 !   integer,               intent(in),   optional  :: totalUWidth(:) @\
-!   type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag @\
 !   integer,               intent(in),   optional  :: staggerLoc @\
 !   integer,               intent(in),   optional  :: vectorDim @\
 !   integer,               intent(in),   optional  :: undistLBound(:) @\
@@ -457,6 +457,9 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and @\
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal @\
 !      to the rank of farray. @\
+! \item[indexflag] @\
+!      Indicate how DE-local indices are defined. See section @\
+!      \ref{opt:indexflag} for a list of valid indexflag options. @\
 ! \item[{[copyflag]}] @\
 !      Specifies whether the Array object will reference the memory allocation @\
 !      provided by {\tt farray} directly or will copy the data from @\
@@ -517,13 +520,6 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 !      The default is a vector that contains the remaining number of elements @\
 !      in each direction as to fit the union of exclusive and computational @\
 !      region into the memory region provided by the {\tt farray} argument. @\
-! \item[{[indexflag]}] @\
-!      Indicate how DE-local indices are defined. By default each DE|s @\
-!      exclusive region is placed to start at the local index space origin, @\
-!      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be @\
-!      aligned with the global index space, if a global index space is well @\
-!      defined by the associated DistGrid. See section \ref{opt:indexflag} @\
-!      for a list of valid indexflag options. @\
 ! \item[{[staggerLoc]}] @\
 !      Stagger location is an arbitrary integer index. This information is @\
 !      used to correctly apply connection transformations of the @\
@@ -555,16 +551,17 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayCreateAssmdShape" @\
   function ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind(farray, & @\
-    distgrid, copyflag, distgridToArrayMap, & @\
+    distgrid, indexflag, copyflag, distgridToArrayMap, & @\
     computationalEdgeLWidth, computationalEdgeUWidth, & @\
     computationalLWidth, computationalUWidth, totalLWidth, & @\
-    totalUWidth, indexflag, staggerLoc, vectorDim, & @\
+    totalUWidth, staggerLoc, vectorDim, & @\
     undistLBound, undistUBound, name, rc) @\
 @\
     type(ESMF_Array) :: ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind @\
 @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
     type(ESMF_DistGrid),   intent(in)              :: distgrid @\
+    type(ESMF_IndexFlag),  intent(in)              :: indexflag @\
     type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
     integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
     integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
@@ -573,7 +570,6 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
     integer,               intent(in),   optional  :: computationalUWidth(:) @\
     integer,               intent(in),   optional  :: totalLWidth(:) @\
     integer,               intent(in),   optional  :: totalUWidth(:) @\
-    type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag @\
     integer,               intent(in),   optional  :: staggerLoc @\
     integer,               intent(in),   optional  :: vectorDim @\
     integer,               intent(in),   optional  :: undistLBound(:) @\
@@ -603,13 +599,11 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
     if (present(copyflag)) copyflag_opt = copyflag @\
 @\
     ! Check that indexflag does not specify mode that is not supported here @\
-    if (present(indexflag)) then @\
-      if (indexflag==ESMF_INDEX_USER) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
-          "- ESMF_INDEX_USER not supported as input value", & @\
-          ESMF_CONTEXT, rc) @\
-        return @\
-      endif @\
+    if (indexflag==ESMF_INDEX_USER) then @\
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
+        "- ESMF_INDEX_USER not supported as input value", & @\
+        ESMF_CONTEXT, rc) @\
+      return @\
     endif @\
 @\
     ! Prepare the LocalArray list to be used in the ArrayCreate() call @\
@@ -620,11 +614,10 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Create the Array object by calling into overloaded ArrayCreate() interf. @\
-    array = ESMF_ArrayCreate(larrayList, distgrid, copyflag_opt, & @\
+    array = ESMF_ArrayCreate(larrayList, distgrid, indexflag, copyflag_opt, & @\
       distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
       computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, & @\
-      indexflag, staggerLoc, vectorDim, undistLBound, undistUBound, name, & @\
-      localrc) @\
+      staggerLoc, vectorDim, undistLBound, undistUBound, name, localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
@@ -657,14 +650,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateLocalArray(larrayList, distgrid, copyflag, &
-    distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
-    computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    indexflag, staggerLoc, vectorDim, undistLBound, undistUBound, name, rc)
+  function ESMF_ArrayCreateLocalArray(larrayList, distgrid, indexflag, &
+    copyflag, distgridToArrayMap, computationalEdgeLWidth, &
+    computationalEdgeUWidth, computationalLWidth, computationalUWidth, &
+    totalLWidth, totalUWidth, staggerLoc, vectorDim, undistLBound, &
+    undistUBound, name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_LocalArray), intent(in)              :: larrayList(:)
        type(ESMF_DistGrid),   intent(in)              :: distgrid
+       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
@@ -673,7 +668,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        integer,               intent(in),   optional  :: computationalUWidth(:)
        integer,               intent(in),   optional  :: totalLWidth(:)
        integer,               intent(in),   optional  :: totalUWidth(:)
-       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: staggerLoc
        integer,               intent(in),   optional  :: vectorDim
        integer,               intent(in),   optional  :: undistLBound(:)
@@ -719,6 +713,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
+! \item[{[indexflag]}]
+!      Indicate how DE-local indices are defined. By default each DE's
+!      exclusive region is placed to start at the local index space origin,
+!      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
+!      aligned with the global index space, if a global index space is well
+!      defined by the associated DistGrid. See section \ref{opt:indexflag}
+!      for a list of valid indexflag options.
 ! \item[{[copyflag]}]
 !      Specifies whether the Array object will reference the memory allocation
 !      provided by {\tt farray} directly or will copy the data from
@@ -778,13 +779,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      The default is a vector that contains the remaining number of elements
 !      in each direction as to fit the union of exclusive and computational
 !      region into the memory region provided by the {\tt larrayList} argument.
-! \item[{[indexflag]}]
-!      Indicate how DE-local indices are defined. By default each DE's
-!      exclusive region is placed to start at the local index space origin,
-!      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
-!      aligned with the global index space, if a global index space is well
-!      defined by the associated DistGrid. See section \ref{opt:indexflag}
-!      for a list of valid indexflag options.
 ! \item[{[staggerLoc]}]
 !      Stagger location is an arbitrary integer index. This information is
 !      used to correctly apply connection transformations of the
@@ -974,14 +968,15 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateAllocate(arrayspec, distgrid, distgridToArrayMap, &
-    computationalEdgeLWidth, computationalEdgeUWidth, &
+  function ESMF_ArrayCreateAllocate(arrayspec, distgrid, indexflag, &
+    distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    indexflag, staggerLoc, vectorDim, undistLBound, undistUBound, name, rc)
+    staggerLoc, vectorDim, undistLBound, undistUBound, name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
        type(ESMF_DistGrid),   intent(in)              :: distgrid
+       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
        integer,               intent(in),   optional  :: computationalEdgeUWidth(:)
@@ -989,7 +984,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        integer,               intent(in),   optional  :: computationalUWidth(:)
        integer,               intent(in),   optional  :: totalLWidth(:)
        integer,               intent(in),   optional  :: totalUWidth(:)
-       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: staggerLoc
        integer,               intent(in),   optional  :: vectorDim
        integer,               intent(in),   optional  :: undistLBound(:)
@@ -1019,6 +1013,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
+! \item[{[indexflag]}]
+!      Indicate how DE-local indices are defined. By default each DE's
+!      exclusive region is placed to start at the local index space origin,
+!      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
+!      aligned with the global index space, if a global index space is well
+!      defined by the associated DistGrid. See section \ref{opt:indexflag}
+!      for a list of valid indexflag options.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by @\
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
@@ -1069,13 +1070,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      region with respect to the upper corner of the computational region.
 !      The default is to accommodate the union of exclusive and computational
 !      region.
-! \item[{[indexflag]}]
-!      Indicate how DE-local indices are defined. By default each DE's
-!      exclusive region is placed to start at the local index space origin,
-!      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
-!      aligned with the global index space, if a global index space is well
-!      defined by the associated DistGrid. See section \ref{opt:indexflag}
-!      for a list of valid indexflag options.
 ! \item[{[staggerLoc]}]
 !      Stagger location is an arbitrary integer index. This information is
 !      used to correctly apply connection transformations of the

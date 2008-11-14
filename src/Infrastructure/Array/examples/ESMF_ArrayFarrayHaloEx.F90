@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.7.2.5 2008/11/03 22:28:28 theurich Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.7.2.6 2008/11/14 21:26:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -104,7 +104,8 @@ program ESMF_ArrayFarrayHaloEx
 ! any additional arguments.
 !EOE
 !BOC
-  array = ESMF_ArrayCreate(farray=farrayA, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farrayA, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 call ESMF_ArrayPrint(array)

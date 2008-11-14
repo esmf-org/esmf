@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.9 2008/11/07 23:52:08 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.10 2008/11/14 21:26:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.9 2008/11/07 23:52:08 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.12.2.10 2008/11/14 21:26:26 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -419,7 +419,8 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate AssmdShape 1D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(farray=farray1D, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farray1D, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -455,7 +456,8 @@ program ESMF_ArrayCreateGetUTest
   write(name, *) "ArrayCreate AssmdShape 1D ESMF_TYPEKIND_R8 w/ negative computationalEdge widths Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array = ESMF_ArrayCreate(farray=farray1D, distgrid=distgrid, &
-    computationalEdgeLWidth=(/-1/), computationalEdgeUWidth=(/-1/), rc=rc)
+    indexflag=ESMF_INDEX_DELOCAL, computationalEdgeLWidth=(/-1/), &
+    computationalEdgeUWidth=(/-1/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -486,7 +488,8 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate AssmdShape 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(farray=farray2D, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farray2D, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -525,7 +528,8 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate AssmdShape 3D ESMF_TYPEKIND_R4 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(farray=farray3D, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farray3D, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -557,7 +561,8 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate AssmdShape 4D ESMF_TYPEKIND_I4 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(farray=farray4D, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farray4D, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.8.2.6 2008/11/07 23:52:08 theurich Exp $
+! $Id: ESMF_ArrayDataUTest.F90,v 1.8.2.7 2008/11/14 21:26:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayDataUTest.F90,v 1.8.2.6 2008/11/07 23:52:08 theurich Exp $'
+    '$Id: ESMF_ArrayDataUTest.F90,v 1.8.2.7 2008/11/14 21:26:26 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -85,7 +85,7 @@ program ESMF_ArrayDataUTest
   !NEX_UTest
   write(name, *) "Creating an Array from allocated F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(fdata, distgrid, rc=rc)
+  array = ESMF_ArrayCreate(fdata, distgrid, indexflag=ESMF_INDEX_DELOCAL, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -159,7 +159,8 @@ program ESMF_ArrayDataUTest
   !NEX_UTest
   write(name, *) "Creating an Array from allocated F90 array pointer using ESMF_DATA_COPY"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(fdata, distgrid, copyflag=ESMF_DATA_COPY, rc=rc)
+  array = ESMF_ArrayCreate(fdata, distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+    copyflag=ESMF_DATA_COPY, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -236,7 +237,8 @@ program ESMF_ArrayDataUTest
   !NEX_UTest
   write(name, *) "Creating an Array from allocated F90 array pointer slice"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(fdataSlice, distgrid, rc=rc)
+  array = ESMF_ArrayCreate(fdataSlice, distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+    rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -318,7 +320,8 @@ program ESMF_ArrayDataUTest
   !NEX_UTest
   write(name, *) "Creating an Array from allocated F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(fdataSlice, distgrid, rc=rc)
+  array = ESMF_ArrayCreate(fdataSlice, distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+    rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -392,7 +395,8 @@ program ESMF_ArrayDataUTest
   !NEX_UTest
   write(name, *) "Creating an Array from allocated F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(fdataSlice, distgrid, copyflag=ESMF_DATA_COPY, rc=rc)
+  array = ESMF_ArrayCreate(fdataSlice, distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+    copyflag=ESMF_DATA_COPY, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 

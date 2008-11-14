@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.1.2.5 2008/05/19 17:38:11 cdeluca Exp $
+! $Id: ESMF_FieldEx.F90,v 1.1.2.6 2008/11/14 21:26:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -126,7 +126,8 @@
 
     ! create an Array 
     array3d = ESMF_ArrayCreate(farray, distgrid=distgrid3d, &
-        staggerloc=0, computationalEdgeLWidth=(/0,0,0/), &
+        indexflag=ESMF_INDEX_DELOCAL, staggerloc=0, &
+        computationalEdgeLWidth=(/0,0,0/), &
         computationalEdgeUWidth=(/-1,-1,-1/), rc=rc) 
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

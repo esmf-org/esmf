@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.21 2008/09/26 20:23:32 theurich Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.22 2008/11/14 21:26:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.21 2008/09/26 20:23:32 theurich Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.22 2008/11/14 21:26:26 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -453,8 +453,9 @@ contains
 @\
     ! create a new array to be used to replace existing field%array @\
     comp_edge_u_width = -1 @\
-    array = ESMF_ArrayCreate(dataptr, distgrid=distgrid, staggerloc=staggerloc, & @\
-                         computationalEdgeUWidth=comp_edge_u_width, rc=localrc) @\
+    array = ESMF_ArrayCreate(dataptr, distgrid=distgrid, indexflag=indexflag, & @\
+      staggerloc=staggerloc, computationalEdgeUWidth=comp_edge_u_width, & @\
+      rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
                               ESMF_ERR_PASSTHRU, & @\
                               ESMF_CONTEXT, rc)) return @\
@@ -896,7 +897,8 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
         ESMF_CONTEXT, rc)) return @\
 @\
     ! Create Array with undistributed dimensions                                @\
-    array = ESMF_ArrayCreate(farray, distgrid=distgrid, copyflag=copyflag, & @\
+    array = ESMF_ArrayCreate(farray, distgrid=distgrid,  & @\
+            indexflag=indexflag, copyflag=copyflag, & @\
             distgridToArrayMap=distgridToArrayMap (1:gridDimCount), & @\
             undistLBound=undistLBound(1:fieldUndistDimCount), & @\
             undistUBound=undistUBound(1:fieldUndistDimCount), & @\
@@ -904,7 +906,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
             computationalEdgeUWidth=compEUWidth(1:gridDimCount), & @\
             totalLWidth=localMaxHaloLWidth(1:gridDimCount), & @\
             totalUWidth=localMaxHaloUWidth(1:gridDimCount), & @\
-            staggerloc=localStaggerLoc%staggerloc, indexflag=indexflag, rc=localrc) @\
+            staggerloc=localStaggerLoc%staggerloc, rc=localrc) @\
             if (ESMF_LogMsgFoundError(localrc, & @\
                    ESMF_ERR_PASSTHRU, & @\
                    ESMF_CONTEXT, rc)) return @\
