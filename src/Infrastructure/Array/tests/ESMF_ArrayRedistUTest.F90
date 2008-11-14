@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.9 2008/10/20 18:36:28 theurich Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.10 2008/11/14 05:06:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@ program ESMF_ArrayRedistUTest
 
 !------------------------------------------------------------------------------
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 #include "ESMF.h"
 
 !==============================================================================
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.9 2008/10/20 18:36:28 theurich Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.10 2008/11/14 05:06:45 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------

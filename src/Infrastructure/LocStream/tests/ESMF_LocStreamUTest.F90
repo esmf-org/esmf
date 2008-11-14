@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStreamUTest.F90,v 1.3 2008/10/13 17:40:14 oehmke Exp $
+! $Id: ESMF_LocStreamUTest.F90,v 1.4 2008/11/14 05:06:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@ program ESMF_LocStreamCreateUTest
 
 !------------------------------------------------------------------------------
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
 !==============================================================================
 !BOP
@@ -34,7 +34,7 @@ program ESMF_LocStreamCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_LocStreamUTest.F90,v 1.3 2008/10/13 17:40:14 oehmke Exp $'
+    '$Id: ESMF_LocStreamUTest.F90,v 1.4 2008/11/14 05:06:45 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"

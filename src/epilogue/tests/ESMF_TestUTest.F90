@@ -1,4 +1,4 @@
-! $Id: ESMF_TestUTest.F90,v 1.2 2008/04/05 03:39:21 cdeluca Exp $
+! $Id: ESMF_TestUTest.F90,v 1.3 2008/11/14 05:06:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@ program ESMF_TestUTest
 
 !------------------------------------------------------------------------------
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
 !==============================================================================
 !BOP

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateHelpers.F90,v 1.15 2008/05/08 04:46:08 theurich Exp $
+! $Id: ESMF_StateHelpers.F90,v 1.16 2008/11/14 05:06:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -11,7 +11,7 @@
 
 #define ESMF_FILENAME "ESMF_StateHelpers.F90"
 
-#include <ESMF.h>
+#include "ESMF.h"
 
 module ESMF_StateHelpers
 

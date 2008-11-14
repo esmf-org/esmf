@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.29 2008/09/29 17:21:16 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.30 2008/11/14 05:06:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 
 !------------------------------------------------------------------------------
 
-#include <ESMF.h>
+#include "ESMF.h"
 
 !==============================================================================
 !BOPI

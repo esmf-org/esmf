@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridCompUTest.F90,v 1.3 2008/10/23 20:59:53 rokuingh Exp $
+! $Id: ESMF_AttributeGridCompUTest.F90,v 1.4 2008/11/14 05:06:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@ program ESMF_AttributeGridCompUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include <ESMF.h>
+#include "ESMF.h"
 !
 !==============================================================================
 !BOP
@@ -35,7 +35,7 @@ program ESMF_AttributeGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.3 2008/10/23 20:59:53 rokuingh Exp $'
+      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.4 2008/11/14 05:06:48 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
