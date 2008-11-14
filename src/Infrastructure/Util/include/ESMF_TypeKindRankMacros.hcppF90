@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindRankMacros.hcppF90,v 1.4 2008/04/05 03:39:01 cdeluca Exp $
+! $Id: ESMF_TypeKindRankMacros.hcppF90,v 1.5 2008/11/14 05:23:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,8 +34,8 @@
 ! a multiline macro, and the output piped thru 'tr' to translate each
 ! @ into <cr> to produce multiple lines of fortran code from a single
 ! macro invocation.   If any preprocessor directives are to be left in the
-! output file (e.g. #include <>), the source should use ^directive (e.g.
-! ^include <header.h> ) again using 'tr' to substitute # for ^ after
+! output file (e.g. #include ""), the source should use ^directive (e.g.
+! ^include "header.h" ) again using 'tr' to substitute # for ^ after
 ! preprocessing is completed.  
 !------------------------------------------------------------------------------
 #endif
