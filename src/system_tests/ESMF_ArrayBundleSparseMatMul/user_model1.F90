@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.4 2008/06/13 00:29:33 theurich Exp $
+! $Id: user_model1.F90,v 1.5 2008/11/14 18:38:30 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -88,7 +88,7 @@ module user_model1
     ! Local variables
     type(ESMF_ArraySpec)  :: arrayspec
     type(ESMF_DistGrid)   :: distgrid
-    type(ESMF_Array)      :: array(2)
+    type(ESMF_Array)      :: array(3)
     type(ESMF_ArrayBundle):: arraybundle
     type(ESMF_VM)         :: vm
     integer               :: petCount
@@ -114,7 +114,11 @@ module user_model1
       indexflag=ESMF_INDEX_GLOBAL, name="array data 1", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     array(2) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-      indexflag=ESMF_INDEX_GLOBAL, name="array data 2", rc=rc)
+      indexflag=ESMF_INDEX_GLOBAL, totalUWidth=(/1,0/), &
+      name="array data 2", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    array(3) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+      indexflag=ESMF_INDEX_GLOBAL, name="array data 3", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     arraybundle = ESMF_ArrayBundleCreate(arrayList=array, name="srcAryBndl", &
       rc=rc)
@@ -139,10 +143,11 @@ module user_model1
 
     ! Local variables
     real(ESMF_KIND_R8)    :: pi
-    type(ESMF_Array)      :: array(2)
+    type(ESMF_Array)      :: array(3)
     type(ESMF_ArrayBundle):: arraybundle
     real(ESMF_KIND_R8), pointer :: farrayPtr1(:,:)   ! matching F90 array ptr
     real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)   ! matching F90 array ptr
+    real(ESMF_KIND_R8), pointer :: farrayPtr3(:,:)   ! matching F90 array ptr
     integer               :: i, j
     
     ! Initialize return code
@@ -165,6 +170,8 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(array(2), localDe=0, farrayPtr=farrayPtr2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayGet(array(3), localDe=0, farrayPtr=farrayPtr3, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Fill source Array with data
     do j = lbound(farrayPtr1, 2), ubound(farrayPtr1, 2)
@@ -173,6 +180,7 @@ module user_model1
           + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
           + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi)
         farrayPtr2(i,j) = farrayPtr1(i,j) + 123.456d0
+        farrayPtr3(i,j) = farrayPtr1(i,j) - 123.456d0
       enddo
     enddo
  
@@ -193,7 +201,7 @@ module user_model1
 
     ! Local variables
     type(ESMF_DistGrid)   :: distgrid
-    type(ESMF_Array)      :: array(2)
+    type(ESMF_Array)      :: array(3)
     type(ESMF_ArrayBundle):: arraybundle
     
     ! Initialize return code
@@ -212,6 +220,8 @@ module user_model1
     call ESMF_ArrayDestroy(array(1), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayDestroy(array(2), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayDestroy(array(3), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_DistGridDestroy(distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

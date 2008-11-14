@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.h,v 1.12 2008/04/05 03:38:52 cdeluca Exp $
+// $Id: ESMC_RHandle.h,v 1.13 2008/11/14 18:38:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -59,7 +59,8 @@ typedef enum {
     ESMC_REDISTHANDLE, 
     ESMC_REGRIDHANDLE, 
     ESMC_UNINITIALIZEDHANDLE,
-    ESMC_ARRAYSPARSEMATMULHANDLE
+    ESMC_ARRAYXXE,
+    ESMC_ARRAYBUNDLEXXE
 } ESMC_HandleType;
 
 // how many route tables are there inside a single handle?  one to one means

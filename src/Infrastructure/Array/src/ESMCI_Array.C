@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.33 2008/11/04 20:06:10 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.34 2008/11/14 18:38:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.33 2008/11/04 20:06:10 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.34 2008/11/14 18:38:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4849,7 +4849,7 @@ void accessLookup(
   // localPet locally acts as server and client to fill its own request
   // t-specific client-server routine
   localClientServerExchange(t);
-  // localPet acts as server, processing requests from clients, send responses
+  // localPet acts as server, processing requests from clients, send response sz
   for (int ii=localPet+1; ii<localPet+petCount; ii++){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -4865,22 +4865,10 @@ void accessLookup(
       send2commhList[i] = NULL;
       vm->send(&(responseStreamSizeServer[i]), sizeof(int), i,
         &(send2commhList[i]));
-      if (responseStreamSize>0){
-        // construct response stream
-        responseStreamServer[i] = new char[responseStreamSize];
-        // t-specific server routine
-        serverResponse(t, count, i, requestStreamServer, responseStreamServer);
-        // send response stream to client Pet "i"
-        send3commhList[i] = NULL;
-        vm->send(responseStreamServer[i], responseStreamSize, i,
-          &(send3commhList[i]));
-        // garbage collection
-        delete [] requestStreamServer[i];
-      }
     }
   }
   // localPet acts as a client, waits for response size from server and posts
-  // 2nd receive for response stream
+  // receive for response stream
   for (int ii=localPet+petCount-1; ii>localPet; ii--){
     // localPet-dependent shifted loop reduces communication contention
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
@@ -4894,6 +4882,27 @@ void accessLookup(
         recv2commhList[i] = NULL;
         vm->recv(responseStreamClient[i], responseStreamSize, i,
           &(recv2commhList[i]));
+      }
+    }
+  }
+  // localPet acts as server, send response stream
+  for (int ii=localPet+1; ii<localPet+petCount; ii++){
+    // localPet-dependent shifted loop reduces communication contention
+    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
+    int count = localIntervalPerPetCount[i];
+    if (count>0){
+      int responseStreamSize = responseStreamSizeServer[i];
+      if (responseStreamSize>0){
+        // construct response stream
+        responseStreamServer[i] = new char[responseStreamSize];
+        // t-specific server routine
+        serverResponse(t, count, i, requestStreamServer, responseStreamServer);
+        // send response stream to client Pet "i"
+        send3commhList[i] = NULL;
+        vm->send(responseStreamServer[i], responseStreamSize, i,
+          &(send3commhList[i]));
+        // garbage collection
+        delete [] requestStreamServer[i];
       }
     }
   }
@@ -7657,10 +7666,10 @@ int sparseMatMulStoreEncodeXXE(
   // todo: from what I saw being set in ESMF_IArrayHaloStoreIndex()
   // todo: All I need here is a valid RouteHandle so I can attach an XXE object.
   localrc =
-    (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYSPARSEMATMULHANDLE);
+    (*routehandle)->ESMC_RouteHandleSetType(ESMC_ARRAYXXE);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  localrc = (*routehandle)->ESMC_RouteHandleSetRouteCount(1);
+  localrc = (*routehandle)->ESMC_RouteHandleSetRouteCount(0);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   localrc = (*routehandle)->ESMC_RouteHandleSetRMapType(ESMC_1TO1HANDLEMAP);
@@ -7823,7 +7832,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       dstInfoTableInit[i] = 0;   // reset
     }
     char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
-    localrc = xxe->appendStorage(localDeFactorBuffer); // XXE garbage collec.
+    localrc = xxe->storeStorage(localDeFactorBuffer); // XXE garbage collec.
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
 #ifdef ASMMSTORETIMING
@@ -7928,7 +7937,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     for (int i=0; i<recvnbDiffPartnerDeCount; i++){
       // large contiguous 1st level receive buffer
       char *buffer = new char[recvnbPartnerDeCount[i] * dataSizeSrc];
-      localrc = xxe->appendStorage(buffer); // XXE garbage collec.
+      localrc = xxe->storeStorage(buffer); // XXE garbage collec.
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       int srcDe = recvnbPartnerDeList[i];
@@ -8018,7 +8027,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       srcInfoTableInit[i] = 0;   // reset
     }
     char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
-    localrc = xxe->appendStorage(localDeFactorBuffer); // XXE garbage collec.
+    localrc = xxe->storeStorage(localDeFactorBuffer); // XXE garbage collec.
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
       ESMF_ERR_PASSTHRU, &rc)) return rc;
     for (int i=0; i<localDeFactorCount; i++){
@@ -8131,7 +8140,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       }
       // intermediate buffer (in case it is needed)
       char *buffer = new char[sendnbPartnerDeCount[i] * dataSizeSrc];
-      localrc = xxe->appendStorage(buffer); // XXE garbage collec.
+      localrc = xxe->storeStorage(buffer); // XXE garbage collec.
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMF_ERR_PASSTHRU, &rc)) return rc;
       int srcDe = srcLocalDeList[j];
@@ -8792,14 +8801,14 @@ int Array::sparseMatMul(
   VMK::wtime(&t3);      //gjt - profile
 #endif
   
+  // set filterBitField  
   int filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
   
   //TODO: determine XXE filterBitField for XXE exec(),
-  // considering src vs. dst, DE, phase of nb-call...
+  //TODO: considering src vs. dst, DE, phase of nb-call...
   
   if (zeroflag!=ESMF_REGION_TOTAL)
     filterBitField |= 1;  // filter the region_total zero operations
-
   if (zeroflag!=ESMF_REGION_SELECT)
     filterBitField |= 2;  // filter the region_select zero operations
   

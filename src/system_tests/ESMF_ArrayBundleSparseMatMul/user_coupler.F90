@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4 2008/06/13 00:29:33 theurich Exp $
+! $Id: user_coupler.F90,v 1.5 2008/11/14 18:38:30 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -88,7 +88,6 @@ module user_coupler
 
     ! Local variables
     integer :: itemcount, localPet
-    type(ESMF_Array) :: srcArray(2), dstArray(2)
     type(ESMF_ArrayBundle):: srcArraybundle, dstArraybundle
     type(ESMF_VM) :: vm
     real(ESMF_KIND_R8):: factorList(10000)
@@ -111,18 +110,12 @@ module user_coupler
     call ESMF_StateReconcile(exportState, vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Get source Array out of import state
-    call ESMF_StateGet(importState, "srcAryBndl", srcArraybundle, &
-      rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArrayBundleGet(srcArraybundle, arrayList=srcArray, rc=rc)
+    ! Get source ArrayBundle out of import state
+    call ESMF_StateGet(importState, "srcAryBndl", srcArraybundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Get destination Array out of export state
-    call ESMF_StateGet(exportState, "dstAryBndl", dstArraybundle, &
-      rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArrayBundleGet(dstArraybundle, arrayList=dstArray, rc=rc)
+    ! Get destination ArrayBundle out of export state
+    call ESMF_StateGet(exportState, "dstAryBndl", dstArraybundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! get localPet
@@ -184,7 +177,6 @@ module user_coupler
     integer, intent(out) :: rc
 
     ! Local variables
-    type(ESMF_Array) :: srcArray(2), dstArray(2)
     type(ESMF_ArrayBundle):: srcArraybundle, dstArraybundle
 
     ! Initialize return code
@@ -192,18 +184,12 @@ module user_coupler
 
     print *, "User Coupler Run starting"
 
-    ! Get source Array out of import state
-    call ESMF_StateGet(importState, "srcAryBndl", srcArrayBundle, &
-      rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArrayBundleGet(srcArraybundle, arrayList=srcArray, rc=rc)
+    ! Get source ArrayBundle out of import state
+    call ESMF_StateGet(importState, "srcAryBndl", srcArrayBundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Get destination Array out of export state
-    call ESMF_StateGet(exportState, "dstAryBndl", dstArraybundle, &
-      rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArrayBundleGet(dstArraybundle, arrayList=dstArray, rc=rc)
+    ! Get destination ArrayBundle out of export state
+    call ESMF_StateGet(exportState, "dstAryBndl", dstArraybundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Use ESMF_ArrayBundleSMM() to take data

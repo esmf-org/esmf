@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.11 2008/11/04 19:08:24 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.12 2008/11/14 18:38:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -328,9 +328,10 @@ class XXE{
     int incCommhandleCount();
     int incXxeSubCount();
     
-    int appendStorage(char *storage);
-    int appendCommhandle(VMK::commhandle **commhandle);
-    int appendXxeSub(XXE *xxeSub);
+    int storeStorage(char *storage);
+    int storeCommhandle(VMK::commhandle **commhandle);
+    int storeXxeSub(XXE *xxeSub);
+    int appendXxeSub(int predicateBitField, XXE *xxeSub, int rraShift);
     int appendWtimer(int predicateBitField, char *string, int id, int actualId,
       int relativeId=0, XXE *relativeXXE=NULL);
     int appendRecvnb(int predicateBitField, void *buffer, int size, int srcPet,
@@ -616,6 +617,7 @@ class XXE{
       OpId opId;
       int predicateBitField;
       XXE *xxe;
+      int rraShift;
     }XxeSubInfo;
     
     typedef struct{
