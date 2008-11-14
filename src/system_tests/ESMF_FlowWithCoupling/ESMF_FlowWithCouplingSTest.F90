@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.28 2007/12/14 19:53:24 svasquez Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.29 2008/11/14 04:39:17 theurich Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -20,7 +20,7 @@
 
     program ESMF_CoupledFlowDemo
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
     ! ESMF Framework module, defines all ESMF data types and procedures
     use ESMF_Mod

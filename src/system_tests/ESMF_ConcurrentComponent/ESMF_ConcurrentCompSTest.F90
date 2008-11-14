@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentCompSTest.F90,v 1.3 2008/06/27 17:24:15 theurich Exp $
+! $Id: ESMF_ConcurrentCompSTest.F90,v 1.4 2008/11/14 04:39:16 theurich Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -42,9 +42,9 @@
 
     program ConcurrentComponent
 
-#include <ESMF_Macros.inc>
-#include <ESMF_Conf.inc>
-#include <ESMF.h>
+#include "ESMF_Macros.inc"
+#include "ESMF_Conf.inc"
+#include "ESMF.h"
 #define ESMF_METHOD "ConcurrentComponent"
 
     ! ESMF Framework module

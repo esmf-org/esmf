@@ -13,7 +13,7 @@ program ESMF_AttributeSTest
 #define ESMF_METHOD "program ESMF_AttributeSTest"
 
 #include "ESMF.h"
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
   ! ESMF Framework module
   use ESMF_Mod

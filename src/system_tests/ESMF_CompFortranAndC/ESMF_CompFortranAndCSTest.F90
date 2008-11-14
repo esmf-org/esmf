@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.7 2008/09/13 05:02:00 theurich Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.8 2008/11/14 04:39:16 theurich Exp $
 !
 ! System test CompFortranAndC
 !  Description on Sourceforge under System Test #63029
@@ -39,7 +39,7 @@
 #define ESMF_METHOD "program CompFortranAndC"
 
 #include "ESMF.h"
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
     ! ESMF Framework module
     use ESMF_Mod

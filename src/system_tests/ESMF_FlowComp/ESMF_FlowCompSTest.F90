@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.27 2007/12/14 19:53:24 svasquez Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.28 2008/11/14 04:39:17 theurich Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -17,7 +17,7 @@
 
     program FlowComp
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
     ! ESMF Framework module
     use ESMF_Mod

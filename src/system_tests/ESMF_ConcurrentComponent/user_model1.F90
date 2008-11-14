@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.6 2008/06/13 16:03:17 feiliu Exp $
+! $Id: user_model1.F90,v 1.7 2008/11/14 04:39:16 theurich Exp $
 !
 ! System test for Concurrent Components.  User-code, component 1.
 
@@ -12,7 +12,7 @@
 !  Creates a Field which is passed back thru the Export State.
 !
 !\begin{verbatim}
-#include <ESMF.h>
+#include "ESMF.h"
 
     module user_model1
 

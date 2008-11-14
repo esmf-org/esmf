@@ -1,4 +1,4 @@
-! $Id: ESMF_DistDirSTest.F90,v 1.9 2008/05/09 18:09:36 feiliu Exp $
+! $Id: ESMF_DistDirSTest.F90,v 1.10 2008/11/14 04:39:16 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -16,7 +16,7 @@
 
 program DistDir
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
   ! ESMF Framework module
   use ESMF_Mod

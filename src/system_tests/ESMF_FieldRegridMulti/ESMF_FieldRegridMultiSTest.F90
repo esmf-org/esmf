@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.23 2007/12/14 19:53:23 svasquez Exp $
+! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.24 2008/11/14 04:39:17 theurich Exp $
 !
 ! System test code FieldRegridMulti
 !  Description on Sourceforge under System Test #xxxxx
@@ -30,7 +30,7 @@
 
     program FieldRegridMulti
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
     ! ESMF Framework module
     use ESMF_Mod

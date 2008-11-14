@@ -1,4 +1,4 @@
-! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.22 2007/06/23 07:00:57 cdeluca Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.23 2008/11/14 04:39:16 theurich Exp $
 !
 ! System test code CouplingOnExclDEs
 !  Description on Sourceforge under System Test #62503
@@ -18,7 +18,7 @@
 
     program CouplingOnExclDEs
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
     ! ESMF Framework module
     use ESMF_Mod

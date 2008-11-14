@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.1 2008/09/10 18:58:21 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.2 2008/11/14 04:39:16 theurich Exp $
 !
 ! System test FieldBundleRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -27,9 +27,9 @@
 
      program Blk2BlkBunRedist
 
-#include <ESMF_Macros.inc>
-#include <ESMF_Conf.inc>
-#include <ESMF.h>
+#include "ESMF_Macros.inc"
+#include "ESMF_Conf.inc"
+#include "ESMF.h"
 #define ESMF_METHOD "FieldBundleRedistBlk2BlkSTest"
 
     ! ESMF Framework module

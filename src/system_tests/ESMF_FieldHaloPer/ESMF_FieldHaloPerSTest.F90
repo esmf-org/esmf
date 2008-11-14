@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.48 2007/12/14 19:53:22 svasquez Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.49 2008/11/14 04:39:16 theurich Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -39,7 +39,7 @@
 
     program FieldHaloPeriodic
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
     ! ESMF Framework module
     use ESMF_Mod

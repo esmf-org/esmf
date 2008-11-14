@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.13 2007/12/14 19:53:23 svasquez Exp $
+! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.14 2008/11/14 04:39:17 theurich Exp $
 !
 ! System test code FieldRegridConserv
 
@@ -26,7 +26,7 @@
 
     program FieldRegridConserv
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
     ! ESMF Framework module
     use ESMF_Mod

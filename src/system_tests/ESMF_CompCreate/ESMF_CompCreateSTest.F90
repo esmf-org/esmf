@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.21 2007/12/14 19:53:22 svasquez Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.22 2008/11/14 04:39:16 theurich Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -17,7 +17,7 @@
 
     program CompCreate
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
     ! ESMF Framework module
     use ESMF_Mod

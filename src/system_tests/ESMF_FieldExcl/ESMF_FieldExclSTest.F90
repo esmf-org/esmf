@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.33 2007/12/14 19:53:22 svasquez Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.34 2008/11/14 04:39:16 theurich Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -41,8 +41,8 @@
 
     program FieldExcl
 
-#include <ESMF_Macros.inc>
-#include <ESMF_Conf.inc>
+#include "ESMF_Macros.inc"
+#include "ESMF_Conf.inc"
 
     ! ESMF Framework module
     use ESMF_Mod

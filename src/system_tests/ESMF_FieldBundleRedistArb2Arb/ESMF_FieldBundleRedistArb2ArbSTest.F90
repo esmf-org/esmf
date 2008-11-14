@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistArb2ArbSTest.F90,v 1.1 2008/09/17 15:52:00 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistArb2ArbSTest.F90,v 1.2 2008/11/14 04:39:16 theurich Exp $
 !
 ! System test FieldBundleRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -27,7 +27,7 @@
 
      program Arb2ArbBunReDist
 
-#include <ESMF_Macros.inc>
+#include "ESMF_Macros.inc"
 
      ! ESMF Framework module
      use ESMF_Mod
