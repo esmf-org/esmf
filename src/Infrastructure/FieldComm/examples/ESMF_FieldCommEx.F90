@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.28 2008/06/02 19:56:49 feiliu Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.29 2008/11/14 05:24:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -24,8 +24,8 @@
 ! Also see the Programming Model section of this document.
 !-----------------------------------------------------------------------------
 
-#include <ESMF.h>
-#include <ESMF_Macros.inc>
+#include "ESMF.h"
+#include "ESMF_Macros.inc"
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldCommEx"
 
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.28 2008/06/02 19:56:49 feiliu Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.29 2008/11/14 05:24:11 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables

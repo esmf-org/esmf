@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistEx.F90,v 1.2 2008/05/29 15:30:16 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistEx.F90,v 1.3 2008/11/14 05:24:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -22,8 +22,8 @@
 !     
 ! This program shows examples of FieldBundle interfaces for redistribution of data.
 !-----------------------------------------------------------------------------
-#include <ESMF.h>
-#include <ESMF_Macros.inc>
+#include "ESMF.h"
+#include "ESMF_Macros.inc"
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleRedistEx"
      ! ESMF Framework module
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRedistEx.F90,v 1.2 2008/05/29 15:30:16 feiliu Exp $'
+    '$Id: ESMF_FieldBundleRedistEx.F90,v 1.3 2008/11/14 05:24:11 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
