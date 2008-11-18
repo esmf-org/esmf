@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.2 2008/11/12 21:46:34 rosalind Exp $
+// $Id: ESMC_MeshUTest.C,v 1.3 2008/11/18 22:03:19 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_UTest_Multi_Proc_Only
   // Create a mesh
   strcpy(name, "MeshCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -54,7 +54,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_UTest_Multi_Proc_Only
   // Read input files' header data
   strcpy(name, "MeshVTKHeader");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -72,7 +72,7 @@ int main(void){
   int elemConn[conn_size];
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_UTest_Multi_Proc_Only
   // Read input files
   strcpy(name, "MeshVTKBody");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");

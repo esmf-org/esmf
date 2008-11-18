@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.22 2008/10/29 14:52:39 rosalind Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.23 2008/11/18 22:03:19 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -211,6 +211,7 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
     for (int e = 0; e < *num_elems; ++e) {
 
     // Get/deduce the element topology
+    printf("mesh.spatial_dim() = %d\n", mesh.spatial_dim() );
     const MeshObjTopo *topo = Vtk2Topo(mesh.spatial_dim(), elemType[e]);
 
     int nnodes = topo->num_nodes;

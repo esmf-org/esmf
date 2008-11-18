@@ -15,6 +15,7 @@
 #include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_F90Interface.h"
 
+#include "ESMCI_Exception.h"
 #include <Mesh/include/ESMCI_MeshCXX.h>
 #include "ESMCI_MeshRead.h"
 #include "ESMCI_MeshVTK.h"
@@ -66,6 +67,100 @@ int MeshCXX::addElements(int *numElems, int *elemId,
    //Initialize localrc; assume routine not implemented
    localrc = ESMC_RC_NOT_IMPL;
    
+   int index;
+   try{
+     index=1;
+      Mesh &mesh = *this;
+    // We must first store all nodes in a flat array since element
+    // connectivity will index into this array.
+    std::vector<MeshObj*> all_nodes;
+    
+    int num_nodes = mesh.num_nodes();
+    printf("mesh.num_nodes() = %d\n", mesh.num_nodes() );
+    index=2;
+
+    all_nodes.resize(num_nodes, static_cast<MeshObj*>(0));
+    index=3;
+
+    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+    index=4;
+
+    for (; ni != ne; ++ni) {
+
+      int seq = ni->get_data_index();
+
+//    ThrowRequire(seq < num_nodes);
+      if (seq >= num_nodes){
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- seq is larger or equal to num_nodes", &localrc);
+      return localrc;
+    }
+    index=5;
+
+      all_nodes[seq] = &*ni;
+    index=0;
+
+    }
+    index=6;
+
+    // Now loop the elements and add them to the mesh.
+    int cur_conn = 0;
+
+    for (int e = 0; e < *numElems; ++e) {
+
+    // Get/deduce the element topology
+    printf("mesh.spatial_dim() = %d\n", mesh.spatial_dim() );
+    const MeshObjTopo *topo = Vtk2Topo(mesh.spatial_dim(), elemType[e]);
+    index=7;
+
+    int nnodes = topo->num_nodes;
+    index=8;
+
+    std::vector<MeshObj*> nconnect(nnodes, static_cast<MeshObj*>(0));
+    index=9;
+
+      // The object
+      long eid = elemId[e];
+      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid);
+      index=10;
+
+      for (int n = 0; n < nnodes; ++n) {
+
+    //  ThrowRequire(elemConn[cur_conn] <= num_nodes);
+        if (num_nodes > elemConn[cur_conn]){
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                 "- num_nodes > elemConn[cur-conn]", &localrc);
+          return localrc;
+        }
+        index=11;
+
+        nconnect[n] = all_nodes[elemConn[cur_conn++]-1];
+        index=10000;
+
+      }
+      index=12;
+
+      mesh.add_element(elem, nconnect, topo->number, topo);
+      index=-1;
+
+    
+    } // for e
+    index=13;
+
+    // Perhaps commit will be a separate call, but for now commit the mesh here.
+
+    mesh.build_sym_comm_rel(MeshObj::NODE);
+    index=14;
+    
+    mesh.Commit();
+    index=15;
+  mesh.Print(Par::Out());
+
+    localrc = ESMF_SUCCESS;
+   } catch(...) {
+    printf("index= %d\n",index);
+    localrc = ESMF_FAILURE;
+   }  
 
    return localrc;
 } // MeshCXX::addElements
@@ -165,7 +260,7 @@ int MeshCXX::freeMemory(){
 } // MeshCXX::freeMemory
 
 
-int MeshVTKHeader(char *fname, int *num_elem, int *num_node, int *conn_size){
+int MeshVTKHeader(char *fname, int *numElem, int *numNode, int *connSize){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::MeshVTKHeader()"
 
@@ -190,7 +285,7 @@ int MeshVTKHeader(char *fname, int *num_elem, int *num_node, int *conn_size){
        newname = newname_str.str() + extension;
      } else newname = fname + extension;
 
-    ReadVTKMeshHeader(newname, *num_elem, *num_node, *conn_size);
+    ReadVTKMeshHeader(newname, *numElem, *numNode, *connSize);
 
     localrc = ESMF_SUCCESS;
 
