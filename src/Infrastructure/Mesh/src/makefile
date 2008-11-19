@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.13 2008/11/08 00:05:30 rosalind Exp $
+# $Id: makefile,v 1.14 2008/11/19 22:36:57 theurich Exp $
 
 # leave alone.
 ALL: build_here 
 
-# Workaround an MPICH(2) issue
+# Workaround an MPICH2 issue
 ESMF_CXXCOMPILECPPFLAGS += -DMPICH_IGNORE_CXX_SEEK
 
 SOURCEC	  = \
@@ -86,3 +86,12 @@ CLOBBERDIRS =
 include ${ESMF_DIR}/makefile
 
 DIRS	  = Zoltan
+
+# XLC++ on BGL systems has trouble with some of the Mesh code in -O mode.
+# -> this seems to be a compiler bug and we may be able to take this out once
+# IBM has it fixed.
+ifeq ($(ESMF_OS),Linux)
+ifeq ($(ESMF_COMPILER),xlf)
+ESMF_OPTLEVEL = 0
+endif
+endif
