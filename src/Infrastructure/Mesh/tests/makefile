@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2008/11/18 22:03:19 rosalind Exp $ 
+# $Id: makefile,v 1.8 2008/11/19 19:08:43 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -11,11 +11,10 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest \
 
 TESTS_OBJ = 
 
-TESTS_RUN     = RUN_ESMC_MeshUTest 
-               #RUN_ESMF_MeshUTest
+TESTS_RUN     = RUN_ESMF_MeshUTest \
+                RUN_ESMC_MeshUTest
 
-TESTS_RUN_UNI = RUN_ESMF_MeshUTestUNI \
-                RUN_ESMC_MeshUTestUNI
+TESTS_RUN_UNI = RUN_ESMF_MeshUTestUNI
 
 
 
@@ -43,8 +42,3 @@ RUN_ESMC_MeshUTest:
 	cp -r data $(ESMF_TESTDIR)
 	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=Mesh NP=6 ctest
-
-RUN_ESMC_MeshUTestUNI:
-	echo "ESMC_MeshUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMC_MeshUTest.stdout
-	# $(MAKE) TNAME=Mesh NP=1 ctest
-
