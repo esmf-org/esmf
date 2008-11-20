@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2008/09/26 21:11:38 cdeluca Exp $
+# $Id: makefile,v 1.7 2008/11/20 04:18:44 peggyli Exp $
 
 ALL: build_here 
 
@@ -74,3 +74,12 @@ CLOBBERDIRS =
 include ${ESMF_DIR}/makefile
 
 DIRS	  = 
+
+# XLC++ on BGL systems has trouble with some of the Mesh code in -O mode.
+# -> this seems to be a compiler bug and we may be able to take this out once
+# IBM has it fixed.
+ifeq ($(ESMF_OS),Linux)
+ifeq ($(ESMF_COMPILER),xlf)
+ESMF_OPTLEVEL = 0
+endif
+endif
