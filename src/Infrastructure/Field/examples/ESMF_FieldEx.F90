@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.1.2.6 2008/11/14 21:26:26 theurich Exp $
+! $Id: ESMF_FieldEx.F90,v 1.1.2.7 2008/11/20 13:03:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -233,7 +233,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! create a Field from the Grid and arrayspec
-    field1 = ESMF_FieldCreate(grid, arrayspec, &
+    field1 = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
          staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -284,7 +284,7 @@
     call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    field1 = ESMF_FieldCreate(grid2d, arrayspec, &
+    field1 = ESMF_FieldCreate(grid2d, arrayspec, ESMF_INDEX_DELOCAL, &
          staggerloc=ESMF_STAGGERLOC_CENTER, &
          gridToFieldMap=(/1,2/), &
          ungriddedLBound=(/1/), ungriddedUBound=(/50/), &
@@ -433,7 +433,7 @@
     allocate(farray7d(fsize(1), fsize(2), fsize(3), fsize(4), fsize(5), fsize(6), fsize(7)))
 
     ! create the Field
-    field7d = ESMF_FieldCreate(grid5d, farray7d, &
+    field7d = ESMF_FieldCreate(grid5d, farray7d, ESMF_INDEX_DELOCAL, &
         ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
         maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &
@@ -460,7 +460,7 @@
                        flbound(4):fubound(4), flbound(5):fubound(5), flbound(6):fubound(6), &
                        flbound(7):fubound(7)) )
 
-    field7d2 = ESMF_FieldCreate(grid5d, farray7d2, &
+    field7d2 = ESMF_FieldCreate(grid5d, farray7d2, ESMF_INDEX_DELOCAL, &
         ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
         maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &

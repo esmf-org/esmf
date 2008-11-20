@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.35 2008/08/13 17:36:38 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.36 2008/11/20 13:03:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.35 2008/08/13 17:36:38 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.36 2008/11/20 13:03:04 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -381,7 +381,7 @@ contains
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field), intent(in)            :: field @\
-!   integer,          intent(in)            :: localDe @\
+!   integer,          intent(in), optional  :: localDe @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farray @\
 !   integer,          intent(out), optional :: exclusiveLBound(:) @\
 !   integer,          intent(out), optional :: exclusiveUBound(:) @\
@@ -405,8 +405,10 @@ contains
 ! \begin{description} @\
 ! \item [field]  @\
 !   {\tt ESMF\_Field} object. @\
-! \item[localDe] @\
-!   The local DE from which to get the information. @\
+! \item[{[localDe]}] @\
+!  Local DE for which information is requested. {\tt [0,..,localDeCount-1]}. @\
+!  For {\tt localDeCount==1} the {\tt localDe} argument may be omitted, @\
+!  in which case it will default to {\tt localDe=0}. @\
 ! \item [farray] @\
 !   Fortran array pointer which will be pointed at DE-local memory allocation. @\
 ! \item[{[exclusiveLBound]}] @\
@@ -475,7 +477,7 @@ contains
 @\
     ! input arguments @\
     type(ESMF_Field), intent(in)            :: field @\
-    integer,          intent(in)            :: localDe @\
+    integer,          intent(in), optional  :: localDe @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farray @\
     integer,          intent(out), optional :: exclusiveLBound(:) @\
     integer,          intent(out), optional :: exclusiveUBound(:) @\
@@ -535,7 +537,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 ! !ARGUMENTS:
     type(ESMF_Field),       intent(in) :: field
-    integer,                intent(in) :: localDe
+    integer,                intent(in), optional :: localDe
     integer,                intent(out), optional :: exclusiveLBound(:)
     integer,                intent(out), optional :: exclusiveUBound(:)
     integer,                intent(out), optional :: exclusiveCount(:)
@@ -558,8 +560,10 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \begin{description}
 ! \item[field]
 !    Field to get the information from.
-! \item[localDe]
-!     The local DE from which to get the information.  
+! \item[{[localDe]}]
+!  Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
+!  For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
+!  in which case it will default to {\tt localDe=0}.
 ! \item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
 !     {\tt exclusiveLBound} must be allocated to be of size equal to the field rank.
@@ -613,7 +617,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     integer :: i, j
     logical :: filled(ESMF_MAXDIM)
 
-    integer :: localDeCount, dimCount
+    integer :: localDeCount, dimCount, l_localDe
     integer, allocatable :: arrayBnd(:, :)
     integer, allocatable :: undistBnd(:)
     integer, allocatable :: distgridToArrayMap(:)
@@ -727,6 +731,18 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         ! Get Size of Array info
         call ESMF_ArrayGet(field%ftypep%array, localDeCount=localDeCount, &
             dimCount=dimCount, rc=localrc)
+
+        if(localDeCount .gt. 1 .and. (.not. present(localDe))) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+              "localDe must be present when localDeCount is greater than 1", &
+               ESMF_CONTEXT, rc)
+           return
+        endif 
+        if(present(localDe)) then
+            l_localDe = localDe
+        else 
+            l_localDe = 0
+        endif
     
         ! Allocate storage for Array info
         allocate(arrayBnd(dimCount, 0:localDeCount-1))
@@ -748,7 +764,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             filled=.false.
             do i=1, dimCount
                l_tlb(distgridToArrayMap(i))=&
-                arrayBnd(distgridToPackedArrayMap(i),localDe)
+                arrayBnd(distgridToPackedArrayMap(i),l_localDe)
                filled(distgridToArrayMap(i))=.true.
             enddo
     
@@ -771,7 +787,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             filled=.false.
             do i=1, dimCount
                 l_tub(distgridToArrayMap(i))=&
-                arrayBnd(distgridToPackedArrayMap(i),localDe)
+                arrayBnd(distgridToPackedArrayMap(i),l_localDe)
                filled(distgridToArrayMap(i))=.true.
             enddo
     
@@ -880,7 +896,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     
 ! !ARGUMENTS:
     type(ESMF_Grid), intent(inout) :: grid     
-    integer, intent(in)            :: localDe
+    integer, intent(in), optional  :: localDe
     type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
     integer, intent(in), optional :: gridToFieldMap(:)    
     integer, intent(in), optional :: ungriddedLBound(:)
@@ -904,10 +920,10 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \begin{description}
 ! \item [grid]
 !       {\tt ESMF\_Grid}.
-! \item [localDe]
-!       The local DE number in its PET context to compute the bounds and counts
-!       information based on the computational and exclusive bounds and counts 
-!       information of the grid from that local DE in its PET context.
+! \item [{[localDe]}]
+!  Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
+!  For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
+!  in which case it will default to {\tt localDe=0}.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see

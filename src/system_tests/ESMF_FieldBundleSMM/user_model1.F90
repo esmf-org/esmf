@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1.2.3 2008/08/04 16:31:20 theurich Exp $
+! $Id: user_model1.F90,v 1.1.2.4 2008/11/20 13:03:04 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -113,7 +113,7 @@ module user_model1
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
 
     do i = 1, 3
-        field(i) = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
+        field(i) = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_GLOBAL, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
     enddo

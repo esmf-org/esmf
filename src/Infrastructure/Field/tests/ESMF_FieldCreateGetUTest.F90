@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.51 2008/11/14 22:13:01 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.52 2008/11/20 13:03:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1726,7 +1726,7 @@ contains
 
         allocate(farray(ec(1), ec(2)))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=sloc, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1789,7 +1789,7 @@ contains
 
         allocate(farray(ec(1), ec(2)))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=sloc, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1830,7 +1830,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1864,7 +1864,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1899,7 +1899,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1931,7 +1931,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             maxHaloLWidth=(/2,2/), maxHaloUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1966,7 +1966,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             maxHaloLWidth=(/2,2/), maxHaloUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2001,7 +2001,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             maxHaloLWidth=(/2,2/), maxHaloUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2142,7 +2142,7 @@ contains
           endif
         endif
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=copyflag, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=copyflag, &
             staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, rc=localrc)
@@ -2231,7 +2231,7 @@ contains
             ESMF_CONTEXT, rc)) return
         allocate(farray(ec(1), ec(2), 10))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
         
@@ -2287,7 +2287,7 @@ contains
 
         allocate(farray(ec(1), ec(2), 10))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
@@ -2324,7 +2324,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
@@ -2359,7 +2359,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
@@ -2394,7 +2394,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             gridToFieldMap=(/2,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
@@ -2534,7 +2534,7 @@ contains
 
         allocate(farray(fsize(1), fsize(2), fsize(3)))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=copyflag, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=copyflag, &
             staggerloc=staggerloc,  gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, rc=localrc)
@@ -2642,7 +2642,7 @@ contains
 
         allocate(farray(fsize(1), fsize(2), fsize(3)))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=copyflag, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=copyflag, &
             staggerloc=staggerloc,  gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, rc=localrc)
@@ -2714,7 +2714,7 @@ contains
 
         allocate(farray(max(cc(1)+5, ec(1)), max(cc(2)+5, ec(2))))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             maxHaloLWidth=(/2,2/), maxHaloUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2763,7 +2763,7 @@ contains
 
         allocate(farray(tlb(1):tub(1), tlb(2):tub(2)))
 
-        field = ESMF_FieldCreateFromPtr(grid, farrayPtr=farray, &
+        field = ESMF_FieldCreate(grid, farrayPtr=farray, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2865,7 +2865,7 @@ contains
 
         allocate(farray(tlb(1):tub(1), -3:3))
 
-        field = ESMF_FieldCreateFromPtr(grid, farrayPtr=farray, &
+        field = ESMF_FieldCreate(grid, farrayPtr=farray, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2961,7 +2961,7 @@ contains
 
         allocate(farray(max(cc(1)+14, ec(1)), max(cc(2)+16, ec(2))))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             !staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             !ungriddedLBound = (/2,3/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/), rc=localrc)
@@ -2997,7 +2997,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             gridToFieldMap=(/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -3056,7 +3056,7 @@ contains
         !allocate(farray(max(cc(1)+14, ec(1)), max(cc(2)+16, ec(2))))
         allocate(farray(max(cc(2)+14, ec(2)), max(cc(1)+16, ec(1))))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -3116,7 +3116,7 @@ contains
 
         allocate(farray(max(cc(1)+7, ec(1)), max(cc(2)+10, ec(2)), 10))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, & !gridToFieldMap = (/3,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/), rc=localrc)
@@ -3177,7 +3177,7 @@ contains
         allocate(farray(max(cc(2)+7, ec(2)), max(cc(1)+10, ec(1)), 10))
         !write(*, "(22I3)") lpe, ec(1:2), cc(1:2)
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/), rc=localrc)
@@ -3239,7 +3239,7 @@ contains
         allocate(farray(max(cc(1)+7, ec(1)), 10, max(cc(2)+10, ec(2))))
         !write(*, "(A7, 22I3)") 'MZS: ', lpe, ec(1:2), cc(1:2), max(cc(1)+7, ec(1)), max(cc(2)+10, ec(2))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,3/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/), rc=localrc)
@@ -3305,7 +3305,7 @@ contains
         allocate(farray(max(cc(2)+7, ec(2)), 10, max(cc(1)+10, ec(1))))
         !write(*, "(22I3)") lpe, ec(1:2), cc(1:2)
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/3,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/), rc=localrc)
@@ -3452,7 +3452,7 @@ contains
           endif
         endif
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=copyflag, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=copyflag, &
             staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, rc=localrc)
@@ -3546,7 +3546,7 @@ contains
 
         allocate(farray(fsize(1), fsize(2), fsize(3), fsize(4), fsize(5), fsize(6), fsize(7)))
 
-        f8 = ESMF_FieldCreate(grid, farray, &
+        f8 = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/2,3/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
             rc=localrc)
@@ -3597,7 +3597,7 @@ contains
         allocate(farray(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3), &
             flb(4):fub(4), flb(5):fub(5), flb(6):fub(6), flb(7):fub(7)) )
 
-        f8 = ESMF_FieldCreate(grid, farray, &
+        f8 = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/2,3/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
             rc=localrc)
@@ -3710,7 +3710,7 @@ contains
           endif
         endif
 
-        field = ESMF_FieldCreate(grid, farray, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
@@ -3876,7 +3876,7 @@ contains
           endif
         endif
 
-        field = ESMF_FieldCreateFromPtr(grid, farray, &
+        field = ESMF_FieldCreate(grid, farray, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
             copyflag=copyflag, &
@@ -4073,7 +4073,7 @@ contains
           endif
         endif
 
-        field = ESMF_FieldCreate(grid, farray, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
@@ -4225,7 +4225,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         ! create field
-        field = ESMF_FieldCreate(grid, arrayspec, gridToFieldMap=gridToFieldMap, &
+        field = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             staggerloc=staggerloc, &

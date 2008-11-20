@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.23 2008/11/14 22:13:00 theurich Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.24 2008/11/20 13:03:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -52,12 +52,11 @@ module ESMF_FieldSetMod
 
   public ESMF_FieldSet
   public ESMF_FieldSetCommit
-  public ESMF_FieldSetCommitPtr
  
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.23 2008/11/14 22:13:00 theurich Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.24 2008/11/20 13:03:04 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -98,24 +97,6 @@ end interface
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     TypeKindRankInterfaceMacro(FieldSetCommit)
-
-! !DESCRIPTION:
-!   This interface finishes a {\tt ESMF\_Field} started with FieldCreateEmpty
-!   These methods all take {\tt ESMF\_Grid} and Fortran data pointer as input to
-!   fill in the {\tt ESMF\_Field} internals. 
-  end interface
-!EOPI
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOPI 
-! !IROUTINE: ESMF_FieldSetCommitPtr - finishes a Field started with FieldCreateEmpty
-!
-! !INTERFACE:
-  interface ESMF_FieldSetCommitPtr
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
     TypeKindRankInterfaceMacro(FieldSetCommitPtr)
 
 ! !DESCRIPTION:
@@ -381,11 +362,8 @@ contains
 !  Defaults to 0.  If specified, the staggerloc specifies the relative position of @\
 !  data array and grid. @\
 ! \item[{[indexflag]}] @\
-!  See Section~\ref{opt:indexflag} for possible values.  Defaults @\
-!  to {\tt ESMF\_INDEX\_DELOCAL}.  If set to @\
-!  {\tt ESMF\_INDEX\_GLOBAL} and the {\tt ESMF\_Grid} associated with the @\
-!  {\tt ESMF\_Field} is regular, then the lower bounds and upper bounds will @\
-!  be allocated with global index numbers corresponding to the grid. @\
+!      Indicate how DE-local indices are defined. See section @\
+!      \ref{opt:indexflag} for a list of valid indexflag options. @\
 ! \item[{[rc]}] @\
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -500,13 +478,14 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommit<rank><type><kind>(field, grid, & @\
-!   farray, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
+!   farray, indexflag, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
 !   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),                intent(inout)         :: field @\
 !   type(ESMF_Grid),                 intent(in)            :: grid @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
+!   type(ESMF_IndexFlag),  intent(in)              :: indexflag @\
 !   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
 !   type(ESMF_STAGGERLOC), intent(in), optional :: staggerloc @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
@@ -535,6 +514,13 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 !       Native fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the farray. @\
+! \item[indexflag] @\
+!      Indicate how DE-local indices are defined. By default each DE's @\
+!      exclusive region is placed to start at the local index space origin, @\
+!      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be @\
+!      aligned with the global index space, if a global index space is well @\
+!      defined by the associated Grid. See section \ref{opt:indexflag} @\
+!      for a list of valid indexflag options. @\
 ! \item [{[copyflag]}] @\
 !       Indicates whether to copy the {\tt farray} or reference it directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
@@ -612,13 +598,14 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommit" @\
   subroutine ESMF_FieldSetCommit##mrank##D##mtypekind(field, grid, farray, & @\
-    copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
+    indexflag, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
     type(ESMF_Grid) :: grid                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
+    type(ESMF_IndexFlag),  intent(in)              :: indexflag @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -649,7 +636,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     integer                        :: compEUWidth(ESMF_MAXDIM), compELWidth(ESMF_MAXDIM) @\
     integer                        :: fieldUndistDimCount                         @\
     logical                        :: flipflop(ESMF_MAXDIM) @\
-    type(ESMF_IndexFlag)           :: indexflag @\
+    type(ESMF_IndexFlag)           :: g_indexflag @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -666,10 +653,17 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     ! and number of undistributed Field Dimensions @\
     call ESMF_GridGet(grid, dimCount=gridDimCount, & @\
           distgridToGridMap=distgridToGridMap, & @\
-          distgrid=distgrid, indexflag=indexflag, rc=localrc) @\
+          distgrid=distgrid, indexflag=g_indexflag, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
+@\
+    if(.not. (indexflag .eq. g_indexflag)) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   @\
+             "- user specified indexflag must be identical with Grid indexflag", &  @\
+               ESMF_CONTEXT, rc) @\
+        return @\
+    endif @\
 @\
     call ESMF_DistGridGet(distgrid, localDe=0, elementCount=elementCount, & @\
       rc=localrc) @\
@@ -949,10 +943,10 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
 #define FieldSetCommitPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommitPtr - Finishes creating Field started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field started with FieldCreateEmpty from Fortran array pointer @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldSetCommitPtr() @\
+! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitPtr<rank><type><kind>(field, grid, & @\
 !   farray, copyflag, staggerloc, gridToFieldMap, & @\
 !   maxHaloLWidth, maxHaloUWidth, rc) @\

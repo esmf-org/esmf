@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.36 2008/05/19 18:37:38 cdeluca Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.55.2.37 2008/11/20 13:03:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -125,7 +125,7 @@
 
     allocate(farray(max(gec(1), gcc(1)), max(gec(2), gcc(2))) )
 
-    field = ESMF_FieldCreate(grid, farray, rc=rc)
+    field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
     print *, "Field Create from a Grid and a Fortran data array returned"
@@ -222,7 +222,7 @@
     fa_shape(2) = max(gec(2), gcc(2))
     fa_shape(3) = 7 ! rule 2 9-3+1
     allocate(farray3d(fa_shape(1), fa_shape(2), fa_shape(3)))
-    field = ESMF_FieldCreate(grid, farray3d, &
+    field = ESMF_FieldCreate(grid, farray3d, ESMF_INDEX_DELOCAL, &
         ungriddedLBound=(/3/), ungriddedUBound=(/9/), &
         rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -275,7 +275,7 @@
     end do
     fa_shape(2) = 7
     allocate(farray3d(fa_shape(1), fa_shape(2), fa_shape(3)))
-    field = ESMF_FieldCreate(grid, farray3d, &
+    field = ESMF_FieldCreate(grid, farray3d, ESMF_INDEX_DELOCAL, &
         ungriddedLBound=(/3/), ungriddedUBound=(/9/), &
         gridToFieldMap=gridToFieldMap2d, &
         rc=rc)
@@ -439,7 +439,7 @@
     end do
     fa_shape(3) = 7          ! 9-3+1
     allocate(farray3d(fa_shape(1), fa_shape(2), fa_shape(3)))
-    field = ESMF_FieldCreate(grid, farray3d, &
+    field = ESMF_FieldCreate(grid, farray3d, ESMF_INDEX_DELOCAL, &
         ungriddedLBound=(/3/), ungriddedUBound=(/9/), &
         maxHaloLWidth=maxHaloLWidth2d, maxHaloUWidth=maxHaloUWidth2d, &
         gridToFieldMap=gridToFieldMap2d, &

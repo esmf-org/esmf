@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.3.2.5 2008/05/06 04:31:46 cdeluca Exp $
+! $Id: user_model1.F90,v 1.3.2.6 2008/11/20 13:03:04 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -110,7 +110,7 @@ module user_model1
       regDecomp=(/petCount,1/), &
       gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), & ! no stagger padding
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
-    field = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
+    field = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_GLOBAL, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field data", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateAdd(exportState, field=field, rc=rc)
