@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.24 2008/11/20 13:03:04 feiliu Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.25 2008/11/20 20:45:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.24 2008/11/20 13:03:04 feiliu Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.25 2008/11/20 20:45:55 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -328,14 +328,13 @@ contains
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSet() @\
 ! subroutine ESMF_FieldSetDataPtr<rank><type><kind>(field, & @\
-!   dataptr, copyflag, indexflag, rc) @\
+!   dataptr, copyflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field), intent(inout) :: field @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: dataptr @\
 !   integer, intent(in), optional :: staggerloc  @\
 !   type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
-!   type(ESMF_IndexFlag), intent(in), optional :: indexflag  @\
 !   integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -361,9 +360,6 @@ contains
 ! \item[{[staggerloc]}] @\
 !  Defaults to 0.  If specified, the staggerloc specifies the relative position of @\
 !  data array and grid. @\
-! \item[{[indexflag]}] @\
-!      Indicate how DE-local indices are defined. See section @\
-!      \ref{opt:indexflag} for a list of valid indexflag options. @\
 ! \item[{[rc]}] @\
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -376,13 +372,12 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetDataPtr" @\
   subroutine ESMF_FieldSetDataPtr##mrank##D##mtypekind(field, & @\
-    dataptr, copyflag, staggerloc, indexflag, rc) @\
+    dataptr, copyflag, staggerloc, rc) @\
 @\
     type(ESMF_Field), intent(inout) :: field @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: dataptr @\
     type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
     integer, intent(in), optional :: staggerloc  @\
-    type(ESMF_IndexFlag), intent(in), optional :: indexflag @\
     integer, intent(out), optional :: rc   @\
 @\
     ! Local variables @\
@@ -431,7 +426,7 @@ contains
 @\
     ! create a new array to be used to replace existing field%array @\
     comp_edge_u_width = -1 @\
-    array = ESMF_ArrayCreate(dataptr, distgrid=distgrid, indexflag=indexflag, & @\
+    array = ESMF_ArrayCreate(dataptr, distgrid=distgrid, & @\
       staggerloc=staggerloc, computationalEdgeUWidth=comp_edge_u_width, & @\
       rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
@@ -482,10 +477,10 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 !   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Field),                intent(inout)         :: field @\
-!   type(ESMF_Grid),                 intent(in)            :: grid @\
+!   type(ESMF_Field),      intent(inout)        :: field @\
+!   type(ESMF_Grid),       intent(in)           :: grid @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
-!   type(ESMF_IndexFlag),  intent(in)              :: indexflag @\
+!   type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
 !   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
 !   type(ESMF_STAGGERLOC), intent(in), optional :: staggerloc @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
@@ -515,12 +510,8 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the farray. @\
 ! \item[indexflag] @\
-!      Indicate how DE-local indices are defined. By default each DE's @\
-!      exclusive region is placed to start at the local index space origin, @\
-!      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be @\
-!      aligned with the global index space, if a global index space is well @\
-!      defined by the associated Grid. See section \ref{opt:indexflag} @\
-!      for a list of valid indexflag options. @\
+!      Indicate how DE-local indices are defined. See section @\
+!      \ref{opt:indexflag} for a list of valid indexflag options. @\
 ! \item [{[copyflag]}] @\
 !       Indicates whether to copy the {\tt farray} or reference it directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
@@ -533,10 +524,10 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 !       value is ESMF\_STAGGERLOC\_CENTER. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
-!       {\tt grid}'s dimCount.  The list elements map each dimension @\
+!       {\tt grid}|s dimCount.  The list elements map each dimension @\
 !       of the {\tt grid} to a dimension in the {\tt field} by @\
 !       specifying the appropriate {\tt field} dimension index. The default is to @\
-!       map all of the {\tt grid}'s dimensions against the lowest dimensions of @\
+!       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
 !       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
 !       to one and smaller than or equal to the {\tt field} rank. @\
@@ -603,11 +594,11 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
-    type(ESMF_Grid) :: grid                  @\
+    type(ESMF_Grid)  :: grid                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
-    type(ESMF_IndexFlag),  intent(in)              :: indexflag @\
-    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
-    type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
+    type(ESMF_IndexFlag),   intent(in)           :: indexflag @\
+    type(ESMF_CopyFlag),    intent(in), optional :: copyflag @\
+    type(ESMF_StaggerLoc),  intent(in), optional ::staggerloc  @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
@@ -991,10 +982,10 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
 !       value is ESMF\_STAGGERLOC\_CENTER. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
-!       {\tt grid}'s dimCount.  The list elements map each dimension @\
+!       {\tt grid}|s dimCount.  The list elements map each dimension @\
 !       of the {\tt grid} to a dimension in the {\tt field} by @\
 !       specifying the appropriate {\tt field} dimension index. The default is to @\
-!       map all of the {\tt grid}'s dimensions against the lowest dimensions of @\
+!       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
 !       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
 !       to one and smaller than or equal to the {\tt field} rank. @\

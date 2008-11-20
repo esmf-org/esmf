@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.36 2008/11/20 13:03:04 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.37 2008/11/20 20:45:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.36 2008/11/20 13:03:04 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.37 2008/11/20 20:45:55 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1016,6 +1016,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     logical, dimension(ESMF_MAXDIM)        :: flipflop
     integer                                :: forderIndex, i
     integer                                :: gridrank, arrayrank, uglb_size, ugub_size
+    integer                                :: localDeCount, l_localDe
 
 
     ! Initialize
@@ -1031,11 +1032,26 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         l_staggerloc = ESMF_STAGGERLOC_CENTER
     endif
 
-    call ESMF_GridGet(grid, dimCount=gridrank, distgridToGridMap=dg2gm, rc=localrc)
+    call ESMF_GridGet(grid, localDeCount=localDeCount, dimCount=gridrank, &
+      distgridToGridMap=dg2gm, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-    call ESMF_GridGet(grid, localDe=localDe, staggerloc=l_staggerloc, &
+
+    ! default localDe    
+    if(localDeCount .gt. 1 .and. (.not. present(localDe))) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+          "localDe must be present when localDeCount is greater than 1", &
+           ESMF_CONTEXT, rc)
+       return
+    endif 
+    if(present(localDe)) then
+        l_localDe = localDe
+    else 
+        l_localDe = 0
+    endif
+
+    call ESMF_GridGet(grid, localDe=l_localDe, staggerloc=l_staggerloc, &
        exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
        computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &

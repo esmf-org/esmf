@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.33 2008/11/20 13:03:04 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.34 2008/11/20 20:45:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.33 2008/11/20 13:03:04 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.34 2008/11/20 20:45:55 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -196,10 +196,10 @@ contains
 !       value is ESMF\_STAGGERLOC\_CENTER. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
-!       {\tt grid}'s dimCount.  The list elements map each dimension @\
+!       {\tt grid}|s dimCount.  The list elements map each dimension @\
 !       of the {\tt grid} to a dimension in the {\tt farray} by @\
 !       specifying the appropriate {\tt farray} dimension index. The default is to @\
-!       map all of the {\tt grid}'s dimensions against the lowest dimensions of @\
+!       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
 !       the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
 !       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
 !       to one and smaller than or equal to the {\tt farray} rank. @\
@@ -322,9 +322,9 @@ TypeKindRankDeclarationMacro(FieldCreateFromPtr)
 ! !ARGUMENTS: @\
 !   type(ESMF_Grid) :: grid                  @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
-!   type(ESMF_IndexFlag),  intent(in)              :: indexflag @\
+!   type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
 !   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
-!   type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
+!   type(ESMF_StaggerLoc), intent(in), optional :: staggerloc  @\
 !   integer, intent(in), optional :: gridToFieldMap(:)     @\
 !   integer, intent(in), optional :: ungriddedLBound(:) @\
 !   integer, intent(in), optional :: ungriddedUBound(:) @\
@@ -354,12 +354,8 @@ TypeKindRankDeclarationMacro(FieldCreateFromPtr)
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the farray. @\
 ! \item[indexflag] @\
-!      Indicate how DE-local indices are defined. By default each DE's @\
-!      exclusive region is placed to start at the local index space origin, @\
-!      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be @\
-!      aligned with the global index space, if a global index space is well @\
-!      defined by the associated Grid. See section \ref{opt:indexflag} @\
-!      for a list of valid indexflag options. @\
+!      Indicate how DE-local indices are defined. See section @\
+!      \ref{opt:indexflag} for a list of valid indexflag options. @\
 ! \item [{[copyflag]}] @\
 !       Whether to copy the {\tt farray} or reference directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
@@ -372,10 +368,10 @@ TypeKindRankDeclarationMacro(FieldCreateFromPtr)
 !       value is ESMF\_STAGGERLOC\_CENTER. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
-!       {\tt grid}'s dimCount.  The list elements map each dimension @\
+!       {\tt grid}|s dimCount.  The list elements map each dimension @\
 !       of the {\tt grid} to a dimension in the {\tt farray} by @\
 !       specifying the appropriate {\tt farray} dimension index. The default is to @\
-!       map all of the {\tt grid}'s dimensions against the lowest dimensions of @\
+!       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
 !       the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
 !       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
 !       to one and smaller than or equal to the {\tt farray} rank. @\
@@ -453,7 +449,7 @@ TypeKindRankDeclarationMacro(FieldCreateFromPtr)
     ! input arguments @\
     type(ESMF_Grid) :: grid                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
-    type(ESMF_IndexFlag),  intent(in)              :: indexflag @\
+    type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -521,7 +517,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 ! !ARGUMENTS:
     type(ESMF_Grid) :: grid               
     type(ESMF_ArraySpec), intent(inout) :: arrayspec     
-    type(ESMF_IndexFlag),  intent(in)   :: indexflag
+    type(ESMF_IndexFlag),  intent(in), optional :: indexflag
     type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
     integer, intent(in), optional :: gridToFieldMap(:)    
     integer, intent(in), optional :: ungriddedLBound(:)
@@ -544,7 +540,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       {\tt ESMF\_Grid} object. 
 ! \item [arrayspec]
 !       Data type and kind specification. 
-! \item[indexflag]
+! \item[{[indexflag]}]
 !      Indicate how DE-local indices are defined. By default each DE's
 !      exclusive region is placed to start at the local index space origin,
 !      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
@@ -666,12 +662,14 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
 
-    if(.not. (g_indexflag .eq. indexflag)) then
+    if (present(indexflag)) then
+      if(.not. (g_indexflag .eq. indexflag)) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
              "- user specified indexflag must be identical with Grid indexflag", &  
                ESMF_CONTEXT, rc)   
         return
-    endif  
+      endif
+    endif
  
     if(fieldDimCount .lt. gridDimCount) then  
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
