@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2008/11/20 04:18:44 peggyli Exp $
+# $Id: makefile,v 1.8 2008/11/20 16:39:49 theurich Exp $
 
 ALL: build_here 
 
@@ -75,7 +75,7 @@ include ${ESMF_DIR}/makefile
 
 DIRS	  = 
 
-# XLC++ on BGL systems has trouble with some of the Mesh code in -O mode.
+# XLC++ on BGL systems has trouble with some of the Zoltan code in -O mode.
 # -> this seems to be a compiler bug and we may be able to take this out once
 # IBM has it fixed.
 ifeq ($(ESMF_OS),Linux)
