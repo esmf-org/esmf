@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.7 2008/10/30 00:01:45 w6ws Exp $
+$Id: ESMF_Conf.inc,v 1.8 2008/11/20 22:27:36 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -22,5 +22,5 @@ be one of the following:
 
 #define ESMF_IOFlushMacro(unit,status) call flush_ (unit)
 
-define ESMF_NO_INITIALIZERS 1
+#define ESMF_NO_INITIALIZERS 1
 
