@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2.2.7 2008/11/08 00:47:38 theurich Exp $
+# $Id: build_rules.mk,v 1.2.2.8 2008/11/20 20:48:06 theurich Exp $
 #
 # Darwin.intelgcc.default
 #
@@ -179,7 +179,7 @@ ESMF_F90LINKLIBS += -lm
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)")
+ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)" | sed 's/\-lcrt1\.o //g')
 
 ############################################################
 # Blank out shared library options
