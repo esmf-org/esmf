@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.25 2008/11/20 20:45:55 theurich Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.26 2008/11/21 05:33:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.25 2008/11/20 20:45:55 theurich Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.26 2008/11/21 05:33:54 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -295,7 +295,7 @@ contains
 
     ftype => field%ftypep
 
-    ! decide if we're regridding or just adding a grid to a partially
+    ! decide if we are regridding or just adding a grid to a partially
     ! created field.
     had_grid = .FALSE.
     if (ftype%gridstatus .eq. ESMF_STATUS_READY) had_grid = .TRUE.
@@ -805,12 +805,12 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     endif @\
 @\
     ! Here we get the lbounds and ubounds for ungridded @\
-    ! dimensions from the native array, if it isn't input @\
+    ! dimensions from the native array, if it is not input @\
     ! through the argument list.  First we need to set up @\
     ! an index array that holds the ungridded dimensions of @\
     ! the native array. @\
 @\
-    ! Since we're saving the ungriddedIndex calculate it even  @\
+    ! Since we are saving the ungriddedIndex calculate it even  @\
     ! if ungridded bounds are present @\
 @\
     ! Figure out which dims are ungridded @\
