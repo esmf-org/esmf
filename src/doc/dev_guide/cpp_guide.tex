@@ -1,4 +1,4 @@
-% CVS $Id: cpp_guide.tex,v 1.1 2008/08/29 14:23:30 w6ws Exp $
+% CVS $Id: cpp_guide.tex,v 1.2 2008/11/21 19:40:27 w6ws Exp $
 
 \subsection{Preprocessor Usage}
 
@@ -43,10 +43,25 @@ to use the following sequence when processing the file:
 preprocessing to occur.  All macro expansion for generic routines
 should be performed in this pass.
 
-\item The {\tt tr} command is run to convert @ characters to newline
-characters.  Secondarily, \^\ characters are converted to \# characters
+\item The {\tt tr} command is run to perform several transformations:
+
+\begin{enumerate}
+
+\item Convert @ characters to newline characters.  As described above, this
+converts the one very long line of any cpp macro expansion into multiple
+source lines for the compiler.
+
+\item Convert caret, \^\, characters to \# characters
 in order to allow selected preprocessing directives to pass through to the
 second level of preprocessing performed by the actual compiler.
+
+\item Convert vertical bar, |, characters to apostrophe (single
+quote) characters.  Vertical bars should be used where apostrophe characters
+need to appear.  This is needed because some versions of cpp look for matching
+apostrophes in order to properly issue code.  Note that only lines within a
+macro definition, i.e., those ending in @\, need to use this transformation.
+
+\end{enumerate}
 
 \item The Fortran compiler is run.  The built-in preprocessor is used for
 the second preprocessing pass.  This pass is used for other preprocessing
