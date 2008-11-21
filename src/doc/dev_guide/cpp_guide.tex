@@ -1,4 +1,4 @@
-% CVS $Id: cpp_guide.tex,v 1.2 2008/11/21 19:40:27 w6ws Exp $
+% CVS $Id: cpp_guide.tex,v 1.3 2008/11/21 19:49:37 w6ws Exp $
 
 \subsection{Preprocessor Usage}
 
@@ -103,7 +103,7 @@ A simple example of generic code written in this style is:
     type(mclass), intent(inout) :: mthis @\
     integer, optional :: rc @\
  @\
-    print *, 'class = ', #mclass @\
+    print *, |class = |, #mclass @\
  @\
     if (present (rc)) rc = ESMF_SUCCESSFUL @\
  @\
