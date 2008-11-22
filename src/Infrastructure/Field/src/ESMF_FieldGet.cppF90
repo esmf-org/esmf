@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.37 2008/11/20 20:45:55 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.38 2008/11/22 01:22:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.37 2008/11/20 20:45:55 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.38 2008/11/22 01:22:07 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -640,13 +640,27 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
            ESMF_CONTEXT, rc)
        return
     endif 
-    call ESMF_ArrayGet(field%ftypep%array, rank=fieldrank, rc=localrc)
+    call ESMF_ArrayGet(field%ftypep%array, rank=fieldrank, &
+        localDeCount=localDeCount, &
+        rc=localrc)
     if (localrc .ne. ESMF_SUCCESS) then
        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
           "Cannot retrieve fieldrank from ftypep%array", &
            ESMF_CONTEXT, rc)
        return
     endif 
+
+    if(localDeCount .gt. 1 .and. (.not. present(localDe))) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+          "localDe must be present when localDeCount is greater than 1", &
+           ESMF_CONTEXT, rc)
+       return
+    endif 
+    if(present(localDe)) then
+        l_localDe = localDe
+    else 
+        l_localDe = 0
+    endif
 
     if(present(exclusiveLBound)) then
         if(size(exclusiveLBound) .ne. fieldrank) then
@@ -729,21 +743,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     if (present(totalLBound) .or. present(totalUBound)) then
     
         ! Get Size of Array info
-        call ESMF_ArrayGet(field%ftypep%array, localDeCount=localDeCount, &
-            dimCount=dimCount, rc=localrc)
+        call ESMF_ArrayGet(field%ftypep%array, dimCount=dimCount, rc=localrc)
 
-        if(localDeCount .gt. 1 .and. (.not. present(localDe))) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-              "localDe must be present when localDeCount is greater than 1", &
-               ESMF_CONTEXT, rc)
-           return
-        endif 
-        if(present(localDe)) then
-            l_localDe = localDe
-        else 
-            l_localDe = 0
-        endif
-    
         ! Allocate storage for Array info
         allocate(arrayBnd(dimCount, 0:localDeCount-1))
         allocate(undistBnd(fieldRank-dimCount))
