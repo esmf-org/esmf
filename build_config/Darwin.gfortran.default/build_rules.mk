@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.10.2.5 2008/11/07 22:25:04 theurich Exp $
+# $Id: build_rules.mk,v 1.10.2.6 2008/11/24 21:42:01 theurich Exp $
 #
 # Darwin.gfortran.default
 #
@@ -73,6 +73,11 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v --version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+
+############################################################
+# Gfortran runtime library on Darwin does not currently seem thread-safe
+#
+ESMF_PTHREADS := OFF
 
 ############################################################
 # Fortran symbol convention
