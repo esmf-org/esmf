@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.10.2.4 2008/08/04 21:05:00 theurich Exp $"
+"$Id: ESMC_Conf.h,v 1.10.2.5 2008/11/25 21:31:09 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -36,14 +36,22 @@ typedef long ESMCI_FortranStrLenArg;
 
 #if S32
 #define ESMF_IS_32BIT_MACHINE 1
+#ifndef ESMF_F90_PTR_BASE_SIZE
 #define ESMF_F90_PTR_BASE_SIZE 36
+#endif
+#ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 12
+#endif
 #define ESMC_POINTER_SIZE 4
 #endif
 #if S64
 #define ESMF_IS_64BIT_MACHINE 1
+#ifndef ESMF_F90_PTR_BASE_SIZE
 #define ESMF_F90_PTR_BASE_SIZE 72
+#endif
+#ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 24
+#endif
 #define ESMC_POINTER_SIZE 8
 #endif
 
