@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5.2.4 2008/07/16 00:19:13 theurich Exp $
+# $Id: build_rules.mk,v 1.5.2.5 2008/11/25 21:32:45 theurich Exp $
 #
 # Linux.pgigcc.default
 #
@@ -74,6 +74,41 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = $(ESMF_DIR)/scripts/version.pgf90 $(ESMF_F90COMPILER)
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+
+
+############################################################
+# Construct the ABISTRING
+#
+ifeq ($(ESMF_MACHINE),x86_64)
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := $(ESMF_MACHINE)_32
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := x86_64_small
+endif
+endif
+
+############################################################
+# Set memory model compiler flags according to ABISTRING
+#
+ifeq ($(ESMF_ABISTRING),x86_64_32)
+ESMF_CXXCOMPILEOPTS       += -m32
+ESMF_CXXLINKOPTS          += -m32
+ESMF_F90COMPILEOPTS       += -m32
+ESMF_F90LINKOPTS          += -m32
+endif
+ifeq ($(ESMF_ABISTRING),x86_64_small)
+ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
+ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
+ESMF_F90LINKOPTS          += -m64 -mcmodel=small
+endif
+ifeq ($(ESMF_ABISTRING),x86_64_medium)
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
+ESMF_F90LINKOPTS          += -m64 mcmodel=medium
+ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
+ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
+endif
 
 ############################################################
 # Link against GCC's stdc++ library (because g++ is used)
