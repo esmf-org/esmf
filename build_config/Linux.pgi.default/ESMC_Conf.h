@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.16 2008/04/05 03:37:49 cdeluca Exp $"
+"$Id: ESMC_Conf.h,v 1.17 2008/11/26 20:58:16 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -47,32 +47,52 @@ extern char pghpf_0c_;
 
 #if S32
 #define ESMF_IS_32BIT_MACHINE 1
+#ifndef ESMF_F90_PTR_BASE_SIZE
 #define ESMF_F90_PTR_BASE_SIZE 72
+#endif
+#ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 24
+#endif
 #define ESMC_POINTER_SIZE 4
 #endif
 #if S64
 #define ESMF_IS_64BIT_MACHINE 1
+#ifndef ESMF_F90_PTR_BASE_SIZE
 #define ESMF_F90_PTR_BASE_SIZE 88
+#endif
+#ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 24
+#endif
 #define ESMC_POINTER_SIZE 8
 #endif
 #if Sx86_64_32
 #define ESMF_IS_32BIT_MACHINE 1
+#ifndef ESMF_F90_PTR_BASE_SIZE
 #define ESMF_F90_PTR_BASE_SIZE 72
+#endif
+#ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 24
+#endif
 #define ESMC_POINTER_SIZE 4
 #endif
 #if Sx86_64_small
 #define ESMF_IS_64BIT_MACHINE 1
+#ifndef ESMF_F90_PTR_BASE_SIZE
 #define ESMF_F90_PTR_BASE_SIZE 88
+#endif
+#ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 24
+#endif
 #define ESMC_POINTER_SIZE 8
 #endif
 #if Sx86_64_medium
 #define ESMF_IS_64BIT_MACHINE 1
+#ifndef ESMF_F90_PTR_BASE_SIZE
 #define ESMF_F90_PTR_BASE_SIZE 144
+#endif
+#ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 48
+#endif
 #define ESMC_POINTER_SIZE 8
 #endif
 
