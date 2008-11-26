@@ -1,4 +1,4 @@
-// $Id: ESMCI_Fraction.C,v 1.2 2008/11/26 06:59:14 eschwab Exp $
+// $Id: ESMCI_Fraction.C,v 1.3 2008/11/26 19:10:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -33,10 +33,15 @@
  // associated class definition file
  #include <ESMCI_Fraction.h>
 
+ // TODO: resolve ambiguity between C and C++ versions of llabs() function,
+ //       or otherwise move macro into ESMCI_Util.h.  Note: llabs() is in C99,
+ //       but is not in C++98.
+ #define LLABS(a) (((a)<0)?(-1*(a)):(a))
+
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Fraction.C,v 1.2 2008/11/26 06:59:14 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.3 2008/11/26 19:10:57 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // TODO:  Use logarithms for checking if a multiplication or division is about
@@ -633,12 +638,12 @@ fflush(stdout);
  #define ESMC_METHOD "ESMCI_FractionGCD()"
 
     // deal with a zero input
-    if      (a == 0 && b != 0) return(llabs(b));
-    else if (a != 0 && b == 0) return(llabs(a));
+    if      (a == 0 && b != 0) return(LLABS(b));
+    else if (a != 0 && b == 0) return(LLABS(a));
     else if (a == 0 && b == 0) return(1);
 
-    ESMC_I8 abs_a = llabs(a);
-    ESMC_I8 abs_b = llabs(b);
+    ESMC_I8 abs_a = LLABS(a);
+    ESMC_I8 abs_b = LLABS(b);
     ESMC_I8 large = MAX(abs_a, abs_b);
     ESMC_I8 small = MIN(abs_a, abs_b);
     ESMC_I8 remainder;
@@ -691,7 +696,7 @@ fflush(stdout);
       return(0);
     }
 
-    return(llabs((a/gcd) * b));   // avoid (a * b) directly to prevent
+    return(LLABS((a/gcd) * b));   // avoid (a * b) directly to prevent
                                   //   overflow when a and b are large;
                                   //   return absolute value
 
