@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.h,v 1.11 2008/11/14 04:05:57 theurich Exp $
+// $Id: ESMCI_TimeInterval.h,v 1.12 2008/11/26 06:59:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -44,23 +44,21 @@
 //   it gains the core representation of time as well as its associated methods.
 //   {\tt TimeInterval} further specializes {\tt BaseTime} by adding shortcut
 //   methods to set and get a {\tt TimeInterval} in a natural way with 
-//   appropriate unit combinations, as per the requirements.  Usually, the
-//   largest resolution of time for a {\tt TimeInterval} is in days, making it
-//   independent of any calendar.  A {\tt TimeInterval} can also be used as a
-//   {\tt Calendar} interval. Then it becomes calendar-dependent, since its
-//   largest resolution of time will be in months and years.  
-//   {\tt TimeInterval} also defines methods for multiplication and division
-//   of {\tt TimeIntervals} by integers, reals, fractions and other
-//   {\tt TimeIntervals}.  {\tt TimeInterval} defines methods for absolute
-//   value and negative absolute value for use with both positive or
-//   negative time intervals. 
+//   appropriate unit combinations, as per the requirements.  The largest
+//   calendar-independent resolution of time for a {\tt TimeInterval} is in
+//   hours.  A {\tt TimeInterval} can also be used as a {\tt Calendar} interval.
+//   Then it becomes calendar-dependent, since its largest resolution of time
+//   will be in days, months and years.  Days are calendar-specific to allow
+//   for non-Earth specific calendars.  {\tt TimeInterval} also defines methods
+//   for multiplication and division of {\tt TimeIntervals} by integers, reals,
+//   fractions and other {\tt TimeIntervals}.  {\tt TimeInterval} defines
+//   methods for absolute value and negative absolute value for use with both
+//   positive or negative time intervals. 
 //
 //   Notes:
 //       - For arithmetic consistency both whole seconds and the numerator of
 //         fractional seconds must carry the same sign (both positve or both 
 //         negative), except, of course, for zero values.
-//       - fractional math should be handled by an open-source package if
-//         available (see {\tt ESMC\_BaseTime.h} also)
 //
 //-------------------------------------------------------------------------
 
@@ -90,7 +88,8 @@ class TimeInterval : public BaseTime {
                               //   specific calendar
     ESMC_I8 yy;      // for relative Calendar intervals:  number of years
     ESMC_I8 mm;      // for relative Calendar intervals:  number of months
-    ESMC_I8 d;       // for relative Calendar intervals:  number of days
+    ESMC_I8 d;       // for relative Calendar intervals:  integer number of days
+    ESMC_R8 d_r8;    // for relative Calendar intervals:  real number of days
 
 // !PUBLIC MEMBER FUNCTIONS:
 
@@ -114,7 +113,8 @@ class TimeInterval : public BaseTime {
                              ESMC_R8 *m_r8=0,  ESMC_R8 *s_r8=0,
                              ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
                              ESMC_R8 *ns_r8=0,
-                             ESMC_I4 *sN=0, ESMC_I4 *sD=0,
+                             ESMC_I4 *sN=0, ESMC_I8 *sN_i8=0,
+                             ESMC_I4 *sD=0, ESMC_I8 *sD_i8=0,
                              Time *startTime=0, Time *endTime=0,
                              Calendar **calendar=0,
                              ESMC_CalendarType *calendarType=0);
@@ -130,7 +130,8 @@ class TimeInterval : public BaseTime {
                              ESMC_R8 *m_r8=0,  ESMC_R8 *s_r8=0,
                              ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
                              ESMC_R8 *ns_r8=0,
-                             ESMC_I4 *sN=0, ESMC_I4 *sD=0,
+                             ESMC_I4 *sN=0, ESMC_I8 *sN_i8=0,
+                             ESMC_I4 *sD=0, ESMC_I8 *sD_i8=0,
                              Time *startTime=0, Time *endTime=0,
                              Calendar **calendar=0,
                              ESMC_CalendarType *calendarType=0,
@@ -204,8 +205,7 @@ class TimeInterval : public BaseTime {
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int readRestart(int nameLen, const char *name=0,
-                                     ESMC_IOSpec *iospec=0);
+    int readRestart(int nameLen, const char *name=0, ESMC_IOSpec *iospec=0);
     int writeRestart(ESMC_IOSpec *iospec=0) const;
 
     // internal validation (TMG 7.1.1)
@@ -216,16 +216,16 @@ class TimeInterval : public BaseTime {
 
     // native C++ constructors/destructors
     TimeInterval(void);
-    TimeInterval(ESMC_I8 s, int sN=0, int sD=1,
-                      ESMC_I8 yy=0, ESMC_I8 mm=0, ESMC_I8 d=0,
-                      Time *startTime=0, Time *endTime=0,
-                      Calendar *calendar=0,
-                      ESMC_CalendarType calendarType=(ESMC_CalendarType)0);
-    int set(ESMC_I8 s, int sN=0, int sD=1,
-                      ESMC_I8 yy=0, ESMC_I8 mm=0, ESMC_I8 d=0,
-                      Time *startTime=0, Time *endTime=0,
-                      Calendar *calendar=0,
-                      ESMC_CalendarType calendarType=(ESMC_CalendarType)0);
+    TimeInterval(ESMC_I8 s, ESMC_I8 sN=0, ESMC_I8 sD=1,
+                 ESMC_I8 yy=0, ESMC_I8 mm=0, ESMC_I8 d=0, ESMC_R8 d_r8=0.0,
+                 Time *startTime=0, Time *endTime=0,
+                 Calendar *calendar=0,
+                 ESMC_CalendarType calendarType=(ESMC_CalendarType)0);
+    int set(ESMC_I8 s, ESMC_I8 sN=0, ESMC_I8 sD=1,
+            ESMC_I8 yy=0, ESMC_I8 mm=0, ESMC_I8 d=0, ESMC_R8 d_r8=0.0,
+            Time *startTime=0, Time *endTime=0,
+            Calendar *calendar=0,
+            ESMC_CalendarType calendarType=(ESMC_CalendarType)0);
                                    // used internally instead of constructor
                                    // to cover case of initial entry from F90,
                                    // to avoid automatic destructor invocation
@@ -237,23 +237,18 @@ class TimeInterval : public BaseTime {
 
     // commutative complements to TimeInterval class member overloaded
     //   "*" operators
-    friend TimeInterval
-                   operator* (const ESMC_I4 &, const TimeInterval &);
-    friend TimeInterval
-                   operator* (const Fraction &, const TimeInterval &);
-    friend TimeInterval
-                   operator* (const ESMC_R8 &, const TimeInterval &);
+    friend TimeInterval operator* (const ESMC_I4 &,  const TimeInterval &);
+    friend TimeInterval operator* (const Fraction &, const TimeInterval &);
+    friend TimeInterval operator* (const ESMC_R8 &,  const TimeInterval &);
 
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private:
     // return in string format (TMG 1.5.9)
-    int getString(char *timeString, 
-                                   const char *options=0) const;
+    int getString(char *timeString, const char *options=0) const;
 
     // common method for overloaded comparison operators
-    bool compare(const TimeInterval &,
-                                  ESMC_ComparisonType) const;
+    bool compare(const TimeInterval &, ESMC_ComparisonType) const;
 
     // common method for positive and negative absolute value
     TimeInterval absValue(ESMC_AbsValueType) const;
@@ -270,7 +265,7 @@ class TimeInterval : public BaseTime {
 //EOP
 //-------------------------------------------------------------------------
 
-};     // end clase TimeInterval
+};     // end class TimeInterval
 
 }      // end namespace ESMCI
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Fraction.h,v 1.1 2008/10/19 03:41:20 eschwab Exp $
+// $Id: ESMCI_Fraction.h,v 1.2 2008/11/26 06:59:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,6 +37,15 @@
 //      it is time-knowledge independent; it simply performs generic fractional
 //      arithmetic, manipulations and comparisons. 
 //
+// TODO:  Can add one more 64 bit integer to the Fraction class to represent a
+//        base 10 exponent, then the Fraction class can be expanded to be an
+//        alternative to IEEE double precision representation and arithmetic,
+//        with a greater range of representation O((+-10^(+-10^20)) vs.
+//        O(+-10^+-308), and up to a few more decimal digits of precision,
+//        about 18 to 19 vs. 15 to 16.  The challenge would be preventing
+//        64-bit overflow in performing arithmetic on large numbers (could
+//        possibly use logarithms, but may lose some precision -- see TODO
+//        near top of ESMCI_Fraction.C).
 //-------------------------------------------------------------------------
 //
 // !USES:
@@ -55,27 +64,29 @@ class Fraction
 {
   private:
     ESMC_I8 w;  // Integer (whole) seconds (signed)
-    ESMC_I4 n;  // Integer fraction (exact) n/d; numerator (signed)
-    ESMC_I4 d;  // Integer fraction (exact) n/d; denominator
+    ESMC_I8 n;  // Integer fraction (exact) n/d; numerator (signed)
+    ESMC_I8 d;  // Integer fraction (exact) n/d; denominator
 
 // !PUBLIC MEMBER FUNCTIONS:
 
   public:
     // native C++ style Set/Get
-    int set(ESMC_I8 w, ESMC_I4 n, ESMC_I4 d);
+    int set(ESMC_I8 w, ESMC_I8 n, ESMC_I8 d);
     int setw(ESMC_I8 w);
-    int setn(ESMC_I4 n);
-    int setd(ESMC_I4 d);
+    int setn(ESMC_I8 n);
+    int setd(ESMC_I8 d);
+    int setr(ESMC_R8 rin);
     ESMC_I8 getw(void) const;
-    ESMC_I4 getn(void) const;
-    ESMC_I4 getd(void) const;
+    ESMC_I8 getn(void) const;
+    ESMC_I8 getd(void) const;
+    ESMC_R8 getr(void) const;
 
     // Set/Get to support F90 optional argument style
-    int set(ESMC_I8 *w, ESMC_I4 *n, ESMC_I4 *d);
-    int get(ESMC_I8 *w, ESMC_I4 *n, ESMC_I4 *d) const;
+    int set(ESMC_I8 *w, ESMC_I8 *n, ESMC_I8 *d);
+    int get(ESMC_I8 *w, ESMC_I8 *n, ESMC_I8 *d) const;
 
     int simplify(void);
-    int convert(ESMC_I4 denominator);
+    int convert(ESMC_I8 denominator);
 
     // comparison methods (TMG 1.5.3, 2.4.3, 7.2)
     bool operator==(const Fraction &) const;
@@ -118,8 +129,8 @@ class Fraction
 
     // native C++ constructor/destructors
     Fraction(void);
-    Fraction(ESMC_I8 w, ESMC_I4 n=0, ESMC_I4 d=1);
-    Fraction(int w, int n=0, int d=1);
+    Fraction(ESMC_I8 w, ESMC_I8 n=0, ESMC_I8 d=1);
+    Fraction(ESMC_R8 r);
     ~Fraction(void);
 
  // < declare the rest of the public interface methods here >
@@ -137,8 +148,8 @@ class Fraction
 
     // related general utility functions which do not operate on fraction
     //   objects directly
-    ESMC_I4 ESMCI_FractionGCD(ESMC_I4 a, ESMC_I4 b);
-    ESMC_I4 ESMCI_FractionLCM(ESMC_I4 a, ESMC_I4 b);
+    ESMC_I8 ESMCI_FractionGCD(ESMC_I8 a, ESMC_I8 b);
+    ESMC_I8 ESMCI_FractionLCM(ESMC_I8 a, ESMC_I8 b);
 
 } // namespace ESMCI
 

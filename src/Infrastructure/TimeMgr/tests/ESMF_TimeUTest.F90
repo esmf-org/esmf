@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.28 2008/11/14 05:06:45 theurich Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.29 2008/11/26 06:59:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.28 2008/11/14 05:06:45 theurich Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.29 2008/11/26 06:59:14 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -46,8 +46,9 @@
       ! individual test result code
       integer :: rc, H, M, S, MS, US, NS, MM, DD, YY, D, dayOfYear, dayOfWeek
       integer :: sN, sD
-      integer(ESMF_KIND_I8) :: year
+      integer(ESMF_KIND_I8) :: year, SN_I8, SD_i8
       real(ESMF_KIND_R8) :: dayOfYear_r8
+      real(ESMF_KIND_R8) :: D_r8, H_r8, M_r8, S_r8, MS_r8, US_r8, NS_r8
       logical :: bool
 
       ! individual test name
@@ -62,13 +63,13 @@
       ! instantiate timestep, start and stop times
       type(ESMF_Time) :: startTime, stopTime, startTime2, midMonth
       type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
-                             julianDayCalendar, &
+                             julianDayCalendar, modifiedJulianDayCalendar, &
                              noLeapCalendar, day360Calendar
 
       ! instantitate some general times and timeintervals
-      type(ESMF_Time) :: time1, time2, time3, time4, time5
+      type(ESMF_Time) :: time1, time2, time3, time4, time5, time6, time7
       type(ESMF_TimeInterval) :: timeInterval2, timeInterval3, timeInterval4, &
-                                 timeInterval5
+                                 timeInterval5, timeInterval6, timeInterval7
 
 !-------------------------------------------------------------------------------
 !    The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -96,6 +97,8 @@
                                               ESMF_CAL_360DAY, rc)
       julianDayCalendar = ESMF_CalendarCreate("Julian Day", &
                                               ESMF_CAL_JULIANDAY, rc)
+      modifiedJulianDayCalendar = ESMF_CalendarCreate("ModifiedJulianDay", &
+                                                      ESMF_CAL_MODJULIANDAY, rc)
 
 
       
@@ -831,7 +834,135 @@
       write(name, *) "Fractional time1 <= time3 Test"
       call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
 
- 
+      ! ----------------------------------------------------------------------------
+      ! Real fractional times tests
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Setting/Getting with _r8's on Julian Day calendar
+      write(failMsg, *) " Did not return Set values and ESMF_SUCCESS"
+      call ESMF_TimeSet(time1, d_r8=9.1d0, &
+                        h_r8=17.4d0, m_r8=47.75d0, &
+                        s_r8=52.25d0, &
+                        ms_r8=22.5d0, us_r8=159.0d0, ns_r8=592.125d0, &
+                        sN_i8=1234567890_ESMF_KIND_I8, &
+                        sD_i8=3000000000_ESMF_KIND_I8, & 
+                        calendar=julianDayCalendar, rc=rc)
+      call ESMF_TimePrint(time1, rc=rc)
+      call ESMF_TimeGet(time1, d_r8=D_r8, h_r8=H_r8, m_r8=M_r8, s_r8=S_r8, &
+                        ms_r8=MS_r8, us_r8=US_r8, ns_r8=NS_r8, &
+                        sN_i8=SN_i8, sD_i8=SD_i8, rc=rc)
+      write(name, *) "Set/Get Real (R8) Time on Julian Day calendar Test"
+      call ESMF_Test((abs(D_r8 -  9.85876949284979d0) < 1d-14) .and. &
+                     (abs(H_r8 -  20.6104678283950d0) < 1d-13) .and. &
+                     (abs(M_r8 -  1236.62806970370d0) < 1d-11) .and. &
+                     (abs(S_r8 -  74197.6841822221d0) < 1d-10) .and. &
+                     (abs(MS_r8 - 74197684.1822221d0) < 1d-7)  .and. &
+                     (abs(US_r8 - 74197684182.2221d0) < 1d-4)  .and. &
+                     (abs(NS_r8 - 74197684182222.1d0) < 1d-1)  .and. &
+                      SN_i8.eq.5473457777_ESMF_KIND_I8 .and. &
+                      SD_i8.eq.8000000000_ESMF_KIND_I8 .and. &
+                      rc.eq.ESMF_SUCCESS, &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, D_r8, H_r8, M_r8, S_r8, MS_r8, US_r8, NS_r8, SN_i8, SD_i8
+      print *, "D_r8 - 9.1 = ", D_r8 - 9.1d0
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Setting/Getting with _r8's on Modified Julian Day calendar
+      write(failMsg, *) " Did not return Set values and ESMF_SUCCESS"
+      call ESMF_TimeSet(time1, d_r8=9.1d0, &
+                        h_r8=17.4d0, m_r8=47.75d0, &
+                        s_r8=52.25d0, &
+                        ms_r8=22.5d0, us_r8=159.0d0, ns_r8=592.125d0, &
+                        sN_i8=1234567890_ESMF_KIND_I8, &
+                        sD_i8=3000000000_ESMF_KIND_I8, & 
+                        calendar=modifiedJulianDayCalendar, rc=rc)
+      call ESMF_TimePrint(time1, rc=rc)
+      call ESMF_TimeGet(time1, d_r8=D_r8, h_r8=H_r8, m_r8=M_r8, s_r8=S_r8, &
+                        ms_r8=MS_r8, us_r8=US_r8, ns_r8=NS_r8, &
+                        sN_i8=SN_i8, sD_i8=SD_i8, rc=rc)
+      write(name, *) "Set/Get Real (R8) Time on Modified Julian Day calendar Test"
+      call ESMF_Test((abs(D_r8 -  9.85876949284979d0) < 1d-14) .and. &
+                     (abs(H_r8 -  20.6104678283950d0) < 1d-13) .and. &
+                     (abs(M_r8 -  1236.62806970370d0) < 1d-11) .and. &
+                     (abs(S_r8 -  74197.6841822221d0) < 1d-10) .and. &
+                     (abs(MS_r8 - 74197684.1822221d0) < 1d-7)  .and. &
+                     (abs(US_r8 - 74197684182.2221d0) < 1d-4)  .and. &
+                     (abs(NS_r8 - 74197684182222.1d0) < 1d-1)  .and. &
+                      SN_i8.eq.5473457777_ESMF_KIND_I8 .and. &
+                      SD_i8.eq.8000000000_ESMF_KIND_I8 .and. &
+                      rc.eq.ESMF_SUCCESS, &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, D_r8, H_r8, M_r8, S_r8, MS_r8, US_r8, NS_r8, SN_i8, SD_i8
+      print *, "D_r8 - 9.1 = ", D_r8 - 9.1d0
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test adding a time and real fractional days time interval
+      write(failMsg, *) " Did not return 11/27/2008 03:45:40 and ESMF_SUCCESS"
+      call ESMF_TimeSet(time6, yy=2008, mm=11, dd=25, h=17, m=15, s=40, &
+                       calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeInterval6, d_r8=1.4375d0, rc=rc)
+      time7 = time6 + timeInterval6
+      call ESMF_TimeGet(time7, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_TimePrint(time7, rc=rc)
+      write(name, *) "Adding Time and real fractional days Timeinterval Test"
+      call ESMF_Test((YY.eq.2008.and.MM.eq.11.and.DD.eq.27.and.H.eq.3.and. &
+                      M.eq.45.and.S.eq.40 &
+                      .and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, YY, "/", MM, "/", DD, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test taking the difference of two times to produce a real fractional
+      ! days result.
+      write(failMsg, *) " Did not return D_r8=1.4375 and ESMF_SUCCESS"
+      timeInterval7 = time7 - time6
+      call ESMF_TimeIntervalGet(timeInterval7, d_r8=D_r8, rc=rc)
+      call ESMF_TimeIntervalPrint(timeInterval7, rc=rc)
+      write(name, *) "Test subtracting two times, resulting in a real fractional days Timeinterval"
+      call ESMF_Test((D_r8.eq.1.4375d0.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, D_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test subracting a real fractional time and real fractional days time interval
+      write(failMsg, *) " Did not return 11/27/2008 03:45:40 and ESMF_SUCCESS"
+      call ESMF_TimeSet(time6, yy=2008, mm=12, dd=1, h=2, m=3, s=4, &
+                       ms_r8=0.125d0, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimePrint(time6, rc=rc)
+      ! interval of 1+5/7 days, to 16 digits of precison
+      call ESMF_TimeIntervalSet(timeInterval6, d_r8=1.714285714285714d0, rc=rc)
+      call ESMF_TimeIntervalPrint(timeInterval6, rc=rc)
+      time7 = time6 - timeInterval6
+      call ESMF_TimePrint(time7, rc=rc)
+      call ESMF_TimeGet(time7, yy=YY, mm=MM, dd=DD, s_r8=S_r8, rc=rc)
+      write(name, *) "Subtracting real fractional Time and real fractional days Timeinterval Test"
+      call ESMF_Test((YY.eq.2008.and.MM.eq.11.and.DD.eq.29.and. &
+                      abs(S_r8-32069.7144107143d0) < 1d-10 &
+                      .and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, YY, "/", MM, "/", DD, " ", S_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test taking the difference of two times to produce time interval
+      ! equal to previous subtraction
+      write(failMsg, *) " Did not return equivalent timeInterval and ESMF_SUCCESS"
+      timeInterval7 = time6 - time7
+      call ESMF_TimeIntervalPrint(timeInterval7, rc=rc)
+      ! calendars must match for equality test, so reset timeInterval6 with cal
+      call ESMF_TimeIntervalSet(timeInterval6, d_r8=1.714285714285714d0, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalPrint(timeInterval6, rc=rc)
+      write(name, *) "Test subtracting two times, producing equal Timeinterval used in previous test"
+      call ESMF_Test((timeInterval7.eq.timeInterval6.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
       ! Leap Year tests
       ! ----------------------------------------------------------------------------

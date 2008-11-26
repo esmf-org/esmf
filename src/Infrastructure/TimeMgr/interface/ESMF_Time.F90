@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.101 2008/11/14 04:05:57 theurich Exp $
+! $Id: ESMF_Time.F90,v 1.102 2008/11/26 06:59:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.101 2008/11/14 04:05:57 theurich Exp $'
+      '$Id: ESMF_Time.F90,v 1.102 2008/11/26 06:59:14 eschwab Exp $'
 
 !==============================================================================
 !
@@ -467,7 +467,7 @@
                                     ms, us, ns, &
                                     d_r8, h_r8, m_r8, s_r8, &
                                     ms_r8, us_r8, ns_r8, &
-                                    sN, sD, &
+                                    sN, sN_i8, sD, sD_i8, &
                                     calendar, calendarType, timeZone, &
                                     timeString, timeStringISOFrac, &
                                     dayOfWeek, midMonth, &
@@ -488,15 +488,17 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: ms
       integer(ESMF_KIND_I4),   intent(out), optional :: us
       integer(ESMF_KIND_I4),   intent(out), optional :: ns
-      real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
-      real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
-      real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
-      real(ESMF_KIND_R8),      intent(out), optional :: s_r8  ! not implemented
-      real(ESMF_KIND_R8),      intent(out), optional :: ms_r8 ! not implemented
-      real(ESMF_KIND_R8),      intent(out), optional :: us_r8 ! not implemented
-      real(ESMF_KIND_R8),      intent(out), optional :: ns_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: d_r8
+      real(ESMF_KIND_R8),      intent(out), optional :: h_r8
+      real(ESMF_KIND_R8),      intent(out), optional :: m_r8
+      real(ESMF_KIND_R8),      intent(out), optional :: s_r8
+      real(ESMF_KIND_R8),      intent(out), optional :: ms_r8
+      real(ESMF_KIND_R8),      intent(out), optional :: us_r8
+      real(ESMF_KIND_R8),      intent(out), optional :: ns_r8
       integer(ESMF_KIND_I4),   intent(out), optional :: sN
+      integer(ESMF_KIND_I8),   intent(out), optional :: sN_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: sD
+      integer(ESMF_KIND_I8),   intent(out), optional :: sD_i8
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
       integer,                 intent(out), optional :: timeZone
@@ -519,7 +521,6 @@
 !     values are converted internally from integers.  For example, if a time
 !     value is 5 and 3/8 seconds (s=5, sN=3, sD=8), and you want to get it as
 !     floating point seconds, you would get 5.375 (s\_r8=5.375).
-!     (Reals not implemented yet).
 !
 !     Units are bound (normalized) by the next larger unit specified.  For
 !     example, if a time is defined to be 2:00 am on February 2, 2004, then
@@ -571,7 +572,7 @@
 !     For dayOfYear\_r8, gets the day of the year the given {\tt ESMF\_Time}
 !     instant falls on.  See range discusion in argument list below.
 !     Return as floating point value; fractional part represents the time of
-!     day.  (Reals not implemented yet).
+!     day.
 !
 !     For dayOfYear\_intvl, gets the day of the year the given {\tt ESMF\_Time}
 !     instant falls on.  Return as an {\tt ESMF\_TimeInterval}.
@@ -607,23 +608,29 @@
 !     \item[{[ns]}]
 !          Integer nanoseconds.
 !     \item[{[d\_r8]}]
-!          Double precision days.  (Not implemented yet).
+!          Double precision days.
 !     \item[{[h\_r8]}]
-!          Double precision hours.  (Not implemented yet).
+!          Double precision hours.
 !     \item[{[m\_r8]}]
-!          Double precision minutes.  (Not implemented yet).
+!          Double precision minutes.
 !     \item[{[s\_r8]}]
-!          Double precision seconds.  (Not implemented yet).
+!          Double precision seconds.
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.  (Not implemented yet).
+!          Double precision milliseconds.
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.  (Not implemented yet).
+!          Double precision microseconds.
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.  (Not implemented yet).
+!          Double precision nanoseconds.
 !     \item[{[sN]}]
-!          Integer numerator portion of fractional seconds (sN/sD).
+!          Integer numerator of fractional seconds (sN/sD).
+!     \item[{[sN\_i8]}]
+!          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
+!                                                           (large, >= 64-bit).
 !     \item[{[sD]}]
-!          Integer denominator portion of fractional seconds (sN/sD).
+!          Integer denominator of fractional seconds (sN/sD).
+!     \item[{[sD\_i8]}]
+!          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
+!                                                           (large, >= 64-bit).
 !     \item[{[calendar]}]
 !          Associated {\tt Calendar}.
 !     \item[{[calendarType]}]
@@ -654,7 +661,7 @@
 !          The {\tt ESMF\_Time} instant's floating point day of the year.
 !          [1.x-366.x] for Gregorian and Julian calendars, [1.x-365.x] for
 !          No-Leap calendar.  [1.x-360.x] for 360-Day calendar.  User-defined
-!          range for Custom calendar.  (Not implemented yet).
+!          range for Custom calendar.
 !     \item[{[dayOfYear\_intvl]}]
 !          The {\tt ESMF\_Time} instant's day of the year as an
 !          {\tt ESMF\_TimeInterval}.
@@ -700,7 +707,8 @@
       call c_ESMC_TimeGet(time, yy, yy_i8, mm, dd, d, d_i8, &
                           h, m, s, s_i8, ms, us, ns, &
                           d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
-                          sN, sD, calendar, calendarType, timeZone, &
+                          sN, sN_i8, sD, sD_i8, &
+                          calendar, calendarType, timeZone, &
                           timeStringLen, tempTimeStringLen, tempTimeString, &
                           timeStringLenISOFrac, tempTimeStringLenISOFrac, &
                           tempTimeStringISOFrac, &
@@ -965,7 +973,8 @@
                                     ms, us, ns, &
                                     d_r8, h_r8, m_r8, s_r8, &
                                     ms_r8, us_r8, ns_r8, &
-                                    sN, sD, calendar, calendarType, &
+                                    sN, sN_i8, sD, sD_i8, &
+                                    calendar, calendarType, &
                                     timeZone, rc)
 
 ! !ARGUMENTS:
@@ -983,15 +992,17 @@
       integer(ESMF_KIND_I4),   intent(in),  optional :: ms
       integer(ESMF_KIND_I4),   intent(in),  optional :: us
       integer(ESMF_KIND_I4),   intent(in),  optional :: ns
-      real(ESMF_KIND_R8),      intent(in),  optional :: d_r8  ! not implemented
-      real(ESMF_KIND_R8),      intent(in),  optional :: h_r8  ! not implemented
-      real(ESMF_KIND_R8),      intent(in),  optional :: m_r8  ! not implemented
-      real(ESMF_KIND_R8),      intent(in),  optional :: s_r8  ! not implemented
-      real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8 ! not implemented
-      real(ESMF_KIND_R8),      intent(in),  optional :: us_r8 ! not implemented
-      real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: d_r8
+      real(ESMF_KIND_R8),      intent(in),  optional :: h_r8
+      real(ESMF_KIND_R8),      intent(in),  optional :: m_r8
+      real(ESMF_KIND_R8),      intent(in),  optional :: s_r8
+      real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8
+      real(ESMF_KIND_R8),      intent(in),  optional :: us_r8
+      real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8
       integer(ESMF_KIND_I4),   intent(in),  optional :: sN
+      integer(ESMF_KIND_I8),   intent(in),  optional :: sN_i8
       integer(ESMF_KIND_I4),   intent(in),  optional :: sD
+      integer(ESMF_KIND_I8),   intent(in),  optional :: sD_i8
       type(ESMF_Calendar),     intent(in),  optional :: calendar
       type(ESMF_CalendarType), intent(in),  optional :: calendarType
       integer,                 intent(in),  optional :: timeZone ! not implemented
@@ -1044,10 +1055,12 @@
 !     to maintain precision. Hence, user-specified floating point values are
 !     converted internally to integers.  Sub-second values are represented
 !     internally with an integer numerator and denominator fraction (sN/sD).
-!     The smallest resolution is nanoseconds (denominator), as per Time
-!     Manager requirement TMG3.1.  Anything smaller will be truncated.  For
-!     example, pi would be represented as s=3, sN=141592654, sD=1000000000.
-!     (Reals not implemented yet).
+!     The smallest required resolution is nanoseconds (denominator), per Time
+!     Manager requirement TMG3.1.  For example, pi can be represented as s=3,
+!     sN=141592654, sD=1000000000.  However, via sN\_i8 and sD\_i8, larger
+!     values can be used.  If specifying a constant floating point value, be
+!     sure to provide at least 16 digits to take full advantage of double
+!     precision, for example s\_r8=2.718281828459045d0 for 'e' seconds.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1081,24 +1094,32 @@
 !     \item[{[ns]}]
 !          Integer nanoseconds.  Default = 0.
 !     \item[{[d\_r8]}]
-!          Double precision days.  Default = 0.0.  (Not implemented yet).
+!          Double precision days.  Default = 0.0.
 !     \item[{[h\_r8]}]
-!          Double precision hours.  Default = 0.0.  (Not implemented yet).
+!          Double precision hours.  Default = 0.0.
 !     \item[{[m\_r8]}]
-!          Double precision minutes.  Default = 0.0.  (Not implemented yet).
+!          Double precision minutes.  Default = 0.0.
 !     \item[{[s\_r8]}]
-!          Double precision seconds.  Default = 0.0.  (Not implemented yet).
+!          Double precision seconds.  Default = 0.0.
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.  Default = 0.0. (Not implemented yet).
+!          Double precision milliseconds.  Default = 0.0.
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.  Default = 0.0. (Not implemented yet).
+!          Double precision microseconds.  Default = 0.0.
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.  Default = 0.0.  (Not implemented yet).
+!          Double precision nanoseconds.  Default = 0.0.
 !     \item[{[sN]}]
-!          Integer numerator portion of fractional seconds (sN/sD).
+!          Integer numerator of fractional seconds (sN/sD).
+!          Default = 0.
+!     \item[{[sN\_i8]}]
+!          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
+!                                                           (large, >= 64-bit).
 !          Default = 0.
 !     \item[{[sD]}]
-!          Integer denominator portion of fractional seconds (sN/sD).
+!          Integer denominator of fractional seconds (sN/sD).
+!          Default = 1.
+!     \item[{[sD\_i8]}]
+!          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
+!                                                           (large, >= 64-bit).
 !          Default = 1.
 !     \item[calendar]
 !          Associated {\tt Calendar}.  Defaults to calendar
@@ -1134,7 +1155,8 @@
       call c_ESMC_TimeSet(time, yy, yy_i8, mm, dd, d, d_i8, &
                           h, m, s, s_i8, ms, us, ns, &
                           d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
-                          sN, sD, calendar, calendarType, timeZone, localrc)
+                          sN, sN_i8, sD, sD_i8, &
+                          calendar, calendarType, timeZone, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 

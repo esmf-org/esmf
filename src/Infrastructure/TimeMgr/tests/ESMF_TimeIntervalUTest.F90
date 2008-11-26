@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.49 2008/11/14 05:06:45 theurich Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.50 2008/11/26 06:59:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.49 2008/11/14 05:06:45 theurich Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.50 2008/11/26 06:59:14 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -67,7 +67,10 @@
       type(ESMF_TimeInterval) :: timeInterval1, timeInterval2, timeInterval3, &
                                  timeInterval4, timeInterval5, timeInterval6
       integer(ESMF_KIND_I8) :: days2
-      real(ESMF_KIND_R8) :: ratio, days_r8
+      real(ESMF_KIND_R8) :: ratio, days_r8, sec_in_r8, sec_out_r8, &
+                            hr_in_r8, hr_out_r8, min_in_r8, min_out_r8, &
+                            ms_in_r8, ms_out_r8, us_in_r8, us_out_r8, &
+                            ns_in_r8, ns_out_r8
 
 
 !-------------------------------------------------------------------------------
@@ -938,10 +941,507 @@
                                calendar=gregorianCalendar, rc=rc)
       diffTime = time1 - time2
       call ESMF_TimeIntervalGet(diffTime, d_r8=days_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(diffTime, rc=rc)
       call ESMF_Test((abs(days_r8 - 722502.253518553d0) < 1d-6 .and. &
                      rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       print *, "Diff time in floating point days = ", days_r8, " rc = ", rc
+
+      ! ----------------------------------------------------------------------------
+      ! The following tests the double-to-rational fraction conversion and back
+      ! ----------------------------------------------------------------------------
+      ! days_r8
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Suggested by Chris Hill in Support Requests #1660968, 1660970
+      write(name, *) "Set/Get floating point days"
+      write(failMsg, *) " Did not return 1.5"
+
+      call ESMF_TimeIntervalSet(timeInterval1, d_r8=1.5d0, &
+                                calendar=gregorianCalendar, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, d_r8=days_r8 )
+      call ESMF_Test(days_r8.eq.1.5d0 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' days_r8 = ', days_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set hours, minutes, seconds/get floating point days"
+      write(failMsg, *) " Did not return 0.22723379629629629629"
+
+      call ESMF_TimeIntervalSet(timeInterval1, h=5, m=27, s=13, &
+                                calendar=gregorianCalendar, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, d_r8=days_r8 )
+      call ESMF_Test(days_r8.eq.0.22723379629629629629d0 .and. &
+                     ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' days_r8 = ', days_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set floating point days, get hours, minutes, seconds"
+      write(failMsg, *) " Did not return h=5, m=27, s=13"
+
+      call ESMF_TimeIntervalSet(timeInterval1, d_r8=0.22723379629629629629d0, &
+                                calendar=gregorianCalendar, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, h=H, m=M,s=S, rc=rc)
+      call ESMF_Test(H.eq.5.and.M.eq.27.and.S.eq.13 .and. &
+                     ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' H, M, S = ', H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set floating point and integer days, get hours, minutes, seconds"
+      write(failMsg, *) " Did not return h=29, m=27, s=13"
+
+      call ESMF_TimeIntervalSet(timeInterval1, d=1, &
+                                d_r8=0.22723379629629629629d0, &
+                                calendar=gregorianCalendar, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, h=H, m=M,s=S, rc=rc)
+      call ESMF_Test(H.eq.29.and.M.eq.27.and.S.eq.13 .and. &
+                     ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' H, M, S = ', H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      ! seconds_r8
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Suggested by Chris Hill in Support Requests #1660968, 1660970
+      write(name, *) "Set/Get floating point seconds, 1.5"
+      write(failMsg, *) " Did not return 1.5"
+
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=1.5d0, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(sec_out_r8.eq.1.5d0 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, 0.125 (1/8)"
+      write(failMsg, *) " Did not return 0.125"
+
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=0.125d0, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(sec_out_r8.eq.0.125d0 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, 0.5625 (9/16)"
+      write(failMsg, *) " Did not return 0.5625"
+
+      sec_in_r8 = 9.0d0/16.0d0
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(sec_out_r8.eq.0.5625d0 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, 0.7142857142857143 (5/7)"
+      write(failMsg, *) " Did not return 0.7142857142857143"
+
+      sec_in_r8 = 5.0d0/7.0d0
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(sec_out_r8.eq.0.7142857142857143d0 .and. & 
+                       ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, 0.66666666666666667 (2/3)"
+      write(failMsg, *) " Did not return 0.66666666666666667"
+
+      sec_in_r8 = 2.0d0/3.0d0
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(sec_out_r8.eq.0.66666666666666667d0 .and. & 
+                       ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, 0.66666666666666667 (2/3)"
+      write(failMsg, *) " Did not return 0.66666666666666667"
+
+      sec_in_r8 = 0.66666666666666667d0
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(sec_out_r8.eq.0.66666666666666667d0 .and. & 
+                       ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, 0.1111111111111111 (1/9)"
+      write(failMsg, *) " Did not return 0.1111111111111111"
+
+      sec_in_r8 = 0.1111111111111111d0
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(sec_out_r8.eq.0.1111111111111111d0 .and. & 
+                       ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, 0.001 (1 ms)"
+      write(failMsg, *) " Did not return 0.001"
+
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=0.001d0, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(sec_out_r8.eq.0.001d0 .and. & 
+                       ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, 0.000001 (1 us)"
+      write(failMsg, *) " Did not return 0.000001"
+
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=0.000001d0, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(sec_out_r8.eq.0.000001d0 .and. & 
+                       ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, 0.000000001 (1 ns)"
+      write(failMsg, *) " Did not return 0.000000001"
+
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=0.000000001d0, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(sec_out_r8.eq.0.000000001d0 .and. & 
+                       ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, 1.0d-9"
+      write(failMsg, *) " Did not return 1.0d-9"
+      !TODO:  1.0d-17 smallest when fraction n/d becomes ESMF_I8
+
+      sec_in_r8 = 1.0d-9
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(sec_out_r8.eq.sec_in_r8 .and. & 
+                       ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, 6.0"
+      write(failMsg, *) " Did not return 6.0"
+
+      sec_in_r8 = 6.0d0
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(sec_out_r8.eq.6.0d0 .and. & 
+                       ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, pi, constant"
+      write(failMsg, *) " Did not return 3.141592653589793"
+
+      sec_in_r8 = 3.141592653589793d0
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(abs(sec_out_r8 - sec_in_r8) < 1d-15 .and. & 
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_in_r8 = ', sec_in_r8
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, pi, computed"
+      write(failMsg, *) " Did not return -3.141592653589793"
+
+      sec_in_r8 = -acos(-1.0d0)
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(abs(sec_out_r8 - sec_in_r8) < 1d-15 .and. & 
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_in_r8 = ', sec_in_r8
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, -e, constant"
+      write(failMsg, *) " Did not return -2.718281828459045"
+
+      sec_in_r8 = -2.718281828459045d0
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(abs(sec_out_r8 - sec_in_r8) < 1d-15 .and. & 
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_in_r8 = ', sec_in_r8
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, e, computed"
+      write(failMsg, *) " Did not return 2.718281828459045"
+
+      sec_in_r8 = exp(1.0d0)
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(abs(sec_out_r8 - sec_in_r8) < 1d-15 .and. & 
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_in_r8 = ', sec_in_r8
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, golden ratio"
+      write(failMsg, *) " Did not return 1.618033988749895"
+
+      sec_in_r8 = (1.0d0 + sqrt(5.0d0))/2.0d0
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(abs(sec_out_r8 - sec_in_r8) < 1d-15 .and. & 
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_in_r8 = ', sec_in_r8
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, square root of 2"
+      write(failMsg, *) " Did not return 1.414213562373095"
+
+      sec_in_r8 = sqrt(2.0d0)
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(abs(sec_out_r8 - sec_in_r8) < 1d-15 .and. & 
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_in_r8 = ', sec_in_r8
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point seconds, negative square root of 3"
+      write(failMsg, *) " Did not return -1.732050807568877"
+
+      sec_in_r8 = -sqrt(3.0d0)
+      call ESMF_TimeIntervalSet(timeInterval1, s_r8=sec_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s_r8=sec_out_r8 )
+      call ESMF_Test(abs(sec_out_r8 - sec_in_r8) < 1d-15 .and. & 
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' sec_in_r8 = ', sec_in_r8
+      !print *, ' sec_out_r8 = ', sec_out_r8
+
+      ! ----------------------------------------------------------------------------
+      ! hours_r8
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point hours, 1.25"
+      write(failMsg, *) " Did not return 1.25"
+
+      call ESMF_TimeIntervalSet(timeInterval1, h_r8=1.25d0, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, h_r8=hr_out_r8 )
+      call ESMF_Test(hr_out_r8.eq.1.25d0 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' hr_out_r8 = ', hr_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point hours, 2 1/3"
+      write(failMsg, *) " Did not return 2.3333333333333333"
+
+      hr_in_r8 = 2.3333333333333333d0
+      call ESMF_TimeIntervalSet(timeInterval1, h_r8=hr_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, h_r8=hr_out_r8 )
+      call ESMF_Test(hr_out_r8.eq.hr_in_r8 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' hr_in_r8 = ', hr_in_r8
+      !print *, ' hr_out_r8 = ', hr_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point hours, 1/60"
+      write(failMsg, *) " Did not return 0.016666666666666667"
+
+      hr_in_r8 = 1.0d0/60.0d0
+      call ESMF_TimeIntervalSet(timeInterval1, h_r8=hr_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, h_r8=hr_out_r8 )
+      call ESMF_Test(hr_out_r8.eq.hr_in_r8 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' hr_in_r8 = ', hr_in_r8
+      !print *, ' hr_out_r8 = ', hr_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point hours, 2/7"
+      write(failMsg, *) " Did not return 0.2857142857142857"
+
+      hr_in_r8 = 2.0d0/7.0d0
+      call ESMF_TimeIntervalSet(timeInterval1, h_r8=hr_in_r8, rc=rc)
+      call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, h_r8=hr_out_r8 )
+      call ESMF_Test(hr_out_r8.eq.hr_in_r8 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      print *, ' hr_in_r8 = ', hr_in_r8
+      print *, ' hr_out_r8 = ', hr_out_r8
+      print *, ' hr_out_r8 - hr_in_r8 = ', hr_out_r8 - hr_in_r8
+      print *, ' rc = ', rc
+
+      ! ----------------------------------------------------------------------------
+      ! minutes_r8
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point minutes, 1/5"
+      write(failMsg, *) " Did not return 0.2"
+
+      call ESMF_TimeIntervalSet(timeInterval1, m_r8=0.2d0, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, m_r8=min_out_r8 )
+      call ESMF_Test(min_out_r8.eq.0.2d0 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' min_out_r8 = ', min_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point minutes, 3 1/10"
+      write(failMsg, *) " Did not return 3.1"
+
+      call ESMF_TimeIntervalSet(timeInterval1, m_r8=3.1d0, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, m_r8=min_out_r8 )
+      call ESMF_Test(min_out_r8.eq.3.1d0 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' min_out_r8 = ', min_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point minutes, 1/6"
+      write(failMsg, *) " Did not return 0.1666666666666666"
+
+      min_in_r8 = 1.0d0 / 6.0d0
+      call ESMF_TimeIntervalSet(timeInterval1, m_r8=min_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, m_r8=min_out_r8 )
+      call ESMF_Test(min_out_r8.eq.min_in_r8 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' min_in_r8 = ', min_in_r8
+      !print *, ' min_out_r8 = ', min_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point minutes, 7/9"
+      write(failMsg, *) " Did not return 0.77777777777777778"
+
+      min_in_r8 = 7.0d0 / 9.0d0
+      call ESMF_TimeIntervalSet(timeInterval1, m_r8=min_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, m_r8=min_out_r8 )
+      call ESMF_Test(min_out_r8.eq.min_in_r8 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' min_in_r8 = ', min_in_r8
+      !print *, ' min_out_r8 = ', min_out_r8
+
+      ! ----------------------------------------------------------------------------
+      ! milliseconds_r8
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point milliseconds, 3.75"
+      write(failMsg, *) " Did not return 3.75"
+
+      call ESMF_TimeIntervalSet(timeInterval1, ms_r8=3.75d0, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, ms_r8=ms_out_r8 )
+      call ESMF_Test(ms_out_r8.eq.3.75d0 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' ms_out_r8 = ', ms_out_r8
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point milliseconds, -8 21/23"
+      write(failMsg, *) " Did not return -8.9130434782608696"
+
+      ms_in_r8 = -8.0d0 - 21.0d0 / 23.0d0
+      print *, ' ms_in_r8 = ', ms_in_r8
+      call ESMF_TimeIntervalSet(timeInterval1, ms_r8=ms_in_r8, rc=rc)
+      call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, ms_r8=ms_out_r8 )
+      call ESMF_Test(ms_out_r8.eq.ms_in_r8 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      print *, ' ms_in_r8 = ', ms_in_r8
+      print *, ' ms_out_r8 = ', ms_out_r8
+
+      ! ----------------------------------------------------------------------------
+      ! microseconds_r8
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point microseconds, 7 1/3"
+      write(failMsg, *) " Did not return 7.333333333333333"
+
+      us_in_r8 = 7.0d0 + 1.0d0 / 3.0d0
+      call ESMF_TimeIntervalSet(timeInterval1, us_r8=us_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, us_r8=us_out_r8 )
+      call ESMF_Test(us_out_r8.eq.us_in_r8 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' us_in_r8 = ', us_in_r8
+      !print *, ' us_out_r8 = ', us_out_r8
+
+      ! ----------------------------------------------------------------------------
+      ! nanoseconds_r8
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Set/Get floating point nanoseconds, 9 4/11"
+      write(failMsg, *) " Did not return 9.363636363636363"
+
+      ns_in_r8 = 9.0d0 + 4.0d0 / 11.0d0
+      call ESMF_TimeIntervalSet(timeInterval1, ns_r8=ns_in_r8, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, ns_r8=ns_out_r8 )
+      call ESMF_Test(ns_out_r8.eq.ns_in_r8 .and. &   ! bitwise identical!
+                     rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !print *, ' ns_in_r8 = ', ns_in_r8
+      !print *, ' ns_out_r8 = ', ns_out_r8
 
       ! ----------------------------------------------------------------------------
       ! Julian Leap year 1900 tests
@@ -1013,7 +1513,7 @@
                       H==12 .and. M==17 .and. S==58 .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+      !print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -1120,7 +1620,7 @@
                       H==12 .and. M==17 .and. S==58 .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+      !print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -3381,18 +3881,20 @@
       call ESMF_Test((S.eq.0.and.sN.eq.1.and.sD.eq.7.and. &
                      rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      print *, "sN/sD = ", sN, "/", sD
+      !print *, "sN/sD = ", sN, "/", sD
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Should produce error message in ESMF_LogFile
-      write(name, *) "Upper limit of denominator Test"
+      write(name, *) "Upper limit of denominator get Test"
       write(failMsg, *) " Did not return 0 0/1 seconds"
       call ESMF_TimeIntervalSet(timeInterval1, sN=1, sD=1000000000, rc=rc)
       timeInterval1 = timeInterval1 / 5
+      sD = 1
       call ESMF_TimeIntervalGet(timeInterval1, s=S, sN=sN, sD=sD, rc=rc)
-      call ESMF_Test((S.eq.0.and.sN.eq.0.and.sD.eq.1), &
+      call ESMF_Test((S.eq.0.and.sN.eq.1.and.sD.eq.1), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !print *, "S, sN, sD = ", S, sN, sD
 
       ! ----------------------------------------------------------------------------
       ! return number of failures to environment; 0 = success (all pass)

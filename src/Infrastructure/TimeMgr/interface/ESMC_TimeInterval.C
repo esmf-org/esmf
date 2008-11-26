@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.3 2008/08/26 15:46:37 theurich Exp $
+// $Id: ESMC_TimeInterval.C,v 1.4 2008/11/26 06:59:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.3 2008/08/26 15:46:37 theurich Exp $";
+static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.4 2008/11/26 06:59:14 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -59,16 +59,17 @@ int  ESMC_TimeIntervalSet(ESMC_TimeInterval* timeInterval,
 
   localrc = pTimeInterval->set( (ESMC_I4*)NULL, (ESMC_I8*)NULL,
                                 (ESMC_I4*)NULL, (ESMC_I8*)NULL,
-                                (ESMC_I4*)NULL,  (ESMC_I8*)NULL,
-                                         &h_I4,  (ESMC_I4*)NULL,
-                                (ESMC_I4*)NULL,  (ESMC_I8*)NULL,
+                                (ESMC_I4*)NULL, (ESMC_I8*)NULL,
+                                         &h_I4, (ESMC_I4*)NULL,
+                                (ESMC_I4*)NULL, (ESMC_I8*)NULL,
                                 (ESMC_I4*)NULL, (ESMC_I4*)NULL,
                                 (ESMC_I4*)NULL,
-                                (ESMC_R8*)NULL,  (ESMC_R8*)NULL,
-                                (ESMC_R8*)NULL,  (ESMC_R8*)NULL,
+                                (ESMC_R8*)NULL, (ESMC_R8*)NULL,
+                                (ESMC_R8*)NULL, (ESMC_R8*)NULL,
                                 (ESMC_R8*)NULL, (ESMC_R8*)NULL,
                                 (ESMC_R8*)NULL,
-                                (ESMC_I4*)NULL, (ESMC_I4*)NULL,
+                                (ESMC_I4*)NULL, (ESMC_I8*)NULL,
+                                (ESMC_I4*)NULL, (ESMC_I8*)NULL,
                                 (ESMCI::Time*)NULL, (ESMCI::Time*)NULL,
                                 (ESMCI::Calendar**)NULL,
                                 (ESMC_CalendarType*)NULL);
@@ -102,16 +103,17 @@ int  ESMC_TimeIntervalGet(ESMC_TimeInterval timeInterval,
 
   localrc = pTimeInterval->get( (ESMC_I4*)NULL, (ESMC_I8*)NULL,
                              (ESMC_I4*)NULL, (ESMC_I8*)NULL,
-                             (ESMC_I4*)NULL,  (ESMC_I8*)NULL,
-                             (ESMC_I4*)NULL,  (ESMC_I4*)NULL,
+                             (ESMC_I4*)NULL, (ESMC_I8*)NULL,
+                             (ESMC_I4*)NULL, (ESMC_I4*)NULL,
                              (ESMC_I4*)NULL,  s_I8,
                              (ESMC_I4*)NULL, (ESMC_I4*)NULL,
                              (ESMC_I4*)NULL,
                              (ESMC_R8*)NULL,  h_R8,
-                             (ESMC_R8*)NULL,  (ESMC_R8*)NULL,
+                             (ESMC_R8*)NULL, (ESMC_R8*)NULL,
                              (ESMC_R8*)NULL, (ESMC_R8*)NULL,
                              (ESMC_R8*)NULL,
-                             (ESMC_I4*)NULL, (ESMC_I4*)NULL,
+                             (ESMC_I4*)NULL, (ESMC_I8*)NULL,
+                             (ESMC_I4*)NULL, (ESMC_I8*)NULL,
                              (ESMCI::Time*)NULL, (ESMCI::Time*)NULL,
                              (ESMCI::Calendar**)NULL,
                              (ESMC_CalendarType*)NULL,

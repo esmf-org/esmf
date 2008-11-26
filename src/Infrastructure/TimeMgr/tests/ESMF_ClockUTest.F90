@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.108 2008/11/14 05:06:45 theurich Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.109 2008/11/26 06:59:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.108 2008/11/14 05:06:45 theurich Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.109 2008/11/26 06:59:14 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -69,8 +69,9 @@
       integer :: timevals(8)
 
       ! instantiate a calendar
-      type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
-                             no_leapCalendar, esmf_360dayCalendar
+      type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, &
+                             no_leapCalendar, esmf_360dayCalendar, &
+                             noCalendar
       type(ESMF_CalendarType) :: cal_type
 
       ! to retrieve time in string format
@@ -87,6 +88,7 @@
       integer(ESMF_KIND_I4) :: day, hour
       integer :: datetime(8)
       integer :: timeStepCount
+      real(ESMF_KIND_R8) :: realSeconds
 
       ! initialize ESMF framework
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -99,13 +101,16 @@
                                               ESMF_CAL_GREGORIAN, rc)
 
       ! initialize secand calendar to be Julian type
-      julianCalendar = ESMF_CalendarCreate("Julian", ESMF_CAL_JULIANDAY, rc)
+      julianDayCalendar = ESMF_CalendarCreate("Julian", ESMF_CAL_JULIANDAY, rc)
 
       ! initialize third calendar to be No Leap type
       no_leapCalendar = ESMF_CalendarCreate("NoLeap", ESMF_CAL_NOLEAP, rc)
 
       ! initialize third calendar to be 360 day type
       esmf_360dayCalendar = ESMF_CalendarCreate("360Day", ESMF_CAL_360DAY, rc)
+
+      ! initialize fourth calendar to be No Calendar type
+      noCalendar = ESMF_CalendarCreate("No Calendar", ESMF_CAL_NOCALENDAR, rc)
 
 !-------------------------------------------------------------------------------
 !    The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -996,7 +1001,7 @@
      !EX_UTest
       write(name, *) "Clock Initialization with stop time & start time with different calendars Test" 
       call ESMF_TimeSet(startTime, yy=2000, mm=3, dd=13, &
-                                   calendar=julianCalendar, rc=rc)
+                                   calendar=julianDayCalendar, rc=rc)
       write(failMsg, *) "Should not return ESMF_SUCCESS."
       clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, &
                                stopTime, rc=rc)
@@ -2016,6 +2021,45 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
+      ! Run a clock to add 0.1 to itself 100,000 times.  In normal double
+      ! precision arithmetic, this produces 10000.0000000188, not exactly
+      ! 10000.0000000000, due to the inherent error of representing 0.1
+      ! precisely in binary.  Demonstrates the ESMF Time Manager's ability to
+      ! represent and manipulate real numbers internally as integers without
+      ! loss of precision.
+      write(name, *) "Real time step clock test"
+      call ESMF_TimeSet(startTime, s_r8=0.0d0, calendar=noCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, s_r8=0.1d0, rc=rc)
+      clock = ESMF_ClockCreate("0.1 second Clock", &
+                               timeStep, startTime, &
+                               runTimeStepCount=100000, rc=rc)
+
+      call ESMF_ClockPrint(clock, "currtime", rc=rc)
+      call ESMF_ClockPrint(clock, "timestep", rc=rc)
+
+      if (rc.eq.ESMF_SUCCESS) then
+      	! Run the clock for 100,000 0.1 second time steps
+      	do while (.not.ESMF_ClockIsStopTime(clock, rc))
+        	call ESMF_ClockAdvance(clock, rc=rc)
+      	end do
+      end if
+
+      call ESMF_ClockPrint(clock, "currtime", rc=rc)
+
+      call ESMF_ClockGet(clock, advanceCount=advanceCounts, rc=rc)
+      call ESMF_ClockGet(clock, currTime=currentTime, rc=rc)
+      call ESMF_TimeGet(currentTime, s_r8=realSeconds, rc=rc)
+      write(failMsg, *) "advanceCount or ending currentTime incorrect or not ESMF_SUCCESS."
+      call ESMF_Test((advanceCounts.eq.100000.and. &
+                      realSeconds.eq.10000.0 &  ! exactly!
+                      .and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ClockDestroy(clock, rc)
+      print *, "0.1 second clock advanced ", advanceCounts, " times."
+      print *, "0.1 second clock end time = ", realSeconds, " seconds."
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
       ! From Shujia Zhou in Support #1091846, Bug #1099731
       write(name, *) "ESMF_TimeGet() Seconds Beyond a Day Test"
       write(failMsg, *) " currentTime seconds incorrect or ESMF_FAILURE"
@@ -2323,9 +2367,10 @@
 #endif
       ! destroy calendars
       call ESMF_CalendarDestroy(gregorianCalendar, rc)
-      call ESMF_CalendarDestroy(julianCalendar, rc)
+      call ESMF_CalendarDestroy(julianDayCalendar, rc)
       call ESMF_CalendarDestroy(no_leapCalendar, rc)
       call ESMF_CalendarDestroy(esmf_360dayCalendar, rc)
+      call ESMF_CalendarDestroy(noCalendar, rc)
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.C,v 1.8 2008/10/19 03:53:58 eschwab Exp $
+// $Id: ESMCI_Calendar.C,v 1.9 2008/11/26 06:59:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Calendar.C,v 1.8 2008/10/19 03:53:58 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Calendar.C,v 1.9 2008/11/26 06:59:14 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -913,8 +913,8 @@ int Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_I8 yy, int mm, int dd, ESMC_I8 d,    // in
-      BaseTime *t) const {                           // out
+      ESMC_I8 yy, int mm, int dd, ESMC_I8 d, ESMC_R8 d_r8,    // in
+      BaseTime *t) const {                                    // out
 //
 // !DESCRIPTION:
 //     Converts a calendar-specific date to core {\tt ESMC\_BaseTime}
@@ -1165,7 +1165,16 @@ int Calendar::count=0;
             //       officially begins at noon rather than midnight
 
             // convert Julian days to basetime seconds (>= 64 bit)
-            t->setw(d * secondsPerDay);
+            if (d != 0) {
+              t->setw(d * secondsPerDay);
+            }
+            if (d_r8 != 0.0) {
+              // avoid error introduced by floating point multiply by setting a
+              // fraction in days, then performing an integer multiply by
+              // the secondsPerDay unit conversion factor.
+              Fraction rdays(d_r8);
+              t->Fraction::operator+=(rdays * secondsPerDay);
+            }
 
             break;
         }
@@ -1180,7 +1189,19 @@ int Calendar::count=0;
             //  word size
 
             // convert Modified Julian days to basetime seconds (>= 64 bit)
-            t->setw((d + 2400001) * secondsPerDay);
+            // TODO:  if both d and d_r8 specified, only one offset is needed.
+            if (d != 0) {
+              t->setw((d + 2400001) * secondsPerDay);
+            }
+            if (d_r8 != 0.0) {
+              // avoid error introduced by floating point multiply and add by
+              // setting a fraction in days and one for the offset, then
+              // performing an integer add of days and offset, and finally
+              // multiply by the secondsPerDay unit conversion factor.
+              Fraction rdays(d_r8);
+              Fraction offset(2400001, 0, 1);
+              t->Fraction::operator+=((rdays + offset) * secondsPerDay);
+            }
 
             break;
         }
@@ -1320,7 +1341,11 @@ int Calendar::count=0;
               if (t->getw() % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMC_R8) t->getw() / (ESMC_R8) secondsPerDay;
+              // avoid error introduced by floating point divide by performing
+              // an integer divide first, then converting to floating point.
+              BaseTime rdays = *t;
+              rdays /= secondsPerDay;
+              *d_r8 = rdays.getr();
             }
 
             // convert Julian days to Gregorian date
@@ -1389,6 +1414,7 @@ int Calendar::count=0;
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, &cal);
               TimeInterval secondsOfTheYear;
               secondsOfTheYear = *t - begnningOfYear;
@@ -1446,7 +1472,11 @@ int Calendar::count=0;
               if (t->getw() % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMC_R8) t->getw() / (ESMC_R8) secondsPerDay;
+              // avoid error introduced by floating point divide by performing
+              // an integer divide first, then converting to floating point.
+              BaseTime rdays = *t;
+              rdays /= secondsPerDay;
+              *d_r8 = rdays.getr();
             }
 
             // Julian day (D) => Julian date (yy, mm, dd)
@@ -1500,6 +1530,7 @@ int Calendar::count=0;
               Time begnningOfYear; 
               begnningOfYear.Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                                            &year, ESMC_NULL_POINTER,
+                                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1593,7 +1624,11 @@ int Calendar::count=0;
               if (tmpS % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMC_R8) tmpS / (ESMC_R8) secondsPerDay;
+              // avoid error introduced by floating point divide by performing
+              // an integer divide first, then converting to floating point.
+              BaseTime rdays = *t;
+              rdays /= secondsPerDay;
+              *d_r8 = rdays.getr();
             }
 
             // remove smallest requested date unit from given time for
@@ -1671,7 +1706,11 @@ int Calendar::count=0;
               if (tmpS % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMC_R8) tmpS / (ESMC_R8) secondsPerDay;
+              // avoid error introduced by floating point divide by performing
+              // an integer divide first, then converting to floating point.
+              BaseTime rdays = *t;
+              rdays /= secondsPerDay;
+              *d_r8 = rdays.getr();
             }
 
             // remove smallest requested date unit from given time for
@@ -1721,8 +1760,16 @@ int Calendar::count=0;
               if (t->getw() % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMC_R8) t->getw() / (ESMC_R8) secondsPerDay;
-              if (this->calendarType == ESMC_CAL_MODJULIANDAY) *d_r8 -= 2400001;
+              // avoid error introduced by floating point divide and possible
+              // subtraction by performing an integer divide first, then the
+              // optional subraction, and finally converting to floating point.
+              BaseTime rdays = *t;
+              rdays /= secondsPerDay;
+              if (this->calendarType == ESMC_CAL_MODJULIANDAY) {
+                BaseTime offset(2400001);
+                rdays -= offset;
+              }
+              *d_r8 = rdays.getr();
             }
 
             // if days specified, remove them from given time for
@@ -1839,6 +1886,7 @@ int Calendar::count=0;
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         ESMC_NULL_POINTER, &cal,
                                         ESMC_NULL_POINTER, &timeZone);
                                    // TODO: use native C++ interface when
@@ -1876,6 +1924,7 @@ int Calendar::count=0;
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, &cal,
                                       ESMC_NULL_POINTER, &timeZone);
                                  // TODO: use native C++ interface when
@@ -1895,6 +1944,13 @@ int Calendar::count=0;
     if (timeinterval.d != 0) {
         TimeInterval daysTi(timeinterval.d * secondsPerDay);
         nonCalTi.BaseTime::operator+=(daysTi);
+    }
+    if (timeinterval.d_r8 != 0.0) {
+        // avoid error introduced by floating point multiply by setting a
+        // fraction in days, then performing an integer multiply by
+        // the secondsPerDay unit conversion factor.
+        Fraction rdays(timeinterval.d_r8);
+        nonCalTi.Fraction::operator+=(rdays * secondsPerDay);
     }
 
     // perform the remaining increment with the non-calendar and
@@ -1990,6 +2046,7 @@ int Calendar::count=0;
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         ESMC_NULL_POINTER, &cal,
                                         ESMC_NULL_POINTER, &timeZone);
                                    // TODO: use native C++ interface when
@@ -2027,6 +2084,7 @@ int Calendar::count=0;
                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                        ESMC_NULL_POINTER, &cal,
                                        ESMC_NULL_POINTER, &timeZone);
                                   // TODO: use native C++ interface when
@@ -2040,12 +2098,19 @@ int Calendar::count=0;
             break;
     }
 
-    // convert any relative days increment to absolute time based
-    //   on this calendar and add to non-calendar units increment
+    // convert any relative days decrement to absolute time based
+    //   on this calendar and add to non-calendar units decrement
     //   (applies to all calendars since secondsPerDay is defined for all)
     if (timeinterval.d != 0) {
         TimeInterval daysTi(timeinterval.d * secondsPerDay);
         nonCalTi.BaseTime::operator+=(daysTi);
+    }
+    if (timeinterval.d_r8 != 0.0) {
+        // avoid error introduced by floating point multiply by setting a
+        // fraction in days, then performing an integer multiply by
+        // the secondsPerDay unit conversion factor.
+        Fraction rdays(timeinterval.d_r8);
+        nonCalTi.Fraction::operator+=(rdays * secondsPerDay);
     }
 
     // perform the remaining decrement with the non-calendar and

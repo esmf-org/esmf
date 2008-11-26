@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.h,v 1.9 2008/11/14 04:05:57 theurich Exp $
+// $Id: ESMCI_Time.h,v 1.10 2008/11/26 06:59:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -99,7 +99,8 @@
                      ESMC_R8 *m_r8=0,  ESMC_R8 *s_r8=0,
                      ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
                      ESMC_R8 *ns_r8=0,
-                     ESMC_I4 *sN=0, ESMC_I4 *sD=0,
+                     ESMC_I4 *sN=0, ESMC_I8 *sN_i8=0,
+                     ESMC_I4 *sD=0, ESMC_I8 *sD_i8=0,
                      Calendar **calendar=0, 
                      ESMC_CalendarType *calendarType=0, 
                      int *timeZone=0);
@@ -115,7 +116,8 @@
                      ESMC_R8 *m_r8=0,  ESMC_R8 *s_r8=0,
                      ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
                      ESMC_R8 *ns_r8=0,
-                     ESMC_I4 *sN=0, ESMC_I4 *sD=0,
+                     ESMC_I4 *sN=0, ESMC_I8 *sN_i8=0,
+                     ESMC_I4 *sD=0, ESMC_I8 *sD_i8=0,
                      Calendar **calendar=0, 
                      ESMC_CalendarType *calendarType=0, 
                      int *timeZone=0,
@@ -179,10 +181,10 @@
 
     // native C++ constructors/destructors
     Time(void);
-    Time(ESMC_I8 s, int sN=0, int sD=1, Calendar *calendar=0,
+    Time(ESMC_I8 s, ESMC_I8 sN=0, ESMC_I8 sD=1, Calendar *calendar=0,
               ESMC_CalendarType calendarType=(ESMC_CalendarType)0,
               int timeZone=0);
-    int set(ESMC_I8 s, int sN=0, int sD=1,
+    int set(ESMC_I8 s, ESMC_I8 sN=0, ESMC_I8 sD=1,
                      Calendar *calendar=0,
                      ESMC_CalendarType calendarType=(ESMC_CalendarType)0,
                      int timeZone=0);

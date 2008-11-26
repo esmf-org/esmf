@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.3 2008/08/26 15:46:37 theurich Exp $
+// $Id: ESMC_Time.C,v 1.4 2008/11/26 06:59:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Time.C,v 1.3 2008/08/26 15:46:37 theurich Exp $";
+static const char *const version = "$Id: ESMC_Time.C,v 1.4 2008/11/26 06:59:14 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -69,7 +69,8 @@ int  ESMC_TimeSet(ESMC_Time* time,
                (ESMC_I4*)NULL, (ESMC_R8*)NULL, (ESMC_R8*)NULL, 
                (ESMC_R8*)NULL, (ESMC_R8*)NULL,
                (ESMC_R8*)NULL, (ESMC_R8*)NULL, (ESMC_R8*)NULL, 
-               (ESMC_I4*)NULL, (ESMC_I4*)NULL,
+               (ESMC_I4*)NULL, (ESMC_I8*)NULL,
+               (ESMC_I4*)NULL, (ESMC_I8*)NULL,
                (ESMCI::Calendar**)(&calendar),
                &calendartype,
                &timeZone);
@@ -106,12 +107,14 @@ int  ESMC_TimeGet(ESMC_Time time,
   ESMCI::Calendar* pcalendar;
   localrc = pTime->get( yy,
    (ESMC_I8*)(0), (int*)(0),     (int*)(0), 
-   (ESMC_I4*)(0), (ESMC_I8*)(0), (ESMC_I4*)(0),               h, (ESMC_I4*)(0), 
-   (ESMC_I8*)(0), (ESMC_I4*)(0), (ESMC_I4*)(0),     (ESMC_I4*)(0), (ESMC_R8*)(0), 
-   (ESMC_R8*)(0), (ESMC_R8*)(0), (ESMC_R8*)(0),     (ESMC_R8*)(0), (ESMC_R8*)(0), 
-   (ESMC_R8*)(0), (ESMC_I4*)(0), (ESMC_I4*)(0),      &pcalendar, calendartype,
+   (ESMC_I4*)(0), (ESMC_I8*)(0),             h, (ESMC_I4*)(0), 
+   (ESMC_I4*)(0), (ESMC_I8*)(0), (ESMC_I4*)(0), (ESMC_I4*)(0), (ESMC_I4*)(0),
+   (ESMC_R8*)(0), (ESMC_R8*)(0), (ESMC_R8*)(0), (ESMC_R8*)(0), (ESMC_R8*)(0),
+   (ESMC_R8*)(0), (ESMC_R8*)(0),
+   (ESMC_I4*)(0), (ESMC_I8*)(0), (ESMC_I4*)(0), (ESMC_I8*)(0),
+      &pcalendar, calendartype,
         timeZone,      int(0),     (int*)(0),        (char*)(0),      (int)(0), 
-       (int*)(0),    (char*)(0),     (int*)(0), (ESMCI::Time*)(0), (ESMC_I4*)(0), 
+       (int*)(0),    (char*)(0),   (int*)(0), (ESMCI::Time*)(0), (ESMC_I4*)(0), 
    (ESMC_R8*)(0), (ESMCI::TimeInterval*)(0)); 
 
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)){

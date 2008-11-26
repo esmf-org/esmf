@@ -1,11 +1,14 @@
-% $Id: TimeInterval_rest.tex,v 1.4 2003/09/11 18:47:05 eschwab Exp $
+% $Id: TimeInterval_rest.tex,v 1.5 2008/11/26 06:59:14 eschwab Exp $
 
 \begin{enumerate}
 
 \item {\bf Limits on time span.} The limits on the time span that can be
-represented are based on the 64-bit and 32-bit integer types used.  For
+represented are based on the 64-bit integer types used.  For
 seconds, a signed 64-bit integer will have a range of +/- $2^{63}$-1, or
-+/- 9223372036854775807.  This corresponds to a range of
++/- 9,223,372,036,854,775,807.  This corresponds to a range of
 +/- ($2^{63}$-1)/(86400 * 365.25) or +/- 292,271,023,045 years.
+
+For fractional seconds, a signed 64-bit integer will handle a resolution of
++/- $2^{31}$-1, or +/- 9,223,372,036,854,775,807 parts of a second.
 
 \end{enumerate}

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.C,v 1.9 2008/10/19 03:53:58 eschwab Exp $"
+// $Id: ESMCI_Time.C,v 1.10 2008/11/26 06:59:14 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Time.C,v 1.9 2008/10/19 03:53:58 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Time.C,v 1.10 2008/11/26 06:59:14 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -82,7 +82,11 @@ namespace ESMCI{
       ESMC_R8 *us_r8,     // in - floating point microseconds
       ESMC_R8 *ns_r8,     // in - floating point nanoseconds
       ESMC_I4 *sN,        // in - fractional seconds numerator
+      ESMC_I8 *sN_i8,     // in - fractional seconds numerator
+                          //                                 (large, >= 64-bit)
       ESMC_I4 *sD,        // in - fractional seconds denominator
+      ESMC_I8 *sD_i8,     // in - fractional seconds denominator
+                          //                                 (large, >= 64-bit)
       Calendar **calendar, // in - associated calendar
       ESMC_CalendarType *calendarType, // in - associated calendar type
       int *timeZone) {         // in - timezone (hours offset from UTC,
@@ -125,7 +129,8 @@ namespace ESMCI{
         h_r8  != ESMC_NULL_POINTER || m_r8  != ESMC_NULL_POINTER ||
         s_r8  != ESMC_NULL_POINTER || ms_r8 != ESMC_NULL_POINTER ||
         us_r8 != ESMC_NULL_POINTER || ns_r8 != ESMC_NULL_POINTER ||
-        sN    != ESMC_NULL_POINTER || sD    != ESMC_NULL_POINTER) {
+        sN    != ESMC_NULL_POINTER || sN_i8 != ESMC_NULL_POINTER ||
+        sD    != ESMC_NULL_POINTER || sD_i8 != ESMC_NULL_POINTER) {
 
       Fraction::set(0,0,1);  // set seconds = 0
                              // set fractional seconds numerator = 0
@@ -187,8 +192,6 @@ namespace ESMCI{
     // TODO: validate inputs (individual and combos), set basetime values
     //       e.g. integer and float specifiers are mutually exclusive
 
-    // TODO: fractional, sub-seconds
-
     // set calendar type
     if (calendar != ESMC_NULL_POINTER) {             // 1st choice
       // set to user's calendar
@@ -221,7 +224,6 @@ namespace ESMCI{
     // TODO: Timezone adjust
 
     // convert date to base time according to calendar type
-    // TODO: fractional, sub-seconds
     // TODO: create two calendar conversion method entry points ?
 
     // is a yy/mm/dd style date specified?
@@ -271,8 +273,7 @@ namespace ESMCI{
       if (dd != ESMC_NULL_POINTER) argDD = *dd;
 
       // do the conversion
-      rc = this->calendar->convertToTime(argYY, argMM, argDD,
-                                                      0, this);
+      rc = this->calendar->convertToTime(argYY, argMM, argDD, 0, 0.0, this);
       if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         { *this = saveTime; return(rc); }
 
@@ -287,7 +288,7 @@ namespace ESMCI{
       }
 
       ESMC_I8 argD = (d != ESMC_NULL_POINTER) ? *d : *d_i8;
-      rc = this->calendar->convertToTime(0, 0, 0, argD, this);
+      rc = this->calendar->convertToTime(0, 0, 0, argD, 0.0, this);
       if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
 
@@ -299,21 +300,16 @@ namespace ESMCI{
         *this = saveTime; return(rc);
       }
 
-      // integer part
-      rc = this->calendar->convertToTime(0, 0, 0, 
-                                              (ESMC_I8) *d_r8, this);
+      rc = this->calendar->convertToTime(0, 0, 0, 0, *d_r8, this);
       if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
 
-      // fractional part
-      setw(getw() + (ESMC_I8) (modf(*d_r8, ESMC_NULL_POINTER) *
-                                           this->calendar->secondsPerDay));
     } else {
       // no year, month or day specified; set defaults per calendar, if any
       if (this->calendar != ESMC_NULL_POINTER) {
         if (this->calendar->calendarType != ESMC_CAL_NOCALENDAR) {
           // defaults:  yy=0, mm=1, dd=1 d=0
-          rc = this->calendar->convertToTime(0, 1, 1, 0, this);
+          rc = this->calendar->convertToTime(0, 1, 1, 0, 0.0, this);
           if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
             { *this = saveTime; return(rc); }
         }
@@ -322,7 +318,7 @@ namespace ESMCI{
     
     // use base class to convert sub-day values
     BaseTime::set(h, m, s, s_i8, ms, us, ns, h_r8, m_r8, s_r8,
-                     ms_r8, us_r8, ns_r8, sN, sD);
+                     ms_r8, us_r8, ns_r8, sN, sN_i8, sD, sD_i8);
 
     rc = Time::validate();
     if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
@@ -364,7 +360,11 @@ namespace ESMCI{
       ESMC_R8 *us_r8,        // out - floating point microseconds
       ESMC_R8 *ns_r8,        // out - floating point nanoseconds
       ESMC_I4 *sN,           // out - fractional seconds numerator
+      ESMC_I8 *sN_i8,        // out - fractional seconds numerator
+                             //                              (large, >= 64-bit)
       ESMC_I4 *sD,           // out - fractional seconds denominator
+      ESMC_I8 *sD_i8,        // out - fractional seconds denominator
+                             //                              (large, >= 64-bit)
       Calendar **calendar,   // out - associated calendar
       ESMC_CalendarType *calendarType, // out - associated calendar type
       int     *timeZone,          // out - timezone (hours offset from UTC)
@@ -393,8 +393,6 @@ namespace ESMCI{
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::Time::get()"
 
-    // TODO: fractional, sub-seconds
-
     int rc = ESMF_SUCCESS;
 
     Time timeToConvert = *this;
@@ -408,9 +406,8 @@ namespace ESMCI{
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                                  ", calendar required.", &rc); return(rc);
       }
-      rc = this->calendar->convertToDate(&timeToConvert,
-                                                      yy, yy_i8, mm, dd,
-                                                      d, d_i8, d_r8);
+      rc = this->calendar->convertToDate(&timeToConvert, yy, yy_i8, mm, dd,
+                                                         d, d_i8, d_r8);
       if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
     }
@@ -453,7 +450,7 @@ namespace ESMCI{
     // use base class to get all other non-calendar dependant units
     rc = BaseTime::get(&timeToConvert, h, m, s, s_i8,
                           ms, us, ns, h_r8, m_r8, s_r8, ms_r8,
-                          us_r8, ns_r8, sN, sD);
+                          us_r8, ns_r8, sN, sN_i8, sD, sD_i8);
     if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
@@ -598,8 +595,8 @@ namespace ESMCI{
 //
 // !ARGUMENTS:
       ESMC_I8 s,          // in - integer seconds
-      int sN,                  // in - fractional seconds, numerator
-      int sD,                  // in - fractional seconds, denominator
+      ESMC_I8 sN,         // in - fractional seconds, numerator
+      ESMC_I8 sD,         // in - fractional seconds, denominator
       Calendar *calendar, // in - associated calendar
       ESMC_CalendarType calendarType, // in - associated calendar type
       int timeZone) {          // in - timezone
@@ -792,7 +789,8 @@ namespace ESMCI{
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, &cal, ESMC_NULL_POINTER, &tz);
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 &cal, ESMC_NULL_POINTER, &tz);
 
     ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
 
@@ -1151,7 +1149,9 @@ namespace ESMCI{
       // default
       BaseTime::print(options);
       if (this->calendar != ESMC_NULL_POINTER) {
-        this->calendar->print(options, this);
+        if (this->calendar->calendarType != ESMC_CAL_NOCALENDAR) {
+          this->calendar->print(options, this);
+        }
       }
       printf("timeZone = %d\n", timeZone);
     }
@@ -1203,8 +1203,8 @@ namespace ESMCI{
 //
 // !ARGUMENTS:
       ESMC_I8 s,           // in - integer seconds
-      ESMC_I4 sN,          // in - fractional seconds, numerator
-      ESMC_I4 sD,          // in - fractional seconds, denominator
+      ESMC_I8 sN,          // in - fractional seconds, numerator
+      ESMC_I8 sD,          // in - fractional seconds, denominator
       Calendar *calendar,  // in - associated calendar
       ESMC_CalendarType calendarType,  // in - associated calendar type
       int timeZone) :           // in - timezone
@@ -1314,7 +1314,8 @@ namespace ESMCI{
 
     ESMC_I8 yy_i8;
     int mm, dd;
-    ESMC_I4 h, m, s, sN, sD; 
+    ESMC_I4 h, m, s;
+    ESMC_I8 sN, sD;
 
     // TODO: use native C++ Get, not F90 entry point, when ready
     rc = Time::get((ESMC_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
@@ -1324,7 +1325,9 @@ namespace ESMCI{
                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                              ESMC_NULL_POINTER, &sN, &sD);
+                              ESMC_NULL_POINTER, 
+                              ESMC_NULL_POINTER, &sN,
+                              ESMC_NULL_POINTER, &sD);
     if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
@@ -1354,7 +1357,7 @@ namespace ESMCI{
 
       // if fractionalSeconds non-zero (sN!=0) append full fractional value
       if (sN != 0) {
-        sprintf(timeString, "%s%02d:%d/%d\0", timeString, s, sN, sD);
+        sprintf(timeString, "%s%02d:%lld/%lld\0", timeString, s, sN, sD);
       } else { // no fractional seconds, just append integer seconds
         sprintf(timeString, "%s%02d\0", timeString, s);
       }
@@ -1443,6 +1446,7 @@ namespace ESMCI{
     int tz = this->timeZone;             //   after Set() clears it
     rc = referenceMonday.Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                                       &yy_i8, &mm, &dd, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1552,6 +1556,7 @@ namespace ESMCI{
                                    ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                    ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                    ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                    ESMC_NULL_POINTER, &cal,
                                    ESMC_NULL_POINTER, &tz);
 
@@ -1569,6 +1574,7 @@ namespace ESMCI{
     Time endOfMonth;
     rc = endOfMonth.Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                                  &yy_i8, &mm, &dd, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1801,6 +1807,7 @@ namespace ESMCI{
     int tz = this->timeZone;             //   after Set() clears it
     rc = dayOne.Time::set((ESMC_I4 *)ESMC_NULL_POINTER,
                              &yy_i8, &mm, &dd,
+                             ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,

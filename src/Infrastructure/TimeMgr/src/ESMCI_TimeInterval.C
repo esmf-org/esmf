@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.C,v 1.10 2008/10/19 03:53:58 eschwab Exp $
+// $Id: ESMCI_TimeInterval.C,v 1.11 2008/11/26 06:59:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.10 2008/10/19 03:53:58 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.11 2008/11/26 06:59:14 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -94,7 +94,11 @@ namespace ESMCI{
       ESMC_R8 *us_r8,     // in - floating point microseconds
       ESMC_R8 *ns_r8,     // in - floating point nanoseconds
       ESMC_I4 *sN,        // in - fractional seconds numerator
+      ESMC_I8 *sN_i8,     // in - fractional seconds numerator
+                          //                                 (large, >= 64-bit)
       ESMC_I4 *sD,        // in - fractional seconds denominator
+      ESMC_I8 *sD_i8,     // in - fractional seconds denominator
+                          //                                 (large, >= 64-bit)
       Time *startTime,    // in - starting time for absolute calendar
                                //      interval
       Time *endTime,      // in - ending time for absolute calendar
@@ -128,6 +132,7 @@ namespace ESMCI{
     this->yy = 0;
     this->mm = 0;
     this->d  = 0;
+    this->d_r8 = 0.0;
     this->startTime.Time::set((ESMC_I8) 0); // |
     this->endTime.Time::set((ESMC_I8) 0);   //  > init to invalid, unset
     this->calendar = ESMC_NULL_POINTER;             // |    state
@@ -206,10 +211,13 @@ namespace ESMCI{
     } else if (d_i8 != ESMC_NULL_POINTER) {
       this->d = *d_i8; // >= 64-bit
     }
+    if (d_r8 != ESMC_NULL_POINTER) {
+      this->d_r8 = *d_r8;
+    }
 
     // use base class set for sub-day values
     rc = BaseTime::set(h, m, s, s_i8, ms, us, ns, h_r8, m_r8, s_r8,
-                          ms_r8, us_r8, ns_r8, sN, sD);
+                          ms_r8, us_r8, ns_r8, sN, sN_i8, sD, sD_i8);
     if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       { *this = saveTimeInterval; return(rc); }
 
@@ -259,7 +267,11 @@ namespace ESMCI{
       ESMC_R8 *us_r8,      // out - floating point microseconds
       ESMC_R8 *ns_r8,      // out - floating point nanoseconds
       ESMC_I4 *sN,         // out - fractional seconds numerator
+      ESMC_I8 *sN_i8,      // out - fractional seconds numerator
+                           //                                (large, >= 64-bit)
       ESMC_I4 *sD,         // out - fractional seconds denominator
+      ESMC_I8 *sD_i8,      // out - fractional seconds denominator
+                           //                                (large, >= 64-bit)
       Time *startTime,     // out - starting time of absolute calendar
                                 //       interval
       Time *endTime,       // out - ending time of absolute calendar
@@ -293,8 +305,6 @@ namespace ESMCI{
 
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::TimeInterval::get()"
-
-    // TODO: fractional, sub-seconds
 
     // TODO: put calendar logic under test for any non-zero yy, mm, d ?
 
@@ -374,6 +384,13 @@ namespace ESMCI{
           (d == ESMC_NULL_POINTER && d_i8 == ESMC_NULL_POINTER)) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
             ", must Get() d or d_i8, since it was Set() with "
+            "ESMC_CAL_NOCALENDAR; impossible conversion implied.",
+            &rc); return(rc);
+      }
+      // if d_r8 was set, must get it
+      if (this->d_r8 != 0 && (d_r8 == ESMC_NULL_POINTER)) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            ", must Get() d_r8, since it was Set() with "
             "ESMC_CAL_NOCALENDAR; impossible conversion implied.",
             &rc); return(rc);
       }
@@ -754,11 +771,11 @@ namespace ESMCI{
           ESMC_LogDefault.MsgFoundError(ESMC_RC_DIV_ZERO, logMsg, &rc);
           return(rc);
         }
-        // TODO: put floating point seconds calculation into Fraction class
-        *d_r8 = (ESMC_R8) days +
-                (((ESMC_R8) tiToConvert.getw() + 
-                  (ESMC_R8) tiToConvert.getn() / (ESMC_R8) tiToConvert.getd()) /
-                  (ESMC_R8) tiToConvert.calendar->secondsPerDay);
+        // avoid error introduced by floating point divide by performing an
+        // integer divide first, then converting to floating point.
+        BaseTime rdays = tiToConvert;
+        rdays /= tiToConvert.calendar->secondsPerDay;
+        *d_r8 = (ESMC_R8) days + rdays.getr();
       }
     }
 
@@ -766,7 +783,7 @@ namespace ESMCI{
     //   unconverted base time
     rc = BaseTime::get(&tiToConvert, h, m, s, s_i8,
                           ms, us, ns, h_r8, m_r8, s_r8,
-                          ms_r8, us_r8, ns_r8, sN, sD);
+                          ms_r8, us_r8, ns_r8, sN, sN_i8, sD, sD_i8);
     if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
@@ -875,11 +892,12 @@ namespace ESMCI{
 //
 // !ARGUMENTS:
       ESMC_I8 s,            // in - integer seconds
-      ESMC_I4 sN,           // in - fractional seconds, numerator
-      ESMC_I4 sD,           // in - fractional seconds, denominator
+      ESMC_I8 sN,           // in - fractional seconds, numerator
+      ESMC_I8 sD,           // in - fractional seconds, denominator
       ESMC_I8 yy,           // in - calendar interval number of years
       ESMC_I8 mm,           // in - calendar interval number of months
-      ESMC_I8 d,            // in - calendar interval number of days
+      ESMC_I8 d,            // in - calendar interval number of integer days
+      ESMC_R8 d_r8,         // in - calendar interval number of real days
       Time *startTime,      // in - interval startTime
       Time *endTime,        // in - interval endTime
       Calendar *calendar,   // in - associated calendar
@@ -906,6 +924,7 @@ namespace ESMCI{
     this->yy = yy;
     this->mm = mm;
     this->d  = d;
+    this->d_r8 = d_r8;
 
     if (startTime != ESMC_NULL_POINTER) {
       this->startTime = *startTime;
@@ -1037,11 +1056,12 @@ namespace ESMCI{
     absValue.TimeInterval::reduce();
 
     // if absolute, simply perform absolute value on baseTime seconds and return
-    if (absValue.yy == 0 && absValue.mm == 0 && absValue.d == 0) {
+    if (absValue.yy == 0 && absValue.mm == 0 && absValue.d == 0 &&
+        absValue.d_r8 == 0.0) {
       if (absValueType == ESMC_POSITIVE_ABS) {
         if (absValue.getw() < 0) {
           absValue.setw(absValue.getw() * -1);
-          // TODO: fractions
+          // TODO: fractions => abs method in Fraction class
         }
       } else { // ESMC_NEGATIVE_ABS
         if (absValue.getw() > 0) {
@@ -1058,7 +1078,7 @@ namespace ESMCI{
       case ESMC_CAL_GREGORIAN:
       case ESMC_CAL_JULIAN:
       case ESMC_CAL_NOLEAP:
-        if (absValue.yy != 0 || absValue.d != 0) {
+        if (absValue.yy != 0 || absValue.d != 0 || absValue.d_r8 != 0.0) {
           // shouldn't be here - yy and d already reduced in Reduce() call
           // above. 
           ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
@@ -1127,7 +1147,7 @@ namespace ESMCI{
                                   ESMC_NULL_POINTER);
           return(errorResult);
         }
-        if (absValue.d != 0) {
+        if (absValue.d != 0 || absValue.d_r8 != 0.0) {
           // shouldn't be here - days already reduced in Reduce() call above
           ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
                                   ", d non-zero: should already be reduced.",
@@ -1139,21 +1159,26 @@ namespace ESMCI{
         // all units must have same sign
         if ( (absValueType == ESMC_POSITIVE_ABS &&
                 absValue.yy < 0 && absValue.mm < 0 &&
-                absValue.d  < 0 && absValue.getw()  < 0) ||
+                absValue.d  < 0 && absValue.d_r8 < 0.0 &&
+                absValue.getw()  < 0) ||
              (absValueType == ESMC_NEGATIVE_ABS &&
                 absValue.yy > 0 && absValue.mm > 0 &&
-                absValue.d  > 0 && absValue.getw()  > 0) ) {
+                absValue.d  > 0 && absValue.d_r8 > 0.0 &&
+                absValue.getw()  > 0) ) {
           absValue.yy *= -1;   // invert sign
           absValue.mm *= -1;
           absValue.d  *= -1;
+          absValue.d_r8 *= -1.0;
           absValue.setw(absValue.getw() * -1);
           return(absValue);
         } else if ( (absValueType == ESMC_POSITIVE_ABS &&
                       absValue.yy >= 0 && absValue.mm >= 0 &&
-                      absValue.d  >= 0 && absValue.getw() >= 0) ||
+                      absValue.d  >= 0 && absValue.d_r8 >= 0.0 &&
+                      absValue.getw() >= 0) ||
                     (absValueType == ESMC_NEGATIVE_ABS &&
                       absValue.yy <= 0 && absValue.mm <= 0 &&
-                      absValue.d  <= 0 && absValue.getw() <= 0) ) {
+                      absValue.d  <= 0 && absValue.d_r8 <= 0.0 &&
+                      absValue.getw() <= 0) ) {
           return(absValue);    // return as is
         } else {
           // mixed signs
@@ -1238,7 +1263,8 @@ namespace ESMCI{
     // if both absolute, simply divide baseTime seconds and return
     if (ti1.yy == 0 && ti2.yy == 0 &&
         ti1.mm == 0 && ti2.mm == 0 &&
-        ti1.d  == 0 && ti2.d  == 0) {
+        ti1.d  == 0 && ti2.d  == 0 &&
+        ti1.d_r8 == 0.0 && ti2.d_r8 == 0.0) {
       return(ti1.BaseTime::operator/(ti2));
     }
 
@@ -1259,7 +1285,8 @@ namespace ESMCI{
       case ESMC_CAL_JULIAN:
       case ESMC_CAL_NOLEAP:
         if (ti1.yy != 0 || ti2.yy != 0 ||
-            ti1.d  != 0 || ti2.d  != 0) {
+            ti1.d  != 0 || ti2.d  != 0 ||
+            ti1.d_r8 != 0.0 || ti2.d_r8 != 0.0) {
           // shouldn't be here - yy and d already reduced in Reduce() call
           ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                                 ", shouldn't be here.",
@@ -1313,7 +1340,8 @@ namespace ESMCI{
                                   ESMC_NULL_POINTER);
           return(0.0);
         }
-        if (ti1.d != 0 || ti2.d != 0) {
+        if (ti1.d != 0 || ti2.d != 0 ||
+            ti1.d_r8 != 0.0 || ti2.d_r8 != 0.0) {
           // shouldn't be here - days already reduced in Reduce() call above
           ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                                 ", shouldn't be here.",
@@ -1326,6 +1354,7 @@ namespace ESMCI{
         if ( (ti1.yy != 0 || ti2.yy != 0) &&
               ti1.mm == 0 && ti2.mm == 0  &&
               ti1.d  == 0 && ti2.d  == 0  &&
+              ti1.d_r8 == 0.0 && ti2.d_r8 == 0.0 &&
               zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // divide years only
           if (ti2.yy != 0) {
@@ -1338,6 +1367,7 @@ namespace ESMCI{
         } else if ( ti1.yy == 0 && ti2.yy == 0   &&
                    (ti1.mm != 0 || ti2.mm != 0)  &&
                     ti1.d  == 0 && ti2.d  == 0   &&
+                    ti1.d_r8 == 0.0 && ti2.d_r8 == 0.0 &&
                     zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // divide months only
           if (ti2.mm != 0) {
@@ -1347,13 +1377,33 @@ namespace ESMCI{
                                                ESMC_NULL_POINTER);
             return(0.0);
           }
+        // TODO:  merge d and d_r8 (below)
+        //        handle all cases of mixing d and d_r8 within a ti and
+        //        between ti1 and ti2
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                     ti1.mm == 0 && ti2.mm == 0  &&
                    (ti1.d  != 0 || ti2.d  != 0) &&
+                    ti1.d_r8 == 0.0 && ti2.d_r8 == 0.0 &&
                     zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // divide days only
           if (ti2.d != 0) {
             return((ESMC_R8) ti1.d / (ESMC_R8) ti2.d);
+          } else {
+            ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,ESMC_CONTEXT,
+                                               ESMC_NULL_POINTER);
+            return(0.0);
+          }
+        // TODO:  merge d and d_r8 (above)
+        //        handle all cases of mixing d and d_r8 within a ti and
+        //        between ti1 and ti2
+        } else if ( ti1.yy == 0 && ti2.yy == 0 &&
+                    ti1.mm == 0 && ti2.mm == 0 &&
+                    ti1.d  == 0 && ti2.d  == 0 &&
+                   (ti1.d_r8 != 0.0 || ti2.d_r8 != 0.0) &&
+                    zeroBaseTime == ti1 && zeroBaseTime == ti2) {
+          // divide days only
+          if (fabs(ti2.d_r8) >= 1e-10) {
+            return(ti1.d_r8 / ti2.d_r8);
           } else {
             ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO,ESMC_CONTEXT,
                                                ESMC_NULL_POINTER);
@@ -1423,6 +1473,7 @@ namespace ESMCI{
       quotient.yy /= divisor;
       quotient.mm /= divisor;
       quotient.d  /= divisor;
+      quotient.d_r8 /= (ESMC_R8) divisor;
 
       // divide absolute seconds (and any fractional) part
       quotient.BaseTime::operator/=(divisor);
@@ -1501,9 +1552,10 @@ namespace ESMCI{
       quotient.yy = (ESMC_I8) ((ESMC_R8) quotient.yy / divisor);
       quotient.mm = (ESMC_I8) ((ESMC_R8) quotient.mm / divisor);
       quotient.d  = (ESMC_I8) ((ESMC_R8) quotient.d  / divisor);
+      quotient.d_r8 = quotient.d_r8 / divisor;
 
       // divide absolute s part  // TODO: fractions
-      quotient.setw((ESMC_I8) ((ESMC_R8) quotient.getw() / divisor));
+      quotient.setr(quotient.getr() / divisor);
 
     } else {
       // TODO: write LogErr message (divide-by-zero)
@@ -1632,7 +1684,8 @@ namespace ESMCI{
     // if both absolute, simply modulus baseTime seconds and return
     if (ti1.yy == 0 && ti2.yy == 0 &&
         ti1.mm == 0 && ti2.mm == 0 &&
-        ti1.d  == 0 && ti2.d  == 0) {
+        ti1.d  == 0 && ti2.d  == 0 &&
+        ti1.d_r8 == 0.0 && ti2.d_r8 == 0.0) {
       remainder = ti1.BaseTime::operator%(ti2);
       return(remainder);
     }
@@ -1654,7 +1707,8 @@ namespace ESMCI{
       case ESMC_CAL_JULIAN:
       case ESMC_CAL_NOLEAP:
         if (ti1.yy != 0 || ti2.yy != 0 ||
-            ti1.d  != 0 || ti2.d  != 0) {
+            ti1.d  != 0 || ti2.d  != 0 ||
+            ti1.d_r8 != 0.0 || ti2.d_r8 != 0.0) {
           // shouldn't be here - yy and d already reduced in Reduce() call
           ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                                 ", shouldn't be here.",
@@ -1709,7 +1763,8 @@ namespace ESMCI{
                                   ESMC_NULL_POINTER);
           return(remainder);
         }
-        if (ti1.d != 0 || ti2.d != 0) {
+        if (ti1.d != 0 || ti2.d != 0 ||
+            ti1.d_r8 != 0.0 || ti2.d_r8 != 0.0) {
           // shouldn't be here - days already reduced in Reduce() call above
           ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                                 ", shouldn't be here.",
@@ -1722,6 +1777,7 @@ namespace ESMCI{
         if ( (ti1.yy != 0 || ti2.yy != 0) &&
               ti1.mm == 0 && ti2.mm == 0  &&
               ti1.d  == 0 && ti2.d  == 0  &&
+              ti1.d_r8 == 0.0 && ti2.d_r8 == 0.0  &&
               zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // modulus years only
           if (ti2.yy != 0) {
@@ -1735,6 +1791,7 @@ namespace ESMCI{
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                    (ti1.mm != 0 || ti2.mm != 0) &&
                     ti1.d  == 0 && ti2.d  == 0  &&
+                    ti1.d_r8 == 0.0 && ti2.d_r8 == 0.0 &&
                     zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // modulus months only
           if (ti2.mm != 0) {
@@ -1745,9 +1802,13 @@ namespace ESMCI{
                                                ESMC_NULL_POINTER);
             return(remainder);
           }
+        // TODO: merge d and d_r8
+        //       handle all cases of mixing d and d_r8 within a ti and
+        //       between ti1 and ti2 ?
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                     ti1.mm == 0 && ti2.mm == 0  &&
                    (ti1.d  != 0 || ti2.d  != 0) &&
+                    ti1.d_r8 == 0.0 && ti2.d_r8 == 0.0 &&
                     zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // modulus days only
           if (ti2.d != 0) {
@@ -1840,6 +1901,7 @@ namespace ESMCI{
     product.yy *= multiplier;
     product.mm *= multiplier;
     product.d  *= multiplier;
+    product.d_r8 *= (ESMC_R8) multiplier;
 
     // multiply absolute seconds (and any fractional) part
     product.BaseTime::operator*=(multiplier);
@@ -2011,9 +2073,10 @@ namespace ESMCI{
     product.yy = (ESMC_I8) ((ESMC_R8) product.yy * multiplier);
     product.mm = (ESMC_I8) ((ESMC_R8) product.mm * multiplier);
     product.d  = (ESMC_I8) ((ESMC_R8) product.d  * multiplier);
+    product.d_r8 = product.d_r8 * multiplier;
 
-    // multiply absolute s part  // TODO: fractions
-    product.setw((ESMC_I8) ((ESMC_R8) product.getw() * multiplier));
+    // multiply absolute seconds (and any fractional) part
+    product.setr(product.getr() * multiplier);
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
@@ -2102,8 +2165,9 @@ namespace ESMCI{
     sum.yy += timeinterval.yy;
     sum.mm += timeinterval.mm;
     sum.d  += timeinterval.d;
+    sum.d_r8 += timeinterval.d_r8;
 
-    // add absolute seconds part using BaseTime operator
+    // add absolute seconds (and any fractional part) using BaseTime operator
     sum.BaseTime::operator+=(timeinterval);
 
     // note: result not normalized here -- it is done during a Get() or use
@@ -2144,8 +2208,10 @@ namespace ESMCI{
     diff.yy -= timeinterval.yy;
     diff.mm -= timeinterval.mm;
     diff.d  -= timeinterval.d;
+    diff.d_r8 -= timeinterval.d_r8;
 
-    // subtract absolute seconds part using BaseTime operator
+    // subtract absolute seconds (and any fractional part) using BaseTime
+    // operator
     diff.BaseTime::operator-=(timeinterval);
 
     // note: result not normalized here -- it is done during a Get() or use
@@ -2397,7 +2463,8 @@ namespace ESMCI{
     // if both absolute, simply compare baseTime seconds and return
     if (ti1.yy == 0 && ti2.yy == 0 &&
         ti1.mm == 0 && ti2.mm == 0 &&
-        ti1.d  == 0 && ti2.d  == 0) {
+        ti1.d  == 0 && ti2.d  == 0 &&
+        ti1.d_r8 == 0.0 && ti2.d_r8 == 0.0) {
       switch (comparisonType)
       {
         case ESMC_EQ:
@@ -2431,7 +2498,8 @@ namespace ESMCI{
       case ESMC_CAL_JULIAN:
       case ESMC_CAL_NOLEAP:
         if (ti1.yy != 0 || ti2.yy != 0 ||
-            ti1.d  != 0 || ti2.d  != 0) {
+            ti1.d  != 0 || ti2.d  != 0 ||
+            ti1.d_r8 != 0.0 || ti2.d_r8 != 0.0) {
           // shouldn't be here - yy and d already reduced in Reduce() call
           ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                                 ", shouldn't be here.",
@@ -2506,7 +2574,8 @@ namespace ESMCI{
                                   ESMC_NULL_POINTER);
           return(false);
         }
-        if (ti1.d != 0 || ti2.d != 0) {
+        if (ti1.d != 0 || ti2.d != 0 ||
+            ti1.d_r8 != 0.0 || ti2.d_r8 != 0.0) {
           // shouldn't be here - days already reduced in Reduce() call above
           ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                                 ", shouldn't be here.",
@@ -2519,6 +2588,7 @@ namespace ESMCI{
         if ( (ti1.yy != 0 || ti2.yy != 0) &&
               ti1.mm == 0 && ti2.mm == 0  &&
               ti1.d  == 0 && ti2.d  == 0  &&
+              ti1.d_r8 == 0.0 && ti2.d_r8 == 0.0 &&
               zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // compare years only
           switch (comparisonType)
@@ -2539,6 +2609,7 @@ namespace ESMCI{
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                    (ti1.mm != 0 || ti2.mm != 0) &&
                     ti1.d  == 0 && ti2.d  == 0  &&
+                    ti1.d_r8 == 0.0 && ti2.d_r8 == 0.0  &&
                     zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // compare months only
           switch (comparisonType)
@@ -2556,9 +2627,13 @@ namespace ESMCI{
             case ESMC_GE:
               return(ti1.mm >= ti2.mm);
            };
+        // TODO:  merge d and d_r8 logic (below)
+        //        handle all cases of mixing d and d_r8 within a ti and
+        //        between ti1 and ti2
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                     ti1.mm == 0 && ti2.mm == 0  &&
                    (ti1.d  != 0 || ti2.d  != 0) &&
+                   ti1.d_r8 == 0.0 && ti2.d_r8 == 0.0 &&
                     zeroBaseTime == ti1 && zeroBaseTime == ti2) {
           // compare days only
           switch (comparisonType)
@@ -2575,6 +2650,30 @@ namespace ESMCI{
               return(ti1.d <= ti2.d);
             case ESMC_GE:
               return(ti1.d >= ti2.d);
+           };
+        // TODO:  merge d and d_r8 logic (above)
+        //        handle all cases of mixing d and d_r8 within a ti and
+        //        between ti1 and ti2
+        } else if ( ti1.yy == 0 && ti2.yy == 0  &&
+                    ti1.mm == 0 && ti2.mm == 0  &&
+                    ti1.d  == 0 && ti2.d  == 0 &&
+                   (ti1.d_r8 != 0.0 || ti2.d_r8 != 0.0) &&
+                    zeroBaseTime == ti1 && zeroBaseTime == ti2) {
+          // compare days only
+          switch (comparisonType)
+          {
+            case ESMC_EQ:
+              return(fabs(ti1.d_r8 - ti2.d_r8) < 1e-10);
+            case ESMC_NE:
+              return(fabs(ti1.d_r8 - ti2.d_r8) >= 1e-10);
+            case ESMC_LT:
+              return(ti1.d_r8 < ti2.d_r8);
+            case ESMC_GT:
+              return(ti1.d_r8 > ti2.d_r8);
+            case ESMC_LE:
+              return(ti1.d_r8 <= ti2.d_r8);
+            case ESMC_GE:
+              return(ti1.d_r8 >= ti2.d_r8);
            };
         } else {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -2760,9 +2859,17 @@ namespace ESMCI{
     } else {
       // default
       BaseTime::print(options);
-      printf("yy = %lld\n", yy);
-      printf("mm = %lld\n", mm);
-      printf("d  = %lld\n", d);
+      printf("yy    = %lld\n", yy);
+      printf("mm    = %lld\n", mm);
+      printf("d     = %lld\n", d);
+      printf("d_r8  = %g\n", d_r8);
+      if (this->calendar != ESMC_NULL_POINTER) {
+        if (this->calendar->calendarType != ESMC_CAL_NOCALENDAR) {
+          printf("Calendar = \n");
+          this->calendar->print(options);
+        }
+      }
+      // TODO:  startTime, endTime (need to check whether initialized first)
     }
 
     printf("end TimeInterval -----------------------\n\n");
@@ -2797,9 +2904,10 @@ namespace ESMCI{
 
    Fraction::set(0,0,1);
 
-   yy = 0;
-   mm = 0;
-   d  = 0;
+   yy    = 0;
+   mm    = 0;
+   d     = 0;
+   d_r8  = 0.0;
 
    if (Calendar::defaultCalendar != ESMC_NULL_POINTER) {
      // use default calendar
@@ -2830,11 +2938,12 @@ namespace ESMCI{
 //
 // !ARGUMENTS:
       ESMC_I8 s,             // in - integer seconds
-      ESMC_I4 sN,            // in - fractional seconds, numerator
-      ESMC_I4 sD,            // in - fractional seconds, denominator
+      ESMC_I8 sN,            // in - fractional seconds, numerator
+      ESMC_I8 sD,            // in - fractional seconds, denominator
       ESMC_I8 yy,            // in - calendar interval number of years
       ESMC_I8 mm,            // in - calendar interval number of months
       ESMC_I8 d,             // in - calendar interval number of days
+      ESMC_R8 d_r8,          // in - calendar interval number of real days
       Time *startTime,       // in - interval start time
       Time *endTime,         // in - interval end time
       Calendar *calendar,    // in - calendar
@@ -2852,9 +2961,10 @@ namespace ESMCI{
 
    BaseTime(s, sN, sD) {  // pass to base class constructor
 
-   this->yy = yy;
-   this->mm = mm;
-   this->d  = d;
+   this->yy   = yy;
+   this->mm   = mm;
+   this->d    = d;
+   this->d_r8 = d_r8;
 
    // startTime, endTime initialized via their own constructor when
    // time interval instantiated; override with user values here
@@ -2956,8 +3066,10 @@ namespace ESMCI{
     }
 
     ESMC_I8 yy_i8, mm_i8, d_i8;
-    ESMC_I4 h, m, s, sN, sD;
+    ESMC_I4 h, m, s;
+    ESMC_I8 sN, sD;
 
+    // TODO: d_r8 merged into d_i8 ?
     // TODO: use native C++ Get, not F90 entry point, when ready
     rc = TimeInterval::get((ESMC_I4 *)ESMC_NULL_POINTER,
                           &yy_i8, ESMC_NULL_POINTER,
@@ -2967,7 +3079,9 @@ namespace ESMCI{
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                          ESMC_NULL_POINTER, ESMC_NULL_POINTER, &sN, &sD);
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER, 
+                          ESMC_NULL_POINTER, &sN,
+                          ESMC_NULL_POINTER, &sD);
 
     if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
@@ -2998,7 +3112,7 @@ namespace ESMCI{
 
       // if fractionalSeconds non-zero (sN!=0) append full fractional value
       if (sN != 0) {
-        sprintf(timeString, "%s%d:%d/%dS\0", timeString, s, sN, sD);
+        sprintf(timeString, "%s%d:%lld/%lldS\0", timeString, s, sN, sD);
       } else { // no fractional seconds, just append integer seconds
         sprintf(timeString, "%s%dS\0", timeString, s);
       }
@@ -3084,8 +3198,17 @@ namespace ESMCI{
           }
           // reduce d to seconds
           if (d != 0) {
-            setw(getw() + d*calendar->secondsPerDay);
+            setw(getw() + d * calendar->secondsPerDay);
             d = 0;
+          }
+          // reduce d_r8 to seconds
+          if (d_r8 != 0.0) {
+            // avoid error introduced by floating point multiply by setting a
+            // fraction in days, then performing an integer multiply by
+            // the secondsPerDay unit conversion factor.
+            Fraction rdays(d_r8);
+            Fraction::operator+=(rdays * calendar->secondsPerDay);
+            d_r8 = 0.0;
           }
           // we now have (mm, s); yy and d have been reduced
         }
@@ -3103,6 +3226,14 @@ namespace ESMCI{
           setw(getw() + d * calendar->secondsPerDay);
           d = 0;
         }
+        if (d_r8 != 0.0) {
+          // avoid error introduced by floating point multiply by setting a
+          // fraction in days, then performing an integer multiply by
+          // the secondsPerDay unit conversion factor.
+          Fraction rdays(d_r8);
+          Fraction::operator+=(rdays * calendar->secondsPerDay);
+          d_r8 = 0.0;
+        }
         // yy, mm, d all reduced to base seconds
         break;
       case ESMC_CAL_JULIANDAY:
@@ -3113,6 +3244,14 @@ namespace ESMCI{
         if (d != 0) {
           setw(getw() + d * calendar->secondsPerDay);
           d = 0;
+        }
+        if (d_r8 != 0.0) {
+          // avoid error introduced by floating point multiply by setting a
+          // fraction in days, then performing an integer multiply by
+          // the secondsPerDay unit conversion factor.
+          Fraction rdays(d_r8);
+          Fraction::operator+=(rdays * calendar->secondsPerDay);
+          d_r8 = 0.0;
         }
         break;
       case ESMC_CAL_NOCALENDAR:

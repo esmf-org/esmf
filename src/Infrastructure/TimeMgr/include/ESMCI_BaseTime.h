@@ -1,4 +1,4 @@
-// $Id: ESMCI_BaseTime.h,v 1.8 2008/11/14 04:05:57 theurich Exp $
+// $Id: ESMCI_BaseTime.h,v 1.9 2008/11/26 06:59:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -147,9 +147,10 @@ class BaseTime : public Fraction { // it is a fraction !
                          ESMC_R8 *s_r8=0,
                          ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
                          ESMC_R8 *ns_r8=0,
-                         ESMC_I4 *sN=0, ESMC_I4 *sD=0);
+                         ESMC_I4 *sN=0, ESMC_I8 *sN_i8=0,
+                         ESMC_I4 *sD=0, ESMC_I8 *sD_i8=0);
 
-    int set(ESMC_I8 S, int sN, int sD);
+    int set(ESMC_I8 S, ESMC_I8 sN, ESMC_I8 sD);
 
     int get(const BaseTime *timeToConvert,
                          ESMC_I4 *h=0, ESMC_I4 *m=0,
@@ -160,7 +161,8 @@ class BaseTime : public Fraction { // it is a fraction !
                          ESMC_R8 *s_r8=0,
                          ESMC_R8 *ms_r8=0, ESMC_R8 *us_r8=0,
                          ESMC_R8 *ns_r8=0,
-                         ESMC_I4 *sN=0, ESMC_I4 *sD=0) const;
+                         ESMC_I4 *sN=0, ESMC_I8 *sN_i8=0,
+                         ESMC_I4 *sD=0, ESMC_I8 *sD_i8=0) const;
 
     // BaseTime doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
@@ -185,7 +187,7 @@ class BaseTime : public Fraction { // it is a fraction !
 
     // native C++ constructors/destructors
     BaseTime(void);
-    BaseTime(ESMC_I8 S, ESMC_I4 sN, ESMC_I4 sD);
+    BaseTime(ESMC_I8 S, ESMC_I8 sN=0, ESMC_I8 sD=1);
     ~BaseTime(void);
 
  // < declare the rest of the public interface methods here >

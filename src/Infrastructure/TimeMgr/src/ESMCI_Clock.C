@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.8 2008/11/10 23:58:45 eschwab Exp $
+// $Id: ESMCI_Clock.C,v 1.9 2008/11/26 06:59:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.8 2008/11/10 23:58:45 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.9 2008/11/26 06:59:14 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -456,10 +456,8 @@ int Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                      calendar);
-      ESMC_LogDefault.MsgFoundError(rc,
-                                         "Time::get(...calendar) failed.",
-                                         &rc);
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, calendar);
+      ESMC_LogDefault.MsgFoundError(rc, "Time::get(...calendar) failed.", &rc);
     }
     if (calendarType != ESMC_NULL_POINTER) {
       // get calendar type from currTime, but could get from any other clock
@@ -473,10 +471,10 @@ int Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                      ESMC_NULL_POINTER, calendarType);
-      ESMC_LogDefault.MsgFoundError(rc,
-                                       "Time::get(...calendarType) failed.",
-                                       &rc);
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      calendarType);
+      ESMC_LogDefault.MsgFoundError(rc, "Time::get(...calendarType) failed.",
+                                    &rc);
     }
     if (timeZone != ESMC_NULL_POINTER) {
       // get timeZone from currTime, but could get from any other clock Time,
@@ -490,10 +488,9 @@ int Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, timeZone);
-      ESMC_LogDefault.MsgFoundError(rc,
-                                         "Time::get(...timeZone) failed.",
-                                         &rc);
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, timeZone);
+      ESMC_LogDefault.MsgFoundError(rc, "Time::get(...timeZone) failed.", &rc);
     }
 
     if (advanceCount != ESMC_NULL_POINTER) *advanceCount = this->advanceCount;
@@ -1585,6 +1582,7 @@ int Clock::count=0;
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, &startCal);
 
       if(ESMC_LogDefault.MsgFoundError(rc,
@@ -1593,6 +1591,7 @@ int Clock::count=0;
       }
 
       rc = stopTime.Time::get((ESMC_I4 *)ESMC_NULL_POINTER, 
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,

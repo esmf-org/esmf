@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time_F.C,v 1.1 2008/10/19 03:59:25 eschwab Exp $
+// $Id: ESMCI_Time_F.C,v 1.2 2008/11/26 06:59:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -49,7 +49,8 @@ extern "C" {
                                 ESMC_R8 *m_r8,  ESMC_R8 *s_r8,
                                 ESMC_R8 *ms_r8, ESMC_R8 *us_r8,
                                 ESMC_R8 *ns_r8,
-                                ESMC_I4 *sN, ESMC_I4 *sD,
+                                ESMC_I4 *sN, ESMC_I8 *sN_i8,
+                                ESMC_I4 *sD, ESMC_I8 *sD_i8,
                                 Calendar **calendar,
                                 ESMC_CalendarType *calendarType,
                                 int *timeZone,
@@ -76,7 +77,9 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(us_r8),
                        ESMC_NOT_PRESENT_FILTER(ns_r8),
                        ESMC_NOT_PRESENT_FILTER(sN),
+                       ESMC_NOT_PRESENT_FILTER(sN_i8),
                        ESMC_NOT_PRESENT_FILTER(sD),
+                       ESMC_NOT_PRESENT_FILTER(sD_i8),
                        ESMC_NOT_PRESENT_FILTER(calendar),
                        ESMC_NOT_PRESENT_FILTER(calendarType),
                        ESMC_NOT_PRESENT_FILTER(timeZone) );
@@ -95,7 +98,8 @@ extern "C" {
                               ESMC_R8 *m_r8,  ESMC_R8 *s_r8,
                               ESMC_R8 *ms_r8, ESMC_R8 *us_r8,
                               ESMC_R8 *ns_r8,
-                              ESMC_I4 *sN, ESMC_I4 *sD,
+                              ESMC_I4 *sN, ESMC_I8 *sN_i8,
+                              ESMC_I4 *sD, ESMC_I8 *sD_i8,
                               Calendar **calendar, 
                               ESMC_CalendarType *calendarType, 
                               int *timeZone,
@@ -132,7 +136,9 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(us_r8),
                        ESMC_NOT_PRESENT_FILTER(ns_r8),
                        ESMC_NOT_PRESENT_FILTER(sN),
+                       ESMC_NOT_PRESENT_FILTER(sN_i8),
                        ESMC_NOT_PRESENT_FILTER(sD),
+                       ESMC_NOT_PRESENT_FILTER(sD_i8),
                        ESMC_NOT_PRESENT_FILTER(calendar),
                        ESMC_NOT_PRESENT_FILTER(calendarType),
                        ESMC_NOT_PRESENT_FILTER(timeZone),
