@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUtil.F90,v 1.1 2008/10/29 23:57:21 w6ws Exp $
+! $Id: ESMF_IOUtil.F90,v 1.2 2008/11/26 15:49:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@ module ESMF_IOUtilMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version = &
-      '$Id: ESMF_IOUtil.F90,v 1.1 2008/10/29 23:57:21 w6ws Exp $'
+      '$Id: ESMF_IOUtil.F90,v 1.2 2008/11/26 15:49:24 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   contains
@@ -105,7 +105,7 @@ module ESMF_IOUtilMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOUnitFlush"
 !BOP
-! !IROUTINE: ESMF\_IOUnitFlush - flush output on a unit number
+! !IROUTINE: ESMF_IOUnitFlush - flush output on a unit number
 !
 ! !INTERFACE:
   subroutine ESMF_IOUnitFlush (unit, rc)
@@ -141,7 +141,7 @@ ESMF_IOFlushMacro(unit,status)
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOUnitGet"
 !BOP
-!  !IROUTINE:  ESMF\_IOUnitGet - Scan for a free I/O unit number
+! !IROUTINE:  ESMF_IOUnitGet - Scan for a free I/O unit number
 !
 ! !INTERFACE:
   subroutine ESMF_IOUnitGet (unit, rc)
