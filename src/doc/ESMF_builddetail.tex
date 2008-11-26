@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.6.2.2 2008/07/17 00:12:52 theurich Exp $
+%  $Id: ESMF_builddetail.tex,v 1.6.2.3 2008/11/26 00:00:47 theurich Exp $
 
 % there is a separate copy of this under build/doc which is
 % now used only by the implementation report.  this was separated
@@ -356,10 +356,14 @@ This macro will be defined on a 32-bit architecture.
 This macro will be defined on a 64-bit architecture.
 
 \item[ESMF\_F90\_PTR\_BASE\_SIZE]
-Value in bytes used to calculate the size of the Fortran dope vector.
+Value in bytes used to calculate the size of the Fortran dope vector. This
+setting can be overridded by setting variable {\tt ESMF\_F90\_PTR\_BASE\_SIZE}
+in the user environment before compiling the ESMF library.
 
 \item[ESMF\_F90\_PTR\_PLUS\_RANK]
-Value in bytes used to calculate the size of the Fortran dope vector.
+Value in bytes used to calculate the size of the Fortran dope vector. This
+setting can be overridded by setting variable {\tt ESMF\_F90\_PTR\_PLUS\_RANK}
+in the user environment before compiling the ESMF library.
 
 \item[ESMC\_POINTER\_SIZE]
 Size of C pointer in bytes.
