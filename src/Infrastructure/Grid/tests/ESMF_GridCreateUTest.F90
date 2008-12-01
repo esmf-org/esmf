@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.67.2.14 2008/11/07 23:52:08 theurich Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.67.2.15 2008/12/01 22:59:40 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.67.2.14 2008/11/07 23:52:08 theurich Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.67.2.15 2008/12/01 22:59:40 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -64,6 +64,7 @@ program ESMF_GridCreateUTest
   integer(ESMF_KIND_I4), pointer :: buf(:)
   integer :: bufCount, offset, localDECount, rank
   integer :: minIndex(3), maxIndex(3) 
+  integer :: celw(3),ceuw(3)
 
   integer:: count, i
   integer(ESMF_KIND_I4) :: intattr, intattr2
@@ -1168,6 +1169,141 @@ program ESMF_GridCreateUTest
 
   ! destroy grid
   call ESMF_ArrayDestroy(array, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test GridGetArrayInfo with replicated dims"
+  write(failMsg, *) "Incorrect result"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! create grid
+  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+                              countsPerDeDim2=(/5/),  & 
+                              countsPerDeDim3=(/3,4/),  &
+	                      gridEdgeLWidth=(/1,2,3/), &
+	                      gridEdgeUWidth=(/4,5,6/), &
+                              indexflag=ESMF_INDEX_GLOBAL, &
+                              rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get array info
+  call ESMF_GridGetArrayInfo(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+          gridToArrayMap=(/0,3,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
+          distgridToArrayMap=distgridToArrayMap, &
+          undistLBound=undistLBound, undistUBound=undistUBound, &
+          computationalEdgeLWidth=celw, &
+          computationalEdgeUWidth=ceuw, &
+          rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Make sure info is as expected
+  if ((distgridToArrayMap(1) .ne. 0) .or. &
+      (distgridToArrayMap(2) .ne. 3) .or. &
+      (distgridToArrayMap(3) .ne. 0)) correct=.false. 
+
+  if (celw(1) .ne. -2) correct=.false.
+  if (ceuw(1) .ne. -5) correct=.false.
+  if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 3)) correct=.false.
+  if ((undistUBound(1) .ne. 7) .or. (undistUBound(2) .ne. 6)) correct=.false.
+
+
+  ! Get array info
+  call ESMF_GridGetArrayInfo(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+          gridToArrayMap=(/3,1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
+          distgridToArrayMap=distgridToArrayMap, &
+          undistLBound=undistLBound, undistUBound=undistUBound, &
+          computationalEdgeLWidth=celw, &
+          computationalEdgeUWidth=ceuw, &
+          rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Make sure info is as expected
+  if ((distgridToArrayMap(1) .ne. 3) .or. &
+      (distgridToArrayMap(2) .ne. 1) .or. &
+      (distgridToArrayMap(3) .ne. 0)) correct=.false. 
+
+  if ((celw(1) .ne. -2) .or. (celw(2) .ne. -1)) correct=.false.
+  if ((ceuw(1) .ne. -5) .or. (ceuw(2) .ne. -4)) correct=.false.
+
+  if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 3)) correct=.false.
+  if ((undistUBound(1) .ne. 7) .or. (undistUBound(2) .ne. 6)) correct=.false.
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test GridGetArrayInfo with replicated dims and non-default distgridToGridMap"
+  write(failMsg, *) "Incorrect result"
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! create grid
+  grid=ESMF_GridCreate(distgrid=distgrid, &
+	               gridEdgeLWidth=(/1,2/), &
+	               gridEdgeUWidth=(/3,4/), &
+                       distgridToGridMap=(/2,1/), &
+                       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get array info
+  call ESMF_GridGetArrayInfo(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+          gridToArrayMap=(/0,1/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
+          distgridToArrayMap=distgridToArrayMap, &
+          undistLBound=undistLBound, undistUBound=undistUBound, &
+          computationalEdgeLWidth=celw, &
+          computationalEdgeUWidth=ceuw, &
+          rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Make sure info is as expected
+  if ((distgridToArrayMap(1) .ne. 1) .or. &
+      (distgridToArrayMap(2) .ne. 0)) correct=.false. 
+
+  if (celw(1) .ne. -2) correct=.false.
+  if (ceuw(1) .ne. -4) correct=.false.
+  if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 3)) correct=.false.
+  if ((undistUBound(1) .ne. 7) .or. (undistUBound(2) .ne. 6)) correct=.false.
+
+
+  ! Get array info
+  call ESMF_GridGetArrayInfo(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+          gridToArrayMap=(/1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
+          distgridToArrayMap=distgridToArrayMap, &
+          undistLBound=undistLBound, undistUBound=undistUBound, &
+          computationalEdgeLWidth=celw, &
+          computationalEdgeUWidth=ceuw, &
+          rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Make sure info is as expected
+  if ((distgridToArrayMap(1) .ne. 0) .or. &
+      (distgridToArrayMap(2) .ne. 1)) correct=.false. 
+
+  if (celw(1) .ne. -1) correct=.false.
+  if (ceuw(1) .ne. -3) correct=.false.
+  if ((undistLBound(1) .ne. 2) .or. (undistLBound(2) .ne. 3)) correct=.false.
+  if ((undistUBound(1) .ne. 7) .or. (undistUBound(2) .ne. 6)) correct=.false.
+
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)

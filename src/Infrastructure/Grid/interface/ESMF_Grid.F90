@@ -195,7 +195,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.32 2008/11/13 22:15:43 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.33 2008/12/01 22:59:40 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1172,7 +1172,8 @@ end interface
 !\item[{[gridToArrayMap]}]
 !     Indicates where each grid dimension goes in the newly created Array.
 !     {\tt The array gridToArrayMap} should be at least of size equal to the grid's dimCount.
-!     If not set defaults to (1,2,3,....).
+!     If not set defaults to (1,2,3,....). An entry of 0 indicates the grid dimension
+!     isn't mapped to the Array. 
 !\item[{[ungriddedLBound]}]
 !     The lower bounds of the non-grid Array dimensions.
 !\item[{[ungriddedUBound]}]
@@ -1202,7 +1203,7 @@ end interface
     integer :: gridComputationalEdgeUWidth(ESMF_MAXDIM)
     integer :: tmpArrayComputationalEdgeLWidth(ESMF_MAXDIM)
     integer :: tmpArrayComputationalEdgeUWidth(ESMF_MAXDIM)
-    integer :: packedGridToArrayMap(ESMF_MAXDIM)
+!    integer :: packedGridToArrayMap(ESMF_MAXDIM)
     integer :: localGridToArrayMap(ESMF_MAXDIM)
     logical :: filled(ESMF_MAXDIM)
    
@@ -1253,9 +1254,6 @@ end interface
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! calc full Array DimCount
-    arrayDimCount=ungriddedDimCount+dimCount
-
     ! calc undist Array DimCount
     undistArrayDimCount=ungriddedDimCount
 
@@ -1269,10 +1267,24 @@ end interface
        endif
     endif
 
-    ! Make sure gridToArrayMap is correct size
+    ! calc full Array DimCount
+    ! Its the ungriddedDimCount + the number of non-zero entries in gridToArrayMap
+    arrayDimCount=ungriddedDimCount
     if (present(gridToArrayMap)) then
        do i=1,dimCount
-          if ((gridToArrayMap(i) <1) .or. (gridToArrayMap(i) > arrayDimCount)) then
+          if (gridToArrayMap(i) .gt. 0) then
+	     arrayDimCount=arrayDimCount+1
+          endif
+       enddo
+   else
+       ! Default assumes all grid dims are used so add number of grid dims
+       arrayDimCount=arrayDimCount+dimCount
+   endif
+
+    ! Make sure gridToArrayMap's entries are correct
+    if (present(gridToArrayMap)) then
+       do i=1,dimCount
+          if ((gridToArrayMap(i) <0) .or. (gridToArrayMap(i) > arrayDimCount)) then
               call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                    "- gridToArrayMap value is outside range", & 
                           ESMF_CONTEXT, rc) 
@@ -1315,7 +1327,6 @@ end interface
    endif  
 
 
-
     ! allocate distgridToGridMap
     allocate(distgridToGridMap(dimCount) , stat=localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
@@ -1333,31 +1344,16 @@ end interface
            rc=localrc)
 
     ! map to Array ordering
-    !! SetupMap
     filled=.false.
     do i=1,dimCount
-       packedGridToArrayMap(distgridToGridMap(i))=localGridToArrayMap(distgridToGridMap(i))
-       filled(distgridToGridMap(i))=.true.
-    enddo
-
-    !! Collapse
-    j=1
-    do i=1,dimCount
-       if (filled(i)) then
-          packedGridToArrayMap(j)=packedGridToArrayMap(i)
-          j=j+1
+       if (localGridToArrayMap(i) .gt. 0) then ! Skip replicated dimensions
+          tmpArrayComputationalEdgeLWidth(localGridToArrayMap(i))=gridComputationalEdgeLWidth(i)
+          tmpArrayComputationalEdgeUWidth(localGridToArrayMap(i))=gridComputationalEdgeUWidth(i)
+          filled(localGridToArrayMap(i))=.true.
        endif
     enddo
 
-    !! build new arrays
-    filled=.false.
-    do i=1,dimCount
-       tmpArrayComputationalEdgeLWidth(packedGridToArrayMap(i))=gridComputationalEdgeLWidth(i)
-       tmpArrayComputationalEdgeUWidth(packedGridToArrayMap(i))=gridComputationalEdgeUWidth(i)
-       filled(packedGridToArrayMap(i))=.true.
-    enddo
-
-    !! Collapse
+    ! Collapse
     j=1
     do i=1,arrayDimCount
        if (filled(i)) then
@@ -1388,7 +1384,9 @@ end interface
       !! set which dimensions are used by the distgrid
       arrayDimType(:)=0 ! initialize to no type
       do i=1,dimCount
-         arrayDimType(distGridToArrayMap(i))=1 ! set to distributed
+        if (distGridToArrayMap(i) .gt. 0) then ! skip replicated dims 
+           arrayDimType(distGridToArrayMap(i))=1 ! set to distributed
+        endif
       enddo
 
       ! TODO: make the below cleaner given no grid undistdim
