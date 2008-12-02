@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.50 2008/11/26 06:59:14 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.51 2008/12/02 06:49:20 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.50 2008/11/26 06:59:14 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.51 2008/12/02 06:49:20 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -66,7 +66,7 @@
       type(ESMF_TimeInterval) :: absoluteTime, diffTime
       type(ESMF_TimeInterval) :: timeInterval1, timeInterval2, timeInterval3, &
                                  timeInterval4, timeInterval5, timeInterval6
-      integer(ESMF_KIND_I8) :: days2
+      integer(ESMF_KIND_I8) :: days2, sD_i8
       real(ESMF_KIND_R8) :: ratio, days_r8, sec_in_r8, sec_out_r8, &
                             hr_in_r8, hr_out_r8, min_in_r8, min_out_r8, &
                             ms_in_r8, ms_out_r8, us_in_r8, us_out_r8, &
@@ -877,7 +877,7 @@
       call ESMF_TimeIntervalSet(timeStep2, d=10, &
                                 calendar=gregorianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-.5) < 1d-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-.5) < 1d-15 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -891,7 +891,7 @@
       call ESMF_TimeIntervalSet(timeStep2, yy=12, &
                                 calendar=gregorianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-.25) < 1d-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-.25) < 1d-15 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -905,7 +905,7 @@
       call ESMF_TimeIntervalSet(timeStep2, mm=8, &
                                 calendar=gregorianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-.75) < 1d-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-.75) < 1d-15 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -919,7 +919,7 @@
       call ESMF_TimeIntervalSet(timeStep2, mm=24, &
                                 calendar=gregorianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-1.5) < 1d-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-1.5) < 1d-14 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -942,7 +942,7 @@
       diffTime = time1 - time2
       call ESMF_TimeIntervalGet(diffTime, d_r8=days_r8, rc=rc)
       !call ESMF_TimeIntervalPrint(diffTime, rc=rc)
-      call ESMF_Test((abs(days_r8 - 722502.253518553d0) < 1d-6 .and. &
+      call ESMF_Test((abs(days_r8 - 722502.253518553d0) < 1d-9 .and. &
                      rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       print *, "Diff time in floating point days = ", days_r8, " rc = ", rc
@@ -968,14 +968,13 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       write(name, *) "Set hours, minutes, seconds/get floating point days"
-      write(failMsg, *) " Did not return 0.22723379629629629629"
+      write(failMsg, *) " Did not return 0.2272337962962963"
 
       call ESMF_TimeIntervalSet(timeInterval1, h=5, m=27, s=13, &
                                 calendar=gregorianCalendar, rc=rc)
       !call ESMF_TimeIntervalPrint(timeInterval1, rc=rc)
       call ESMF_TimeIntervalGet(timeInterval1, d_r8=days_r8 )
-      call ESMF_Test(days_r8.eq.0.22723379629629629629d0 .and. &
-                     ! bitwise identical!
+      call ESMF_Test(abs(days_r8 - 0.2272337962962963d0) < 1d-15 .and. &
                      rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
       !print *, ' days_r8 = ', days_r8
 
@@ -2167,7 +2166,7 @@
       call ESMF_TimeIntervalSet(timeStep2, d=10, &
                                 calendar=julianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-.5) < 1d-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-.5) < 1d-15 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -2181,7 +2180,7 @@
       call ESMF_TimeIntervalSet(timeStep2, yy=12, &
                                 calendar=julianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-.25) < 1d-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-.25) < 1d-15 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -2195,7 +2194,7 @@
       call ESMF_TimeIntervalSet(timeStep2, mm=8, &
                                 calendar=julianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-.75) < 1d-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-.75) < 1d-15 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -2209,7 +2208,7 @@
       call ESMF_TimeIntervalSet(timeStep2, mm=24, &
                                 calendar=julianCalendar, rc=rc)
       ratio = timeStep / timeStep2
-      call ESMF_Test((abs(ratio-1.5) < 1d-6 .and. rc==ESMF_SUCCESS), &
+      call ESMF_Test((abs(ratio-1.5) < 1d-15 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "ratio, rc = ", ratio, rc
@@ -3734,13 +3733,13 @@
 
       !EX_UTest
       write(name, *) "Real ratio of two fractional Time Intervals Test 1"
-      write(failMsg, *) " Did not return 2.933333333 seconds and ESMF_SUCCESS"
+      write(failMsg, *) " Did not return 2.93333333333333 seconds and ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeInterval1, s=10, sN=2, sD=3, rc=rc)
       call ESMF_TimeIntervalSet(timeInterval2, s=3, sN=7, sD=11, rc=rc)
       ratio = timeInterval1 / timeInterval2
-      call ESMF_Test((abs(ratio-2.93333333) < 1d-6 .and. rc==ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      print *, "ratio, rc = ", ratio, rc
+      call ESMF_Test((abs(ratio-2.93333333333333d0) < 1d-14 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !print *, "ratio, rc = ", ratio, rc
 
       ! ----------------------------------------------------------------------------
 
@@ -3885,16 +3884,17 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      ! Should produce error message in ESMF_LogFile
+      ! Should produce error message upon 1st TimeIntervalGet() in ESMF_LogFile
       write(name, *) "Upper limit of denominator get Test"
-      write(failMsg, *) " Did not return 0 0/1 seconds"
+      write(failMsg, *) " Did not return 0 1/5000000000 seconds"
       call ESMF_TimeIntervalSet(timeInterval1, sN=1, sD=1000000000, rc=rc)
       timeInterval1 = timeInterval1 / 5
-      sD = 1
+      ! I4 sD overflows with I8 value => LogErr msg
       call ESMF_TimeIntervalGet(timeInterval1, s=S, sN=sN, sD=sD, rc=rc)
-      call ESMF_Test((S.eq.0.and.sN.eq.1.and.sD.eq.1), &
+      call ESMF_TimeIntervalGet(timeInterval1, s=S, sN=sN, sD_i8=sD_i8, rc=rc)
+      call ESMF_Test((S.eq.0.and.sN.eq.1.and.sD_i8.eq.5000000000_ESMF_KIND_I8),&
                       name, failMsg, result, ESMF_SRCLINE)
-      !print *, "S, sN, sD = ", S, sN, sD
+      print *, "S, sN, sD_i8 = ", S, sN, sD_i8
 
       ! ----------------------------------------------------------------------------
       ! return number of failures to environment; 0 = success (all pass)
