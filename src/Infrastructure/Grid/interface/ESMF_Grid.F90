@@ -195,7 +195,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.33 2008/12/01 22:59:40 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.34 2008/12/02 20:54:07 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -953,7 +953,8 @@ end interface
 !\item[{[gridToArrayMap]}]
 !     Indicates where each grid dimension goes in the newly created Array.
 !     {\tt The array gridToArrayMap} should be at least of size equal to the grid's dimCount.
-!     If not set defaults to (1,2,3,....).
+!     If not set defaults to (1,2,3,....). An entry of 0 indicates the grid dimension
+!     won't be used in the creation of the Array.
 !\item[{[ungriddedLBound]}]
 !     The lower bounds of the non-grid Array dimensions.
 !\item[{[ungriddedUBound]}]
@@ -987,6 +988,7 @@ end interface
     integer, pointer :: distgridToArrayMap(:)
     integer :: dimCount
     integer :: i,ungriddedDimCount, arrayDimCount, undistArrayDimCount, bndpos
+    logical :: contains_nonzero
    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1041,9 +1043,6 @@ end interface
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! calc full Array DimCount
-    arrayDimCount=ungriddedDimCount+dimCount
-
     ! calc undist Array DimCount
     undistArrayDimCount=ungriddedDimCount
 
@@ -1057,10 +1056,26 @@ end interface
        endif
     endif
 
+
+    ! calc full Array DimCount
+    ! Its the ungriddedDimCount + the number of non-zero entries in gridToArrayMap
+    arrayDimCount=ungriddedDimCount
+    if (present(gridToArrayMap)) then
+       do i=1,dimCount
+          if (gridToArrayMap(i) .gt. 0) then
+	     arrayDimCount=arrayDimCount+1
+          endif
+       enddo
+   else
+       ! Default assumes all grid dims are used so add number of grid dims
+       arrayDimCount=arrayDimCount+dimCount
+   endif
+
+
     ! Make sure gridToArrayMap is correct size
     if (present(gridToArrayMap)) then
        do i=1,dimCount
-          if ((gridToArrayMap(i) <1) .or. (gridToArrayMap(i) > arrayDimCount)) then
+          if ((gridToArrayMap(i) <0) .or. (gridToArrayMap(i) > arrayDimCount)) then
               call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                    "- gridToArrayMap value is outside range", & 
                           ESMF_CONTEXT, rc) 
@@ -1068,6 +1083,23 @@ end interface
           endif
        enddo
     endif
+
+    ! Make sure gridToArrayMap contains at least one non-zero entry
+    if (present(gridToArrayMap)) then
+       contains_nonzero=.false.
+       do i=1,dimCount
+          if (gridToArrayMap(i) >0) then
+	     contains_nonzero=.true.
+          endif
+       enddo
+       if (.not. contains_nonzero) then 
+             call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   "- gridToArrayMap must contains at least one value greater than 0", & 
+                          ESMF_CONTEXT, rc) 
+              return 
+       endif
+    endif
+
 
    ! construct ArraySpec
    call ESMF_ArraySpecSet(arrayspec,rank=arrayDimCount,typekind=localTypeKind, rc=localrc)
@@ -1206,8 +1238,7 @@ end interface
 !    integer :: packedGridToArrayMap(ESMF_MAXDIM)
     integer :: localGridToArrayMap(ESMF_MAXDIM)
     logical :: filled(ESMF_MAXDIM)
-   
-
+    logical :: contains_nonzero   
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1291,6 +1322,23 @@ end interface
               return 
           endif
        enddo
+    endif
+
+
+    ! Make sure gridToArrayMap contains at least one non-zero entry
+    if (present(gridToArrayMap)) then
+       contains_nonzero=.false.
+       do i=1,dimCount
+          if (gridToArrayMap(i) >0) then
+	     contains_nonzero=.true.
+          endif
+       enddo
+       if (.not. contains_nonzero) then 
+             call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   "- gridToArrayMap must contains at least one value greater than 0", & 
+                          ESMF_CONTEXT, rc) 
+              return 
+       endif
     endif
 
     ! Check distgridToArrayMap
