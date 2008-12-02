@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.31 2008/08/14 01:50:20 rokuingh Exp $
+! $Id: user_model1.F90,v 1.32 2008/12/02 22:43:00 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -302,16 +302,51 @@ module user_model1
 
     ! Local variables
     type(ESMF_VM)               :: vm
-    integer                     :: petCount, status, myPet
+    integer                     :: petCount, status, myPet, k
+    character(ESMF_MAXSTR)      :: name2,value2,conv,purp,purp2,name3
+    character(ESMF_MAXSTR),dimension(2) :: attrList
+    type(ESMF_Field)            :: field
+    type(ESMF_FieldBundle)      :: fbundle
+    type(ESMF_Grid)             :: grid
 
     ! Initialize return code
     rc = ESMF_SUCCESS
 
+    conv = 'CF'
+    purp = 'basic'
+    name2 = 'standard_name'
+    value2 = 'default_standard_name'
+    name3 = 'long_name'
+    
+    purp2 = 'extended'
+    attrList(1) = 'coordinates'
+    attrList(2) = 'mask'
+    
     ! Determine petCount
     call ESMF_GridCompGet(comp, vm=vm, rc=status)
     if (status .ne. ESMF_SUCCESS) return
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
     if (status .ne. ESMF_SUCCESS) return
+
+    call ESMF_StateGet(exportState, "fbundle", fbundle, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldBundleGet(fbundle, grid=grid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    do k = 1, 10
+        call ESMF_FieldBundleGet(fbundle, fieldIndex=k, field=field, rc=rc)
+        if (rc/=ESMF_SUCCESS) return ! bail out
+        call ESMF_AttributeSet(field, name2, value2, convention=conv, purpose=purp, rc=status)
+        if (rc/=ESMF_SUCCESS) return ! bail out
+        call ESMF_AttributeAdd(field, attrList=attrList, convention=conv, purpose=purp2, &
+          count=2, attpacknestflag=ESMF_ATTPACKNEST_ON, rc=rc)
+        call ESMF_AttributeSet(field, name='coordinates', value='latlon', &
+          convention=conv, purpose=purp2, rc=rc)
+        call ESMF_AttributeSet(field, name='mask', value='yes', &
+          convention=conv, purpose=purp2, rc=rc)
+        if (rc/=ESMF_SUCCESS) return ! bail out
+        call ESMF_AttributeRemove(field, name=name3, convention=conv, purpose=purp, rc=status)
+        if (rc/=ESMF_SUCCESS) return ! bail out
+    enddo
 
     !print *, 'myPet = ', myPet
 

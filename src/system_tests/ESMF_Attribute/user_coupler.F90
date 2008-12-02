@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.15 2008/07/28 03:59:23 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.16 2008/12/02 22:43:00 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -108,6 +108,11 @@ module user_coupler
     ! Local variables
     type(ESMF_VM)               :: vm
     integer                     :: myPet
+    
+    ! for testing update
+    type(ESMF_Array)            :: array
+    integer, dimension(4)       :: rootList
+    character(ESMF_MAXSTR)      :: conv,purp
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -122,6 +127,10 @@ module user_coupler
     call ESMF_StateGet(importState, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateGet(exportState, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    rootList = (/0,1,2,3/)
+    call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! copy all Attribute information into export State
