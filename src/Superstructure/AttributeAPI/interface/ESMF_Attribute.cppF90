@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.6 2008/12/02 22:21:40 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.7 2008/12/02 23:45:12 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.6 2008/12/02 22:21:40 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.7 2008/12/02 23:45:12 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -383,12 +383,12 @@ module ESMF_AttributeMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_ArrayAttUpdate
-        module procedure ESMF_CplCompAttWrite
-        module procedure ESMF_GridCompAttWrite
-        module procedure ESMF_FieldAttWrite
-        module procedure ESMF_FBundleAttWrite
-        module procedure ESMF_GridAttWrite
-        module procedure ESMF_StateAttWrite
+        module procedure ESMF_CplCompAttUpdate
+        module procedure ESMF_GridCompAttUpdate
+        module procedure ESMF_FieldAttUpdate
+        module procedure ESMF_FBundleAttUpdate
+        module procedure ESMF_GridAttUpdate
+        module procedure ESMF_StateAttUpdate
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that update
