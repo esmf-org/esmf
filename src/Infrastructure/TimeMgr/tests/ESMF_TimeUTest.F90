@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.29 2008/11/26 06:59:14 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.30 2008/12/02 06:54:13 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.29 2008/11/26 06:59:14 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.30 2008/12/02 06:54:13 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -199,7 +199,7 @@
       call ESMF_TimeGet(stopTime, dayOfYear_r8=dayOfYear_r8, rc=rc)
       write(name, *) "Time Get floating point day of the year test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and. &
-                     (abs(dayOfYear_r8 - 29.5124768518518d0) < 1d-6), &
+                     (abs(dayOfYear_r8 - 29.5124768518518d0) < 1d-13), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "dayOfYear_r8 = ", dayOfyear_r8
 
