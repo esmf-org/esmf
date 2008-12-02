@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.114 2008/10/08 23:36:22 rokuingh Exp $
+// $Id: ESMC_Base.C,v 1.115 2008/12/02 22:26:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.114 2008/10/08 23:36:22 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.115 2008/12/02 22:26:16 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -663,9 +663,12 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     // update offset to point to past the current obj
     *offset = (cp - buffer);
 
+    // setup the root Attribute, passing the address of this
+    root.setBase(this);
+
     // Deserialize the Attribute hierarchy
     localrc = root.ESMC_Deserialize(buffer, offset);
-    
+        
   return ESMF_SUCCESS;
 
  } // end ESMC_Deserialize
@@ -894,6 +897,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   sprintf(baseName, "%s%3d", "unnamed", ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
   
+  // setup the root Attribute, passing the address of this
+  root.setBase(this);
+  
   baseStatus = ESMF_STATUS_READY;
 
  } // end ESMC_Base
@@ -933,16 +939,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       sprintf(baseName, "%s%3d", className, ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
 
-/*  ***FIXME*** This code is invalid - when Attribute removed from Base,
-//              the nattrs argument should be removed from the call.
-  if (nattrs > 0) {
-      if (root.ESMCI_AttributeAlloc(nattrs) != ESMF_SUCCESS) {
-          baseStatus = ESMF_STATUS_INVALID;   // can't return err, but can
-          return;                            // try to indicate unhappiness
-      }
-  }
-*/
-
+  // setup the root Attribute, passing the address of this
+  root.setBase(this);
+  
   baseStatus = ESMF_STATUS_READY;
 
  } // end ESMC_Base
@@ -968,7 +967,10 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   int i;
 
   baseStatus = ESMF_STATUS_INVALID;
-
+  
+  // setup the root Attribute, passing the address of this
+  //delete root;
+  
   // if we have to support reference counts someday,
   // test if (refCount > 0) and do something if true;
 

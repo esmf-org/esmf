@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.5 2008/10/23 20:59:53 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.6 2008/12/02 22:21:40 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -64,6 +64,7 @@ module ESMF_AttributeMod
   use ESMF_StateTypesMod
   use ESMF_StateVaMod
   use ESMF_StateMod
+  use ESMF_VMMod
 
   implicit none
 
@@ -99,6 +100,7 @@ module ESMF_AttributeMod
       public ESMF_AttributeRemove
       public ESMF_AttributeGet
       public ESMF_AttributeSet
+      public ESMF_AttributeUpdate
       public ESMF_AttributeWrite
 
 !EOPI 
@@ -106,7 +108,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.5 2008/10/23 20:59:53 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.6 2008/12/02 22:21:40 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -367,6 +369,30 @@ module ESMF_AttributeMod
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that write
 !     an Attribute or Attribute package.
+ 
+!EOPI
+      end interface
+
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeUpdate  - Update an Attribute hierarchy
+!
+! !INTERFACE:
+      interface ESMF_AttributeUpdate
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_ArrayAttUpdate
+        module procedure ESMF_CplCompAttWrite
+        module procedure ESMF_GridCompAttWrite
+        module procedure ESMF_FieldAttWrite
+        module procedure ESMF_FBundleAttWrite
+        module procedure ESMF_GridAttWrite
+        module procedure ESMF_StateAttWrite
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that update
+!     an Attribute hierarchy.
  
 !EOPI
       end interface
@@ -3287,6 +3313,72 @@ AttSetCharacterMacro(ESMF_Array, array, array)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayAttUpdate"
+!BOPI
+! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeUpdate()
+      subroutine ESMF_ArrayAttUpdate(array, vm, rootList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array
+      type(ESMF_VM), intent(in) :: vm
+      integer, dimension(:), intent(in), optional :: rootList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Update an Attribute hierarchy.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!      An {\tt ESMF\_Array} object.
+!     \item [vm]
+!      The virtural machine over which this Array's Attribute hierarchy 
+!      should be updated.
+!     \item [rootList]
+!      The list of "root" PET's that are to be used to update.
+!     \item [{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, count                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+      call ESMF_ArrayValidate(array, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rootList)) then
+	count = size(rootList)
+        call c_ESMCI_AttributeUpdate(array, vm, rootList, count, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else 
+	call c_ESMCI_AttributeUpdate(array, vm, 0, 1, localrc)
+	if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      end if
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayAttUpdate
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayAttWrite"
 !BOPI
 ! !IROUTINE: ESMF_AttributeWrite - Print the Attribute package
@@ -3767,6 +3859,72 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_CplCompAttUpdate"
+!BOPI
+! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeUpdate()
+      subroutine ESMF_CplCompAttUpdate(comp, vm, rootList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp), intent(inout) :: comp
+      type(ESMF_VM), intent(in) :: vm
+      integer, dimension(:), intent(in), optional :: rootList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Update an Attribute hierarchy.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [comp]
+!      An {\tt ESMF\_CplComp} object.
+!     \item [vm]
+!      The virtural machine over which this CplComp's Attribute hierarchy 
+!      should be updated.
+!     \item [rootList]
+!      The list of "root" PET's that are to be used to update.
+!     \item [{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, count                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
+
+      call ESMF_CplCompValidate(comp, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rootList)) then
+	count = size(rootList)
+        call c_ESMCI_AttributeUpdate(comp%compp%base, vm, rootList, count, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else 
+	call c_ESMCI_AttributeUpdate(comp%compp%base, vm, 0, 1, localrc)
+	if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      end if
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_CplCompAttUpdate
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_CplCompAttWrite"
 !BOPI
 ! !IROUTINE: ESMF_CplCompAttWrite - Print the Attribute package
@@ -4203,6 +4361,72 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_GridCompAttUpdate"
+!BOPI
+! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeUpdate()
+      subroutine ESMF_GridCompAttUpdate(comp, vm, rootList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(inout) :: comp
+      type(ESMF_VM), intent(in) :: vm
+      integer, dimension(:), intent(in), optional :: rootList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Update an Attribute hierarchy.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [comp]
+!      An {\tt ESMF\_GridComp} object.
+!     \item [vm]
+!      The virtural machine over which this GridComp's Attribute hierarchy 
+!      should be updated.
+!     \item [rootList]
+!      The list of "root" PET's that are to be used to update.
+!     \item [{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, count                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
+
+      call ESMF_GridCompValidate(comp, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rootList)) then
+	count = size(rootList)
+        call c_ESMCI_AttributeUpdate(comp%compp%base, vm, rootList, count, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else 
+	call c_ESMCI_AttributeUpdate(comp%compp%base, vm, 0, 1, localrc)
+	if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      end if
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridCompAttUpdate
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_GridCompAttWrite"
 !BOPI
 ! !IROUTINE: ESMF_GridCompAttWrite - Print the Attribute package
@@ -4449,6 +4673,73 @@ GetCountNameNumberMacro(ESMF_Field, field, field%ftypep%base)
 TypeKind3DeclarationMacro(AttSet, ESMF_Field, field, field%ftypep%base)
 AttSetLogicalMacro(ESMF_Field, field, field%ftypep%base)
 AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldAttUpdate"
+!BOPI
+! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeUpdate()
+      subroutine ESMF_FieldAttUpdate(field, vm, rootList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field
+      type(ESMF_VM), intent(in) :: vm
+      integer, dimension(:), intent(in), optional :: rootList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Update an Attribute hierarchy.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!      An {\tt ESMF\_Field} object.
+!     \item [vm]
+!      The virtural machine over which this Field's Attribute hierarchy 
+!      should be updated.
+!     \item [rootList]
+!      The list of "root" PET's that are to be used to update.
+!     \item [{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, count                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+      ! this is commented out because empty objects can hold Attributes
+      !call ESMF_FieldValidate(field, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rootList)) then
+	count = size(rootList)
+        call c_ESMCI_AttributeUpdate(field%ftypep%base, vm, rootList, count, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else 
+	call c_ESMCI_AttributeUpdate(field%ftypep%base, vm, 0, 1, localrc)
+	if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      end if
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldAttUpdate
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
@@ -4736,6 +5027,72 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FBundleAttUpdate"
+!BOPI
+! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeUpdate()
+      subroutine ESMF_FBundleAttUpdate(fieldbundle, vm, rootList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
+      type(ESMF_VM), intent(in) :: vm
+      integer, dimension(:), intent(in), optional :: rootList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Update an Attribute hierarchy.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [fieldbundle]
+!      An {\tt ESMF\_FieldBundle} object.
+!     \item [vm]
+!      The virtural machine over which this FieldBundle's Attribute hierarchy 
+!      should be updated.
+!     \item [rootList]
+!      The list of "root" PET's that are to be used to update.
+!     \item [{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, count                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
+
+      !call ESMF_FieldBundleValidate(fieldbundle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rootList)) then
+	count = size(rootList)
+        call c_ESMCI_AttributeUpdate(fieldbundle%btypep%base, vm, rootList, count, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else 
+	call c_ESMCI_AttributeUpdate(fieldbundle%btypep%base, vm, 0, 1, localrc)
+	if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      end if
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FBundleAttUpdate
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FBundleAttWrite"
 !BOPI
 ! !IROUTINE: ESMF_FBundleAttWrite - Print the Attribute package
@@ -4961,6 +5318,73 @@ GetCountNameNumberMacro(ESMF_Grid, grid, grid)
 TypeKind3DeclarationMacro(AttSet, ESMF_Grid, grid, grid)
 AttSetLogicalMacro(ESMF_Grid, grid, grid)
 AttSetCharacterMacro(ESMF_Grid, grid, grid)
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_GridAttUpdate"
+!BOPI
+! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeUpdate()
+      subroutine ESMF_GridAttUpdate(grid, vm, rootList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout) :: grid
+      type(ESMF_VM), intent(in) :: vm
+      integer, dimension(:), intent(in), optional :: rootList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Update an Attribute hierarchy.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!      An {\tt ESMF\_Grid} object.
+!     \item [vm]
+!      The virtural machine over which this Grid's Attribute hierarchy 
+!      should be updated.
+!     \item [rootList]
+!      The list of "root" PET's that are to be used to update.
+!     \item [{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, count                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+      ! this is commented out because empty objects can hold Attributes
+      !call ESMF_GridValidate(grid, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rootList)) then
+	count = size(rootList)
+        call c_ESMCI_AttributeUpdate(grid, vm, rootList, count, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else 
+	call c_ESMCI_AttributeUpdate(grid, vm, 0, 1, localrc)
+	if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      end if
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridAttUpdate
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
@@ -5550,6 +5974,72 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_StateAttUpdate"
+!BOPI
+! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeUpdate()
+      subroutine ESMF_StateAttUpdate(state, vm, rootList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      type(ESMF_VM), intent(in) :: vm
+      integer, dimension(:), intent(in), optional :: rootList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Update an Attribute hierarchy.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!     \item [vm]
+!      The virtural machine over which this State's Attribute hierarchy 
+!      should be updated.
+!     \item [rootList]
+!      The list of "root" PET's that are to be used to update.
+!     \item [{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, count                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      if (present(rootList)) then
+	count = size(rootList)
+        call c_ESMCI_AttributeUpdate(state%statep%base, vm, rootList, count, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else 
+	call c_ESMCI_AttributeUpdate(state%statep%base, vm, 0, 1, localrc)
+	if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      end if
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAttUpdate
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_StateAttWrite"
 !BOPI
 ! !IROUTINE: ESMF_StateAttWrite - Print the Attribute package
@@ -5687,6 +6177,45 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAttWrite
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeUpdate  - Update an Attribute hierarchy
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeUpdate(<object>, vm, rootList, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     type(ESMF_VM), intent(in) :: vm
+!     integer, dimension(:), intent(in), optional :: rootList
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Update an Attribute hierarchy during runtime.
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [vm]
+!           The virtural machine over which this Attribute hierarchy 
+!           should be updated.
+!     \item [rootList]
+!           The list of "root" PET's that are to be used to update.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AttributeWrite  - Write an Attribute package

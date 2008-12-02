@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.3 2008/10/23 20:58:29 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.4 2008/12/02 22:24:33 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.3 2008/10/23 20:58:29 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.4 2008/12/02 22:24:33 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -3131,6 +3131,115 @@ extern "C" {
   return;
 
 }  // end c_ESMCI_AttributeSetObjsInTree
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMCI_AttributeUpdate - Update an Attribute
+//
+// !INTERFACE:
+      void FTN(c_esmci_attributeupdate)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmci_attributeupdate()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      ESMCI::VM **vm,           // in - VM that this Attribute lives on
+      int *rootList,            // in - root PET list
+      int *count,               // in - count of rootList
+      int *rc) {                // in - return code
+// 
+// !DESCRIPTION:
+//     Update an Attribute.
+//
+//EOP
+
+  int status;
+  vector<ESMC_I4> rootListl;
+  
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+  
+  //check the VM
+  if (*vm == ESMC_NULL_POINTER){
+    *vm = ESMCI::VM::getCurrent(&status);
+    if (ESMC_LogDefault.MsgFoundError(ESMF_FAILURE, ESMF_ERR_PASSTHRU, &status))
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // make list into a vector
+  rootListl.reserve(*count);
+  for (unsigned int i=0; i<*count; ++i)
+    rootListl.push_back(rootList[i]);
+
+  // Update the Attribute
+  status = (**base).root.ESMCI_AttributeUpdate(*vm, rootListl);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed call AttributeUpdate from interface", &status);
+  }
+
+  if (rc) *rc = status;
+  return;
+
+}  // end c_ESMCI_AttributeUpdate
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMCI_AttributeUpdateReset - Reset flags in an Attribute hierarchy
+//
+// !INTERFACE:
+      void FTN(c_esmci_attributeupdatereset)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmci_attributeupdatereset()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      int *rc) {                // in - return code
+// 
+// !DESCRIPTION:
+//     Reset flags after updating an Attribute hierarchy.
+//
+//EOP
+
+  int status;
+  
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+  
+  // Update the Attribute
+  status = (**base).root.ESMCI_AttributeUpdateReset();
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed call AttributeUpdateReset from interface", &status);
+  }
+
+  if (rc) *rc = status;
+  return;
+
+}  // end c_ESMCI_AttributeUpdate
 
 #undef  ESMC_METHOD
 

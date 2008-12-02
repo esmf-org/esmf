@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.7 2008/11/10 21:22:03 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.8 2008/12/02 22:24:33 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -30,17 +30,15 @@
 #include "ESMCI_Attribute.h"
 #include "ESMC_Base.h"
 #include "ESMCI_LogErr.h"
+//#include "ESMCI_VM.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.7 2008/11/10 21:22:03 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.8 2008/12/02 22:24:33 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
-
-// initialize class-wide instance counter
-static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -425,6 +423,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     (attpack->attrList[i])->~ESMCI_Attribute();
     attpack->attrList.erase(attpack->attrList.begin() + i - removed);
     (attpack->attrCount)--;
+    attpack->structChange = ESMF_TRUE;
     removed++;
   }
   
@@ -452,6 +451,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     attpack->~ESMCI_Attribute();
     (nestedpack->attrList).erase((nestedpack->attrList).begin() + ind);
     nestedpack->attrCount--;
+    nestedpack->structChange = ESMF_TRUE;
   }
   // else we screwed up
   else {
@@ -520,6 +520,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       (attpack->attrList[i])->~ESMCI_Attribute();
       attpack->attrList.erase(attpack->attrList.begin() + i);
       (attpack->attrCount)--;
+      attpack->structChange = ESMF_TRUE;
       done = true;
       break;
     }
@@ -542,6 +543,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       attpack->~ESMCI_Attribute();
       (nestedpack->attrList).erase((nestedpack->attrList).begin() + ind);
       nestedpack->attrCount--;
+      nestedpack->structChange = ESMF_TRUE;
     }
     // else we screwed up
     else {
@@ -1827,6 +1829,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       attrList[i]->~ESMCI_Attribute();
       attrList.erase(attrList.begin() + i);
       attrCount--;
+      structChange = ESMF_TRUE;
       done = true;
       break;
     }
@@ -1894,8 +1897,11 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       return ESMF_SUCCESS;
   }   
 
+  attr->structChange = ESMF_TRUE;
+  attr->attrBase = this->attrBase;
   attrList.push_back(attr);   
   attrCount++;
+  structChange = ESMF_TRUE;
   
   return ESMF_SUCCESS;
 
@@ -2403,7 +2409,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     
   for (unsigned int i=0; i<attrCount; i++) {
     if (attrList[i]->attrRoot == ESMF_TRUE) {
-      if (destination->root.attrID == attrList[i]->attrID) {
+      if (destination->ESMC_BaseGetID() == attrList[i]->attrBase->ESMC_BaseGetID()) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeSetLink tried to double set a link", &localrc);
         return ESMF_FAILURE;
@@ -2415,6 +2421,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     
   attrList.push_back(attr);
   attrCount++;
+  
+  // now set linkChange
+  linkChange = ESMF_TRUE;
 
   return ESMF_SUCCESS;
 
@@ -3153,14 +3162,17 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   attrPack = ESMF_TRUE;
   attrPackHead = ESMF_TRUE;
   attrNested = ESMF_FALSE;
+  
+  linkChange = ESMF_FALSE;
+  structChange = ESMF_FALSE;
+  valueChange = ESMF_FALSE;
 
-  attrID = globalCount++;
+  attrBase = NULL;
   attrCount = 0;
   attrList.reserve(attrCount);
 
-  // set name out of order so using attrID is thread-safe
-  sprintf(name, "Attribute package - %d %s %s %s",attrID, 
-  conv.c_str(), purp.c_str(), obj.c_str());
+  sprintf(name, "Attribute package - %s %s %s", 
+    conv.c_str(), purp.c_str(), obj.c_str());
   attrName = name;
 
   vi = 0;
@@ -3211,7 +3223,11 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   attrPackHead = ESMF_FALSE;
   attrNested = ESMF_FALSE;
 
-  attrID = globalCount++;
+  linkChange = ESMF_FALSE;
+  structChange = ESMF_FALSE;
+  valueChange = ESMF_FALSE;
+
+  attrBase = NULL;
   attrCount = 0;
   attrList.reserve(attrCount);
 
@@ -3247,20 +3263,24 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOPI
 
-  attrName = '\0';
+  //attrName = '\0';
   tk = ESMF_NOKIND;
   items = 0;
   slen = 0;
   attrRoot = ESMF_TRUE;
 
-  attrConvention = '\0';
-  attrPurpose = '\0';
-  attrObject = '\0';
+  //attrConvention = '\0';
+  //attrPurpose = '\0';
+  //attrObject = '\0';
   attrPack = ESMF_FALSE;
   attrPackHead = ESMF_FALSE;
   attrNested = ESMF_FALSE;
 
-  attrID = globalCount++;
+  linkChange = ESMF_FALSE;
+  structChange = ESMF_FALSE;
+  valueChange = ESMF_FALSE;
+
+  attrBase = NULL;
   attrCount = 0;
   attrList.reserve(attrCount);
 
@@ -3296,20 +3316,24 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 //EOPI
 
-  attrName = '\0';
+  //attrName = '\0';
   tk = ESMF_NOKIND;
   items = 0;
   slen = 0;
-  attrRoot = attributeRoot;
+  attrRoot = ESMF_FALSE;
 
-  attrConvention = '\0';
-  attrPurpose = '\0';
-  attrObject = '\0';
+  //attrConvention = '\0';
+  //attrPurpose = '\0';
+  //attrObject = '\0';
   attrPack = ESMF_FALSE;
   attrPackHead = ESMF_FALSE;
   attrNested = ESMF_FALSE;
 
-  attrID = globalCount++;
+  linkChange = ESMF_FALSE;
+  structChange = ESMF_FALSE;
+  valueChange = ESMF_FALSE;
+
+  attrBase = NULL;
   attrCount = 0;
   attrList.reserve(attrCount);
 
@@ -3355,14 +3379,18 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   slen = 0;          // only used for string values
   attrRoot = ESMF_FALSE;
    
-  attrConvention = '\0';
-  attrPurpose = '\0';
-  attrObject = '\0';
+  //attrConvention = '\0';
+  //attrPurpose = '\0';
+  //attrObject = '\0';
   attrPack = ESMF_FALSE;
   attrPackHead = ESMF_FALSE;
   attrNested = ESMF_FALSE;
 
-  attrID = globalCount++;
+  linkChange = ESMF_FALSE;
+  structChange = ESMF_FALSE;
+  valueChange = ESMF_FALSE;
+
+  attrBase = NULL;
   attrCount = 0;
   attrList.reserve(attrCount);
   
@@ -3451,70 +3479,75 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //   Set a value on an existing {\tt ESMCI_Attribute} object.
 //
 //EOPI
-  int i, localrc;
+  int localrc;
+  unsigned int i;
 
-  tk = typekind;
-  items = numitems;
-  slen = 0;          // only used for string values
-  
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  if (items == 1) {
+  if (numitems == 1) {
       if (datap) {
-            if (tk == ESMC_TYPEKIND_I4)
+            if (typekind == ESMC_TYPEKIND_I4)
                 vi = *(static_cast<ESMC_I4*> (datap));  
-            else if (tk == ESMC_TYPEKIND_I8)
+            else if (typekind == ESMC_TYPEKIND_I8)
                 vtl = *(static_cast<ESMC_I8*> (datap));  
-            else if (tk == ESMC_TYPEKIND_R4)
+            else if (typekind == ESMC_TYPEKIND_R4)
                 vf = *(static_cast<ESMC_R4*> (datap));  
-            else if (tk == ESMC_TYPEKIND_R8)
+            else if (typekind == ESMC_TYPEKIND_R8)
                 vd = *(static_cast<ESMC_R8*> (datap));  
-            else if (tk == ESMC_TYPEKIND_LOGICAL)
+            else if (typekind == ESMC_TYPEKIND_LOGICAL)
                 vb = *(static_cast<ESMC_Logical*> (datap));  
-            else if (tk == ESMC_TYPEKIND_CHARACTER)
+            else if (typekind == ESMC_TYPEKIND_CHARACTER)
                 vcp = *(static_cast<string*> (datap));
       }
 
-  } else if (items > 1) {
-        if (tk == ESMC_TYPEKIND_I4) {
+  } else if (numitems > 1) {
+        if (typekind == ESMC_TYPEKIND_I4) {
             vip.clear();
-            vip.reserve(items);      
+            vip.reserve(numitems);      
             if (datap) 
-              for (i=0; i<items; i++)
+              for (i=0; i<numitems; i++)
                 vip.push_back((*(static_cast<vector<ESMC_I4>*> (datap)))[i]);  
-        } else if (tk == ESMC_TYPEKIND_I8) {
+        } else if (typekind == ESMC_TYPEKIND_I8) {
             vlp.clear();
-            vlp.reserve(items);      
+            vlp.reserve(numitems);      
             if (datap) 
-              for (i=0; i<items; i++)
+              for (i=0; i<numitems; i++)
                 vlp.push_back((*(static_cast<vector<ESMC_I8>*> (datap)))[i]);  
-        } else if (tk == ESMC_TYPEKIND_R4) {
+        } else if (typekind == ESMC_TYPEKIND_R4) {
             vfp.clear();
-            vfp.reserve(items);      
+            vfp.reserve(numitems);      
             if (datap) 
-              for (i=0; i<items; i++)
+              for (i=0; i<numitems; i++)
                 vfp.push_back((*(static_cast<vector<ESMC_R4>*> (datap)))[i]);  
-        } else if (tk == ESMC_TYPEKIND_R8) {
+        } else if (typekind == ESMC_TYPEKIND_R8) {
             vdp.clear();
-            vdp.reserve(items);      
+            vdp.reserve(numitems);      
             if (datap) 
-              for (i=0; i<items; i++)
+              for (i=0; i<numitems; i++)
                 vdp.push_back((*(static_cast<vector<ESMC_R8>*> (datap)))[i]);  
-        } else if (tk == ESMC_TYPEKIND_LOGICAL) {
+        } else if (typekind == ESMC_TYPEKIND_LOGICAL) {
             vbp.clear();
-            vbp.reserve(items);      
+            vbp.reserve(numitems);      
             if (datap) 
-              for (i=0; i<items; i++)
+              for (i=0; i<numitems; i++)
                 vbp.push_back((*(static_cast<vector<ESMC_Logical>*> (datap)))[i]);  
-        } else if (tk == ESMC_TYPEKIND_CHARACTER) {
+        } else if (typekind == ESMC_TYPEKIND_CHARACTER) {
             vcpp.clear();
-            vcpp.reserve(items);
+            vcpp.reserve(numitems);
             if (datap) {
-              for (i=0; i<items; i++) 
+              for (i=0; i<numitems; i++) 
                 vcpp.push_back((*(static_cast<vector<string>*> (datap)))[i]);
             }
         }
+  }
+ 
+  // if a change was made, note the new values
+  if (numitems >= 1) {
+    tk = typekind;
+    items = numitems;
+    slen = 0;
+    valueChange = ESMF_TRUE;
   }
 
   return ESMF_SUCCESS;
@@ -3554,6 +3587,10 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
   attrPack = source.attrPack;
   attrPackHead = source.attrPackHead;
   attrNested = source.attrNested;
+
+  valueChange = source.valueChange;
+  linkChange = source.linkChange;
+  structChange = source.structChange;
 
   if (items == 1) {
         if (tk == ESMC_TYPEKIND_I4)
@@ -3608,6 +3645,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       attr = source.attrList[i];
       attrList.push_back(attr);
       attrCount++;
+      structChange = ESMF_TRUE;
     }
   }
 
@@ -3645,7 +3683,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 
   // if there are Attributes or attpacks delete, if links disconnect
   for (int i=0; i<attrCount; i++) {
-    if (attrRoot == ESMF_TRUE) attrList[i] = ESMC_NULL_POINTER;
+    if (attrList[i]->attrRoot == ESMF_TRUE) attrList[i] = ESMC_NULL_POINTER;
     else delete attrList[i];
   }
 
@@ -3674,6 +3712,7 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     int loffset, nbytes, chars;
     int localrc;
     unsigned int i;
+    ESMCI_Attribute *attr;
     
     // Initialize local return code; assume routine not implemented
     localrc = ESMC_RC_NOT_IMPL;
@@ -3787,11 +3826,25 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     if (nbytes!=0) loffset += 8-nbytes;  
 
     // Deserialize the {\tt ESMCI_Attribute} hierarchy
-    for (int i=0; i<attrCount; i++) {
-      attrList[i] = new ESMCI_Attribute(ESMF_FALSE);
-      if (!(attrList[i]))
+    int numattrs = attrCount;
+    attrCount = 0;
+    for (int i=0; i<numattrs; i++) {
+      attr = new ESMCI_Attribute(ESMF_FALSE);
+      if (!attr)
         return ESMF_FAILURE;
-      attrList[i]->ESMC_Deserialize(buffer,&loffset);
+      attr->setBase(attrBase);
+      localrc = attr->ESMC_Deserialize(buffer,&loffset);
+      if (localrc != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "AttributeDeserialize failed deserializing next attr", &localrc);
+        return ESMF_FAILURE;
+      }
+      localrc = ESMCI_AttributeSet(attr);
+      if (localrc != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "AttributeDeserialize failed adding attribute", &localrc);
+        return ESMF_FAILURE;
+      }
     }
       
     // make sure loffset is aligned correctly
@@ -3904,11 +3957,11 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
       SERIALIZE_VAR(cc,buffer,offset,attrNested,ESMC_Logical);
           
       // we don't serialize through links, so we must compute attrCount - linkAttrs
-      int linkCount = 0;
+      int realCount = 0;
       for (i=0; i<attrCount; ++i)
-        if (attrList[i]->attrRoot == ESMF_TRUE) ++linkCount;
+        if (attrList[i]->attrRoot == ESMF_FALSE) ++realCount;
 
-      SERIALIZE_VAR(cc,buffer,offset,attrCount-linkCount,int);
+      SERIALIZE_VAR(cc,buffer,offset,realCount,int);
 
       if (items == 1) {
         if (tk == ESMC_TYPEKIND_I4) {

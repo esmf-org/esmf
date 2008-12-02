@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.4 2008/10/23 20:58:29 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.5 2008/12/02 22:24:33 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -21,6 +21,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include "math.h"
 using namespace std;
 
 #include "ESMCI_Util.h"
@@ -44,6 +45,7 @@ using namespace std;
 namespace ESMCI {
 
   class ESMCI_Attribute;
+  class VM;
 
 class ESMCI_Attribute 
 {
@@ -61,7 +63,11 @@ class ESMCI_Attribute
     ESMC_Logical attrPackHead;         // the head of an Attpack
     ESMC_Logical attrNested;           // a nested Attpack
 
-    int attrID;                 // ID of the attribute
+    ESMC_Logical linkChange;           // flag for link changes
+    ESMC_Logical structChange;         // flag for structural changes
+    ESMC_Logical valueChange;          // flag for value changes
+
+    ESMC_Base *attrBase;        // pointer to a root attr's Base object
     int attrCount;              // number of attributes in use in list
     vector<ESMCI_Attribute*>  attrList;  // attributes - array of pointers
 
@@ -85,6 +91,9 @@ class ESMCI_Attribute
 
 //-----------------------------------------------------------------------------
  public:
+    // helper to set the Base address in attrBase
+    void setBase(ESMC_Base *setBase){ attrBase = setBase; }
+
     // attpack methods
     int ESMCI_AttPackCreate(const string &name, const string &convention, 
       const string &purpose, const string &object, const ESMC_AttPackNestFlag &flag);
@@ -172,6 +181,22 @@ class ESMCI_Attribute
     int ESMCI_AttributeSetObjsInTree(const string &name, const string &object, 
       const ESMC_TypeKind &tk, int count, void *value);
 
+    // attribute update
+    int ESMCI_AttributeUpdate(VM *vm, const vector<ESMC_I4> &rootList);
+    int ESMCI_AttributeUpdateBufRecv(char *recvBuf, int localPet, int *offset, const int &length);
+    int ESMCI_AttributeUpdateBufSend(char *sendBuf, int localPet, int *offset, int *length) const;
+    int ESMCI_AttributeUpdateComm(VM *vm, int sendBufSize, int *recvBufSize, 
+      char *sendBuf, char *recvBuf, const vector<ESMC_I4> &roots, 
+      const vector<ESMC_I4> &nonroots) const;
+    int ESMCI_AttributeUpdateChanges(int *linkChanges,
+      int *structChanges, int *valueChanges, int *numKeys) const;
+    bool ESMCI_AttributeUpdateKeyCompare(char *key1, char *key2) const;
+    int ESMCI_AttributeUpdateKeyCreate(char *key) const;
+    int ESMCI_AttributeUpdateNeeded(VM *vm, int &bufSize,
+      const vector<ESMC_I4> &roots, const vector<ESMC_I4> &nonroots) const;
+    int ESMCI_AttributeUpdateRemove(int attrNum);
+    int ESMCI_AttributeUpdateReset();
+
     // attribute write methods
     int ESMCI_AttributeWriteTab(const string &convention, const string &purpose, 
       const string &object, const string &varobj, const string &basename) const;
@@ -200,6 +225,7 @@ class ESMCI_Attribute
     int ESMC_Deserialize(char *buffer, int *offset);
     int ESMC_Serialize(char *buffer, int *length, int *offset) const;
     int ESMC_SerializeCC(char *buffer, int *length, int &offset, bool cc) const;
+
 };
 } // namespace
 
@@ -266,6 +292,9 @@ extern "C" {
   void FTN(c_esmci_attributesetobjsintree)(ESMC_Base **base, char *object, char *name, 
                                           ESMC_TypeKind *tk, int *count, void *value, 
                                           int *rc, int olen, int nlen);
+  void FTN(c_esmci_attributeupdate)(ESMC_Base **base, ESMCI::VM **vm, int *rootList,
+                                    int *count, int *rc);
+  void FTN(c_esmci_attributeupdatereset)(ESMC_Base **base, int *rc);
   }
 
 // class utility functions, not methods, since they operate on

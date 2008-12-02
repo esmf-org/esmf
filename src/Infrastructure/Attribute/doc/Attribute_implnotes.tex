@@ -1,4 +1,4 @@
-% $Id: Attribute_implnotes.tex,v 1.8 2008/10/23 20:58:29 rokuingh Exp $
+% $Id: Attribute_implnotes.tex,v 1.9 2008/12/02 22:24:33 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,24 +8,11 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-This section covers the current development on Attribute consistency in a distributed environment, Attribute memory deallocation, and Attribute copying capabilities.  The {\tt ESMF\_Attribute} class currently has limited ability to communicate the current state of an Attribute hierarchy, which is only available in the initialization phase of a model component.  Upcoming design and development involves a routine that will allow the state of the Attribute hierarchy to be updated during the run phase of a model component.  Issues and procedures dealing with Attribute memory deallocation, copying of Attribute hierarchies, using {\tt ESMF\_AttributeGet()} to retrieve Attribute lists, and nested Attribute package capabilities are also discussed. 
-
-\subsubsection{Attributes in a Distributed Environment} 
-\label{sec:Att:Dist}
-
-The  {\tt ESMF\_Attribute} class is slightly different than other ESMF objects in the context of reconciling across exclusive sets of PETs.  The {\tt ESMF\_StateReconcile()} call is used to create a consistent view of ESMF objects over the entire VM in the initialization phase of a model run.  All Attributes that are attached to an ESMF object contained in the State, i.e. an object that is being reconciled, are also reconciled.  This is done by making a deep copy of the {\it entire} Attribute hierarchy below the point at which the reconcile is taking place.  This means that, at the conclusion of {\tt ESMF\_StateReconcile()} there are many partial duplicate copies of the Attribute hierarchy.
-
-These partial copies of the Attribute hierarchy present a problem with respect to resource management.  Unlike other ESMF objects created by {\tt ESMF\_StateReconcile()}, they are not considered proxy objects, and therefore are not fully deallocated when the corresponding destroy routine is called.  Also of note is that these partial copies are permanent, after they are created they cannot be changed or updated.  These issues will be resolved with more development in the {\tt ESMF\_Attribute} class.
-
-Another caveat with the current design is that Attributes which are attached directly to an {\tt ESMF\_State} are not included when the State is reconciled.  This is also an area of current development.  The complete construction of a consistent view of the Attribute hierarchy in the initialization phase of a model run, and the ability to update the Attribute hierarchy throughout the run phase are two main goals for the continued development of the {\tt ESMF\_Attribute} class.
+This section covers Attribute memory deallocation, the use of {\tt ESMF\_AttributeGet()}, Attribute package nesting capabilities, and issues with Attributes in a distributed environment.  Issues and procedures dealing with Attribute memory deallocation using {\tt ESMF\_AttributeGet()} to retrieve Attribute lists, and nested Attribute package capabilities are discussed to help avoid misuse.  The limitations with Attributes in a distributed environment are also discussed, with an outline of the future work to be done in this area. 
 
 \subsubsection{Attribute Memory Deallocation}
 
-The {\tt ESMF\_Attribute} class presents a somewhat different paradigm with respect to memory deallocation than other ESMF objects.  The {\tt ESMF\_AttributeRemove()} call can be issued to remove any single Attribute from an ESMF object or an Attribute package on an ESMF object.  This call is not enabled to remove Attributes in groups, such as an entire Attribute package with one call, at this time.  However, the user is not required to remove all Attributes that are used in a model run.  The entire Attribute hierarchy will be removed automatically by the ESMF, provided the ESMF objects which contain them are properly destroyed.  
-
-\subsubsection{Copying Attribute hierarchies}
-
-The ability to copy an Attribute hierarchy is limited at this time.  The {\tt ESMF\_AttributeCopy()} routine can be used to {\it locally} copy an Attribute hierarchy between States.  It is important to note that this is a local copy, and no inter-PET communication is carried out.  Another feature of note is that this functionality is based on a soft copy, and therefore further changes made to the original Attribute hierarchy will also affect the new Attribute hierarchy, and vice versa.  The option for a deep copy in this routine is in development, as well as the option for copying between other ESMF objects besides State.  
+The {\tt ESMF\_Attribute} class presents a somewhat different paradigm with respect to memory deallocation than other ESMF objects.  The {\tt ESMF\_AttributeRemove()} call can be issued to remove any Attribute from an ESMF object or an Attribute package on an ESMF object.  This call is also enabled to remove entire Attribute packages with one call, which would remove any nested Attribute packages as well.  The user is {\bf not} required to remove all Attributes that are used in a model run.  The entire Attribute hierarchy will be removed automatically by the ESMF, provided the ESMF objects which contain them are properly destroyed.  
 
 \subsubsection{Using {\tt ESMF\_AttributeGet()} to retrieve Attribute lists}
 
@@ -37,8 +24,9 @@ There is a recommended practice when using nested Attribute packages to organize
 
 Another consideration when using nested Attribute packages is to remember to specify that the nesting capability is desired by setting the {\it attpacknestflag} argument to {\bf ESMF\_ATTPACKNEST\_ON}.  In addition, when a nested Attribute package is removed, every nested Attribute package below the point of removal will also be removed.  Thus, by removing the CF Attribute package on a Field, the ESG and any other customized Attribute packages will also be removed.
 
+\subsubsection{Attributes in a Distributed Environment} 
 
-
+Attributes which are attached directly to an {\tt ESMF\_State} are not updated when the State is reconciled.  
 
 
 

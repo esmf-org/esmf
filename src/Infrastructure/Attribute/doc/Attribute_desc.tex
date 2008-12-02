@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.13 2008/10/23 20:58:29 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.14 2008/12/02 22:24:33 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,7 +8,7 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-The {\tt ESMF\_Attribute} class is used to hold the metadata for other ESMF objects.  This class can be used to build Attribute hierarchies which connect the Attributes of different ESMF classes.  The {\tt ESMF\_Attribute} class is also capable of allowing the representation of standard Attribute packages for a more unified description of an object.  All Attributes are consistent across all PETs of the object to which they are attached.  This class is only partially implemented in this release.
+The {\tt ESMF\_Attribute} class is used to hold the metadata for other ESMF objects.  This class can be used to build Attribute hierarchies which connect the Attributes of different ESMF classes.  The {\tt ESMF\_Attribute} class is also capable of allowing the representation of standard Attribute packages for a more unified description of an object.  All Attributes are consistent across the entire virtual machine of the object to which they are attached.  This class is only partially implemented in this release.
 
 \subsubsection{Attribute Representation in ESMF}
 
@@ -45,7 +45,7 @@ All Attributes also contain character strings specifying the convention, type, a
 
 \subsubsection{Attribute Hierarchies}
 
-Of these ESMF objects with Attributes, only some can link their Attributes together in an Attribute hierarchy.  These objects are:
+Of the ESMF objects with Attributes, only some can link their Attributes together in an Attribute hierarchy.  These objects are:
 
 \begin{itemize}
 \item CplComp
@@ -55,13 +55,13 @@ Of these ESMF objects with Attributes, only some can link their Attributes toget
 \item State
 \end{itemize}
 
-The most common use for this capability is for linking the Attributes of a Field to the FieldBundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are done automatically by ESMF.  
+The most common use for this capability is for linking the Attributes of a Field to the FieldBundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are automatically handled by the ESMF.  
 
-Attribute hierarchies are linked with "shallow" copies, meaning that the Attributes belonging to an external object are not copied, they are only referenced by a pointer.  On this note, the function used to copy an Attribute hierarchy follows a similar practice of local "shallow" copying.  In this case the Attributes which {\it belong} to the object being copied are actually copied in full, while the Attributes which are linked to the object being copied are referenced by a pointer.  This means that after copying an Attribute hierarchy from ESMF object A to ESMF object B, the changes made to the lower portion of either A or B's Attribute hierarchy will be reflected on {\it both} object A and object B.
+At this time, Attribute hierarchies are linked in a "shallow" manner, meaning that the Attributes belonging to an external object are not copied, they are only referenced by a pointer.  
 
 \subsubsection{Attribute Packages}
 
-At this time, only select ESMF classes have Attribute packages.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as "CF" (see below) and "general".  These specifiers will be used much more rigorously in future releases to help incorporate many existing metadata standards.  In this release the user can use an ESMF supplied standard Attribute package, specify their own Attribute packages, or add customized Attributes to the ESMF supplied Attribute package.  Working with Attribute packages is quite involved, at present, but significant effort in automation of these metadata capabilities in ESMF is anticipated in future releases. 
+At this time, only select ESMF classes are enabled to contain Attribute packages.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as "CF" (see below) and "general".  These specifiers will be used much more rigorously in future releases to help incorporate many existing metadata standards.  One can use an ESMF supplied standard Attribute package, specify their own Attribute packages, or add customized Attributes to the ESMF supplied Attribute package.  Working with Attribute packages is quite involved, at present, but significant effort in automation of these metadata capabilities in the ESMF is anticipated in future releases. 
 
 The standard Attribute packages supplied by ESMF exist for the following ESMF objects:
 
@@ -103,9 +103,20 @@ The main use of the nesting capabilities of Attribute packages is geared towards
 
 The nesting capabilities of Attribute packages are also very useful for organizing the customized metadata supplied by a user.  For example, if a user was not satisfied with the metadata support required in the ESG convention for Field they could supply a list of Attributes they would like to support.  This new Attribute package would then be nested, in one additional layer, inside the Attribute package of ESG, which itself is nested inside the CF Attribute package.  This capability of nesting Attribute packages allows for a multitude of metadata organization strategies, and will also aid in the enforcement of metadata compliance when it is implemented in a future ESMF release.
 
+\subsubsection{Attributes in a Distributed Environment}
+\label{sec:Att:Dist}
 
+The  {\tt ESMF\_Attribute} class is slightly different than other ESMF objects in the context of reconciling across exclusive sets of PETs.  To better explain the ESMF capabilities for ensuring concurrency of Attributes in a distributed environment, small working vocabulary of ESMF Attributes will be presented.  Three types of changes to an Attribute hierarchy need to be specified, these are: 1. {\bf link changes} are structural links created when two separate Attribute hierarchies are linked, 2. {\bf structural changes} are changes which occur when Attributes or Attribute packages are added or removed within a single Attribute hierarchy, and 3. {\bf value changes} occur when the value portion of any single Attribute is modified.  These definitions will help to describe how {\tt ESMF\_StateReconcile()} and {\tt ESMF\_AttributeUpdate()} can be effectively used to ensure a consistent view of metadata throughout a model run.
 
+The {\tt ESMF\_StateReconcile()} call is used to create a consistent view of ESMF objects over the entire VM in the initialization phase of a model run.  All Attributes that are attached to an ESMF object contained in the State, i.e. an object that is being reconciled, are also reconciled.  This means that, at the conclusion of {\tt ESMF\_StateReconcile()} there is a one-to-one correspondence between Attributes hierarchies and the objects to which they belong.  This is the only place where link changes in an Attribute hierarchy can be resolved at this time.
 
+The {\tt ESMF\_AttributeUpdate()} call can be used any time during the run phase of a model to insure that either structural or value changes made to an Attribute hierarchy on a subset of the VM are consistently represented across the remainder of the VM.  This call is similar to {\tt ESMF\_StateReconcile()} in that it must be called from a location that has a view of the entire VM across which to update the Attribute hierarchy, such as a coupler.  The main difference is that {\tt ESMF\_AttributeUpdate()} operates only on the underlying Attribute hierarchy of the given ESMF object.  The Attribute hierarchy may be updated as many times as necessary, and is expected to be much more efficient than the {\tt ESMF\_StateReconcile()} for this reason.  The specification of a list of PETs that are to be used as the basis for the update is one such efficiency boost, as this allows a many-to-many communication.
+
+\subsubsection{Copying Attribute hierarchies}
+
+The ability to copy an Attribute hierarchy is limited at this time.  The {\tt ESMF\_AttributeCopy()} routine can be used to {\it locally} copy an Attribute hierarchy between States.  It is important to note that this is a local copy, and no inter-PET communication is carried out.  Another feature of note is that this functionality is based on a soft copy, and therefore further changes made to the original Attribute hierarchy will also affect the new Attribute hierarchy, and vice versa.  The option for a deep copy in this routine is in development, as well as the option for copying between other ESMF objects besides State.  
+
+On this note, the {\tt ESMF\_AttributeCopy()} routine follows a similar practice of local "shallow" copying.  In this case the Attributes which {\it belong} to the object being copied are actually copied in full, while the Attributes which are linked to the object being copied are referenced by a pointer.  This means that after copying an Attribute hierarchy from ESMF object A to ESMF object B, the changes made to the lower portion of either A or B's Attribute hierarchy will be reflected on {\it both} object A and object B.
 
 
 
