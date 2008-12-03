@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5.2.6 2008/12/03 00:19:17 theurich Exp $
+# $Id: build_rules.mk,v 1.5.2.7 2008/12/03 00:35:51 theurich Exp $
 #
 # Linux.pgigcc.default
 #
@@ -94,20 +94,20 @@ endif
 ifeq ($(ESMF_ABISTRING),x86_64_32)
 ESMF_CXXCOMPILEOPTS       += -m32
 ESMF_CXXLINKOPTS          += -m32
-ESMF_F90COMPILEOPTS       += -tp px
-ESMF_F90LINKOPTS          += -tp px
+ESMF_F90COMPILEOPTS       +=
+ESMF_F90LINKOPTS          +=
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
-ESMF_F90COMPILEOPTS       += -tp x64 -mcmodel=small
-ESMF_F90LINKOPTS          += -tp x64 -mcmodel=small
+ESMF_F90COMPILEOPTS       += -mcmodel=small
+ESMF_F90LINKOPTS          += -mcmodel=small
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
-ESMF_F90COMPILEOPTS       += -tp x64 -mcmodel=medium
-ESMF_F90LINKOPTS          += -tp x64 -mcmodel=medium
+ESMF_F90COMPILEOPTS       += -mcmodel=medium
+ESMF_F90LINKOPTS          += -mcmodel=medium
 endif
 
 ############################################################

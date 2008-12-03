@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.29.2.10 2008/12/03 00:19:16 theurich Exp $
+# $Id: build_rules.mk,v 1.29.2.11 2008/12/03 00:35:51 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -99,22 +99,22 @@ endif
 # Set memory model compiler flags according to ABISTRING
 #
 ifeq ($(ESMF_ABISTRING),x86_64_32)
-ESMF_CXXCOMPILEOPTS       += -tp px
-ESMF_CXXLINKOPTS          += -tp px
-ESMF_F90COMPILEOPTS       += -tp px
-ESMF_F90LINKOPTS          += -tp px
+ESMF_CXXCOMPILEOPTS       += 
+ESMF_CXXLINKOPTS          += 
+ESMF_F90COMPILEOPTS       += 
+ESMF_F90LINKOPTS          += 
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
-ESMF_CXXCOMPILEOPTS       += -tp x64 -mcmodel=small
-ESMF_CXXLINKOPTS          += -tp x64 -mcmodel=small
-ESMF_F90COMPILEOPTS       += -tp x64 -mcmodel=small
-ESMF_F90LINKOPTS          += -tp x64 -mcmodel=small
+ESMF_CXXCOMPILEOPTS       += -mcmodel=small
+ESMF_CXXLINKOPTS          += -mcmodel=small
+ESMF_F90COMPILEOPTS       += -mcmodel=small
+ESMF_F90LINKOPTS          += -mcmodel=small
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
-ESMF_CXXCOMPILEOPTS       += -tp x64 -mcmodel=medium
-ESMF_CXXLINKOPTS          += -tp x64 -mcmodel=medium
-ESMF_F90COMPILEOPTS       += -tp x64 -mcmodel=medium
-ESMF_F90LINKOPTS          += -tp x64 -mcmodel=medium
+ESMF_CXXCOMPILEOPTS       += -mcmodel=medium
+ESMF_CXXLINKOPTS          += -mcmodel=medium
+ESMF_F90COMPILEOPTS       += -mcmodel=medium
+ESMF_F90LINKOPTS          += -mcmodel=medium
 endif
 
 ############################################################
