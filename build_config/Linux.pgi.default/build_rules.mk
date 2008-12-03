@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.41 2008/11/26 20:09:46 theurich Exp $
+# $Id: build_rules.mk,v 1.42 2008/12/03 01:40:46 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -99,22 +99,22 @@ endif
 # Set memory model compiler flags according to ABISTRING
 #
 ifeq ($(ESMF_ABISTRING),x86_64_32)
-ESMF_CXXCOMPILEOPTS       += -m32
-ESMF_CXXLINKOPTS          += -m32
-ESMF_F90COMPILEOPTS       += -m32
-ESMF_F90LINKOPTS          += -m32
+ESMF_CXXCOMPILEOPTS       += 
+ESMF_CXXLINKOPTS          += 
+ESMF_F90COMPILEOPTS       += 
+ESMF_F90LINKOPTS          += 
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
-ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
-ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
-ESMF_F90LINKOPTS          += -m64 -mcmodel=small
+ESMF_CXXCOMPILEOPTS       += -mcmodel=small
+ESMF_CXXLINKOPTS          += -mcmodel=small
+ESMF_F90COMPILEOPTS       += -mcmodel=small
+ESMF_F90LINKOPTS          += -mcmodel=small
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
-ESMF_F90LINKOPTS          += -m64 mcmodel=medium
-ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
-ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
+ESMF_CXXCOMPILEOPTS       += -mcmodel=medium
+ESMF_CXXLINKOPTS          += -mcmodel=medium
+ESMF_F90COMPILEOPTS       += -mcmodel=medium
+ESMF_F90LINKOPTS          += -mcmodel=medium
 endif
 
 ############################################################
@@ -122,11 +122,6 @@ endif
 #
 ESMF_F90COMPILEFREENOCPP = -Mfreeform
 ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
-
-############################################################
-# Assume standard LAPACK libraries available by default
-#
-ESMF_LAPACKDEFAULT       = netlib
 
 ############################################################
 # Determine where pgf90's libraries are located

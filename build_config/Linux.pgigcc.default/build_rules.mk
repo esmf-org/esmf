@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.13 2008/11/26 20:09:47 theurich Exp $
+# $Id: build_rules.mk,v 1.14 2008/12/03 01:40:46 theurich Exp $
 #
 # Linux.pgigcc.default
 #
@@ -94,20 +94,20 @@ endif
 ifeq ($(ESMF_ABISTRING),x86_64_32)
 ESMF_CXXCOMPILEOPTS       += -m32
 ESMF_CXXLINKOPTS          += -m32
-ESMF_F90COMPILEOPTS       += -m32
-ESMF_F90LINKOPTS          += -m32
+ESMF_F90COMPILEOPTS       +=
+ESMF_F90LINKOPTS          +=
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
-ESMF_F90LINKOPTS          += -m64 -mcmodel=small
+ESMF_F90COMPILEOPTS       += -mcmodel=small
+ESMF_F90LINKOPTS          += -mcmodel=small
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
-ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
-ESMF_F90LINKOPTS          += -m64 mcmodel=medium
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
+ESMF_F90COMPILEOPTS       += -mcmodel=medium
+ESMF_F90LINKOPTS          += -mcmodel=medium
 endif
 
 ############################################################
@@ -121,11 +121,6 @@ ESMF_F90LINKLIBS  += -lstdc++
 #
 ESMF_F90COMPILEFREENOCPP = -Mfreeform
 ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
-
-############################################################
-# Assume standard LAPACK libraries available by default
-#
-ESMF_LAPACKDEFAULT       = netlib
 
 ############################################################
 # Determine where pgf90's libraries are located
