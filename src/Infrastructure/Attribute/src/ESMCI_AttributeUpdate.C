@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.1 2008/12/02 22:24:33 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.2 2008/12/03 17:48:36 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.1 2008/12/02 22:24:33 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.2 2008/12/03 17:48:36 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -576,8 +576,8 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
       indRecv = distance(nonroots.begin(), find(nonroots.begin(), nonroots.end(), localPet));
     
     // receive with message=0 and status=NULL for now
-    vm->recv(recvBufSize, sizeof(int), roots[indRecv], 0, NULL);
-    vm->recv(recvBuf, *recvBufSize, roots[indRecv], 0, NULL);
+    vm->recv(recvBufSize, sizeof(int), roots[indRecv], 0);
+    vm->recv(recvBuf, *recvBufSize, roots[indRecv], 0);
     /*printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
             localPet, recvBuf, roots[indRecv]);*/
   }
