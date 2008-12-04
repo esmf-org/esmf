@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.5 2008/09/12 17:05:42 theurich Exp $
+! $Id: user_FortranComponent.F90,v 1.6 2008/12/04 16:44:26 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -127,7 +127,7 @@
         end do
 
         array = ESMF_ArrayCreate(farray=farray, distgrid=distgrid, &
-          name="array1", rc=rc)
+          indexflag=ESMF_INDEX_DELOCAL, name="array1", rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 
         write(name, *) "Adding an Array to a State Test"
