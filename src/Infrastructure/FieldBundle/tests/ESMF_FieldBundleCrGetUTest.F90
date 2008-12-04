@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.8 2008/11/14 05:06:45 theurich Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.9 2008/12/04 23:45:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -207,7 +207,7 @@ contains
             enddo
         enddo
 
-        f1 = ESMF_FieldCreate(grid, farray1, name='field1', rc=localrc)
+        f1 = ESMF_FieldCreate(grid, farray1, ESMF_INDEX_DELOCAL, name='field1', rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -217,7 +217,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-        f2 = ESMF_FieldCreate(grid, farray2(:,:), copyflag, name='field2', rc=localrc)
+        f2 = ESMF_FieldCreate(grid, farray2(:,:), ESMF_INDEX_DELOCAL, copyflag, name='field2', rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -229,7 +229,7 @@ contains
 
         if(ldo_slicing) then
 
-            f3 = ESMF_FieldCreate(grid, farray3(:, 4:13), copyflag, name='field3', rc=localrc)
+            f3 = ESMF_FieldCreate(grid, farray3(:, 4:13), ESMF_INDEX_DELOCAL, copyflag, name='field3', rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
@@ -241,7 +241,7 @@ contains
         endif
 
         if(ldo_slicing1) then
-            f4 = ESMF_FieldCreate(grid, farray4(3:7, 4:13), copyflag, name='field4', rc=localrc)
+            f4 = ESMF_FieldCreate(grid, farray4(3:7, 4:13), ESMF_INDEX_DELOCAL, copyflag, name='field4', rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
@@ -251,7 +251,7 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
 
-            f5 = ESMF_FieldCreate(grid, farray4(3:7, ::2), copyflag, name='field5', rc=localrc)
+            f5 = ESMF_FieldCreate(grid, farray4(3:7, ::2), ESMF_INDEX_DELOCAL, copyflag, name='field5', rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return

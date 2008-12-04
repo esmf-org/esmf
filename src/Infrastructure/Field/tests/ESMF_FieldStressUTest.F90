@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldStressUTest.F90,v 1.5 2008/11/14 05:06:45 theurich Exp $
+! $Id: ESMF_FieldStressUTest.F90,v 1.6 2008/12/04 23:45:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2007, University Corporation for Atmospheric Research,
@@ -124,7 +124,8 @@ contains
             allocate(farray(max(gcc(1), gec(1)), max(gcc(2), gec(2))) )
 
             array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
-                staggerloc=0, computationalEdgeUWidth=(/-1,-1/), rc=localrc)
+                indexflag=ESMF_INDEX_DELOCAL, staggerloc=0, &
+                computationalEdgeUWidth=(/-1,-1/), rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return

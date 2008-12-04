@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.30 2008/11/14 05:06:45 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.31 2008/12/04 23:45:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1666,7 +1666,7 @@ contains
 
         allocate(farray(ec(1), ec(2)))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=sloc, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1730,7 +1730,7 @@ contains
 
         allocate(farray(ec(1), ec(2)))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=sloc, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1771,7 +1771,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1805,7 +1805,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1840,7 +1840,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1872,7 +1872,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             maxHaloLWidth=(/2,2/), maxHaloUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1907,7 +1907,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             maxHaloLWidth=(/2,2/), maxHaloUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -1942,7 +1942,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             maxHaloLWidth=(/2,2/), maxHaloUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2083,7 +2083,7 @@ contains
           endif
         endif
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=copyflag, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=copyflag, &
             staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, rc=localrc)
@@ -2172,7 +2172,7 @@ contains
             ESMF_CONTEXT, rc)) return
         allocate(farray(ec(1), ec(2), 10))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
         
@@ -2228,7 +2228,7 @@ contains
 
         allocate(farray(ec(1), ec(2), 10))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
@@ -2265,7 +2265,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
@@ -2300,7 +2300,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
@@ -2335,7 +2335,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             gridToFieldMap=(/2,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
@@ -2475,7 +2475,7 @@ contains
 
         allocate(farray(fsize(1), fsize(2), fsize(3)))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=copyflag, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=copyflag, &
             staggerloc=staggerloc,  gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, rc=localrc)
@@ -2583,7 +2583,7 @@ contains
 
         allocate(farray(fsize(1), fsize(2), fsize(3)))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=copyflag, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=copyflag, &
             staggerloc=staggerloc,  gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, rc=localrc)
@@ -2655,7 +2655,7 @@ contains
 
         allocate(farray(max(cc(1)+5, ec(1)), max(cc(2)+5, ec(2))))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             maxHaloLWidth=(/2,2/), maxHaloUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2674,6 +2674,202 @@ contains
         deallocate(farray)
 
     end subroutine test3a
+
+    subroutine test3a_fptr(rc)
+        integer, intent(out)  :: rc
+        integer                 :: localrc
+        type(ESMF_Field)        :: field
+        type(ESMF_Grid)         :: grid
+        real, dimension(:,:), pointer  :: farray
+        real, dimension(:,:), pointer  :: farray1
+
+        integer, dimension(2)               :: tlb, tub, felb, feub, fclb, fcub
+        integer, dimension(2)               :: gelb, geub, gclb, gcub
+        logical                             :: t
+        integer                             :: i
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+                                  regDecomp=(/2,2/), name="testgrid", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(grid, localDe=0, totalLBound=tlb, totalUBound=tub, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        allocate(farray(tlb(1):tub(1), tlb(2):tub(2)))
+
+        field = ESMF_FieldCreate(grid, farrayPtr=farray, &
+            staggerloc=ESMF_STAGGERLOC_CENTER, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            exclusiveLBound=felb, exclusiveUBound=feub, &
+            computationalLBound=fclb, computationalUBound=fcub, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! test pointer equivalence
+        t = associated(farray, farray1)
+        do i = 1, 2
+            t = t .and. (lbound(farray, i) .eq. tlb(i))
+            t = t .and. (ubound(farray, i) .eq. tub(i))
+        enddo
+
+        if(.not. t) then
+          call ESMF_LogMsgSetError(ESMF_RC_PTR_BAD, &
+            "- pointer queried from object is not equivalent to the one passed in)", &
+            ESMF_CONTEXT, rc)
+          return
+        endif
+
+        ! test field and grid bounds
+        call ESMF_GridGet(grid, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
+            exclusiveLBound=gelb, exclusiveUBound=geub, &
+            computationalLBound=gclb, computationalUBound=gcub, &
+            rc=localrc) 
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        t = .true.
+        do i = 1, 2
+            t = t .and. (gelb(i) .eq. felb(i))
+            t = t .and. (geub(i) .eq. feub(i))
+            t = t .and. (gclb(i) .eq. fclb(i))
+            t = t .and. (gcub(i) .eq. fcub(i))
+        enddo
+        if(.not. t) then
+          call ESMF_LogMsgSetError(ESMF_RC_PTR_BAD, &
+            "- bounds queried from grid different from those queried from field)", &
+            ESMF_CONTEXT, rc)
+          return
+        endif
+        
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        deallocate(farray1)
+
+    end subroutine test3a_fptr
+
+    subroutine test3a2_fptr(rc)
+        integer, intent(out)  :: rc
+        integer                 :: localrc
+        type(ESMF_Field)        :: field
+        type(ESMF_Grid)         :: grid
+        type(ESMF_DistGrid)     :: distgrid
+        real, dimension(:,:), pointer  :: farray
+        real, dimension(:,:), pointer  :: farray1
+
+        integer, dimension(1)               :: tlb, tub
+        integer, dimension(1)               :: gelb, geub, gclb, gcub
+        integer, dimension(2)               :: felb, feub, fclb, fcub
+        logical                             :: t
+        integer                             :: i
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/20/), &
+                                  regDecomp=(/4/), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        grid = ESMF_GridCreate(distgrid=distgrid, &
+                                  name="testgrid", rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(grid, localDe=0, totalLBound=tlb, totalUBound=tub, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        allocate(farray(tlb(1):tub(1), -3:3))
+
+        field = ESMF_FieldCreate(grid, farrayPtr=farray, &
+            staggerloc=ESMF_STAGGERLOC_CENTER, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(field, localDe=0, farray=farray1, &
+            exclusiveLBound=felb, exclusiveUBound=feub, &
+            computationalLBound=fclb, computationalUBound=fcub, &
+            rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        ! test pointer equivalence
+        t = associated(farray, farray1)
+        do i = 1, 1
+            t = t .and. (lbound(farray, i) .eq. tlb(i))
+            t = t .and. (ubound(farray, i) .eq. tub(i))
+        enddo
+
+        if(.not. t) then
+          call ESMF_LogMsgSetError(ESMF_RC_PTR_BAD, &
+            "- pointer queried from object is not equivalent to the one passed in)", &
+            ESMF_CONTEXT, rc)
+          return
+        endif
+
+        ! test field and grid bounds
+        call ESMF_GridGet(grid, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
+            exclusiveLBound=gelb, exclusiveUBound=geub, &
+            computationalLBound=gclb, computationalUBound=gcub, &
+            rc=localrc) 
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        t = .true.
+        do i = 1, 1
+            t = t .and. (gelb(i) .eq. felb(i))
+            t = t .and. (geub(i) .eq. feub(i))
+            t = t .and. (gclb(i) .eq. fclb(i))
+            t = t .and. (gcub(i) .eq. fcub(i))
+        enddo
+        if(.not. t) then
+          call ESMF_LogMsgSetError(ESMF_RC_PTR_BAD, &
+            "- bounds queried from grid different from those queried from field)", &
+            ESMF_CONTEXT, rc)
+          return
+        endif
+        
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+        deallocate(farray1)
+
+    end subroutine test3a2_fptr
 
     subroutine test3b(rc)
         integer, intent(out)  :: rc
@@ -2706,7 +2902,7 @@ contains
 
         allocate(farray(max(cc(1)+14, ec(1)), max(cc(2)+16, ec(2))))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             !staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             !ungriddedLBound = (/2,3/), ungriddedUBound=(/4,5/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/), rc=localrc)
@@ -2742,7 +2938,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             gridToFieldMap=(/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2801,7 +2997,7 @@ contains
         !allocate(farray(max(cc(1)+14, ec(1)), max(cc(2)+16, ec(2))))
         allocate(farray(max(cc(2)+14, ec(2)), max(cc(1)+16, ec(1))))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -2861,7 +3057,7 @@ contains
 
         allocate(farray(max(cc(1)+7, ec(1)), max(cc(2)+10, ec(2)), 10))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, & !gridToFieldMap = (/3,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/), rc=localrc)
@@ -2922,7 +3118,7 @@ contains
         allocate(farray(max(cc(2)+7, ec(2)), max(cc(1)+10, ec(1)), 10))
         !write(*, "(22I3)") lpe, ec(1:2), cc(1:2)
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/), rc=localrc)
@@ -2984,7 +3180,7 @@ contains
         allocate(farray(max(cc(1)+7, ec(1)), 10, max(cc(2)+10, ec(2))))
         !write(*, "(A7, 22I3)") 'MZS: ', lpe, ec(1:2), cc(1:2), max(cc(1)+7, ec(1)), max(cc(2)+10, ec(2))
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,3/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/), rc=localrc)
@@ -3050,7 +3246,7 @@ contains
         allocate(farray(max(cc(2)+7, ec(2)), 10, max(cc(1)+10, ec(1))))
         !write(*, "(22I3)") lpe, ec(1:2), cc(1:2)
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=ESMF_DATA_COPY, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/3,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/), rc=localrc)
@@ -3197,7 +3393,7 @@ contains
           endif
         endif
 
-        field = ESMF_FieldCreate(grid, farray, copyflag=copyflag, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=copyflag, &
             staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, rc=localrc)
@@ -3291,7 +3487,7 @@ contains
 
         allocate(farray(fsize(1), fsize(2), fsize(3), fsize(4), fsize(5), fsize(6), fsize(7)))
 
-        f8 = ESMF_FieldCreate(grid, farray, &
+        f8 = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/2,3/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
             rc=localrc)
@@ -3342,7 +3538,7 @@ contains
         allocate(farray(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3), &
             flb(4):fub(4), flb(5):fub(5), flb(6):fub(6), flb(7):fub(7)) )
 
-        f8 = ESMF_FieldCreate(grid, farray, &
+        f8 = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/2,3/), &
             maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
             rc=localrc)
@@ -3455,7 +3651,7 @@ contains
           endif
         endif
 
-        field = ESMF_FieldCreate(grid, farray, &
+        field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
@@ -3617,7 +3813,7 @@ contains
           endif
         endif
 
-        field = ESMF_FieldCreate(grid, farray, &
+        field = ESMF_FieldCreate(grid, farrayPtr=farray, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
@@ -3769,7 +3965,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         ! create field
-        field = ESMF_FieldCreate(grid, arrayspec, gridToFieldMap=gridToFieldMap, &
+        field = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             staggerloc=staggerloc, &
@@ -3947,7 +4143,7 @@ contains
         integer                                     :: i, ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
         integer, dimension(7)                       :: fec, fcc, ftc
-        real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray
+        real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), allocatable :: farray
         real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray1
         real(ESMF_KIND_R8)                          :: n
         integer, dimension(7,1)                     :: aelb, aeub, aclb, acub, atlb, atub
@@ -4066,7 +4262,7 @@ contains
             distgridToArrayMap(i) = l_g2fm(l_dg2gm(i))
         enddo
         ! create array
-        array = ESMF_ArrayCreate(farray, distgrid, copyflag, distgridToArrayMap, &
+        array = ESMF_ArrayCreate(farray, distgrid, ESMF_INDEX_DELOCAL, copyflag, distgridToArrayMap, &
             staggerLoc=staggerloc%staggerloc, &
             undistLBound = ungriddedLBound, undistUBound = ungriddedUBound, &
             computationalEdgeLWidth=celw, computationalEdgeUWidth=ceuw, &

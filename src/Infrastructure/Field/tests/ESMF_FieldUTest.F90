@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.132 2008/11/14 05:06:45 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.133 2008/12/04 23:45:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.132 2008/11/14 05:06:45 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.133 2008/12/04 23:45:52 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -192,7 +192,7 @@
       allocate (lsfptr(10))
 
       ! Create Field
-      fls=ESMF_FieldCreate(locstream, lsfptr, rc=localrc)
+      fls=ESMF_FieldCreate(locstream, lsfptr, indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
 
       ! check bounds
@@ -435,7 +435,8 @@
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      f2 = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, &
+      f2 = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
+                                          staggerloc=ESMF_STAGGERLOC_CENTER, &
                                           name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with a Grid and ArraySpec Test"
@@ -454,7 +455,8 @@
       !EX_UTest_Multi_Proc_Only
       ! verify we can create a 3d data on a 2d grid
       call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
-      f2 = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, &
+      f2 = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
+            staggerloc=ESMF_STAGGERLOC_CENTER, &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
             name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -469,7 +471,7 @@
       ! the argument list. The data array is referenced and not copied.
       ! Verifying that a Field can be created with a Grid
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-      f3 = ESMF_FieldCreate(grid, arrayspec, &
+      f3 = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
                         name="Field 0", iospec=ios, rc=rc)
 
@@ -499,7 +501,7 @@
       ! and Array.  f6 is *not* created here and should be invalid.
       grid2 = ESMF_GridCreateEmpty(rc=rc)
       call ESMF_GridDestroy(grid2, rc=rc)
-      f6 = ESMF_FieldCreate(grid2, arrayspec, &
+      f6 = ESMF_FieldCreate(grid2, arrayspec, ESMF_INDEX_DELOCAL, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
                         name="Field 0", iospec=ios, rc=rc)
 
@@ -524,7 +526,7 @@
       ! f3 gets created here and used thru the rest of the tests.
       gname="oceangrid"
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-      f3 = ESMF_FieldCreate(grid, arrayspec, &
+      f3 = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
                         name="Field 0", iospec=ios, rc=rc)
       call ESMF_FieldGet(f3, grid=grid3, rc=rc)

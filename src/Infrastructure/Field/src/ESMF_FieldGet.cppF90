@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.31 2008/12/04 16:42:00 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.32 2008/12/04 23:45:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.31 2008/12/04 16:42:00 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.32 2008/12/04 23:45:52 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -165,10 +165,10 @@ contains
 !       Section \ref{sec:opt:staggerloc}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
-!       {\tt grid}'s dimCount.  The list elements map each dimension
+!       {\tt grid}|s dimCount.  The list elements map each dimension
 !       of the {\tt grid} to a dimension in the {\tt field} by
 !       specifying the appropriate {\tt field} dimension index. The default is to
-!       map all of the {\tt grid}'s dimensions against the lowest dimensions of
+!       map all of the {\tt grid}|s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
 !       The values of all {\tt gridToFieldMap} entries must be greater than or equal
 !       to one and smaller than or equal to the {\tt field} rank.
@@ -612,7 +612,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! The arguments are:
 ! \begin{description}
 ! \item[field]
-!    Field to get the information from.
+!     Field to get the information from.
 ! \item[{[localDe]}]
 !  Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
 !  For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
@@ -975,19 +975,19 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \item [grid]
 !       {\tt ESMF\_Grid}.
 ! \item [{[localDe]}]
-!  Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
-!  For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
-!  in which case it will default to {\tt localDe=0}.
+!       Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
+!       For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
+!       in which case it will default to {\tt localDe=0}.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
 !       Section \ref{sec:opt:staggerloc}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
-!       {\tt grid}'s dimCount.  The list elements map each dimension
+!       {\tt grid}|s dimCount.  The list elements map each dimension
 !       of the {\tt grid} to a dimension in the {\tt field} by
 !       specifying the appropriate {\tt field} dimension index. The default is to
-!       map all of the {\tt grid}'s dimensions against the lowest dimensions of
+!       map all of the {\tt grid}|s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
 !       The values of all {\tt gridToFieldMap} entries must be greater than or equal
 !       to one and smaller than or equal to the {\tt field} rank.
@@ -1059,7 +1059,6 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     integer :: localrc
     type(ESMF_STAGGERLOC)                  :: l_staggerloc
     type(ESMF_GeomBase) :: geombase
-    integer                                :: localDeCount, l_localDe
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -1078,26 +1077,10 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     geombase=ESMF_GeomBaseCreate(grid,l_staggerloc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
-
-    ! default localDe    
-    call ESMF_GeomBaseGet(geombase, localDeCount=localDeCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
-    if(localDeCount .gt. 1 .and. (.not. present(localDe))) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-          "localDe must be present when localDeCount is greater than 1", &
-           ESMF_CONTEXT, rc)
-       return
-    endif 
-    if(present(localDe)) then
-        l_localDe = localDe
-    else 
-        l_localDe = 0
-    endif
+ 
 
     ! call into generic alloc bound calculation subroutine
-    call ESMF_FieldGetGBAllocBounds(geombase, l_localDe, gridToFieldMap, &
+    call ESMF_FieldGetGBAllocBounds(geombase, localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         maxHaloLWidth, maxHaloUWidth, &
         totalLBound, totalUBound, totalCount, rc=localrc)
@@ -1151,15 +1134,15 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \item [locstream]
 !       {\tt ESMF\_LocStream}.
 ! \item [{[localDe]}]
-!  Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
-!  For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
-!  in which case it will default to {\tt localDe=0}.
+!       Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
+!       For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
+!       in which case it will default to {\tt localDe=0}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to 1.
 !       The list elements map the dimension
 !       of the {\tt locstream} to a dimension in the {\tt field} by
 !       specifying the appropriate {\tt field} dimension index. The default is to
-!       map the {\tt locstream}'s dimension against the lowest dimension of
+!       map the {\tt locstream}|s dimension against the lowest dimension of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1/).
 !       The values of all {\tt gridToFieldMap} entries must be greater than or equal
 !       to one and smaller than or equal to the {\tt field} rank.
@@ -1206,9 +1189,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 !  !Local Variables
     integer :: localrc
-    type(ESMF_STAGGERLOC)                  :: l_staggerloc
     type(ESMF_GeomBase) :: geombase
-    integer                                :: localDeCount, l_localDe
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -1221,25 +1202,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
  
-    ! default localDe    
-    call ESMF_GeomBaseGet(geombase, localDeCount=localDeCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
-    if(localDeCount .gt. 1 .and. (.not. present(localDe))) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-          "localDe must be present when localDeCount is greater than 1", &
-           ESMF_CONTEXT, rc)
-       return
-    endif 
-    if(present(localDe)) then
-        l_localDe = localDe
-    else 
-        l_localDe = 0
-    endif
 
     ! call into generic alloc bound calculation subroutine
-    call ESMF_FieldGetGBAllocBounds(geombase, l_localDe, gridToFieldMap, &
+    call ESMF_FieldGetGBAllocBounds(geombase, localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound=totalLBound, totalUBound=totalUBound, &
         totalCount=totalCount, rc=localrc)
@@ -1255,6 +1220,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
     if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_FieldGetLSAllocBounds
+
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
@@ -1293,15 +1259,15 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \item [mesh]
 !       {\tt ESMF\_Mesh}.
 ! \item [{[localDe]}]
-!  Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
-!  For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
-!  in which case it will default to {\tt localDe=0}.
+!       Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
+!       For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
+!       in which case it will default to {\tt localDe=0}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
-!       {\tt grid}'s dimCount.  The list elements map each dimension
+!       {\tt grid}|s dimCount.  The list elements map each dimension
 !       of the {\tt grid} to a dimension in the {\tt field} by
 !       specifying the appropriate {\tt field} dimension index. The default is to
-!       map all of the {\tt grid}'s dimensions against the lowest dimensions of
+!       map all of the {\tt grid}|s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
 !       The values of all {\tt gridToFieldMap} entries must be greater than or equal
 !       to one and smaller than or equal to the {\tt field} rank.
@@ -1349,9 +1315,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 !  !Local Variables
     integer :: localrc
-    type(ESMF_STAGGERLOC)                  :: l_staggerloc
     type(ESMF_GeomBase) :: geombase
-    integer                                :: localDeCount, l_localDe
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -1364,25 +1328,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
  
-    ! default localDe    
-    call ESMF_GeomBaseGet(geombase, localDeCount=localDeCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
-    if(localDeCount .gt. 1 .and. (.not. present(localDe))) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-          "localDe must be present when localDeCount is greater than 1", &
-           ESMF_CONTEXT, rc)
-       return
-    endif 
-    if(present(localDe)) then
-        l_localDe = localDe
-    else 
-        l_localDe = 0
-    endif
 
     ! call into generic alloc bound calculation subroutine
-    call ESMF_FieldGetGBAllocBounds(geombase, l_localDe, gridToFieldMap, &
+    call ESMF_FieldGetGBAllocBounds(geombase, localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound=totalLBound, totalUBound=totalUBound, &
         totalCount=totalCount, rc=localrc)
@@ -1438,16 +1386,16 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \begin{description}
 ! \item [geombase]
 !       {\tt ESMF\_GeomBase}.
-! \item [{[localDe]}]
-!  Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
-!  For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
-!  in which case it will default to {\tt localDe=0}.
+! \item [localDe]
+!       The local DE number in its PET context to compute the bounds and counts
+!       information based on the computational and exclusive bounds and counts 
+!       information of the grid from that local DE in its PET context.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
-!       {\tt grid}'s dimCount.  The list elements map each dimension
+!       {\tt grid}|s dimCount.  The list elements map each dimension
 !       of the {\tt grid} to a dimension in the {\tt field} by
 !       specifying the appropriate {\tt field} dimension index. The default is to
-!       map all of the {\tt grid}'s dimensions against the lowest dimensions of
+!       map all of the {\tt grid}|s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
 !       The values of all {\tt gridToFieldMap} entries must be greater than or equal
 !       to one and smaller than or equal to the {\tt field} rank.
@@ -1538,16 +1486,13 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
     ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit,geombase,rc)
 
-    call ESMF_GeomBaseGet(geombase, dimCount=gridrank, distgridToGridMap=dg2gm, rc=localrc)
+    call ESMF_GeomBaseGet(geombase, localDeCount=localDeCount, &
+      dimCount=gridrank, distgridToGridMap=dg2gm, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
-        
+
     ! default localDe    
-    call ESMF_GeomBaseGet(geombase, localDeCount=localDeCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
     if(localDeCount .gt. 1 .and. (.not. present(localDe))) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
           "localDe must be present when localDeCount is greater than 1", &
@@ -1737,6 +1682,5 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
     if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_FieldGetGBAllocBounds
-
 
 end module ESMF_FieldGetMod

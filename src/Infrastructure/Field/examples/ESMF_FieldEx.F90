@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.6 2008/05/30 19:50:35 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.7 2008/12/04 23:45:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_ArraySpec) :: arrayspec
-    real(ESMF_KIND_R8), dimension(:,:,:), pointer :: farray
+    real(ESMF_KIND_R8), dimension(:,:,:), allocatable :: farray
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: farray1
     type(ESMF_Field)  :: field, field1, field3, field4
     type(ESMF_Grid)   :: grid3d, grid, grid2d
@@ -119,7 +119,7 @@
     ! create a 3D data Field from a Grid and Array.
     ! first create a Grid 
     grid3d = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/xdim,ydim,zdim/), &
-                              regDecomp=(/2,2,1/), name="grid", rc=rc)
+                            regDecomp=(/2,2,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_GridGet(grid=grid3d, distgrid=distgrid3d, rc=rc)
@@ -132,7 +132,7 @@
     allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)) )
 
     ! create an Array 
-    array3d = ESMF_ArrayCreate(farray=farray, distgrid=distgrid3d, &
+    array3d = ESMF_ArrayCreate(farray, distgrid=distgrid3d, indexflag=ESMF_INDEX_DELOCAL, &
         staggerloc=0, computationalEdgeLWidth=(/0,0,0/), &
         computationalEdgeUWidth=(/-1,-1,-1/), rc=rc) 
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -240,7 +240,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! create a Field from the Grid and arrayspec
-    field1 = ESMF_FieldCreate(grid, arrayspec, &
+    field1 = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
          staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -291,7 +291,7 @@
     call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    field1 = ESMF_FieldCreate(grid2d, arrayspec, &
+    field1 = ESMF_FieldCreate(grid2d, arrayspec, ESMF_INDEX_DELOCAL, &
          staggerloc=ESMF_STAGGERLOC_CENTER, &
          gridToFieldMap=(/1,2/), &
          ungriddedLBound=(/1/), ungriddedUBound=(/50/), &
@@ -440,7 +440,7 @@
     allocate(farray7d(fsize(1), fsize(2), fsize(3), fsize(4), fsize(5), fsize(6), fsize(7)))
 
     ! create the Field
-    field7d = ESMF_FieldCreate(grid5d, farray7d, &
+    field7d = ESMF_FieldCreate(grid5d, farray7d, ESMF_INDEX_DELOCAL, &
         ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
         maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &
@@ -467,7 +467,7 @@
                        flbound(4):fubound(4), flbound(5):fubound(5), flbound(6):fubound(6), &
                        flbound(7):fubound(7)) )
 
-    field7d2 = ESMF_FieldCreate(grid5d, farray7d2, &
+    field7d2 = ESMF_FieldCreate(grid5d, farray7d2, ESMF_INDEX_DELOCAL, &
         ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
         maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &
