@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.52 2008/11/10 18:28:11 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.53 2008/12/04 16:42:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -120,6 +120,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   int staggerLocCount;
   Array ***coordArrayList; // size of coordArrayList = staggerLocCountxdimCount [staggerLoc][coord]
+  int   **staggerMemLBoundList;     // hold memLBound info [staggerloc][dim]
   int   **staggerAlignList;     // hold alignment info [staggerloc][dim]
   int   **staggerEdgeLWidthList;     // hold LWidth info [staggerloc][dim]
   int   **staggerEdgeUWidthList;     // hold UWidth info [staggerloc][dim]
@@ -210,6 +211,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
        int *gridAlign,
        int *coordDimCountArg,                     // (in)
        int **coordDimMapArg,                   // (in)
+       int *gridMemLBoundArg,                      // (in)
        ESMC_IndexFlag indexflagArg,             // (in)
        int *minIndexArg,                       // (in)
        int *maxIndexArg,                       // (in)
@@ -225,7 +227,8 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 		    int _staggerloc, // (in)
 		    int *staggerAlign,  // (in)
 		    int *staggerEdgeLWidth,  // (in)
-		    int *staggerEdgeUWidth  // (in)
+		    int *staggerEdgeUWidth,  // (in)
+		    int *staggerMemLBound  // (in)
 		    );
 
 
@@ -263,10 +266,12 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
         int  **getCoordMapDim(void) const {return coordMapDim;} 
   const int   *getStaggerEdgeLWidth(int staggerloc) const {return staggerEdgeLWidthList[staggerloc];}
   const int   *getStaggerEdgeUWidth(int staggerloc) const {return staggerEdgeUWidthList[staggerloc];}
+  const int   *getStaggerMemLBound(int staggerloc) const {return staggerMemLBoundList[staggerloc];}
   const int   *getMinIndex(int tileno) const { return minIndex; }
   const int   *getMaxIndex(int tileno) const { return maxIndex; }
         int  **getLocalIndices(void) const { return coordLocalIndices;}
 
+  bool isEmptyCoordArray(int staggerloc, int coord) {return (coordArrayList[staggerloc][coord]==ESMC_NULL_POINTER);}
 
 
   // Use these when DistGrid topology stuff is in place
@@ -309,6 +314,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
           int *localCount,          // (in)
 	  InterfaceInt *_coordDimCount,              // (in)
 	  InterfaceInt *_coordDimMap,             // (in)
+	  InterfaceInt *gridMemLBound,          // (in)
 	  ESMC_IndexFlag *_indexflag,                  // (in)
 	  bool *destroyDistgrid,
 	  bool *destroyDELayout
@@ -336,6 +342,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 	       InterfaceInt *distgridToGridMap,                  // (in)
 	       InterfaceInt *coordDimCount,              // (in)
 	       InterfaceInt *coordDimMap,             // (in)
+	       InterfaceInt *gridMemLBound,          // (in)
 	       ESMC_IndexFlag *indexflag,                  // (in)
 	       bool *destroyDistgrid,
 	       bool *destroyDELayout,
@@ -481,7 +488,8 @@ int getComputationalUBound(
                      int *_staggerloc,
                      InterfaceInt *_staggerEdgeLWidthArg,
                      InterfaceInt *_staggerEdgeUWidthArg,
-                     InterfaceInt *_staggerAlign
+                     InterfaceInt *_staggerAlign,
+                     InterfaceInt *_staggerMemLBound
                      );
 
  // Allocate coordinate Arrays for every coord in a staggerloc
@@ -534,6 +542,7 @@ int getComputationalUBound(
 		      InterfaceInt *_undistUBound,  
 		      InterfaceInt *_coordDimCount,
 		      InterfaceInt *_coordDimMap,
+                      InterfaceInt *gridMemLBound,
 		      ESMC_IndexFlag *_indexflag, 
 		      bool *destroyDistgrid,
 		      bool *destroyDELayout
@@ -690,6 +699,7 @@ class ProtoGrid {
   InterfaceInt *gridEdgeLWidth;
   InterfaceInt *gridEdgeUWidth;
   InterfaceInt *gridAlign;   
+  InterfaceInt *gridMemLBound;   
   InterfaceInt *distgridToGridMap;   
   InterfaceInt *undistLBound;  
   InterfaceInt *undistUBound;  
