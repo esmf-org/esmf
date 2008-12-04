@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGatherUTest.F90,v 1.10 2008/11/14 05:06:45 theurich Exp $
+! $Id: ESMF_ArrayGatherUTest.F90,v 1.11 2008/12/04 19:17:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_ArrayGatherUTest.F90,v 1.10 2008/11/14 05:06:45 theurich Exp $'
+    '$Id: ESMF_ArrayGatherUTest.F90,v 1.11 2008/12/04 19:17:21 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -102,8 +102,8 @@ contains
         type(ESMF_Array)                            :: array
         integer                                     :: localrc, lpe, i, j
 
-        integer, allocatable                        :: farray(:)
-        integer, allocatable                        :: farrayDst(:)
+        integer, pointer                            :: farray(:)
+        integer, pointer                            :: farrayDst(:)
         integer                                     :: fa_shape(1)
 
         rc = ESMF_SUCCESS
@@ -183,8 +183,8 @@ contains
         type(ESMF_Array)                            :: array
         integer                                     :: localrc, lpe, i, j
 
-        integer, allocatable                        :: farray(:,:)
-        integer, allocatable                        :: farrayDst(:,:)
+        integer, pointer                            :: farray(:,:)
+        integer, pointer                            :: farrayDst(:,:)
         integer                                     :: fa_shape(2)
 
         rc = ESMF_SUCCESS
@@ -264,8 +264,8 @@ contains
         type(ESMF_Array)                            :: array
         integer                                     :: localrc, lpe, i, j, k
 
-        integer, allocatable                        :: farray(:,:,:)
-        integer, allocatable                        :: farrayDst(:,:,:)
+        integer, pointer                            :: farray(:,:,:)
+        integer, pointer                            :: farrayDst(:,:,:)
         integer                                     :: fa_shape(3)
 
         rc = ESMF_SUCCESS

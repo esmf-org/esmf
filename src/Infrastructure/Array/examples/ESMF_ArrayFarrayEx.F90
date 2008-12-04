@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.10 2008/09/18 21:05:18 theurich Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.11 2008/12/04 19:17:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -146,7 +146,8 @@ program ESMF_ArrayFarrayEx
 ! just created.
 !EOE
 !BOC
-  array = ESMF_ArrayCreate(farray=farrayE, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farrayE, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !call ESMF_ArrayPrint(array)
@@ -198,7 +199,7 @@ program ESMF_ArrayFarrayEx
 ! PET-local array.
 !EOE
 !BOC
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
@@ -224,12 +225,13 @@ program ESMF_ArrayFarrayEx
 !BOC
   allocate(farrayA(10,10))    ! user controlled allocation
   farrayA = 23.67d0           ! initialize to some value
-  array = ESMF_ArrayCreate(farray=farrayA, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farrayA, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   print *, farrayA            ! print PET-local farrayA directly
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)! obtain array pointer
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)! obtain array pointer
   print *, farrayPtr          ! print PET-local piece of Array through pointer
   call ESMF_ArrayDestroy(array, rc=rc) ! destroy the Array
   deallocate(farrayA)         ! user controlled de-allocation
@@ -240,12 +242,13 @@ program ESMF_ArrayFarrayEx
 !BOC
   allocate(farrayP(10,10))    ! user controlled allocation
   farrayP = 56.81d0           ! initialize to some value
-  array = ESMF_ArrayCreate(farray=farrayP, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farrayP, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   print *, farrayP            ! print PET-local farrayA directly
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)! obtain array pointer
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)! obtain array pointer
   print *, farrayPtr          ! print PET-local piece of Array through pointer
   call ESMF_ArrayDestroy(array, rc=rc) ! destroy the Array
   deallocate(farrayP)         ! user controlled de-allocation

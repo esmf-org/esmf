@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.7 2008/05/12 21:56:35 theurich Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.8 2008/12/04 19:17:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -330,7 +330,7 @@ program ESMF_ArraySparseMatMulEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
-  call ESMF_ArrayGet(srcArray, localDe=0, farrayPtr=farray3d, rc=rc)
+  call ESMF_ArrayGet(srcArray, farrayPtr=farray3d, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   counter = localPet*100
   do k=lbound(farray3d,3),ubound(farray3d,3)
@@ -462,7 +462,7 @@ program ESMF_ArraySparseMatMulEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
-  call ESMF_ArrayGet(srcArray, localDe=0, farrayPtr=farray3d, rc=rc)
+  call ESMF_ArrayGet(srcArray, farrayPtr=farray3d, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   counter = localPet*100
   do k=lbound(farray3d,3),ubound(farray3d,3)

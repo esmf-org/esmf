@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.18 2008/11/14 05:06:45 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.19 2008/12/04 19:17:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.18 2008/11/14 05:06:45 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.19 2008/12/04 19:17:21 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -63,10 +63,20 @@ program ESMF_ArrayCreateGetUTest
   real(ESMF_KIND_R8), pointer     :: farrayPtr1D(:)
   real(ESMF_KIND_R8), pointer     :: farrayPtr2D(:,:)
   real(ESMF_KIND_R4), pointer     :: farrayPtr3D(:,:,:)
+  real(ESMF_KIND_R4), pointer     :: farrayPtr3Dx(:,:,:)
   integer(ESMF_KIND_I4), pointer  :: farrayPtr4D(:,:,:,:)
   character (len=80)      :: arrayName
   integer, allocatable:: totalLWidth(:,:), totalUWidth(:,:)
   integer, allocatable:: totalLBound(:,:), totalUBound(:,:)
+  
+  integer:: count, i
+  integer(ESMF_KIND_I4) :: intattr, intattr2
+  integer(ESMF_KIND_I4) :: intattrlist(6)
+  real(ESMF_KIND_R8) :: rattr, rattrlist(2)
+  character (len=32) :: lattrstr
+  type(ESMF_Logical) :: lattr, lattrlist(6)
+  character (len=512) :: cattr, cattr2
+  
   
 
 !-------------------------------------------------------------------------------
@@ -128,8 +138,21 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Fortran array pointer, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Getting Attribute count from an Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_AttributeGet(array, count, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Attribute count from an Array"
+  write(failMsg, *) "Incorrect count"
+  call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -159,6 +182,43 @@ program ESMF_ArrayCreateGetUTest
   call ESMF_ArrayDestroy(arrayCpy, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate from Ptr with 3D farray on 2D DistGrid Test as Ptr"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(farrayPtr3D(-2:6,12,3:10))
+  array = ESMF_ArrayCreate(farrayPtr=farrayPtr3D, distgrid=distgrid, &
+    name="MyArray", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayPrint for ArrayCreate from Ptr Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3Dx, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Deallocate returned pointer Test"
+  write(failMsg, *) "Did not return success"
+  deallocate(farrayPtr3Dx, stat=rc)
+  call ESMF_Test((rc.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate with 3D farray on 2D DistGrid Test"
@@ -359,21 +419,22 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate AssmdShape 1D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(farray=farray1D, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farray1D, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Fortran array pointer, 1D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr1D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr1D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet w/ incompatible Fortran array pointer, 1D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -395,7 +456,8 @@ program ESMF_ArrayCreateGetUTest
   write(name, *) "ArrayCreate AssmdShape 1D ESMF_TYPEKIND_R8 w/ negative computationalEdge widths Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array = ESMF_ArrayCreate(farray=farray1D, distgrid=distgrid, &
-    computationalEdgeLWidth=(/-1/), computationalEdgeUWidth=(/-1/), rc=rc)
+    indexflag=ESMF_INDEX_DELOCAL, computationalEdgeLWidth=(/-1/), &
+    computationalEdgeUWidth=(/-1/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -426,21 +488,22 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate AssmdShape 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(farray=farray2D, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farray2D, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Fortran array pointer, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet w/ incompatible Fortran array pointer, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr3D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3D, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -465,14 +528,15 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate AssmdShape 3D ESMF_TYPEKIND_R4 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(farray=farray3D, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farray3D, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Fortran array pointer, 3D ESMF_TYPEKIND_R4 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr3D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr3D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -497,16 +561,17 @@ program ESMF_ArrayCreateGetUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate AssmdShape 4D ESMF_TYPEKIND_I4 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  array = ESMF_ArrayCreate(farray=farray4D, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(farray=farray4D, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_DELOCAL, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Fortran array pointer, 4D ESMF_TYPEKIND_I4 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr4D, rc=rc)
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr4D, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+    
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test"
