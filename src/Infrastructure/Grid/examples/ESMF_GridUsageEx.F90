@@ -986,7 +986,7 @@ endif
 ! the coordinate storage.  The following example
 ! adds coordinate storage to the corner stagger location in {\tt grid}, plus sets
 ! the associated coordinate data. Note, the input coordinate arrays (CoordX, CoordY)
-! may be either Fortran or ESMF Array's (The Fortran arrays are restricted to single DE to
+! may be either Fortran or ESMF Arrays (The Fortran arrays are restricted to single DE to
 ! PET mappings). They also need to be of the proper size and dimension to correspond to the Grid. 
 !EOEI
 

@@ -1087,10 +1087,11 @@ extern "C" {
          if (decompType == ESMC_GRID_NONARBITRARY) {		  
    	    // Map to coordinate ordering		
 	    for (int i=0; i<coordDimCount[coord]; i++) {
-	          (*_computationalLBound)->array[i]=lBnd[coordDimMap[coord][i]];
+	          (*_computationalLBound)->array[i]=lBnd[coordDimMap[coord][i]]+userIndexOffset[i];
 	    }
          } else { // arbitrary grid
 	    for (int i=0; i<coordDimCount[coord]; i++) {
+	      /// TODO: figure out userIndexOffset for ARB grid
  	          (*_computationalLBound)->array[i]=lBnd[coordMapDim[coord][i]];
 	    }		
          }	  
@@ -1130,9 +1131,10 @@ extern "C" {
          if (decompType == ESMC_GRID_NONARBITRARY) {
    	    // Map to coordinate ordering
 	   for (int i=0; i<coordDimCount[coord]; i++) {
-	         (*_computationalUBound)->array[i]=uBnd[coordDimMap[coord][i]];
+	         (*_computationalUBound)->array[i]=uBnd[coordDimMap[coord][i]]+userIndexOffset[i];
 	   }
          } else { // arbitrary grid
+           /// TODO: figure out userIndexOffset for ARB grid
 	   for (int i=0; i<coordDimCount[coord]; i++) {
 	         (*_computationalUBound)->array[i]=uBnd[coordMapDim[coord][i]];
            }
