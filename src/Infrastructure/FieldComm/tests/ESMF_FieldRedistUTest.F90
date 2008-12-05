@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistUTest.F90,v 1.7 2008/11/14 05:06:45 theurich Exp $
+! $Id: ESMF_FieldRedistUTest.F90,v 1.8 2008/12/05 00:41:47 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistUTest.F90,v 1.7 2008/11/14 05:06:45 theurich Exp $'
+    '$Id: ESMF_FieldRedistUTest.F90,v 1.8 2008/12/05 00:41:47 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -149,7 +149,7 @@ contains
         ! create src_farray, srcArray, and srcField
         allocate(src_farray(fa_shape(1)) )
         src_farray = lpe
-        srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, &
+        srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
             staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -164,7 +164,7 @@ contains
         ! create dst_farray, dstArray, and dstField
         allocate(dst_farray(fa_shape(1)) )
         dst_farray = 0
-        dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, &
+        dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
             staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &

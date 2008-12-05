@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.34 2008/11/14 05:06:45 theurich Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.35 2008/12/05 00:41:47 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldGatherUTest.F90,v 1.34 2008/11/14 05:06:45 theurich Exp $'
+    '$Id: ESMF_FieldGatherUTest.F90,v 1.35 2008/12/05 00:41:47 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -149,7 +149,7 @@ contains
 
         allocate(farray(fa_shape(1)))
         farray = lpe
-        array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
+        array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
             staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -238,7 +238,7 @@ contains
 
         allocate(farray(fa_shape(1), fa_shape(2)))
         farray = lpe
-        array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
+        array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
             staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -327,7 +327,7 @@ contains
 
         allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)))
         farray = lpe
-        array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
+        array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
             staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
@@ -419,7 +419,7 @@ contains
 
         allocate(farray(fa_shape(1), fa_shape(2)))
         farray = lpe
-        array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
+        array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
             staggerloc=0, &
             rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
