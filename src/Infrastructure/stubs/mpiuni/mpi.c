@@ -1,10 +1,15 @@
-/*$Id: mpi.c,v 1.5 2008/01/04 18:03:09 w6ws Exp $*/
+/*$Id: mpi.c,v 1.6 2008/12/05 19:22:57 w6ws Exp $*/
 
 /*
       This provides a few of the MPI-uni functions that cannot be implemented
     with C macros
 */
+#if !defined (ESMF_OS_MinGW)
 #include <sys/time.h>
+#else
+#include <windows.h>
+#endif
+
 #include "mpi.h"
 
 #if defined (MPIUNI_USE_STDCALL)
@@ -172,6 +177,8 @@ int Petsc_MPI_Finalize(void)
   return 0;
 }
 
+#if !defined (ESMF_OS_MinGW)
+// POSIX version
 double ESMC_MPI_Wtime(void)
 {
   struct timeval tv;
@@ -182,6 +189,20 @@ double ESMC_MPI_Wtime(void)
   seconds = tv.tv_sec + tv.tv_usec * 0.000001;
   return seconds;
 }
+#else
+// Windows version
+double ESMC_MPI_Wtime(void)
+{
+  FILETIME ft;
+  GetSystemTimeAsFileTime (&ft);
+
+  long long datetime = ft.dwHighDateTime;
+  datetime <<= 32;
+  datetime += ft.dwLowDateTime;
+
+  return datetime/10000000.;
+}
+#endif
 
 /*=============================================================================
   I if'ed out the remaining section of this source file in order to prevent
