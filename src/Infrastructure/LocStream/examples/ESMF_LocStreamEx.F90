@@ -120,7 +120,7 @@ program ESMF_LocStreamEx
    ! Field create methods (e.g. from ArraySpec) would also apply.
    !-------------------------------------------------------------------       
    field_temperature=ESMF_FieldCreate(locstream,   &
-                                   farray=temperature, &
+                                   temperature, &
                                    name="temperature", &
                                    rc=rc)
 
@@ -212,7 +212,7 @@ program ESMF_LocStreamEx
    ! Field create methods (e.g. from ArraySpec) would also apply.
    !-------------------------------------------------------------------    
    field_temperature=ESMF_FieldCreate(locstream,   &
-                                 farray=temperature, &
+                                 temperature, &
                                  name="temperature", &
                                  rc=rc)
 
