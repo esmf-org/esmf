@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.77 2008/11/14 01:26:35 theurich Exp $
+# $Id: build_rules.mk,v 1.78 2008/12/05 20:17:57 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -30,7 +30,7 @@ ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
 ESMF_F90LINKLIBS       += -lmpi -lmpi++
 ESMF_CXXLINKLIBS       += -lmpi -lmpi++
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIRUNDEFAULT      = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),mpich)
