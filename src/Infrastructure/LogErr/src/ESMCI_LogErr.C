@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.C,v 1.3 2008/08/01 23:36:54 rosalind Exp $
+// $Id: ESMCI_LogErr.C,v 1.4 2008/12/05 19:10:41 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -25,7 +25,10 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
+
+#if !defined (ESMF_OS_MinGW)
 #include <sys/time.h>
+#endif
 
 // associated class definition file
 #include "ESMC_Start.h"
@@ -50,7 +53,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr.C,v 1.3 2008/08/01 23:36:54 rosalind Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr.C,v 1.4 2008/12/05 19:10:41 w6ws Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -553,16 +556,26 @@ void ESMC_TimeStamp(
 {
     time_t tm;
     struct tm ti;
+#if !defined (ESMF_OS_MinGW)
     struct timeval tv;	
     gettimeofday(&tv,NULL);
     ti=*localtime((const time_t*)&tv.tv_sec);
+#else
+    time_t tv;
+    time (&tv);
+    ti=*localtime(&tv);
+#endif
     *y=ti.tm_year+1900;
     *mn=ti.tm_mon+1;
     *d=ti.tm_mday;
     *h=ti.tm_hour;
     *m=ti.tm_min;
     *s=ti.tm_sec;
+#if !defined (ESMF_OS_MinGW)
     *ms=tv.tv_usec;
+#else
+    *ms=0;
+#endif
 }
 
 
