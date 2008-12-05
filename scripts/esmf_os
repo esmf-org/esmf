@@ -8,4 +8,8 @@ cygwin_test=`echo $esmf_os | grep -i cygwin`
 if [ -n "$cygwin_test" ]; then
 esmf_os=Cygwin
 fi
+mingw_test=`echo $esmf_os | grep -i mingw`
+if [ -n "$mingw_test" ]; then
+esmf_os=MinGW
+fi
 echo $esmf_os
