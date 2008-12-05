@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.49 2008/10/29 23:59:24 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.50 2008/12/05 19:31:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1813,13 +1813,10 @@ end subroutine ESMF_LogSet
     	alog%LOG_ENTRY(index)%methodflag = .FALSE.
     	alog%LOG_ENTRY(index)%lineflag = .FALSE.
     	alog%LOG_ENTRY(index)%fileflag = .FALSE.
-! Calling "adjustl" crashes on wJet Intel. The calls are commented out
-! until bug 1828647 is resolved.
     	if (present(method)) then
-!        	tmethod=adjustl(method)
+        	tmethod=adjustl(method)
 		alog%LOG_ENTRY(index)%methodflag=.TRUE.
-!		alog%LOG_ENTRY(index)%method = tmethod
-		alog%LOG_ENTRY(index)%method = method
+		alog%LOG_ENTRY(index)%method = tmethod
     	endif	
     	if (present(line)) then
         	tline=line 
@@ -1827,10 +1824,9 @@ end subroutine ESMF_LogSet
 		alog%LOG_ENTRY(index)%line = tline
     	endif	
     	if (present(file)) then
-!        	tfile=adjustl(file)
+        	tfile=adjustl(file)
 		alog%LOG_ENTRY(index)%fileflag = .TRUE.
-!		alog%LOG_ENTRY(index)%file = tfile
-		alog%LOG_ENTRY(index)%file = file
+		alog%LOG_ENTRY(index)%file = tfile
     	endif
     	select case (msgtype%mtype)
         case (1)
