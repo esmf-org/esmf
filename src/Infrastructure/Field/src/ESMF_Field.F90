@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.29 2008/07/17 21:41:36 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.30 2008/12/08 22:25:57 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -204,7 +204,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.272.2.29 2008/07/17 21:41:36 feiliu Exp $'
+    '$Id: ESMF_Field.F90,v 1.272.2.30 2008/12/08 22:25:57 feiliu Exp $'
 
 !==============================================================================
 !
@@ -2040,17 +2040,21 @@ contains
                  return
               endif 
               do i=1, dimCount
-                  if(gridCompLBnd(distgridToGridMap(i)) .ne. arrayCompLBnd(distgridToPackedArrayMap(i), lDE)) then
-                      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                         "grid computationalLBound does not match array computationalLBound", &
-                          ESMF_CONTEXT, rc)
-                      return
-                  endif
-                  if(gridCompUBnd(distgridToGridMap(i)) .ne. arrayCompUBnd(distgridToPackedArrayMap(i), lDE)) then
-                      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                         "grid computationalUBound does not match array computationalUBound", &
-                          ESMF_CONTEXT, rc)
-                      return
+                  if(distgridToPackedArrayMap(i) .ne. 0) then
+                      if(gridCompLBnd(distgridToGridMap(i)) .ne. &
+                        arrayCompLBnd(distgridToPackedArrayMap(i), lDE)) then
+                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                             "grid computationalLBound does not match array computationalLBound", &
+                              ESMF_CONTEXT, rc)
+                          return
+                      endif
+                      if(gridCompUBnd(distgridToGridMap(i)) .ne. &
+                        arrayCompUBnd(distgridToPackedArrayMap(i), lDE)) then
+                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                             "grid computationalUBound does not match array computationalUBound", &
+                              ESMF_CONTEXT, rc)
+                          return
+                      endif
                   endif
               enddo
               deallocate(gridCompUBnd, gridCompLBnd)

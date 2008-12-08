@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.38 2008/11/22 01:22:07 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.39 2008/12/08 22:25:57 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.38 2008/11/22 01:22:07 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.39 2008/12/08 22:25:57 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -154,10 +154,7 @@ contains
 !       specifying the appropriate {\tt field} dimension index. The default is to
 !       map all of the {\tt grid}'s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
-!       to one and smaller than or equal to the {\tt field} rank.
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry
-!       multiple times. The total ungridded dimensions in the {\tt field}
+!       The total ungridded dimensions in the {\tt field}
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
@@ -936,10 +933,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       specifying the appropriate {\tt field} dimension index. The default is to
 !       map all of the {\tt grid}'s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
-!       to one and smaller than or equal to the {\tt field} rank.
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry
-!       multiple times. The total ungridded dimensions in the {\tt field}
+!       The total ungridded dimensions in the {\tt field}
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
@@ -1017,6 +1011,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     logical, dimension(ESMF_MAXDIM)        :: flipflop
     integer                                :: forderIndex, i
     integer                                :: gridrank, arrayrank, uglb_size, ugub_size
+    integer                                :: grid_repdimcount
     integer                                :: localDeCount, l_localDe
 
 
@@ -1087,6 +1082,42 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         endif 
     endif
 
+    ! set up local gridToFieldMap
+    grid_repdimcount = 0
+    if(present(gridToFieldMap)) then
+        l_g2fm(1:size(gridToFieldMap)) = gridToFieldMap
+        do i = 1, size(gridToFieldMap)
+            if(gridToFieldMap(i) == 0) grid_repdimcount = grid_repdimcount + 1
+        enddo
+    else
+        do i = 1, ESMF_MAXDIM
+            l_g2fm(i) = i
+        enddo
+    endif
+    ! gridToFieldMap elements must be in range 0...fieldRank and unique  
+    ! algorithm to check element uniqueness:  
+    !   run time: O(ESMF_MAXDIM)  
+    !   memory:   O(2*ESMF_MAXDIM)  
+    !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector  
+    flipflop = .false.  
+    do i = 1, gridrank
+       if(l_g2fm(i) .lt. 0 .and. l_g2fm(i) .gt. arrayrank) then  
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
+                 "- gridToFieldMap element must be within range 0...array rank", &  
+                   ESMF_CONTEXT, rc)   
+           return  
+       endif  
+       if(l_g2fm(i) /= 0) then
+           if(flipflop(l_g2fm(i))) then  
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
+                     "- gridToFieldMap element must be unique", &  
+                       ESMF_CONTEXT, rc)   
+               return  
+           endif  
+           flipflop(l_g2fm(i)) = .true.  
+       endif
+    enddo  
+
     ! User must either provide both ungriddedLBound and ungriddedUBound
     ! with same size or don't specify either one of them. There is no
     ! suitable default value for unbounded variables, especially when
@@ -1116,6 +1147,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
     ! the result Field/array rank
     arrayrank = gridrank + uglb_size
+    arrayrank = arrayrank - grid_repdimcount
 
     ! check argument validity
     if(present(totalLBound)) then
@@ -1143,36 +1175,6 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         endif 
     endif
 
-    ! set up local gridToFieldMap
-    if(present(gridToFieldMap)) then
-        l_g2fm(1:size(gridToFieldMap)) = gridToFieldMap
-    else
-        do i = 1, ESMF_MAXDIM
-            l_g2fm(i) = i
-        enddo
-    endif
-    ! gridToFieldMap elements must be in range 1...fieldRank and unique  
-    ! algorithm to check element uniqueness:  
-    !   run time: O(ESMF_MAXDIM)  
-    !   memory:   O(2*ESMF_MAXDIM)  
-    !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector  
-    flipflop = .false.  
-    do i = 1, gridrank
-       if(l_g2fm(i) .lt. 1 .and. l_g2fm(i) .gt. arrayrank) then  
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
-                 "- gridToFieldMap element must be within range 1...array rank", &  
-                   ESMF_CONTEXT, rc)   
-           return  
-       endif  
-       if(flipflop(l_g2fm(i))) then  
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
-                 "- gridToFieldMap element must be unique", &  
-                   ESMF_CONTEXT, rc)   
-           return  
-       endif  
-       flipflop(l_g2fm(i)) = .true.  
-    enddo  
-
     ! At this point input arguments are validated
     ! allocate the return value arrays
     allocate(l_alb(arrayrank), l_aub(arrayrank), l_ac(arrayrank))
@@ -1190,7 +1192,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     ! compute ungridded Fortran array bounds
     f2gm = 0
     do i = 1, gridrank
-        f2gm(l_g2fm(i)) = i
+        if(l_g2fm(i) /= 0) f2gm(l_g2fm(i)) = i
     enddo
     forderIndex = 1
     do i = 1, arrayrank

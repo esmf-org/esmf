@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.34 2008/11/20 20:45:55 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.35 2008/12/08 22:25:57 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.34 2008/11/20 20:45:55 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.35 2008/12/08 22:25:57 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -201,17 +201,11 @@ contains
 !       specifying the appropriate {\tt farray} dimension index. The default is to @\
 !       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
 !       the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
-!       to one and smaller than or equal to the {\tt farray} rank. @\
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
-!       multiple times. The total ungridded dimensions in the {\tt field} @\
+!       The total ungridded dimensions in the {\tt field} @\
 !       are the total {\tt farray} dimensions less @\
 !       the total (distributed + undistributed) dimensions in @\
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
-!       stored in the {\t farray}.  Permutations of the order of @\
-!       dimensions are handled via individual communication methods.  For example, @\
-!       an undistributed dimension can be remapped to a distributed dimension @\
-!       as part of the ESMF\_ ArrayRedist() operation. @\
+!       stored in the {\t farray}. @\
 ! \item [{[maxHaloLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
 !       of dimensions in the {\tt grid}.  However, ordering of the elements @\
@@ -373,17 +367,11 @@ TypeKindRankDeclarationMacro(FieldCreateFromPtr)
 !       specifying the appropriate {\tt farray} dimension index. The default is to @\
 !       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
 !       the {\tt farray} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
-!       to one and smaller than or equal to the {\tt farray} rank. @\
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
-!       multiple times. The total ungridded dimensions in the {\tt field} @\
+!       The total ungridded dimensions in the {\tt field} @\
 !       are the total {\tt farray} dimensions less @\
 !       the total (distributed + undistributed) dimensions in @\
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
-!       stored in the {\t farray}.  Permutations of the order of @\
-!       dimensions are handled via individual communication methods.  For example, @\
-!       an undistributed dimension can be remapped to a distributed dimension @\
-!       as part of the ESMF\_ ArrayRedist() operation. @\
+!       stored in the {\t farray}. @\
 ! \item [{[ungriddedLBound]}] @\
 !       Lower bounds of the ungridded dimensions of the {\tt field}. @\
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
@@ -560,10 +548,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       specifying the appropriate {\tt field} dimension index. The default is to
 !       map all of the {\tt grid}'s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
-!       to one and smaller than or equal to the {\tt field} rank.
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry
-!       multiple times. The total ungridded dimensions in the {\tt field}
+!       The total ungridded dimensions in the {\tt field}
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
@@ -622,6 +607,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
     logical :: rcpresent                        ! Return code present
     integer :: fieldDimCount, fieldUngriddedDimCount 
     integer :: gridDimCount
+    integer :: grid_repdimcount
     integer :: fieldUndistDimCount 
     integer :: i
     integer :: localGridToFieldMap(ESMF_MAXDIM)
@@ -688,8 +674,47 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
       endif
     endif
 
-    fieldUngriddedDimCount = fieldDimCount-gridDimCount  
-    fieldUndistDimCount = fieldDimCount-gridDimCount  
+    ! Set default gridToFieldMap
+    grid_repdimcount = 0
+    if (present(gridToFieldMap)) then  
+       localGridToFieldMap(1:gridDimCount) = &  
+         gridToFieldMap (1:gridDimCount)  
+       do i = 1, size(gridToFieldMap)
+           if(gridToFieldMap(i) == 0) grid_repdimcount = grid_repdimcount + 1
+       enddo
+    else  
+      do i = 1, gridDimCount  
+        localGridToFieldMap(i) = i  
+      enddo  
+    endif  
+
+     ! gridToFieldMap elements must be in range 0...fieldRank and unique  
+     ! algorithm to check element uniqueness:  
+     !   run time: O(ESMF_MAXDIM)  
+     !   memory:   O(2*ESMF_MAXDIM)  
+     !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector  
+     flipflop = .false.  
+     do i = 1, gridDimCount  
+        if(localGridToFieldMap(i) .lt. 0 .and. &  
+          localGridToFieldMap(i) .gt. fieldDimCount) then  
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
+                  "- gridToFieldMap element must be within range 0...array rank", &  
+                    ESMF_CONTEXT, rc)   
+            return  
+        endif  
+        if(localGridToFieldMap(i) /= 0) then
+            if(flipflop(localGridToFieldMap(i))) then  
+                call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
+                      "- gridToFieldMap element must be unique", &  
+                        ESMF_CONTEXT, rc)   
+                return  
+            endif  
+            flipflop(localGridToFieldMap(i)) = .true.  
+        endif
+     enddo  
+ 
+    fieldUngriddedDimCount = fieldDimCount-gridDimCount + grid_repdimcount 
+    fieldUndistDimCount = fieldDimCount-gridDimCount + grid_repdimcount 
  
     ! Error Check Input  
     if (present(gridToFieldMap)) then   
@@ -743,39 +768,6 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
     else  
        localStaggerLoc = ESMF_STAGGERLOC_CENTER  
     endif  
- 
-    ! Set default gridToFieldMap
-     if (present(gridToFieldMap)) then  
-       localGridToFieldMap(1:gridDimCount) = &  
-          gridToFieldMap (1:gridDimCount)  
-     else  
-       do i = 1, gridDimCount  
-         localGridToFieldMap(i) = i  
-       enddo  
-     endif  
-
-     ! gridToFieldMap elements must be in range 1...fieldRank and unique  
-     ! algorithm to check element uniqueness:  
-     !   run time: O(ESMF_MAXDIM)  
-     !   memory:   O(2*ESMF_MAXDIM)  
-     !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector  
-     flipflop = .false.  
-     do i = 1, gridDimCount  
-        if(localGridToFieldMap(i) .lt. 1 .and. &  
-          localGridToFieldMap(i) .gt. fieldDimCount) then  
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
-                  "- gridToFieldMap element must be within range 1...array rank", &  
-                    ESMF_CONTEXT, rc)   
-            return  
-        endif  
-        if(flipflop(localGridToFieldMap(i))) then  
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
-                  "- gridToFieldMap element must be unique", &  
-                    ESMF_CONTEXT, rc)   
-            return  
-        endif  
-        flipflop(localGridToFieldMap(i)) = .true.  
-     enddo  
  
      if(present(maxHaloLWidth)) then  
        localMaxHaloLWidth(1:gridDimCount) = &  
@@ -888,10 +880,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       specifying the appropriate {\tt field} dimension index. The default is to
 !       map all of the {\tt grid}'s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
-!       to one and smaller than or equal to the {\tt field} rank.
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry
-!       multiple times. The total ungridded dimensions in the {\tt field}
+!       The total ungridded dimensions in the {\tt field}
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
@@ -951,6 +940,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 
     integer :: fieldDimCount, fieldUngriddedDimCount 
     integer :: gridDimCount
+    integer :: grid_repdimcount
     integer :: fieldUndistDimCount 
     integer :: i
     integer :: localGridToFieldMap(ESMF_MAXDIM)
@@ -1012,8 +1002,60 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
       endif
     endif
  
-    fieldUngriddedDimCount = fieldDimCount-gridDimCount  
-    fieldUndistDimCount = fieldDimCount-gridDimCount  
+    ! Set default values.  
+    if (present(staggerloc)) then  
+       localStaggerloc = staggerloc  
+    else  
+       localStaggerLoc = ESMF_STAGGERLOC_CENTER  
+    endif  
+    
+    if (present(copyflag)) then
+        l_copyflag = copyflag
+    else
+        l_copyflag = ESMF_DATA_REF
+    endif
+ 
+    ! Set default gridToFieldMap
+    grid_repdimcount = 0
+    if (present(gridToFieldMap)) then  
+       localGridToFieldMap(1:gridDimCount) = &  
+         gridToFieldMap (1:gridDimCount)  
+       do i = 1, size(gridToFieldMap)
+           if(gridToFieldMap(i) == 0) grid_repdimcount = grid_repdimcount + 1
+       enddo
+    else  
+      do i = 1, gridDimCount  
+        localGridToFieldMap(i) = i  
+      enddo  
+    endif  
+
+     ! gridToFieldMap elements must be in range 0...fieldRank and unique  
+     ! algorithm to check element uniqueness:  
+     !   run time: O(ESMF_MAXDIM)  
+     !   memory:   O(2*ESMF_MAXDIM)  
+     !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector  
+     flipflop = .false.  
+     do i = 1, gridDimCount  
+        if(localGridToFieldMap(i) .lt. 0 .and. &  
+          localGridToFieldMap(i) .gt. fieldDimCount) then  
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
+                  "- gridToFieldMap element must be within range 0...array rank", &  
+                    ESMF_CONTEXT, rc)   
+            return  
+        endif  
+        if(localGridToFieldMap(i) /= 0) then
+            if(flipflop(localGridToFieldMap(i))) then  
+                call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
+                      "- gridToFieldMap element must be unique", &  
+                        ESMF_CONTEXT, rc)   
+                return  
+            endif  
+            flipflop(localGridToFieldMap(i)) = .true.  
+        endif
+     enddo  
+ 
+    fieldUngriddedDimCount = fieldDimCount-gridDimCount + grid_repdimcount 
+    fieldUndistDimCount = fieldDimCount-gridDimCount + grid_repdimcount 
  
     ! Error Check Input  
     if (present(gridToFieldMap)) then   
@@ -1068,52 +1110,6 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
         return
     endif
 
-    ! Set default values.  
-    if (present(staggerloc)) then  
-       localStaggerloc = staggerloc  
-    else  
-       localStaggerLoc = ESMF_STAGGERLOC_CENTER  
-    endif  
-    
-    if (present(copyflag)) then
-        l_copyflag = copyflag
-    else
-        l_copyflag = ESMF_DATA_REF
-    endif
- 
-    ! Set default gridToFieldMap
-     if (present(gridToFieldMap)) then  
-       localGridToFieldMap(1:gridDimCount) = &  
-          gridToFieldMap (1:gridDimCount)  
-     else  
-       do i = 1, gridDimCount  
-         localGridToFieldMap(i) = i  
-       enddo  
-     endif  
-
-     ! gridToFieldMap elements must be in range 1...fieldRank and unique  
-     ! algorithm to check element uniqueness:  
-     !   run time: O(ESMF_MAXDIM)  
-     !   memory:   O(2*ESMF_MAXDIM)  
-     !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector  
-     flipflop = .false.  
-     do i = 1, gridDimCount  
-        if(localGridToFieldMap(i) .lt. 1 .and. &  
-          localGridToFieldMap(i) .gt. fieldDimCount) then  
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
-                  "- gridToFieldMap element must be within range 1...array rank", &  
-                    ESMF_CONTEXT, rc)   
-            return  
-        endif  
-        if(flipflop(localGridToFieldMap(i))) then  
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
-                  "- gridToFieldMap element must be unique", &  
-                    ESMF_CONTEXT, rc)   
-            return  
-        endif  
-        flipflop(localGridToFieldMap(i)) = .true.  
-     enddo  
- 
      if(present(maxHaloLWidth)) then  
        localMaxHaloLWidth(1:gridDimCount) = &  
           maxHaloLWidth (1:gridDimCount)  
@@ -1302,10 +1298,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       specifying the appropriate {\tt field} dimension index. The default is to
 !       map all of the {\tt grid}'s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
-!       to one and smaller than or equal to the {\tt field} rank.
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry
-!       multiple times. The total ungridded dimensions in the {\tt field}
+!       The total ungridded dimensions in the {\tt field}
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
@@ -1606,10 +1599,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       specifying the appropriate {\tt field} dimension index. The default is to
 !       map all of the {\tt grid}'s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
-!       to one and smaller than or equal to the {\tt field} rank.
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry
-!       multiple times. The total ungridded dimensions in the {\tt field}
+!       The total ungridded dimensions in the {\tt field}
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
@@ -1799,10 +1789,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       specifying the appropriate {\tt field} dimension index. The default is to
 !       map all of the {\tt grid}'s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
-!       to one and smaller than or equal to the {\tt field} rank.
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry
-!       multiple times. The total ungridded dimensions in the {\tt field}
+!       The total ungridded dimensions in the {\tt field}
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
@@ -1973,10 +1960,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       specifying the appropriate {\tt field} dimension index. The default is to
 !       map all of the {\tt grid}'s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
-!       to one and smaller than or equal to the {\tt field} rank.
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry
-!       multiple times. The total ungridded dimensions in the {\tt field}
+!       The total ungridded dimensions in the {\tt field}
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
