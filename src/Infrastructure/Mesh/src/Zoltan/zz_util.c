@@ -6,19 +6,15 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: zz_util.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:55 $
+ *    $Author: w6ws $
+ *    $Date: 2008/12/08 23:04:36 $
  *    Revision: 1.10 $
  ****************************************************************************/
 
 
 #include <stdio.h>
 #include <ctype.h>
-#ifdef __STDC__
 #include <string.h>
-#else
-#include <strings.h>
-#endif  /* __STDC__ */
 
 #include "zz_util_const.h"
 #include "zoltan_mem.h"

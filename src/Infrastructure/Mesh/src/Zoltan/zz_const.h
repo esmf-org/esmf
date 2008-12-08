@@ -6,8 +6,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: zz_const.h,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:54 $
+ *    $Author: w6ws $
+ *    $Date: 2008/12/08 23:04:36 $
  *    Revision: 1.32.2.2 $
  ****************************************************************************/
 
@@ -18,11 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#ifdef __STDC__
 #include <string.h>
-#else
-#include <strings.h>
-#endif  /* __STDC__ */
 
 #include "zoltan.h"
 #include "lb_const.h"

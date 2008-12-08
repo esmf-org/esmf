@@ -6,8 +6,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: zoltan_mem.h,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:54 $
+ *    $Author: w6ws $
+ *    $Date: 2008/12/08 23:04:36 $
  *    Revision: 1.9 $
  ****************************************************************************/
 
@@ -16,11 +16,7 @@
 #define __MEM_CONST_H
 
 
-#ifdef __STDC__
 #include <string.h>
-#else
-#include <strings.h>
-#endif  /* __STDC__ */
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */

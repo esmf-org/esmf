@@ -6,8 +6,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: dr_loadbal.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:48 $
+ *    $Author: w6ws $
+ *    $Date: 2008/12/08 23:04:36 $
  *    Revision: 1.109.2.3 $
  ****************************************************************************/
 
@@ -26,7 +26,7 @@ double Timer_Callback_Time, Timer_Global_Callback_Time;
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 
 #include "dr_const.h"
 #include "dr_err_const.h"
