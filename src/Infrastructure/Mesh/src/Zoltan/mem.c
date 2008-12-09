@@ -6,8 +6,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: mem.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:51 $
+ *    $Author: w6ws $
+ *    $Date: 2008/12/09 23:09:10 $
  *    Revision: 1.20 $
  ****************************************************************************/
 
@@ -19,7 +19,7 @@
 #include <string.h>
 #include "zoltan_mem.h"
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined (__cplusplus)
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -144,7 +144,7 @@ void Zoltan_Memory_Debug(int new_level) {
 /*****************************************************************************/
 /*****************************************************************************/
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined (__cplusplus)
 
 double *Zoltan_Array_Alloc(char *file, int lineno, int numdim, ...)
 
@@ -169,7 +169,7 @@ va_dcl
     long off;    /* offset from beginning of array       */
   } dim[4];      /* Info about each dimension            */
 
-#ifndef __STDC__
+#if !defined(__STDC__) || !defined(__cplusplus)
   char *file;           /* Filename of source code from call.   */
   int lineno;           /* Line number of call.                 */
   int numdim;           /* Number of dimensions                 */
@@ -182,7 +182,7 @@ va_dcl
   char   *data;         /* Data offset                          */
   va_list va;           /* Current pointer in the argument list */
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined(__cplusplus)
   va_start(va, numdim);
 #else
   va_start(va);
@@ -447,7 +447,7 @@ void Zoltan_Free (void **ptr, char *filename, int lineno)
 
 /* Free n pointers. Variable number of arguments is allowed.  */
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined(__cplusplus)
 
 void Zoltan_Multifree(char *filename, int lineno, int n, ...)
 {

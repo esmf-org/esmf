@@ -7,7 +7,7 @@
  * CVS File Information :
  *    $RCSfile: zoltan_mem.h,v $
  *    $Author: w6ws $
- *    $Date: 2008/12/08 23:04:36 $
+ *    $Date: 2008/12/09 23:09:10 $
  *    Revision: 1.9 $
  ****************************************************************************/
 
@@ -47,7 +47,7 @@ extern "C" {
 
 /* function declarations for dynamic array allocation */
 
-#ifdef __STDC__
+#if defined (__STDC__) || defined (__cplusplus)
 extern double *Zoltan_Array_Alloc(char *file, int lineno, int numdim, ...);
 #else
 extern double *Zoltan_Array_Alloc();
@@ -61,7 +61,7 @@ extern double *Zoltan_Realloc(void *ptr, int n, char *filename, int lineno);
 extern void Zoltan_Memory_Stats(void);
 extern int Zoltan_Memory_Usage(int);
 
-#ifdef __STDC__
+#if defined (__STDC__) || defined (__cplusplus)
 extern void Zoltan_Multifree(char *, int, int n, ...);
 #else
 extern void Zoltan_Multifree();
