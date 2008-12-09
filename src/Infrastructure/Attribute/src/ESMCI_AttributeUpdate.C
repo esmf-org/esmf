@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.2 2008/12/03 17:48:36 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.3 2008/12/09 21:48:59 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.2 2008/12/03 17:48:36 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.3 2008/12/09 21:48:59 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -540,6 +540,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   char msgbuf[ESMF_MAXSTR];
   int localrc;
   unsigned int i;
+  int handshake = 42;
     
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
@@ -547,6 +548,9 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   // query the VM for localPet and petCount
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
+
+  // prepare for comms
+  VMK::commhandle **commh = new VMK::commhandle*;
   
   // am I a root?
   vector<ESMC_I4>::const_iterator itSend, itNR, itR;
@@ -576,8 +580,15 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
       indRecv = distance(nonroots.begin(), find(nonroots.begin(), nonroots.end(), localPet));
     
     // receive with message=0 and status=NULL for now
-    vm->recv(recvBufSize, sizeof(int), roots[indRecv], 0);
-    vm->recv(recvBuf, *recvBufSize, roots[indRecv], 0);
+    *commh = NULL;
+    vm->recv(recvBufSize, sizeof(int), roots[indRecv], commh);
+    vm->send(&handshake, sizeof(int), roots[indRecv]);
+    vm->commqueuewait();
+    *commh = NULL;
+    vm->recv(recvBuf, *recvBufSize, roots[indRecv], commh);
+    vm->send(&handshake, sizeof(int), roots[indRecv]);
+    // now we all wait for all comm calls to complete
+    vm->commqueuewait();
     /*printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
             localPet, recvBuf, roots[indRecv]);*/
   }
@@ -601,8 +612,10 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
         // send with message=0 and status=NULL for now
         /*printf("\n\nI am PET #%d, I am sending message \"%s\" to PET #%d\n\n",
                 localPet, sendBuf, nonroots[indSend]);*/
-        vm->send(&sendBufSize, sizeof(sendBufSize), nonroots[indSend],0);
-        vm->send(sendBuf, sendBufSize, nonroots[indSend],0);
+        vm->recv(&handshake, sizeof(int), nonroots[indSend]);
+        vm->send(&sendBufSize, sizeof(sendBufSize), nonroots[indSend]);
+        vm->recv(&handshake, sizeof(int), nonroots[indSend]);
+        vm->send(sendBuf, sendBufSize, nonroots[indSend]);
       }
     }
   }
