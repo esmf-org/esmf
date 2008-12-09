@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.39 2008/12/08 22:25:57 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.40 2008/12/09 21:10:10 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.39 2008/12/08 22:25:57 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.40 2008/12/09 21:10:10 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -614,7 +614,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     integer :: i, j
     logical :: filled(ESMF_MAXDIM)
 
-    integer :: localDeCount, dimCount, l_localDe
+    integer :: localDeCount, dimCount, l_localDe, dimCount_repdim
     integer, allocatable :: arrayBnd(:, :)
     integer, allocatable :: undistBnd(:)
     integer, allocatable :: distgridToArrayMap(:)
@@ -737,33 +737,52 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     allocate(l_tlb(fieldrank), l_tub(fieldrank))
     allocate(l_ec(fieldrank), l_cc(fieldrank), l_tc(fieldrank))
 
+    ! count the number of ungridded dimension in Grid to Field mapping
+    dimCount_repdim = 0
+    do i = 1, gridrank
+        if(field%ftypep%gridToFieldMap(i) == 0) dimCount_repdim = dimCount_repdim + 1
+    enddo
+
     if (present(totalLBound) .or. present(totalUBound)) then
     
         ! Get Size of Array info
         call ESMF_ArrayGet(field%ftypep%array, dimCount=dimCount, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
 
         ! Allocate storage for Array info
+        ! size of undistBnd is total number of undistributed dimensions
+        ! including replicated dimensions
         allocate(arrayBnd(dimCount, 0:localDeCount-1))
-        allocate(undistBnd(fieldRank-dimCount))
+        allocate(undistBnd(fieldRank-dimCount+dimCount_repdim))
         allocate(distgridToPackedArrayMap(dimCount))
         allocate(distgridToArrayMap(dimCount))
               
-       ! get distributed dimension map
-       call ESMF_ArrayGet(field%ftypep%array, & 
-         distgridToPackedArrayMap=distgridToPackedArrayMap, &
-         distgridToArrayMap=distgridToArrayMap, rc=localrc)
+        ! get distributed dimension map
+        call ESMF_ArrayGet(field%ftypep%array, & 
+            distgridToPackedArrayMap=distgridToPackedArrayMap, &
+            distgridToArrayMap=distgridToArrayMap, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
     
         ! fill totalLBounds
         if (present(totalLBound)) then
             call ESMF_ArrayGet(field%ftypep%array, totalLBound=arrayBnd, & 
                 undistLBound=undistBnd, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
     
             ! set distributed dimensions
             filled=.false.
             do i=1, dimCount
-               l_tlb(distgridToArrayMap(i))=&
-                arrayBnd(distgridToPackedArrayMap(i),l_localDe)
-               filled(distgridToArrayMap(i))=.true.
+                if(distgridToPackedArrayMap(i) /= 0) then
+                   l_tlb(distgridToArrayMap(i))=&
+                    arrayBnd(distgridToPackedArrayMap(i),l_localDe)
+                   filled(distgridToArrayMap(i))=.true.
+                endif
             enddo
     
             ! set undistributed dimensions
@@ -780,13 +799,18 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         if (present(totalUBound)) then
             call ESMF_ArrayGet(field%ftypep%array, totalUBound=arrayBnd, & 
                 undistUBound=undistBnd, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
     
             ! set distributed dimensions
             filled=.false.
             do i=1, dimCount
-                l_tub(distgridToArrayMap(i))=&
-                arrayBnd(distgridToPackedArrayMap(i),l_localDe)
-               filled(distgridToArrayMap(i))=.true.
+                if(distgridToPackedArrayMap(i) /= 0) then
+                    l_tub(distgridToArrayMap(i))=&
+                    arrayBnd(distgridToPackedArrayMap(i),l_localDe)
+                    filled(distgridToArrayMap(i))=.true.
+                endif
             enddo
     
             ! set undistributed dimensions
