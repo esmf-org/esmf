@@ -6,8 +6,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: coloring.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:45 $
+ *    $Author: w6ws $
+ *    $Date: 2008/12/09 23:07:28 $
  *    Revision: 1.18.2.1 $
  ****************************************************************************/
 
@@ -24,6 +24,12 @@
 #include "zz_util_const.h"
 #include "parmetis_jostle.h"
 #include "all_allo_const.h"
+
+#if defined (ESMF_OS_MinGW)
+// TODO: Eventually find better replacements on Windows.
+#define drand48() ((double)rand () / RAND_MAX)
+#define srand48 srand
+#endif
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
