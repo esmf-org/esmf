@@ -7,7 +7,7 @@
  * CVS File Information :
  *    $RCSfile: dr_loadbal.c,v $
  *    $Author: w6ws $
- *    $Date: 2008/12/08 23:04:36 $
+ *    $Date: 2008/12/10 20:50:37 $
  *    Revision: 1.109.2.3 $
  ****************************************************************************/
 
@@ -27,6 +27,9 @@ double Timer_Callback_Time, Timer_Global_Callback_Time;
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#if defined (ESMF_OS_MinGW)
+#define strcasecmp _strcmpi
+#endif
 
 #include "dr_const.h"
 #include "dr_err_const.h"

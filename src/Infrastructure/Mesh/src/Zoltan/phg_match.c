@@ -7,12 +7,16 @@
  * CVS File Information :
  *    $RCSfile: phg_match.c,v $
  *    $Author: w6ws $
- *    $Date: 2008/11/06 19:55:28 $
+ *    $Date: 2008/12/10 20:50:37 $
  *    Revision: 1.180.2.2 $
  ****************************************************************************/
 
 #include <stdlib.h>
 #include "phg.h"
+
+#if defined (ESMF_OS_MinGW)
+#define strcasecmp _strcmpi
+#endif
  
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */

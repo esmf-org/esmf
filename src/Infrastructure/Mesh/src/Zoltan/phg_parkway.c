@@ -6,12 +6,16 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: phg_parkway.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:53 $
+ *    $Author: w6ws $
+ *    $Date: 2008/12/10 20:50:37 $
  *    Revision: 1.5 $
  ****************************************************************************/
 #include "zz_const.h"
 #include "phg.h"
+
+#if defined (ESMF_OS_MinGW)
+#define strcasecmp _strcmpi
+#endif
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
