@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.54 2008/09/26 21:11:37 cdeluca Exp $ 
+# $Id: makefile,v 1.55 2008/12/10 06:49:19 donstark Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -11,9 +11,19 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldUTest \
                 $(ESMF_TESTDIR)/ESMF_FieldStressUTest \
                
 TESTS_RUN     = RUN_ESMF_FieldUTest \
-		RUN_ESMF_FieldCreateGetUTest \
-                RUN_ESMF_FieldStressUTest \
-                
+ 		RUN_ESMF_FieldCreateGetUTest \
+                 RUN_ESMF_FieldStressUTest \
+ 
+ifeq ($(ESMF_TESTHARNESS), NONEXHAUSTIVE)
+  TESTS_RUN  := $(TESTS_RUN) \
+                RUN_ESMF_FieldHarness1UTest
+else
+ifeq ($(ESMF_TESTHARNESS), EXHAUSTIVE)
+  TESTS_RUN  := $(TESTS_RUN) \
+                RUN_ESMF_FieldHarness1UTest
+endif
+endif
+               
 TESTS_RUN_UNI = RUN_ESMF_FieldStressUTestUNI
 
 include ${ESMF_DIR}/makefile
@@ -44,3 +54,23 @@ RUN_ESMF_FieldStressUTest:
 
 RUN_ESMF_FieldStressUTestUNI:
 	$(MAKE) TNAME=FieldStress NP=1 ftest
+
+#
+# FieldHarness
+#
+
+RUN_ESMF_FieldHarness1UTest:        
+	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
+	if ! grep FieldHarness1UTest $(ESMF_TESTDIR)/test_harness.list ; then \
+	  echo "ESMF_FieldHarness1UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
+	fi ; \
+	else \
+	  echo "ESMF_FieldHarness1UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
+	fi
+	cp -f test_harness.rc $(ESMF_TESTDIR)        
+	cp -f harness_config/*.rc $(ESMF_TESTDIR)        
+	rm -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout        
+	$(MAKE) TNAME=TestHarness HNAME=FieldHarness1 NP=1 htest        
+	@if [ -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout ] ; then \
+	  cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout $(ESMF_TESTDIR)/ESMF_FieldHarness1UTest.stdout ; \
+	fi 
