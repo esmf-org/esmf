@@ -1,17 +1,26 @@
-# grid_rectilinear.rc
+# TestGrid2.rc
 #
 # This file contains the grid specifications for the Test Harness.
 # Requirements:
 # See documentation for further details of the descriptor syntax.
 #################################################################################
 
-grid_type: RECTILINEAR
+grid_type: REMAP
 
-# regular rectilinear Grid specification - Specify the A grid, other staggers are 
-# calculated from that.
-grid::
+################################################################################
+# grid | source | grid    |    grid   | grid  | units | destination | 
+# rank |  tag   | spacing | dimension | range |       |    tag      |
+################################################################################
+# Grid specification for remapping
+
+
 #rank spacing  size  range (min/max)  units
-
-3  'UNI'  120  -3.14159  3.14159  'RAD'   'UNI'  90  -1.57  1.57  'RAD'   'UNI'  20  0  4000  'METERS'
-3  'UNI'  120  -180   180  'DEG_E'  'GAU'  88  -88   88   'DEG_N'  'UNI'  20  0  4000  'METERS'
+grid_remap::
+# example of a pair of 2D periodic grids 
+2   SRC    UNIFORM_PERIODIC   120    -3.14159  3.14159    RADIANS   
+&          UNIFORM_POLE        90    -1.57     1.57       RADIANS   
+&   DST    UNIFORM_PERIODIC   120  -180      180          DEG_E   
+&          GAUSSIAN_POLE       88   -88       88          DEG_N   
+&   FUNCTION    CONSTANT    PERIODIC   END
 ::
+
