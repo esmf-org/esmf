@@ -164,8 +164,6 @@
   endif
 
   !------------------------------------------------------------------------
-  ! calls ESMF_Finalize() internally
-  !------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE) 
   !------------------------------------------------------------------------
 
@@ -250,9 +248,10 @@ contains
   !-----------------------------------------------------------------------------
   ! if the class is not supported, then post an error
   !-----------------------------------------------------------------------------
-  if ( trim(adjustL(har%testClass)) /= 'ARRAY'  .and.                          &
-       trim(adjustL(har%testClass)) /= 'BUNDLE' .and.                          &
-       trim(adjustL(har%testClass)) /= 'FIELD'  .and.                          &
+  if ( trim(adjustL(har%testClass)) /= 'ARRAY'        .and.                    &
+       trim(adjustL(har%testClass)) /= 'ARRAYBUNDLE'  .and.                    &
+       trim(adjustL(har%testClass)) /= 'FIELD'        .and.                    &
+       trim(adjustL(har%testClass)) /= 'FIELDBUNDLE' .and.                     &
        trim(adjustL(har%testClass)) /= 'GRID'   .and.                          &
        trim(adjustL(har%testClass)) /= 'REGRID' ) then
      call ESMF_LogMsgSetError( ESMF_FAILURE,"class name not of valid type "//  &
@@ -569,10 +568,21 @@ contains
            enddo  ! kstr
         enddo    ! kfile
 
+     case("ARRAYBUNDLE")
+     return
+
      case("FIELD")
-     ! not currently supported
-     call ESMF_LogMsgSetError( ESMF_FAILURE,"field test class currently" //    &
-               " unsupported",rcToReturn=returnrc)
+        do kfile=1,har%numRecords
+           do kstr=1,har%rcrd(kfile)%numStrings
+              ! test of a single problem descriptor string w/ specifiers
+!             call array_remap_test(har%rcrd(kfile)%str(kstr),har%failures,     &
+!                                    har%reportType, VM, localrc)
+!             if (ESMF_LogMsgFoundError(localrc," error array remap test",      &
+!                rcToReturn=returnrc)) return
+           enddo  ! kstr
+        enddo    ! kfile
+
+     case("FIELDBUNDLE")
      return
 
      case default

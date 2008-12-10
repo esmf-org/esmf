@@ -118,10 +118,10 @@
 
      case('REMAP')
 !      print*,' read grid specification for remapping test'
-       call read_remapping_grid(lfilename, Gfile%nGspecs, Gfile%src_grid,      &
-                Gfile%dst_grid,testfunction, localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
-               rcToReturn=rc)) return
+!      call read_remapping_grid(lfilename, Gfile%nGspecs, Gfile%src_grid,      &
+!               Gfile%dst_grid,testfunction, localrc)
+!      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
+!              rcToReturn=rc)) return
 
      case default
        ! error
