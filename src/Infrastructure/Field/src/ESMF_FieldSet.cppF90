@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.28 2008/12/09 21:10:10 feiliu Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.29 2008/12/10 14:25:13 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.28 2008/12/09 21:10:10 feiliu Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.29 2008/12/10 14:25:13 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -784,13 +784,15 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
                    ESMF_CONTEXT, rc)  @\
            return @\
        endif @\
-       if(flipflop(localGridToFieldMap(i))) then @\
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
-                 "- gridToFieldMap element must be unique", & @\
-                   ESMF_CONTEXT, rc)  @\
-           return @\
-       endif @\
-       flipflop(localGridToFieldMap(i)) = .true. @\
+       if(localGridToFieldMap(i) /= 0) then @\
+	   if(flipflop(localGridToFieldMap(i))) then @\
+	       call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
+	    	 "- gridToFieldMap element must be unique", & @\
+	    	   ESMF_CONTEXT, rc)  @\
+	       return @\
+	   endif @\
+	   flipflop(localGridToFieldMap(i)) = .true. @\
+	endif @\
     enddo @\
 @\
     if(present(maxHaloLWidth)) then @\
