@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.54 2008/12/09 21:10:10 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.55 2008/12/10 14:50:58 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1468,15 +1468,16 @@
             gridToFieldMap=(/1,4,0,7/) &
             )
         write(failMsg, *) ""
-        write(name, *) "Creating a 7D field from a 4D grid rep-dim and 3D ungridded bounds " // &
+        write(name, *) "Creating a 7D field from a 4D grid and 3D ungridded bounds " // &
             "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
-            "data copy, corner stagger"
+            "data copy, corner stagger, replicated dimension"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 4D grid and 3D ungridded bounds
-        call test7d3_generic_repdim_setcommit(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
+        call test7d3_generic_repdim_sct(rc, &
+            minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1,1/), ungriddedUBound=(/4,5,3,1/), &
             maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/1,3,4,5/), &
@@ -1486,9 +1487,9 @@
             gridToFieldMap=(/1,4,0,7/) &
             )
         write(failMsg, *) ""
-        write(name, *) "Setcommit a 7D field from a 4D grid rep-dim and 3D ungridded bounds " // &
+        write(name, *) "Setcommit a 7D field from a 4D grid and 3D ungridded bounds " // &
             "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
-            "data copy, corner stagger"
+            "data copy, corner stagger, replicated dimension"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -4618,7 +4619,7 @@ contains
 !------------------------------------------------------------------------
     ! create a 7d Field using grid and arrayspec
     ! use allocBounds to verify field create
-    subroutine test7d3_generic_repdim_setcommit(rc, minindex, maxindex, &
+    subroutine test7d3_generic_repdim_sct(rc, minindex, maxindex, &
         gridEdgeLWidth, gridEdgeUWidth, &
         regDecomp, &
         distgridToGridMap, &
@@ -4851,7 +4852,7 @@ contains
         call ESMF_GridDestroy(grid)
         call ESMF_DistGridDestroy(distgrid)
         deallocate(farray_cr)
-    end subroutine test7d3_generic_repdim_setcommit
+    end subroutine test7d3_generic_repdim_sct
 
 !------------------------------------------------------------------------
     ! create a 7d Field using grid and array
