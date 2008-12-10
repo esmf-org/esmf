@@ -24,7 +24,7 @@
 ########################################################################################
 problem_descriptor_string::
 # remap example
-'[B1G1;B2G2] --> [B1G1;B2G2]' -d DistGrid2D2d.rc -g TestGrid2.rc     
+'[B1G1;B2G2] =B=> [B1G1;B2G2]' -d DistGrid2D2d.rc -g TestGrid2.rc     
 ::   # end of list
 ~                     
 
