@@ -6,18 +6,21 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: dr_input.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:47 $
+ *    $Author: w6ws $
+ *    $Date: 2008/12/10 20:47:23 $
  *    Revision: 1.66.2.1 $
  ****************************************************************************/
 
 #include <mpi.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
+
+#if !defined (ESMF_OS_MinGW)
+#include <unistd.h>
+#endif
 
 #include "dr_const.h"
 #include "dr_input_const.h"
