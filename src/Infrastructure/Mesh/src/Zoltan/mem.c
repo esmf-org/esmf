@@ -7,7 +7,7 @@
  * CVS File Information :
  *    $RCSfile: mem.c,v $
  *    $Author: w6ws $
- *    $Date: 2008/12/10 19:27:13 $
+ *    $Date: 2008/12/10 20:45:06 $
  *    Revision: 1.20 $
  ****************************************************************************/
 
@@ -169,7 +169,7 @@ va_dcl
     long off;    /* offset from beginning of array       */
   } dim[4];      /* Info about each dimension            */
 
-#ifndef __STDC__
+#if !defined (__STDC__) && !defined (__cplusplus)
   char *file;           /* Filename of source code from call.   */
   int lineno;           /* Line number of call.                 */
   int numdim;           /* Number of dimensions                 */
