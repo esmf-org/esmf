@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.96 2008/09/26 23:15:45 theurich Exp $
+# $Id: makefile,v 1.97 2008/12/11 19:51:39 w6ws Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -187,7 +187,11 @@ info:   script_info
 	-@echo ""
 	-@echo ""
 	-@echo "--------------------------------------------------------------"
+ifeq ($(ESMF_OS),MinGW)
+	-@echo Compiling on `date` on `uname -n`
+else
 	-@echo Compiling on `date` on `hostname`
+endif
 	-@echo Machine characteristics: `uname -a`
 	-@echo "=============================================================="
 	-@echo " "
