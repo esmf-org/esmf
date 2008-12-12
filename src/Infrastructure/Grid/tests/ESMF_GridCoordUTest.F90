@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.20.2.9 2008/11/07 23:52:08 theurich Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.20.2.10 2008/12/12 20:00:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.20.2.9 2008/11/07 23:52:08 theurich Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.20.2.10 2008/12/12 20:00:50 svasquez Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -2634,7 +2634,7 @@ program ESMF_GridCoordUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test 3D Grid Bounds with 2D+1 Factorized Coordinate Arrays"
+  write(name, *) "Test 3D Grid Bounds with 2D plus 1 Factorized Coordinate Arrays"
   write(failMsg, *) "Incorrect result"
 
   ! init success flag
