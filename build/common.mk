@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.246 2008/12/12 08:02:54 w6ws Exp $
+#  $Id: common.mk,v 1.247 2008/12/12 08:04:43 w6ws Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -223,6 +223,13 @@ export ESMF_MACHINE := $(shell uname -m)
 endif
 endif
 
+ifeq ($(ESMF_OS),MinGW)
+# set ESMF_MACHINE for MinGW
+ifeq ($(ESMF_MACHINE),default)
+export ESMF_MACHINE := $(shell uname -m)
+endif
+endif
+
 ifeq ($(ESMF_OS),Darwin)
 # set ESMF_MACHINE for Darwin
 ifeq ($(ESMF_MACHINE),default)
@@ -270,6 +277,14 @@ export ESMF_ABI = 64
 endif
 ifeq ($(ESMF_MACHINE),x86_64)
 # and x86_64
+export ESMF_ABI = 64
+endif
+endif
+
+ifeq ($(ESMF_OS),MinGW)
+# default on MinGW is 32-bit
+export ESMF_ABI = 32
+ifeq ($(ESMF_MACHINE),x86_64)
 export ESMF_ABI = 64
 endif
 endif
@@ -502,9 +517,15 @@ endif
 #-------------------------------------------------------------------------------
 ESMF_PTHREADSDEFAULT        = ON
 
+ifeq ($(ESMF_OS),MinGW)
+ESMF_ARDEFAULT              = lib
+ESMF_ARCREATEFLAGSDEFAULT   =
+ESMF_AREXTRACTDEFAULT       = $(ESMF_ARDEFAULT) -extract:
+else
 ESMF_ARDEFAULT              = ar
 ESMF_ARCREATEFLAGSDEFAULT   = cr
 ESMF_AREXTRACTDEFAULT       = $(ESMF_ARDEFAULT) -x
+endif
 ESMF_RANLIBDEFAULT          = ranlib
 ESMF_SEDDEFAULT             = sed
 ESMF_CPPDEFAULT             = gcc
@@ -518,13 +539,31 @@ ESMF_RPATHPREFIX     = -Wl,-rpath,
 
 ESMF_F90OPTFLAG_X           =
 ESMF_CXXOPTFLAG_X           =
+ifeq ($(ESMF_OS).$(ESMF_COMPILER),MinGW.intel)
+ESMF_F90OPTFLAG_G           = -Od -debug
+ESMF_CXXOPTFLAG_G           = -Od -debug
+else
 ESMF_F90OPTFLAG_G           = -g
 ESMF_CXXOPTFLAG_G           = -g
+endif
 
 # setting default optimization flags is platform dependent
 ifneq ($(origin ESMF_OPTLEVEL), environment)
 ESMF_OPTLEVEL = $(ESMF_OPTLEVELDEFAULT)
 endif
+
+ifeq ($(ESMF_OS),Cygwin)
+ifeq ($(ESMF_COMPILER),intel)
+ESMF_OPTLEVEL               = 2
+endif
+endif
+
+ifeq ($(ESMF_OS),MinGW)
+ifeq ($(ESMF_COMPILER),intel)
+ESMF_OPTLEVEL               = 2
+endif
+endif
+
 ifneq ($(ESMF_OPTLEVEL),default)
 # if NEC, insert option before -O
 ifeq ($(ESMF_COMPILER),sxcross)
@@ -540,7 +579,7 @@ ESMF_F90OPTFLAG_O = -Wf -O
 else
 ESMF_F90OPTFLAG_O = -O
 endif
-ESMF_CXXOPTFLAG_O = -O -DNDEBUG
+ESMF_CXXOPTFLAG_O = -O2 -DNDEBUG
 endif
 
 
@@ -689,11 +728,22 @@ endif
 NO_OCFLAG_LIST := \
 	$(ESMF_OS).absoft \
 	$(ESMF_OS).absoftintel \
-	IRIX64.default
+	IRIX64.default \
+	Cygwin.intelgcc \
+	Cygwin.intel \
+	MinGW.intel
+WINTEL_OFFLAG_LIST := \
+	Cygwin.intelgcc \
+	Cygwin.intel \
+	MinGW.intel
 ifeq (,$(findstring $(ESMF_OS).$(ESMF_COMPILER),$(NO_OCFLAG_LIST)))
   ESMF_OBJOUT_OPTION = -o $@
 else
+ifeq (,$(findstring $(ESMF_OS).$(ESMF_COMPILER),$(WINTEL_OFFLAG_LIST)))
   ESMF_OBJOUT_OPTION = ; $(ESMF_MV) $*.o $@
+else
+  ESMF_OBJOUT_OPTION = ; $(ESMF_MV) $*.obj $@
+endif
 endif
 
 
@@ -2570,32 +2620,56 @@ $(ESMF_OBJDIR)/%.o : %.C
 
 .F90.a:
 	$(ESMF_F90COMPILEFREECPP_CMD) $<
+ifeq ($(ESMF_OS),MinGW)
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
+else
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
+endif
 	$(ESMF_RM) $*.o
 
 .f90.a:
 	$(ESMF_F90COMPILEFREENOCPP_CMD) $<
+ifeq ($(ESMF_OS),MinGW)
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
+else
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
+endif
 	$(ESMF_RM) $*.o
 
 .F.a:
 	$(ESMF_F90COMPILEFIXCPP_CMD) $<
+ifeq ($(ESMF_OS),MinGW)
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
+else
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
+endif
 	$(ESMF_RM) $*.o
 
 .f.a:
 	$(ESMF_F90COMPILEFIXNOCPP_CMD) $<
+ifeq ($(ESMF_OS),MinGW)
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
+else
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
+endif
 	$(ESMF_RM) $*.o
 
 .c.a:
 	$(ESMF_CXXCOMPILE_CMD) $<
+ifeq ($(ESMF_OS),MinGW)
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
+else
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
+endif
 	$(ESMF_RM) $*.o
 
 .C.a:
 	$(ESMF_CXXCOMPILE_CMD) $<
+ifeq ($(ESMF_OS),MinGW)
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
+else
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
+endif
 	$(ESMF_RM) $*.o
 
 # The rules below generate a valid Fortran file using gcc as a preprocessor:
@@ -2654,9 +2728,16 @@ shared:
 #  Build (deferred) static library from all objects
 #-------------------------------------------------------------------------------
 defer:
+ifeq ($(ESMF_OS),MinGW)
+	cd $(ESMF_OBJDIR) ; \
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:libesmf.a \
+		$(notdir $(wildcard $(ESMF_OBJDIR)/*.o)) ; \
+	$(ESMF_MV) libesmf.a $(ESMFLIB)
+else
 	cd $(ESMF_OBJDIR) ; \
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMFLIB) \
 		$(notdir $(wildcard $(ESMF_OBJDIR)/*.o))
+endif
 
 
 #-------------------------------------------------------------------------------
