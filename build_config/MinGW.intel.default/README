@@ -4,3 +4,15 @@ Intel icl C++ compiler.
 Requires the following environment settings:
 
   ESMF_COMPILER intel
+
+Notes:
+
+1.) This port was performed under Windows CCS Server 2003,
+using MinGW 5.1.4 and MSYS 1.0.11.
+
+2.) The MinGW version of gcc is required for preprocessing.
+
+3.) Prior to running the ESMF make, ensure that all compiler
+environment variables (in particular, PATH, LIB, and INC) are
+set up.  These should point to the correct Intel and VS
+directories.

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1 2008/12/05 19:15:08 w6ws Exp $
+# $Id: build_rules.mk,v 1.2 2008/12/12 07:52:36 w6ws Exp $
 #
 # MinGW.intel.default
 #
@@ -9,7 +9,7 @@
 ESMF_F90DEFAULT         = ifort
 ESMF_F90COMPILEOPTS    += -unix -Qfpp
 ESMF_CXXDEFAULT         = icl
-ESMF_CXXCOMPILEOPTS    += -TP
+ESMF_CXXCOMPILEOPTS    += -TP -GX
 
 ############################################################
 # Default MPI setting.
@@ -74,6 +74,11 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
 # Windows does not have support for system(3c) call
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
+
+############################################################
+# Windows does not have support for the times system call
+#
+ESMF_CXXCOMPILECPPFLAGS += -DNO_TIMES
 
 ############################################################
 # Windows does not have support for Pthreads
@@ -143,6 +148,11 @@ endif
 #
 ESMF_F90COMPILEFREENOCPP = -fpp0 -FR
 ESMF_F90COMPILEFIXCPP    = -fpp
+
+###########################################################
+# Windows does not have a ranlib command -> "true" is a noop command
+#
+ESMF_RANLIBDEFAULT       = true
 
 ###########################################################
 # Determine where gcc's libraries are located
