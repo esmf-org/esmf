@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.55 2008/12/10 14:50:58 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.1.2.56 2008/12/12 15:43:39 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1461,14 +1461,14 @@
         call test7d3_generic_repdim(rc, minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1,1/), ungriddedUBound=(/4,5,3,1/), &
-            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/1,3,4,5/), &
+            maxHaloLWidth=(/1,1,2/), maxHaloUWidth=(/1,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
             gridToFieldMap=(/1,4,0,7/) &
             )
         write(failMsg, *) ""
-        write(name, *) "Creating a 7D field from a 4D grid and 3D ungridded bounds " // &
+        write(name, *) "Creating a 7D field from a 4D grid and 4D ungridded bounds " // &
             "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
             "data copy, corner stagger, replicated dimension"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1480,14 +1480,14 @@
             minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1,1/), ungriddedUBound=(/4,5,3,1/), &
-            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/1,3,4,5/), &
+            maxHaloLWidth=(/1,1,2/), maxHaloUWidth=(/1,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
             gridToFieldMap=(/1,4,0,7/) &
             )
         write(failMsg, *) ""
-        write(name, *) "Setcommit a 7D field from a 4D grid and 3D ungridded bounds " // &
+        write(name, *) "Setcommit a 7D field from a 4D grid and 4D ungridded bounds " // &
             "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
             "data copy, corner stagger, replicated dimension"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
