@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.201.2.22 2008/11/07 21:12:24 theurich Exp $
+#  $Id: common.mk,v 1.201.2.23 2008/12/12 18:24:09 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -731,7 +731,7 @@ ifeq ($(origin ESMF_F90_PTR_BASE_SIZE), environment)
 CPPFLAGS       += -DESMF_F90_PTR_BASE_SIZE=$(ESMF_F90_PTR_BASE_SIZE)
 endif
 ifeq ($(origin ESMF_F90_PTR_PLUS_RANK), environment)
-CPPFLAGS       += -DESMF_F90_PTR_BASE_SIZE=$(ESMF_F90_PTR_PLUS_RANK)
+CPPFLAGS       += -DESMF_F90_PTR_PLUS_RANK=$(ESMF_F90_PTR_PLUS_RANK)
 endif
 
 #-------------------------------------------------------------------------------
