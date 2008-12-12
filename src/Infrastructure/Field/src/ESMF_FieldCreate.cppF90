@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.35 2008/12/08 22:25:57 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.36 2008/12/12 14:16:39 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.35 2008/12/08 22:25:57 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.36 2008/12/12 14:16:39 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -208,7 +208,7 @@ contains
 !       stored in the {\t farray}. @\
 ! \item [{[maxHaloLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
-!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt farray}.  Values default @\
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in @\
 !       the size of the {\tt farray}.  That is, for each gridded dimension the @\
@@ -219,7 +219,7 @@ contains
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[maxHaloUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
-!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt farray}.  Values default @\
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in @\
 !       the size of the {\tt farray}.  That is, for each gridded dimension the @\
@@ -392,7 +392,7 @@ TypeKindRankDeclarationMacro(FieldCreateFromPtr)
 !       these ungridded dimensions is the same as their order in the {\tt farray}. @\
 ! \item [{[maxHaloLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
-!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt farray}.  Values default @\
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in @\
 !       the size of the {\tt farray}.  That is, for each gridded dimension the @\
@@ -403,7 +403,7 @@ TypeKindRankDeclarationMacro(FieldCreateFromPtr)
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[maxHaloUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
-!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt farray}.  Values default @\
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in @\
 !       the size of the {\tt farray}.  That is, for each gridded dimension the @\
@@ -573,7 +573,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[maxHaloLWidth]}]
 !       Lower bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -584,7 +584,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -606,7 +606,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
     integer :: localrc                          !  Local error code
     logical :: rcpresent                        ! Return code present
     integer :: fieldDimCount, fieldUngriddedDimCount 
-    integer :: gridDimCount
+    integer :: gridDimCount, gridDimCount_norep
     integer :: grid_repdimcount
     integer :: fieldUndistDimCount 
     integer :: i
@@ -687,6 +687,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
         localGridToFieldMap(i) = i  
       enddo  
     endif  
+    gridDimCount_norep = gridDimCount - grid_repdimcount
 
      ! gridToFieldMap elements must be in range 0...fieldRank and unique  
      ! algorithm to check element uniqueness:  
@@ -745,18 +746,18 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
     endif  
  
     if (present(maxHaloLWidth)) then   
-        if (size(maxHaloLWidth) .ne. gridDimCount) then  
+        if (size(maxHaloLWidth) .ne. gridDimCount_norep) then  
             call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
-              "- maxHaloLWidth must equal to grid dimCount", &  
+              "- maxHaloLWidth must equal to gridded dimCount", &  
                 ESMF_CONTEXT, rc)   
             return  
         endif  
     endif  
  
     if (present(maxHaloUWidth)) then   
-       if (size(maxHaloUWidth) .ne. gridDimCount) then  
+       if (size(maxHaloUWidth) .ne. gridDimCount_norep) then  
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
-              "- maxHaloUWidth must equal to grid dimCount", &  
+              "- maxHaloUWidth must equal to gridded dimCount", &  
                 ESMF_CONTEXT, rc)   
            return  
        endif  
@@ -770,15 +771,15 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
     endif  
  
      if(present(maxHaloLWidth)) then  
-       localMaxHaloLWidth(1:gridDimCount) = &  
-          maxHaloLWidth (1:gridDimCount)  
+       localMaxHaloLWidth(1:gridDimCount_norep) = &  
+          maxHaloLWidth (1:gridDimCount_norep)  
      else  
           localMaxHaloLWidth = 0  
      endif  
  
      if(present(maxHaloUWidth)) then  
-       localMaxHaloUWidth(1:gridDimCount) = &  
-          maxHaloUWidth (1:gridDimCount)  
+       localMaxHaloUWidth(1:gridDimCount_norep) = &  
+          maxHaloUWidth (1:gridDimCount_norep)  
      else  
           localMaxHaloUWidth = 0  
      endif  
@@ -796,8 +797,8 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
     ! Call construction method to allocate and initialize field internals.
     call ESMF_FieldConstructIANew(ftype, grid, arrayspec, &
                                 localStaggerloc, localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
-                                ungriddedUBound, localMaxHaloLWidth(1:gridDimCount), &
-                                localMaxHaloUWidth(1:gridDimCount), name, &
+                                ungriddedUBound, localMaxHaloLWidth(1:gridDimCount_norep), &
+                                localMaxHaloUWidth(1:gridDimCount_norep), name, &
                                 iospec, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -905,7 +906,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[maxHaloLWidth]}]
 !       Lower bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -916,7 +917,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -939,7 +940,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
     logical :: rcpresent                    ! Return code present
 
     integer :: fieldDimCount, fieldUngriddedDimCount 
-    integer :: gridDimCount
+    integer :: gridDimCount, gridDimCount_norep
     integer :: grid_repdimcount
     integer :: fieldUndistDimCount 
     integer :: i
@@ -1028,6 +1029,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
         localGridToFieldMap(i) = i  
       enddo  
     endif  
+    gridDimCount_norep = gridDimCount - grid_repdimcount
 
      ! gridToFieldMap elements must be in range 0...fieldRank and unique  
      ! algorithm to check element uniqueness:  
@@ -1086,18 +1088,18 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
     endif  
  
     if (present(maxHaloLWidth)) then   
-        if (size(maxHaloLWidth) .ne. gridDimCount) then  
+        if (size(maxHaloLWidth) .ne. gridDimCount_norep) then  
             call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
-              "- maxHaloLWidth must equal to grid dimCount", &  
+              "- maxHaloLWidth must equal to gridded dimCount", &  
                 ESMF_CONTEXT, rc)   
             return  
         endif  
     endif  
  
     if (present(maxHaloUWidth)) then   
-       if (size(maxHaloUWidth) .ne. gridDimCount) then  
+       if (size(maxHaloUWidth) .ne. gridDimCount_norep) then  
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
-              "- maxHaloUWidth must equal to grid dimCount", &  
+              "- maxHaloUWidth must equal to gridded dimCount", &  
                 ESMF_CONTEXT, rc)   
            return  
        endif  
@@ -1111,15 +1113,15 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
     endif
 
      if(present(maxHaloLWidth)) then  
-       localMaxHaloLWidth(1:gridDimCount) = &  
-          maxHaloLWidth (1:gridDimCount)  
+       localMaxHaloLWidth(1:gridDimCount_norep) = &  
+          maxHaloLWidth (1:gridDimCount_norep)  
      else  
           localMaxHaloLWidth = 0  
      endif  
  
      if(present(maxHaloUWidth)) then  
-       localMaxHaloUWidth(1:gridDimCount) = &  
-          maxHaloUWidth (1:gridDimCount)  
+       localMaxHaloUWidth(1:gridDimCount_norep) = &  
+          maxHaloUWidth (1:gridDimCount_norep)  
      else  
           localMaxHaloUWidth = 0  
      endif  
@@ -1323,7 +1325,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[maxHaloLWidth]}]
 !       Lower bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -1334,7 +1336,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -1624,7 +1626,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[maxHaloLWidth]}]
 !       Lower bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -1635,7 +1637,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -1814,7 +1816,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [maxHaloLWidth]
 !       Lower bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -1825,7 +1827,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [maxHaloUWidth]
 !       Upper bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -1985,7 +1987,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[maxHaloLWidth]}]
 !       Lower bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -1996,7 +1998,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
