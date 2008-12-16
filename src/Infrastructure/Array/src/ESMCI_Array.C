@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.1.2.51 2008/12/12 06:55:40 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.1.2.52 2008/12/16 14:39:36 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.51 2008/12/12 06:55:40 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.1.2.52 2008/12/16 14:39:36 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -728,7 +728,7 @@ Array *Array::create(
         "- totalLWidth and distgrid mismatch", rc);
       return ESMC_NULL_POINTER;
     }
-    for (int i=0; i<dimCount; i++){
+    for (int i=0; i<redDimCount; i++){
       if (totalLWidthArg->array[i] < 0){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
           "- totalLWidth may only contain positive values", rc);
