@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.23.2.17 2008/08/12 20:34:13 oehmke Exp $
+// $Id: ESMCI_Grid_F.C,v 1.23.2.18 2008/12/16 02:07:13 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -698,7 +698,7 @@ extern "C" {
 	
       } else {
 	// given the array get the exclusive bounds of the localDE
-	arrayLBnd=array->getExclusiveLBound()+localDE*distDimCount;
+	arrayLBnd=array->getExclusiveLBound()+localDE*coordDimCount[coord];
 	
 	int j=0;
 	for (int i=0; i<coordDimCount[coord]; i++) {
@@ -740,7 +740,7 @@ extern "C" {
 	}
       } else {
 	// given the array get the exclusive bounds of the localDE
-	arrayUBnd=array->getExclusiveUBound()+localDE*distDimCount;
+	arrayUBnd=array->getExclusiveUBound()+localDE*coordDimCount[coord];
 	
 	int j=0;
 	for (int i=0; i<coordDimCount[coord]; i++) {
@@ -784,8 +784,8 @@ extern "C" {
       } else {
 
 	// given the array get the exclusive bounds of the localDE
-	arrayLBnd=array->getExclusiveLBound()+localDE*distDimCount;
-	arrayUBnd=array->getExclusiveUBound()+localDE*distDimCount;
+	arrayLBnd=array->getExclusiveLBound()+localDE*coordDimCount[coord];
+	arrayUBnd=array->getExclusiveUBound()+localDE*coordDimCount[coord];
 	
 	int j=0;
 	for (int i=0; i<coordDimCount[coord]; i++) {
@@ -833,7 +833,7 @@ extern "C" {
 	}
       } else {
 	// given the array get the exclusive bounds of the localDE
-	arrayLBnd=array->getComputationalLBound()+localDE*distDimCount;
+	arrayLBnd=array->getComputationalLBound()+localDE*coordDimCount[coord];;
 	
 	int j=0;
 	for (int i=0; i<coordDimCount[coord]; i++) {
@@ -880,7 +880,7 @@ extern "C" {
 	}
       } else {
 	// given the array get the exclusive bounds of the localDE
-	arrayUBnd=array->getComputationalUBound()+localDE*distDimCount;
+	arrayUBnd=array->getComputationalUBound()+localDE*coordDimCount[coord];
 	
 	int j=0;
 	for (int i=0; i<coordDimCount[coord]; i++) {
@@ -935,8 +935,8 @@ extern "C" {
 	
       } else {
 	// given the array get the exclusive bounds of the localDE
-	arrayLBnd=array->getComputationalLBound()+localDE*distDimCount;
-	arrayUBnd=array->getComputationalUBound()+localDE*distDimCount;
+	arrayLBnd=array->getComputationalLBound()+localDE*coordDimCount[coord];
+	arrayUBnd=array->getComputationalUBound()+localDE*coordDimCount[coord];
 	
 	int j=0;
 	for (int i=0; i<coordDimCount[coord]; i++) {
@@ -968,7 +968,7 @@ extern "C" {
       }
 
       // now that we have the array get the total bounds of the localDE
-      arrayLBnd=array->getTotalLBound()+localDE*distDimCount;
+      arrayLBnd=array->getTotalLBound()+localDE*coordDimCount[coord];
   
       int j=0;
       for (int i=0; i<coordDimCount[coord]; i++) {
@@ -996,7 +996,7 @@ extern "C" {
       }
 
       // now that we have the array get the total bounds of the localDE
-      arrayUBnd=array->getTotalUBound()+localDE*distDimCount;
+      arrayUBnd=array->getTotalUBound()+localDE*coordDimCount[coord];
 
       int j=0;
       for (int i=0; i<coordDimCount[coord]; i++) {
@@ -1024,10 +1024,10 @@ extern "C" {
       }
 
       // now that we have the array get the total bounds of the localDE
-      arrayLBnd=array->getTotalLBound()+localDE*distDimCount;
+      arrayLBnd=array->getTotalLBound()+localDE*coordDimCount[coord];
 
       // now that we have the array get the total bounds of the localDE
-      arrayUBnd=array->getTotalUBound()+localDE*distDimCount;
+      arrayUBnd=array->getTotalUBound()+localDE*coordDimCount[coord];
 
       int j=0;
       for (int i=0; i<coordDimCount[coord]; i++) {

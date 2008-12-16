@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.36.2.20 2008/09/04 20:27:08 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.36.2.21 2008/12/16 02:07:13 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.20 2008/09/04 20:27:08 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.21 2008/12/16 02:07:13 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -318,7 +318,7 @@ int Grid::addCoordArray(
     
     // fill in ArraySpec with information describing coordinate
     arrayspec->set(coordDimCount[coord], typekind);
-    
+   
     //// Initialize distgridToArrayMap array to 0 to make all unspecified dimensions
     //// replicated
     for (int i=0; i<dimCount; i++) {
@@ -367,8 +367,7 @@ int Grid::addCoordArray(
     }
 
     // set size of computational lower bound 
-    // (needs to be total dimCount of distGrid even if coord dimCount < distgrid dimCount)
-    compLWidthIntInt->extent[0]=distDimCount;
+    compLWidthIntInt->extent[0]=coordDimCount[coord];
     
     // init ComputationalUWidth to 0
     for (int i=0; i<coordDistDimCount; i++) {
@@ -376,8 +375,7 @@ int Grid::addCoordArray(
     }
 
     // set size of computational upper bound 
-    // (needs to be total dimCount of distGrid even if coord dimCount < distgrid dimCount)
-    compUWidthIntInt->extent[0]=distDimCount;
+    compUWidthIntInt->extent[0]=coordDimCount[coord];;
     
     //// Expand the boundaries of the computational region of the Array 
     //// (distributed and undistributed) to hold the stagger padding
@@ -408,7 +406,7 @@ int Grid::addCoordArray(
       printf("%d ", compLWidthIntIntArray[i]);
     }
     printf("\n");
-     DEBUG */
+      DEBUG */
 
     //// Optionally fix the lower memory bounds of each DE's memory chunk
     if (indexflag==ESMF_INDEX_USER) {
@@ -1850,7 +1848,6 @@ int Grid::setCoordArray(
     }
 
 
-
   // Check that the passed in Array's dimmap is consistant with this coord's
   int distgridToCoordMap[ESMF_MAXDIM];
 
@@ -1897,7 +1894,7 @@ int Grid::setCoordArray(
     //// Calculate the stagger lower bounds from the array
     ////// Get exclusive bounds (since the grid and array have
     ////// the same distgrid their exclusive bounds are the same)
-   const int *exLBnd=arrayArg->getExclusiveLBound()+lDE*distDimCount;
+   const int *exLBnd=arrayArg->getExclusiveLBound()+lDE*coordDimCount[coord];
 
     ////// Get stagger Lbnd offset
     localrc=this->getLDEStaggerLOffset(staggerloc, lDE, offset);
@@ -1908,26 +1905,19 @@ int Grid::setCoordArray(
     ////// distributed bounds are exclusive bounds minus stagger padding
     ////// undistributed bounds are undistLBound minus stagger padding
     for (int i=0; i<coordDimCount[coord]; i++) {
-      int gi=coordDimMap[coord][i];
-      if (coordIsDist[coord][i]) {
-        staggerLBnd[i]=exLBnd[coordMapDim[coord][i]]+offset[gi];
-      } else {
-        staggerLBnd[i]=gridUndistLBound[gridMapDim[gi]]+offset[gi];
-      }
+        int gi=coordDimMap[coord][i];
+        staggerLBnd[i]=exLBnd[i]+offset[gi];
     }
 
     //// get computationalLBound from the array
     ///// get the computational bounds of the localDE
-    const int *arrayCompLBnd=arrayArg->getComputationalLBound()+lDE*distDimCount;
+    const int *arrayCompLBnd=arrayArg->getComputationalLBound()+lDE*coordDimCount[coord];
 
     ///// Fill in the compLBnd array
     for (int i=0; i<coordDimCount[coord]; i++) {
-      if (coordIsDist[coord][i]) {
-        compLBnd[i]=arrayCompLBnd[coordMapDim[coord][i]];
-      } else {
-        compLBnd[i]=arrayUndistLBound[coordMapDim[coord][i]];
-      }
+        compLBnd[i]=arrayCompLBnd[i];
     }
+
 
     //// Make sure the grid staggerUndistLBound fit within the array computational L bounds
     for (int i=0; i<coordDimCount[coord]; i++) {
@@ -1939,11 +1929,10 @@ int Grid::setCoordArray(
       }
     }
 
-
     //// Calculate the stagger upper bounds from the array
     ////// Get array exclusive bounds (since the grid and array have
     ////// the same distgrid their exclusive bounds are the same)
-   const int *exUBnd=arrayArg->getExclusiveUBound()+lDE*distDimCount;
+   const int *exUBnd=arrayArg->getExclusiveUBound()+lDE*coordDimCount[coord];
 
     ////// Get stagger Ubnd offset
     localrc=this->getLDEStaggerUOffset(staggerloc, lDE, offset);
@@ -1954,24 +1943,16 @@ int Grid::setCoordArray(
     ////// undistributed bounds are undistUBound plus stagger padding
     for (int i=0; i<coordDimCount[coord]; i++) {
       int gi=coordDimMap[coord][i];
-      if (coordIsDist[coord][i]) {
-        staggerUBnd[i]=exUBnd[coordMapDim[coord][i]]-offset[gi];
-      } else {
-        staggerUBnd[i]=gridUndistUBound[gridMapDim[gi]]-offset[gi];
-      }
+        staggerUBnd[i]=exUBnd[i]-offset[gi];
     }
     
     //// get computationalUBound from the array
     ///// get the computational bounds of the localDE
-    const int *arrayCompUBnd=arrayArg->getComputationalUBound()+lDE*distDimCount;
+    const int *arrayCompUBnd=arrayArg->getComputationalUBound()+lDE*coordDimCount[coord];
 
     ///// Fill in the compLBnd array
     for (int i=0; i<coordDimCount[coord]; i++) {
-      if (coordIsDist[coord][i]) {
-        compUBnd[i]=arrayCompUBnd[coordMapDim[coord][i]];
-      } else {
-        compUBnd[i]=arrayUndistUBound[coordMapDim[coord][i]];
-      }
+        compUBnd[i]=arrayCompUBnd[i];
     }
 
     //// Make sure the grid's stagger upper bounds fit within the array computational upper bounds

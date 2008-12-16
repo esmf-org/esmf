@@ -195,7 +195,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.34 2008/12/02 20:54:07 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.35 2008/12/16 02:07:13 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -989,6 +989,7 @@ end interface
     integer :: dimCount
     integer :: i,ungriddedDimCount, arrayDimCount, undistArrayDimCount, bndpos
     logical :: contains_nonzero
+    integer :: gridUsedDimCount
    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1056,20 +1057,23 @@ end interface
        endif
     endif
 
-
-    ! calc full Array DimCount
-    ! Its the ungriddedDimCount + the number of non-zero entries in gridToArrayMap
-    arrayDimCount=ungriddedDimCount
+    ! calc the number of dimensions from the grid being used (e.g. with non-zero mapping)
     if (present(gridToArrayMap)) then
+       gridUsedDimCount=0
        do i=1,dimCount
           if (gridToArrayMap(i) .gt. 0) then
-	     arrayDimCount=arrayDimCount+1
+	     gridUsedDimCount=gridUsedDimCount+1
           endif
        enddo
    else
        ! Default assumes all grid dims are used so add number of grid dims
-       arrayDimCount=arrayDimCount+dimCount
+       gridUsedDimCount=dimCount
    endif
+
+
+    ! calc full Array DimCount
+    ! Its the ungriddedDimCount + the number of non-zero entries in gridToArrayMap
+    arrayDimCount=ungriddedDimCount+gridUsedDimCount
 
 
     ! Make sure gridToArrayMap is correct size
@@ -1083,6 +1087,7 @@ end interface
           endif
        enddo
     endif
+
 
     ! Make sure gridToArrayMap contains at least one non-zero entry
     if (present(gridToArrayMap)) then
@@ -1132,8 +1137,8 @@ end interface
     ! create Array
     array=ESMF_ArrayCreate(arrayspec=arrayspec, &
               distgrid=distgrid, distgridToArrayMap=distgridToArrayMap, &
-              computationalEdgeLWidth=compELWidth(1:dimCount), &
-              computationalEdgeUWidth=compEUWidth(1:dimCount), &
+              computationalEdgeLWidth=compELWidth(1:gridUsedDimCount), &
+              computationalEdgeUWidth=compEUWidth(1:gridUsedDimCount), &
               totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
               indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
               undistLBound=arrayLBound, undistUBound=arrayUBound, name=name, &
@@ -1239,6 +1244,7 @@ end interface
     integer :: localGridToArrayMap(ESMF_MAXDIM)
     logical :: filled(ESMF_MAXDIM)
     logical :: contains_nonzero   
+    integer :: gridUsedDimCount
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1288,6 +1294,7 @@ end interface
     ! calc undist Array DimCount
     undistArrayDimCount=ungriddedDimCount
 
+
     ! Make sure gridToArrayMap is correct size
     if (present(gridToArrayMap)) then
        if (size(gridToArrayMap) < dimCount) then
@@ -1298,19 +1305,25 @@ end interface
        endif
     endif
 
-    ! calc full Array DimCount
-    ! Its the ungriddedDimCount + the number of non-zero entries in gridToArrayMap
-    arrayDimCount=ungriddedDimCount
+
+    ! calc the number of dimensions from the grid being used (e.g. with non-zero mapping)
     if (present(gridToArrayMap)) then
+       gridUsedDimCount=0
        do i=1,dimCount
           if (gridToArrayMap(i) .gt. 0) then
-	     arrayDimCount=arrayDimCount+1
+	     gridUsedDimCount=gridUsedDimCount+1
           endif
        enddo
    else
        ! Default assumes all grid dims are used so add number of grid dims
-       arrayDimCount=arrayDimCount+dimCount
+       gridUsedDimCount=dimCount
    endif
+
+
+    ! calc full Array DimCount
+    ! Its the ungriddedDimCount + the number of non-zero entries in gridToArrayMap
+    arrayDimCount=ungriddedDimCount+gridUsedDimCount
+
 
     ! Make sure gridToArrayMap's entries are correct
     if (present(gridToArrayMap)) then
@@ -1341,6 +1354,7 @@ end interface
        endif
     endif
 
+
     ! Check distgridToArrayMap
     if (size(distgridToArrayMap) < dimCount) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
@@ -1350,7 +1364,7 @@ end interface
     endif
 
     ! Check distgridToArrayMap
-    if (size(computationalEdgeLWidth) < dimCount) then
+    if (size(computationalEdgeLWidth) < gridUsedDimCount) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
                    "- computationalEdgeLWidth is too small", & 
                           ESMF_CONTEXT, rc) 
@@ -1358,7 +1372,7 @@ end interface
     endif
 
     ! Check distgridToArrayMap
-    if (size(computationalEdgeUWidth) < dimCount) then
+    if (size(computationalEdgeUWidth) < gridUsedDimCount) then
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
                    "- computationalEdgeUWidth is too small", & 
                           ESMF_CONTEXT, rc) 
@@ -1417,6 +1431,7 @@ end interface
       distgridToArrayMap(i)=localGridToArrayMap(distgridToGridMap(i))
    enddo
 
+
    ! construct array based on the presence of distributed dimensions
    ! if there are undistributed dimensions ...
    if (undistArrayDimCount .gt. 0) then      
@@ -1436,6 +1451,7 @@ end interface
            arrayDimType(distGridToArrayMap(i))=1 ! set to distributed
         endif
       enddo
+
 
       ! TODO: make the below cleaner given no grid undistdim
       !! Fill in ungridded bound info
@@ -1459,6 +1475,7 @@ end interface
             endif
          enddo
 
+
       !! cleanup
       deallocate(arrayDimType)
       deallocate(arrayDimInd)
@@ -1466,7 +1483,6 @@ end interface
 
     ! cleanup
     deallocate(distgridToGridMap)
- 
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.20.2.10 2008/12/12 20:00:50 svasquez Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.20.2.11 2008/12/16 02:07:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.20.2.10 2008/12/12 20:00:50 svasquez Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.20.2.11 2008/12/16 02:07:13 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -197,7 +197,7 @@ program ESMF_GridCoordUTest
   ! get distgrid 
   call ESMF_GridGet(grid2D, distgrid=tmpDistGrid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
- 
+
   ! First make bad Array and make sure it fails
   ! Create Array 
   array1D=ESMF_ArrayCreate(arrayspec=arrayspec1D, distgrid=tmpdistgrid, &
@@ -224,6 +224,7 @@ program ESMF_GridCoordUTest
                staggerloc=ESMF_STAGGERLOC_CORNER, array=array1D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
+
   ! Get Coord From Array
   call ESMF_GridGetCoord(grid2D,coordDim=1,&
                staggerloc=ESMF_STAGGERLOC_CORNER, array=array2, rc=localrc)
@@ -246,6 +247,7 @@ program ESMF_GridCoordUTest
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -2621,7 +2623,6 @@ program ESMF_GridCoordUTest
            ielbnd3=(/4/),ieubnd3=(/7/),iloff3=(/0,0/),iuoff3=(/0,0/), &
            correct=correct, rc=rc) 
 
-
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -2974,6 +2975,7 @@ program ESMF_GridCoordUTest
   call ESMF_GridDestroy(grid3D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+100 continue
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
