@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.31 2008/12/12 21:52:09 feiliu Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.32 2008/12/17 15:06:38 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.31 2008/12/12 21:52:09 feiliu Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.32 2008/12/17 15:06:38 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -912,9 +912,9 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     field%ftypep%staggerloc = localStaggerLoc @\
     field%ftypep%gridToFieldMap(1:gridDimCount) = & @\
        localGridToFieldMap(1:gridDimCount) @\
-    field%ftypep%maxHaloLWidth(1:gridDimCount) = & @\
+    field%ftypep%maxHaloLWidth(1:gridDimCount_norep) = & @\
        localMaxHaloLWidth (1:gridDimCount_norep) @\
-    field%ftypep%maxHaloUWidth(1:gridDimCount) = & @\
+    field%ftypep%maxHaloUWidth(1:gridDimCount_norep) = & @\
        localMaxHaloUWidth (1:gridDimCount_norep) @\
     field%ftypep%ungriddedLBound(1:fieldUngriddedDimCount) = & @\
        localUngriddedLBound(1:fieldUngriddedDimCount) @\
@@ -1251,9 +1251,9 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
     field%ftypep%staggerloc = localStaggerLoc @\
     field%ftypep%gridToFieldMap(1:gridDimCount) = & @\
        localGridToFieldMap(1:gridDimCount) @\
-    field%ftypep%maxHaloLWidth(1:gridDimCount) = & @\
+    field%ftypep%maxHaloLWidth(1:gridDimCount_norep) = & @\
        localMaxHaloLWidth (1:gridDimCount_norep) @\
-    field%ftypep%maxHaloUWidth(1:gridDimCount) = & @\
+    field%ftypep%maxHaloUWidth(1:gridDimCount_norep) = & @\
        localMaxHaloUWidth (1:gridDimCount_norep) @\
     field%ftypep%datastatus = ESMF_STATUS_READY @\
     field%ftypep%grid  = grid @\
