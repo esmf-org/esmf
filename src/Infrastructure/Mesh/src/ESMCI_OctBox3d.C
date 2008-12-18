@@ -171,7 +171,14 @@ int Finalize_BOX3D(BOX3D *tree)
   for (i=0; i<tree->curr_node; i++)
     {
        /* get a random location in the node list */
+#if defined (ESMF_OS_MinGW)
+// TODO: Look for a Standard-conforming way to do random numbers that
+// gives more digits than rand().  For example, see Stroustrup 3rd
+// edition, section 22.7.
+       r = 0;
+#else
        r=random();
+#endif
        rf=r;
        j=tree->curr_node*rf/maxf;
 
