@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.37 2008/12/05 06:39:25 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.38 2008/12/18 14:43:27 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ module ESMF_FieldCreateMod
   use ESMF_ArrayCreateMod
   
   use ESMF_FieldMod
-  use ESMF_FieldSetMod
+  use ESMF_FieldSetCoMod
   
   implicit none
 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.37 2008/12/05 06:39:25 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.38 2008/12/18 14:43:27 feiliu Exp $'
 
 !==============================================================================
 ! 
