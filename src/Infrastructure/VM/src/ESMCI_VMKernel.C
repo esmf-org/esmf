@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.3 2008/09/15 20:53:14 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.4 2008/12/18 22:42:03 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -29,7 +29,11 @@
 #define _XOPEN_SOURCE_EXTENDED
 #endif
 
+#if !defined (ESMF_OS_MinGW)
 #include <unistd.h>
+#else
+#include <windows.h>
+#endif
 
 // On OSF1 (i.e. Tru64) systems there is a problem with picking up the 
 // prototype of gethostid() from unistd.h from within C++....
@@ -66,6 +70,12 @@
 #define VM_SIG1               (SIGUSR2)
 // Note that SIGUSR2 interferes with LAM!
 #endif
+#endif
+
+#if defined (ESMF_OS_MinGW)
+// Windows equivalent to POSIX getpid(2)
+typedef DWORD pid_t;
+#define getpid GetCurrentProcessId
 #endif
 
 namespace ESMCI {
@@ -236,6 +246,7 @@ void VMK::obtain_args(){
 void VMK::init(MPI_Comm mpiCommunicator){
   // initialize the physical machine and a default (all MPI) virtual machine
   // initialize signal handling -> this MUST happen before MPI_Init is called!!
+#if !defined (ESMF_NO_SIGNALS)
   struct sigaction action;
   action.sa_handler = SIG_DFL;
   sigemptyset (&(action.sa_mask));
@@ -244,6 +255,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   sigemptyset(&sigs_to_block);
   sigaddset(&sigs_to_block, VM_SIG1);
   sigprocmask(SIG_BLOCK, &sigs_to_block, NULL); // block VM_SIG1
+#endif
   // obtain command line arguments and store in the VM class
   argc = 0; // reset
   for (int k=0; k<100; k++)
@@ -839,7 +851,11 @@ static void *vmk_spawn(void *arg){
         sarg->contributors[sarg->mypet][i].blocker_tid);
 #endif
       // send signal to the _other_ process
+#if !defined (ESMF_OS_MinGW)
       kill(sarg->contributors[sarg->mypet][i].pid, VM_SIG1);
+#else
+// TODO: Windows equivalent, perhaps using TerminateProcess
+#endif
       // which ever thread of the other process woke up will try to receive tid
 //      MPI_Send(&(sarg->contributors[sarg->mypet][i].blocker_tid),
 //      sizeof(pthread_t), MPI_BYTE, sarg->contributors[sarg->mypet][i].mpi_pid,
@@ -893,9 +909,11 @@ static void *vmk_sigcatcher(void *arg){
   pid_t pid = getpid();
   vmkt->arg = (void *)&pid;
   // more preparation
+#if !defined (ESMF_NO_SIGNALS)
   sigset_t sigs_to_catch;
   sigemptyset(&sigs_to_catch);
   sigaddset(&sigs_to_catch, VM_SIG1);
+#endif
   int caught;
   MPI_Status mpi_s;
   VMK vm;  // need a handle to access the MPI_Comm of default VMK
@@ -2602,7 +2620,9 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
           // use nanosleep to pause between tests to lower impact on CPU load
 #ifdef ESMF_NO_NANOSLEEP
 #else
+#if !defined (ESMF_OS_MinGW)
           struct timespec dt = {0, nanopause};
+#endif
 #endif
           int completeFlag = 0;
           for(;;){
@@ -2617,7 +2637,11 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
             if (completeFlag) break;
 #ifdef ESMF_NO_NANOSLEEP
 #else
+#if !defined (ESMF_OS_MinGW)
             nanosleep(&dt, NULL);
+#else
+            Sleep (1); // 1 millisec delay
+#endif
 #endif
           }
           if (status){
