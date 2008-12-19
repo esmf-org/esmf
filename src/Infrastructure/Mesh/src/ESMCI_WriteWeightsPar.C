@@ -13,6 +13,7 @@
 #include <Mesh/include/ESMCI_Interp.h>
 #include <Mesh/include/ESMCI_Migrator.h>
 #include <Mesh/include/ESMCI_MeshUtils.h>
+#include <ESMC_Macros.h>
 
 #ifdef ESMF_PNETCDF
 #include <pnetcdf.h>
@@ -22,6 +23,8 @@ typedef long long MPI_OffType;
 #endif
 
 #include <limits>
+#include <time.h>
+
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -380,7 +383,8 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
    int retval;
    
    int n_adimid, n_bdimid, nv_adimid, nv_bdimid, src_grid_rankdimid, dst_grid_rankdimid,
-       ni_adimid, nj_adimid, ni_bdimid, nj_bdimid, n_sdimid, num_wgtsdimid, n_kdimid;
+     ni_adimid, nj_adimid, ni_bdimid, nj_bdimid, n_sdimid, num_wgtsdimid, n_kdimid;
+
    
    // Define dimensions
    if ((retval = ncmpi_def_dim(ncid, "n_a", ncsrc.grid_size, &n_adimid)))
@@ -538,12 +542,64 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
     if ((retval = ncmpi_def_var(ncid, "S", NC_DOUBLE, 1, &n_sdimid, &Sid)))
       Throw() << "NC error:" << ncmpi_strerror(retval);
     
+    // Add some global attributes to let this work with scrip_test 
+    // eventually these should be optional with a flag
+
+
+    // Title
+    // TODO: make this title contain the grid file names
+    static char title[]="Patch Weights";
+    if ((retval = ncmpi_put_att_text(ncid, NC_GLOBAL, "title",std::strlen(title), title)))
+      Throw() << "NC error:" << ncmpi_strerror(retval);
+
+
+    // Normalization type
+    static char norm[]="destarea";
+    if ((retval = ncmpi_put_att_text(ncid, NC_GLOBAL, "normalization",std::strlen(norm), norm)))
+      Throw() << "NC error:" << ncmpi_strerror(retval);
+
+    // map method 
+    // Note we are making this "Bilinear" because this is the closest equivalent to what we have
+    static char map_method[]="Bilinear remapping";
+    if ((retval = ncmpi_put_att_text(ncid, NC_GLOBAL, "map_method",std::strlen(map_method), map_method)))
+      Throw() << "NC error:" << ncmpi_strerror(retval);
+
+    // conventions
+    static char conventions[]="NCAR-CSM";
+    if ((retval = ncmpi_put_att_text(ncid, NC_GLOBAL, "conventions",std::strlen(conventions), conventions)))
+      Throw() << "NC error:" << ncmpi_strerror(retval);
+
+    // src file
+    if ((retval = ncmpi_put_att_text(ncid, NC_GLOBAL, "domain_a",src_ncfile.length(),
+                                     src_ncfile.c_str())))
+      Throw() << "NC error:" << ncmpi_strerror(retval);
+
+    // dst file
+    if ((retval = ncmpi_put_att_text(ncid, NC_GLOBAL, "domain_b",dst_ncfile.length(),
+                                     dst_ncfile.c_str())))
+      Throw() << "NC error:" << ncmpi_strerror(retval);
+
+
+    // Some other useful attributes suggested by Brian Kauffman
+    // src file
+    if ((retval = ncmpi_put_att_text(ncid, NC_GLOBAL, "grid_file_src",src_ncfile.length(),
+                                     src_ncfile.c_str())))
+      Throw() << "NC error:" << ncmpi_strerror(retval);
+
+    // dst file
+    if ((retval = ncmpi_put_att_text(ncid, NC_GLOBAL, "grid_file_dst",dst_ncfile.length(),
+                                     dst_ncfile.c_str())))
+      Throw() << "NC error:" << ncmpi_strerror(retval);
+
+    if ((retval = ncmpi_put_att_text(ncid, NC_GLOBAL, "CVS_revision",std::strlen(ESMF_VERSION_STRING),
+                                     ESMF_VERSION_STRING)))
+      Throw() << "NC error:" << ncmpi_strerror(retval);
+
+
    // End of definition
    if ((retval = ncmpi_enddef(ncid)))
      Throw() << "NC error:" << ncmpi_strerror(retval);
- 
 
-   
    // Grid dims are the same on all procs.  Just write on proc 0
    ncmpi_begin_indep_data(ncid);  
    
@@ -600,8 +656,15 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
    
    {
    std::vector<double> frac;
-   
    frac.resize(ncsrc.grid_size, 0);
+
+   // Make frac non-zero for non-zero mask values
+   for (int i=0; i<frac.size(); i++) {
+     if (ncsrc.grid_imask[i] == 1) {
+       frac[i]=1.0;
+     }
+   }
+
    if ((retval = ncmpi_put_vara_double_all(ncid,frac_aid, startsa, countsa, &frac[0])))
      Throw() << "NC error:" << ncmpi_strerror(retval);
    
@@ -650,6 +713,14 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
    std::vector<double> frac;
    
    frac.resize(ncdst.grid_size, 0);
+
+   // Make frac non-zero for non-zero mask values
+   for (int i=0; i<frac.size(); i++) {
+     if (ncdst.grid_imask[i] == 1) {
+       frac[i]=1.0;
+     }
+   }
+
    if ((retval = ncmpi_put_vara_double_all(ncid, frac_bid, startsb, countsb, &frac[0])))
       Throw() << "NC error:" << ncmpi_strerror(retval);
 
