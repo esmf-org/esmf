@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.89 2008/11/26 06:59:14 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.90 2008/12/19 07:01:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.89 2008/11/26 06:59:14 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.90 2008/12/19 07:01:17 eschwab Exp $'
 
 !==============================================================================
 !
@@ -991,7 +991,7 @@
                                          timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: mm
@@ -1212,7 +1212,7 @@
                                               timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: mm
@@ -1240,7 +1240,7 @@
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
-      type(ESMF_Time),         intent(inout)            :: startTimeIn    ! Input
+      type(ESMF_Time),         intent(inout)         :: startTimeIn    ! Input
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
@@ -1440,7 +1440,7 @@
                                             timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: mm
@@ -1669,7 +1669,7 @@
                                                timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: mm
@@ -1917,7 +1917,7 @@
       subroutine ESMF_TimeIntervalPrint(timeinterval, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
       character (len=*),       intent(in),  optional :: options
       integer,                 intent(out), optional :: rc
 
@@ -1987,7 +1987,7 @@
       subroutine ESMF_TimeIntervalReadRestart(timeinterval, name, iospec, rc)
 !
 ! !ARGUMENTS:      
-      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
       character (len=*),       intent(in)            :: name
       type(ESMF_IOSpec),       intent(in),  optional :: iospec
       integer,                 intent(out), optional :: rc
@@ -2117,11 +2117,11 @@
 !     \item[{[s\_i8]}]
 !          Integer seconds (large, >= 64-bit).  Default = 0
 !     \item[{[ms]}]
-!          Integer milliseconds.  Default = 0.
+!          Integer milliseconds.  Default = 0
 !     \item[{[us]}]
-!          Integer microseconds.  Default = 0.
+!          Integer microseconds.  Default = 0
 !     \item[{[ns]}]
-!          Integer nanoseconds.  Default = 0.
+!          Integer nanoseconds.  Default = 0
 !     \item[{[d\_r8]}]
 !          Double precision days.  Default = 0.0.
 !     \item[{[h\_r8]}]
@@ -2138,18 +2138,18 @@
 !          Double precision nanoseconds.  Default = 0.0.
 !     \item[{[sN]}]
 !          Integer numerator of fractional seconds (sN/sD).
-!          Default = 0.
+!          Default = 0
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
-!          Default = 0.
+!          Default = 0
 !     \item[{[sD]}]
 !          Integer denominator of fractional seconds (sN/sD).
-!          Default = 1.
+!          Default = 1
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
-!          Default = 1.
+!          Default = 1
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2265,11 +2265,11 @@
 !     \item[{[s\_i8]}]
 !          Integer seconds (large, >= 64-bit).  Default = 0
 !     \item[{[ms]}]
-!          Integer milliseconds.  Default = 0.
+!          Integer milliseconds.  Default = 0
 !     \item[{[us]}]
-!          Integer microseconds.  Default = 0.
+!          Integer microseconds.  Default = 0
 !     \item[{[ns]}]
-!          Integer nanoseconds.  Default = 0.
+!          Integer nanoseconds.  Default = 0
 !     \item[{[d\_r8]}]
 !          Double precision days.  Default = 0.0.
 !     \item[{[h\_r8]}]
@@ -2286,18 +2286,18 @@
 !          Double precision nanoseconds.  Default = 0.0.
 !     \item[{[sN]}]
 !          Integer numerator of fractional seconds (sN/sD).
-!          Default = 0.
+!          Default = 0
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
-!          Default = 0.
+!          Default = 0
 !     \item[{[sD]}]
 !          Integer denominator of fractional seconds (sN/sD).
-!          Default = 1.
+!          Default = 1
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional seconds (sN\_i8/sD\_i8).
 !                                                           (large, >= 64-bit).
-!          Default = 1.
+!          Default = 1
 !     \item[startTime]
 !          Starting time of an absolute calendar interval (yy, mm, and/or d);
 !          pins a calendar interval to a specific point in time.  If not set,
@@ -2418,11 +2418,11 @@
 !     \item[{[s\_i8]}]
 !          Integer seconds (large, >= 64-bit).  Default = 0
 !     \item[{[ms]}]
-!          Integer milliseconds.  Default = 0.
+!          Integer milliseconds.  Default = 0
 !     \item[{[us]}]
-!          Integer microseconds.  Default = 0.
+!          Integer microseconds.  Default = 0
 !     \item[{[ns]}]
-!          Integer nanoseconds.  Default = 0.
+!          Integer nanoseconds.  Default = 0
 !     \item[{[d\_r8]}]
 !          Double precision days.  Default = 0.0.
 !     \item[{[h\_r8]}]
@@ -2439,18 +2439,18 @@
 !          Double precision nanoseconds.  Default = 0.0.
 !     \item[{[sN]}]
 !          Integer numerator of fractional seconds (sN/sD).
-!          Default = 0.
+!          Default = 0
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional seconds (sN\_i8/sD\_i8).
 !                                                           (large, >= 64-bit).
-!          Default = 0.
+!          Default = 0
 !     \item[{[sD]}]
 !          Integer denominator of fractional seconds (sN/sD).
-!          Default = 1.
+!          Default = 1
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional seconds (sN\_i8/sD\_i8).
 !                                                           (large, >= 64-bit).
-!          Default = 1.
+!          Default = 1
 !     \item[{[calendar]}]
 !          {\tt Calendar} used to give better definition to calendar interval
 !          (yy, mm, and/or d) for arithmetic, comparison, and conversion
@@ -2578,11 +2578,11 @@
 !     \item[{[s\_i8]}]
 !          Integer seconds (large, >= 64-bit).  Default = 0
 !     \item[{[ms]}]
-!          Integer milliseconds.  Default = 0.
+!          Integer milliseconds.  Default = 0
 !     \item[{[us]}]
-!          Integer microseconds.  Default = 0.
+!          Integer microseconds.  Default = 0
 !     \item[{[ns]}]
-!          Integer nanoseconds.  Default = 0.
+!          Integer nanoseconds.  Default = 0
 !     \item[{[d\_r8]}]
 !          Double precision days.  Default = 0.0.
 !     \item[{[h\_r8]}]
@@ -2599,18 +2599,18 @@
 !          Double precision nanoseconds.  Default = 0.0.
 !     \item[{[sN]}]
 !          Integer numerator of fractional seconds (sN/sD).
-!          Default = 0.
+!          Default = 0
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
-!          Default = 0.
+!          Default = 0
 !     \item[{[sD]}]
 !          Integer denominator of fractional seconds (sN/sD).
-!          Default = 1.
+!          Default = 1
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
-!          Default = 1.
+!          Default = 1
 !     \item[{[calendarType]}]
 !          Alternate to, and mutually exclusive with, calendar above.  More
 !          convenient way of specifying a built-in calendar type.
@@ -2654,7 +2654,7 @@
       subroutine ESMF_TimeIntervalValidate(timeinterval, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
       character (len=*),       intent(in),  optional :: options
       integer,                 intent(out), optional :: rc
 
@@ -2702,7 +2702,7 @@
       subroutine ESMF_TimeIntervalWriteRestart(timeinterval, iospec, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(inout)            :: timeinterval
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
       type(ESMF_IOSpec),       intent(in),  optional :: iospec
       integer,                 intent(out), optional :: rc
 

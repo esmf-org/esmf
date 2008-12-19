@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalType.F90,v 1.14 2008/11/14 04:05:57 theurich Exp $
+! $Id: ESMF_TimeIntervalType.F90,v 1.15 2008/12/19 07:01:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -83,7 +83,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeIntervalType.F90,v 1.14 2008/11/14 04:05:57 theurich Exp $'
+      '$Id: ESMF_TimeIntervalType.F90,v 1.15 2008/12/19 07:01:17 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -100,7 +100,7 @@
 !
 ! !ARGUMENTS:
        type(ESMF_TimeInterval), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_TimeIntervalGetInit
+       ESMF_INIT_TYPE                                :: ESMF_TimeIntervalGetInit
 !
 ! !DESCRIPTION:
 !      Get the initialization status of the shallow class {\tt timeinterval}.

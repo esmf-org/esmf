@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockType.F90,v 1.17 2008/11/14 04:05:57 theurich Exp $
+! $Id: ESMF_ClockType.F90,v 1.18 2008/12/19 07:01:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -68,7 +68,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ClockType.F90,v 1.17 2008/11/14 04:05:57 theurich Exp $'
+      '$Id: ESMF_ClockType.F90,v 1.18 2008/12/19 07:01:17 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -84,7 +84,7 @@
 !
 ! !ARGUMENTS:
        type(ESMF_Clock), intent(in), optional :: d
-       ESMF_INIT_TYPE :: ESMF_ClockGetInit
+       ESMF_INIT_TYPE                         :: ESMF_ClockGetInit
 !
 ! !DESCRIPTION:
 !      Get the initialization status of the Deep class {\tt bundle}.
@@ -117,8 +117,8 @@
   subroutine ESMF_ClockSetInitCreated(clock, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Clock), intent(inout)           :: clock
-    integer,          intent(out),  optional  :: rc  
+    type(ESMF_Clock), intent(inout)         :: clock
+    integer,          intent(out), optional :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -158,8 +158,8 @@
   subroutine ESMF_ClockSetInitDeleted(clock, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Clock), intent(inout)           :: clock
-    integer,          intent(out),  optional  :: rc  
+    type(ESMF_Clock), intent(inout)         :: clock
+    integer,          intent(out), optional :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -199,9 +199,9 @@
   subroutine ESMF_ClockGetThis(clock, this, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Clock),   intent(in)              :: clock
-    type(ESMF_Pointer), intent(out)             :: this
-    integer,            intent(out),  optional  :: rc  
+    type(ESMF_Clock),   intent(in)             :: clock
+    type(ESMF_Pointer), intent(out)            :: this
+    integer,            intent(out),  optional :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -243,9 +243,9 @@
   subroutine ESMF_ClockSetThis(clock, this, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Clock),   intent(inout)           :: clock
-    type(ESMF_Pointer), intent(in)              :: this
-    integer,            intent(out),  optional  :: rc  
+    type(ESMF_Clock),   intent(inout)          :: clock
+    type(ESMF_Pointer), intent(in)             :: this
+    integer,            intent(out),  optional :: rc  
 !         
 !
 ! !DESCRIPTION:

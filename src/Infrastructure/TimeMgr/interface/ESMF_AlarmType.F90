@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmType.F90,v 1.18 2008/11/14 04:05:57 theurich Exp $
+! $Id: ESMF_AlarmType.F90,v 1.19 2008/12/19 07:01:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -86,7 +86,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_AlarmType.F90,v 1.18 2008/11/14 04:05:57 theurich Exp $'
+      '$Id: ESMF_AlarmType.F90,v 1.19 2008/12/19 07:01:17 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -100,7 +100,7 @@
 !
 ! !ARGUMENTS:
        type(ESMF_Alarm), intent(inout), optional :: d
-       ESMF_INIT_TYPE :: ESMF_AlarmGetInit
+       ESMF_INIT_TYPE                            :: ESMF_AlarmGetInit
 !
 ! !DESCRIPTION:
 !      Get the initialization status of the Deep class {\tt alarm}.
@@ -134,8 +134,8 @@
   subroutine ESMF_AlarmSetInitCreated(alarm, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Alarm), intent(inout)           :: alarm
-    integer,          intent(out),  optional  :: rc  
+    type(ESMF_Alarm), intent(inout)         :: alarm
+    integer,          intent(out), optional :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -174,8 +174,8 @@
   subroutine ESMF_AlarmSetInitDeleted(alarm, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Alarm), intent(inout)           :: alarm
-    integer,          intent(out),  optional  :: rc  
+    type(ESMF_Alarm), intent(inout)         :: alarm
+    integer,          intent(out), optional :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -210,9 +210,9 @@
   subroutine ESMF_AlarmGetThis(alarm, this, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Alarm), intent(in), optional :: alarm
-    type(ESMF_Pointer), intent(out) :: this
-    integer, intent(out),optional :: rc
+    type(ESMF_Alarm),   intent(in),  optional :: alarm
+    type(ESMF_Pointer), intent(out)           :: this
+    integer,            intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -246,9 +246,9 @@
   subroutine ESMF_AlarmSetThis(alarm, this, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Alarm), intent(inout) :: alarm
-    type(ESMF_Pointer), intent(in) :: this
-    integer, intent(out), optional :: rc
+    type(ESMF_Alarm),   intent(inout)          :: alarm
+    type(ESMF_Pointer), intent(in)             :: this
+    integer,            intent(out), optional  :: rc
 !
 !
 ! !DESCRIPTION:

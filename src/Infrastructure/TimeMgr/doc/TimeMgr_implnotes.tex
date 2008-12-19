@@ -1,4 +1,4 @@
-% $Id: TimeMgr_implnotes.tex,v 1.8 2004/06/18 22:32:56 eschwab Exp $
+% $Id: TimeMgr_implnotes.tex,v 1.9 2008/12/19 07:01:16 eschwab Exp $
 
 \subsection{Design and Implementation Notes}
 \begin{enumerate}
@@ -38,7 +38,7 @@ seconds are incremented or decremented accordingly and the numerator is
 reset to the remainder.  Conversions are performed upon demand by
 interface methods within the TimeInterval and
 Time classes.  This is done because different applications require different
-representations of time intervals and time instances.
+representations of time intervals and time instances.  Floating point values as well as integers can be specified for the various time units in the interfaces, see Table~\ref{table:timeOpts}.  Floating point values are represented internally as integer-based rational fractions.
 
 The BaseTime class defines increment and decrement methods for basic
 TimeInterval calculations between Time instants.  It is done here rather

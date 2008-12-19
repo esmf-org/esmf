@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Clock.F90,v 1.80 2008/11/14 04:05:57 theurich Exp $
+! $Id: ESMF_Clock.F90,v 1.81 2008/12/19 07:01:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.80 2008/11/14 04:05:57 theurich Exp $'
+      '$Id: ESMF_Clock.F90,v 1.81 2008/12/19 07:01:17 eschwab Exp $'
 
 !==============================================================================
 !
@@ -225,7 +225,7 @@
 
 ! !ARGUMENTS:
       type(ESMF_Clock),               intent(inout)         :: clock
-      type(ESMF_TimeInterval),        intent(inout),  optional :: timeStep
+      type(ESMF_TimeInterval),        intent(inout), optional :: timeStep
       type(ESMF_Alarm), dimension(:), intent(out), optional :: ringingAlarmList
       integer,                        intent(out), optional :: ringingAlarmCount
       integer,                        intent(out), optional :: rc
@@ -499,7 +499,7 @@
       subroutine ESMF_ClockDestroy(clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Clock) :: clock
+      type(ESMF_Clock)               :: clock
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -753,7 +753,7 @@
                                         alarmList, alarmCount, timeStep, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),               intent(in)         :: clock
+      type(ESMF_Clock),               intent(in)            :: clock
       type(ESMF_AlarmListType),       intent(in)            :: alarmListType
       type(ESMF_Alarm), dimension(:), intent(out)           :: alarmList
       integer,                        intent(out)           :: alarmCount
@@ -870,10 +870,10 @@
       subroutine ESMF_ClockGetNextTime(clock, nextTime, timeStep, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),        intent(in)         :: clock
-      type(ESMF_Time),         intent(out)           :: nextTime
-      type(ESMF_TimeInterval), intent(inout),  optional :: timeStep
-      integer,                 intent(out), optional :: rc
+      type(ESMF_Clock),        intent(in)              :: clock
+      type(ESMF_Time),         intent(out)             :: nextTime
+      type(ESMF_TimeInterval), intent(inout), optional :: timeStep
+      integer,                 intent(out), optional   :: rc
     
 ! !DESCRIPTION:
 !     Calculates what the next time of the {\tt clock} will be, based on
@@ -928,7 +928,7 @@
       logical :: ESMF_ClockIsDone
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(in)         :: clock
+      type(ESMF_Clock), intent(in)            :: clock
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -977,7 +977,7 @@
       logical :: ESMF_ClockIsReverse
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(in)         :: clock
+      type(ESMF_Clock), intent(in)            :: clock
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1026,7 +1026,7 @@
       logical :: ESMF_ClockIsStopTime
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(in)         :: clock
+      type(ESMF_Clock), intent(in)            :: clock
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1074,7 +1074,7 @@
       logical :: ESMF_ClockIsStopTimeEnabled
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(in)         :: clock
+      type(ESMF_Clock), intent(in)            :: clock
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1119,7 +1119,7 @@
       subroutine ESMF_ClockPrint(clock, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),  intent(in)         :: clock
+      type(ESMF_Clock),  intent(in)            :: clock
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
@@ -1246,18 +1246,18 @@
                                currTime, advanceCount, direction, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),        intent(inout)         :: clock
-      character (len=*),       intent(in),  optional :: name
-      type(ESMF_TimeInterval), intent(inout),  optional :: timeStep
-      type(ESMF_Time),         intent(inout),  optional :: startTime
-      type(ESMF_Time),         intent(inout),  optional :: stopTime
-      type(ESMF_TimeInterval), intent(inout),  optional :: runDuration
-      integer,                 intent(in),  optional :: runTimeStepCount
-      type(ESMF_Time),         intent(inout),  optional :: refTime
-      type(ESMF_Time),         intent(inout),  optional :: currTime
-      integer(ESMF_KIND_I8),   intent(in),  optional :: advanceCount
-      type(ESMF_Direction),    intent(in),  optional :: direction
-      integer,                 intent(out), optional :: rc
+      type(ESMF_Clock),        intent(inout)           :: clock
+      character (len=*),       intent(in),    optional :: name
+      type(ESMF_TimeInterval), intent(inout), optional :: timeStep
+      type(ESMF_Time),         intent(inout), optional :: startTime
+      type(ESMF_Time),         intent(inout), optional :: stopTime
+      type(ESMF_TimeInterval), intent(inout), optional :: runDuration
+      integer,                 intent(in),    optional :: runTimeStepCount
+      type(ESMF_Time),         intent(inout), optional :: refTime
+      type(ESMF_Time),         intent(inout), optional :: currTime
+      integer(ESMF_KIND_I8),   intent(in),    optional :: advanceCount
+      type(ESMF_Direction),    intent(in),    optional :: direction
+      integer,                 intent(out),   optional :: rc
     
 ! !DESCRIPTION:
 !     Sets/resets one or more of the properties of an {\tt ESMF\_Clock} that
