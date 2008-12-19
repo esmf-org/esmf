@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.3 2008/12/09 21:48:59 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.4 2008/12/19 00:31:28 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,9 +8,9 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
-#define ESMF_FILENAME "ESMCI_Attribute.C"
+#define ESMF_FILENAME "ESMCI_AttributeUpdate.C"
 
-// ESMCI_Attribute method implementation (body) file
+// Attribute method implementation (body) file
 
 // single blank line to make protex happy.
 //BOPI
@@ -20,7 +20,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMCI_Attribute} methods declared
+// The code in this file implements the C++ {\tt Attribute} methods declared
 // in the companion file ESMCI_Attribute.h
 //
 //-----------------------------------------------------------------------------
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.3 2008/12/09 21:48:59 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.4 2008/12/19 00:31:28 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -51,12 +51,12 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_AttributeUpdate"
+#define ESMC_METHOD "AttributeUpdate"
 //BOPI
-// !IROUTINE:  ESMCI_AttributeUpdate - update an {\tt ESMCI_Attribute}
+// !IROUTINE:  AttributeUpdate - update an {\tt Attribute}
 //
 // !INTERFACE:
-      int ESMCI_Attribute::ESMCI_AttributeUpdate(
+      int Attribute::AttributeUpdate(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -66,7 +66,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
       const vector<ESMC_I4> &roots) {      // the rootList
 //
 // !DESCRIPTION:
-//    Update an {\tt ESMCI_Attribute} hierarchy with a later version of itself.  
+//    Update an {\tt Attribute} hierarchy with a later version of itself.  
 //    Expected to be called internally.
 //
 //EOPI
@@ -102,7 +102,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   }
   
   // find out if update is necessary
-  localrc = ESMCI_AttributeUpdateNeeded(vm, length, roots, nonroots);
+  localrc = AttributeUpdateNeeded(vm, length, roots, nonroots);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.Write(
                   "AttributeUpdateNeeded failed", ESMC_LOG_INFO);
@@ -118,7 +118,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   
   // I am a root, create buffer
   if (it == nonroots.end()) {
-    localrc = ESMCI_AttributeUpdateBufSend(sendBuf, localPet, &offset, &length);
+    localrc = AttributeUpdateBufSend(sendBuf, localPet, &offset, &length);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufSend failed", &localrc);
@@ -130,7 +130,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
 //printf("offset = %d\n", offset);
   // roots send to nonroots
   // recvBuf = new char[20];  sendBuf = new char[20];  sendBuf = "Hello World!";
-  localrc = ESMCI_AttributeUpdateComm(vm, offset, &recvlength, sendBuf, recvBuf, roots, nonroots);
+  localrc = AttributeUpdateComm(vm, offset, &recvlength, sendBuf, recvBuf, roots, nonroots);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateComm failed", &localrc);
@@ -141,7 +141,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
 //printf("recvlength = %d\n", recvlength);
   // I am a nonroot, unpack buffer
   if (it != nonroots.end()) {
-      localrc = ESMCI_AttributeUpdateBufRecv(recvBuf, localPet, &offset, recvlength);
+      localrc = AttributeUpdateBufRecv(recvBuf, localPet, &offset, recvlength);
       if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufSend failed", &localrc);
@@ -152,7 +152,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   }
 //printf("offset = %d\n", offset);
   // all set flags to false
-  localrc = ESMCI_AttributeUpdateReset();
+  localrc = AttributeUpdateReset();
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateReset failed", &localrc);
@@ -166,15 +166,15 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
 
   return ESMF_SUCCESS;
 
- } // end ESMCI_AttributeUpdate
+ } // end AttributeUpdate
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_AttributeUpdateBufRecv"
+#define ESMC_METHOD "AttributeUpdateBufRecv"
 //BOPI
-// !IROUTINE:  ESMCI_AttributeUpdateBufRecv - unpack the serialized Attribute updates
+// !IROUTINE:  AttributeUpdateBufRecv - unpack the serialized Attribute updates
 //
 // !INTERFACE:
-      int ESMCI_Attribute::ESMCI_AttributeUpdateBufRecv(
+      int Attribute::AttributeUpdateBufRecv(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -186,14 +186,14 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
       const int &length)  {                 // length of buffer
 //
 // !DESCRIPTION:
-//    Serialize the updates to an {\tt ESMCI_Attribute} hierarchy.  
+//    Serialize the updates to an {\tt Attribute} hierarchy.  
 //    Expected to be called internally.
 //
 //EOPI
 
   char msgbuf[ESMF_MAXSTR];
   int localrc, nbytes, loffset;
-  ESMCI_Attribute *attr;
+  Attribute *attr;
   unsigned int i;
   char *thiskey, *distkey;
   thiskey = new char[keySize];
@@ -203,7 +203,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   localrc = ESMC_RC_NOT_IMPL;
 
   // make key
-  localrc = ESMCI_AttributeUpdateKeyCreate(thiskey);
+  localrc = AttributeUpdateKeyCreate(thiskey);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateMakeKey failed", &localrc);
@@ -215,7 +215,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   memcpy(distkey, recvBuf+(*offset), keySize);
 
   // compare keys
-  if (ESMCI_AttributeUpdateKeyCompare(thiskey, distkey) == false) {
+  if (AttributeUpdateKeyCompare(thiskey, distkey) == false) {
     //printf("DeleteMe!!!\n");
     return 42;
   }
@@ -257,10 +257,10 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
     int nChange = sizeof(int)+1+(sizeof(bool)*2);
     int numChanges = (*(reinterpret_cast<int*> (distkey+nChange)));
     for (i=0; i<numChanges; ++i) {
-      attr = new ESMCI_Attribute(ESMF_FALSE);
+      attr = new Attribute(ESMF_FALSE);
       attr->setBase(attrBase);
       attr->ESMC_Deserialize(recvBuf,offset);
-      localrc = ESMCI_AttributeSet(attr);
+      localrc = AttributeSet(attr);
       if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufRecv failed adding attribute", &localrc);
@@ -268,7 +268,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
         delete [] distkey;
         return ESMF_FAILURE;
       }
-      localrc = attr->ESMCI_AttributeUpdateReset();
+      localrc = attr->AttributeUpdateReset();
       if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufRecv failed resetting", &localrc);
@@ -281,7 +281,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   
   // else if value change, unpack into temp and set
   else if ((*(reinterpret_cast<bool*> (distkey+vChange))) == true) {
-    attr = new ESMCI_Attribute(ESMF_FALSE);
+    attr = new Attribute(ESMF_FALSE);
     attr->ESMC_Deserialize(recvBuf,offset);
     *this = *attr;
     // can delete this one and not call reset because this is a leaf
@@ -303,9 +303,9 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
       
   // recurse through the Attribute hierarchy
   for (i=0; i<attrCount; ++i) {
-    localrc = attrList[i]->ESMCI_AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
+    localrc = attrList[i]->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
     if (localrc == 42) {
-      localrc = ESMCI_AttributeUpdateRemove(i);
+      localrc = AttributeUpdateRemove(i);
       if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufRecv failed removing attr", &localrc);
@@ -338,15 +338,15 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
     
   return ESMF_SUCCESS;
   
-  } // end ESMCI_AttributeUpdateBufRecv
+  } // end AttributeUpdateBufRecv
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_AttributeUpdateBufSend"
+#define ESMC_METHOD "AttributeUpdateBufSend"
 //BOPI
-// !IROUTINE:  ESMCI_AttributeUpdateBufSend - serialize the Attribute updates
+// !IROUTINE:  AttributeUpdateBufSend - serialize the Attribute updates
 //
 // !INTERFACE:
-      int ESMCI_Attribute::ESMCI_AttributeUpdateBufSend(
+      int Attribute::AttributeUpdateBufSend(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -358,7 +358,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
       int *length) const {            // length of buffer
 //
 // !DESCRIPTION:
-//    Deserialize the updates to an {\tt ESMCI_Attribute} hierarchy.  
+//    Deserialize the updates to an {\tt Attribute} hierarchy.  
 //    Expected to be called internally.
 //
 //EOPI
@@ -370,12 +370,12 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
   
-  // check (length - offset) > sizeof(ESMCI_Attribute) + keylength
+  // check (length - offset) > sizeof(Attribute) + keylength
   
   // make key
   char *key;
   key = new char[keySize];
-  localrc = ESMCI_AttributeUpdateKeyCreate(key);
+  localrc = AttributeUpdateKeyCreate(key);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateMakeKey failed", &localrc);
@@ -407,7 +407,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   if (structChange == ESMF_TRUE) {
     for (i=0; i<attrCount; ++i) {
       if (attrList[i]->structChange == ESMF_TRUE) {
-        localrc = attrList[i]->ESMCI_AttributeUpdateReset();
+        localrc = attrList[i]->AttributeUpdateReset();
         if (localrc != ESMF_SUCCESS) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufSend failed resetting", &localrc);
@@ -442,7 +442,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
 
   // recurse through the Attribute hierarchy
   for (i=0; i<attrCount; i++) {
-    localrc = attrList[i]->ESMCI_AttributeUpdateBufSend(sendBuf,localPet,offset,length);
+    localrc = attrList[i]->AttributeUpdateBufSend(sendBuf,localPet,offset,length);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufSend failed", &localrc);
@@ -463,15 +463,15 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   
   return ESMF_SUCCESS;
   
-  } // end ESMCI_AttributeUpdateBufSend
+  } // end AttributeUpdateBufSend
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_AttributeUpdateChanges"
+#define ESMC_METHOD "AttributeUpdateChanges"
 //BOPI
-// !IROUTINE:  ESMCI_AttributeUpdateChanges - look for changes in Attribute hierachy
+// !IROUTINE:  AttributeUpdateChanges - look for changes in Attribute hierachy
 //
 // !INTERFACE:
-      int ESMCI_Attribute::ESMCI_AttributeUpdateChanges(
+      int Attribute::AttributeUpdateChanges(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -483,7 +483,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
       int *numKeys) const{        // number of keys flag
 //
 // !DESCRIPTION:
-//    Search an {\tt ESMCI_Attribute} hierarchy for changes to be updated.  
+//    Search an {\tt Attribute} hierarchy for changes to be updated.  
 //    Expected to be called internally.
 //
 //EOPI
@@ -503,21 +503,21 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   if (valueChange == ESMF_TRUE) ++(*valueChanges);
 
   for(i=0; i<attrCount; ++i) {
-    localrc = attrList[i]->ESMCI_AttributeUpdateChanges(linkChanges,
+    localrc = attrList[i]->AttributeUpdateChanges(linkChanges,
       structChanges,valueChanges,numKeys);
   }
   
   return ESMF_SUCCESS;
   
-  } // end ESMCI_AttributeUpdateChanges
+  } // end AttributeUpdateChanges
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_AttributeUpdateComm"
+#define ESMC_METHOD "AttributeUpdateComm"
 //BOPI
-// !IROUTINE:  ESMCI_AttributeUpdateComm - {\tt ESMCI_Attribute} update comm pattern
+// !IROUTINE:  AttributeUpdateComm - {\tt Attribute} update comm pattern
 //
 // !INTERFACE:
-      int ESMCI_Attribute::ESMCI_AttributeUpdateComm(
+      int Attribute::AttributeUpdateComm(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -532,7 +532,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
       const vector<ESMC_I4> &nonroots) const {     // nonroots vector
 //
 // !DESCRIPTION:
-//    Update an {\tt ESMCI_Attribute} hierarchy with a later version of itself.  
+//    Update an {\tt Attribute} hierarchy with a later version of itself.  
 //    Expected to be called internally.
 //
 //EOPI
@@ -629,15 +629,15 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   
   return ESMF_SUCCESS;
   
-  } // end ESMCI_AttributeUpdateComm
+  } // end AttributeUpdateComm
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_AttributeUpdateKeyCompare"
+#define ESMC_METHOD "AttributeUpdateKeyCompare"
 //BOPI
-// !IROUTINE:  ESMCI_AttributeUpdateKeyCompare - Compare Attribute keys
+// !IROUTINE:  AttributeUpdateKeyCompare - Compare Attribute keys
 //
 // !INTERFACE:
-      bool ESMCI_Attribute::ESMCI_AttributeUpdateKeyCompare(
+      bool Attribute::AttributeUpdateKeyCompare(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -680,15 +680,15 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   
   return result;
     
-  } // end ESMCI_AttributeUpdateKeyCompare
+  } // end AttributeUpdateKeyCompare
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_AttributeUpdateKeyCreate"
+#define ESMC_METHOD "AttributeUpdateKeyCreate"
 //BOPI
-// !IROUTINE:  ESMCI_AttributeUpdateKeyCreate - Make the key for this Attribute
+// !IROUTINE:  AttributeUpdateKeyCreate - Make the key for this Attribute
 //
 // !INTERFACE:
-      int ESMCI_Attribute::ESMCI_AttributeUpdateKeyCreate(
+      int Attribute::AttributeUpdateKeyCreate(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -788,15 +788,15 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   delete [] xorkey;
   return ESMF_SUCCESS;
   
-  } // end ESMCI_AttributeUpdateKeyCreate
+  } // end AttributeUpdateKeyCreate
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_AttributeUpdateNeeded"
+#define ESMC_METHOD "AttributeUpdateNeeded"
 //BOPI
-// !IROUTINE:  ESMCI_AttributeUpdateNeeded - Determine if update is needed
+// !IROUTINE:  AttributeUpdateNeeded - Determine if update is needed
 //
 // !INTERFACE:
-      int ESMCI_Attribute::ESMCI_AttributeUpdateNeeded(
+      int Attribute::AttributeUpdateNeeded(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -808,7 +808,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
       const vector<ESMC_I4> &nonroots) const {    // nonroots vector
 //
 // !DESCRIPTION:
-//    Determine if ESMCI_AttributeUpdate() is needed. 
+//    Determine if AttributeUpdate() is needed. 
 //    Expected to be called internally.
 //
 //EOPI
@@ -849,7 +849,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
     int numKeys = 0;
 
     // look for changes
-    localrc = ESMCI_AttributeUpdateChanges(&linkChanges, &structChanges, 
+    localrc = AttributeUpdateChanges(&linkChanges, &structChanges, 
       &valueChanges, &numKeys);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -881,8 +881,8 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
     numKeysOut = numKeys;
   }
   
-  // call ESMCI_AttributeUpdateComm with changes as sendBuf and recvBuf
-  localrc = ESMCI_AttributeUpdateComm(vm, length, &recvlength, 
+  // call AttributeUpdateComm with changes as sendBuf and recvBuf
+  localrc = AttributeUpdateComm(vm, length, &recvlength, 
         sendBuf, recvBuf, roots, nonroots);
   if (localrc != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -944,7 +944,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   }
   
   // set return value of buffer size
-  bufSize = realChangesOut*sizeof(ESMCI_Attribute) + numKeysOut*keySize;
+  bufSize = realChangesOut*sizeof(Attribute) + numKeysOut*keySize;
   
   /*printf("linkChanges = %d, realChangesOut = %d, numKeysOut = %d bufSize = %d\n", 
     linkChangesOut, realChangesOut, numKeysOut, bufSize);*/
@@ -954,15 +954,15 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
 
   return ESMF_SUCCESS;
   
-  } // end ESMCI_AttributeUpdateNeeded
+  } // end AttributeUpdateNeeded
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_AttributeUpdateRemove"
+#define ESMC_METHOD "AttributeUpdateRemove"
 //BOPI
-// !IROUTINE:  ESMCI_AttributeUpdateRemove - Remove an Attribute in Update
+// !IROUTINE:  AttributeUpdateRemove - Remove an Attribute in Update
 //
 // !INTERFACE:
-      int ESMCI_Attribute::ESMCI_AttributeUpdateRemove(
+      int Attribute::AttributeUpdateRemove(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -983,25 +983,25 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  ESMCI_Attribute *attr;
+  Attribute *attr;
   attr = attrList[attrNum];
   
-  attr->~ESMCI_Attribute();
+  attr->~Attribute();
   attrList.erase(attrList.begin() + attrNum);
   attrCount--;
   structChange = ESMF_TRUE;
 
   return ESMF_SUCCESS;
   
-  } // end ESMCI_AttributeUpdateRemove
+  } // end AttributeUpdateRemove
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_AttributeUpdateReset"
+#define ESMC_METHOD "AttributeUpdateReset"
 //BOPI
-// !IROUTINE:  ESMCI_AttributeUpdateReset - Reset flags for AttributeUpdate
+// !IROUTINE:  AttributeUpdateReset - Reset flags for AttributeUpdate
 //
 // !INTERFACE:
-      int ESMCI_Attribute::ESMCI_AttributeUpdateReset(
+      int Attribute::AttributeUpdateReset(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1010,7 +1010,7 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
         ) { 
 //
 // !DESCRIPTION:
-//    Reset the flags for ESMCI_AttributeUpdate().
+//    Reset the flags for AttributeUpdate().
 //    Expected to be called internally.
 //
 //EOPI
@@ -1027,11 +1027,11 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   valueChange = ESMF_FALSE;
 
   for(i=0; i<attrCount; ++i) {
-    localrc = attrList[i]->ESMCI_AttributeUpdateReset();
+    localrc = attrList[i]->AttributeUpdateReset();
   }
 
   return ESMF_SUCCESS;
   
-  } // end ESMCI_AttributeUpdateReset
+  } // end AttributeUpdateReset
 
 } // namespace ESMCI

@@ -1,4 +1,4 @@
-! $Id: ESMF_Overloads.F90,v 1.13 2008/10/08 23:41:14 rokuingh Exp $
+! $Id: ESMF_Overloads.F90,v 1.14 2008/12/19 00:30:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Overloads.F90,v 1.13 2008/10/08 23:41:14 rokuingh Exp $'
+      '$Id: ESMF_Overloads.F90,v 1.14 2008/12/19 00:30:53 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -212,7 +212,7 @@
 
         ! pass thru f90/c++ interface - this requires first entry of object
         ! is a base type.
-        call c_ESMCI_AttributeSetChar(field, name, value, status)
+        call c_ESMC_AttributeSetChar(field, name, value, status)
 
         if (rcpresent) rc = status
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.50 2008/12/02 22:23:09 rokuingh Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.51 2008/12/19 00:30:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.50 2008/12/02 22:23:09 rokuingh Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.51 2008/12/19 00:30:53 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -217,7 +217,7 @@
                               ESMF_CONTEXT, rc)) return
 
     ! Reset the change flags in the Attribute hierarchy
-    call c_ESMCI_AttributeUpdateReset(state%statep%base, localrc);
+    call c_ESMC_AttributeUpdateReset(state%statep%base, localrc);
     if (ESMF_LogMsgFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.155 2008/11/07 21:50:35 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.156 2008/12/19 00:30:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.155 2008/11/07 21:50:35 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.156 2008/12/19 00:30:53 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -554,7 +554,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMCI_AttributeSetLink(state%statep%base, field%ftypep%base, localrc)
+      call c_ESMC_AttributeSetLink(state%statep%base, field%ftypep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -565,17 +565,17 @@
       lname1 = 'import'
       lname2 = 'export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -653,7 +653,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMCI_AttributeSetLink(state%statep%base, field%ftypep%base, localrc)
+      call c_ESMC_AttributeSetLink(state%statep%base, field%ftypep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -664,17 +664,17 @@
       lname1 = 'import'
       lname2 = 'export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -750,7 +750,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMCI_AttributeSetLink(state%statep%base, &
+      call c_ESMC_AttributeSetLink(state%statep%base, &
         fieldbundle%btypep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -762,17 +762,17 @@
       lname1 = 'import'
       lname2 = 'export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -851,7 +851,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMCI_AttributeSetLink(state%statep%base, &
+      call c_ESMC_AttributeSetLink(state%statep%base, &
         fieldbundle%btypep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -863,17 +863,17 @@
       lname1 = 'import'
       lname2 = 'export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1075,7 +1075,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMCI_AttributeSetLink(state%statep%base, nestedstate%statep%base, localrc)
+      call c_ESMC_AttributeSetLink(state%statep%base, nestedstate%statep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -1086,17 +1086,17 @@
       lname1 = 'import'
       lname2 = 'export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1176,7 +1176,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMCI_AttributeSetLink(state%statep%base, nestedstate%statep%base, localrc)
+      call c_ESMC_AttributeSetLink(state%statep%base, nestedstate%statep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -1187,17 +1187,17 @@
       lname1 = 'import'
       lname2 = 'export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1490,7 +1490,7 @@
 
       ! link the Attribute hierarchies
       do i=1,count
-         call c_ESMCI_AttributeSetLink(state%statep%base, &
+         call c_ESMC_AttributeSetLink(state%statep%base, &
           fieldList(i)%ftypep%base, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -1503,17 +1503,17 @@
       lname1 = 'import'
       lname2 = 'export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1589,7 +1589,7 @@
 
       ! link the Attribute hierarchies
       do i=1,count
-         call c_ESMCI_AttributeSetLink(state%statep%base, &
+         call c_ESMC_AttributeSetLink(state%statep%base, &
           fieldbundleList(i)%btypep%base, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -1602,17 +1602,17 @@
       lname1 = 'import'
       lname2 = 'export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -1824,7 +1824,7 @@
 
       ! link the Attribute hierarchies
       do i=1,count
-         call c_ESMCI_AttributeSetLink(state%statep%base, &
+         call c_ESMC_AttributeSetLink(state%statep%base, &
           nestedStateList(i)%statep%base, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -1837,17 +1837,17 @@
       lname1 = 'import'
       lname2 = 'export'
       if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMCI_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
+        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5741,7 +5741,7 @@
               sip%datap%fbp = ESMF_FieldBundleDeserialize(vm, buffer, offset, localrc)
               !  here we relink the State Attribute hierarchy to the FieldBundle
               !  Attribute hierarchy, as they were linked before
-              call c_ESMCI_AttributeSetLink(sp%base, sip%datap%fbp%btypep%base, localrc)
+              call c_ESMC_AttributeSetLink(sp%base, sip%datap%fbp%btypep%base, localrc)
               if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
@@ -5753,7 +5753,7 @@
               sip%datap%fp = ESMF_FieldDeserialize(vm, buffer, offset, localrc)
               !  here we relink the State Attribute hierarchy to the Field
               !  Attribute hierarchy, as they were linked before
-              call c_ESMCI_AttributeSetLink(sp%base, sip%datap%fp%ftypep%base, localrc)
+              call c_ESMC_AttributeSetLink(sp%base, sip%datap%fp%ftypep%base, localrc)
               if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
@@ -5774,7 +5774,7 @@
               sip%datap%spp => subsubstate%statep
               !  here we relink the State Attribute hierarchy to the subState
               !  Attribute hierarchy, as they were linked before
-              call c_ESMCI_AttributeSetLink(sp%base, sip%datap%spp%base, localrc)
+              call c_ESMC_AttributeSetLink(sp%base, sip%datap%spp%base, localrc)
               if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
