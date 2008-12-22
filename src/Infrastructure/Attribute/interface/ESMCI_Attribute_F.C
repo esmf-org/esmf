@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.5 2008/12/19 00:31:28 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.6 2008/12/22 20:21:34 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.5 2008/12/19 00:31:28 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.6 2008/12/22 20:21:34 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2523,19 +2523,20 @@ extern "C" {
       return;
   }
 
-  string cname(name, nlen);
-  cname.resize(cname.find_last_not_of(" ")+1);
-  if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed allocating attribute name", &status);
-      if (rc) *rc = status;
-      return;
-  }
+  // declare string for name
+  string cname;
 
   status = (**base).root.AttributeGet((*num)-1, &cname, tk, count);
   if (status != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute info by num", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  if (cname.empty()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed getting attribute name", &status);
       if (rc) *rc = status;
       return;
   }
