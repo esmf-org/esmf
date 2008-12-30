@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2008/09/26 04:05:31 cdeluca Exp $ 
+# $Id: makefile,v 1.6 2008/12/30 00:09:51 rokuingh Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -27,7 +27,7 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  = $(SYSTEM_TESTS_BUILD)
+CLEANFILES  = $(SYSTEM_TESTS_BUILD) *.xml *.stdout
 CLOBBERDIRS =
 
 
