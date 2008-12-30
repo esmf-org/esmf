@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.4 2008/12/19 00:31:28 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.5 2008/12/30 00:07:47 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.4 2008/12/19 00:31:28 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.5 2008/12/30 00:07:47 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -717,12 +717,6 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   // copy the baseID
   *(reinterpret_cast<int*> (key+offset)) = attrBase->ESMC_BaseGetID();
   offset += sizeof(int);
-  if ( offset > 4) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "AttributeUpdateMakeKey key buffer is misaligned", &localrc);
-    delete [] xorkey;
-    return ESMF_FAILURE;
-  }
 
   // xor the name into key
   if (!attrName.empty()) {
@@ -741,12 +735,6 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
     
   memcpy((key+offset),xorkey,1);
   offset += 1;
-  if ( offset > 5) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "AttributeUpdateMakeKey key buffer is misaligned", &localrc);
-    delete [] xorkey;
-    return ESMF_FAILURE;
-  }
    
   // now the value and struct changes booleans
   bool trueval = true;
@@ -761,12 +749,6 @@ static const int keySize = 2*sizeof(int) + 2*sizeof(bool) + 1;
   else 
     *(reinterpret_cast<bool*> (key+offset)) = falseval;
   offset += sizeof(bool);
-  if ( offset > 7) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "AttributeUpdateMakeKey key buffer is misaligned", &localrc);
-    delete [] xorkey;
-    return ESMF_FAILURE;
-  }
   
   // now the number of struct changes on this attribute
   int numChanges = 0;

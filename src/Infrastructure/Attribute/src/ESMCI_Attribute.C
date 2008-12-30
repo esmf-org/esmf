@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.9 2008/12/19 00:31:28 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.10 2008/12/30 00:07:47 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.9 2008/12/19 00:31:28 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.10 2008/12/30 00:07:47 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2523,7 +2523,7 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
   
     // Open an XML file for writing
-  sprintf(msgbuf,"%s.out",basename.c_str());
+  sprintf(msgbuf,"%s.stdout",basename.c_str());
   if((tab=fopen(msgbuf,"w"))==NULL) {
     localrc = ESMF_FAILURE;
     sprintf(msgbuf,"Could not open the write file!");
