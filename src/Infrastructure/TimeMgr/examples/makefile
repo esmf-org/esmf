@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2007/09/28 21:43:18 svasquez Exp $
+# $Id: makefile,v 1.27.2.1 2008/12/31 17:41:18 theurich Exp $
 
 ALL:  build_examples
 
@@ -20,23 +20,23 @@ EXAMPLES_BUILD   =  $(ESMF_EXDIR)/ESMF_TimeEx \
                     $(ESMF_EXDIR)/ESMF_TimeIntervalEx \
                     $(ESMF_EXDIR)/ESMF_CalendarEx \
                     $(ESMF_EXDIR)/ESMF_ClockEx \
-                    $(ESMF_EXDIR)/ESMF_AlarmEx \
-		    $(ESMF_EXDIR)/ESMC_ClockEx
+                    $(ESMF_EXDIR)/ESMF_AlarmEx
+#		    $(ESMF_EXDIR)/ESMC_ClockEx
 
 
 EXAMPLES_RUN     =  run_ESMF_TimeEx \
                     run_ESMF_TimeIntervalEx \
                     run_ESMF_CalendarEx \
                     run_ESMF_ClockEx \
-                    run_ESMF_AlarmEx \
-		    run_ESMC_ClockEx
+                    run_ESMF_AlarmEx
+#		    run_ESMC_ClockEx
 
 EXAMPLES_RUN_UNI =  run_ESMF_TimeEx_uni \
                     run_ESMF_TimeIntervalEx_uni \
                     run_ESMF_CalendarEx_uni \
                     run_ESMF_ClockEx_uni \
-                    run_ESMF_AlarmEx_uni \
-		    run_ESMC_ClockEx_uni
+                    run_ESMF_AlarmEx_uni
+#		    run_ESMC_ClockEx_uni
 
 include ${ESMF_DIR}/makefile
 
