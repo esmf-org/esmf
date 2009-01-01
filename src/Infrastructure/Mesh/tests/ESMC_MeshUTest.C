@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.3 2008/11/18 22:03:19 rosalind Exp $
+// $Id: ESMC_MeshUTest.C,v 1.4 2009/01/01 19:37:19 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,7 +38,9 @@ int main(void){
   int result = 0;
   int rc;
   int num_elem, num_node, conn_size;
-  ESMC_Mesh *mesh;
+  ESMC_Mesh mesh;
+  int pdim=2;
+  int sdim=3;
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
@@ -49,7 +51,7 @@ int main(void){
   // Create a mesh
   strcpy(name, "MeshCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  mesh = ESMC_MeshCreate(2,3,&rc);
+  mesh = ESMC_MeshCreate(&pdim,&sdim,&rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -78,6 +80,29 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_MeshVTKBody("data/testmesh", nodeId, nodeCoord, nodeOwner,
                         elemId, elemType, elemConn);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+    // VTKBody returns zero based elemConn, so make them 1 based
+    for (int i = 0; i < conn_size; i++){
+      elemConn[i] = elemConn[i]+1;
+    }
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  // Add node information to the mesh
+  strcpy(name, "MeshAddNodes");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshAddNodes(&mesh, &num_node, nodeId, nodeCoord, nodeOwner);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  // Add element information to the mesh
+  strcpy(name, "MeshAddElements");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshAddElements(&mesh, &num_elem, elemId, elemType, elemConn);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

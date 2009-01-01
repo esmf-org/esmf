@@ -24,7 +24,7 @@ namespace ESMCI {
     MeshCXX();
     ~MeshCXX();
 
-    MeshCXX* create(int*, int*, int*);
+    static MeshCXX* create(int*, int*, int*);
     int addElements(int*, int*, int*, int*);
     int addNodes(int*, int*, double*, int*);
     int createDistGrids(int*, int*);

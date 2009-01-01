@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.7 2008/11/12 21:46:34 rosalind Exp $
+// $Id: ESMC_Mesh.C,v 1.8 2009/01/01 19:37:19 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,19 +34,41 @@ extern "C" {
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshCreate()"
-ESMC_Mesh *ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc) {
+ESMC_Mesh ESMC_MeshCreate(int *parametricDim, int *spatialDim, int *rc){
   int localrc;
+
+  // Initialize return code. Assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+  if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
+  ESMC_Mesh mesh;
+
+  mesh.ptr = (void*)
+    ESMCI::MeshCXX::create(parametricDim, spatialDim, &localrc);
+
+  if (rc) *rc = localrc;
+
+  return mesh;
+
+} // ESMC_MeshCreate
+
+/* 
+ESMC_Mesh *ESMC_MeshCreate(int *parametricDim, int *spatialDim, int *rc) {
+  int localrc, pDim,sDim;
    // Initialize return code. Assume routine not implemented
    localrc = ESMC_RC_NOT_IMPL;
    if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
+   pDim=*parametricDim;
+   sDim=*spatialDim;
 
   ESMC_Mesh *mesh;
   mesh = new ESMC_Mesh();
 
   MeshCXX* mep;
-  mep = new MeshCXX();
-
-  (mep)->create(&parametricDim, &spatialDim, &localrc);
+  //mep = new MeshCXX();
+  //(mep)->create(&pDim, &sDim, &localrc);
+  mep = MeshCXX::create(&pDim, &sDim, &localrc);
 
   if (rc) *rc = localrc;
   mesh->ptr = (void*)mep;
@@ -54,6 +76,8 @@ ESMC_Mesh *ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc) {
   return mesh;
 
 } // ESMC_MeshCreate
+
+*/
 
 //--------------------------------------------------------------------------
 // !BOP

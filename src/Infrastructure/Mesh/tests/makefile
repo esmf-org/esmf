@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2008/11/19 19:08:43 theurich Exp $ 
+# $Id: makefile,v 1.9 2009/01/01 19:37:20 rosalind Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -6,13 +6,13 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR    = src/Infrastructure/Mesh/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest \
-                $(ESMF_TESTDIR)/ESMC_MeshUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshUTest \
+ 		$(ESMF_TESTDIR)/ESMF_MeshUTest
 
 TESTS_OBJ = 
 
-TESTS_RUN     = RUN_ESMF_MeshUTest \
-                RUN_ESMC_MeshUTest
+TESTS_RUN     = RUN_ESMC_MeshUTest \
+ 		RUN_ESMF_MeshUTest
 
 TESTS_RUN_UNI = RUN_ESMF_MeshUTestUNI
 

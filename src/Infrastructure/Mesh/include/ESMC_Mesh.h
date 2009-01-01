@@ -35,7 +35,7 @@ typedef struct {
 typedef enum {ESMC_MESHELEMENT_QUAD=0, ESMC_MESHELEMENT_TRI=1,
      ESMC_MESHELEMENT_HEX=2, ESMC_MESHELEMENT_TET=3} ESMF_MeshElement;
 
-ESMC_Mesh *ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc);
+ESMC_Mesh ESMC_MeshCreate(int *parametricDim, int *spatialDim, int *rc);
 
 int ESMC_MeshCreateDistGrids(ESMC_Mesh *mesh, int *num_nodes, int *num_elements);
 
