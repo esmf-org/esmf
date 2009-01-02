@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.1 2008/12/18 14:43:51 feiliu Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.2 2009/01/02 19:48:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.1 2008/12/18 14:43:51 feiliu Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.2 2009/01/02 19:48:56 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -90,7 +90,7 @@ module ESMF_FieldSetCoMod
 !   This interface finishes a {\tt ESMF\_Field} started with FieldCreateEmpty
 !   These methods all take {\tt ESMF\_Grid} and Fortran data pointer as input to
 !   fill in the {\tt ESMF\_Field} internals. 
-  end interface ESMF_FieldSetCommit
+  end interface
 !EOPI
 !------------------------------------------------------------------------------
 
@@ -315,8 +315,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitGridPtr<rank><type><kind>(field, grid, & @\
-!   farrayPtr, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
+!   farrayPtr, copyflag, staggerloc, gridToFieldMap, & @\
+!   maxHaloLWidth, maxHaloUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),                intent(inout)         :: field @\
@@ -325,8 +325,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 !   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
 !   type(ESMF_STAGGERLOC), intent(in), optional :: staggerloc @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(in), optional :: ungriddedLBound(:) @\
-!   integer,               intent(in), optional :: ungriddedUBound(:) @\
 !   integer,               intent(in), optional :: maxHaloLWidth(:) @\
 !   integer,               intent(in), optional :: maxHaloUWidth(:) @\
 !   integer,               intent(inout), optional :: rc @\
@@ -375,24 +373,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 !       the dimensions in @\
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
 !       stored in the {\t field}.   @\
-! \item [{[ungriddedLBound]}] @\
-!       Lower bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. When field dimension count is @\
-!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
-!       must be specified. When both are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt field}. @\
-! \item [{[ungriddedUBound]}] @\
-!       Upper bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. When field dimension count is @\
-!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
-!       must be specified. When both are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt field}. @\
 ! \item [{[maxHaloLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
 !       of dimensions in the {\tt grid}.  However, ordering of the elements @\
@@ -428,8 +408,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitGridPtr" @\
   subroutine ESMF_FieldSetCommitGridPtr##mrank##D##mtypekind(field, grid, farrayPtr, & @\
-    copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
+    copyflag, staggerloc, gridToFieldMap, & @\
+    maxHaloLWidth, maxHaloUWidth, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
@@ -438,8 +418,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
-    integer, intent(in), optional :: ungriddedLBound(:) @\
-    integer, intent(in), optional :: ungriddedUBound(:) @\
     integer, intent(in), optional :: maxHaloLWidth(:) @\
     integer, intent(in), optional :: maxHaloUWidth(:) @\
     integer, intent(out), optional :: rc                @\
@@ -492,8 +470,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 @\
   ! Do General GeomBase SetCommit @\
   call ESMF_FieldSetCommitGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
-    copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc=localrc) @\
+    copyflag, gridToFieldMap, & @\
+    maxHaloLWidth, maxHaloUWidth, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -674,8 +652,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitLSPtr<rank><type><kind>(field, locstream, & @\
-!   farrayPtr, copyflag, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, rc) @\
+!   farrayPtr, copyflag, gridToFieldMap, & @\
+!   rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),                intent(inout)         :: field @\
@@ -683,8 +661,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
 !   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(in), optional :: ungriddedLBound(:) @\
-!   integer,               intent(in), optional :: ungriddedUBound(:) @\
 !   integer,               intent(inout), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -725,24 +701,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 !       the dimensions in @\
 !       the {\tt locstream}.  Ungridded dimensions must be in the same order they are @\
 !       stored in the {\t field}.   @\
-! \item [{[ungriddedLBound]}] @\
-!       Lower bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. When field dimension count is @\
-!       greater than locstream dimension count, both ungriddedLBound and ungriddedUBound @\
-!       must be specified. When both are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt field}. @\
-! \item [{[ungriddedUBound]}] @\
-!       Upper bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. When field dimension count is @\
-!       greater than locstream dimension count, both ungriddedLBound and ungriddedUBound @\
-!       must be specified. When both are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt field}. @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -756,8 +714,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitLSPtr" @\
   subroutine ESMF_FieldSetCommitLSPtr##mrank##D##mtypekind(field, locstream, farrayPtr, & @\
-    copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, rc) @\
+    copyflag, gridToFieldMap, & @\
+    rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
@@ -765,8 +723,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
-    integer, intent(in), optional :: ungriddedLBound(:) @\
-    integer, intent(in), optional :: ungriddedUBound(:) @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
@@ -809,8 +765,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 @\
   ! Do General GeomBase SetCommit @\
   call ESMF_FieldSetCommitGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
-    copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, rc=localrc) @\
+    copyflag, gridToFieldMap, & @\
+    rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -992,8 +948,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitMeshPtr<rank><type><kind>(field, mesh, & @\
-!   farrayPtr, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, rc) @\
+!   farrayPtr, indexflag, copyflag, gridToFieldMap, & @\
+!   rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),                intent(inout)         :: field @\
@@ -1001,8 +957,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
 !   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(in), optional :: ungriddedLBound(:) @\
-!   integer,               intent(in), optional :: ungriddedUBound(:) @\
 !   integer,               intent(inout), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -1043,24 +997,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 !       the dimensions in @\
 !       the {\tt mesh}.  Ungridded dimensions must be in the same order they are @\
 !       stored in the {\t field}.   @\
-! \item [{[ungriddedLBound]}] @\
-!       Lower bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. When field dimension count is @\
-!       greater than mesh dimension count, both ungriddedLBound and ungriddedUBound @\
-!       must be specified. When both are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt field}. @\
-! \item [{[ungriddedUBound]}] @\
-!       Upper bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. When field dimension count is @\
-!       greater than mesh dimension count, both ungriddedLBound and ungriddedUBound @\
-!       must be specified. When both are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt field}. @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -1074,8 +1010,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitMeshPtr" @\
   subroutine ESMF_FieldSetCommitMeshPtr##mrank##D##mtypekind(field, mesh, farrayPtr, & @\
-    copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, rc) @\
+    copyflag, gridToFieldMap, & @\
+    rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
@@ -1083,8 +1019,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
-    integer, intent(in), optional :: ungriddedLBound(:) @\
-    integer, intent(in), optional :: ungriddedUBound(:) @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
@@ -1127,8 +1061,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 @\
   ! Do General GeomBase SetCommit @\
   call ESMF_FieldSetCommitGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
-    copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, rc=localrc) @\
+    copyflag, gridToFieldMap, & @\
+    rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -1595,8 +1529,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitGBPtr<rank><type><kind>(field, geombase, & @\
-!   farrayPtr, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
+!   farrayPtr, copyflag, staggerloc, gridToFieldMap, & @\
+!   maxHaloLWidth, maxHaloUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),                intent(inout)         :: field @\
@@ -1605,8 +1539,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 !   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
 !   type(ESMF_STAGGERLOC), intent(in), optional :: staggerloc @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(in), optional :: ungriddedLBound(:) @\
-!   integer,               intent(in), optional :: ungriddedUBound(:) @\
 !   integer,               intent(in), optional :: maxHaloLWidth(:) @\
 !   integer,               intent(in), optional :: maxHaloUWidth(:) @\
 !   integer,               intent(inout), optional :: rc @\
@@ -1655,24 +1587,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 !       the dimensions in @\
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
 !       stored in the {\t field}.   @\
-! \item [{[ungriddedLBound]}] @\
-!       Lower bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. When field dimension count is @\
-!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
-!       must be specified. When both are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt field}. @\
-! \item [{[ungriddedUBound]}] @\
-!       Upper bounds of the ungridded dimensions of the {\tt field}. @\
-!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded @\
-!       dimensions in the {\tt field}.  All ungridded dimensions of the @\
-!       {\tt field} are also undistributed. When field dimension count is @\
-!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound @\
-!       must be specified. When both are specified the values are checked @\
-!       for consistency.  Note that the the ordering of @\
-!       these ungridded dimensions is the same as their order in the {\tt field}. @\
 ! \item [{[maxHaloLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
 !       of dimensions in the {\tt grid}.  However, ordering of the elements @\
@@ -1708,8 +1622,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitGBPtr" @\
   subroutine ESMF_FieldSetCommitGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
-    copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
+    copyflag, gridToFieldMap, & @\
+    maxHaloLWidth, maxHaloUWidth, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
@@ -1717,25 +1631,19 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farrayPtr @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
-    integer, intent(in), optional :: ungriddedLBound(:) @\
-    integer, intent(in), optional :: ungriddedUBound(:) @\
     integer, intent(in), optional :: maxHaloLWidth(:) @\
     integer, intent(in), optional :: maxHaloUWidth(:) @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
-    integer                        :: localrc, i, count @\
+    integer                        :: localrc, i @\
     integer                        :: fieldDimCount, fieldUngriddedDimCount @\
     integer                        :: gridDimCount  @\
-    integer                        :: ungriddedIndex(ESMF_MAXDIM) @\
     integer                        :: distgridToArrayMap (ESMF_MAXDIM) @\
     integer                        :: undistLBound(ESMF_MAXDIM), undistUBound(ESMF_MAXDIM) @\
-    integer                        :: localUngriddedLBound (ESMF_MAXDIM) @\
-    integer                        :: localUngriddedUBound (ESMF_MAXDIM) @\
     integer                        :: localGridToFieldMap (ESMF_MAXDIM) @\
     integer                        :: localMaxHaloLWidth (ESMF_MAXDIM) @\
     integer                        :: localMaxHaloUWidth (ESMF_MAXDIM) @\
-    logical                        :: isGridded(ESMF_MAXDIM) @\
     integer                        :: distgridToGridMap(ESMF_MAXDIM) @\
     type(ESMF_Array)               :: array @\
     type(ESMF_DistGrid)            :: distgrid @\
@@ -1792,15 +1700,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
               ESMF_CONTEXT, rc)  @\
         return @\
     endif @\
-    if(fieldDimCount .gt. gridDimCount) then @\
-      if( (.not. present(ungriddedLBound)) .or. & @\
-          (.not. present(ungriddedUBound)) ) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
-         "- ungridded bounds must be present when Field has ungridded dimension(s)", & @\
-           ESMF_CONTEXT, rc) @\
-        return @\
-      endif @\
-    endif @\
 @\
     fieldUngriddedDimCount = fieldDimCount-gridDimCount @\
     fieldUndistDimCount = fieldDimCount-gridDimCount @\
@@ -1810,24 +1709,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
          if (size(gridToFieldMap) .ne. gridDimCount) then @\
     call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
           "- gridToFieldMap size must equal to grid_rank", & @\
-            ESMF_CONTEXT, rc)  @\
-    return @\
-         endif @\
-    endif @\
-@\
-    if (present(ungriddedLBound)) then  @\
-         if (size(ungriddedLBound) .ne. fieldUngriddedDimCount) then @\
-    call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-          "- ungriddedLBound size must equal to array_rank-grid_rank", & @\
-            ESMF_CONTEXT, rc)  @\
-    return @\
-         endif @\
-    endif @\
-@\
-    if (present(ungriddedUBound)) then  @\
-         if (size(ungriddedUBound) .ne. fieldUngriddedDimCount) then @\
-    call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-          "- ungriddedUBound size must equal to array_rank-grid_rank", & @\
             ESMF_CONTEXT, rc)  @\
     return @\
          endif @\
@@ -1896,73 +1777,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
          localMaxHaloUWidth = 0 @\
     endif @\
 @\
-    ! Here we get the lbounds and ubounds for ungridded @\
-    ! dimensions from the native array, if it isnt input @\
-    ! through the argument list.  First we need to set up @\
-    ! an index array that holds the ungridded dimensions of @\
-    ! the native array. @\
-@\
-    ! Since were saving the ungriddedIndex calculate it even  @\
-    ! if ungridded bounds are present @\
-@\
-    ! Figure out which dims are ungridded @\
-    isGridded = .false. @\
-    do i=1, gridDimCount @\
-       isGridded(localGridToFieldMap(i)) = .true. @\
-    enddo @\
-@\
-    ! Use ungridded info to figure out the map from ungridded to field dims @\
-    count=1 @\
-    do i=1,fieldDimCount @\
-      if (.not. isGridded(i)) then @\
-          ungriddedIndex(count)=i  @\
-          count=count+1            @\
-      endif                        @\
-    enddo                          @\
-@\
-    ! set Array ungridded bounds depending on what user provides@\
-    if (present(ungriddedLBound)) then @\
-       if(present(ungriddedUBound)) then @\
-         ! Both present so copy @\
-         localUngriddedLBound(1:fieldUngriddedDimCount) = & @\
-              ungriddedLBound(1:fieldUngriddedDimCount) @\
-         localUngriddedUBound(1:fieldUngriddedDimCount) = & @\
-             ungriddedUBound(1:fieldUngriddedDimCount) @\
-       else  @\
-         ! Copy lower bound and make upper bound high enough to fit @\
-         localUngriddedLBound(1:fieldUngriddedDimCount) = & @\
-             ungriddedLBound(1:fieldUngriddedDimCount) @\
-         do i=1, fieldUngriddedDimCount        @\
-           localUngriddedUBound(i) = ungriddedLBound(i)+ & @\
-             size (farrayPtr,ungriddedIndex(i))-1 @\
-         enddo   @\
-       endif @\
-     else  @\
-       if(present(ungriddedUBound)) then @\
-         ! Copy upper bound and make lower bound low enough to fit @\
-         do i=1, fieldUngriddedDimCount        @\
-           localUngriddedLBound(i) = ungriddedUBound(i)- & @\
-             size (farrayPtr,ungriddedIndex(i))+1 @\
-         enddo   @\
-         localUngriddedUBound(1:fieldUngriddedDimCount) = & @\
-             ungriddedUBound(1:fieldUngriddedDimCount) @\
-       else  @\
-         ! No user info copy array bounds @\
-         ! Note: assumed shape bounds will be 1...size @\
-         do i=1, fieldUngriddedDimCount        @\
-            localUngriddedLBound(i) = lbound(farrayPtr,ungriddedIndex(i)) @\
-            localUngriddedUBound(i) = ubound(farrayPtr,ungriddedIndex(i)) @\
-        enddo   @\
-      endif @\
-    endif @\
-@\
     ! The undistributed info from the Grid needs to be @\
     ! combined with the ungridded info from the Field in order @\
     ! to create the Array for the Field. @\
     call ESMF_GeomBaseGetArrayInfo(geombase, & @\
          gridToArrayMap=localGridToFieldMap, & @\
-         ungriddedLBound=localUngriddedLBound (1:fieldUngriddedDimCount), & @\
-         ungriddedUBound=localUngriddedUBound (1:fieldUngriddedDimCount), & @\
          distgridToArrayMap=distgridToArrayMap, & @\
          undistLBound=undistLBound, undistUBound=undistUBound, & @\
           computationalEdgeLWidth=compELWidth, & @\
@@ -1999,10 +1818,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
        localMaxHaloLWidth (1:gridDimCount) @\
     field%ftypep%maxHaloUWidth(1:gridDimCount) = & @\
        localMaxHaloUWidth (1:gridDimCount) @\
-    field%ftypep%ungriddedLBound(1:fieldUngriddedDimCount) = & @\
-       localUngriddedLBound(1:fieldUngriddedDimCount) @\
-    field%ftypep%ungriddedUBound(1:fieldUngriddedDimCount) = & @\
-       localUngriddedUBound(1:fieldUngriddedDimCount) @\
     field%ftypep%datastatus = ESMF_STATUS_READY @\
     field%ftypep%geombase  = geombase @\
     field%ftypep%gridstatus = ESMF_STATUS_READY @\

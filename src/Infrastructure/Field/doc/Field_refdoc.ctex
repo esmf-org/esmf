@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.46 2008/09/26 23:28:37 cdeluca Exp $
+% $Id: Field_refdoc.ctex,v 1.47 2009/01/02 19:48:02 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -81,16 +81,24 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMF_FieldCreate_fapi}
+\input{ESMF_FieldCreateGr_fapi}
+\input{ESMF_FieldCreateLo_fapi}
+\input{ESMF_FieldCreateMe_fapi}
+\input{ESMF_FieldCreateBa_fapi}
 \input{ESMF_FieldGet_fapi}
 \input{ESMF_FieldPr_fapi}
 \input{ESMF_FieldSet_fapi}
+\input{ESMF_FieldSetCo_fapi}
 \input{ESMF_Field_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/ESMF_FieldCreate_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldCreateGr_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldCreateLo_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldCreateMe_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldCreateBa_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldGet_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldPr_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldSet_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldSetCo_fapi}
 \input{../Infrastructure/Field/doc/ESMF_Field_fapi}
 #endif
 
