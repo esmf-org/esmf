@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.31 2008/12/04 23:45:52 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.32 2009/01/02 20:01:01 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -3738,7 +3738,7 @@ contains
         integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
         logical, optional                 :: fieldget
 
-        real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray
+        real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), allocatable :: farray
         type(ESMF_Field)    :: field
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
@@ -3813,7 +3813,7 @@ contains
           endif
         endif
 
-        field = ESMF_FieldCreate(grid, farrayPtr=farray, &
+        field = ESMF_FieldCreate(grid, farray=farray, indexflag=ESMF_INDEX_DELOCAL, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
             gridToFieldMap=gridToFieldMap, &
