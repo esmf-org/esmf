@@ -534,6 +534,7 @@
   ! (5) grid units
   ! Acceptable values for the units are: DEGREE(S), DEGREE(S)_EAST,
   ! DEGREE(S)_NORTH, DEG, DEG_E, DEG_N, RADIANS, RAD, METERS, M, KILOMETERS, KM.
+  ! (6) test function
   ! 
   ! NOTES:
   ! Both the grid type and units should be enclosed by either single or double 

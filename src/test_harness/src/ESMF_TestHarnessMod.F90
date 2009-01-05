@@ -30,6 +30,7 @@
 !
 ! The code in this file contains data types and basic functions for the
 ! {\tt ESMF\_TestHarness}.  
+!  Expand on the type of routines included here
 !
 !-------------------------------------------------------------------------------
 ! !USES:
