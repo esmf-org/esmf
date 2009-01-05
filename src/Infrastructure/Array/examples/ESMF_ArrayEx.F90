@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.42 2008/12/04 19:17:21 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.43 2009/01/05 21:27:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -340,8 +340,9 @@ program ESMF_ArrayEx
 ! consequence} of the choices made for the other regions collectively across
 ! all DEs into which an Array object is decomposed. An Array object can be
 ! queried for its DE-local {\em interior regions} as to offer additional
-! information to the user necessary to write more efficient code. See section 
-! \ref{ArrayEx_interiorRegion}(not yet implemented) for more details.
+! information to the user necessary to write more efficient code.
+! %See section 
+! %\ref{ArrayEx_interiorRegion}(not yet implemented) for more details.
 !
 ! By default the bounds of each DE-local {\em total region} are defined as
 ! to put the start of the DE-local {\em exclusive region} at the "origin" of 
@@ -617,8 +618,9 @@ program ESMF_ArrayEx
 ! computational algorithm. The Array class offers mask type information 
 ! through the {\tt ESMF\_ArrayGet()} method in order to assist the user in 
 ! dealing with elements that are not part of the Array index space as it is 
-! defined in the corresponding DistGrid object. Please see section 
-! \ref{ArrayEx_interiorRegion} for details.
+! defined in the corresponding DistGrid object.
+! %Please see section 
+! %\ref{ArrayEx_interiorRegion} for details.
 !
 !
 ! \subsubsection{Halo communication}
@@ -1448,9 +1450,11 @@ program ESMF_ArrayEx
 !EOC
 !BOE
 ! 
-! Finally, the definition and usage of the stagger location index as it was
-! described in sections \ref{ArrayEx_staggerLocations} and
-! \ref{ArrayEx_staggeredArrays} for the 2D case applies without change to 
+! Finally, the definition and usage of the stagger location index 
+! as it was described 
+! %in sections \ref{ArrayEx_staggerLocations} and
+! %\ref{ArrayEx_staggeredArrays}
+! for the 2D case applies without change to 
 ! 1D, 3D or any other dimensionality. Connections defined in the DistGrid object
 ! may utilize the stagger location index in order to express characteristics of
 ! the index space topology. The concept is completely rank independent.
@@ -1546,8 +1550,9 @@ program ESMF_ArrayEx
 ! Undistribted Array dimensions can be used to store multi-dimensional data for
 ! each Array index space element. A special purpose of undistributed dimensions
 ! is to store multiple data arrays in the same Array object. It is, for example,
-! possible to store {\tt array1} and {\tt array2} of section
-! \ref{ArrayEx_staggeredArrays} in a single Array object using one 
+! possible to store {\tt array1} and {\tt array2} 
+! %of section \ref{ArrayEx_staggeredArrays}
+! in a single Array object using one 
 ! undistributed dimension of size 2. The same {\tt distgrid} object as 
 ! before can be used to create the Array. 
 !EOE
@@ -1572,7 +1577,9 @@ program ESMF_ArrayEx
 ! remain unchanged and apply across all undistributed components. 
 !
 ! The optional arguments used in the following call are identical to those
-! used to create {\tt array1} of section \ref{ArrayEx_staggeredArrays}. This
+! used to create {\tt array1}
+! %of section \ref{ArrayEx_staggeredArrays}
+! . This
 ! will set the total region and the stagger location of both undistributed
 ! components to be those of {\tt array1}.
 !EOE
