@@ -221,7 +221,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.98 2008/12/04 16:42:00 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.99 2009/01/05 20:14:17 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -5824,7 +5824,7 @@ end subroutine ESMF_GridGetDefault
 !          Upon return this holds the number of items in the total region per dimension
 !          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
 !          be allocated to be of size equal to the coord dimCount.
-!          Please see Section~\ref{sec:grid:usaGge:bounds} for a description
+!          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
