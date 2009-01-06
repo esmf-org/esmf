@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.scali.batch,v 1.3 2008/12/25 17:15:53 svasquez Exp $
+# $Id: mpirun.scali.batch,v 1.4 2009/01/06 21:58:55 svasquez Exp $
 ################################################################################
 # This script abides to the ESMF script rules for executing the bundled test 
 # and example applications.
@@ -58,7 +58,7 @@ do
 done
 
 #wait for file to appear.
-sleep 30
+sleep 45
 # move job output file to stdout.
 mv -f *$proc_id*  $prog.stdout
 
