@@ -202,7 +202,6 @@
 % -----------
 \newpage
 \section{Clock Class}
-\label{sec:Clock}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -246,7 +245,6 @@
 % -----------
 \newpage
 \section{Alarm Class}
-\label{sec:Alarm}
 
 \subsection{Description}
 #ifdef STANDALONE
