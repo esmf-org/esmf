@@ -1,4 +1,4 @@
-! $Id: user_modelD.F90,v 1.4 2008/06/13 00:29:36 theurich Exp $
+! $Id: user_modelD.F90,v 1.5 2009/01/07 16:43:19 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -78,9 +78,9 @@ module user_modelD
  
     
   subroutine user_init(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(in) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Nothing to do
@@ -95,9 +95,9 @@ module user_modelD
 !   !
  
   subroutine user_run(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(in) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
@@ -131,9 +131,9 @@ module user_modelD
 !   !
  
   subroutine user_final(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(in) :: comp
-    type(ESMF_State), intent(inout) ::  importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) ::  importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
