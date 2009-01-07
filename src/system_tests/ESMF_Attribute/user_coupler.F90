@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.16 2008/12/02 22:43:00 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.17 2009/01/07 16:15:53 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -75,7 +75,7 @@ module user_coupler
   subroutine user_init(comp, importState, exportState, clock, rc)
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables

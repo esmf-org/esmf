@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.32 2008/12/02 22:43:00 rokuingh Exp $
+! $Id: user_model1.F90,v 1.33 2009/01/07 16:15:53 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -76,9 +76,9 @@ module user_model1
  
     
   subroutine user_init(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
@@ -295,9 +295,9 @@ module user_model1
 !   !
  
   subroutine user_run(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     ! Local variables
@@ -359,9 +359,9 @@ module user_model1
 !   !
  
   subroutine user_final(comp, importState, exportState, clock, rc)
-    type(ESMF_GridComp), intent(inout) :: comp
-    type(ESMF_State), intent(inout) :: importState, exportState
-    type(ESMF_Clock), intent(in) :: clock
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
     type(ESMF_Field)            :: field
