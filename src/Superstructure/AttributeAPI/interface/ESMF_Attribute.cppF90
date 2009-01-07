@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.8 2008/12/19 00:30:53 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.9 2009/01/07 03:44:07 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.8 2008/12/19 00:30:53 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.9 2009/01/07 03:44:07 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -3336,10 +3336,10 @@ AttSetCharacterMacro(ESMF_Array, array, array)
 !     \item [array]
 !      An {\tt ESMF\_Array} object.
 !     \item [vm]
-!      The virtural machine over which this Array's Attribute hierarchy 
+!      The virtural machine over which this Attribute hierarchy 
 !      should be updated.
 !     \item [rootList]
-!      The list of "root" PET's that are to be used to update.
+!      The list of "root" PETs that are to be used to update.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3882,10 +3882,10 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 !     \item [comp]
 !      An {\tt ESMF\_CplComp} object.
 !     \item [vm]
-!      The virtural machine over which this CplComp's Attribute hierarchy 
+!      The virtural machine over which this Attribute hierarchy 
 !      should be updated.
 !     \item [rootList]
-!      The list of "root" PET's that are to be used to update.
+!      The list of "root" PETs that are to be used to update.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4384,10 +4384,10 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 !     \item [comp]
 !      An {\tt ESMF\_GridComp} object.
 !     \item [vm]
-!      The virtural machine over which this GridComp's Attribute hierarchy 
+!      The virtural machine over which this Attribute hierarchy 
 !      should be updated.
 !     \item [rootList]
-!      The list of "root" PET's that are to be used to update.
+!      The list of "root" PETs that are to be used to update.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4699,10 +4699,10 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 !     \item [field]
 !      An {\tt ESMF\_Field} object.
 !     \item [vm]
-!      The virtural machine over which this Field's Attribute hierarchy 
+!      The virtural machine over which this Attribute hierarchy 
 !      should be updated.
 !     \item [rootList]
-!      The list of "root" PET's that are to be used to update.
+!      The list of "root" PETs that are to be used to update.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4949,6 +4949,7 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
       endif
 
       ! no standard attribute package for FieldBundle at this time
+      localrc = ESMF_SUCCESS
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5050,10 +5051,10 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 !     \item [fieldbundle]
 !      An {\tt ESMF\_FieldBundle} object.
 !     \item [vm]
-!      The virtural machine over which this FieldBundle's Attribute hierarchy 
+!      The virtural machine over which this Attribute hierarchy 
 !      should be updated.
 !     \item [rootList]
-!      The list of "root" PET's that are to be used to update.
+!      The list of "root" PETs that are to be used to update.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5299,6 +5300,7 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
       endif
 
       ! no standard attribute package for Grid at this time
+      localrc = ESMF_SUCCESS
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5344,10 +5346,10 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
 !     \item [grid]
 !      An {\tt ESMF\_Grid} object.
 !     \item [vm]
-!      The virtural machine over which this Grid's Attribute hierarchy 
+!      The virtural machine over which this Attribute hierarchy 
 !      should be updated.
 !     \item [rootList]
-!      The list of "root" PET's that are to be used to update.
+!      The list of "root" PETs that are to be used to update.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5997,10 +5999,10 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [vm]
-!      The virtural machine over which this State's Attribute hierarchy 
+!      The virtural machine over which this Attribute hierarchy 
 !      should be updated.
 !     \item [rootList]
-!      The list of "root" PET's that are to be used to update.
+!      The list of "root" PETs that are to be used to update.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -6209,7 +6211,7 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
 !           The virtural machine over which this Attribute hierarchy 
 !           should be updated.
 !     \item [rootList]
-!           The list of "root" PET's that are to be used to update.
+!           The list of "root" PETs that are to be used to update.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
