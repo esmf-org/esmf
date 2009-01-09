@@ -13,6 +13,6 @@ using MinGW 5.1.4 and MSYS 1.0.11.
 2.) The MinGW version of gcc is required for preprocessing.
 
 3.) Prior to running the ESMF make, ensure that all compiler
-environment variables (in particular, PATH, LIB, and INC) are
-set up.  These should point to the correct Intel and VS
-directories.
+environment variables (in particular, PATH, LIB, and INCLUDE)
+are set up.  These should point to the correct Intel, Visual
+Studio, and SDK directories.
