@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.172 2008/09/15 17:10:25 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.173 2009/01/09 18:55:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -240,6 +240,8 @@
       public ESMF_CompIsPetLocal
 
       public ESMF_CompValidate, ESMF_CompPrint
+      
+      public ESMF_CompSetServicesLib
 
       public ESMF_CompSetVMMaxThreads
       public ESMF_CompSetVMMinThreads
@@ -254,7 +256,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.172 2008/09/15 17:10:25 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.173 2009/01/09 18:55:01 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1836,6 +1838,58 @@ end function
        if (rcpresent) rc = ESMF_SUCCESS
 
        end subroutine ESMF_CompPrint
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompSetServicesLib"
+!BOPI
+! !IROUTINE: ESMF_CompSetServices - Call user provided routine located in shared object
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_CompSetServices()
+  recursive subroutine ESMF_CompSetServicesLib(compp, sharedObj, routine, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CompClass),    pointer               :: compp
+      character(len=*),        intent(in)            :: sharedObj
+      character(len=*),        intent(in)            :: routine
+      integer,                 intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call into user provided routine which is responsible for setting
+!  component's Initialize(), Run() and Finalize() services. The named
+!  {\tt routine} must exist in the shared object file specified in the
+!  {\tt sharedObj} argument.
+!    
+!  The arguments are:
+!  \begin{description}
+!  \item[compp]
+!  Component pointer.
+!  \item[sharedObj]
+!  Name of shared object that contains {\tt routine}.
+!  \item[routine]
+!  Name of routine to be called.
+! \item[{[rc]}]
+!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+  ! local vars
+  integer :: localrc                       ! local error status
+
+  ! Initialize return code; assume failure until success is certain
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_RC_NOT_IMPL
+
+  call c_ESMC_SetServicesLib(compp%this, sharedObj, routine, localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------

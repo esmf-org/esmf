@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompSetServ.F90,v 1.14 2008/07/25 20:28:30 theurich Exp $
+! $Id: ESMF_CplCompSetServ.F90,v 1.15 2009/01/09 18:55:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -232,5 +232,38 @@
 !  The subroutine, when called by the framework, must make successive calls to
 !  {\tt ESMF\_CplCompSetEntryPoint} to preset callback routines for initialization,
 !  run, and finalization for a coupler component.
+!
+!EOP
+
+!BOP
+! !IROUTINE: ESMF_CplCompSetServices - Register CplComp interface routines located in shared object
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_CplCompSetServices()
+  recursive subroutine ESMF_CplCompSetServicesLib(comp, sharedObj, routine, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp),      intent(inout)         :: comp
+      character(len=*),        intent(in)            :: sharedObj
+      character(len=*),        intent(in)            :: routine
+      integer,                 intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call into user provided routine which is responsible for setting
+!  component's Initialize(), Run() and Finalize() services. The named
+!  {\tt routine} must exist in the shared object file specified in the
+!  {\tt sharedObj} argument.
+!    
+!  The arguments are:
+!  \begin{description}
+!  \item[comp]
+!  Coupler component.
+!  \item[sharedObj]
+!  Name of shared object that contains {\tt routine}.
+!  \item[routine]
+!  Name of routine to be called.
+! \item[{[rc]}]
+!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
 !
 !EOP

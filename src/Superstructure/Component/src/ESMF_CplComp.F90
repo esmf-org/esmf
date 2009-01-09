@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.92 2008/07/25 18:31:22 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.93 2009/01/09 18:55:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.92 2008/07/25 18:31:22 theurich Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.93 2009/01/09 18:55:01 theurich Exp $'
 
 !==============================================================================
 !
@@ -163,7 +163,7 @@
 	end subroutine
       end interface
 
-      interface
+      interface ESMF_CplCompSetServices
 !BOPI
 ! !IROUTINE: ESMF_CplCompSetServices
 !
@@ -189,6 +189,9 @@
 !     for a coupler component.
 !EOPI
         end subroutine
+        
+        module procedure ESMF_CplCompSetServicesLib
+        
       end interface
 
 !------------------------------------------------------------------------------
@@ -209,6 +212,61 @@
 !
 ! compp = rval%compp
 !end subroutine
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetServicesLib"
+!BOPI
+! !IROUTINE: ESMF_CplCompSetServices - Register CplComp interface routines located in shared object
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_CplCompSetServices()
+  recursive subroutine ESMF_CplCompSetServicesLib(comp, sharedObj, routine, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp),      intent(inout)         :: comp
+      character(len=*),        intent(in)            :: sharedObj
+      character(len=*),        intent(in)            :: routine
+      integer,                 intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call into user provided routine which is responsible for setting
+!  component's Initialize(), Run() and Finalize() services. The named
+!  {\tt routine} must exist in the shared object file specified in the
+!  {\tt sharedObj} argument.
+!    
+!  The arguments are:
+!  \begin{description}
+!  \item[comp]
+!  Coupler component.
+!  \item[sharedObj]
+!  Name of shared object that contains {\tt routine}.
+!  \item[routine]
+!  Name of routine to be called.
+! \item[{[rc]}]
+!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+  ! local vars
+  integer :: localrc                       ! local error status
+
+  ! Initialize return code; assume failure until success is certain
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_RC_NOT_IMPL
+
+  ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, comp, rc)
+  
+  call ESMF_CompSetServicesLib(comp%compp, sharedObj, routine, rc=localrc)
+  ! Use LogErr to handle return code
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
