@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.30 2008/12/08 22:25:57 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.31 2009/01/09 22:43:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -204,7 +204,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.272.2.30 2008/12/08 22:25:57 feiliu Exp $'
+    '$Id: ESMF_Field.F90,v 1.272.2.31 2009/01/09 22:43:17 theurich Exp $'
 
 !==============================================================================
 !
@@ -1987,12 +1987,13 @@ contains
              return
           endif 
           ! Verify that array rank is greater than or equal to grid rank + ungridded bound rank
-          if ( arrayrank .lt. gridrank) then
-              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                 "grid rank + ungridded Bound rank not equal to array rank", &
-                  ESMF_CONTEXT, rc)
-              return
-          endif
+!gjt: take this out because of replicated dimensions arrayrank may be less!          
+!          if ( arrayrank .lt. gridrank) then
+!              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+!                 "grid rank + ungridded Bound rank not equal to array rank", &
+!                  ESMF_CONTEXT, rc)
+!              return
+!          endif
           
           ! Verify the distgrids in array and grid match.
           if(ESMF_DistGridMatch(gridDistGrid, arrayDistGrid, rc=localrc) .ne. ESMF_TRUE) then

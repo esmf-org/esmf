@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.32 2008/12/17 15:06:38 feiliu Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.33 2009/01/09 22:43:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.32 2008/12/17 15:06:38 feiliu Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.33 2009/01/09 22:43:17 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -685,22 +685,6 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
     ! Check the size of the native array. @\
     fieldDimCount = mrank @\
 @\
-    if(fieldDimCount .lt. gridDimCount) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-            "- farray rank must be greater than or equal to grid rank", & @\
-              ESMF_CONTEXT, rc)  @\
-        return @\
-    endif @\
-    if(fieldDimCount .gt. gridDimCount) then @\
-      if( (.not. present(ungriddedLBound)) .or. & @\
-          (.not. present(ungriddedUBound)) ) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
-         "- ungridded bounds must be present when Field has ungridded dimension(s)", & @\
-           ESMF_CONTEXT, rc) @\
-        return @\
-      endif @\
-    endif @\
-@\
     ! Error Check Input @\
     gridDimCount_repdim = 0 @\
     if (present(gridToFieldMap)) then  @\
@@ -715,6 +699,22 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
         enddo @\
     endif @\
     gridDimCount_norep = gridDimCount - gridDimCount_repdim @\
+@\
+    if(fieldDimCount .lt. gridDimCount_norep) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
+            "- farray rank must be greater than or equal to grid rank", & @\
+              ESMF_CONTEXT, rc)  @\
+        return @\
+    endif @\
+    if(fieldDimCount .gt. gridDimCount_norep) then @\
+      if( (.not. present(ungriddedLBound)) .or. & @\
+          (.not. present(ungriddedUBound)) ) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
+         "- ungridded bounds must be present when Field has ungridded dimension(s)", & @\
+           ESMF_CONTEXT, rc) @\
+        return @\
+      endif @\
+    endif @\
 @\
     ! ungridded dimensions plus replicated dimensions @\
     fieldUngriddedDimCount = fieldDimCount-gridDimCount + gridDimCount_repdim @\
@@ -1114,16 +1114,6 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
       endif @\
     endif @\
 @\
-    ! Check the size of the native array. @\
-    fieldDimCount = mrank @\
-@\
-    if(fieldDimCount .lt. gridDimCount) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-            "- farrayPtr rank must be greater than or equal to grid rank", & @\
-              ESMF_CONTEXT, rc)  @\
-        return @\
-    endif @\
-@\
     ! Error Check Input @\
     ! And count the number of replicated dimensions in the Grid @\
     gridDimCount_repdim = 0 @\
@@ -1139,6 +1129,16 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
         enddo @\
     endif @\
     gridDimCount_norep = gridDimCount - gridDimCount_repdim @\
+@\
+    ! Check the size of the native array. @\
+    fieldDimCount = mrank @\
+@\
+    if(fieldDimCount .lt. gridDimCount_norep) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
+            "- farrayPtr rank must be greater than or equal to grid rank", & @\
+              ESMF_CONTEXT, rc)  @\
+        return @\
+    endif @\
 @\
     fieldUndistDimCount = fieldDimCount-gridDimCount + gridDimCount_repdim @\
 @\
@@ -1232,8 +1232,8 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
     array = ESMF_ArrayCreate(farrayPtr, distgrid=distgrid, & @\
             copyflag=copyflag, & @\
             distgridToArrayMap=distgridToArrayMap (1:gridDimCount), & @\
-            computationalEdgeLWidth=compELWidth(1:gridDimCount), & @\
-            computationalEdgeUWidth=compEUWidth(1:gridDimCount), & @\
+            computationalEdgeLWidth=compELWidth(1:gridDimCount_norep), & @\
+            computationalEdgeUWidth=compEUWidth(1:gridDimCount_norep), & @\
             totalLWidth=localMaxHaloLWidth(1:gridDimCount_norep), & @\
             totalUWidth=localMaxHaloUWidth(1:gridDimCount_norep), & @\
             staggerloc=localStaggerLoc%staggerloc, rc=localrc) @\
