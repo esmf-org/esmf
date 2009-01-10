@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2 2008/12/12 07:52:36 w6ws Exp $
+# $Id: build_rules.mk,v 1.3 2009/01/10 01:41:07 w6ws Exp $
 #
 # MinGW.intel.default
 #
@@ -54,6 +54,11 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
+
+############################################################
+# Force Fortran symbols lower case
+#
+ESMF_F90COMPILEOPTS += -names:lowercase
 
 ############################################################
 # Windows does not have support for POSIX IPC (memory mapped files)
@@ -157,28 +162,28 @@ ESMF_RANLIBDEFAULT       = true
 ###########################################################
 # Determine where gcc's libraries are located
 #
-ESMF_F90LINKPATHS += \
-  -L$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
-ESMF_F90LINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
+# ESMF_F90LINKPATHS += \
+#  -L$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
+# ESMF_F90LINKRPATHS += \
+#  -Wl,-rpath,$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
 
 ############################################################
 # Determine where gfortran's libraries are located
 #
-ESMF_CXXLINKPATHS += \
-  -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
-ESMF_CXXLINKRPATHS += \
-  -Wl,-rpath,$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
+# ESMF_CXXLINKPATHS += \
+#   -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
+# ESMF_CXXLINKRPATHS += \
+#   -Wl,-rpath,$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lstdc++
+# ESMF_F90LINKLIBS += -lstdc++
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)")
+# ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)")
 
 ############################################################
 # Blank out shared library options
