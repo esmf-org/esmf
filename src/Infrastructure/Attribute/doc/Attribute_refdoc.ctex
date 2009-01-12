@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.12 2009/01/12 18:38:26 rokuingh Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.13 2009/01/12 18:56:07 rokuingh Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -15,10 +15,6 @@
 \usepackage{html}
 \usepackage{times}
 \usepackage{alltt}
-
-\usepackage{dcolumn}
-\newcolumntype{+}{D{/}{\mbox{--}}{4}}
-\newcolumntype{,}{D{,}{,}{2}}
 
 \usepackage[T1]{fontenc}
 \usepackage[dvips]{graphics,color}
