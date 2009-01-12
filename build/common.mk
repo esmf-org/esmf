@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.247 2008/12/12 08:04:43 w6ws Exp $
+#  $Id: common.mk,v 1.248 2009/01/12 18:18:56 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1244,7 +1244,7 @@ tree_include:
 # prevent the wildcards from being expanded.)
 
 CLEAN_DEFDIRS = coredir.*
-CLEAN_DEFAULTS = *.o *.mod *.txt core ESM*.stdout ESM*.Log PET*.Log *ESMF_LogFile
+CLEAN_DEFAULTS = *.o *.so *.mod *.txt core ESM*.stdout ESM*.Log PET*.Log *ESMF_LogFile
 CLEAN_TEXFILES = *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG
 
 clean:
@@ -1521,7 +1521,7 @@ tree_build_system_tests: $(SYSTEM_TESTS_BUILD)
 $(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
 	$(MAKE) chkdir_tests
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(SYSTEM_TESTS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.so *.mod
 
 
 # debugging aid:  link the executable, standard output, and log file to
@@ -1549,7 +1549,7 @@ $(ESMF_TESTDIR)/ESMF_%STestD : $(SYSTEM_TESTS_OBJ_D) $(ESMFLIB) ESMF_%STestD.o
 $(ESMF_TESTDIR)/ESMF_%STestE : $(SYSTEM_TESTS_OBJ_E) $(ESMFLIB) ESMF_%STestE.o 
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(SYSTEM_TESTS_OBJ_E) ESMF_$*STestE.o $(ESMF_F90ESMFLINKLIBS)
 MPMDCLEANUP:
-	$(ESMF_RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.so *.mod
 
 #
 # run_system_tests
@@ -1762,7 +1762,7 @@ tree_build_use_test_cases: chkdir_tests $(USE_TEST_CASES_BUILD)
 #
 $(ESMF_TESTDIR)/ESMF_%UseTestCase : ESMF_%UseTestCase.o $(USE_TEST_CASES_OBJ) $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(USE_TEST_CASES_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.so *.mod
 
 
 # debugging aid:  link the executable, standard output, and log file to
@@ -1910,16 +1910,16 @@ tree_build_unit_tests: $(TESTS_BUILD)
 
 $(ESMF_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(ESMF_UTEST_$(*)_OBJS) $(TESTS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.so *.mod
 
 
 $(ESMF_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
 	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) -o $@ $(ESMC_UTEST_$(*)_OBJS) $< $(ESMF_CXXESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.so *.mod
 
 $(ESMF_TESTDIR)/ESMCI_%UTest : ESMCI_%UTest.o $(ESMFLIB)
 	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) -o $@ $(ESMCI_UTEST_$(*)_OBJS) $< $(ESMF_CXXESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.so *.mod
 
 # debugging aid:  link the executable, standard output, and log file to
 # temporary names in the current directory (they are built in the test
@@ -2197,7 +2197,7 @@ tree_build_examples: $(EXAMPLES_BUILD)
 #
 $(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(ESMF_EXAMPLE_$(*)_OBJS) $< $(ESMF_F90ESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.so *.mod
 
 
 $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
@@ -2301,7 +2301,7 @@ tree_build_demos: $(DEMOS_BUILD)
 
 $(ESMF_TESTDIR)/%App : %Demo.o $(DEMOS_OBJ) $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(DEMOS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.mod
+	$(ESMF_RM) -f *.o *.so *.mod
 
 
 #
@@ -2879,7 +2879,7 @@ $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 #  These rules are for compiling the test examples.
 #-------------------------------------------------------------------------------
 .cpp.rm .cc.rm .C.rm .F.rm .f.rm .c.rm:
-	-@$(ESMF_RM) $* *.o $*.mon.* gmon.out mon.out
+	-@$(ESMF_RM) $* *.o *.so $*.mon.* gmon.out mon.out
 
 
 #-------------------------------------------------------------------------------
