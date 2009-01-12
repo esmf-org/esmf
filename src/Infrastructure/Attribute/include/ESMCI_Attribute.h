@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.7 2008/12/19 00:31:28 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.8 2009/01/12 18:38:26 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -117,7 +117,9 @@ class Attribute
       const string &purpose, const string &object);
     
     // copy an attribute hierarchy
+    int AttributeCopy(const Attribute &source);
     int AttributeCopyAll(ESMC_Base *source);
+
     
     // count the number of objects in an attribute hierarchy
     int AttributeCountTree(const string &convention, const string &purpose,  

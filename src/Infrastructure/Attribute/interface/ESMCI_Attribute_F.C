@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.6 2008/12/22 20:21:34 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.7 2009/01/12 18:38:26 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.6 2008/12/22 20:21:34 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.7 2009/01/12 18:38:26 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1855,7 +1855,60 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeCopyAll - copy an attribute hierarchy between objects
+// !IROUTINE:  c_ESMC_AttributeCopy - copy an attribute between objects
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributecopy)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributecopy()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **source,              // in/out - base object
+      ESMC_Base **destination,         // in/out - base object
+      int *rc) {                       // in/out - return code
+// 
+// !DESCRIPTION:
+//     Copy the Attribute hierarchy from Base1 to Base2
+//
+//EOP
+
+  int status;
+  
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!source) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad source base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+  
+  if (!destination) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad destination base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  status = (**destination).root.AttributeCopy((**source).root);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed attributecopy", &status);
+  }
+  
+  if (rc) *rc = status;
+  return;
+
+}  // end c_ESMC_AttributeCopy
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeCopyAll - copy an attribute hierarchy between objects
 //
 // !INTERFACE:
       void FTN(c_esmc_attributecopyall)(
@@ -1904,7 +1957,7 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeCopyAll
+}  // end c_ESMC_AttributeCopyAll
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -1976,7 +2029,7 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeGetChar - get attribute from an ESMF type
+// !IROUTINE:  c_ESMC_AttributeGetChar - get attribute from an ESMF type
 //
 // !INTERFACE:
       void FTN(c_esmc_attributegetchar)(
@@ -2080,11 +2133,11 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeGetChar
+}  // end c_ESMC_AttributeGetChar
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeGetCharList - get attribute list from an ESMF type
+// !IROUTINE:  c_ESMC_AttributeGetCharList - get attribute list from an ESMF type
 //
 // !INTERFACE:
       void FTN(c_esmc_attributegetcharlist)(
@@ -2229,11 +2282,11 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeGetCharList
+}  // end c_ESMC_AttributeGetCharList
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeGetValue - get attribute from an ESMF type
+// !IROUTINE:  c_ESMC_AttributeGetValue - get attribute from an ESMF type
 //
 // !INTERFACE:
       void FTN(c_esmc_attributegetvalue)(
@@ -2377,11 +2430,11 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeGetValue
+}  // end c_ESMC_AttributeGetValue
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeGetInfoName - get type and number of items in an attr
+// !IROUTINE:  c_ESMC_AttributeGetInfoName - get type and number of items in an attr
 //
 // !INTERFACE:
       void FTN(c_esmc_attributegetinfoname)(
@@ -2459,11 +2512,11 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeGetInfoName
+}  // end c_ESMC_AttributeGetInfoName
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeGetInfoNum - get type and number of items in an attr
+// !IROUTINE:  c_ESMC_AttributeGetInfoNum - get type and number of items in an attr
 //
 // !INTERFACE:
       void FTN(c_esmc_attributegetinfonum)(
@@ -2550,12 +2603,12 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeGetInfoNum
+}  // end c_ESMC_AttributeGetInfoNum
 
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeGetCount - get number of attrs
+// !IROUTINE:  c_ESMC_AttributeGetCount - get number of attrs
 //
 // !INTERFACE:
       void FTN(c_esmc_attributegetcount)(
@@ -2607,7 +2660,7 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeGetCount
+}  // end c_ESMC_AttributeGetCount
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -2684,7 +2737,7 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeSetChar - Set String Attribute on an ESMF type
+// !IROUTINE:  c_ESMC_AttributeSetChar - Set String Attribute on an ESMF type
 //
 // !INTERFACE:
       void FTN(c_esmc_attributesetchar)(
@@ -2765,11 +2818,11 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeSetChar
+}  // end c_ESMC_AttributeSetChar
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeSetCharList - Set String Attribute List on an ESMF type
+// !IROUTINE:  c_ESMC_AttributeSetCharList - Set String Attribute List on an ESMF type
 //
 // !INTERFACE:
       void FTN(c_esmc_attributesetcharlist)(
@@ -2862,11 +2915,11 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeSetCharList
+}  // end c_ESMC_AttributeSetCharList
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeSetValue - Set Attribute on an ESMF type
+// !IROUTINE:  c_ESMC_AttributeSetValue - Set Attribute on an ESMF type
 //
 // !INTERFACE:
       void FTN(c_esmc_attributesetvalue)(
@@ -2989,11 +3042,11 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeSetValue
+}  // end c_ESMC_AttributeSetValue
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeSetLink - Set a link in an Attribute hierarchy
+// !IROUTINE:  c_ESMC_AttributeSetLink - Set a link in an Attribute hierarchy
 //
 // !INTERFACE:
       void FTN(c_esmc_attributesetlink)(
@@ -3043,11 +3096,11 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeSetLink
+}  // end c_ESMC_AttributeSetLink
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeSetObjsInTree - Set an Attribute on all objects
+// !IROUTINE:  c_ESMC_AttributeSetObjsInTree - Set an Attribute on all objects
 //                                               in an Attribute hierarchy
 //
 // !INTERFACE:
@@ -3131,11 +3184,11 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeSetObjsInTree
+}  // end c_ESMC_AttributeSetObjsInTree
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeUpdate - Update an Attribute
+// !IROUTINE:  c_ESMC_AttributeUpdate - Update an Attribute
 //
 // !INTERFACE:
       void FTN(c_esmc_attributeupdate)(
@@ -3194,11 +3247,11 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeUpdate
+}  // end c_ESMC_AttributeUpdate
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_AttributeUpdateReset - Reset flags in an Attribute hierarchy
+// !IROUTINE:  c_ESMC_AttributeUpdateReset - Reset flags in an Attribute hierarchy
 //
 // !INTERFACE:
       void FTN(c_esmc_attributeupdatereset)(
@@ -3240,7 +3293,7 @@ extern "C" {
   if (rc) *rc = status;
   return;
 
-}  // end c_esmc_AttributeUpdate
+}  // end c_ESMC_AttributeUpdate
 
 #undef  ESMC_METHOD
 

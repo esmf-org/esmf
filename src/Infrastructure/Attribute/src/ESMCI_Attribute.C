@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.10 2008/12/30 00:07:47 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.11 2009/01/12 18:38:26 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.10 2008/12/30 00:07:47 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.11 2009/01/12 18:38:26 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -625,6 +625,107 @@ namespace ESMCI {
   return ESMF_SUCCESS;
   
 }  // end AttPackSet()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeCopy"
+//BOPI
+// !IROUTINE:  AttributeCopy - copy {\tt Attributes} between objects 
+//
+// !INTERFACE:
+      int Attribute::AttributeCopy(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      const Attribute &source) {  // in - the source object
+// 
+// !DESCRIPTION:
+//     All {\tt Attributes} associated with the source object are copied to the
+//     destination object (*this) without copying through links.
+//
+//EOPI
+
+  int i, localrc;
+  Attribute *attr;
+
+  attrName = source.attrName;
+  tk = source.tk;
+  items = source.items;
+  slen = source.slen;
+  attrRoot = source.attrRoot;
+  
+  attrConvention = source.attrConvention;
+  attrPurpose = source.attrPurpose;
+  attrObject = source.attrObject;
+  attrPack = source.attrPack;
+  attrPackHead = source.attrPackHead;
+  attrNested = source.attrNested;
+
+  valueChange = source.valueChange;
+  linkChange = source.linkChange;
+  structChange = source.structChange;
+
+  if (items == 1) {
+        if (tk == ESMC_TYPEKIND_I4)
+            vi = source.vi;  
+        else if (tk == ESMC_TYPEKIND_I8)
+            vtl = source.vtl;  
+        else if (tk == ESMC_TYPEKIND_R4)
+            vf = source.vf;  
+        else if (tk == ESMC_TYPEKIND_R8)
+            vd = source.vd;  
+        else if (tk == ESMC_TYPEKIND_LOGICAL)
+            vb = source.vb;
+        else if (tk == ESMC_TYPEKIND_CHARACTER)
+            vcp = source.vcp;
+  } else if (items > 1) {
+    // items > 1, alloc space for a list and do the copy
+          if (tk == ESMC_TYPEKIND_I4) {
+              vip.clear();
+              vip.reserve(items);
+              vip = source.vip;
+          } else if (tk == ESMC_TYPEKIND_I8) {
+              vlp.clear();
+              vlp.reserve(items);
+              vlp = source.vlp;
+          } else if (tk == ESMC_TYPEKIND_R4) {
+              vfp.clear();
+              vfp.reserve(items);
+              vfp = source.vfp;
+          } else if (tk == ESMC_TYPEKIND_R8) {
+              vdp.clear();
+              vdp.reserve(items);
+              vdp = source.vdp;
+          } else if (tk == ESMC_TYPEKIND_LOGICAL){
+              vbp.clear();
+              vbp.reserve(items);
+              vbp = source.vbp;
+          } else if (tk == ESMC_TYPEKIND_CHARACTER) {
+              vcpp.clear();
+              vcpp.reserve(items);
+              vcpp = source.vcpp;
+          }
+  }
+
+  // if Attribute list, copy it.
+  for (i=0; i<source.attrCount; i++) {
+    if(source.attrList[i]->attrRoot != ESMF_TRUE) {
+      attr = new Attribute(ESMF_FALSE);
+      localrc = attr->AttributeCopy(*(source.attrList[i]));
+      localrc = AttributeSet(attr);
+      if (localrc != ESMF_SUCCESS) {
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                             "AttributeCopy bailed", 
+                             &localrc);
+          return ESMF_FAILURE;
+      }
+    }
+  }
+
+  return ESMF_SUCCESS;
+
+}  // end AttributeCopy
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeCopyAll"
@@ -2403,6 +2504,7 @@ namespace ESMCI {
 
   int localrc;
   Attribute *attr;
+  char msgbuf[ESMF_MAXSTR];
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
@@ -2410,8 +2512,9 @@ namespace ESMCI {
   for (unsigned int i=0; i<attrCount; i++) {
     if (attrList[i]->attrRoot == ESMF_TRUE) {
       if (destination->ESMC_BaseGetID() == attrList[i]->attrBase->ESMC_BaseGetID()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "AttributeSetLink tried to double set a link", &localrc);
+        sprintf(msgbuf, "AttributeSetLink tried to double set a link SrcBase = %d, DestBase = %d",
+                   attrList[i]->attrBase->ESMC_BaseGetID(), destination->ESMC_BaseGetID());
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         return ESMF_FAILURE;
       }
     }
@@ -3320,7 +3423,7 @@ namespace ESMCI {
   tk = ESMF_NOKIND;
   items = 0;
   slen = 0;
-  attrRoot = ESMF_FALSE;
+  attrRoot = attributeRoot;
 
   //attrConvention = '\0';
   //attrPurpose = '\0';

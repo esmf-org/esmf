@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.14 2008/12/02 22:24:33 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.15 2009/01/12 18:38:26 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -40,6 +40,22 @@ Each Attribute contains a name value pair in which the value can be any of sever
 \item {\tt EMSF\_TYPEKIND\_Character}
 \item {\tt EMSF\_TYPEKIND\_Character} list
 \end{itemize}
+
+\begin{tabular}{|r||+|>{\raggedright}p{2.2cm}|,|}     \hline
+\multicolumn{4}{|c|}{GG\&A Hoofed Stock}\\
+\hline\hline
+& \multicolumn{1}{c|}{Price}& &
+\\ \cline{2-2} \multicolumn{1}{|c||}{Year}
+& \mbox{low}/\mbox{high}
+& \multicolumn{1}{c|}{Comments}
+& \multicolumn{1}{c|}{Other}    \\ \hline
+1971 & 97/245  &Bad year for farmers in
+        the West. & 23,45       \\ \hline
+  72 &245/245  &Light trading due to a
+        heavy winter.   & 435,23\\ \hline
+  73 &245/2001 &No gnus was very good
+        gnus this year. & 387,56\\ \hline
+\end{tabular}
 
 All Attributes also contain character strings specifying the convention, type, and object of the Attribute for the purpose of keeping track of Attribute packages.  All Attributes contain a list of pointers to other Attributes, which is empty until specified otherwise.  This list of Attribute pointers is what allows Attribute hierarchies to be built.  Using this feature an Attribute for one ESMF class can be linked to an Attribute in another ESMF class.
 
