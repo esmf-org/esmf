@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.50 2008/12/05 19:31:27 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.51 2009/01/12 05:03:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -1801,7 +1801,7 @@ end subroutine ESMF_LogSet
 
         if (alog%FileIsOpen .ne. ESMF_TRUE) then
           print *, "ESMF_Log not open -- cannot ESMF_LogWrite()."
-          rc=ESMF_FAILURE
+          if (present(rc)) rc=ESMF_FAILURE
           return
         endif
 
