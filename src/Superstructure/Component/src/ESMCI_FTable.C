@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.6 2009/01/09 18:55:01 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.7 2009/01/12 18:20:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.6 2009/01/09 18:55:01 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.7 2009/01/12 18:20:10 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -331,6 +331,11 @@ extern "C" {
     ESMCI_FortranStrLenArg llen, ESMCI_FortranStrLenArg rlen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
+#ifdef ESMF_NO_DLFCN
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, 
+      "System does not support dynamic loading.", rc);
+    return;
+#else
     string sharedObj(sharedObjArg, llen);
     string routine(routineArg, rlen);
     sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
@@ -351,6 +356,7 @@ extern "C" {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
     if (rc) rc = ESMF_SUCCESS;
+#endif
   }
 } // extern "C"
 //==============================================================================
