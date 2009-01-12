@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.7 2008/07/23 04:51:54 theurich Exp $
+# $Id: build_rules.mk,v 1.8 2009/01/12 18:23:05 theurich Exp $
 #
 # Linux.nagintel.default
 #
@@ -124,6 +124,6 @@ ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPILER) $
 ESMF_CXXLINKLIBS += -lrt -ldl $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
 
 ############################################################
-# Blank out shared library options
+# Shared library options
 #
-ESMF_SL_LIBS_TO_MAKE  =
+ESMF_SL_LIBOPTS  += -shared

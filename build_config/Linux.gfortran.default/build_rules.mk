@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.12 2008/07/23 04:51:54 theurich Exp $
+# $Id: build_rules.mk,v 1.13 2009/01/12 18:23:05 theurich Exp $
 #
 # Linux.gfortran.default
 #
@@ -168,14 +168,14 @@ ESMF_CXXLINKRPATHS += -Wl,-rpath,$(dir $(ESMF_LIBGFORTRAN))
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lrt -lstdc++
+ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt -lgfortran
+ESMF_CXXLINKLIBS += -lrt -lgfortran -ldl
 
 ############################################################
-# Blank out shared library options
+# Shared library options
 #
-ESMF_SL_LIBS_TO_MAKE  =
+ESMF_SL_LIBOPTS  += -shared

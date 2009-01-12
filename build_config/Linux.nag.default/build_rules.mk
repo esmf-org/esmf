@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.32 2008/07/23 04:51:54 theurich Exp $
+# $Id: build_rules.mk,v 1.33 2009/01/12 18:23:05 theurich Exp $
 #
 # Linux.nag.default
 #
@@ -103,14 +103,14 @@ ESMF_CXXLINKRPATHS      =
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lrt -lstdc++
+ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
+ESMF_CXXLINKLIBS += -lrt -ldl $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COMPILER))
 
 ############################################################
-# Blank out shared library options
+# Shared library options
 #
-ESMF_SL_LIBS_TO_MAKE  =
+ESMF_SL_LIBOPTS  += -shared

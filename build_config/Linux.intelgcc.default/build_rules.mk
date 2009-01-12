@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.15 2008/12/05 20:17:57 theurich Exp $
+# $Id: build_rules.mk,v 1.16 2009/01/12 18:23:05 theurich Exp $
 #
 # Linux.intelgcc.default
 #
@@ -178,6 +178,6 @@ ESMF_F90LINKLIBS += -limf -lm -lrt -ldl
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)") -lrt -ldl
 
 ############################################################
-# Blank out shared library options
+# Shared library options
 #
-ESMF_SL_LIBS_TO_MAKE  =
+ESMF_SL_LIBOPTS  += -shared

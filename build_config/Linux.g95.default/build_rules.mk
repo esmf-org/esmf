@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.18 2008/08/28 19:10:42 theurich Exp $
+# $Id: build_rules.mk,v 1.19 2009/01/12 18:23:05 theurich Exp $
 #
 # Linux.g95.default
 #
@@ -163,7 +163,7 @@ ESMF_F90LINKRPATHS += -Wl,-rpath,$(dir $(ESMF_LIBSTDCXX))
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lrt -lstdc++
+ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
@@ -173,9 +173,9 @@ ESMF_F90LINKLIBS += -lrt -lstdc++
 # could potentially cause the linker to pick gcc system libs from g95's version
 # of gcc rather than the actually used gcc version. The following approach
 # avoids this.
-ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a)
+ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a) -ldl
 
 ############################################################
-# Blank out shared library options
+# Shared library options
 #
-ESMF_SL_LIBS_TO_MAKE  =
+ESMF_SL_LIBOPTS  += -shared

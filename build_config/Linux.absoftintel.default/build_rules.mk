@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.14 2008/10/15 03:47:28 w6ws Exp $
+# $Id: build_rules.mk,v 1.15 2009/01/12 18:23:05 theurich Exp $
 #
 # Linux.absoftintel.default
 #
@@ -120,6 +120,6 @@ ESMF_F90LINKLIBS += -lU77 $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPI
 ESMF_CXXLINKLIBS += -lU77 -lrt -ldl $(shell $(ESMF_DIR)/scripts/libs.absoft $(ESMF_F90COMPILER))
 
 ############################################################
-# Blank out shared library options
+# Shared library options
 #
-ESMF_SL_LIBS_TO_MAKE  =
+ESMF_SL_LIBOPTS  += -shared

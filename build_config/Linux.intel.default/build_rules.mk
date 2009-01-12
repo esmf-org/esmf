@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.78 2008/12/05 20:17:57 theurich Exp $
+# $Id: build_rules.mk,v 1.79 2009/01/12 18:23:05 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -177,6 +177,6 @@ ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPILER) $
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)") -lrt -ldl
 
 ############################################################
-# Blank out shared library options
+# Shared library options
 #
-ESMF_SL_LIBS_TO_MAKE  =
+ESMF_SL_LIBOPTS  += -shared
