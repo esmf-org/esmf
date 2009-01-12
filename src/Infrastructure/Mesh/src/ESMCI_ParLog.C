@@ -16,8 +16,6 @@
 
 namespace ESMCI {
 
-ParLog *ParLog::classInstance = NULL;
-
 ParLog *ParLog::instance(const std::string &fstem) {
   
   if (classInstance) return classInstance;
