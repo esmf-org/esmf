@@ -6,8 +6,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: dr_random_io.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:48 $
+ *    $Author: theurich $
+ *    $Date: 2009/01/12 05:05:39 $
  *    Revision: 1.5 $
  ****************************************************************************/
 
@@ -43,6 +43,19 @@ extern "C" {
 /****************************************************************************/
 /****************************************************************************/
 /****************************************************************************/
+
+/* Global variables for driver */
+int Debug_Driver;
+int Debug_Chaco_Input;
+int Number_Iterations;
+int Driver_Action;
+int Chaco_In_Assign_Inv;
+struct Test_Flags Test;
+struct Output_Flags Output;
+
+double Total_Partition_Time;
+
+
 
 int create_random_input(
   int Proc,
