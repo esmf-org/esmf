@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.40 2009/01/07 21:20:42 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.41 2009/01/13 22:18:26 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.40 2009/01/07 21:20:42 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.41 2009/01/13 22:18:26 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1938,13 +1938,6 @@ end subroutine ESMF_FieldConstructNoDataPtr
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_GeomBase}. @\
-! For examples and @\
-! associated documentations using this method see Section  @\
-! \ref{sec:field:usage:create_2dptr}, @\
-! \ref{sec:field:usage:create_2dgrid_3dptr}, @\
-! \ref{sec:field:usage:create_2dgrid_3dptr_map}, @\
-! \ref{sec:field:usage:create_2dgrid_3dptr_map_halo}, and @\
-! \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -2131,13 +2124,6 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_GeomBase}. @\
-! For examples and @\
-! associated documentations using this method see Section  @\
-! \ref{sec:field:usage:create_2dptr}, @\
-! \ref{sec:field:usage:create_2dgrid_3dptr}, @\
-! \ref{sec:field:usage:create_2dgrid_3dptr_map}, @\
-! \ref{sec:field:usage:create_2dgrid_3dptr_map_halo}, and @\
-! \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -3480,13 +3466,6 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_LocStream}. @\
-! For examples and @\
-! associated documentations using this method see Section  @\
-! \ref{sec:field:usage:create_2dptr}, @\
-! \ref{sec:field:usage:create_2dmesh_3dptr}, @\
-! \ref{sec:field:usage:create_2dmesh_3dptr_map}, @\
-! \ref{sec:field:usage:create_2dmesh_3dptr_map_halo}, and @\
-! \ref{sec:field:usage:create_5dmesh_7dptr_2dungridded}. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -3849,13 +3828,6 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Mesh}. @\
-! For examples and @\
-! associated documentations using this method see Section  @\
-! \ref{sec:field:usage:create_2dptr}, @\
-! \ref{sec:field:usage:create_2dmesh_3dptr}, @\
-! \ref{sec:field:usage:create_2dmesh_3dptr_map}, @\
-! \ref{sec:field:usage:create_2dmesh_3dptr_map_halo}, and @\
-! \ref{sec:field:usage:create_5dmesh_7dptr_2dungridded}. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -4006,13 +3978,6 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Mesh}. @\
-! For examples and @\
-! associated documentations using this method see Section  @\
-! \ref{sec:field:usage:create_2dptr}, @\
-! \ref{sec:field:usage:create_2dmesh_3dptr}, @\
-! \ref{sec:field:usage:create_2dmesh_3dptr_map}, @\
-! \ref{sec:field:usage:create_2dmesh_3dptr_map_halo}, and @\
-! \ref{sec:field:usage:create_5dmesh_7dptr_2dungridded}. @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
