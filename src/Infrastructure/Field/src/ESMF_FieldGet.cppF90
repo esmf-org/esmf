@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.2.2.41 2008/12/12 14:16:39 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.2.2.42 2009/01/13 17:25:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.41 2008/12/12 14:16:39 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.2.2.42 2009/01/13 17:25:17 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1220,15 +1220,19 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         if(l_g2fm(i) /= 0) f2gm(l_g2fm(i)) = i
     enddo
     forderIndex = 1
-    do i = 1, arrayrank
-        ! if the i-th dimension is ungridded
-        if(f2gm(i) .eq. 0) then
-            l_alb(i) = l_uglb(forderIndex)
-            l_aub(i) = l_ugub(forderIndex)
-            l_ac(i)  = l_aub(i) - l_alb(i) + 1
-            forderIndex = forderIndex + 1
-        endif
-    enddo
+    ! ungridded bounds info present indicates field has ungridded dimension
+    ! otherwise we don't have to worry about this.
+    if(uglb_size /= 0) then
+        do i = 1, arrayrank
+            ! if the i-th dimension is ungridded
+            if(f2gm(i) .eq. 0) then
+                l_alb(i) = l_uglb(forderIndex)
+                l_aub(i) = l_ugub(forderIndex)
+                l_ac(i)  = l_aub(i) - l_alb(i) + 1
+                forderIndex = forderIndex + 1
+            endif
+        enddo
+    endif
 
     ! Next compute the gridded bounds using the mapping
     ! from Field to Grid computed in last step

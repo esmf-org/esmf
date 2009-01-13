@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.36 2008/12/12 14:16:39 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.7.2.37 2009/01/13 17:25:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.36 2008/12/12 14:16:39 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.7.2.37 2009/01/13 17:25:17 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -657,23 +657,6 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
       endif
     endif
  
-    if(fieldDimCount .lt. gridDimCount) then  
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
-             "- farray rank must be greater than or equal to grid rank", &  
-               ESMF_CONTEXT, rc)   
-        return
-    endif  
-
-    if(fieldDimCount .gt. gridDimCount) then
-      if( (.not. present(ungriddedLBound)) .or. &
-          (.not. present(ungriddedUBound)) ) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-         "- ungridded bounds must be present when Field has ungridded dimension(s)", &
-           ESMF_CONTEXT, rc)
-        return
-      endif
-    endif
-
     ! Set default gridToFieldMap
     grid_repdimcount = 0
     if (present(gridToFieldMap)) then  
@@ -688,6 +671,23 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
       enddo  
     endif  
     gridDimCount_norep = gridDimCount - grid_repdimcount
+
+    if(fieldDimCount .lt. gridDimCount_norep) then  
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+             "- farray rank must be greater than or equal to grid rank", &  
+               ESMF_CONTEXT, rc)   
+        return
+    endif  
+
+    if(fieldDimCount .gt. gridDimCount_norep) then
+      if( (.not. present(ungriddedLBound)) .or. &
+          (.not. present(ungriddedUBound)) ) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+         "- ungridded bounds must be present when Field has ungridded dimension(s)", &
+           ESMF_CONTEXT, rc)
+        return
+      endif
+    endif
 
      ! gridToFieldMap elements must be in range 0...fieldRank and unique  
      ! algorithm to check element uniqueness:  
@@ -986,23 +986,6 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
  
-    if(fieldDimCount .lt. gridDimCount) then  
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
-             "- farray rank must be greater than or equal to grid rank", &  
-               ESMF_CONTEXT, rc)   
-        return
-    endif  
-
-    if(fieldDimCount .gt. gridDimCount) then
-      if( (.not. present(ungriddedLBound)) .or. &
-          (.not. present(ungriddedUBound)) ) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-         "- ungridded bounds must be present when Field has ungridded dimension(s)", &
-           ESMF_CONTEXT, rc)
-        return
-      endif
-    endif
- 
     ! Set default values.  
     if (present(staggerloc)) then  
        localStaggerloc = staggerloc  
@@ -1031,6 +1014,23 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
     endif  
     gridDimCount_norep = gridDimCount - grid_repdimcount
 
+    if(fieldDimCount .lt. gridDimCount_norep) then  
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+             "- farray rank must be greater than or equal to grid rank", &  
+               ESMF_CONTEXT, rc)   
+        return
+    endif  
+
+    if(fieldDimCount .gt. gridDimCount_norep) then
+      if( (.not. present(ungriddedLBound)) .or. &
+          (.not. present(ungriddedUBound)) ) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+         "- ungridded bounds must be present when Field has ungridded dimension(s)", &
+           ESMF_CONTEXT, rc)
+        return
+      endif
+    endif
+ 
      ! gridToFieldMap elements must be in range 0...fieldRank and unique  
      ! algorithm to check element uniqueness:  
      !   run time: O(ESMF_MAXDIM)  
@@ -1659,7 +1659,7 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
     integer :: localrc
     type(ESMF_Array) :: array                  
     type(ESMF_TypeKind) :: typekind
-    integer :: i, arrayRank, gridRank
+    integer :: i, arrayRank, gridRank, gridRank_norep
 
     ! Initialize return code   
     localrc = ESMF_RC_NOT_IMPL
@@ -1681,7 +1681,14 @@ TypeKindRankDeclarationMacro(FieldCreateAssmdShape)
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-    if (arrayRank .lt. gridRank) then
+    gridRank_norep = gridRank
+    if(present(gridToFieldMap)) then
+        do i = 1, gridRank
+            if(gridToFieldMap(i) == 0) gridRank_norep = gridRank_norep - 1
+        enddo
+    endif
+
+    if (arrayRank .lt. gridRank_norep) then
        call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK, &
                                "Array rank must be equal to or greater than Grid rank", &
                                 ESMF_CONTEXT, rc) 

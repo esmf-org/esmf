@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.272.2.31 2009/01/09 22:43:17 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.272.2.32 2009/01/13 17:25:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -204,7 +204,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.272.2.31 2009/01/09 22:43:17 theurich Exp $'
+    '$Id: ESMF_Field.F90,v 1.272.2.32 2009/01/13 17:25:17 feiliu Exp $'
 
 !==============================================================================
 !
@@ -1902,7 +1902,7 @@ contains
       type(ESMF_StaggerLoc) :: staggerloc
       integer :: exclLBounds(ESMF_MAXDIM)  ! exclusive grid lower bounds
       integer :: exclUBounds(ESMF_MAXDIM)  ! exclusive grid upper bounds
-      integer :: gridrank, arrayrank
+      integer :: gridrank, arrayrank, gridrank_norep
       integer :: i, lDE                        ! helper variables to verify bounds
       integer :: localDECount, dimCount        ! and distgrid
       integer, allocatable :: distgridToGridMap(:)
@@ -1986,14 +1986,6 @@ contains
                  ESMF_CONTEXT, rc)
              return
           endif 
-          ! Verify that array rank is greater than or equal to grid rank + ungridded bound rank
-!gjt: take this out because of replicated dimensions arrayrank may be less!          
-!          if ( arrayrank .lt. gridrank) then
-!              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-!                 "grid rank + ungridded Bound rank not equal to array rank", &
-!                  ESMF_CONTEXT, rc)
-!              return
-!          endif
           
           ! Verify the distgrids in array and grid match.
           if(ESMF_DistGridMatch(gridDistGrid, arrayDistGrid, rc=localrc) .ne. ESMF_TRUE) then
@@ -2027,6 +2019,18 @@ contains
                  ESMF_CONTEXT, rc)
              return
           endif 
+
+          ! Verify that array rank is greater than or equal to grid rank + ungridded bound rank
+          gridrank_norep = gridrank
+          do i = 1, dimCount
+            if(distgridToPackedArrayMap(i) == 0) gridrank_norep = gridrank_norep - 1
+          enddo
+          if ( arrayrank .lt. gridrank_norep) then
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                 "grid rank + ungridded Bound rank not equal to array rank", &
+                  ESMF_CONTEXT, rc)
+              return
+          endif
 
           ! verify array computational bounds match grid computational bounds per localDE
           do lDE=0, localDECount-1
