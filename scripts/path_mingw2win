@@ -1,0 +1,19 @@
+#!/bin/sh
+# Convert a path from MinGW style (e.g., /f/dir/name) to Windows
+# style (e.g., f:/dir/name)
+
+# check for absolute path name
+firstchar=`echo $1 | cut -c 1`
+if [ $firstchar != / ]; then
+  echo $1
+  exit
+fi
+
+# process absolute path
+
+drivename=`echo $1 | cut -f2 -d/`
+winpath=`echo $1 | cut -f3- -d/`
+
+echo $drivename:/$winpath
+
+# end of script
