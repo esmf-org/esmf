@@ -18,7 +18,7 @@ namespace ESMCI {
  int MeshVTKHeader(char*, int*, int*, int*);
  int MeshVTKBody(char*, int*, double*, int*, int*, int*, int*);
 
-  class MeshCXX : public Mesh {
+  class MeshCXX  {
 
     public:
     MeshCXX();
@@ -27,7 +27,8 @@ namespace ESMCI {
     static MeshCXX* create(int*, int*, int*);
     int addElements(int*, int*, int*, int*);
     int addNodes(int*, int*, double*, int*);
-    int createDistGrids(int*, int*);
+    std::vector<int> getNodeGIDS();
+    int createDistGrids(int*, int*, int*, int*);
     int destroy();
     int freeMemory();
 
@@ -35,6 +36,7 @@ namespace ESMCI {
     friend int MeshVTKBody(char*, int*, double*, int*, int*, int*, int*);
 
     private:
+    Mesh* meshPointer;
     int isMeshFreed();
     int* nodalDistGrid;
     int* elementDistGrid;

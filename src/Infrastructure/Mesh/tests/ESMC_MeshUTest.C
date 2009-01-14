@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.4 2009/01/01 19:37:19 rosalind Exp $
+// $Id: ESMC_MeshUTest.C,v 1.5 2009/01/14 16:38:23 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -73,6 +73,9 @@ int main(void){
   int elemType[num_elem];
   int elemConn[conn_size];
 
+  int* nodeDistG;
+  int* elemDistG;
+
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
   // Read input files
@@ -105,6 +108,25 @@ int main(void){
   rc = ESMC_MeshAddElements(&mesh, &num_elem, elemId, elemType, elemConn);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  // Free internal mesh memory
+  strcpy(name, "MeshFreeMemory");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshFreeMemory(&mesh);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  // Destroy mesh object
+  strcpy(name, "MeshDestroy");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshDestroy(&mesh);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(result, __FILE__, __LINE__, 0);

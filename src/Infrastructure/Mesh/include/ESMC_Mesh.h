@@ -37,7 +37,7 @@ typedef enum {ESMC_MESHELEMENT_QUAD=0, ESMC_MESHELEMENT_TRI=1,
 
 ESMC_Mesh ESMC_MeshCreate(int *parametricDim, int *spatialDim, int *rc);
 
-int ESMC_MeshCreateDistGrids(ESMC_Mesh *mesh, int *num_nodes, int *num_elements);
+int ESMC_MeshCreateDistGrids(ESMC_Mesh *mesh, int* nodeDistGrid, int* elemDistGrid, int *num_nodes, int *num_elements);
 
 int ESMC_MeshAddNodes(ESMC_Mesh *mesh, int *num_nodes, int *nodeIds, 
                       double *nodeCoords, int *nodeOwners);

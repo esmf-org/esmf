@@ -24,15 +24,17 @@
 
 namespace ESMCI {
 
-MeshCXX::MeshCXX() : Mesh(){
+MeshCXX::MeshCXX() {
 }
 MeshCXX::~MeshCXX(){
+//  delete meshPointer;
 }
 MeshCXX* MeshCXX::create( int *pdim, int *sdim, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MeshCXX::create()"
 
-   MeshCXX* meshp;
+   MeshCXX* meshCXXp;
+   Mesh* meshp;
    try {
     int localrc;
 
@@ -41,10 +43,13 @@ MeshCXX* MeshCXX::create( int *pdim, int *sdim, int *rc){
 
     if (*pdim > *sdim) throw;
 
-    meshp = new MeshCXX();
+    meshCXXp = new MeshCXX();
+    meshp = new Mesh();
 
     (meshp)->set_parametric_dimension(*pdim);
     (meshp)->set_spatial_dimension(*sdim);
+
+    (meshCXXp)->meshPointer = meshp;
 
     ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -54,7 +59,7 @@ MeshCXX* MeshCXX::create( int *pdim, int *sdim, int *rc){
    } catch(...) {
      *rc = ESMF_FAILURE;
    }
-   return meshp;
+   return meshCXXp;
 } // MeshCXX::create
  
 
@@ -68,7 +73,7 @@ int MeshCXX::addElements(int *numElems, int *elemId,
    localrc = ESMC_RC_NOT_IMPL;
    
    try{
-      Mesh &mesh = *this;
+      Mesh &mesh = *meshPointer;
     // We must first store all nodes in a flat array since element
     // connectivity will index into this array.
     std::vector<MeshObj*> all_nodes;
@@ -120,7 +125,6 @@ int MeshCXX::addElements(int *numElems, int *elemId,
 
 
         nconnect[n] = all_nodes[elemConn[cur_conn++]-1];
-  //    nconnect[n] = all_nodes[elemConn[cur_conn++]];
 
       }
 
@@ -156,7 +160,7 @@ int MeshCXX::addNodes(int *numNodes, int *nodeId, double *nodeCoord,
 
    try{
 
-      Mesh &mesh = *this;
+      Mesh &mesh = *meshPointer;
        for (int n = 0; n < *numNodes; ++n) {
 
       MeshObj *node = new MeshObj(MeshObj::NODE, nodeId[n], n);
@@ -198,7 +202,49 @@ int MeshCXX::addNodes(int *numNodes, int *nodeId, double *nodeCoord,
    return localrc;
 } // MeshCXX::addNodes
 
-int MeshCXX::createDistGrids(int *numLNodes, int *numLElems){
+extern "C" void FTN(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
+
+
+/**
+ * Sort nodes by the order in which they were originally declared
+ * (which is stored by get_data_index)
+ */
+
+std::vector<int> MeshCXX::getNodeGIDS(){
+
+  std::vector<int> ngid;
+
+  UInt nnodes = meshPointer->num_nodes();
+
+  Mesh::iterator ni = meshPointer->node_begin(), ne = meshPointer->node_end();
+
+  std::vector<std::pair<int,int> > gids;
+
+  for (; ni != ne; ++ni) {
+
+    MeshObj &node = *ni;
+
+    if (!GetAttr(node).is_locally_owned()) continue;
+
+    int idx = node.get_data_index();
+
+    gids.push_back(std::make_pair(idx, node.get_id()));
+
+  }
+
+  std::sort(gids.begin(), gids.end());
+
+  ngid.clear();
+  for (UInt i = 0; i < gids.size(); ++i) ngid.push_back(gids[i].second);
+
+  return ngid;
+
+} // getNodeGIDS
+
+
+
+int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes, 
+     int *numLElems){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::MeshCXX::createDistGrids()"
 
@@ -206,24 +252,59 @@ int MeshCXX::createDistGrids(int *numLNodes, int *numLElems){
    //Initialize localrc; assume routine not implemented
    localrc = ESMC_RC_NOT_IMPL;
 
-   // Local variables
-   int* ngrids;
-   int* egrids;
+  // The nodal map.  First get the set of owned nodal ids
+  std::vector<int> ngids;
+  std::vector<int> egids;
+  {
+    Context c; c.set(Attr::OWNED_ID);
+    Attr ae(MeshObj::ELEMENT, c);
+
+    ngids = getNodeGIDS();
+
+//  getMeshGIDS(*this, ae, egids);
+    getMeshGIDS(*meshPointer, ae, egids);
+  }
+
+/*
+  Par::Out() << "Node ids:(" << ngids.size() << ")" << std::endl;
+  std::copy(ngids.begin(), ngids.end(), std::ostream_iterator<int>(Par::Out(), "
+\n"));
+  Par::Out().flush();
+*/
+
+/*
+  Par::Out() << "Elem ids:" << std::endl;
+  std::copy(egids.begin(), egids.end(), std::ostream_iterator<UInt>(Par::Out(),
+"\n"));
+  Par::Out().flush();
+*/
+
+  // Create the distgrids
+  {
+    int nsize = *numLNodes = ngids.size();
+    int rc1;
+
+    FTN(f_esmf_getmeshdistgrid)(ngrid, &nsize, &ngids[0], &rc1);
+
+    ESMC_LogDefault.MsgFoundError(rc1,
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(&localrc));
+
+  }
+  {
+    int esize = *numLElems = egids.size();
+    int rc1;
+    FTN(f_esmf_getmeshdistgrid)(egrid, &esize, &egids[0], &rc1);
+
+    ESMC_LogDefault.MsgFoundError(rc1,
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(&localrc));
+
+  }
 
    return localrc;
 } // MeshCXX::createDistGrids
 
-
-int MeshCXX::destroy(){
-#undef ESMC_METHOD
-#define ESMC_METHOD "ESMCI::MeshCXX::destroy()"
-
-   int localrc;
-   //Initialize localrc; assume routine not implemented
-   localrc = ESMC_RC_NOT_IMPL;
-  
-   return localrc;
-} // MeshCXX::destroy
 
 
 int MeshCXX::freeMemory(){
@@ -234,6 +315,10 @@ int MeshCXX::freeMemory(){
    int localrc;
    //Initialize localrc; assume routine not implemented
    localrc = ESMC_RC_NOT_IMPL;
+
+   delete meshPointer;
+
+   localrc = ESMF_SUCCESS;
 
    return localrc;
 } // MeshCXX::freeMemory

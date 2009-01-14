@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.8 2009/01/01 19:37:19 rosalind Exp $
+// $Id: ESMC_Mesh.C,v 1.9 2009/01/14 16:38:23 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -130,7 +130,8 @@ int ESMC_MeshAddElements(ESMC_Mesh *mesh, int *num_elems, int *elementIds,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshCreateDistGrids()"
-int ESMC_MeshCreateDistGrids(ESMC_Mesh *mesh, int *num_nodes, int *num_elements)
+int ESMC_MeshCreateDistGrids(ESMC_Mesh *mesh, int *nodeDistGrid, 
+  int *elemDistGrid, int *num_nodes, int *num_elements)
 {
    int localrc;
    // Initialize return code. Assume routine not implemented
@@ -138,7 +139,8 @@ int ESMC_MeshCreateDistGrids(ESMC_Mesh *mesh, int *num_nodes, int *num_elements)
 
    MeshCXX* mep = (MeshCXX*)(mesh->ptr);
 
-   localrc = mep->createDistGrids(num_nodes, num_elements);
+   localrc = mep->createDistGrids(nodeDistGrid, elemDistGrid, num_nodes, 
+     num_elements);
 
    return localrc;
 
@@ -161,7 +163,9 @@ int ESMC_MeshDestroy(ESMC_Mesh *mesh){
 
    MeshCXX* mep = (MeshCXX*)(mesh->ptr);
 
-   localrc = mep->destroy();
+   delete mep;
+
+   localrc = ESMF_SUCCESS;
 
    return localrc;
 
