@@ -27,7 +27,7 @@ namespace ESMCI {
 MeshCXX::MeshCXX() {
 }
 MeshCXX::~MeshCXX(){
-//  delete meshPointer;
+  if (!isMeshFreed())  delete meshPointer;
 }
 MeshCXX* MeshCXX::create( int *pdim, int *sdim, int *rc){
 #undef  ESMC_METHOD
@@ -54,7 +54,8 @@ MeshCXX* MeshCXX::create( int *pdim, int *sdim, int *rc){
     ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 
-    
+    meshCXXp->meshFreed = 0;
+ 
     *rc = localrc;
    } catch(...) {
      *rc = ESMF_FAILURE;
@@ -317,6 +318,7 @@ int MeshCXX::freeMemory(){
    localrc = ESMC_RC_NOT_IMPL;
 
    delete meshPointer;
+   meshFreed=1;
 
    localrc = ESMF_SUCCESS;
 
@@ -396,5 +398,9 @@ int MeshVTKBody(char *fname, int *nodeId, double *nodeCoord, int *nodeOwner,
   return localrc;
 
 } //MeshVTKBody
+
+int MeshCXX::isMeshFreed(){
+  return meshFreed;
+}
 
 } // namespace ESMCI
