@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.9 2009/01/15 06:50:41 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.10 2009/01/15 22:54:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.9 2009/01/15 06:50:41 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.10 2009/01/15 22:54:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -356,7 +356,7 @@ extern "C" {
         "routine not found", rc);
       return;
     }
-    ESMCI::FTable::setServices(&ptr, func, &localrc);
+    ESMCI::FTable::setServices(ptr, func, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
     if (rc) rc = ESMF_SUCCESS;
@@ -391,7 +391,7 @@ extern "C" {
         "routine not found", rc);
       return;
     }
-    ESMCI::FTable::setVM(&ptr, func, &localrc);
+    ESMCI::FTable::setVM(ptr, func, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
     if (rc) rc = ESMF_SUCCESS;

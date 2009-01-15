@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.94 2009/01/15 06:50:41 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.95 2009/01/15 22:54:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.94 2009/01/15 06:50:41 theurich Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.95 2009/01/15 22:54:21 theurich Exp $'
 
 !==============================================================================
 !
@@ -290,8 +290,7 @@
 
   ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, comp, rc)
   
-  call ESMF_CompSetServicesLib(comp%compp, sharedObj, routine, rc=localrc)
-  ! Use LogErr to handle return code
+  call c_ESMC_SetServicesLib(comp, sharedObj, routine, localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -344,8 +343,7 @@ end subroutine
 
   ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, comp, rc)
   
-  call ESMF_CompSetVMLib(comp%compp, sharedObj, routine, rc=localrc)
-  ! Use LogErr to handle return code
+  call c_ESMC_SetVMLib(comp, sharedObj, routine, localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
