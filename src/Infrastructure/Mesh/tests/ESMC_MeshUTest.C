@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.5 2009/01/14 16:38:23 rosalind Exp $
+// $Id: ESMC_MeshUTest.C,v 1.6 2009/01/15 02:33:34 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -42,6 +42,17 @@ int main(void){
   int pdim=2;
   int sdim=3;
 
+  int *nodeId;
+  double *nodeCoord;
+  int *nodeOwner;
+
+  int *elemId;
+  int *elemType;
+  int *elemConn;
+
+  int *nodeDistG;
+  int *elemDistG;
+
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -65,16 +76,13 @@ int main(void){
   //----------------------------------------------------------------------------
 
   // Allocate the arrays to describe Mesh
-  int nodeId[num_node];
-  double nodeCoord[3*num_node];
-  int nodeOwner[num_node];
+  nodeId    = (int *) malloc (num_node * sizeof (int));
+  nodeCoord = (double *) malloc (3*num_node * sizeof (double));
+  nodeOwner = (int *) malloc (num_node * sizeof (int));
 
-  int elemId[num_elem];
-  int elemType[num_elem];
-  int elemConn[conn_size];
-
-  int* nodeDistG;
-  int* elemDistG;
+  elemId   = (int *) malloc (num_elem * sizeof (int));
+  elemType = (int *) malloc (num_elem * sizeof (int));
+  elemConn = (int *) malloc (conn_size * sizeof (int));
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
