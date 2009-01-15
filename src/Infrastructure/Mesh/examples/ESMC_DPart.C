@@ -13,7 +13,6 @@
  * Program splits a serial mesh into a set of meshes for parallel exection 
  */
 
-#include <unistd.h>
 #include <stdlib.h>
 //#include <ctype.h>
 #include <stdio.h>
