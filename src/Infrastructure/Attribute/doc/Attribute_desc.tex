@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.16 2009/01/12 18:56:07 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.17 2009/01/15 06:02:40 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,7 +8,7 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-The {\tt ESMF\_Attribute} class is used to hold the metadata for other ESMF objects.  This class can be used to build Attribute hierarchies which connect the Attributes of different ESMF classes.  The {\tt ESMF\_Attribute} class is also capable of allowing the representation of standard Attribute packages for a more unified description of an object.  All Attributes are consistent across the entire virtual machine of the object to which they are attached.  This class is only partially implemented in this release.
+The {\tt Attribute} class is used to hold the metadata for other ESMF objects.  This class can be used to build Attribute hierarchies which connect the Attributes of different ESMF classes.  The class is also capable of allowing the representation of standard Attribute packages for a more unified description of an object.  All Attributes are consistent across the entire virtual machine of the object to which they are attached.  This class is only partially implemented in this release.
 
 \subsubsection{Attribute Representation in ESMF}
 
@@ -24,7 +24,7 @@ Attributes are meant to be used as a tool for the user to help internally docume
 \item State
 \end{itemize}
 
-Each Attribute contains a name value pair in which the value can be any of several numeric, character, and logical types.  The allowable ESMF Attribute value types include:
+Each Attribute contains a name value pair in which the value can be any of several numeric, character, and logical types.  The allowable Attribute value types include:
 
 \begin{itemize}
 \item {\tt ESMF\_TYPEKIND\_I4}
@@ -63,7 +63,7 @@ At this time, Attribute hierarchies are linked in a "shallow" manner, meaning th
 
 At this time, only select ESMF classes are enabled to contain Attribute packages.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as "CF" (see below) and "general".  These specifiers will be used much more rigorously in future releases to help incorporate many existing metadata standards.  One can use an ESMF supplied standard Attribute package, specify their own Attribute packages, or add customized Attributes to the ESMF supplied Attribute package.  Working with Attribute packages is quite involved, at present, but significant effort in automation of these metadata capabilities in the ESMF is anticipated in future releases. 
 
-The standard Attribute packages supplied by ESMF exist for the following ESMF objects:
+The standard Attribute packages supplied by the ESMF exist for the following ESMF objects:
 
 \begin{itemize}
 \item CplComp
@@ -97,16 +97,16 @@ The standard Attribute package for the Components is only partially based on the
 
 The ESMF also allows nesting of Attribute packages.  This capability is meant to be used to organize different metadata compliance levels, such as CF and ESG.  The nesting of Attribute packages is also very helpful when adding customized Attributes to a package.  
 
-The main use of the nesting capabilities of Attribute packages is geared towards organizing different metadata compliance levels.  For instance, the CF metadata standard for Fields requires that there be Attributes to track the {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units} of the Field.  The ESG standard, on the other hand, requires two additional Attributes called {\it import} and {\it export}.  In this case the ESMF representation of the ESG compliant Attribute package for a Field would involve a nested Attribute package structure.  This would involve the ESG-specific Attribute package, containing the Attributes {\it import} and {\it export} nested inside the CF-specific Attribute package, containing the Attributes {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units}.  An Attribute package can be nested by passing in a value of {\bf ESMF\_ATTPACKNEST\_ON} for the {\it attpacknestflag} argument of the {\tt ESMF\_AttributeAdd()} interface call.  The default value of the optional {\it attpacknestflag} argument is {\bf ESMF\_ATTPACKNEST\_OFF}.
+The main use of the nesting capabilities of Attribute packages is geared towards organizing different metadata compliance levels.  For instance, the CF metadata standard for Fields requires that there be Attributes to track the {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units} of the Field.  The ESG standard, on the other hand, requires two additional Attributes called {\it import} and {\it export}.  In this case the ESMF representation of the ESG compliant Attribute package for a Field would involve a nested Attribute package structure.  This would involve the ESG-specific Attribute package, containing the Attributes {\it import} and {\it export} containing a nested version of the CF-specific Attribute package, with the Attributes {\it name}, {\it long\_name}, {\it standard\_name}, and {\it units}.  An Attribute package can be nested by passing in a value of {\bf ESMF\_ATTPACKNEST\_ON} for the {\it attpacknestflag} argument of the {\tt ESMF\_AttributeAdd()} interface call.  The default value of the optional {\it attpacknestflag} argument is {\bf ESMF\_ATTPACKNEST\_OFF}.
 
 [UML diagram goes here]
 
-The nesting capabilities of Attribute packages are also very useful for organizing the customized metadata supplied by a user.  For example, if a user was not satisfied with the metadata support required in the ESG convention for Field they could supply a list of Attributes they would like to support.  This new Attribute package would then be nested, in one additional layer, inside the Attribute package of ESG, which itself is nested inside the CF Attribute package.  This capability of nesting Attribute packages allows for a multitude of metadata organization strategies, and will also aid in the enforcement of metadata compliance when it is implemented in a future ESMF release.
+The nesting capabilities of Attribute packages are also very useful for organizing the customized metadata supplied by a user.  For example, if a user was not satisfied with the metadata support required in the ESG convention for Field they could supply a list of Attributes they would like to support.  This new Attribute package would then be used as an additional layer, inside which the Attribute package of ESG would be nested, inside which the CF Attribute package would be nested.  This capability of nesting Attribute packages allows for a multitude of metadata organization strategies, and will also aid in the enforcement of metadata compliance when it is implemented in a future ESMF release.
 
 \subsubsection{Attributes in a Distributed Environment}
 \label{sec:Att:Dist}
 
-The  {\tt ESMF\_Attribute} class is slightly different than other ESMF objects in the context of reconciling across exclusive sets of PETs.  To better explain the ESMF capabilities for ensuring concurrency of Attributes in a distributed environment, small working vocabulary of ESMF Attributes will be presented.  Three types of changes to an Attribute hierarchy need to be specified, these are: 1. {\bf link changes} are structural links created when two separate Attribute hierarchies are linked, 2. {\bf structural changes} are changes which occur when Attributes or Attribute packages are added or removed within a single Attribute hierarchy, and 3. {\bf value changes} occur when the value portion of any single Attribute is modified.  These definitions will help to describe how {\tt ESMF\_StateReconcile()} and {\tt ESMF\_AttributeUpdate()} can be effectively used to ensure a consistent view of metadata throughout a model run.
+The  {\tt ESMF\_Attribute} class is slightly different than other ESMF objects in the context of building a consistent view of the metadata across the VM.  To better explain the ESMF capabilities for ensuring the integrity of Attributes in a distributed environment, a small working vocabulary of ESMF Attributes will be presented.  Three types of changes to an Attribute hierarchy need to be specified, these are: 1. {\bf link changes} are structural links created when two separate Attribute hierarchies are linked, 2. {\bf structural changes} are changes which occur when Attributes or Attribute packages are added or removed within a single level of an Attribute hierarchy, and 3. {\bf value changes} occur when the value portion of any single Attribute is modified.  These definitions will help to describe how {\tt ESMF\_StateReconcile()} and {\tt ESMF\_AttributeUpdate()} can be effectively used to ensure a consistent view of metadata throughout a model run.
 
 The {\tt ESMF\_StateReconcile()} call is used to create a consistent view of ESMF objects over the entire VM in the initialization phase of a model run.  All Attributes that are attached to an ESMF object contained in the State, i.e. an object that is being reconciled, are also reconciled.  This means that, at the conclusion of {\tt ESMF\_StateReconcile()} there is a one-to-one correspondence between Attributes hierarchies and the objects to which they belong.  This is the only place where link changes in an Attribute hierarchy can be resolved at this time.
 

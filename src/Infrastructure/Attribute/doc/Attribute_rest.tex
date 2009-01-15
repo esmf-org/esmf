@@ -1,4 +1,4 @@
-% $Id: Attribute_rest.tex,v 1.7 2008/09/19 03:31:18 rokuingh Exp $
+% $Id: Attribute_rest.tex,v 1.8 2009/01/15 06:02:40 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -8,9 +8,9 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-The ability to update an Attribute hierarchy, including Attribute packages, is an area of active design and development.  The ability to reconcile Attributes is already implemented, as described in Section \ref{sec:Att:Dist}.  It may also be necessary to update any or all of the Attributes in an Attribute hierarchy during runtime, without the expense of calling {\tt ESMF\_StateReconcile()}.  
+The ability to update an Attribute hierarchy, including Attribute packages, is an area of active design and development.
 
-Additional capabilities which are still in the developmental stage are listed by category.
+Additional capabilities of the Attribute class which are still in the developmental stage are listed by category.
  
 \subsubsection{Attributes}
 
@@ -22,7 +22,6 @@ Additional capabilities which are still in the developmental stage are listed by
 \subsubsection{Attribute Hierarchies}
 
 \begin{itemize}
-\item Addition of a updating routine that will sync an Attribute hierarchy with a later version of itself.
 \item The option of "deep" copies of an Attribute hierarchy
 \end{itemize}
 
@@ -31,4 +30,5 @@ Additional capabilities which are still in the developmental stage are listed by
 \begin{itemize}
 \item Automatically create object Attribute packages upon object creation.
 \item Enforcement of metadata standards
+\item allow {\tt ESMF\_AttributeWrite()} to write from all Attribute packages nested inside the Attribute package with the specified convention and purpose.
 \end{itemize}
