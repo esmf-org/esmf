@@ -35,6 +35,10 @@
 #include <stdexcept>
 #include <cmath>
 
+#if !defined (M_PI)
+// for Windows...
+#define M_PI 3.14159265358979323846
+#endif
 
 using namespace ESMCI;
 
