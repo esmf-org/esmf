@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.105 2009/01/09 18:55:01 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.106 2009/01/15 06:50:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -93,13 +93,14 @@
       ! interface blocks for ESMF routines that are implemented in C
       public :: ESMF_GridCompSetEntryPoint
       public :: ESMF_GridCompSetServices
+      public :: ESMF_GridCompSetVM
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.105 2009/01/09 18:55:01 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.106 2009/01/15 06:50:41 theurich Exp $'
 
 !==============================================================================
 !
@@ -202,6 +203,35 @@
                 
       end interface
 
+      interface ESMF_GridCompSetVM
+!BOPI
+! !IROUTINE: ESMF_GridCompSetVM
+!
+! !INTERFACE:
+        subroutine ESMF_GridCompSetVM (comp, subroutineName, rc)
+
+! !ARGUMENTS:
+          use ESMF_CompMod
+          implicit none
+          type(ESMF_GridComp), intent(inout) :: comp
+          interface
+            subroutine subroutineName (comp, rc)
+              use ESMF_CompMod
+              implicit none
+              type(ESMF_GridComp) :: comp
+              integer, intent(out) :: rc
+            end subroutine
+          end interface
+          integer, intent(out) :: rc
+! !DESCRIPTION:
+!     Call user-supplied subroutine whose purpose is to then
+!     set VM properties for this GridComp
+!EOPI
+        end subroutine
+
+        module procedure ESMF_GridCompSetVMLib
+                
+      end interface
 !==============================================================================
 
       contains
@@ -254,6 +284,61 @@
   ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, comp, rc)
   
   call ESMF_CompSetServicesLib(comp%compp, sharedObj, routine, rc=localrc)
+  ! Use LogErr to handle return code
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompSetVMLib"
+!BOPI
+! !IROUTINE: ESMF_GridCompSetVM - Set GridComp VM properties in routine located in shared object
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_GridCompSetVM()
+  recursive subroutine ESMF_GridCompSetVMLib(comp, sharedObj, routine, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp),     intent(inout)         :: comp
+      character(len=*),        intent(in)            :: sharedObj
+      character(len=*),        intent(in)            :: routine
+      integer,                 intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call into user provided routine which is responsible for setting
+!  component's VM properties. The named
+!  {\tt routine} must exist in the shared object file specified in the
+!  {\tt sharedObj} argument.
+!    
+!  The arguments are:
+!  \begin{description}
+!  \item[comp]
+!  Gridded component.
+!  \item[sharedObj]
+!  Name of shared object that contains {\tt routine}.
+!  \item[routine]
+!  Name of routine to be called.
+! \item[{[rc]}]
+!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+  ! local vars
+  integer :: localrc                       ! local error status
+
+  ! Initialize return code; assume failure until success is certain
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_RC_NOT_IMPL
+
+  ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, comp, rc)
+  
+  call ESMF_CompSetVMLib(comp%compp, sharedObj, routine, rc=localrc)
   ! Use LogErr to handle return code
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return

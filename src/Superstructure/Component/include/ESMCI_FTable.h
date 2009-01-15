@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.3 2008/08/29 17:08:03 theurich Exp $
+// $Id: ESMCI_FTable.h,v 1.4 2009/01/15 06:50:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -129,6 +129,7 @@ class FTable {
     datainfo *data;
   public:
     static void setServices(void *ptr, void (*func)(), int *status);
+    static void setVM(void *ptr, void (*func)(), int *status);
     static void setTypedEP(void *ptr, char *tname, int slen, int *phase, 
       int nstate, enum ftype ftype, void *func, int *status);
     static void getDP(FTable ***ptr, void **datap, int *status);

@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.8 2009/01/12 18:24:48 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.9 2009/01/15 06:50:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.8 2009/01/12 18:24:48 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.9 2009/01/15 06:50:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -54,6 +54,7 @@ static const char *const version = "$Id: ESMCI_FTable.C,v 1.8 2009/01/12 18:24:4
 // prototypes for fortran interface routines
 extern "C" {
   void FTN(f_esmf_compsetvminfo)(ESMCI::Comp *compp, void *vm_info, int *rc);
+  void FTN(f_esmf_compgetvminfo)(ESMCI::Comp *compp, void *vm_info, int *rc);
   void FTN(f_esmf_compgetvmparent)(ESMCI::Comp *compp, ESMCI::VM **vmparent, 
     int *rc);
   void FTN(f_esmf_compgetvmplan)(ESMCI::Comp *compp, ESMCI::VMPlan **vmplan, 
@@ -326,6 +327,7 @@ extern "C" {
 //==============================================================================
 // These functions are being called through the Fortran interface layer
 extern "C" {
+  
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setserviceslib"
   void FTN(c_esmc_setserviceslib)(void *ptr, char *sharedObjArg,
@@ -360,6 +362,42 @@ extern "C" {
     if (rc) rc = ESMF_SUCCESS;
 #endif
   }
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_setvmlib"
+  void FTN(c_esmc_setvmlib)(void *ptr, char *sharedObjArg,
+    char *routineArg, int *rc, 
+    ESMCI_FortranStrLenArg llen, ESMCI_FortranStrLenArg rlen){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+#ifdef ESMF_NO_DLFCN
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, 
+      "System does not support dynamic loading.", rc);
+    return;
+#else
+    string sharedObj(sharedObjArg, llen);
+    string routine(routineArg, rlen);
+    sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
+    routine.resize(routine.find_last_not_of(" ")+1);
+    void *lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
+    if (lib == NULL){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+        "shared object not found", rc);
+      return;
+    }
+    void (*func)() = (void (*)())dlsym(lib, routine.c_str());
+    if ((void *)func == NULL){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+        "routine not found", rc);
+      return;
+    }
+    ESMCI::FTable::setVM(&ptr, func, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+    if (rc) rc = ESMF_SUCCESS;
+#endif
+  }
+  
 } // extern "C"
 //==============================================================================
 
@@ -392,6 +430,19 @@ extern "C" {
 
   void FTN(esmf_usercompsetservices)(void *ptr, void (*func)(), int *status){
     ESMCI::FTable::setServices(ptr, func, status);
+  }
+
+  // ---------- Set VM ---------------
+  void FTN(esmf_gridcompsetvm)(void *ptr, void (*func)(), int *status){
+    ESMCI::FTable::setVM(ptr, func, status);
+  }
+     
+  void FTN(esmf_cplcompsetvm)(void *ptr, void (*func)(), int *status){
+    ESMCI::FTable::setVM(ptr, func, status);
+  }
+
+  void FTN(esmf_usercompsetvm)(void *ptr, void (*func)(), int *status){
+    ESMCI::FTable::setVM(ptr, func, status);
   }
 
   // ---------- Set Entry Point ---------------
@@ -731,88 +782,153 @@ void FTable::setDP(FTable ***ptr, void **datap, int *status){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Ftable::setServices"
 void FTable::setServices(void *ptr, void (*func)(), int *status) {
-     int localrc, funcrc;
-     int *tablerc;
-     ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
-     ESMCI::FTable *tabptr;
-     
-     if (status) *status = ESMF_SUCCESS;  // assume success 'till problems found
-
-     //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
-     //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
-     //if ((ptr == ESMC_NULL_POINTER)) {
-     if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-                                              "null pointer found", status);
-        return;
-     }
-     tabptr = **(ESMCI::FTable***)ptr;
-     //printf("tabptr = 0x%08x\n", (ESMC_POINTER)(tabptr));
-
-     // TODO: shouldn't need to expand the table here - should be buried
-     // inside ftable code.
-     localrc = (tabptr)->extend(8, 2); // room for 8 funcs, 2 data
-     if (localrc != ESMF_SUCCESS) {
-         if (status) *status = localrc;
-         return;
-     }
-
-     // TODO: this is going to cause a memory leak, because the 'tablerc'
-     // variable is actually stored in the jump table as one of the arguments.
-     // i believe it is used to call a subroutine which has a return code,
-     // but then that code is ignored.  so there are two problems here:
-     // how to return the error(s), and how to delete the integer when the
-     // table is destroyed.  for now, it is a leak; small, and only shows up
-     // when you delete a component which does not happen often, thankfully.
-     tablerc = new int;
-     localrc = (tabptr)->setFuncPtr("register", (void *)func, 
-                                                           f90comp, tablerc);
-
-     // TODO: decide what to do if tablerc comes back
-     // with an error.  for now, ignore it and look at localrc only.
-   
-     if (localrc != ESMF_SUCCESS) {
-         if (status) *status = localrc;
-         return;
-     }
-
-     localrc = (tabptr)->callVFuncPtr("register", &funcrc);
-     if (localrc != ESMF_SUCCESS) {
-         if (status) *status = localrc;
-         return;
-     }
-
-     if (funcrc != ESMF_SUCCESS) {
-         if (status) *status = funcrc;
-         return;
-     }
-
-     // time to startup the VM for this component...     
-     ESMCI::VM *vm_parent;
-     FTN(f_esmf_compgetvmparent)(f90comp, &vm_parent, &localrc); //get vm_parent
-     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-       status)) return;
-     ESMCI::VMPlan *vmplan_p;
-     FTN(f_esmf_compgetvmplan)(f90comp, &vmplan_p, &localrc);    //get vmplan_p
-     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-       status)) return;
-     // parent VM and plan for child can now be used to startup the child VM
-     void *vm_info = vm_parent->startup(vmplan_p,
-       ESMCI_FTableCallEntryPointVMHop, NULL, &localrc);
-     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-       status)) return;
-     // keep vm_info in a safe place (in parent component) 'till it's used again
-     FTN(f_esmf_compsetvminfo)(f90comp, &vm_info, &localrc);
-     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-       status)) return;
-     // ...now the component's VM is started up and placed on hold.
-     
-     return;
+  int localrc, funcrc;
+  int *tablerc;
+  ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
+  ESMCI::FTable *tabptr;
   
-     // TODO:  see if it is possible to make this simpler and call directly:
-     // rc = (*func)(comp, func_rc);
-     // *status = ESMF_SUCCESS;
-     // return; 
+  if (status) *status = ESMF_SUCCESS;  // assume success 'till problems found
+
+  //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
+  //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
+  //if ((ptr == ESMC_NULL_POINTER)) {
+  if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
+     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+                                           "null pointer found", status);
+     return;
+  }
+  tabptr = **(ESMCI::FTable***)ptr;
+  //printf("tabptr = 0x%08x\n", (ESMC_POINTER)(tabptr));
+
+  // TODO: shouldn't need to expand the table here - should be buried
+  // inside ftable code.
+  localrc = (tabptr)->extend(8, 2); // room for 8 funcs, 2 data
+  if (localrc != ESMF_SUCCESS) {
+      if (status) *status = localrc;
+      return;
+  }
+
+  // TODO: this is going to cause a memory leak, because the 'tablerc'
+  // variable is actually stored in the jump table as one of the arguments.
+  // i believe it is used to call a subroutine which has a return code,
+  // but then that code is ignored.  so there are two problems here:
+  // how to return the error(s), and how to delete the integer when the
+  // table is destroyed.  for now, it is a leak; small, and only shows up
+  // when you delete a component which does not happen often, thankfully.
+  tablerc = new int;
+  localrc = (tabptr)->setFuncPtr("register", (void *)func, f90comp, tablerc);
+
+  // TODO: decide what to do if tablerc comes back
+  // with an error.  for now, ignore it and look at localrc only.
+  
+  if (localrc != ESMF_SUCCESS) {
+      if (status) *status = localrc;
+      return;
+  }
+
+  // time to startup the VM for this component (if not already started)...
+  ESMCI::VM *vm_parent;
+  FTN(f_esmf_compgetvmparent)(f90comp, &vm_parent, &localrc); //get vm_parent
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    status)) return;
+  ESMCI::VMPlan *vmplan_p;
+  FTN(f_esmf_compgetvmplan)(f90comp, &vmplan_p, &localrc);    //get vmplan_p
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    status)) return;
+  void *vm_info;
+  FTN(f_esmf_compgetvminfo)(f90comp, &vm_info, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    status)) return;
+  if (vm_info==NULL){
+    // VM for this component has not been started yet
+    vm_info = vm_parent->startup(vmplan_p,
+      ESMCI_FTableCallEntryPointVMHop, NULL, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      status)) return;
+    // keep vm_info in a safe place (in parent component) 'till it's used again
+    FTN(f_esmf_compsetvminfo)(f90comp, &vm_info, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      status)) return;
+  }
+  // ...now the component's VM is started up and placed on hold.
+  
+  // call into register routine using the component's VM
+  void *vm_cargo;
+  FTN(c_esmc_ftablecallentrypointvm)(&vm_parent, &vmplan_p, &vm_info,
+    &vm_cargo, &tabptr, "register", NULL, &localrc, 8);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    status)) return;
+  
+  int callrc;
+  FTN(c_esmc_compwait)(&vm_parent, &vmplan_p, &vm_info,
+    &vm_cargo, &callrc, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    status)) return;
+  
+  return;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Ftable::setVM"
+void FTable::setVM(void *ptr, void (*func)(), int *status) {
+  int localrc, funcrc;
+  int *tablerc;
+  ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
+  ESMCI::FTable *tabptr;
+  
+  if (status) *status = ESMF_SUCCESS;  // assume success 'till problems found
+
+  //printf("ptr = 0x%08x\n", (ESMC_POINTER)ptr);
+  //printf("*ptr = 0x%08x\n", (ESMC_POINTER)(*(int*)ptr));
+  //if ((ptr == ESMC_NULL_POINTER)) {
+  if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)) {
+     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+                                           "null pointer found", status);
+     return;
+  }
+  tabptr = **(ESMCI::FTable***)ptr;
+  //printf("tabptr = 0x%08x\n", (ESMC_POINTER)(tabptr));
+
+  // TODO: shouldn't need to expand the table here - should be buried
+  // inside ftable code.
+  localrc = (tabptr)->extend(8, 2); // room for 8 funcs, 2 data
+  if (localrc != ESMF_SUCCESS) {
+      if (status) *status = localrc;
+      return;
+  }
+
+  // TODO: this is going to cause a memory leak, because the 'tablerc'
+  // variable is actually stored in the jump table as one of the arguments.
+  // i believe it is used to call a subroutine which has a return code,
+  // but then that code is ignored.  so there are two problems here:
+  // how to return the error(s), and how to delete the integer when the
+  // table is destroyed.  for now, it is a leak; small, and only shows up
+  // when you delete a component which does not happen often, thankfully.
+  tablerc = new int;
+  localrc = (tabptr)->setFuncPtr("setVM", (void *)func, f90comp, tablerc);
+
+  // TODO: decide what to do if tablerc comes back
+  // with an error.  for now, ignore it and look at localrc only.
+  
+  if (localrc != ESMF_SUCCESS) {
+      if (status) *status = localrc;
+      return;
+  }
+
+  localrc = (tabptr)->callVFuncPtr("setVM", &funcrc);
+  if (localrc != ESMF_SUCCESS) {
+      if (status) *status = localrc;
+      return;
+  }
+
+  if (funcrc != ESMF_SUCCESS) {
+      if (status) *status = funcrc;
+      return;
+  }
+
+  return;
 }
 //-----------------------------------------------------------------------------
 
