@@ -1,4 +1,4 @@
-! $Id: ESMF_SetServCode.F90,v 1.10 2008/11/14 05:06:48 theurich Exp $
+! $Id: ESMF_SetServCode.F90,v 1.11 2009/01/15 06:52:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -31,13 +31,43 @@
     use ESMF_Mod
     implicit none
     
+    public SetVM
     public SetServ1, SetServ2
 
 contains
 
+    subroutine SetVM(gcomp, rc)
+       type(ESMF_GridComp) :: gcomp
+       integer, intent(out) :: rc
+#ifdef ESMF_TESTWITHTHREADS
+       type(ESMF_VM) :: vm
+       logical :: supportPthreads
+#endif
+       ! Initialize return code
+       rc = ESMF_SUCCESS
+#ifdef ESMF_TESTWITHTHREADS
+       ! The following call will turn on ESMF-threading (single threaded)
+       ! for this component. If you are using this file as a template for
+       ! your own code development you probably don't want to include the
+       ! following call unless you are interested in exploring ESMF's
+       ! threading features.
+
+       ! First test whether ESMF-threading is supported on this machine
+       call ESMF_VMGetGlobal(vm, rc=rc)
+       call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+       if (supportPthreads) then
+         call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
+       endif
+#endif
+    end subroutine SetVM
+
+
     subroutine SetServ1(gcomp, rc)
        type(ESMF_GridComp) :: gcomp
        integer, intent(out) :: rc
+       
+       ! Initialize return code
+       rc = ESMF_SUCCESS
 
        call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init1, &
                                                      ESMF_SINGLEPHASE, rc)
@@ -45,12 +75,16 @@ contains
                                                      ESMF_SINGLEPHASE, rc)
        call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final1, &
                                                      ESMF_SINGLEPHASE, rc)
-
+                                                     
     end subroutine SetServ1
+
 
     subroutine SetServ2(gcomp, rc)
        type(ESMF_GridComp) :: gcomp
        integer, intent(out) :: rc
+
+       ! Initialize return code
+       rc = ESMF_SUCCESS
 
        call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init2, &
                                                      ESMF_SINGLEPHASE, rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.11 2008/11/14 05:06:48 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.12 2009/01/15 06:52:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -74,10 +74,22 @@
 !   !  Create a Component
     cname = "Atmosphere"
     comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
-                                             configFile="grid.rc", rc=rc)  
+      petList=(/0,2/), configFile="grid.rc", rc=rc)  
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+!-------------------------------------------------------------------------
+!   !
+    !NEX_UTest
+!   !  Set VM
+
+    call ESMF_GridCompSetVM(comp1, SetVM, rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Setting Component VM"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
