@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.4 2009/01/15 06:04:13 rokuingh Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.5 2009/01/16 16:50:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -198,7 +198,7 @@ program ESMF_AttributeEx
       call ESMF_AttributeGet(gridcomp, count=count, rc=rc)
 !EOC
 
-      if (all (value /= inLogl)) then
+      if (all (value .NEQV. inLogl)) then
         print *, "Attribute logical list IN did not match OUT"
       endif
 
