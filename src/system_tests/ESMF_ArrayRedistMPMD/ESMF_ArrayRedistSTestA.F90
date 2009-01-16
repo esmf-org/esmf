@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTestA.F90,v 1.5 2008/04/22 18:01:38 theurich Exp $
+! $Id: ESMF_ArrayRedistSTestA.F90,v 1.6 2009/01/16 05:28:24 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MPMD_SYSTEM_TEST   String used by test script to count system tests.
@@ -55,12 +55,12 @@ program ESMF_ArrayRedistSTest
   use ESMF_TestMod
 
 #ifdef MODEL1
-  use user_model1, only : userm1_register
+  use user_model1, only : userm1_setvm, userm1_register
 #endif
 #ifdef MODEL2
-  use user_model2, only : userm2_register
+  use user_model2, only : userm2_setvm, userm2_register
 #endif
-  use user_coupler, only : usercpl_register
+  use user_coupler, only : usercpl_setvm, usercpl_register
 
   implicit none
     
@@ -152,23 +152,38 @@ program ESMF_ArrayRedistSTest
 !-------------------------------------------------------------------------
 
 #ifdef MODEL1
+  call ESMF_GridCompSetVM(comp1, userm1_setvm, localrc)
+  print *, "Comp1 SetVM finished, rc= ", localrc
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   call ESMF_GridCompSetServices(comp1, userm1_register, localrc)
-  print *, "Comp SetServices finished, rc= ", localrc
+  print *, "Comp1 SetServices finished, rc= ", localrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 #endif
 
 #ifdef MODEL2
+  call ESMF_GridCompSetVM(comp2, userm2_setvm, localrc)
+  print *, "Comp2 SetVM finished, rc= ", localrc
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   call ESMF_GridCompSetServices(comp2, userm2_register, localrc)
-  print *, "Comp SetServices finished, rc= ", localrc
+  print *, "Comp2 SetServices finished, rc= ", localrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 #endif
 
+  call ESMF_CplCompSetVM(cpl, usercpl_setvm, localrc)
+  print *, "Cpl SetVM finished, rc= ", localrc
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   call ESMF_CplCompSetServices(cpl, usercpl_register, localrc)
-  print *, "Comp SetServices finished, rc= ", localrc
+  print *, "Cpl SetServices finished, rc= ", localrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)

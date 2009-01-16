@@ -1,4 +1,4 @@
-! $Id: cplComp.F90,v 1.6 2008/06/13 00:29:35 theurich Exp $
+! $Id: cplComp.F90,v 1.7 2009/01/16 05:28:25 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -10,7 +10,7 @@ module cplCompMod
 
   implicit none
     
-  public cplCompReg
+  public cplCompSetVM, cplCompReg
         
 !-------------------------------------------------------------------------
 
@@ -18,7 +18,7 @@ module cplCompMod
 
 !-------------------------------------------------------------------------
 
-  subroutine cplCompReg(comp, rc)
+  subroutine cplCompSetVM(comp, rc)
     type(ESMF_CplComp) :: comp
     integer, intent(out) :: rc
 #ifdef ESMF_TESTWITHTHREADS
@@ -28,16 +28,6 @@ module cplCompMod
 
     ! Initialize
     rc = ESMF_SUCCESS
-
-    ! Register Init, Finalize (this component does not provide Run)
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, compInit1, 1, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, compInit2, 2, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, compFinal1, 1, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, compFinal2, 2, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
@@ -53,6 +43,25 @@ module cplCompMod
       call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
     endif
 #endif
+
+  end subroutine
+
+  subroutine cplCompReg(comp, rc)
+    type(ESMF_CplComp) :: comp
+    integer, intent(out) :: rc
+
+    ! Initialize
+    rc = ESMF_SUCCESS
+
+    ! Register Init, Finalize (this component does not provide Run)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, compInit1, 1, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, compInit2, 2, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, compFinal1, 1, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, compFinal2, 2, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine
 

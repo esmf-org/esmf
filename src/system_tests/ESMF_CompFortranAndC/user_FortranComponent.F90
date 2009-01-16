@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.6 2008/12/04 16:44:26 theurich Exp $
+! $Id: user_FortranComponent.F90,v 1.7 2009/01/16 05:28:24 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -20,7 +20,7 @@
 
     implicit none
     
-    public myRegistrationInFortran
+    public mySetVMInFortran, myRegistrationInFortran
         
     real(ESMF_KIND_R8), save, allocatable    :: farray(:,:)
     contains
@@ -30,7 +30,7 @@
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
  
-    subroutine myRegistrationInFortran(comp, rc)
+    subroutine mySetVMInFortran(comp, rc)
         type(ESMF_GridComp) :: comp
         integer, intent(out) :: rc
 
@@ -38,6 +38,30 @@
         type(ESMF_VM) :: vm
         logical :: supportPthreads
 #endif
+
+        ! Initialize return code
+        rc = ESMF_SUCCESS
+
+#ifdef ESMF_TESTWITHTHREADS
+        ! The following call will turn on ESMF-threading (single threaded)
+        ! for this component. If you are using this file as a template for
+        ! your own code development you probably don't want to include the
+        ! following call unless you are interested in exploring ESMF's
+        ! threading features.
+
+        ! First test whether ESMF-threading is supported on this machine
+        call ESMF_VMGetGlobal(vm, rc=rc)
+        call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+        if (supportPthreads) then
+          call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+        endif
+#endif
+
+    end subroutine
+
+    subroutine myRegistrationInFortran(comp, rc)
+        type(ESMF_GridComp) :: comp
+        integer, intent(out) :: rc
 
         ! Initialize return code
         rc = ESMF_SUCCESS
@@ -55,22 +79,6 @@
                                                           ESMF_SINGLEPHASE, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
-
-
-#ifdef ESMF_TESTWITHTHREADS
-        ! The following call will turn on ESMF-threading (single threaded)
-        ! for this component. If you are using this file as a template for
-        ! your own code development you probably don't want to include the
-        ! following call unless you are interested in exploring ESMF's
-        ! threading features.
-
-        ! First test whether ESMF-threading is supported on this machine
-        call ESMF_VMGetGlobal(vm, rc=rc)
-        call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-        if (supportPthreads) then
-          call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
-        endif
-#endif
 
     end subroutine
 

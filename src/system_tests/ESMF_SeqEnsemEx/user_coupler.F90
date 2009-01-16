@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.6 2009/01/07 16:43:19 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.7 2009/01/16 05:28:25 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -20,7 +20,7 @@ module user_coupler
     
   implicit none
    
-  public usercpl_register
+  public usercpl_setvm, usercpl_register
         
   contains
 
@@ -29,28 +29,13 @@ module user_coupler
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
  
-  subroutine usercpl_register(comp, rc)
+  subroutine usercpl_setvm(comp, rc)
     type(ESMF_CplComp) :: comp
     integer, intent(out) :: rc
 
 #ifdef ESMF_TESTWITHTHREADS
     type(ESMF_VM) :: vm
     logical :: supportPthreads
-#endif
-
-    print *, "in user setservices routine"
-
-    ! Register the callback routines.
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
-      ESMF_SINGLEPHASE, rc)
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
-      ESMF_SINGLEPHASE, rc)
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
-      ESMF_SINGLEPHASE, rc)
-
-    print *, "Registered Initialize, Run, and Finalize routines"
-
-#ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
     ! for this component. If you are using this file as a template for 
     ! your own code development you probably don't want to include the 
@@ -64,6 +49,25 @@ module user_coupler
       call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
     endif
 #endif
+
+    rc = ESMF_SUCCESS
+  end subroutine
+
+  subroutine usercpl_register(comp, rc)
+    type(ESMF_CplComp) :: comp
+    integer, intent(out) :: rc
+
+    print *, "in user setservices routine"
+
+    ! Register the callback routines.
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
+      ESMF_SINGLEPHASE, rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
+      ESMF_SINGLEPHASE, rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
+      ESMF_SINGLEPHASE, rc)
+
+    print *, "Registered Initialize, Run, and Finalize routines"
 
     rc = ESMF_SUCCESS
   end subroutine

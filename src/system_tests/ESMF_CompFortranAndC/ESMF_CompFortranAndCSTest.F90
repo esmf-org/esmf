@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.8 2008/11/14 04:39:16 theurich Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.9 2009/01/16 05:28:24 theurich Exp $
 !
 ! System test CompFortranAndC
 !  Description on Sourceforge under System Test #63029
@@ -46,7 +46,7 @@
     use ESMF_TestMod
     use ESMF_CompMod
     
-    use user_FortranComponent
+    use user_FortranComponent, only: mySetVMInFortran, myRegistrationInFortran
 
     implicit none
 

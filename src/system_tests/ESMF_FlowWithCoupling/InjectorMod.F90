@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.32 2008/07/03 23:07:57 eschwab Exp $
+! $Id: InjectorMod.F90,v 1.33 2009/01/16 05:28:25 theurich Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -81,15 +81,6 @@
         call ESMF_GridCompSetInternalState(comp, wrap, rc)
 
         print *, "Registered Private Data block for Internal State"
-
-#ifdef ESMF_TESTWITHTHREADS
-        ! The following call will turn on ESMF-threading (single threaded)
-        ! for this component. If you are using this file as a template for 
-        ! your own code development you probably don't want to include the 
-        ! following call unless you are interested in exploring ESMF's 
-        ! threading features.
-        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
-#endif
 
         rc = ESMF_SUCCESS
 

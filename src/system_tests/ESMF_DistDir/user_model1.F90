@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.8 2008/06/13 00:29:35 theurich Exp $
+! $Id: user_model1.F90,v 1.9 2009/01/16 05:28:25 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -20,7 +20,7 @@ module user_model1
 
   implicit none
     
-  public userm1_register
+  public userm1_setvm, userm1_register
         
   contains
 
@@ -29,7 +29,7 @@ module user_model1
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
  
-  subroutine userm1_register(comp, rc)
+  subroutine userm1_setvm(comp, rc)
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
 #ifdef ESMF_TESTWITHTHREADS
@@ -37,18 +37,8 @@ module user_model1
     logical :: supportPthreads
 #endif
 
-    print *, "in user register routine"
-
-    ! Register the callback routines.
-
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
-      ESMF_SINGLEPHASE, rc)
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
-      ESMF_SINGLEPHASE, rc)
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
-      ESMF_SINGLEPHASE, rc)
-
-    print *, "Registered Initialize, Run, and Finalize routines"
+    ! Initialize return code
+    rc = ESMF_SUCCESS
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
@@ -64,6 +54,26 @@ module user_model1
       call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
     endif
 #endif
+
+  end subroutine
+
+  subroutine userm1_register(comp, rc)
+    type(ESMF_GridComp) :: comp
+    integer, intent(out) :: rc
+
+    print *, "in user register routine"
+
+    ! Register the callback routines.
+
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
+      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
+      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
+      ESMF_SINGLEPHASE, rc)
+
+    print *, "Registered Initialize, Run, and Finalize routines"
+
 
     rc = ESMF_SUCCESS
   end subroutine

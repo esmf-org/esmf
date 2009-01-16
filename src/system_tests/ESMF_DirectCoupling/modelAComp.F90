@@ -1,4 +1,4 @@
-! $Id: modelAComp.F90,v 1.5 2008/06/13 00:29:35 theurich Exp $
+! $Id: modelAComp.F90,v 1.6 2009/01/16 05:28:25 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -10,7 +10,7 @@ module modelACompMod
 
   implicit none
     
-  public modelACompReg
+  public modelACompSetVM, modelACompReg
         
 !-------------------------------------------------------------------------
 
@@ -18,7 +18,7 @@ module modelACompMod
 
 !-------------------------------------------------------------------------
 
-  subroutine modelACompReg(comp, rc)
+  subroutine modelACompSetVM(comp, rc)
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
 #ifdef ESMF_TESTWITHTHREADS
@@ -28,17 +28,6 @@ module modelACompMod
 
     ! Initialize
     rc = ESMF_SUCCESS
-
-    ! Register Init, Run, Finalize
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, compInit, &
-      ESMF_SINGLEPHASE, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, compRun, &
-      ESMF_SINGLEPHASE, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, compFinal, &
-      ESMF_SINGLEPHASE, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
@@ -54,6 +43,26 @@ module modelACompMod
       call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
     endif
 #endif
+
+  end subroutine
+
+  subroutine modelACompReg(comp, rc)
+    type(ESMF_GridComp) :: comp
+    integer, intent(out) :: rc
+
+    ! Initialize
+    rc = ESMF_SUCCESS
+
+    ! Register Init, Run, Finalize
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, compInit, &
+      ESMF_SINGLEPHASE, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, compRun, &
+      ESMF_SINGLEPHASE, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, compFinal, &
+      ESMF_SINGLEPHASE, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine
 

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.23 2008/04/02 20:43:04 cdeluca Exp $
+! $Id: user_model1.F90,v 1.24 2009/01/16 05:28:25 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -72,15 +72,6 @@
         call ESMF_GridCompSetInternalState(comp, wrap, rc)
 
         print *, "Registered Private Data block for Internal State"
-
-#ifdef ESMF_TESTWITHTHREADS
-        ! The following call will turn on ESMF-threading (single threaded)
-        ! for this component. If you are using this file as a template for 
-        ! your own code development you probably don't want to include the 
-        ! following call unless you are interested in exploring ESMF's 
-        ! threading features.
-        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
-#endif
 
         rc = ESMF_SUCCESS
 

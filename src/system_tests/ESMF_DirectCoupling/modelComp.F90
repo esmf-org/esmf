@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.7 2008/06/13 00:29:35 theurich Exp $
+! $Id: modelComp.F90,v 1.8 2009/01/16 05:28:25 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -9,12 +9,12 @@ module modelCompMod
   use ESMF_Mod
 
   ! Model components
-  use modelACompMod,     only : modelACompReg
-  use modelBCompMod,     only : modelBCompReg
+  use modelACompMod,     only : modelACompSetVM, modelACompReg
+  use modelBCompMod,     only : modelBCompSetVM, modelBCompReg
 
   implicit none
     
-  public modelCompReg
+  public modelCompSetVM, modelCompReg
         
   ! internal module wide objects
   type(ESMF_GridComp), save :: modelAComp, modelBComp
@@ -26,7 +26,7 @@ module modelCompMod
 
 !-------------------------------------------------------------------------
 
-  subroutine modelCompReg(comp, rc)
+  subroutine modelCompSetVM(comp, rc)
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
 #ifdef ESMF_TESTWITHTHREADS
@@ -36,17 +36,6 @@ module modelCompMod
 
     ! Initialize
     rc = ESMF_SUCCESS
-
-    ! Register Init, Run, Finalize
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, compInit, &
-      ESMF_SINGLEPHASE, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, compRun, &
-      ESMF_SINGLEPHASE, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, compFinal, &
-      ESMF_SINGLEPHASE, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
@@ -62,6 +51,26 @@ module modelCompMod
       call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
     endif
 #endif
+
+  end subroutine
+
+  subroutine modelCompReg(comp, rc)
+    type(ESMF_GridComp) :: comp
+    integer, intent(out) :: rc
+
+    ! Initialize
+    rc = ESMF_SUCCESS
+
+    ! Register Init, Run, Finalize
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, compInit, &
+      ESMF_SINGLEPHASE, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, compRun, &
+      ESMF_SINGLEPHASE, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, compFinal, &
+      ESMF_SINGLEPHASE, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine
 
@@ -104,10 +113,14 @@ module modelCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! SetServices for modelAComp
+    call ESMF_GridCompSetVM(modelAComp, modelACompSetVM, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_GridCompSetServices(modelAComp, modelACompReg, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! SetServices for modelBComp
+    call ESMF_GridCompSetVM(modelBComp, modelBCompSetVM, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_GridCompSetServices(modelBComp, modelBCompReg, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     

@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.21 2007/06/23 04:01:24 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.22 2009/01/16 05:28:25 theurich Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -49,15 +49,6 @@
                                      ESMF_SINGLEPHASE, localrc)
 
       !print *, "Registered Initialize, Run, and Finalize routines"
-
-#ifdef ESMF_TESTWITHTHREADS
-        ! The following call will turn on ESMF-threading (single threaded)
-        ! for this component. If you are using this file as a template for 
-        ! your own code development you probably don't want to include the 
-        ! following call unless you are interested in exploring ESMF's 
-        ! threading features.
-        call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
-#endif
 
       ! set return code
       rc = localrc

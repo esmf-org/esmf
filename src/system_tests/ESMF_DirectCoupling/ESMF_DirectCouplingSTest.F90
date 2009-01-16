@@ -1,4 +1,4 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.3 2008/04/22 18:01:39 theurich Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.4 2009/01/16 05:28:25 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -106,9 +106,9 @@ program ESMF_DirectCouplingSTest
   use ESMF_TestMod
 
   ! Application components
-  use ioCompMod,     only : ioCompReg
-  use modelCompMod,  only : modelCompReg
-  use cplCompMod,    only : cplCompReg
+  use ioCompMod,     only : ioCompSetVM, ioCompReg
+  use modelCompMod,  only : modelCompSetVM, modelCompReg
+  use cplCompMod,    only : cplCompSetVM, cplCompReg
 
   implicit none
     
@@ -187,16 +187,28 @@ program ESMF_DirectCouplingSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
+  call ESMF_GridCompSetVM(ioComp, ioCompSetVM, localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   call ESMF_GridCompSetServices(ioComp, ioCompReg, localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
+  call ESMF_GridCompSetVM(modelComp, modelCompSetVM, localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   call ESMF_GridCompSetServices(modelComp, modelCompReg, localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
+  call ESMF_CplCompSetVM(cplComp, cplCompSetVM, localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   call ESMF_CplCompSetServices(cplComp, cplCompReg, localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &

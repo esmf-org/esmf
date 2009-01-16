@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSharedObjSTest.F90,v 1.1 2009/01/12 21:37:47 theurich Exp $
+! $Id: ESMF_ArrayRedistSharedObjSTest.F90,v 1.2 2009/01/16 05:28:24 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -46,7 +46,7 @@ program ESMF_ArrayRedistSharedObjSTest
   use ESMF_Mod
   use ESMF_TestMod
 
-  use user_model2, only : userm2_register
+  use user_model2, only : userm2_setvm, userm2_register
 
   implicit none
     
@@ -131,6 +131,12 @@ program ESMF_ArrayRedistSharedObjSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
+  call ESMF_GridCompSetVM(comp1, sharedObj="./user_model1.so", &
+    routine="userm1_setvm_", rc=localrc)
+  print *, "Comp SetVM finished, rc= ", localrc
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   call ESMF_GridCompSetServices(comp1, sharedObj="./user_model1.so", &
     routine="userm1_reg_", rc=localrc)
   print *, "Comp SetServices finished, rc= ", localrc
@@ -138,12 +144,23 @@ program ESMF_ArrayRedistSharedObjSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
+  call ESMF_GridCompSetVM(comp2, userm2_setvm, localrc)
+  print *, "Comp2 SetVM finished, rc= ", localrc
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   call ESMF_GridCompSetServices(comp2, userm2_register, localrc)
-  print *, "Comp SetServices finished, rc= ", localrc
+  print *, "Comp2 SetServices finished, rc= ", localrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
+  call ESMF_CplCompSetVM(cpl, sharedObj="./user_coupler.so", &
+    routine="usercpl_setvm_", rc=localrc)
+  print *, "Comp SetVM finished, rc= ", localrc
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   call ESMF_CplCompSetServices(cpl, sharedObj="./user_coupler.so", &
     routine="usercpl_reg_", rc=localrc)
   print *, "Comp SetServices finished, rc= ", localrc

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistDirSTest.F90,v 1.10 2008/11/14 04:39:16 theurich Exp $
+! $Id: ESMF_DistDirSTest.F90,v 1.11 2009/01/16 05:28:25 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -15,19 +15,20 @@
 !\begin{verbatim}
 
 program DistDir
+#define ESMF_METHOD "program ESMF_DistDir"
 
-#include "ESMF_Macros.inc"
+#include "ESMF.h"
 
   ! ESMF Framework module
   use ESMF_Mod
   use ESMF_TestMod
 
-  use user_model1, only : userm1_register
+  use user_model1, only : userm1_setvm, userm1_register
 
   implicit none
     
   ! Local variables
-  integer :: localPet, petCount, rc
+  integer :: localPet, petCount, localrc, rc
   character(len=ESMF_MAXSTR) :: cname1
   type(ESMF_VM):: vm
   type(ESMF_State) :: c1exp
@@ -89,9 +90,16 @@ program DistDir
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_GridCompSetServices(comp1, userm1_register, rc)
-  print *, "Comp SetServices finished, rc= ", rc
-  if (rc .ne. ESMF_SUCCESS) goto 10
+  call ESMF_GridCompSetVM(comp1, userm1_setvm, localrc)
+  print *, "Comp1 SetVM finished, rc= ", localrc
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  call ESMF_GridCompSetServices(comp1, userm1_register, localrc)
+  print *, "Comp1 SetServices finished, rc= ", localrc
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

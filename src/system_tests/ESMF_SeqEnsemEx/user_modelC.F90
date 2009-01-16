@@ -1,4 +1,4 @@
-! $Id: user_modelC.F90,v 1.4 2009/01/07 16:43:19 rokuingh Exp $
+! $Id: user_modelC.F90,v 1.5 2009/01/16 05:28:25 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -20,7 +20,7 @@ module user_modelC
 
   implicit none
     
-  public userC_register
+  public userC_setvm, userC_register
         
   contains
 
@@ -29,14 +29,33 @@ module user_modelC
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
  
-  subroutine userC_register(comp, rc)
+  subroutine userC_setvm(comp, rc)
     type(ESMF_GridComp)  :: comp
     integer, intent(out) :: rc
 
 #ifdef ESMF_TESTWITHTHREADS
     type(ESMF_VM) :: vm
     logical :: supportPthreads
+    ! The following call will turn on ESMF-threading (single threaded)
+    ! for this component. If you are using this file as a template for 
+    ! your own code development you probably don't want to include the 
+    ! following call unless you are interested in exploring ESMF's 
+    ! threading features.
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads) then
+      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+    endif
 #endif
+
+    rc = ESMF_SUCCESS
+  end subroutine
+
+  subroutine userC_register(comp, rc)
+    type(ESMF_GridComp)  :: comp
+    integer, intent(out) :: rc
 
     print *, "in user register routine"
 
@@ -56,21 +75,7 @@ module user_modelC
 
     print *, "Registered Initialize, Run, and Finalize routines"
 
-#ifdef ESMF_TESTWITHTHREADS
-    ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
-    ! threading features.
-
-    ! First test whether ESMF-threading is supported on this machine
-    call ESMF_VMGetGlobal(vm, rc=rc)
-    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-    if (supportPthreads) then
-      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
-    endif
-#endif
-
+    rc = ESMF_SUCCESS
   end subroutine
 
 !-------------------------------------------------------------------------

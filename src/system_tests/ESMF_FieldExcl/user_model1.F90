@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.29 2008/04/02 20:43:03 cdeluca Exp $
+! $Id: user_model1.F90,v 1.30 2009/01/16 05:28:25 theurich Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -45,15 +45,6 @@
                                        user_final, ESMF_SINGLEPHASE, localrc)
 
         !print *, "Registered Initialize, Run, and Finalize routines"
-
-#ifdef ESMF_TESTWITHTHREADS
-        ! The following call will turn on ESMF-threading (single threaded)
-        ! for this component. If you are using this file as a template for 
-        ! your own code development you probably don't want to include the 
-        ! following call unless you are interested in exploring ESMF's 
-        ! threading features.
-        call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
-#endif
 
         ! return code
         rc = localrc

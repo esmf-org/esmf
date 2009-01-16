@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.22 2008/11/14 04:39:16 theurich Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.23 2009/01/16 05:28:24 theurich Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -23,7 +23,7 @@
     use ESMF_Mod
     use ESMF_TestMod
     
-    use user_model
+    use user_model, only : user_setvm, user_register
 
     implicit none
     

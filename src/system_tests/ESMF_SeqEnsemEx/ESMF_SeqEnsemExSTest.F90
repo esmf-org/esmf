@@ -1,4 +1,4 @@
-! $Id: ESMF_SeqEnsemExSTest.F90,v 1.1 2008/02/20 22:47:31 svasquez Exp $
+! $Id: ESMF_SeqEnsemExSTest.F90,v 1.2 2009/01/16 05:28:25 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -48,11 +48,11 @@ program ESMF_SeqEnsemExSTest
   use ESMF_Mod
   use ESMF_TestMod
 
-  use user_modelA, only : userA_register
-  use user_modelB, only : userB_register
-  use user_modelC, only : userC_register
-  use user_modelD, only : userD_register
-  use user_coupler, only : usercpl_register
+  use user_modelA, only : userA_setvm, userA_register
+  use user_modelB, only : userB_setvm, userB_register
+  use user_modelC, only : userC_setvm, userC_register
+  use user_modelD, only : userD_setvm, userD_register
+  use user_coupler, only : usercpl_setvm, usercpl_register
 
   implicit none
     
@@ -143,24 +143,39 @@ program ESMF_SeqEnsemExSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
+  call ESMF_GridCompSetVM(compA, userA_setvm, rc)
+  print *, "CompA SetVM finished, rc= ", rc
+  if (rc .ne. ESMF_SUCCESS) goto 10
   call ESMF_GridCompSetServices(compA, userA_register, rc)
-  print *, "Comp SetServices finished, rc= ", rc
+  print *, "CompA SetServices finished, rc= ", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
+  call ESMF_GridCompSetVM(compB, userB_setvm, rc)
+  print *, "CompB SetVM finished, rc= ", rc
+  if (rc .ne. ESMF_SUCCESS) goto 10
   call ESMF_GridCompSetServices(compB, userB_register, rc)
-  print *, "Comp SetServices finished, rc= ", rc
+  print *, "CompB SetServices finished, rc= ", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
+  call ESMF_GridCompSetVM(compC, userC_setvm, rc)
+  print *, "CompA SetVM finished, rc= ", rc
+  if (rc .ne. ESMF_SUCCESS) goto 10
   call ESMF_GridCompSetServices(compC, userC_register, rc)
-  print *, "Comp SetServices finished, rc= ", rc
+  print *, "CompC SetServices finished, rc= ", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
+  call ESMF_GridCompSetVM(compD, userD_setvm, rc)
+  print *, "CompD SetVM finished, rc= ", rc
+  if (rc .ne. ESMF_SUCCESS) goto 10
   call ESMF_GridCompSetServices(compD, userD_register, rc)
-  print *, "Comp SetServices finished, rc= ", rc
+  print *, "CompD SetServices finished, rc= ", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
+  call ESMF_CplCompSetVM(cpl, usercpl_setvm, rc)
+  print *, "Cpl SetVM finished, rc= ", rc
+  if (rc .ne. ESMF_SUCCESS) goto 10
   call ESMF_CplCompSetServices(cpl, usercpl_register, rc)
-  print *, "Comp SetServices finished, rc= ", rc
+  print *, "Cpl SetServices finished, rc= ", rc
   if (rc .ne. ESMF_SUCCESS) goto 10
 
 !------------------------------------------------------------------------------
