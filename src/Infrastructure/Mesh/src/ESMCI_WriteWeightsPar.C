@@ -645,18 +645,20 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
    if ((retval = ncmpi_put_vara_int_all(ncid, mask_aid, startsa, countsa, &ncsrc.grid_imask[0])))
      Throw() << "NC error:" << ncmpi_strerror(retval);
    
+   // Set Src Area
    {
      std::vector<double> area;
      
-     area.resize(ncsrc.grid_size, 0);
+     area.resize(ncsrc.local_grid_size, 0.0);
      if ((retval = ncmpi_put_vara_double_all(ncid, area_aid, startsa, countsa, &area[0])))
        Throw() << "NC error:" << ncmpi_strerror(retval);
      
    }
    
+   // Set Src Frac
    {
    std::vector<double> frac;
-   frac.resize(ncsrc.grid_size, 0);
+   frac.resize(ncsrc.local_grid_size, 0.0);
 
    // Make frac non-zero for non-zero mask values
    for (int i=0; i<frac.size(); i++) {
@@ -701,18 +703,20 @@ void WriteNCMatFilePar(const std::string &src_ncfile,
    if ((retval = ncmpi_put_vara_int_all(ncid, mask_bid, startsb, countsb, &ncdst.grid_imask[0])))
      Throw() << "NC error:" << ncmpi_strerror(retval);
 
+   // Set Dst Area
    {
      std::vector<double> area;
      
-     area.resize(ncdst.grid_size, 0);
+     area.resize(ncdst.local_grid_size, 0.0);
      if ((retval = ncmpi_put_vara_double_all(ncid, area_bid, startsb, countsb, &area[0])))
         Throw() << "NC error:" << ncmpi_strerror(retval);
    }
    
+   // Set Dst Frac
    {
    std::vector<double> frac;
    
-   frac.resize(ncdst.grid_size, 0);
+   frac.resize(ncdst.local_grid_size, 0.0);
 
    // Make frac non-zero for non-zero mask values
    for (int i=0; i<frac.size(); i++) {

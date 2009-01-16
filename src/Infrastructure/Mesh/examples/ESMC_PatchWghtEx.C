@@ -48,7 +48,7 @@ using namespace ESMCI;
 
 int main(int argc, char *argv[]) {
 
-  Par::Init("PATCHLOG", true);
+  Par::Init("PATCHLOG", false);
 
   Mesh srcmesh, dstmesh;
 
@@ -84,8 +84,9 @@ int main(int argc, char *argv[]) {
      MeshAddPole(srcmesh, 1, constraint_id, pole_constraints);
      MeshAddPole(srcmesh, 2, constraint_id, pole_constraints);
 
-WriteMesh(srcmesh, "src");
-WriteMesh(dstmesh, "dst");
+     // Only for Debug
+     //WriteMesh(srcmesh, "src");
+     //WriteMesh(dstmesh, "dst");
 
      std::vector<Interp::FieldPair> fpairs;
      fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_PATCH));
