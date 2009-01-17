@@ -453,8 +453,9 @@ void PatchRecov<NFIELD,Real>::CreatePatch(
     // Find an integration rule that just overconstrains the problem
     
     const intgRule *ir = 0;
-    // Need <= to have enough points to fully constrain matrix
-    for (UInt q = 1; q <= pdeg; q++) {
+    // Need to have enough points to fully constrain matrix
+    // Come up with a better max than pdeg+4
+     for (UInt q = 1; q <= pdeg+4; q++) {
       ir = GetIntg(selem)->ChangeOrder(q);
       if (num_elems*ir->npoints() >= ncoef) {
 /*
@@ -519,8 +520,9 @@ std::cout << "threshold  tripped.  nsamples=" << nsamples << ", ncoef=" << ncoef
       MEValues<METraits<Real,double>, NFIELD> mev(field.GetMEFamily(), &coord);
 
       const intgRule *ir = 0;
-      // Need <= to have enough points to fully constrain matrix
-      for (UInt q = 1; q <= pdeg; q++) {
+      // Need to have enough points to fully constrain matrix
+      // Come up with a better max than pdeg+4
+      for (UInt q = 1; q <= pdeg+4; q++) {
         ir = GetIntg(selem)->ChangeOrder(q);
         if (num_elems*ir->npoints() >= ncoef) {
           break;
