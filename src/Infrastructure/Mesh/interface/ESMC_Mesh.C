@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.9 2009/01/14 16:38:23 rosalind Exp $
+// $Id: ESMC_Mesh.C,v 1.10 2009/01/20 04:25:40 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -192,9 +192,66 @@ int ESMC_MeshFreeMemory(ESMC_Mesh *mesh){
 
    return localrc;
 
-} // ESMC_MeshDestroy
+} // ESMC_MeshFreeMemory
 
 
+//--------------------------------------------------------------------------
+// !BOP
+// !IROUTINE: ESMC_MeshGetNumNodes
+//
+// !EOP
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshGetNumNodes()"
+int ESMC_MeshGetNumNodes(ESMC_Mesh *mesh, int* num_nodes){
+   int localrc;
+   // Initialize return code. Assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
+   try{
+
+   MeshCXX* mep = (MeshCXX*)(mesh->ptr);
+   *num_nodes = mep->numNodes();
+   localrc = ESMF_SUCCESS;
+
+  } catch(...) {
+
+    localrc = ESMF_FAILURE;
+
+  }
+
+  return localrc;
+
+} // ESMC_MeshGetNumNodes
+
+//--------------------------------------------------------------------------
+// !BOP
+// !IROUTINE: ESMC_MeshGetNumNodes
+//
+// !EOP
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshGetNumElements()"
+int ESMC_MeshGetNumElements(ESMC_Mesh *mesh, int* num_elems){
+   int localrc;
+   // Initialize return code. Assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
+
+   try{
+
+   MeshCXX* mep = (MeshCXX*)(mesh->ptr);
+   *num_elems = mep->numElements();
+   localrc = ESMF_SUCCESS;
+
+  } catch(...) {
+
+    localrc = ESMF_FAILURE;
+
+  }
+
+  return localrc;
+
+} // ESMC_MeshGetNumElements
 //--------------------------------------------------------------------------
 // !BOP
 // !IROUTINE: ESMC_MeshVTKHeader
@@ -236,5 +293,25 @@ int ESMC_MeshVTKBody(char *fname, int *nodeId, double *nodeCoord, int *nodeOwner
    return localrc;
 } // ESMC_MeshVTKBody
 
-} // extern "C"
+//--------------------------------------------------------------------------
+// !BOP
+// !IROUTINE: ESMC_MeshWrite
+//
+// !EOP
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshWrite()"
+int ESMC_MeshWrite(ESMC_Mesh *mesh, char* filename){
+   int localrc;
+   // Initialize return code. Assume routine not implemented
+   localrc = ESMC_RC_NOT_IMPL;
 
+
+   MeshCXX* mep = (MeshCXX*)(mesh->ptr);
+
+   localrc = mep->meshWrite(filename);
+
+   return localrc;
+} // ESMC_Write
+
+} // extern "C"

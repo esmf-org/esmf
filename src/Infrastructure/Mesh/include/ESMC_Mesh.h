@@ -54,6 +54,12 @@ int ESMC_MeshVTKHeader(char *fname, int *num_elem, int *num_node, int *conn_size
 int ESMC_MeshVTKBody(char *fname, int *nodeId, double *nodeCoord, int *nodeOwner,
                 int *elemId, int *elemType, int *elemConn);
 
+int ESMC_MeshWrite(ESMC_Mesh *mesh, char* fname);
+
+int ESMC_MeshGetNumNodes(ESMC_Mesh *mesh, int* num_nodes);
+
+int ESMC_MeshGetNumElements(ESMC_Mesh *mesh, int* num_elems);
+
 
 //int ESMC_MeshCreateAll(ESMC_Mesh *mesh, int parametricDim, int *nodeIds, double *nodeCoords,
 //             int *nodeOwners, int *elementIds, int *elementTypes, int *elementConn);

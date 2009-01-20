@@ -29,8 +29,11 @@ namespace ESMCI {
     int addNodes(int*, int*, double*, int*);
     std::vector<int> getNodeGIDS();
     int createDistGrids(int*, int*, int*, int*);
+    int meshWrite(char*);
     int destroy();
     int freeMemory();
+    int numNodes();
+    int numElements();
 
     friend int MeshVTKHeader(char*, int*, int*, int*);
     friend int MeshVTKBody(char*, int*, double*, int*, int*, int*, int*);
@@ -41,7 +44,7 @@ namespace ESMCI {
     int* nodalDistGrid;
     int* elementDistGrid;
     int numLNodes;
-    int num_LElements;
+    int numLElements;
     int meshFreed;
   };
 

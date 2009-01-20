@@ -403,4 +403,35 @@ int MeshCXX::isMeshFreed(){
   return meshFreed;
 }
 
+
+int MeshCXX::numNodes(){
+   return numLNodes;
+}
+
+
+int MeshCXX::numElements(){
+   return numLElements;
+}
+
+int MeshCXX::meshWrite(char* fileName){
+
+  int localrc;
+  //Initialize localrc; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  try{
+
+     WriteMesh(*meshPointer, fileName);
+     localrc=ESMF_SUCCESS;
+
+  } catch(...) {
+
+    localrc = ESMF_FAILURE;
+
+  }
+
+  return localrc;
+
+} //meshWrite
+
 } // namespace ESMCI

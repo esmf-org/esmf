@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.6 2009/01/15 02:33:34 w6ws Exp $
+// $Id: ESMC_MeshUTest.C,v 1.7 2009/01/20 04:25:40 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -38,6 +38,7 @@ int main(void){
   int result = 0;
   int rc;
   int num_elem, num_node, conn_size;
+  int num_elements, num_nodes;
   ESMC_Mesh mesh;
   int pdim=2;
   int sdim=3;
@@ -114,6 +115,33 @@ int main(void){
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_MeshAddElements(&mesh, &num_elem, elemId, elemType, elemConn);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  // Write out the internal mesh data
+  strcpy(name, "MeshWrite");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshWrite(&mesh, "MeshOutput");
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  // Get the number of local nodes
+  strcpy(name, "MeshGetNumNodes");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshGetNumNodes(&mesh, &num_nodes);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  // Get the number of local elements
+  strcpy(name, "MeshGetNumElements");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshGetNumElements(&mesh, &num_elements);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
