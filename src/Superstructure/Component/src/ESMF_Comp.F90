@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.175 2009/01/15 22:54:21 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.176 2009/01/21 21:05:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research, 
@@ -254,7 +254,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.175 2009/01/15 22:54:21 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.176 2009/01/21 21:05:02 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1005,9 +1005,10 @@ end function
           ! only set arguments on those PETs that are executing the component
           call c_ESMC_FTableSetStateArgs(compp%this, methodtype, phase, &
             compp%compw, compp%is, compp%es, compp%argclock, status)
-          if (ESMF_LogMsgFoundError(status, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+!gjt: ignore return value now that setservices runs in child context
+!          if (ESMF_LogMsgFoundError(status, &
+!            ESMF_ERR_PASSTHRU, &
+!            ESMF_CONTEXT, rc)) return
         endif
           
         ! callback into user code
