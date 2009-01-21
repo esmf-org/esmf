@@ -1,7 +1,7 @@
-// $Id: ESMCI_Grid.C,v 1.36.2.22 2009/01/06 23:25:39 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.36.2.23 2009/01/21 21:25:21 cdeluca Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2008, University Corporation for Atmospheric Research, 
+// Copyright 2002-2009, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.22 2009/01/06 23:25:39 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.36.2.23 2009/01/21 21:25:21 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max

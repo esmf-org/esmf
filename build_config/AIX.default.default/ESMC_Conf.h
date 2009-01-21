@@ -1,11 +1,11 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.9.2.3 2008/11/25 21:31:09 theurich Exp $"
+"$Id: ESMC_Conf.h,v 1.9.2.4 2009/01/21 21:25:17 cdeluca Exp $"
 "Defines the configuration for this machine"
 #endif
 
 #if 0
 Earth System Modeling Framework
-Copyright 2002-2008, University Corporation for Atmospheric Research,
+Copyright 2002-2009, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

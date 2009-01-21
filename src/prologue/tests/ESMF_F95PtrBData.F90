@@ -1,7 +1,7 @@
-! $Id: ESMF_F95PtrBData.F90,v 1.1.2.1 2008/05/06 17:26:58 w6ws Exp $
+! $Id: ESMF_F95PtrBData.F90,v 1.1.2.2 2009/01/21 21:25:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2008, University Corporation for Atmospheric Research,
+! Copyright 2002-2009, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
