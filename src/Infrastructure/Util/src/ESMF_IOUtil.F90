@@ -1,7 +1,7 @@
-! $Id: ESMF_IOUtil.F90,v 1.2 2008/11/26 15:49:24 w6ws Exp $
+! $Id: ESMF_IOUtil.F90,v 1.3 2009/01/21 21:38:01 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2008, University Corporation for Atmospheric Research,
+! Copyright 2002-2009, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -96,7 +96,7 @@ module ESMF_IOUtilMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version = &
-      '$Id: ESMF_IOUtil.F90,v 1.2 2008/11/26 15:49:24 w6ws Exp $'
+      '$Id: ESMF_IOUtil.F90,v 1.3 2009/01/21 21:38:01 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
   contains

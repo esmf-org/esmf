@@ -1,7 +1,7 @@
-!  $Id: ESMF_Field_C.F90,v 1.8 2008/04/05 03:38:16 cdeluca Exp $
+!  $Id: ESMF_Field_C.F90,v 1.9 2009/01/21 21:37:59 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2008, University Corporation for Atmospheric Research, 
+! Copyright 2002-2009, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.8 2008/04/05 03:38:16 cdeluca Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.9 2009/01/21 21:37:59 cdeluca Exp $'
 !==============================================================================
    subroutine f_esmf_fieldcreate(fieldp, rc)
        use ESMF_UtilTypesMod    ! ESMF base class

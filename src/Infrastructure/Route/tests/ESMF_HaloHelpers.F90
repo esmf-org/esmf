@@ -1,7 +1,7 @@
-! $Id: ESMF_HaloHelpers.F90,v 1.15 2008/04/05 03:38:55 cdeluca Exp $
+! $Id: ESMF_HaloHelpers.F90,v 1.16 2009/01/21 21:38:01 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2008, University Corporation for Atmospheric Research,
+! Copyright 2002-2009, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

@@ -1,7 +1,7 @@
-! $Id: ESMF_InternArrayDataMap.F90,v 1.14 2008/07/03 23:07:49 eschwab Exp $
+! $Id: ESMF_InternArrayDataMap.F90,v 1.15 2009/01/21 21:37:59 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2008, University Corporation for Atmospheric Research, 
+! Copyright 2002-2009, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -214,7 +214,7 @@ module ESMF_InternArrayDataMapMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version =  &
-    '$Id: ESMF_InternArrayDataMap.F90,v 1.14 2008/07/03 23:07:49 eschwab Exp $'
+    '$Id: ESMF_InternArrayDataMap.F90,v 1.15 2009/01/21 21:37:59 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 

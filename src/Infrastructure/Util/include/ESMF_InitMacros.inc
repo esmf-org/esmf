@@ -1,8 +1,8 @@
 #if 0
-$Id: ESMF_InitMacros.inc,v 1.32 2008/04/05 03:39:01 cdeluca Exp $
+$Id: ESMF_InitMacros.inc,v 1.33 2009/01/21 21:38:01 cdeluca Exp $
 
 Earth System Modeling Framework
-Copyright 2002-2008, University Corporation for Atmospheric Research,
+Copyright 2002-2009, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

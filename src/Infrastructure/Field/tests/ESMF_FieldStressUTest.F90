@@ -1,7 +1,7 @@
-! $Id: ESMF_FieldStressUTest.F90,v 1.6 2008/12/04 23:45:52 feiliu Exp $
+! $Id: ESMF_FieldStressUTest.F90,v 1.7 2009/01/21 21:37:59 cdeluca Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2007, University Corporation for Atmospheric Research,
+! Copyright 2002-2009, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
