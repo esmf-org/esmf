@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.2 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.3 2009/01/22 17:38:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -22,9 +22,9 @@ module user_model
 
   implicit none
     
-  public userm1_register
-  public userm2_register
-  public usercpl_register
+  public userm1_setvm, userm1_register
+  public userm2_setvm, userm2_register
+  public usercpl_setvm, usercpl_register
         
   contains
 
@@ -33,6 +33,35 @@ module user_model
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
  
+  subroutine userm1_setvm(comp, rc)
+    type(ESMF_GridComp)  :: comp
+    integer, intent(out) :: rc
+
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    logical :: supportPthreads
+#endif
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+#ifdef ESMF_TESTWITHTHREADS
+    ! The following call will turn on ESMF-threading (single threaded)
+    ! for this component. If you are using this file as a template for 
+    ! your own code development you probably don't want to include the 
+    ! following call unless you are interested in exploring ESMF's 
+    ! threading features.
+    
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads) then
+      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+    endif
+#endif
+    
+  end subroutine
+
   subroutine userm1_register(comp, rc)
     type(ESMF_GridComp)  :: comp
     integer, intent(out) :: rc
@@ -399,6 +428,35 @@ module user_model
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
  
+  subroutine userm2_setvm(comp, rc)
+    type(ESMF_GridComp)  :: comp
+    integer, intent(out) :: rc
+
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    logical :: supportPthreads
+#endif
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+#ifdef ESMF_TESTWITHTHREADS
+    ! The following call will turn on ESMF-threading (single threaded)
+    ! for this component. If you are using this file as a template for 
+    ! your own code development you probably don't want to include the 
+    ! following call unless you are interested in exploring ESMF's 
+    ! threading features.
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads) then
+      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+    endif
+#endif
+    
+  end subroutine
+
   subroutine userm2_register(comp, rc)
     type(ESMF_GridComp)  :: comp
     integer, intent(out) :: rc
@@ -513,6 +571,35 @@ module user_model
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
  
+  subroutine usercpl_setvm(comp, rc)
+    type(ESMF_CplComp) :: comp
+    integer, intent(out) :: rc
+
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    logical :: supportPthreads
+#endif
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+    
+#ifdef ESMF_TESTWITHTHREADS
+    ! The following call will turn on ESMF-threading (single threaded)
+    ! for this component. If you are using this file as a template for 
+    ! your own code development you probably don't want to include the 
+    ! following call unless you are interested in exploring ESMF's 
+    ! threading features.
+    
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads) then
+      call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
+    endif
+#endif
+
+  end subroutine
+
   subroutine usercpl_register(comp, rc)
     type(ESMF_CplComp) :: comp
     integer, intent(out) :: rc
@@ -667,9 +754,9 @@ program ESMF_AttributeUpdateEx
       ! Use ESMF framework module
       use ESMF_Mod
       
-      use user_model, only : userm1_register, &
-                             userm2_register, &
-                             usercpl_register
+      use user_model, only : userm1_setvm, userm1_register, &
+                             userm2_setvm, userm2_register, &
+                             usercpl_setvm, usercpl_register
       
       implicit none
 
@@ -724,6 +811,11 @@ program ESMF_AttributeUpdateEx
           petList=(/0,1,2,3/), rc=rc)
       endif
 !EOC      
+      ! SetVM section
+      call ESMF_GridCompSetVM(gridcomp1, userm1_setvm, rc)
+      call ESMF_GridCompSetVM(gridcomp2, userm2_setvm, rc)
+      call ESMF_CplCompSetVM(cplcomp, usercpl_setvm, rc)
+
       ! Register section
       call ESMF_GridCompSetServices(gridcomp1, userm1_register, rc)
       call ESMF_GridCompSetServices(gridcomp2, userm2_register, rc)
@@ -737,7 +829,7 @@ program ESMF_AttributeUpdateEx
         ESMF_STATE_IMPORT, rc=rc)
       call ESMF_GridCompInitialize(gridcomp2, importState=c2imp, rc=rc)
       call ESMF_CplCompInitialize(cplcomp, importState=c1exp, &
-        exportState=c2imp, rc=rc)  
+        exportState=c2imp, rc=rc)
       
 !BOC
       ! initialize variables

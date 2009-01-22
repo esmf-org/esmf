@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2009/01/15 06:04:14 rokuingh Exp $
+# $Id: makefile,v 1.3 2009/01/22 17:38:20 rokuingh Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -12,7 +12,7 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_AttributeEx \
                     $(ESMF_EXDIR)/ESMF_AttributeUpdateEx
 
 EXAMPLES_RUN      = run_ESMF_AttributeEx \
-                    run_ESMF_AttributePackageEx \
+		    run_ESMF_AttributePackageEx \
                     run_ESMF_AttributeUpdateEx
 
 EXAMPLES_RUN_UNI  = run_ESMF_AttributeEx_uni \
