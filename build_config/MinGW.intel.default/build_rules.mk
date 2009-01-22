@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.4 2009/01/22 00:55:35 w6ws Exp $
+# $Id: build_rules.mk,v 1.5 2009/01/22 06:04:00 w6ws Exp $
 #
 # MinGW.intel.default
 #
@@ -71,6 +71,11 @@ ESMF_F90COMPILEOPTS += -names:lowercase
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 
 ############################################################
+# Windows does not have support for POSIX dynamic linking
+#
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
+
+############################################################
 # Windows does not have support for "gethostid()"
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
@@ -121,13 +126,6 @@ ESMF_PTHREADS := OFF
 ############################################################
 # Construct the ABISTRING
 #
-ifeq ($(ESMF_MACHINE),ia64)
-ifeq ($(ESMF_ABI),64)
-ESMF_ABISTRING := $(ESMF_MACHINE)_64
-else
-$(error Invalid ESMF_MACHINE / ESMF_ABI combination: $(ESMF_MACHINE) / $(ESMF_ABI))
-endif
-endif
 ifeq ($(ESMF_MACHINE),x86_64)
 ifeq ($(ESMF_ABI),32)
 ESMF_ABISTRING := $(ESMF_MACHINE)_32
@@ -140,17 +138,23 @@ endif
 ############################################################
 # Set memory model compiler flags according to ABISTRING
 #
+ifeq ($(ESMF_ABISTRING),x86_64_32)
+ESMF_F90COMPILEOPTS     += -m32
+ESMF_F90LINKOPTS        += -m32
+ESMF_CXXCOMPILEOPTS     += -m32
+ESMF_CXXLINKOPTS        += -m32
+endif
+ifeq ($(ESMF_ABISTRING),x86_64_small)
+ESMF_F90COMPILEOPTS     += -m64 -mcmodel=small
+ESMF_F90LINKOPTS        += -m64 -mcmodel=small
+ESMF_CXXCOMPILEOPTS     += -m64 -mcmodel=small
+ESMF_CXXLINKOPTS        += -m64 -mcmodel=small
+endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
 ESMF_F90COMPILEOPTS     += -mcmodel=medium
 ESMF_F90LINKOPTS        += -mcmodel=medium
 ESMF_CXXCOMPILEOPTS     += -mcmodel=medium
 ESMF_CXXLINKOPTS        += -mcmodel=medium
-endif
-ifeq ($(ESMF_ABISTRING),ia64_64)
-ESMF_CXXCOMPILEOPTS       += -size_lp64
-ESMF_CXXLINKOPTS          += -size_lp64
-ESMF_F90COMPILEOPTS       += -size_lp64
-ESMF_F90LINKOPTS          += -size_lp64
 endif
 
 ############################################################
