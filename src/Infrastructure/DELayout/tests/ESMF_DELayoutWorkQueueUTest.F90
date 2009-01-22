@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.15 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.16 2009/01/22 04:56:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -17,12 +17,12 @@ module ESMF_DELayoutWQUTest_mod
 
   implicit none
   
-  public mygcomp_register_withoutthreads
-  public mygcomp_register_withthreads
+  public mygcomp_register
+  public mygcomp_setvm_withthreads
     
   contains !--------------------------------------------------------------------
 
-  subroutine mygcomp_register_withoutthreads(gcomp, rc)
+  subroutine mygcomp_register(gcomp, rc)
     type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
     
@@ -38,20 +38,16 @@ module ESMF_DELayoutWQUTest_mod
     
   end subroutine !--------------------------------------------------------------
   
-  subroutine mygcomp_register_withthreads(gcomp, rc)
+  subroutine mygcomp_setvm_withthreads(gcomp, rc)
     type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
     
     rc = ESMF_SUCCESS
 
-    print *, "*** hi from mygcomp_register ***"
+    print *, "*** hi from mygcomp_setvm_withthreads ***"
     
     ! Run this VM as multi-threaded as resources will allow
     call ESMF_GridCompSetVMMaxThreads(gcomp, rc=rc)
-    if (rc /= ESMF_SUCCESS) return  ! bail out
-    
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, &
-      ESMF_SINGLEPHASE, rc)
     if (rc /= ESMF_SUCCESS) return  ! bail out
     
   end subroutine !--------------------------------------------------------------
@@ -205,7 +201,7 @@ program ESMF_DELayoutWQUTest
   !NEX_UTest
   write(name, *) "GridCompSetServices() - round 1"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_GridCompSetServices(gcomp, mygcomp_register_withoutthreads, rc)
+  call ESMF_GridCompSetServices(gcomp, mygcomp_register, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
@@ -237,10 +233,9 @@ program ESMF_DELayoutWQUTest
   write(name, *) "GridCompSetServices() - round 2"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   if (supportPthreads) then
-    call ESMF_GridCompSetServices(gcomp, mygcomp_register_withthreads, rc)
-  else
-    call ESMF_GridCompSetServices(gcomp, mygcomp_register_withoutthreads, rc)
+    call ESMF_GridCompSetVM(gcomp, mygcomp_setvm_withthreads, rc)
   endif
+  call ESMF_GridCompSetServices(gcomp, mygcomp_register, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
   !NEX_UTest
