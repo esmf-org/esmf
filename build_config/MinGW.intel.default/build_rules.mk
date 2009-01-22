@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.3 2009/01/10 01:41:07 w6ws Exp $
+# $Id: build_rules.mk,v 1.4 2009/01/22 00:55:35 w6ws Exp $
 #
 # MinGW.intel.default
 #
@@ -9,7 +9,12 @@
 ESMF_F90DEFAULT         = ifort
 ESMF_F90COMPILEOPTS    += -unix -Qfpp
 ESMF_CXXDEFAULT         = icl
-ESMF_CXXCOMPILEOPTS    += -TP -GX
+# Specify that .C files are c++
+ESMF_CXXCOMPILEOPTS    += -TP
+# Specify the c++ exception model
+ESMF_CXXCOMPILEOPTS    += -EHsc
+# Eliminate warnings about using _s variants of library functions
+ESMF_CXXCOMPILEOPTS    += -D_CRT_SECURE_NO_WARNINGS
 
 ############################################################
 # Default MPI setting.
