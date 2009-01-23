@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.13 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.14 2009/01/23 02:43:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,6 +36,9 @@
     integer :: rc
     character(ESMF_MAXSTR) :: cname
     type(ESMF_GridComp) :: comp1
+    type(ESMF_VM) :: vm
+    integer:: petCount, i
+    integer, allocatable:: petList(:)
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -67,14 +70,23 @@
         
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
-
+! - construct petList according to petCount
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    
+    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    
+    allocate(petList((petCount+1)/2))
+    petList=(/(2*i, i=0,(petCount+1)/2-1)/)
+    
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Create a Component
     cname = "Atmosphere"
     comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
-      petList=(/0,2/), configFile="grid.rc", rc=rc)  
+      petList=petList, configFile="grid.rc", rc=rc)  
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
