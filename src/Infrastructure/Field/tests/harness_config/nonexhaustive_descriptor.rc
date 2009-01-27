@@ -2,29 +2,32 @@
 #
 # This file contains the regrid/redist problem descriptor strings for the testing harness.
 # Requirements:
-# This configuration file follows the Config class syntax. The problem descriptor strings # are stored as entries in a table and must follow the statement "problem_descriptor_string::" # and be terminated by double colons "::". The # sign signifies everything that follows it is a# comment, and should be ignored by the parser.       ## The descriptors must be enclosed by quotation marks " or '.
+# This configuration file follows the Config class syntax. The problem descriptor strings # are stored as 
+# strings in a table and must follow the statement "problem_descriptor_string::" and be terminated by double 
+# colons "::". The # sign signifies everything that follows it is a comment, and should be ignored by the 
+# parser. The descriptors must be enclosed by quotation marks " or '.
 # See documentation for further details of the descriptor syntax.
 #
 # Syntax Summary
-#       Process specification: --> (redist), =*=> (remap, *=B, C, S, N, ...)
+#       Process specification: --> (redist), =*=> (remap, *=B, C, P, S, N, ...)
 #       Chunks of memory are enclosed by [ ], and delineated by ;
-#       IGrid specification: G (tensor igrid), S (spherical), U (unstructured)
+#       Grid specification: G (tensor grid), U (unstructured)
 #       Distribution specification: B (block), C (block cyclic), A (arbitrary)
 #
 # Specification files
 # Following the problem descriptor string are filename(s) with the complete problem specification.
 #       -d DeLayout/distgrid specification
-#       -g IGrid Specification
+#       -g Grid Specification
 # Multiple filenames can be used to specify the respective parameter space.       
 #
 # ex.
-#       '[B1G1;B2G2] --> [B1G1;B2G2]' -d distgrid.rc otherdistgrid.rc -g igrid.rc
-# specifies that a redistribution test is to be conducted where the range of distributions 
-# is specified by two files and the range of igrid types is specified by a single file.
+#       '[B1G1;B2G2] =B=> [B1G1;B2G2]' -d distgrid.rc otherdistgrid.rc -g igrid.rc
+# specifies that a remapping test is to be conducted where the range of distributions 
+# is specified by two files and the range of grid types is specified by a single file.
 ########################################################################################
 problem_descriptor_string::
 # remap example
-'[B1G1;B2G2] =B=> [B1G1;B2G2]' -d DistGrid2D2d.rc -g TestGrid2.rc     
+'[B1G1;B2G2] =B=> [B1G1;B2G2]' -d DistGrid2D2D.rc -g TestGrid2D.rc     
 ::   # end of list
 ~                     
 
