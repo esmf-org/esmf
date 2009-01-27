@@ -97,16 +97,16 @@
   !-----------------------------------------------------------------------------
   ! Search and extract the grid type specifier
   !-----------------------------------------------------------------------------
-  call ESMF_ConfigFindLabel(localcf, 'grid_type:', rc=localrc )
+  call ESMF_ConfigFindLabel(localcf, 'map_type:', rc=localrc )
   if( ESMF_LogMsgFoundError(localrc,                                           &
-         "cannot find config label grid_type:", rcToReturn=rc) ) return  
+         "cannot find config label map_type:", rcToReturn=rc) ) return  
 
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
   if( ESMF_LogMsgFoundError(localrc,                                           &
-         "cannot read config label grid_type:" , rcToReturn=rc) ) return
+         "cannot read config label map_type:" , rcToReturn=rc) ) return
 
   !-----------------------------------------------------------------------------
-  ! Read the grid specifier file. The 'grid_type' argument specifies the type 
+  ! Read the grid specifier file. The 'map_type' argument specifies the type 
   ! of grid specification to be read ( redistrbution or remapping ).
   !-----------------------------------------------------------------------------
   select case(trim(adjustL(ltmp)) )
@@ -202,7 +202,7 @@
   integer, intent(inout) :: rc
 
   ! local parameters
-  character(ESMF_MAXSTR), parameter :: descriptor_label = "grid_redist::"
+  character(ESMF_MAXSTR), parameter :: descriptor_label = "map_redist::"
 
   ! local esmf types
   type(ESMF_Config) :: localcf
@@ -242,13 +242,13 @@
   !----------------------------------------------------------------------------- 
   ! extract the grid type specifier as sanity check
   !-----------------------------------------------------------------------------
-  call ESMF_ConfigFindLabel(localcf, 'grid_type:', rc=localrc )
+  call ESMF_ConfigFindLabel(localcf, 'map_type:', rc=localrc )
   if( ESMF_LogMsgFoundError(localrc,                                           &
-         "cannot find config label grid_type", rcToReturn=rc) ) return  
+         "cannot find config label map_type", rcToReturn=rc) ) return  
 
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
   if( ESMF_LogMsgFoundError(localrc,                                           &
-         "cannot find config label grid_type:",                                &
+         "cannot find config label map_type:",                                 &
          rcToReturn=rc) ) return
 
   if( trim(adjustL( ltmp )) /= 'REDISTRIBUTION' ) then
@@ -579,7 +579,7 @@
   integer, intent(inout) :: rc
 
   ! local parameters
-  character(ESMF_MAXSTR), parameter :: descriptor_label = "grid_remap::"
+  character(ESMF_MAXSTR), parameter :: descriptor_label = "map_regrid::"
 
   ! local esmf types
   type(ESMF_Config) :: localcf
@@ -621,13 +621,13 @@
   !----------------------------------------------------------------------------- 
   ! extract the grid type specifier as sanity check
   !-----------------------------------------------------------------------------
-  call ESMF_ConfigFindLabel(localcf, 'grid_type:', rc=localrc )
+  call ESMF_ConfigFindLabel(localcf, 'map_type:', rc=localrc )
   if( ESMF_LogMsgFoundError(localrc,                                           &
-         "cannot find config label grid_type", rcToReturn=rc) ) return  
+         "cannot find config label map_type", rcToReturn=rc) ) return  
 
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
   if( ESMF_LogMsgFoundError(localrc,                                           &
-         "cannot find config label grid_type:",                                &
+         "cannot find config label map_type:",                                &
          rcToReturn=rc) ) return
 
   if( trim(adjustL( ltmp )) /= 'REMAP' ) then 
