@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.55 2008/12/10 06:49:19 donstark Exp $ 
+# $Id: makefile,v 1.56 2009/01/27 16:39:16 donstark Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -20,7 +20,8 @@ ifeq ($(ESMF_TESTHARNESS), NONEXHAUSTIVE)
 else
 ifeq ($(ESMF_TESTHARNESS), EXHAUSTIVE)
   TESTS_RUN  := $(TESTS_RUN) \
-                RUN_ESMF_FieldHarness1UTest
+                RUN_ESMF_FieldHarness1UTest \
+                RUN_ESMF_FieldHarness2UTest
 endif
 endif
                
@@ -74,3 +75,22 @@ RUN_ESMF_FieldHarness1UTest:
 	@if [ -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout ] ; then \
 	  cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout $(ESMF_TESTDIR)/ESMF_FieldHarness1UTest.stdout ; \
 	fi 
+
+RUN_ESMF_FieldHarness2UTest:        
+	@if [ -f $(ESMF_TESTDIR)/test_harness.list ] ; then \
+	if ! grep FieldHarness2UTest $(ESMF_TESTDIR)/test_harness.list ; then \
+	  echo "ESMF_FieldHarness2UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
+	fi ; \
+	else \
+	  echo "ESMF_FieldHarness2UTest" > $(ESMF_TESTDIR)/test_harness.list ; \
+	fi
+	cp -f test_harness.rc $(ESMF_TESTDIR)        
+	cp -f harness_config/*.rc $(ESMF_TESTDIR)        
+	rm -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout        
+	$(MAKE) TNAME=TestHarness HNAME=FieldHarness2 NP=2 htest        
+	@if [ -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout ] ; then \
+	  cp -f $(ESMF_TESTDIR)/ESMF_TestHarnessUTest.stdout $(ESMF_TESTDIR)/ESMF_FieldHarness2UTest.stdout ; \
+	fi 
+
+
+
