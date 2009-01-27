@@ -1,7 +1,6 @@
-! $Id: ESMF_TestHarnessGridMod.F90,v 1.19 2009/01/22 02:52:31 theurich Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2009, University Corporation for Atmospheric Research,
+! Copyright 2002-2007, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -70,10 +69,12 @@
   character(ESMF_MAXSTR) :: ltmp, lfilename
 
   ! local grid records 
-  type(sized_char_array), pointer :: testfunction(:)
+  type(test_function_record), pointer :: testfunction(:)
 
   ! local integers variables
   integer :: localrc ! local error status
+
+  integer :: i, igrid, irank
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -118,11 +119,38 @@
                rcToReturn=rc)) return
 
      case('REMAP')
-!      print*,' read grid specification for remapping test'
-!      call read_remapping_grid(lfilename, Gfile%nGspecs, Gfile%src_grid,      &
-!               Gfile%dst_grid,testfunction, localrc)
-!      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
-!              rcToReturn=rc)) return
+       print*,' read grid specification for remapping test'
+       call read_remapping_grid(lfilename, Gfile%nGspecs, Gfile%src_grid,      &
+                Gfile%dst_grid, testfunction, localrc)
+
+
+       ! print out diagnostics
+       print*,'Number of grid specs', Gfile%nGspecs
+       do igrid=1, Gfile%nGspecs
+           print*,'====================================================='
+           print*,igrid,'SRC rank', Gfile%src_grid(igrid)%grank
+           do irank=1, Gfile%src_grid(igrid)%grank
+             print*,'SRC grid type', Gfile%src_grid(igrid)%gtype(irank)%string
+             print*,'SRC size/range', Gfile%src_grid(igrid)%gsize(irank),'/',  &
+                    Gfile%src_grid(igrid)%grange(irank,1),Gfile%src_grid(igrid)%grange(irank,2) 
+             print*,'SRC grid units', Gfile%src_grid(igrid)%gunits(irank)%string
+           enddo
+           print*,igrid,'DST rank', Gfile%dst_grid(igrid)%grank
+           do irank=1, Gfile%dst_grid(igrid)%grank
+             print*,'DST grid type', Gfile%dst_grid(igrid)%gtype(irank)%string
+             print*,'DST size/range', Gfile%dst_grid(igrid)%gsize(irank),'/',  &
+                    Gfile%dst_grid(igrid)%grange(irank,1),Gfile%dst_grid(igrid)%grange(irank,2) 
+             print*,'DST grid units', Gfile%dst_grid(igrid)%gunits(irank)%string
+           enddo
+           print*,'-----------------------------------------------------'
+           print*,igrid,' testfunction ', trim(testfunction(igrid)%string)
+           do i=1,testfunction(igrid)%prank
+             print*,' testfunction parameters',testfunction(igrid)%param(i)
+           enddo
+           print*,'====================================================='
+       enddo
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
+               rcToReturn=rc)) return
 
      case default
        ! error
@@ -518,8 +546,8 @@
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  subroutine read_remapping_grid(lfilename, ngrids,                            &
-                                 src_grid, dst_grid, testfunction, rc)
+  subroutine read_remapping_grid(lfilename, ngrids, src_grid, dst_grid,        &
+                                 testfunction, rc)
   !-----------------------------------------------------------------------------
   ! routine to read the grid specifier file for a remapping test. The routine
   ! reads a pair (source and destination) of grid specification needed for the 
@@ -546,7 +574,7 @@
   ! arguments
   character(ESMF_MAXSTR), intent(in   ) :: lfilename
   type(grid_specification_record), pointer :: src_grid(:), dst_grid(:)
-  type(sized_char_array), pointer :: testfunction(:)
+  type(test_function_record), pointer :: testfunction(:)
   integer, intent(  out) :: ngrids
   integer, intent(inout) :: rc
 
@@ -557,7 +585,7 @@
   type(ESMF_Config) :: localcf
 
   ! local character strings
-  character(ESMF_MAXSTR) :: ltmp, lchar
+  character(ESMF_MAXSTR) :: ltmp, lchar, lchartmp, lnumb
   character(ESMF_MAXSTR) :: gtype, gunits, gtag
   type(character_array) :: wchar(10)
 
@@ -566,13 +594,13 @@
   ! local integer variables
   integer :: ntmp, grank, gsize
   integer :: irow, krow, nrows, igrid, ngrid, irank, kelements
-  integer :: iTFun, k
+  integer :: iTFun, k, out_counter
   integer, allocatable :: ncolumns(:), new_row(:)
   integer :: localrc ! local error status
   integer :: allocRcToTest
 
   ! local real variables
-  real(ESMF_KIND_R8) :: gmin, gmax
+  real(ESMF_KIND_R8) :: gmin, gmax, tmp, tmpchar
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -608,7 +636,6 @@
      trim( lfilename ),  rcToReturn=rc)
      return
   endif
-
   !-----------------------------------------------------------------------------
   ! search for the grid specifier table
   !-----------------------------------------------------------------------------
@@ -616,7 +643,6 @@
   if( ESMF_LogMsgFoundError(localrc,                                           &
      "cannot find config label " // trim(descriptor_label),                    &
       rcToReturn=rc) ) return
-
   !-----------------------------------------------------------------------------
   ! determine the total number of table rows, continue only if not empty
   ! NOTE: the number of table rows >= number of grid entries due to the
@@ -634,7 +660,6 @@
              rcToReturn=rc)
      return
   endif
-
   !-----------------------------------------------------------------------------
   ! extract the table column lengths of this file
   !-----------------------------------------------------------------------------
@@ -666,7 +691,6 @@
         return
       endif
   enddo    ! end  krow
-
   !-----------------------------------------------------------------------------
   ! determine the actual number of grids specified in the file by counting 
   ! lines not starting with the continuation symbol '&'. The number of actual
@@ -702,7 +726,6 @@
      endif
   enddo    ! end  krow
   ngrids = ngrid
-
   !-----------------------------------------------------------------------------
   ! allocate storage for the grid information based on the calculated number of
   ! separate grid entries
@@ -719,7 +742,6 @@
   if (ESMF_LogMsgFoundAllocError(allocRcToTest, "test type"//                  &
      " in read_remapping_grid", rcToReturn=rc)) then
   endif
-
   !-----------------------------------------------------------------------------
   ! Read the grid specifications from the table:
   ! (1) start at the top of the table.
@@ -738,27 +760,42 @@
   ! move to the next line in the table and confirm that (1) the line doesn't
   ! start with a continuation symbol, and (2) that the line isn't empty.
   !-----------------------------------------------------------------------------
-  igrid= 0
-  do krow=1,nrows
-
-!    print*,'krow',krow,' new row columns',new_row(krow),ncolumns(krow) 
-
+  irow = 1      ! start with first row
+  igrid = 0
+  !-----------------------------------------------------------------------------
+  ! as long as the current row is within the bounds of the table process entry
+  !-----------------------------------------------------------------------------
+  out_counter = 0
+  do while(irow <= nrows .and. new_row(irow) /= 0 )
+     !--------------------------------------------------------------------------
      ! new grid specification - not continuation symbol and not end of row
-     if( new_row(krow) /= 0 .and. ncolumns(krow) > 0 ) then
-     call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
-        ! extract rank of current grid
-        call ESMF_ConfigGetAttribute(localcf, grank)
-        irank = 1        ! grid element being read (<= rank)
-        kelements = 1    ! row element just read
-        irow = krow   
+     !--------------------------------------------------------------------------
+     if( ncolumns(irow) > 0 ) then
+        call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
+        kelements = 0    ! no elements of the row have been read
         igrid = igrid +1 ! new grid description
-        if( igrid > ngrid ) then
-           call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
-                 "attempting to access a higher index grid than exists.",      &
-                 rcToReturn=rc)
+
+        !-----------------------------------------------------------------------
+        ! extract rank of current grid
+        !-----------------------------------------------------------------------
+        call ESMF_ConfigGetAttribute(localcf, grank)
+        !-----------------------------------------------------------------------
+        ! check that grid rank should be between 1 and 7
+        !-----------------------------------------------------------------------
+        if( grank < 1 .or. grank >7 ) then 
+           write(lchar,"(i5)") irow
+           write(lnumb,"(i5)") grank
+           call ESMF_LogMsgSetError(ESMF_FAILURE,"unacceptable rank, should"   &
+                // " be " // "> 1 and <= 7. Rank is " // trim(lnumb) //        &
+                ". On line " //                                                &
+                trim(lchar) // " of table " // trim(descriptor_label) //       &
+                " in file " // trim(lfilename), rcToReturn=rc)
            return
         endif
+
+        !-----------------------------------------------------------------------
         ! allocate workspace
+        !-----------------------------------------------------------------------
         src_grid(igrid)%grank = grank
         allocate( src_grid(igrid)%gtype(grank), stat=allocRcToTest )
         if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char array "//          &
@@ -800,17 +837,18 @@
         if (ESMF_LogMsgFoundAllocError(allocRcToTest, "real array "//          &
            " grange in read_remapping_grid", rcToReturn=rc)) then
         endif
-
-
         !-----------------------------------------------------------------------
         ! Source Grid
         !-----------------------------------------------------------------------
         !-----------------------------------------------------------------------
         ! read source grid tag
         !-----------------------------------------------------------------------
+           kelements = 1
+         ! print*,'before tag',kelements, irow, nrows, ncolumns(irow), new_row(irow)
         call read_table_string(gtag,                                           &
                                 kelements, irow, nrows, ncolumns, new_row,     &
                                 lfilename, descriptor_label, localcf, localrc)  
+         ! print*,'after tag',kelements, irow, nrows, ncolumns(irow), new_row(irow)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
                rcToReturn=rc)) return
         ! if tag not equal SRC post error
@@ -820,11 +858,10 @@
                  " grid specifier file" // trim(lfilename), rcToReturn=rc)
            return
         endif
-
         !-----------------------------------------------------------------------
         ! read row elements until grid rank is reached
         !-----------------------------------------------------------------------
-        do while ( irank <= grank )
+        do irank=1, grank
            !--------------------------------------------------------------------
            ! if haven't reached end of line, read source grid type
            !--------------------------------------------------------------------
@@ -846,7 +883,6 @@
                rcToReturn=rc)) return
 
            src_grid(igrid)%gsize(irank) = gsize 
-
            !--------------------------------------------------------------------
            ! read source minimum grid range
            !--------------------------------------------------------------------
@@ -877,13 +913,7 @@
                rcToReturn=rc)) return
 
            src_grid(igrid)%gunits(irank)%string = gunits
-
-           !--------------------------------------------------------------------
-           ! increment grid rank and loop
-           !--------------------------------------------------------------------
-           irank = irank + 1 
-
-        end do ! while
+        end do !
 
         !-----------------------------------------------------------------------
         ! Destination Grid
@@ -905,14 +935,9 @@
         endif
 
         !-----------------------------------------------------------------------
-        ! reset irank for destination input
-        !-----------------------------------------------------------------------
-        irank = 1        ! grid element being read (<= rank)
-
-        !-----------------------------------------------------------------------
         ! read row elements until grid rank is reached
         !-----------------------------------------------------------------------
-        do while ( irank <= grank )
+        do irank=1, grank
            !--------------------------------------------------------------------
            ! if haven't reached end of line, read destination grid type
            !--------------------------------------------------------------------
@@ -966,12 +991,7 @@
 
            dst_grid(igrid)%gunits(irank)%string = gunits
 
-           !--------------------------------------------------------------------
-           ! increment grid rank and loop
-           !--------------------------------------------------------------------
-           irank = irank + 1 
-
-        end do ! while
+        end do !
 
         !-----------------------------------------------------------------------
         ! Test Function
@@ -993,47 +1013,92 @@
         endif
 
         !-----------------------------------------------------------------------
-        !
+        ! extract test function and parameters
         !-----------------------------------------------------------------------
         iTFun = 0  ! initialize test function counter
+
+        !-----------------------------------------------------------------------
+        ! read first function types
+        !-----------------------------------------------------------------------
+        call read_table_string(gtag,                                           &
+                               kelements, irow, nrows, ncolumns, new_row,      &
+                               lfilename, descriptor_label, localcf, localrc)  
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+               rcToReturn=rc)) return
 
         do while (  trim(adjustL(gtag)) /= 'END' )
 
            !--------------------------------------------------------------------
            ! read function types
            !--------------------------------------------------------------------
+           iTFun = iTFun + 1  ! count number of specified test functions
+           wchar(iTFun)%string = gtag
+
+           ! read next paramter
            call read_table_string(gtag,                                        &
                                 kelements, irow, nrows, ncolumns, new_row,     &
                                 lfilename, descriptor_label, localcf, localrc)  
            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,               &
                rcToReturn=rc)) return
 
-           iTFun = iTFun + 1  ! count number of specified test functions
-           wchar(iTFun)%string = gtag
-
         end do ! while
 
         !-----------------------------------------------------------------------
         ! allocate character array for test functions & copy values from work array
         !-----------------------------------------------------------------------
-        allocate( testfunction(ngrid)%tag(iTFun-1), stat=allocRcToTest )
-        if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type in "//             &
-           " read_remapping_grid", rcToReturn=rc)) then
+        if(iTFun > 0) then
+           allocate( testfunction(igrid)%param(iTFun-1), stat=allocRcToTest )
+           if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type in "//          &
+               " read_remapping_grid", rcToReturn=rc)) then
+           endif
         endif
 
+        testfunction(igrid)%prank = iTFun-1
 
-        testfunction(igrid)%tagsize = iTFun-1
+        testfunction(igrid)%string = wchar(1)%string
 
-        do k=1,iTFun-1
-            testfunction(igrid)%tag(k)%string = wchar(k)%string
+        do k=2,iTFun
+            lchar = trim( wchar(k)%string )
+            read(lchar,*) tmp
+            testfunction(igrid)%param(k-1) = tmp
         enddo
 
      endif    !
 
-     !--------------------------------------------------------------------------
-     ! move to next row 
-     !--------------------------------------------------------------------------
-  enddo    ! end  krow
+     !---------------------------------------------------------------------------
+     ! both source and destination specifications have been read, move to next
+     ! entry - check new row to make certain it is a new entry and not a
+     ! continuation.
+     !---------------------------------------------------------------------------
+     if( irow+1 <= nrows ) then
+        if( new_row(irow+1) /= 0)  then
+          ! if there is a next row and it doesn't have a continuation symbol
+          irow = irow + 1
+        else
+          ! error next line should be a new entry but instead a continuation
+          ! symbol was found
+          write(lchar,"(i5)") irow+1
+          write(lnumb,"(i5)") irank
+          call ESMF_LogMsgSetError(ESMF_FAILURE,"next line in table " //      &
+                trim(descriptor_label) // " should be a new entry, but " //   &
+                "instead a continuation symbol was found. Line " //           &
+                trim(lchar) // " of table " // trim(descriptor_label) //      &
+                " in file " //trim(lfilename) // " had a continuation"        &
+                // " symbol." , rcToReturn=rc)
+                return
+        endif
+     elseif(irow+1 > nrows .and. trim(gtag) /= "END") then
+       ! we should be done and can drop out, but there is no end tag
+       call ESMF_LogMsgSetError(ESMF_FAILURE,"should be at end of " //       &
+                "table " // trim(descriptor_label) // " but no end tag" // &
+                " found. File " // trim(lfilename) , rcToReturn=rc)
+                return
+     else
+       ! we are at the end of the table so finish up.
+       irow = irow+1
+     endif
+
+  end do    ! while
 
   !-----------------------------------------------------------------------------
   ! deallocate workspace

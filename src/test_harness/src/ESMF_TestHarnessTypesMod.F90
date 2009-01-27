@@ -1,7 +1,6 @@
-! $Id: ESMF_TestHarnessTypesMod.F90,v 1.7 2009/01/22 02:52:31 theurich Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2009, University Corporation for Atmospheric Research,
+! Copyright 2002-2007, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -82,6 +81,19 @@
 ! !PUBLIC TYPES:
   public
 
+  ! character types
+  type character_array
+     character(ESMF_MAXSTR) :: string
+  end type character_array
+
+  ! sized char type
+  type sized_char_array
+     integer :: tagsize
+     type(character_array), pointer :: tag(:)
+  end type sized_char_array
+
+!-------------------------------------------------------------------------------
+!
   type name_record
      integer :: value
      character(ESMF_MAXSTR) :: descriptor
@@ -93,26 +105,18 @@
      type(character_array), pointer :: test_string(:,:)
   end type test_record
 
+  type test_function_record   
+     character(ESMF_MAXSTR) ::string 
+     integer :: prank                            ! rank of parameters 
+      real(ESMF_KIND_R8), pointer :: param(:)     ! test function parameters
+  end type test_function_record   
+
   type process_record
      character(ESMF_MAXSTR) ::string 
      integer :: tag                   ! process tag
      integer :: location              ! string location of method
   end type process_record
 
-
-!-------------------------------------------------------------------------------
-!
-
-  ! character types
-  type character_array
-     character(ESMF_MAXSTR) :: string
-  end type character_array
-
-  ! sized char type
-  type sized_char_array
-     integer :: tagsize
-     type(character_array), pointer :: tag(:)
-  end type sized_char_array
 
 !-------------------------------------------------------------------------------
 !  Distribution Types
