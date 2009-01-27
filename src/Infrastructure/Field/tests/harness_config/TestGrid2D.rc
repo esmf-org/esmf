@@ -1,0 +1,32 @@
+# TestGrid2D.rc
+#
+# This file contains the grid specifications for the Test Harness.
+# Requirements:
+# See documentation for further details of the descriptor syntax.
+#################################################################################
+
+grid_type: REMAP
+
+################################################################################
+# grid | source | grid    |    grid   | grid  | units | destination | 
+# rank |  tag   | spacing | dimension | range |       |    tag      |
+################################################################################
+# Grid specification for remapping
+
+
+#rank spacing  size  range (min/max)  units
+grid_remap::
+# example of a pair of 2D periodic grids 
+2   SRC    UNIFORM_PERIODIC   120    -3.14159  3.14159    RADIANS   
+&          UNIFORM_POLE        90    -1.57     1.57       RADIANS   
+&   DST    UNIFORM_PERIODIC   120  -180      180          DEG_E   
+&          GAUSSIAN_POLE       88   -88       88          DEG_N   
+&   FUNCTION    CONSTANT  2.0 0.1    END
+#
+2   SRC    UNIFORM   400  -1000  1200      meters    
+&          UNIFORM   200  -500    600      meters    
+&   DST    UNIFORM   200  -500    500      km      
+&          GAUSSIAN  100  -300    300      km    
+&   FUNCTION    PULSE  2.0 5.0  0.1    END
+::
+
