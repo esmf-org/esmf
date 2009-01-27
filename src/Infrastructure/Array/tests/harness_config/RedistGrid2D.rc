@@ -1,9 +1,9 @@
-# grid_rectilinear.rc
+# RedsitGrid2D.rc
 #
 # This file contains the grid specifications for the Test Harness.
 # Requirements:
 # See documentation for further details of the descriptor syntax.
-#################################################################################
+##################################################################################
 
 grid_type: REDISTRIBUTION
 
