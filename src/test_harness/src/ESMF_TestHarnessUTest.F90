@@ -575,7 +575,7 @@ contains
         do kfile=1,har%numRecords
            do kstr=1,har%rcrd(kfile)%numStrings
               ! test of a single problem descriptor string w/ specifiers
-!             call array_remap_test(har%rcrd(kfile)%str(kstr),har%failures,     &
+!             call field_remap_test(har%rcrd(kfile)%str(kstr),har%failures,     &
 !                                    har%reportType, VM, localrc)
 !             if (ESMF_LogMsgFoundError(localrc," error array remap test",      &
 !                rcToReturn=returnrc)) return
