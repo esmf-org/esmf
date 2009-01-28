@@ -1,6 +1,16 @@
-Settings for Cygwin, using the GNU gfortran compiler that comes with the GCC of
-version 4.0.0 and up.
+Settings for Cygwin, using the GNU gfortran.
+
+ESMF requires gfortran 4.3 or later.
 
 Requires the following environment settings:
 
 ESMF_COMPILER gfortran
+
+Note that if the gfortran-4 and g++-4 packages have been
+installed via the cygwin setup installer, the ESMF_F90DEFAULT
+and ESMF_CXXDEFAULT compiler names used in build_rules.mk
+must be changed accordingly to:
+
+ESMF_F90DEFAULT    = gfortran-4
+ESMF_CXXDEFAULT    = g++-4
+
