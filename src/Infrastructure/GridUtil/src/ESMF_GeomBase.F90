@@ -148,7 +148,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.6 2009/01/21 21:37:59 cdeluca Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.7 2009/01/28 22:22:17 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -228,14 +228,14 @@ end interface
 
 ! !INTERFACE:
       subroutine ESMF_GeomBaseGetArrayInfo(gridbase,                         &
-                           gridToArrayMap, ungriddedLBound, ungriddedUBound, &
+                           gridToFieldMap, ungriddedLBound, ungriddedUBound, &
                            distgridToArrayMap, undistLBound, undistUBound,   &
                            computationalEdgeLWidth, computationalEdgeUWidth, &
                            rc)
 !
 ! !ARGUMENTS:
        type(ESMF_GeomBase),   intent(in)            :: gridbase
-       integer,               intent(in),  optional :: gridToArrayMap(:)
+       integer,               intent(in),  optional :: gridToFieldMap(:)
        integer,               intent(in),  optional :: ungriddedLBound(:)
        integer,               intent(in),  optional :: ungriddedUBound(:)
        integer,               intent(out)           :: distgridToArrayMap(:)
@@ -249,14 +249,14 @@ end interface
 ! !DESCRIPTION:
 !  
 ! This subroutine gets information from a GeomBase which is useful in creating an
-! Array. This subroutine takes as input {\tt gridToArrayMap} which gives for each
+! Array. This subroutine takes as input {\tt gridToFieldMap} which gives for each
 ! gridbase object dimension which dimension in the eventual Array it should be
 ! mapped to. It also takes {\tt ungriddedLBound} and {\tt ungriddedUBound} which
 ! describes the dimensions of the Array not associated with the gridbase object. 
 ! From these it produces a mapping from the distgrid to the Array, the undistributed
 ! bounds of the Array in the correct order and the computationalEdgeWidths in
 ! the correct order. (For everything besides {\tt Grid} the computationalEdgeWidths
-! will be 0, and the gridToArrayMap and distgridToArrayMap will be single element
+! will be 0, and the gridToFieldMap and distgridToArrayMap will be single element
 ! arrays describing which dimension in the Array the gridbase object (e.g. Mesh)
 ! is mapped to.
 !
@@ -264,9 +264,9 @@ end interface
 ! \begin{description}
 !\item[{gridbase}]
 !     The gridbase to get the information from to create the Array.
-!\item[{[gridToArrayMap]}]
+!\item[{[gridToFieldMap]}]
 !     Indicates where each grid dimension goes in the newly created Array.
-!     {\tt The array gridToArrayMap} should be at least of size equal to the gridbase object's
+!     {\tt The array gridToFieldMap} should be at least of size equal to the gridbase object's
 !     Array dimension (e.g. Mesh = 1)
 !     If not set defaults to (1,2,3,....,gridbase objects dim).
 !\item[{[ungriddedLBound]}]
@@ -301,7 +301,7 @@ end interface
     select case(gbcp%type%type)
        case (ESMF_GEOMTYPE_GRID%type) ! Grid 
          call ESMF_GridGetArrayInfo(gbcp%grid, gbcp%staggerloc,     &
-                           gridToArrayMap, ungriddedLBound, ungriddedUBound, &
+                           gridToFieldMap, ungriddedLBound, ungriddedUBound, &
                            distgridToArrayMap, undistLBound, undistUBound,       &
                            computationalEdgeLWidth, computationalEdgeUWidth, &
                            rc=localrc)
@@ -310,8 +310,8 @@ end interface
                                  ESMF_CONTEXT, rc)) return
 
        case (ESMF_GEOMTYPE_MESH%type) ! Mesh
-          if (present(gridToArrayMap)) then
-            distgridToArrayMap = gridToArrayMap
+          if (present(gridToFieldMap)) then
+            distgridToArrayMap = gridToFieldMap
           else
             distgridToArrayMap = 1
           endif
@@ -327,8 +327,8 @@ end interface
           computationalEdgeUWidth = 0
 
        case (ESMF_GEOMTYPE_LOCSTREAM%type) ! LocStream
-          if (present(gridToArrayMap)) then
-             distgridToArrayMap = gridToArrayMap
+          if (present(gridToFieldMap)) then
+             distgridToArrayMap = gridToFieldMap
           else
              distgridToArrayMap = 1
           endif
