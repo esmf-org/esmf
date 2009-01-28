@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.79 2009/01/21 21:37:59 cdeluca Exp $
+// $Id: ESMCI_Grid.C,v 1.80 2009/01/28 22:11:59 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.79 2009/01/21 21:37:59 cdeluca Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.80 2009/01/28 22:11:59 peggyli Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -79,18 +79,18 @@ int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind *_typekind,
                InterfaceInt *_distgridToGridMap,
               InterfaceInt *_undistLBound, InterfaceInt *_undistUBound, 
               InterfaceInt *_coordDimCount, InterfaceInt *_coordDimMap,
+	      InterfaceInt *_gridMemLBound,
               ESMC_IndexFlag *_indexflag, bool destroyDistgrid,
               bool destroyDELayout);
 
 int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind *_typekind,
-              DistGrid *_distgrid, InterfaceInt *_gridEdgeLWidth, 
+              DistGrid *_distgrid, 
               InterfaceInt *_minIndex, InterfaceInt *_maxIndex,
 	      InterfaceInt *_localIndices, int localCount,
               InterfaceInt *_distDim, int arbDim, 
               InterfaceInt *_undistLBound, InterfaceInt *_undistUBound, 
               InterfaceInt *_coordDimCount, InterfaceInt *_coordDimMap,
-              ESMC_IndexFlag *_indexflag, bool destroyDistgrid,
-              bool destroyDELayout);
+              bool destroyDistgrid, bool destroyDELayout);
 
 int setDefaultsLUA(int dimCount,
                    InterfaceInt *lWidthIn, InterfaceInt *uWidthIn, InterfaceInt *alignIn,
@@ -643,7 +643,11 @@ int Grid::addCoordArrayArb(
     //// fill in distgridToArrayMap for use in Array::create
     //// distgridToArrayMap - computed by inverting how coords dims map to distgrid
     for (int i=0; i<coordDimCount[coord]; i++) {
+      if (coordDimMap[coord][i] == ESMC_GRID_ARBDIM) 
+        distgridToArrayMapIntIntArray[coordMapDim[coord][i]]=arbDim; // convert to 1-based
+      else {
         distgridToArrayMapIntIntArray[coordMapDim[coord][i]]=i+1; // convert to 1-based
+      }
     }
 
     distgridToArrayMapIntInt->extent[0]=distgrid->getDimCount();
@@ -659,7 +663,7 @@ int Grid::addCoordArrayArb(
                         ESMC_NULL_POINTER, NULL, &staggerloc, ESMC_NULL_POINTER,
                        (InterfaceInt *)ESMC_NULL_POINTER,
                        (InterfaceInt *)ESMC_NULL_POINTER, 
-                       &localrc);
+			&localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
                                   ESMF_ERR_PASSTHRU, &rc)) return rc;        
 
@@ -1457,7 +1461,208 @@ int Grid::addItemArray(
   }
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::addItemArrayArb()"
+//BOP
+// !IROUTINE:  addItemArrayArb
+//
+// !INTERFACE:
+int Grid::addItemArrayArb(
 
+//
+// !RETURN VALUE:
+//   Return code
+//
+// !ARGUMENTS:
+//
+                          int *staggerlocArg,             // (in) optional
+			  int *itemArg,                   // (in) required
+			  ESMC_TypeKind *typekindArg     // (in) optional          
+  ) {
+//
+// !DESCRIPTION:
+//   Create the storage (ESMF Array objects) to hold the item for a
+// stagger location. 
+//EOP
+//-----------------------------------------------------------------------------
+  // local vars
+  int rc, localrc;
+  int staggerloc,item;
+  ESMC_DataCopy docopy;
+  const int *distgridToArrayMap;
+  Array *array;
+  int extent[1];
+  ESMC_TypeKind typekind;
+
+  // initialize return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // Make sure the grid has the correct status for this action
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+      "- grid not of correct status to perform this operation", &rc);
+    return rc;
+  }  
+
+  // If staggerloc hasn't been passed in use a default, otherwise copy it. 
+  if (staggerlocArg==NULL) {
+    staggerloc=0;  // default
+  } else {
+    staggerloc=*staggerlocArg;
+  }
+
+  // Translate itemArg to item
+  if (itemArg==NULL) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+      "- must provide item", &rc);
+    return rc;
+  } else {
+    item=*itemArg;
+  }
+
+  // Error check item
+  if ((item < 0) || (item >= ESMC_GRIDITEM_COUNT)) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+				  "- Invalid item type", &rc);
+    return rc;
+  } 
+
+  // Translate typekindArg to typekind to be used. 
+  if (typekindArg==NULL) {
+    if (item==ESMC_GRIDITEM_MASK) {
+      typekind=ESMC_TYPEKIND_I4;
+    } else {
+      typekind=ESMC_TYPEKIND_R8;
+    }
+  } else {
+    typekind=*typekindArg;
+
+    // Error check typekind vs. item type
+    if ((typekind != ESMC_TYPEKIND_I4) && (item==ESMC_GRIDITEM_MASK)) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+			   "- Mask item must be integer", &rc);
+      return rc;
+    } 
+  }
+
+  // Allocate lWidth, uWidth, and Align based on inputs and defaults
+  int *staggerEdgeLWidth = new int[dimCount];
+  int *staggerEdgeUWidth = new int[dimCount];
+  int *staggerAlign = new int[dimCount];
+
+  // Set lWidth, uWidth, and Align based on inputs and defaults
+  localrc=setDefaultsLUA(dimCount,
+ 	  NULL, NULL, NULL,
+          staggerEdgeLWidthList[staggerloc], staggerEdgeUWidthList[staggerloc], staggerAlignList[staggerloc], 
+          staggerEdgeLWidth, staggerEdgeUWidth, staggerAlign);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+                           ESMF_ERR_PASSTHRU, &rc)) return rc;        
+
+
+  // Make sure we haven't already set these, and if we have make sure they're the same
+  if (this->hasCoordStaggerLoc(staggerloc)) {
+    
+    //// Error check LWidth
+    for (int i=0; i<dimCount; i++) {
+      if (staggerEdgeLWidth[i] != staggerEdgeLWidthList[staggerloc][i]) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                 "- staggerEdgeLWidth must match coordinate one if coordinates exist", &rc);
+        return rc;
+      }
+    }
+
+    //// Error check UWidth
+    for (int i=0; i<dimCount; i++) {
+      if (staggerEdgeUWidth[i] != staggerEdgeUWidthList[staggerloc][i]) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                 "- staggerEdgeUWidth must match coordinate one if coordinates exist", &rc);
+        return rc;
+      }
+    }
+
+    //// Error check Align
+    for (int i=0; i<dimCount; i++) {
+      if (staggerAlign[i] != staggerAlignList[staggerloc][i]) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                 "- staggerAlign must match coordinate one if coordinates exist", &rc);
+        return rc;
+      }
+    }
+  }
+
+  int distgridDimCount = dimCount - distDimCount + 1;
+
+  // construct ArraySpec for using to call Array::create
+  ArraySpec *arrayspec= new ArraySpec;     
+    
+  int *distgridToArrayMapIntIntArray=new int[distgridDimCount];
+  extent[0]=distgridDimCount;
+  InterfaceInt *distgridToArrayMapIntInt=new InterfaceInt(distgridToArrayMapIntIntArray,1,extent); 
+
+  ////////////
+  ///// Construct the item array
+  ///////////
+  // fill in ArraySpec with information describing coordinate
+  arrayspec->set(distgridDimCount, typekind);
+
+    
+  // make distgridToArray mapping a 1-1 mapping between array and distgrid
+  for (int i=0; i<distgridDimCount; i++) {
+    distgridToArrayMapIntIntArray[i]=i+1; // convert to 1-based
+  }
+      
+  // set size of distgridToArrayMap 
+  // (needs to be distgrid dimCount)
+  // (0's indicate unused dimensions)
+  distgridToArrayMapIntInt->extent[0]=distgridDimCount;
+        
+  
+    // Create an Array to hold the coords 
+   array=Array::create(arrayspec, distgrid,
+		      distgridToArrayMapIntInt,
+		       (InterfaceInt *)ESMC_NULL_POINTER,
+		       (InterfaceInt *)ESMC_NULL_POINTER,
+		       (InterfaceInt *)ESMC_NULL_POINTER,
+		       (InterfaceInt *)ESMC_NULL_POINTER,
+		       (InterfaceInt *)ESMC_NULL_POINTER,
+		       (InterfaceInt *)ESMC_NULL_POINTER,
+		       &indexflag, NULL, &staggerloc, ESMC_NULL_POINTER,
+		       (InterfaceInt *)ESMC_NULL_POINTER,
+		       (InterfaceInt *)ESMC_NULL_POINTER, 
+		       &localrc);
+
+   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+	   ESMF_ERR_PASSTHRU, &rc)) return rc;        
+
+   // Set newly created Array into Grid
+   localrc=this->setItemArrayInternal(staggerloc, item, array, true);
+   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+                               ESMF_ERR_PASSTHRU, &rc)) return rc;        
+    
+
+  // Set information about this stagger into the Grid
+  localrc=this->setStaggerInfo(staggerloc, staggerAlign, staggerEdgeLWidth, 
+			       staggerEdgeUWidth, 
+			       staggerMemLBoundList[staggerloc]); // TODO: this is just using existing
+                                                                  // MemLBound need to change this
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            ESMF_ERR_PASSTHRU, &rc)) return rc;        
+
+
+  // Dellocate temporay arrays
+  delete arrayspec;     
+  delete [] distgridToArrayMapIntIntArray;
+  delete distgridToArrayMapIntInt;
+  if (staggerEdgeUWidth != ESMC_NULL_POINTER) delete [] staggerEdgeUWidth;
+  if (staggerEdgeLWidth != ESMC_NULL_POINTER) delete [] staggerEdgeLWidth;
+  if (staggerAlign != ESMC_NULL_POINTER) delete [] staggerAlign;
+
+  // return ESMF_SUCCESS
+  return ESMF_SUCCESS;
+  }
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -1511,7 +1716,7 @@ int Grid::commit(
     localrc = construct(this, proto->nameLen, proto->name, proto->typekind, 
 			proto->distgrid, proto->minIndex, proto->maxIndex,
 			proto->coordLocalIndices, proto->localCount,
-			proto->distgridToGridMap, 
+			proto->distDim, 
 			proto->arbDim,
 			proto->undistLBound,
 			proto->undistUBound,
@@ -2047,6 +2252,7 @@ int Grid::getComputationalLBound(
       lBndArg[i] += offsetL[i];  
     }
   } else {
+   // always start with 1 for arbitrary grid
     for (int i=0; i<dimCount-distDimCount+1; i++) {
       lBndArg[i]=1;
     }
@@ -2142,7 +2348,6 @@ int Grid::getComputationalUBound(
 //-----------------------------------------------------------------------------
 
 
-// <<<<<<<<< Does this function work for Arb grid???? <<<<<<<<<<<<<<
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Grid::getExclusiveLBound()"
@@ -2186,25 +2391,31 @@ int Grid::getExclusiveLBound(
         return rc;
   }
 
-   // get grid distributed exclusive bounds
-   localrc=this->getDistExclusiveLBound(localDEArg, distExLBnd);
-   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) return rc;
+  if (decompType == ESMC_GRID_NONARBITRARY) { 
 
-   // Combine Dist and Undist Bounds
-   for (int i=0; i<dimCount; i++) {
-     if (gridIsDist[i]) {
-       lBndArg[i]=distExLBnd[gridMapDim[i]];
-     } else {
-       lBndArg[i]=undistLBound[gridMapDim[i]];
-     }
-   }
-  
+    // get grid distributed exclusive bounds
+    localrc=this->getDistExclusiveLBound(localDEArg, distExLBnd);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) return rc;
+
+    // Combine Dist and Undist Bounds
+    for (int i=0; i<dimCount; i++) {
+      if (gridIsDist[i]) {
+	lBndArg[i]=distExLBnd[gridMapDim[i]];
+      } else {
+	lBndArg[i]=undistLBound[gridMapDim[i]];
+      }
+    }
+  } else {
+    // always start with 1 for arbitrary grid
+    for (int i=0; i<dimCount-distDimCount+1; i++) {
+      lBndArg[i]=1;
+    }
+  }  
   // tell the calling subroutine that we've had a successful outcome
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
-// <<<<<<<<< Does this function work for Arb grid???? <<<<<<<<<<<<<<
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Grid::getExclusiveUBound()"
@@ -2248,6 +2459,7 @@ int Grid::getExclusiveUBound(
         return rc;
   }
 
+  if (decompType == ESMC_GRID_NONARBITRARY) { 
    // get grid distributed exclusive bounds
    localrc=this->getDistExclusiveUBound(localDEArg, distExUBnd);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) return rc;
@@ -2260,7 +2472,22 @@ int Grid::getExclusiveUBound(
        uBndArg[i]=undistUBound[gridMapDim[i]];
      }
    }
-  
+  } else {
+    // exclusive Ubound for arbitrary grid is the same as the computational Ubound
+    // Get some useful information
+    int distgridDimCount = dimCount-distDimCount+1;
+    const int *localDeList = distgrid->getDELayout()->getLocalDeList();
+    const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
+
+    // Get the Global DE from the local DE
+    int de = localDeList[localDEArg];
+
+    // exlc. region for each DE ends at indexCountPDimPDe of the associated
+    // DistGrid
+    for (int i=0; i<distgridDimCount; i++) {
+      uBndArg[i]=indexCountPDimPDe[de*distgridDimCount+i];
+    }
+  }  
   // tell the calling subroutine that we've had a successful outcome
   return ESMF_SUCCESS;
 }
@@ -2621,6 +2848,7 @@ int Grid::getCoord(
 	   coordIndex[i] = index[coordDimMap[c][i]];
 	 }
        }
+       
        //// Get pointer to LocalArray data
        localrc=localArray->getData(coordIndex, coord+c);
        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
@@ -2955,6 +3183,7 @@ int Grid::set(
   InterfaceInt *gridEdgeUWidthArg,  // (in) optional
   InterfaceInt *gridAlignArg,       // (in) optional
   InterfaceInt *distgridToGridMapArg,       // (in) optional
+  InterfaceInt *distDimArg,          // (in) optional
   InterfaceInt *minIndexArg,           // (int) optional
   InterfaceInt *maxIndexArg,           // (int) optional
   InterfaceInt *localIndicesArg,           // (int) optional
@@ -3049,7 +3278,6 @@ int Grid::set(
     proto->gridAlign=_copyInterfaceInt(gridAlignArg);
   }
 
-
   // if passed in, set distgridToGridMap
   if (distgridToGridMapArg != ESMC_NULL_POINTER) { 
     // if present get rid of the old data
@@ -3057,6 +3285,15 @@ int Grid::set(
 
     // record the new data
     proto->distgridToGridMap=_copyInterfaceInt(distgridToGridMapArg);
+  }
+
+  // if passed in, set distDim
+  if (distDimArg != ESMC_NULL_POINTER) { 
+    // if present get rid of the old data
+    if (proto->distDim !=ESMC_NULL_POINTER) _freeInterfaceInt(&proto->distDim);
+
+    // record the new data
+    proto->distDim=_copyInterfaceInt(distDimArg);
   }
 
   // if passed in, set minIndex
@@ -3503,14 +3740,25 @@ int Grid::setItemArray(
         "- Data Copy Flag not implemented yet", &rc);
       return rc;
   }
+
  
   // Ensure the passed in array has the correct dimCount
-  if (dimCount != arrayArg->getRank()){
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+  if (decompType == ESMC_GRID_NONARBITRARY) {
+    // for non-arbitrary grid, the item array has the same dim count as the grid
+    if (dimCount != arrayArg->getRank()){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Array and Grid coord dimCount mismatch ", &rc);
-      return rc;
-    }
-
+        return rc;
+    } 
+  } else {
+    // for arbitrary grid, the item array has the same dim count as the distgrid
+    int distgridDimCount = dimCount - distDimCount + 1;
+    if (distgridDimCount != arrayArg->getRank()){
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+        "- Array and DistGrid dimCount mismatch ", &rc);
+        return rc;
+    } 
+  }
   // Ensure the passed in array has the correct typekind
   if ((item == ESMC_GRIDITEM_MASK) && 
       (ESMC_TYPEKIND_I4 != arrayArg->getTypekind())){
@@ -3533,66 +3781,69 @@ int Grid::setItemArray(
       return rc;
     }
 
+  // Skip the distgridToArrayMap and bound checkings for the arbitrary grid
+  if (decompType == ESMC_GRID_NONARBITRARY) {
 
-  // get the Array's dimmap 
-  distgridToArrayMap=arrayArg->getDistGridToArrayMap();
+     // get the Array's dimmap 
+     distgridToArrayMap=arrayArg->getDistGridToArrayMap();
 
-  //// Check if the Array's dimmap matches what we expect for the coord
-  ok=true;
-  for (int i=0; i<dimCount; i++) {
-    if (distgridToGridMap[i]+1 != distgridToArrayMap[i]) ok=false;
-  }
-  if (!ok) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- Array and Grid to distgrid mapping mismatch ", &rc);
-      return rc;
-  }
+     //// Check if the Array's dimmap matches what we expect for the coord
+     ok=true;
+     for (int i=0; i<dimCount; i++) {
+        if (distgridToGridMap[i]+1 != distgridToArrayMap[i]) ok=false;
+     }
+     if (!ok) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+           "- Array and Grid to distgrid mapping mismatch ", &rc);
+        return rc;
+     }   
   
-  // Check and make sure the array's computational bounds are
-  // big enough for the stagger padding
-  int gridLBnd[ESMF_MAXDIM];
-  int gridUBnd[ESMF_MAXDIM];
-  int localDECount=distgrid->getDELayout()->getLocalDeCount();
-  for (int lDE=0; lDE < localDECount; lDE++) {
+     // Check and make sure the array's computational bounds are
+     // big enough for the stagger padding
+     int gridLBnd[ESMF_MAXDIM];
+     int gridUBnd[ESMF_MAXDIM];
+     int localDECount=distgrid->getDELayout()->getLocalDeCount();
+     for (int lDE=0; lDE < localDECount; lDE++) {
     
-    //// get computationalLBound from the array
-    //// get the computational bounds of the localDE
-    const int *arrayLBnd=arrayArg->getComputationalLBound()+lDE*dimCount;
+       //// get computationalLBound from the array
+       //// get the computational bounds of the localDE
+       const int *arrayLBnd=arrayArg->getComputationalLBound()+lDE*dimCount;
 
-    //// get computationalBound from the grid
-    localrc=this->getComputationalLBound(staggerloc,lDE,gridLBnd);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+       //// get computationalBound from the grid
+       localrc=this->getComputationalLBound(staggerloc,lDE,gridLBnd);
+       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                               &rc)) return rc; 
 
-    //// check that bounds match
-    for (int i=0; i<dimCount; i++) {
-      if (arrayLBnd[i] != gridLBnd[i]) {
-	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-	 "- Array computationalLBound doesn't match grid computationalLBound ", &rc);
-	return rc;
-      } 
-    }
+       //// check that bounds match
+       for (int i=0; i<dimCount; i++) {
+	 if (arrayLBnd[i] != gridLBnd[i]) {
+	   ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+		 "- Array computationalLBound doesn't match grid computationalLBound ", &rc);
+	   return rc;
+	 } 
+       }
 
 
-    //// get computationalUBound from the array
-    //// get the computational bounds of the localDE
-    const int *arrayUBnd=arrayArg->getComputationalUBound()+lDE*dimCount;
+       //// get computationalUBound from the array
+       //// get the computational bounds of the localDE
+       const int *arrayUBnd=arrayArg->getComputationalUBound()+lDE*dimCount;
 
-    //// get computationalBound from the grid
-    localrc=this->getComputationalUBound(staggerloc,lDE,gridUBnd);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+       //// get computationalBound from the grid
+       localrc=this->getComputationalUBound(staggerloc,lDE,gridUBnd);
+       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                               &rc)) return rc; 
 
-    //// check that bounds match
-    for (int i=0; i<dimCount; i++) {
-      if (arrayUBnd[i] != gridUBnd[i]) {
-	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-	 "- Array computationalUBound doesn't match grid computationalUBound ", &rc);
-	return rc;
-      } 
-    }
+       //// check that bounds match
+       for (int i=0; i<dimCount; i++) {
+	 if (arrayUBnd[i] != gridUBnd[i]) {
+	   ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+	   "- Array computationalUBound doesn't match grid computationalUBound ", &rc);
+	   return rc;
+	 } 
+       }
+     }
+
   }
-
   // If we've reached this point then arrayArg is of the right size and shape
   // to hold the coordinates in coord, so put it in. 
   rc=this->setItemArrayInternal(staggerloc, item, arrayArg, false);
@@ -3720,6 +3971,7 @@ int Grid::constructInternal(
   destroyDistgrid=destroyDistgridArg; 
   destroyDELayout=destroyDELayoutArg;
 
+  arbDim = arbDimArg;
 
   // Set the number of stagger locations from the grid dimCount
   staggerLocCount=_NumStaggerLocsFromDimCount(dimCount); 
@@ -4284,6 +4536,7 @@ Grid::Grid(
      DELayout::destroy(&tmpDELayout);
    }
 
+
    // If present delete ProtoGrid
    if (proto != ESMC_NULL_POINTER) delete proto;
 
@@ -4372,6 +4625,7 @@ ProtoGrid::ProtoGrid(
   gridAlign=ESMC_NULL_POINTER;   
   gridMemLBound=ESMC_NULL_POINTER;   
   distgridToGridMap=ESMC_NULL_POINTER;   
+  distDim=ESMC_NULL_POINTER;   
   undistLBound=ESMC_NULL_POINTER;  
   undistUBound=ESMC_NULL_POINTER;  
   coordDimCount=ESMC_NULL_POINTER;  
@@ -4380,7 +4634,7 @@ ProtoGrid::ProtoGrid(
   minIndex=ESMC_NULL_POINTER;
   maxIndex=ESMC_NULL_POINTER;
   localCount=0;
-  arbDim = -1;
+  arbDim = 1;
   coordLocalIndices=ESMC_NULL_POINTER;
   destroyDistgrid=ESMC_NULL_POINTER; 
   destroyDELayout=ESMC_NULL_POINTER; 
@@ -5990,7 +6244,7 @@ int construct(
     gridAlign[i] = 0;
   }
 
-  // If the distgridToGridMapArg parameter has been passed in then error check 
+  // If the distDimArg parameter has been passed in then error check 
   // and copy it, otherwise set a default.
   if (distDimArg->dimCount != 1){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
