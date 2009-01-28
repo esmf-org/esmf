@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.86 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.87 2009/01/28 22:27:41 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.86 2009/01/21 21:37:59 cdeluca Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.87 2009/01/28 22:27:41 peggyli Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -1288,7 +1288,7 @@ program ESMF_GridCreateUTest
 
   ! Get array info
   call ESMF_GridGetArrayInfo(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-          gridToArrayMap=(/0,3,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
+          gridToFieldMap=(/0,3,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
           computationalEdgeLWidth=celw, &
@@ -1309,7 +1309,7 @@ program ESMF_GridCreateUTest
 
   ! Get array info
   call ESMF_GridGetArrayInfo(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-          gridToArrayMap=(/3,1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
+          gridToFieldMap=(/3,1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
           computationalEdgeLWidth=celw, &
@@ -1355,7 +1355,7 @@ program ESMF_GridCreateUTest
 
   ! Get array info
   call ESMF_GridGetArrayInfo(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-          gridToArrayMap=(/0,1/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
+          gridToFieldMap=(/0,1/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
           computationalEdgeLWidth=celw, &
@@ -1375,7 +1375,7 @@ program ESMF_GridCreateUTest
 
   ! Get array info
   call ESMF_GridGetArrayInfo(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-          gridToArrayMap=(/1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
+          gridToFieldMap=(/1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
           computationalEdgeLWidth=celw, &
@@ -1474,7 +1474,7 @@ program ESMF_GridCreateUTest
 
   ! Get array info
   call ESMF_GridGetArrayInfo(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-          gridToArrayMap=(/0,3,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
+          gridToFieldMap=(/0,3,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
           computationalEdgeLWidth=celw, &
@@ -1495,7 +1495,7 @@ program ESMF_GridCreateUTest
 
   ! Get array info
   call ESMF_GridGetArrayInfo(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-          gridToArrayMap=(/3,1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
+          gridToFieldMap=(/3,1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
           computationalEdgeLWidth=celw, &
@@ -1541,7 +1541,7 @@ program ESMF_GridCreateUTest
 
   ! Get array info
   call ESMF_GridGetArrayInfo(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-          gridToArrayMap=(/0,1/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
+          gridToFieldMap=(/0,1/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
           computationalEdgeLWidth=celw, &
@@ -1561,7 +1561,7 @@ program ESMF_GridCreateUTest
 
   ! Get array info
   call ESMF_GridGetArrayInfo(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-          gridToArrayMap=(/1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
+          gridToFieldMap=(/1,0/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
           distgridToArrayMap=distgridToArrayMap, &
           undistLBound=undistLBound, undistUBound=undistUBound, &
           computationalEdgeLWidth=celw, &
