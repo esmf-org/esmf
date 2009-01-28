@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.2.2.34 2009/01/21 21:25:20 cdeluca Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.2.2.35 2009/01/28 20:04:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldSetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.34 2009/01/21 21:25:20 cdeluca Exp $'
+    '$Id: ESMF_FieldSet.cppF90,v 1.2.2.35 2009/01/28 20:04:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -468,7 +468,7 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 #define FieldSetCommitDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field from Fortran array started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -503,12 +503,11 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farray}.  @\
 ! \item [grid]  @\
-!       The {\tt ESMF\_Grid} object to finish the Field.  The dimCount of the @\
-!       Grid must be smaller than or equal to the rank of the {\tt farray}. @\
+!       The {\tt ESMF\_Grid} object to finish the Field. @\
 ! \item [farray] @\
 !       Native fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
-!       for the farray. @\
+!       for the {\tt farray}. @\
 ! \item[indexflag] @\
 !      Indicate how DE-local indices are defined. See section @\
 !      \ref{opt:indexflag} for a list of valid indexflag options. @\
@@ -525,15 +524,21 @@ TypeKindRankDeclarationMacro(FieldSetDataPtr)
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt grid}|s dimCount.  The list elements map each dimension @\
-!       of the {\tt grid} to a dimension in the {\tt field} by @\
-!       specifying the appropriate {\tt field} dimension index. The default is to @\
-!       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
-!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
-!       The total ungridded dimensions in the {\tt field} @\
-!       are the total {\tt field} dimensions less @\
-!       the dimensions in @\
-!       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
-!       stored in the {\t field}.   @\
+!       of the {\tt grid} to a dimension in the {\tt farray} by @\
+!       specifying the appropriate {\tt farray} dimension index. The @\
+!       default is to map all of the {\tt grid}|s dimensions against the @\
+!       lowest dimensions of the {\tt farray} in sequence, i.e. @\
+!       {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       Unmapped {\tt farray} dimensions are undistributed Field @\
+!       dimensions. @\
+!       All {\tt gridToFieldMap} entries must be greater than or equal @\
+!       to zero and smaller than or equal to the Field dimCount. It is erroneous @\
+!       to specify the same entry multiple times unless it is zero. @\
+!       If the Field dimCount is less than the Grid dimCount then the default @\
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero @\
+!       entry in the {\tt gridToFieldMap} indicates that the particular @\
+!       Grid dimension will be replicating the Field across the DEs along @\
+!       this direction. @\
 ! \item [{[ungriddedLBound]}] @\
 !       Lower bounds of the ungridded dimensions of the {\tt field}. @\
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
@@ -940,12 +945,12 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
 #define FieldSetCommitPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field started with FieldCreateEmpty from Fortran array pointer @\
+! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field from Fortran array pointer started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitPtr<rank><type><kind>(field, grid, & @\
-!   farray, copyflag, staggerloc, gridToFieldMap, & @\
+!   farrayPtr, copyflag, staggerloc, gridToFieldMap, & @\
 !   maxHaloLWidth, maxHaloUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -968,16 +973,16 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
 ! \item [field]  @\
 !       The {\tt ESMF\_Field} object to be completed and @\
 !       committed in this call.  The {\tt field} will have the same dimension @\
-!       (dimCount) as the rank of the {\tt farray}.  @\
+!       (dimCount) as the rank of the {\tt farrayPtr}.  @\
 ! \item [grid]  @\
 !       The {\tt ESMF\_Grid} object to finish the Field.  The dimCount of the @\
-!       Grid must be smaller than or equal to the rank of the {\tt farray}. @\
+!       Grid must be smaller than or equal to the rank of the {\tt farrayPtr}. @\
 ! \item [farrayPtr] @\
 !       Native fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
-!       for the farray. @\
+!       for the {\tt farrayPtr}. @\
 ! \item [{[copyflag]}] @\
-!       Indicates whether to copy the {\tt farray} or reference it directly. @\
+!       Indicates whether to copy the {\tt farrayPtr} or reference it directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
 !       {\tt ESMF\_DATA\_REF}. @\
 ! \item [{[staggerloc]}] @\
@@ -989,15 +994,21 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt grid}|s dimCount.  The list elements map each dimension @\
-!       of the {\tt grid} to a dimension in the {\tt field} by @\
-!       specifying the appropriate {\tt field} dimension index. The default is to @\
-!       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
-!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
-!       The total ungridded dimensions in the {\tt field} @\
-!       are the total {\tt field} dimensions less @\
-!       the dimensions in @\
-!       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
-!       stored in the {\t field}.   @\
+!       of the {\tt grid} to a dimension in the {\tt farrayPtr} by @\
+!       specifying the appropriate {\tt farrayPtr} dimension index. The @\
+!       default is to map all of the {\tt grid}|s dimensions against the @\
+!       lowest dimensions of the {\tt farrayPtr} in sequence, i.e. @\
+!       {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       Unmapped {\tt farrayPtr} dimensions are undistributed Field @\
+!       dimensions. @\
+!       All {\tt gridToFieldMap} entries must be greater than or equal @\
+!       to zero and smaller than or equal to the Field dimCount. It is erroneous @\
+!       to specify the same entry multiple times unless it is zero. @\
+!       If the Field dimCount is less than the Grid dimCount then the default @\
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero @\
+!       entry in the {\tt gridToFieldMap} indicates that the particular @\
+!       Grid dimension will be replicating the Field across the DEs along @\
+!       this direction. @\
 ! \item [{[maxHaloLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
@@ -1101,14 +1112,14 @@ TypeKindRankDeclarationMacro(FieldSetCommit)
       fpointer => farrayPtr @\
       if(.not. associated(fpointer,farrayPtr)) then @\
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &  @\
-          "- farray is not associated with memory allocation)", & @\
+          "- farrayPtr is not associated with memory allocation)", & @\
           ESMF_CONTEXT, rc)  @\
         return @\
       endif @\
 @\
       if (size(fpointer)==0) then @\
         call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &  @\
-          "- farray is not associated with memory allocation)", & @\
+          "- farrayPtr is not associated with memory allocation)", & @\
           ESMF_CONTEXT, rc)  @\
         return @\
       endif @\
