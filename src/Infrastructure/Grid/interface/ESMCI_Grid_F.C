@@ -198,6 +198,7 @@ extern "C" {
 			   ESMCI::InterfaceInt **_coordDimCount,
 			   int *_localCount,			
 			   ESMCI::InterfaceInt **_localIndices,
+			   int *_arbDim,
 			   ESMCI::InterfaceInt **_coordDimMap,		  
 			   ESMCI::InterfaceInt **_gridEdgeLWidth, 	  
 			   ESMCI::InterfaceInt **_gridEdgeUWidth,   
@@ -361,6 +362,11 @@ extern "C" {
 	  k++;
 	}
       } 
+    }
+
+    // get arbDim
+    if (ESMC_NOT_PRESENT_FILTER(_arbDim) != ESMC_NULL_POINTER) {
+      *_arbDim = grid->getArbDim();
     }
 
     // get gridEdgeLWidth
@@ -692,6 +698,27 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
+  void FTN(c_esmc_gridadditemarb)(ESMCI::Grid **grid, 
+                                         int *staggerloc, 
+                                         int *item,
+			                 ESMC_TypeKind *itemTypeKind,   
+                                         int *rc) {
+    int localrc;
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridadditemarb()"
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    localrc= (*grid)->addItemArrayArb(ESMC_NOT_PRESENT_FILTER(staggerloc),
+      ESMC_NOT_PRESENT_FILTER(item), ESMC_NOT_PRESENT_FILTER(itemTypeKind));
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+}
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
   void FTN(c_esmc_gridsetcoordfromarray)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          int *coord, 
@@ -771,7 +798,8 @@ extern "C" {
     // call into C++
     localrc = (*grid)->set(*nameLen, ESMC_NOT_PRESENT_FILTER(name),
       ESMC_NOT_PRESENT_FILTER(coordTypeKind), tmp_distgrid, 
-      *gridEdgeLWidthArg, *gridEdgeUWidthArg, *gridAlignArg, *distgridToGridMapArg,
+      *gridEdgeLWidthArg, *gridEdgeUWidthArg, *gridAlignArg, 
+      *distgridToGridMapArg, *distDimArg,
       *minIndexArg, *maxIndexArg, *localIndicesArg, ESMC_NOT_PRESENT_FILTER(localCount),
       *coordDimCountArg, *coordDimMapArg,
       *gridMemLBoundArg, ESMC_NOT_PRESENT_FILTER(indexflag), 
@@ -865,7 +893,6 @@ extern "C" {
    coordDimMap=grid->getCoordDimMap();
    coordMapDim=grid->getCoordMapDim();
    coordIsDist=grid->getCoordIsDist();
-   coordMapDim=grid->getCoordMapDim();
    decompType=grid->getDecompType();
 
     // coord
@@ -920,7 +947,6 @@ extern "C" {
    localrc=grid->getExclusiveUBound(localDE,gridExUBnd);
    if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
-
 
    // Get Array
    array = ESMC_NULL_POINTER;   
@@ -994,8 +1020,6 @@ extern "C" {
       }
     }
 
-
-
     // fill exclusiveUBound
     if (*_exclusiveUBound != NULL){
       // exclusiveUBound was provided -> do some error checking
@@ -1059,8 +1083,6 @@ extern "C" {
       }
     }
 
-
-
     // fill computationalLBound
     if (*_computationalLBound != NULL){
       // computationalLBound was provided -> do some error checking
@@ -1105,7 +1127,6 @@ extern "C" {
       }
     }
     
-
     // fill computationalUBound
     if (*_computationalUBound != NULL){
       // computationalUBound was provided -> do some error checking
@@ -1142,7 +1163,7 @@ extern "C" {
       } else {
 	// given the array get the exclusive bounds of the localDE
 	arrayUBnd=array->getComputationalUBound()+localDE*distDimCount;
-	
+		
 	for (int i=0; i<coordDimCount[coord]; i++) {
 	    (*_computationalUBound)->array[i]=arrayUBnd[i];
 	}	
