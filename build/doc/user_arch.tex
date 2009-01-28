@@ -1,4 +1,4 @@
-% $Id: user_arch.tex,v 1.28.2.13 2009/01/28 05:03:36 theurich Exp $
+% $Id: user_arch.tex,v 1.28.2.14 2009/01/28 20:02:58 theurich Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
@@ -67,8 +67,8 @@ Sun SPARC             &\tt SunOS  &\tt default      &\tt mpi        &\tt 64     
 
 \vspace{1ex}
 
-{\bf All possible options}. Where multiple options exist 
-and the default is independent of {\tt ESMF\_MACHINE} the default value is in {\bf bold}:
+{\bf All possible options}. Where multiple options exist, and the default is independent
+of {\tt ESMF\_MACHINE}, the default value is in {\bf bold}:
 
 \vspace{1ex}
 
@@ -96,11 +96,11 @@ Linux   &\tt g95         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32
 Linux   &\tt gfortran    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64, ia64\_64, \\
         &                &                              &\tt x86\_64\_32, x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
-Linux   &\tt intel       &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user,&\tt 32, 64, ia64\_64, \\
-        &                &\tt intelmpi,scalimpi         &\tt x86\_64\_32, x86\_64\_small, \\
+Linux   &\tt intel       &\tt {\bf mpiuni},mpi,mpich,mpich2,lam,openmpi,&\tt 32, 64, ia64\_64, \\
+        &                &\tt user,intelmpi,scalimpi    &\tt x86\_64\_32, x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
-Linux   &\tt intelgcc    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user,&\tt 32, 64, ia64\_64, \\
-        &                &\tt intelmpi                  &\tt x86\_64\_32, x86\_64\_small, \\
+Linux   &\tt intelgcc    &\tt {\bf mpiuni},mpi,mpich,mpich2,lam,openmpi,&\tt 32, 64, ia64\_64, \\
+        &                &\tt user,intelmpi             &\tt x86\_64\_32, x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
 Linux   &\tt lahey       &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
 Linux   &\tt nag         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
@@ -110,7 +110,7 @@ Linux   &\tt pathscale   &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32
 Linux   &\tt pgi         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64, x86\_64\_32, \\
         &                &\tt scalimpi                  &\tt x86\_64\_small, x86\_64\_medium \\
 Linux   &\tt pgigcc      &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
-Linux   &\tt xlf         &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
+Linux   &\tt xlf         &\tt mpiuni,{\bf mpi},user      &\tt 32  \\
 OSF1    &\tt default     &\tt mpiuni,{\bf mpi},user      &\tt 64  \\
 SunOS   &\tt default     &\tt mpiuni,{\bf mpi},user      &\tt 32, {\bf 64} \\
 Unicos  &\tt default     &\tt mpiuni,{\bf mpi},user      &\tt 64  \\
