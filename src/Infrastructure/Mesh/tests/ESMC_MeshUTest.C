@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.8 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMC_MeshUTest.C,v 1.9 2009/01/28 18:15:29 rosalind Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -117,6 +117,16 @@ int main(void){
   rc = ESMC_MeshAddElements(&mesh, &num_elem, elemId, elemType, elemConn);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //X_UTest_Multi_Proc_Only
+  // Create DisGrids for the nodes and elements of the mesh
+//  strcpy(name, "MeshCreateDistGrid");
+//  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+//  rc = ESMC_MeshCreateDistGrids(&mesh, nodeDistG, elemDistG, &num_node, &num_elem);
+//  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
