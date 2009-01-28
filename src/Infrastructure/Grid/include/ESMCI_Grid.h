@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.54 2009/01/21 21:37:59 cdeluca Exp $
+// $Id: ESMCI_Grid.h,v 1.55 2009/01/28 22:20:12 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -117,6 +117,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   // Index array for arbitrarily distributed grid
   int localCount;   // number of local cells
   int **coordLocalIndices;  // 2D array holding the local indices [localCount, distRank]
+  int arbDim;       // the distgrid dimension that represents the arbitrary dimensions of the grid
 
   int staggerLocCount;
   Array ***coordArrayList; // size of coordArrayList = staggerLocCountxdimCount [staggerLoc][coord]
@@ -270,6 +271,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   const int   *getMinIndex(int tileno) const { return minIndex; }
   const int   *getMaxIndex(int tileno) const { return maxIndex; }
         int  **getLocalIndices(void) const { return coordLocalIndices;}
+        int   getArbDim(void) const { return arbDim;}
 
   bool isEmptyCoordArray(int staggerloc, int coord) {return (coordArrayList[staggerloc][coord]==ESMC_NULL_POINTER);}
 
@@ -308,6 +310,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 	  InterfaceInt *gridEdgeUWidth,          // (in)
 	  InterfaceInt *gridAlign,          // (in)
 	  InterfaceInt *_distgridToGridMap,                  // (in)
+	  InterfaceInt *_distDim,                  // (in)
           InterfaceInt *_minIndex,          // (in)
           InterfaceInt *_maxIndex,          // (in)
           InterfaceInt *_localIndices,          // (in)
@@ -457,6 +460,13 @@ int getComputationalUBound(
                      InterfaceInt *_staggerEdgeLWidthArg,
                      InterfaceInt *_staggerEdgeUWidthArg,
                      InterfaceInt *_staggerAlign
+                     );
+
+ // Allocate item Arrays for a staggerloc
+ int addItemArrayArb(
+                     int *_staggerloc,
+		     int *item,
+		     ESMC_TypeKind *typekind          
                      );
 
 
@@ -701,6 +711,7 @@ class ProtoGrid {
   InterfaceInt *gridAlign;   
   InterfaceInt *gridMemLBound;   
   InterfaceInt *distgridToGridMap;   
+  InterfaceInt *distDim;   
   InterfaceInt *undistLBound;  
   InterfaceInt *undistUBound;  
   InterfaceInt *coordDimCount;  
