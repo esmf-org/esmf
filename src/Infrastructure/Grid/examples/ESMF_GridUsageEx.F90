@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.28.2.18 2009/01/21 21:25:21 cdeluca Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.28.2.19 2009/01/28 23:54:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -834,19 +834,8 @@ endif
 ! the user first calls {\tt ESMF\_GridCreateEmpty()} to allocate the shell of
 ! a Grid. Next, we use the {\tt ESMF\_GridSetCommitShapeTile()}
 ! call that fills in the Grid and does an internal commit to make it usable.
-! For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()}
-! call must occur on the same or a subset of the PETs as the
-!  {\tt ESMF\_GridCreateEmpty()} call. The 
-! {\tt ESMF\_GridSetCommitShapeTile()} call uses the VM for
-! the context in which it's executed and the "empty" Grid contains
-! no information about the VM in which it was run.  This means that if the
-! {\tt ESMF\_GridSetCommitShapeTile()} call occurs
-! in a subset of the PETs in which the {\tt ESMF\_GridCreateEmpty()} was 
-! executed that the Grid is created only in that subset. Inside the subset
-! the Grid will be fine, but outside the subset the Grid objects will
-! still be "empty" and not usable. The following example uses the
-! incremental technique to create a rectangular 10x20 Grid with coordinates at
-! the center and corner stagger locations. 
+! The following example uses this incremental technique to create a rectangular 
+! 10x20 Grid with coordinates at the center and corner stagger locations. 
 !EOE
 
 !BOC
