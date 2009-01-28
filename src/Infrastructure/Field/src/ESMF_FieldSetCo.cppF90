@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.3 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.4 2009/01/28 22:25:42 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.3 2009/01/21 21:37:59 cdeluca Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.4 2009/01/28 22:25:42 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -1461,7 +1461,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
     ! combined with the ungridded info from the Field in order @\
     ! to create the Array for the Field. @\
     call ESMF_GeomBaseGetArrayInfo(geombase, & @\
-         gridToArrayMap=localGridToFieldMap, & @\
+         gridToFieldMap=localGridToFieldMap, & @\
          ungriddedLBound=localUngriddedLBound (1:fieldUngriddedDimCount), & @\
          ungriddedUBound=localUngriddedUBound (1:fieldUngriddedDimCount), & @\
          distgridToArrayMap=distgridToArrayMap, & @\
@@ -1781,7 +1781,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     ! combined with the ungridded info from the Field in order @\
     ! to create the Array for the Field. @\
     call ESMF_GeomBaseGetArrayInfo(geombase, & @\
-         gridToArrayMap=localGridToFieldMap, & @\
+         gridToFieldMap=localGridToFieldMap, & @\
          distgridToArrayMap=distgridToArrayMap, & @\
          undistLBound=undistLBound, undistUBound=undistUBound, & @\
           computationalEdgeLWidth=compELWidth, & @\
