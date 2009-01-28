@@ -7,9 +7,15 @@ Requires the following environment settings:
 ESMF_COMPILER gfortran
 
 Note that if the gfortran-4 and g++-4 packages have been
-installed via the cygwin setup installer, the ESMF_F90DEFAULT
-and ESMF_CXXDEFAULT compiler names used in build_rules.mk
-must be changed accordingly to:
+installed via the cygwin setup installer, the ESMF compiler
+defaults need to be overridden by setting environment 
+variables:
+
+ESMF_F90 gfortran-4
+ESMF_CXX g++-4
+
+Alternatively the ESMF_F90DEFAULT and ESMF_CXXDEFAULT compiler
+names used in build_rules.mk can be changed to:
 
 ESMF_F90DEFAULT    = gfortran-4
 ESMF_CXXDEFAULT    = g++-4
