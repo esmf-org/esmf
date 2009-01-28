@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.27.2.7 2008/05/19 19:21:21 theurich Exp $
+% $Id: ESMF_options.tex,v 1.27.2.8 2009/01/28 22:13:06 theurich Exp $
 
 \section{Global Options and Parameters}
 
@@ -200,9 +200,13 @@ Indicates whether index is local (per DE) or global (per object).
 Valid values are:
 \begin{description}
 \item [ESMF\_INDEX\_DELOCAL]
-      Refers to indices on the local DE.
+      Indicates that DE-local index space starts at lower bound 1 for each DE.
 \item [ESMF\_INDEX\_GLOBAL]
-      Refers to object-wide indices.
+      Indicates that global indices are used. This means that DE-local index
+      space starts at the global lower bound for each DE.
+\item [ESMF\_INDEX\_USER]
+      Indicates that the DE-local index bounds are explicitly set by the user.
+      
 \end{description}
 
 \subsubsection{ESMF\_NeededFlag}
