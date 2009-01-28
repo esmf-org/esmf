@@ -195,7 +195,7 @@ public  ESMF_DefaultFlag
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47.2.36 2009/01/21 21:25:21 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.47.2.37 2009/01/28 22:37:05 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1587,10 +1587,9 @@ end interface
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Indicates whether the indices in the grid are to be interpreted to form
-!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
-!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
-!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
+!      Indicates the indexing scheme to be used in the new Grid. Please see 
+!      Section~\ref{opt:indexflag} for the list of options. If not present, 
+!      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1980,10 +1979,9 @@ end interface
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Indicates whether the indices in the grid are to be interpreted to form
-!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
-!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
-!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
+!      Indicates the indexing scheme to be used in the new Grid. Please see 
+!      Section~\ref{opt:indexflag} for the list of options. If not present, 
+!      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
@@ -3105,10 +3103,9 @@ end interface
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Indicates whether the indices in the grid are to be interpreted to form
-!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
-!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
-!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
+!      Indicates the indexing scheme to be used in the new Grid. Please see 
+!      Section~\ref{opt:indexflag} for the list of options. If not present, 
+!      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)
@@ -4065,7 +4062,8 @@ end interface
 !     Specification of how the stagger locations should align with the cell
 !     index space. The array should be of size greater or equal to the Grid dimCount. 
 ! \item[{[indexflag]}]
-!    Flag that indicates how the DE-local indices are to be defined.
+!      Flag indicating the indexing scheme being used in the Grid. Please see 
+!      Section~\ref{opt:indexflag} for the list of options. 
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -6996,10 +6994,9 @@ endif
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Indicates whether the indices in the grid are to be interpreted to form
-!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
-!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
-!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
+!      Indicates the indexing scheme to be used in the new Grid. Please see 
+!      Section~\ref{opt:indexflag} for the list of options. If not present, 
+!      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[destroyDistgrid]}]
 !      If true, when the Grid is destroyed the DistGrid will be destroyed also. 
 !      Defaults to false. 
@@ -7417,10 +7414,9 @@ endif
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Indicates whether the indices in the grid are to be interpreted to form
-!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
-!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
-!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
+!      Indicates the indexing scheme to be used in the new Grid. Please see 
+!      Section~\ref{opt:indexflag} for the list of options. If not present, 
+!      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
@@ -8556,10 +8552,9 @@ endif
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Indicates whether the indices in the grid are to be interpreted to form
-!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
-!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
-!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
+!      Indicates the indexing scheme to be used in the new Grid. Please see 
+!      Section~\ref{opt:indexflag} for the list of options. If not present, 
+!      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)
