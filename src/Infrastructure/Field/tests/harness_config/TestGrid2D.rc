@@ -5,7 +5,7 @@
 # See documentation for further details of the descriptor syntax.
 #################################################################################
 
-grid_type: REMAP
+map_type: REGRID
 
 ################################################################################
 # grid | source | grid    |    grid   | grid  | units | destination | 
@@ -15,7 +15,7 @@ grid_type: REMAP
 
 
 #rank spacing  size  range (min/max)  units
-grid_remap::
+map_regrid::
 # example of a pair of 2D periodic grids 
 2   SRC    UNIFORM_PERIODIC   120    -3.14159  3.14159    RADIANS   
 &          UNIFORM_POLE        90    -1.57     1.57       RADIANS   
