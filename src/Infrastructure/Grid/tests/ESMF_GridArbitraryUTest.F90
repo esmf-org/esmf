@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.2 2009/01/29 06:06:28 peggyli Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.3 2009/01/29 18:13:14 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.2 2009/01/29 06:06:28 peggyli Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.3 2009/01/29 18:13:14 peggyli Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -473,7 +473,7 @@ program ESMF_GridArbitraryUTest
   print *, 'undistbounds', undistLBound, undistUBound
   print *, 'computationaledgewidths', celw, ceuw
 
-  if ((undistLBound(1) .ne. 1) .or. (undistLBound(2) .ne. 10)) correct=.false.
+  if ((undistLBound(1) .ne. 1) .or. (undistUBound(1) .ne. 10)) correct=.false.
   if ((celw(1) .ne. 0) .or. (celw(2) .ne. 0)) correct=.false.
   if ((ceuw(1) .ne. 0) .or. (ceuw(2) .ne. 0)) correct=.false.
 
