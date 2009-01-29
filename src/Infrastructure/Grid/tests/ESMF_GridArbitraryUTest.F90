@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.1 2009/01/28 22:28:31 peggyli Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.2 2009/01/29 06:06:28 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.1 2009/01/28 22:28:31 peggyli Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.2 2009/01/29 06:06:28 peggyli Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -957,6 +957,13 @@ program ESMF_GridArbitraryUTest
   !print *,"PET", myPet, "index:", index3, "coord", coord3
   if (coord3(2) .ne. 200) correct = .false.
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy grid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  correct=.true.
+  rc=ESMF_SUCCESS
 
   call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
