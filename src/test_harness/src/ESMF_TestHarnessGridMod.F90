@@ -79,7 +79,7 @@
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
   rc = ESMF_RC_NOT_IMPL
-
+print*,'entering read grid specification'
   !-----------------------------------------------------------------------------
   ! open the grid file
   !-----------------------------------------------------------------------------
@@ -88,7 +88,7 @@
                             rcToReturn=rc) ) return
 
   lfilename = Gfile%filename
-! print*,'Opening Grid specifier file  ',trim( lfilename )
+  print*,'Opening Grid specifier file  ',trim( lfilename )
   call ESMF_ConfigLoadFile(localcf, trim( lfilename ), rc=localrc )
   if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot load config file " // trim( lfilename ),                      &
@@ -104,25 +104,27 @@
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
   if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot read config label map_type:" , rcToReturn=rc) ) return
-
+print*,' extract the grid specifier map_type'
   !-----------------------------------------------------------------------------
   ! Read the grid specifier file. The 'map_type' argument specifies the type 
   ! of grid specification to be read ( redistrbution or remapping ).
   !-----------------------------------------------------------------------------
+print*,'action type:', trim(adjustL(ltmp))
   select case(trim(adjustL(ltmp)) )
-
      case('REDISTRIBUTION')
-!      print*,' read grid specification for redistribution test'
+       print*,' read grid specification for redistribution test'
        call read_redistribution_grid(lfilename, Gfile%nGspecs, Gfile%src_grid, &
                 Gfile%dst_grid,localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
                rcToReturn=rc)) return
 
-     case('REMAP')
-       print*,' read grid specification for remapping test'
-       call read_remapping_grid(lfilename, Gfile%nGspecs, Gfile%src_grid,      &
+     case('REGRID')
+       print*,' read grid specification for regridding test'
+       call read_regridding_grid(lfilename, Gfile%nGspecs, Gfile%src_grid,     &
                 Gfile%dst_grid, testfunction, localrc)
-
+       print*,'output from read_regridding_grid'
+       print*,'  Gfile%nGspecs',  Gfile%nGspecs
+       print*,' filename:', trim(lfilename)
 
        ! print out diagnostics
        print*,'Number of grid specs', Gfile%nGspecs
@@ -546,7 +548,7 @@
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  subroutine read_remapping_grid(lfilename, ngrids, src_grid, dst_grid,        &
+  subroutine read_regridding_grid(lfilename, ngrids, src_grid, dst_grid,        &
                                  testfunction, rc)
   !-----------------------------------------------------------------------------
   ! routine to read the grid specifier file for a remapping test. The routine
@@ -605,7 +607,7 @@
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
   rc = ESMF_RC_NOT_IMPL
-
+print*,'inside read_regridding_grid'
   !-----------------------------------------------------------------------------
   ! open the grid file
   !-----------------------------------------------------------------------------
@@ -617,7 +619,7 @@
   if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot load config file " // trim( lfilename ),                      &
          rcToReturn=rc) ) return
-
+print*,'file opened'
   !----------------------------------------------------------------------------- 
   ! extract the grid type specifier as sanity check
   !-----------------------------------------------------------------------------
@@ -625,17 +627,19 @@
   if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot find config label map_type", rcToReturn=rc) ) return  
 
+print*,' found lable map_type '
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
   if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot find config label map_type:",                                &
          rcToReturn=rc) ) return
-
-  if( trim(adjustL( ltmp )) /= 'REMAP' ) then 
+print*,'get attribute '
+  if( trim(adjustL( ltmp )) /= 'REGRID' ) then 
      call ESMF_LogMsgSetError(                                                 &
      ESMF_FAILURE, "Wrong grid type for remap test in file " //                &
      trim( lfilename ),  rcToReturn=rc)
      return
   endif
+
   !-----------------------------------------------------------------------------
   ! search for the grid specifier table
   !-----------------------------------------------------------------------------
@@ -670,7 +674,7 @@
 
   allocate( ncolumns(nrows), stat=allocRcToTest )
   if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array ncolumns"//     &
-     " in read_remapping_grid", rcToReturn=rc)) then
+     " in read_regridding_grid", rcToReturn=rc)) then
   endif
 
 
@@ -706,7 +710,7 @@
      rcToReturn=rc) ) return
   allocate( new_row(nrows), stat=allocRcToTest )
   if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array new_row"//      &
-     " in read_remapping_grid", rcToReturn=rc)) then
+     " in read_regridding_grid", rcToReturn=rc)) then
   endif
 
 
@@ -725,6 +729,8 @@
         new_row(krow) =  ngrid
      endif
   enddo    ! end  krow
+  print*,' inside read regridding_grid'
+  print*,' number of grids in read_regridding_grid',ngrid,nrows
   ngrids = ngrid
   !-----------------------------------------------------------------------------
   ! allocate storage for the grid information based on the calculated number of
@@ -732,15 +738,15 @@
   !-----------------------------------------------------------------------------
   allocate( src_grid(ngrid), stat=allocRcToTest )
   if (ESMF_LogMsgFoundAllocError(allocRcToTest, "grid type src_grid"//         &
-     " in read_remapping_grid", rcToReturn=rc)) then
+     " in read_regridding_grid", rcToReturn=rc)) then
   endif
   allocate( dst_grid(ngrid), stat=allocRcToTest )
   if (ESMF_LogMsgFoundAllocError(allocRcToTest, "grid type dst_grid "//        &
-     " in read_remapping_grid", rcToReturn=rc)) then
+     " in read_regridding_grid", rcToReturn=rc)) then
   endif
   allocate( testfunction(ngrid), stat=allocRcToTest  )
   if (ESMF_LogMsgFoundAllocError(allocRcToTest, "test type"//                  &
-     " in read_remapping_grid", rcToReturn=rc)) then
+     " in read_reregridding_grid", rcToReturn=rc)) then
   endif
   !-----------------------------------------------------------------------------
   ! Read the grid specifications from the table:
@@ -799,43 +805,43 @@
         src_grid(igrid)%grank = grank
         allocate( src_grid(igrid)%gtype(grank), stat=allocRcToTest )
         if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char array "//          &
-           " gtype in read_remapping_grid", rcToReturn=rc)) then
+           " gtype in read_regridding_grid", rcToReturn=rc)) then
         endif
 
         allocate( src_grid(igrid)%gunits(grank), stat=allocRcToTest )
         if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char array "//          &
-           " gunits in read_remapping_grid", rcToReturn=rc)) then
+           " gunits in read_regridding_grid", rcToReturn=rc)) then
         endif
 
         allocate( src_grid(igrid)%gsize(grank), stat=allocRcToTest )
         if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array "//       &
-           " gsize in read_remapping_grid", rcToReturn=rc)) then
+           " gsize in read_regridding_grid", rcToReturn=rc)) then
         endif
 
         allocate( src_grid(igrid)%grange(grank,2), stat=allocRcToTest )
         if (ESMF_LogMsgFoundAllocError(allocRcToTest, "real array "//          &
-           " grange in read_remapping_grid", rcToReturn=rc)) then
+           " grange in read_regridding_grid", rcToReturn=rc)) then
         endif
 
         dst_grid(igrid)%grank = grank
         allocate( dst_grid(igrid)%gtype(grank), stat=allocRcToTest )
         if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char array "//          &
-           " gtype in read_remapping_grid", rcToReturn=rc)) then
+           " gtype in read_regridding_grid", rcToReturn=rc)) then
         endif
 
         allocate( dst_grid(igrid)%gunits(grank), stat=allocRcToTest )
         if (ESMF_LogMsgFoundAllocError(allocRcToTest, "char array "//          &
-           " grank in read_remapping_grid", rcToReturn=rc)) then
+           " grank in read_regridding_grid", rcToReturn=rc)) then
         endif
 
         allocate( dst_grid(igrid)%gsize(grank), stat=allocRcToTest )
         if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array "//       &
-           " gsize in read_remapping_grid", rcToReturn=rc)) then
+           " gsize in read_regridding_grid", rcToReturn=rc)) then
         endif
 
         allocate( dst_grid(igrid)%grange(grank,2), stat=allocRcToTest )
         if (ESMF_LogMsgFoundAllocError(allocRcToTest, "real array "//          &
-           " grange in read_remapping_grid", rcToReturn=rc)) then
+           " grange in read_regridding_grid", rcToReturn=rc)) then
         endif
         !-----------------------------------------------------------------------
         ! Source Grid
@@ -1049,7 +1055,7 @@
         if(iTFun > 0) then
            allocate( testfunction(igrid)%param(iTFun-1), stat=allocRcToTest )
            if (ESMF_LogMsgFoundAllocError(allocRcToTest, "type in "//          &
-               " read_remapping_grid", rcToReturn=rc)) then
+               " read_regridding_grid", rcToReturn=rc)) then
            endif
         endif
 
@@ -1112,7 +1118,7 @@
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  end subroutine read_remapping_grid
+  end subroutine read_regridding_grid
   !-----------------------------------------------------------------------------
 
 
@@ -1150,4 +1156,4 @@
 
 !===============================================================================
   end module ESMF_TestHarnessGridMod
-!===============================================================================
+!==============================================================================
