@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.4 2009/01/30 00:40:30 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.5 2009/01/30 15:44:42 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -27,7 +27,8 @@ program ESMF_AttributeUpdateEx
   use ESMF_Mod
   use ESMF_TestMod
 
-  use ESMF_AttributeUpdateExMod, only : userm1_setvm, userm1_register, userm2_setvm, userm2_register, usercpl_setvm, usercpl_register
+  use ESMF_AttributeUpdateMod, only : userm1_setvm, userm1_register, &
+    userm2_setvm, userm2_register, usercpl_setvm, usercpl_register
 
 implicit none
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.1 2009/01/30 00:40:30 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.2 2009/01/30 15:44:42 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -6,7 +6,7 @@
 !-------------------------------------------------------------------------
 
 
-module ESMF_AttributeUpdateExMod
+module ESMF_AttributeUpdateMod
 
   ! ESMF Framework module
   use ESMF_Mod
@@ -15,7 +15,9 @@ module ESMF_AttributeUpdateExMod
   
   private
   
-  public userm1_setvm, userm1_register, userm2_setvm, userm2_register, usercpl_setvm, usercpl_register
+  public userm1_setvm, userm1_register
+  public userm2_setvm, userm2_register
+  public usercpl_setvm, usercpl_register
 
   contains
 
