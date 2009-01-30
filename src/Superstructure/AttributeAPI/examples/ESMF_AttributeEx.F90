@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.6 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.7 2009/01/30 00:40:30 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -24,7 +24,7 @@ program ESMF_AttributeEx
 ! Component, but the same principles apply to the coupler Component, State, 
 ! Grid, FieldBundle, Field, and Array.  The
 ! functionality that is demonstrated includes setting and getting Attributes, 
-! working with Attributes with different types and lists, removing Attributs,
+! working with Attributes with different types and lists, removing Attributes,
 ! and getting default Attributes.  Various other uses of 
 ! {\tt ESMF\_AttributeGet()} is covered in detail in the last section.  The
 ! first thing we must do is declare variables and initialize the ESMF.
@@ -64,7 +64,6 @@ program ESMF_AttributeEx
       logical, dimension(3)                 :: inLogl, value
       
       type(ESMF_TypeKind)   :: tk
-!EOC         
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -73,6 +72,7 @@ program ESMF_AttributeEx
       ! get the vm
       call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
       if (rc/=ESMF_SUCCESS) goto 10
+!EOC         
       
       if (localPet==0) then
         print *, "--------------------------------------- "
@@ -121,13 +121,13 @@ program ESMF_AttributeEx
         valueList=inI4l, rc=rc)
       call ESMF_AttributeSet(gridcomp, name="ESMF_I8name", value=inI8,  rc=rc)
       call ESMF_AttributeSet(gridcomp, name="ESMF_I8namelist", &
-        valueList=inI4l, rc=rc)
+        valueList=inI8l, rc=rc)
       call ESMF_AttributeSet(gridcomp, name="ESMF_R4name", value=inR4, rc=rc)
       call ESMF_AttributeSet(gridcomp, name="ESMF_R4namelist", &
-        valueList=inI4l, rc=rc)
+        valueList=inR4l, rc=rc)
       call ESMF_AttributeSet(gridcomp, name="ESMF_R8name", value=inR8, rc=rc)
       call ESMF_AttributeSet(gridcomp, name="ESMF_R8namelist", &
-        valueList=inI4l, rc=rc)
+        valueList=inR8l, rc=rc)
       call ESMF_AttributeSet(gridcomp, name="Character_name", &
         value=inChar, rc=rc)
       call ESMF_AttributeSet(gridcomp, name="Character_namelist", &

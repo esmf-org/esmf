@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.2 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.3 2009/01/30 00:40:30 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -19,7 +19,7 @@ program ESMF_AttributePackageEx
 !BOE
 ! \subsubsection{Example: Intermediate Attribute usage: Attribute Packages}
 !
-! This example is slightly more complex that the example presented in section 
+! This example is slightly more complex than the example presented in section 
 ! \ref{AttributeEx} and illustrates the use of the ESMF\_Attribute class to create 
 ! Attribute hierarchies using Attribute packages.  A gridded Component
 ! is used in conjunction with two States, a FieldBundle, and various realistic
@@ -58,8 +58,7 @@ program ESMF_AttributePackageEx
                                  value4,value5,value6,value7,value8,value9, &
                                  value10,convESG,convCC,purpGen
       
-      character(ESMF_MAXSTR),dimension(2)   :: attrList
-!EOC         
+      character(ESMF_MAXSTR),dimension(2)   :: attrList         
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -68,6 +67,7 @@ program ESMF_AttributePackageEx
       ! get the vm
       call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
       if (rc/=ESMF_SUCCESS) goto 10
+!EOC
       
       if (localPet==0) then
         print *, "--------------------------------------- "
@@ -113,7 +113,7 @@ program ESMF_AttributePackageEx
 !    {\tt ESMF\_AttributeAdd()} to create customized Attribute packages, then
 !    we will nest the ESG convention Attribute packages inside our customized
 !    packages.  For the
-!    Component we will simply usethe ESMF supplied (ESG) Attribute package.
+!    Component we will simply use the ESMF supplied (ESG) Attribute package.
 !    In this simple example the purpose for the Attribute packages will
 !    be specified as "general" in all cases.
 !EOE
