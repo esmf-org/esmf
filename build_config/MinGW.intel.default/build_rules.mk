@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5 2009/01/22 06:04:00 w6ws Exp $
+# $Id: build_rules.mk,v 1.6 2009/01/30 02:00:33 w6ws Exp $
 #
 # MinGW.intel.default
 #
@@ -35,14 +35,16 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),msmpi)
 # Microsofts version of MPICH2 on CCS 2003 is generally at:
-# ESMF_MSMPIDIR        = /c/"Program Files"/"Microsoft Compute Cluster Pack"
+ESMF_MSMPIDIR        = /c/"Program Files"/"Microsoft Compute Cluster Pack"
+ESMF_MSMPIDIRW       = c:/"Program Files"/"Microsoft Compute Cluster Pack"
 # and on HPC 2008:
 # ESMF_MSMPIDIR        = /c/"Program Files"/"Microsoft HPC Pack 2008 SDK"
 ESMF_CXXCOMPILECPPFLAGS+= -D__int64="long long"
 ESMF_F90COMPILEPATHS   += -I$(ESMF_MSMPIDIR)/Include
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_MSMPIDIR)/Include
-ESMF_F90LINKLIBS       += $(ESMF_MSMPIDIR)/Lib/i386/msmpi.lib
-ESMF_CXXLINKLIBS       += $(ESMF_MSMPIDIR)/Lib/i386/msmpi.lib
+ESMF_MPILIBPATH          = -libpath:$(ESMF_MSMPIDIRW)/Lib/amd64
+ESMF_F90LINKLIBS       += msmpi.lib
+ESMF_CXXLINKLIBS       += msmpi.lib
 ESMF_MPIRUNDEFAULT      = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
