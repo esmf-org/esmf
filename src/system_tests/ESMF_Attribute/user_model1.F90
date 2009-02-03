@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.35 2009/01/16 05:28:24 theurich Exp $
+! $Id: user_model1.F90,v 1.36 2009/02/03 17:39:17 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -92,11 +92,13 @@ module user_model1
     ! Local variables
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
-    character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2,value3,value4,conv,purp
+    character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2,value3,value4,&
+                                   conv,purp, convCC, purpGen
     type(ESMF_ArraySpec)        :: arrayspec
     type(ESMF_Grid)             :: grid
     type(ESMF_Field)            :: DPEDT,DTDT,DUDT,DVDT,PHIS,QTR,CNV,CONVCPT,CONVKE,CONVPHI
     type(ESMF_FieldBundle)      :: fbundle
+    character(ESMF_MAXSTR),dimension(2)   :: attrList         
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -116,6 +118,23 @@ module user_model1
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
+    convCC = 'CustomConvention'
+    purpGen = 'general'
+
+    attrList(1) = 'coordinates'
+    attrList(2) = 'mask'
+
+    ! Add an Attribute to the top level State (test Reconcile)
+    call ESMF_AttributeAdd(exportState, attrList=attrList, convention=convCC, &
+      purpose=purpGen, count=2, rc=rc)
+    call ESMF_AttributeSet(exportState, name='coordinates', value='latlon', &
+      convention=convCC, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(exportState, name='mask', value='yes', &
+      convention=convCC, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(exportState, name="TESTESTEST", &
+                           value="SUCCESUCCESUCCES", rc=status)
+    if (status .ne. ESMF_SUCCESS) return
+
     ! Initialize variables
     conv = 'CF'
     purp = 'basic'
@@ -295,7 +314,7 @@ module user_model1
     ! Connect the Attributes from the FieldBundle to the export State
     call ESMF_StateAdd(exportState, fieldbundle=fbundle, rc=status)
     if (status .ne. ESMF_SUCCESS) return
-
+    
   end subroutine user_init
 
 !-------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.18 2009/01/16 05:28:24 theurich Exp $
+! $Id: user_coupler.F90,v 1.19 2009/02/03 17:39:17 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -98,7 +98,7 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateReconcile(exportState, vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-   
+                 
   end subroutine user_init
 
 
@@ -118,7 +118,7 @@ module user_coupler
     
     ! for testing update
     type(ESMF_Array)            :: array
-    integer, dimension(4)       :: rootList
+    integer, dimension(3)       :: rootList
     character(ESMF_MAXSTR)      :: conv,purp
 
     ! Initialize return code
@@ -135,11 +135,11 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateGet(exportState, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    
-    rootList = (/0,1,2,3/)
+        
+    rootList = (/0,1,2/)
     call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    
+        
     ! copy all Attribute information into export State
     call ESMF_AttributeCopy(importState, exportState, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
