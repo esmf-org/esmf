@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.13 2009/01/25 18:49:16 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.14 2009/02/03 17:37:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.13 2009/01/25 18:49:16 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.14 2009/02/03 17:37:57 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -81,12 +81,12 @@ namespace ESMCI {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttPackCreate"
+#define ESMC_METHOD "AttPackAddAttribute"
 //BOPI
-// !IROUTINE:  AttPackCreate() - create an attpack and add an {\tt Attribute}
+// !IROUTINE:  AttPackAddAttribute() - add an {\tt Attribute} to an attpack
 //
 // !INTERFACE:
-      int Attribute::AttPackCreate(
+      int Attribute::AttPackAddAttribute(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -95,17 +95,74 @@ namespace ESMCI {
       const string &name,                    // in - Attribute name
       const string &convention,              // in - Attribute convention
       const string &purpose,                 // in - Attribute purpose
-      const string &object,                  // in - Attribute object type
-      const ESMC_AttPackNestFlag &flag) {    // in - flag to nest or not  
+      const string &object) {                // in - Attribute object type 
 // 
 // !DESCRIPTION:
-//     Setup the name, convention and purpose of an attpack and add
-//     an {\tt Attribute} with a specified name but no value.
+//     Add an {\tt Attribute} with a specified name but no value.
 //
 //EOPI
 
   int localrc;
-  Attribute *attr, *attpack, *nestedpack;
+  char msgbuf[ESMF_MAXSTR];
+  Attribute *attr, *attpack;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // Search for the attpack, make it if not found
+  attpack = AttPackGet(convention, purpose, object);
+  if(!attpack) {
+       sprintf(msgbuf, "Cannot find an Attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
+                      convention.c_str(), purpose.c_str(), object.c_str());
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                             msgbuf, &localrc);
+      return ESMF_FAILURE;
+  }
+  
+  // make an Attribute in the new attpack
+  attr = new Attribute(name, convention, purpose, object);  
+  if (!attr) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "failed initialized an attpack Attribute", &localrc);
+    return ESMF_FAILURE;
+  }
+  
+  // add the new Attribute to the new attpack
+  localrc = attpack->AttributeSet(attr);
+  if (localrc != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               "failed adding an attpack Attribute", &localrc);
+    return ESMF_FAILURE;
+  }
+  
+  return ESMF_SUCCESS;
+
+}  // end AttPackAddAttribute()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttPackCreate"
+//BOPI
+// !IROUTINE:  AttPackCreate() - create an attpack
+//
+// !INTERFACE:
+      int Attribute::AttPackCreate(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      const string &convention,              // in - Attribute convention
+      const string &purpose,                 // in - Attribute purpose
+      const string &object,                  // in - Attribute object type
+      const ESMC_AttPackNestFlag &flag) {    // in - flag to nest or not  
+// 
+// !DESCRIPTION:
+//     Setup the name, convention and purpose of an attpack.
+//
+//EOPI
+
+  int localrc;
+  Attribute *attpack, *nestedpack;
   bool stop = false;
 
   // Initialize local return code; assume routine not implemented
@@ -146,23 +203,7 @@ namespace ESMCI {
       return ESMF_FAILURE;
     }
   }
-  
-  // make an Attribute in the new attpack
-  attr = new Attribute(name, convention, purpose, object);  
-  if (!attr) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed initialized an attpack Attribute", &localrc);
-    return ESMF_FAILURE;
-  }
-  
-  // add the new Attribute to the new attpack
-  localrc = attpack->AttributeSet(attr);
-  if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed adding an attpack Attribute", &localrc);
-    return ESMF_FAILURE;
-  }
-  
+    
   return ESMF_SUCCESS;
 
 }  // end AttPackCreate()
@@ -661,9 +702,7 @@ namespace ESMCI {
   attrPackHead = source.attrPackHead;
   attrNested = source.attrNested;
 
-  valueChange = source.valueChange;
-  linkChange = source.linkChange;
-  structChange = source.structChange;
+  valueChange = ESMF_TRUE;
 
   if (items == 1) {
         if (tk == ESMC_TYPEKIND_I4)
@@ -711,6 +750,7 @@ namespace ESMCI {
   for (i=0; i<source.attrCount; i++) {
     if(source.attrList.at(i)->attrRoot != ESMF_TRUE) {
       attr = new Attribute(ESMF_FALSE);
+      attr->attrBase = this->attrBase; 
       localrc = attr->AttributeCopy(*(source.attrList.at(i)));
       localrc = AttributeSet(attr);
       if (localrc != ESMF_SUCCESS) {
@@ -1981,8 +2021,10 @@ namespace ESMCI {
 
   // first, see if you are replacing an existing Attribute
   for (i=0; i<attrCount; i++) {
-      if ((attr->attrName).compare(attrList.at(i)->attrName))
-          continue;
+    if ((attr->attrName).compare(attrList.at(i)->attrName)==0 &&
+        (attr->attrConvention).compare(attrList.at(i)->attrConvention)==0 &&
+        (attr->attrPurpose).compare(attrList.at(i)->attrPurpose)==0 &&
+        (attr->attrObject).compare(attrList.at(i)->attrObject)==0) {
 
       // FIXME: we might want an explicit flag saying that this is what
       // is wanted, instead of an error if a previous value not expected.
@@ -1993,8 +2035,14 @@ namespace ESMCI {
       // delete old Attribute, including possibly freeing a list
       delete attrList.at(i);
 
+      // replace the original Attribute with attr
       attrList.at(i) = attr;
+      // attr may be of a different value than the original Attribute
+      attr->valueChange = ESMF_TRUE;
+      // point attr to its new Base
+      attr->attrBase = this->attrBase; 
       return ESMF_SUCCESS;
+    }
   }   
 
   attr->structChange = ESMF_TRUE;
@@ -3266,7 +3314,7 @@ namespace ESMCI {
   attrNested = ESMF_FALSE;
   
   linkChange = ESMF_FALSE;
-  structChange = ESMF_FALSE;
+  structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
 
   attrBase = NULL;
@@ -3326,7 +3374,7 @@ namespace ESMCI {
   attrNested = ESMF_FALSE;
 
   linkChange = ESMF_FALSE;
-  structChange = ESMF_FALSE;
+  structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
 
   attrBase = NULL;
@@ -3379,7 +3427,7 @@ namespace ESMCI {
   attrNested = ESMF_FALSE;
 
   linkChange = ESMF_FALSE;
-  structChange = ESMF_FALSE;
+  structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
 
   attrBase = NULL;
@@ -3432,7 +3480,7 @@ namespace ESMCI {
   attrNested = ESMF_FALSE;
 
   linkChange = ESMF_FALSE;
-  structChange = ESMF_FALSE;
+  structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
 
   attrBase = NULL;
@@ -3489,7 +3537,7 @@ namespace ESMCI {
   attrNested = ESMF_FALSE;
 
   linkChange = ESMF_FALSE;
-  structChange = ESMF_FALSE;
+  structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
 
   attrBase = NULL;
@@ -3690,9 +3738,7 @@ namespace ESMCI {
   attrPackHead = source.attrPackHead;
   attrNested = source.attrNested;
 
-  valueChange = source.valueChange;
-  linkChange = source.linkChange;
-  structChange = source.structChange;
+  valueChange = ESMF_TRUE;
 
   if (items == 1) {
         if (tk == ESMC_TYPEKIND_I4)

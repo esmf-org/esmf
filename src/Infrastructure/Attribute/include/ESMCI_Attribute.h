@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.9 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMCI_Attribute.h,v 1.10 2009/02/03 17:37:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -96,7 +96,9 @@ class Attribute
     void setBase(ESMC_Base *setBase){ attrBase = setBase; }
 
     // attpack methods
-    int AttPackCreate(const string &name, const string &convention, 
+    int AttPackAddAttribute(const string &name, const string &convention, 
+      const string &purpose, const string &object);
+    int AttPackCreate(const string &convention, 
       const string &purpose, const string &object, const ESMC_AttPackNestFlag &flag);
     Attribute *AttPackGet(const string &convention, 
       const string &purpose, const string &object) const;
@@ -234,8 +236,11 @@ class Attribute
 
 // fortran interface functions to attribute objects
 extern "C" {
-  void FTN(c_esmc_attpackcreate)(ESMC_Base **base, char *name, char *convention, char *purpose, 
-                                 char *object, ESMC_AttPackNestFlag *flag, int *rc, int nlen, 
+  void FTN(c_esmc_attpackaddattribute)(ESMC_Base **base, char *name, char *convention, char *purpose, 
+                                 char *object, int *rc, int nlen, 
+                                 int clen, int plen, int olen);
+  void FTN(c_esmc_attpackcreate)(ESMC_Base **base, char *convention, char *purpose, 
+                                 char *object, ESMC_AttPackNestFlag *flag, int *rc, 
                                  int clen, int plen, int olen);
   void FTN(c_esmc_attpackdestroy)(ESMC_Base **base, char *name, char *convention, char *purpose,
                                     char *object, int *rc, int nlen, int clen, int plen, int olen);

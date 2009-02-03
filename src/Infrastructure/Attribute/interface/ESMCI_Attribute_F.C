@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.8 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.9 2009/02/03 17:37:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.8 2009/01/21 21:37:58 cdeluca Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.9 2009/02/03 17:37:57 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -51,13 +51,13 @@ extern "C" {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_attpackcreate - Setup the attribute package
+// !IROUTINE:  c_esmc_attpackaddattribute - add an attribute to an attpack
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackcreate)(
+      void FTN(c_esmc_attpackaddattribute)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpackcreate()"
+#define ESMC_METHOD "c_esmc_attpackaddattribute()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -68,7 +68,6 @@ extern "C" {
       char *convention,          // in - convention
       char *purpose,             // in - purpose
       char *object,              // in - object type
-      ESMC_AttPackNestFlag *flag, // in - attpack nesting flag
       int *rc,                   // in - return code
       int nlen,                  // hidden/in - strlen count for name
       int clen,                  // hidden/in - strlen count for convention
@@ -162,7 +161,112 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackCreate(cname, cconv, cpurp, cobj, *flag);
+  status = (**base).root.AttPackAddAttribute(cname, cconv, cpurp, cobj);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed getting attribute value", &status);
+  }
+
+  if (rc) *rc = status;
+  return;
+
+}  // end c_esmc_attpackaddattribute
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_esmc_attpackcreate - Setup the attribute package
+//
+// !INTERFACE:
+      void FTN(c_esmc_attpackcreate)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackcreate()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,          // in/out - base object
+      char *convention,          // in - convention
+      char *purpose,             // in - purpose
+      char *object,              // in - object type
+      ESMC_AttPackNestFlag *flag, // in - attpack nesting flag
+      int *rc,                   // in - return code
+      int clen,                  // hidden/in - strlen count for convention
+      int plen,                  // hidden/in - strlen count for purpose           
+      int olen) {                // hidden/in - strlen count for object
+// 
+// !DESCRIPTION:
+//     Associate a convention, purpose, and object type with an attribute package
+//
+//EOP
+
+  int status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cconv.empty()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  if (cpurp.empty()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  if (cobj.empty()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Set the attribute on the object.
+  status = (**base).root.AttPackCreate(cconv, cpurp, cobj, *flag);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "failed getting attribute value", &status);
@@ -1894,7 +1998,7 @@ extern "C" {
     if (rc) *rc = status;    
     return;
   }
-
+  
   status = (**destination).root.AttributeCopy((**source).root);
   if (status != ESMF_SUCCESS) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
