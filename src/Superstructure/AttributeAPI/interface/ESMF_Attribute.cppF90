@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.11 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.12 2009/02/03 17:36:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.11 2009/01/21 21:38:02 cdeluca Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.12 2009/02/03 17:36:15 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -974,29 +974,55 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
+      if (directional == 0) then @\
+      call c_ESMC_AttPackCreate(mthisfield, fconvention, & @\
+        fpurpose, fobject, attpacknest, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (directional == 1) then @\
+      call c_ESMC_AttPackCreate(mthisfield, convention, & @\
+        fpurpose, fobject, attpacknest, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (directional == 2) then @\
+      call c_ESMC_AttPackCreate(mthisfield, fconvention, & @\
+        purpose, fobject, attpacknest, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (directional == 3) then @\
+      call c_ESMC_AttPackCreate(mthisfield, convention, & @\
+        purpose, fobject, attpacknest, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      end if @\
+ @\
       do i = 1, localCount @\
        @\
         if (directional == 0) then @\
-        call c_ESMC_AttPackCreate(mthisfield, attrList(i), fconvention, & @\
-          fpurpose, fobject, attpacknest, localrc) @\
+        call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), fconvention, & @\
+          fpurpose, fobject, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
         else if (directional == 1) then @\
-        call c_ESMC_AttPackCreate(mthisfield, attrList(i), convention, & @\
-          fpurpose, fobject, attpacknest, localrc) @\
+        call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), convention, & @\
+          fpurpose, fobject, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
         else if (directional == 2) then @\
-        call c_ESMC_AttPackCreate(mthisfield, attrList(i), fconvention, & @\
-          purpose, fobject, attpacknest, localrc) @\
+        call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), fconvention, & @\
+          purpose, fobject, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
         else if (directional == 3) then @\
-        call c_ESMC_AttPackCreate(mthisfield, attrList(i), convention, & @\
-          purpose, fobject, attpacknest, localrc) @\
+        call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), convention, & @\
+          purpose, fobject, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
@@ -3275,18 +3301,20 @@ contains
         attpacknest = ESMF_ATTPACKNEST_OFF
       endif
 
-     call c_ESMC_AttPackCreate(array, name1, fconvention, &
+      call c_ESMC_AttPackCreate(array, fconvention, &
         fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(array, name2, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(array, name3, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(array, name4, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(array, name5, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(array, name6, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
+      call c_ESMC_AttPackAddAttribute(array, name1, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(array, name2, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(array, name3, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(array, name4, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(array, name5, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(array, name6, fconvention, &
+        fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -3587,26 +3615,28 @@ AttSetCharacterMacro(ESMF_Array, array, array)
         attpacknest = ESMF_ATTPACKNEST_OFF
       endif
 
-      call c_ESMC_AttPackCreate(comp%compp%base, name1, fconvention, &
+      call c_ESMC_AttPackCreate(comp%compp%base, fconvention, &
         fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name2, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name3, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name4, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name5, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name6, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name7, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name8, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name9, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name10, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name1, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name2, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name3, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name4, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name5, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name6, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name7, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name8, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name9, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name10, fconvention, &
+        fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4125,26 +4155,28 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
         attpacknest = ESMF_ATTPACKNEST_OFF
       endif
 
-      call c_ESMC_AttPackCreate(comp%compp%base, name1, fconvention, &
+      call c_ESMC_AttPackCreate(comp%compp%base, fconvention, &
         fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name2, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name3, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name4, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name5, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name6, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name7, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name8, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name9, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(comp%compp%base, name10, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name1, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name2, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name3, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name4, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name5, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name6, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name7, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name8, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name9, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(comp%compp%base, name10, fconvention, &
+        fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4617,18 +4649,20 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
         attpacknest = ESMF_ATTPACKNEST_OFF
       endif
 
-      call c_ESMC_AttPackCreate(field%ftypep%base, name1, fconvention, &
+      call c_ESMC_AttPackCreate(field%ftypep%base, fconvention, &
         fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(field%ftypep%base, name2, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(field%ftypep%base, name3, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(field%ftypep%base, name4, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(field%ftypep%base, name5, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(field%ftypep%base, name6, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
+      call c_ESMC_AttPackAddAttribute(field%ftypep%base, name1, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(field%ftypep%base, name2, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(field%ftypep%base, name3, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(field%ftypep%base, name4, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(field%ftypep%base, name5, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(field%ftypep%base, name6, fconvention, &
+        fpurpose, fobject, localrc)
 
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -5551,10 +5585,12 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
         attpacknest = ESMF_ATTPACKNEST_OFF
       endif
 
-      call c_ESMC_AttPackCreate(state%statep%base, name1, fconvention, &
+      call c_ESMC_AttPackCreate(state%statep%base, fconvention, &
         fpurpose, fobject, attpacknest, localrc)
-      call c_ESMC_AttPackCreate(state%statep%base, name2, fconvention, &
-        fpurpose, fobject, attpacknest, localrc)
+      call c_ESMC_AttPackAddAttribute(state%statep%base, name1, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(state%statep%base, name2, fconvention, &
+        fpurpose, fobject, localrc)
 
       lvalue = .true.
       if (state%statep%st == ESMF_STATE_IMPORT) then

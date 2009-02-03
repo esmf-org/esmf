@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.5 2009/01/30 15:44:42 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.6 2009/02/03 17:36:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,10 +38,10 @@ implicit none
 !
 ! This advanced example illustrates the proper methods of Attribute manipulation
 ! in a distributed environment to ensure consistency of metadata across the VM. 
-! This example is much more complicated that the previous two because we will
+! This example is much more complicated than the previous two because we will
 ! be following the flow of control of a typical model run with two gridded Components
 ! and one coupling Component.  We will start out in the application driver, declaring
-! Components, States, and the routines used to initialize, run and finalize the users
+! Components, States, and the routines used to initialize, run and finalize the user's
 ! model Components.  Then we will follow the control flow into the actual Component level
 ! through initialize, run, and finalize examining how Attributes are used to organize the
 ! metadata.
@@ -129,39 +129,15 @@ implicit none
       call ESMF_CplCompSetServices(cplcomp, usercpl_register, rc)
 
 !BOE
-! Now the individual Components will be run.  First we will initialize the two
-! gridded Components, the we will initialize the coupler Component. 
-! During each of these Component initialize routines Attribute
-! packages will be added, and the Attributes set.  The Attribute
-! hierarchies will also be linked.  As the gridded Components will
-! be running on exclusive portions of the VM, the Attributes will need to 
-! be made available across the VM using an {\tt ESMF\_StateReconcile()}
-! call in the coupler Component.  The majority of the work
-! with Attributes will take place in this portion of the 
-! model run, as metadata rarely needs to be changed during run time.  What 
-! follows are the calls from the driver code that run the initialize routines
-! for each of the Components.  After these calls we will step through the first 
-! cycle as explained in the introduction, through the intialize routins of
-! gridded Component 1 to gridded Component 2 to the coupler Component.
-!EOE
-
-!BOC
-      call ESMF_GridCompInitialize(gridcomp1, exportState=c1exp, rc=rc)
-      call ESMF_GridCompInitialize(gridcomp2, importState=c2imp, rc=rc)
-      call ESMF_CplCompInitialize(cplcomp, importState=c1exp, &
-        exportState=c2imp, rc=rc)
-!EOC
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  once state reconcile is fixed this stuff should be done before the initialize routines
-
-! Before the individual components are run, Attributes should be set at the
+! Before the individual components are initialized, run, and finalized Attributes should be set at the
 ! Component level.  Here we are going to use the ESG Attribute package on 
 ! the first gridded Component.  The Attribute package is added, and then
 ! each of the Attributes is set.  The Attribute hierarchy of the Component
 ! is then linked to the Attribute hierarchy of the export State in a 
 ! manual fashion.
+!EOE
 
+!BOC
       convESG = 'ESG'
       purpGen = 'general'
       name1 = 'discipline'
@@ -208,14 +184,44 @@ implicit none
       call ESMF_AttributeSet(gridcomp1, name10, value10, &
         convention=convESG, purpose=purpGen, rc=rc)
       
-      ! link the Component Attribute hierarchy to State
       call ESMF_AttributeSet(gridcomp1, c1exp, rc=rc) 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!EOC
+
+!BOE
+! Now the individual Components will be run.  First we will initialize the two
+! gridded Components, then we will initialize the coupler Component. 
+! During each of these Component initialize routines Attribute
+! packages will be added, and the Attributes set.  The Attribute
+! hierarchies will also be linked.  As the gridded Components will
+! be running on exclusive portions of the VM, the Attributes will need to 
+! be made available across the VM using an {\tt ESMF\_StateReconcile()}
+! call in the coupler Component.  The majority of the work
+! with Attributes will take place in this portion of the 
+! model run, as metadata rarely needs to be changed during run time.  
+!
+! What 
+! follows are the calls from the driver code that run the initialize, run, and finalize routines
+! for each of the Components.  After these calls we will step through the first 
+! cycle as explained in the introduction, through the intialize routins of
+! gridded Component 1 to gridded Component 2 to the coupler Component.
+!EOE
+
+!BOC
+      call ESMF_GridCompInitialize(gridcomp1, exportState=c1exp, rc=rc)
+      call ESMF_GridCompInitialize(gridcomp2, importState=c2imp, rc=rc)
+      call ESMF_CplCompInitialize(cplcomp, importState=c1exp, &
+        exportState=c2imp, rc=rc)
 
       call ESMF_GridCompRun(gridcomp1, exportState=c1exp, rc=rc)
       call ESMF_CplCompRun(cplcomp, importState=c1exp, &
         exportState=c2imp, rc=rc)
       call ESMF_GridCompRun(gridcomp2, importState=c2imp, rc=rc)
+      
+      call ESMF_GridCompFinalize(gridcomp1, exportState=c1exp, rc=rc)
+      call ESMF_GridCompFinalize(gridcomp2, importState=c2imp, rc=rc)
+      call ESMF_CplCompFinalize(cplcomp, importState=c1exp, &
+        exportState=c2imp, rc=rc)
+!EOC
       
       call ESMF_GridCompDestroy(gridcomp1, rc=rc)
       call ESMF_GridCompDestroy(gridcomp2, rc=rc)

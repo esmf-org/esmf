@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.2 2009/01/30 15:44:42 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.3 2009/02/03 17:36:15 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -254,19 +254,20 @@ module ESMF_AttributeUpdateMod
 ! In the first gridded Component initialize routine we need to create some
 ! Attribute packages and set all of the Attributes.  These Attributes will
 ! be attached to realistic Fields, containing a Grid, which are contained in a 
-! FieldBundle.  The first thing to do is declare variables and make the Fields.
+! FieldBundle.  The first thing to do is declare variables and make the Grid.
 !EOE
 
 !BOC
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
-                                   value3,value4,convESG,purpGen
+                                   value3,value4,convESG,purpGen,convCC
     type(ESMF_ArraySpec)        :: arrayspec
     type(ESMF_Grid)             :: grid
     type(ESMF_Field)            :: DPEDT,DTDT,DUDT,DVDT,PHIS,QTR,CNV,CONVCPT, &
                                    CONVKE,CONVPHI
     type(ESMF_FieldBundle)      :: fbundle
+    character(ESMF_MAXSTR),dimension(2)   :: attrList         
     
     rc = ESMF_SUCCESS
 
@@ -282,6 +283,34 @@ module ESMF_AttributeUpdateMod
       gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (rc/=ESMF_SUCCESS) return
+!EOC
+
+!BOE
+! This first bit is a verification that the {\tt ESMF\_StateReconcile()} call will correctly
+! reconcile Attributes and Attribute packages that are attached to the top level 
+! State in an Attribute hierarchy.  A customized Attribute package is set up and added
+! to the export State, as well as a single Attribute.  During the initialize phase of the
+! coupler Component, the structure of these Attributes should be reconciled across the
+! VM.  The value of the Attributes in this structure are not guaranteed after the 
+! completion of {\tt ESMF\_StateReconcile()}, as that is the responsibility of the
+! {\tt ESMF\_AttributeUpdate()} call.  There will be more on this subject when we get
+! to the coupler Component.
+!EOE
+
+!BOC
+    convCC = 'CustomConvention'
+    attrList(1) = 'coordinates'
+    attrList(2) = 'mask'
+
+    call ESMF_AttributeAdd(exportState, attrList=attrList, convention=convCC, &
+      purpose=purpGen, count=2, rc=rc)
+    call ESMF_AttributeSet(exportState, name='coordinates', value='latlon', &
+      convention=convCC, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(exportState, name='mask', value='yes', &
+      convention=convCC, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(exportState, name="TESTESTEST", &
+                           value="SUCCESUCCESUCCES", rc=status)
+    if (status .ne. ESMF_SUCCESS) return
 !EOC
 
 !BOE
@@ -566,12 +595,12 @@ module ESMF_AttributeUpdateMod
 ! in the first gridded Component on one set of the PETs in the VM is
 ! intended to be read and manipulated by the second gridded Component
 ! which runs on an exclusive set of the PETs of the VM for this 
-! application, we need to first make that data consistent across the
-! entire VM.  This is done with an {\tt ESMF\_StateReconcile()} call.
-! This State level call handles both the data, Fields and FieldBundles, 
-! and the metadata, Attribute and Attribute packages.  A flag will be
+! application.  We need to first make that data consistent across the
+! entire VM with the {\tt ESMF\_StateReconcile()} call.
+! This State level call handles both the data -- Fields and FieldBundles, 
+! and the metadata -- Attribute and Attribute packages.  In future releases a flag will be
 ! added to this call to allow the user to specify whether they want 
-! the metadata to be reconciled or not in future releases.
+! the metadata to be reconciled or not.
 !EOE
 
 !BOC
@@ -612,7 +641,7 @@ module ESMF_AttributeUpdateMod
 ! package inside the currently existing Attribute package on each Field.  We
 ! will also change the value of one of the Attributes in the original Attribute
 ! package, and remove another of the Attributes from the original Attribute 
-! packag on each of the Fields.  The first thing is to declare variables and
+! package on each of the Fields.  The first thing is to declare variables and
 ! get the Component, VM, State, and FieldBundle.
 !EOE
 
@@ -650,8 +679,8 @@ module ESMF_AttributeUpdateMod
 
 !BOE
 ! At this point we will extract each of the Fields in the FieldBundle in turn
-! and add a nested Attribute package, change the value of one Attribute in the
-! original Attribute package, and delete one other of the Attributes in the
+! and change the value of one Attribute in the original Attribute package, 
+! add a nested Attribute package, and delete one other of the Attributes in the
 ! original Attribute package.  These three changes represent, respectively, a
 ! structural, value, and structural change to the Attribute hierarchy during
 ! run time, which must be reconciled across the VM before the second gridded
@@ -697,10 +726,10 @@ module ESMF_AttributeUpdateMod
     integer, intent(out) :: rc
 
 !BOE
-! In the run phase of the component Component we must now ensure that the
+! In the run phase of the coupler Component we must now ensure that the
 ! entire VM again has a consistent view of the Attribute hierarchy.  This 
 ! is different from the communication done in the initialize phase of the
-! model run because the only structural change that has occured is in the
+! model run because the only structural change that has occurred is in the
 ! Attribute hierarchy.  Therefore an {\tt ESMF\_AttributeUpdate()} call can
 ! be used at this point to reconcile these changes.  It should be noted that
 ! the {\tt ESMF\_AttributeUpdate()} call will reconcile value changes to the
@@ -768,7 +797,7 @@ module ESMF_AttributeUpdateMod
 ! been ensured for consistency across the VM, including the exclusive
 ! piece of which is being used in this Component.  Therefore we are free
 ! to use the metadata as we wish, considering only that any changes we 
-! make to it during run time with have to first be reconciled before other
+! make to it during run time will have to first be reconciled before other
 ! parts of the VM can use them.  However, this is not our concern at this
 ! point because we will now explore the capabilities of {\tt ESMF\_AttributeWrite()}.
 !
@@ -776,7 +805,7 @@ module ESMF_AttributeUpdateMod
 ! capabilities of the Attribute class, soon to be replaced by the ESMF I/O
 ! class.  We will first write out the Attribute hierarchy to an .xml file, 
 ! after which we will write out the Attribute hierarchy to a more reader
-! friendly tab-delimited format.  Both of these write calls will put their
+! friendly tab-delimited format.  Both of these write calls will output their
 ! respective data into files in the execution directory, in either a .xml
 ! or .stdout file.  
 !EOE
