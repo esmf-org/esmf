@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.53 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.54 2009/02/03 17:34:18 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.53 2009/01/21 21:38:02 cdeluca Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.54 2009/02/03 17:34:18 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -268,6 +268,7 @@
     type(ESMF_StateItem), pointer :: stateitem
     type(ESMF_StateItemInfo), pointer :: si
     type(ESMF_State) :: wrapper
+    type(ESMF_Base) :: base
     integer(ESMF_KIND_I4), pointer, dimension(:) :: bptr
     integer :: offset, mypet
     type(ESMF_VMId) :: VMdummyID
@@ -305,7 +306,7 @@
     ! shortname for use in the code below
     si => stateInfoList(1)
     
-    !  THIS IS A HACK (+1) - to allow top level State to reconcile Attributes
+    ! (+1) to allow top level State space to reconcile Attributes
     si%mycount = state%statep%datacount + 1
     if (si%mycount .gt. 0) then
         allocate(si%idsend(si%mycount), stat=localrc)
@@ -326,24 +327,19 @@
                                        ESMF_CONTEXT, rc)) return
     endif
 
-    !  THIS IS A HACK - to allow top level State to reconcile Attributes
-    ! reset count
+    ! (+1) to allow top level State space to reconcile Attributes
     si%mycount = state%statep%datacount + 1
 
-    ! first pack up the Base underneath this State
-    ! check whether the change flags have been tripped, if so change the BaseID
     offset = 0
     call c_ESMC_GetID(state%statep%base, si%idsend(1), localrc)
-    !si%idsend(1) = si%idsend(1) * mypet * -1
     call c_ESMC_GetVMId(state%statep%base, si%vmidsend(1), localrc)
     si%objsend(1) = ESMF_ID_BASE%objectID
     bptr => si%blindsend(:,1)
-    call c_ESMC_BaseSerialize(state%statep%base, bptr(1), &
-                              bufsize, offset, localrc)
-    ! END OF HACK
+    call c_ESMC_BaseSerialize(state%statep%base, bptr(1), bufsize, offset, localrc)
 
-    !  THIS IS A HACK (starting from 2) - to allow top level State to reconcile Attributes
+    !  start from 2, top level State is number 1
     do i=2, si%mycount
+        ! i-1 because we are starting from 2, all else should be i
         stateitem => state%statep%datalist(i-1)
         offset = 0
         select case (stateitem%otype%ot)
@@ -569,9 +565,9 @@
     integer :: pets, mypet, i, j, k, l, m, localrc
     integer(ESMF_KIND_I4) :: count(1)
     type(ESMF_State) :: substate
+    type(ESMF_Base) :: base
     type(ESMF_FieldBundle) :: bundle
     type(ESMF_Field) :: field
-    type(ESMF_Base) :: base
     type(ESMF_Array) :: array
     type(ESMF_ArrayBundle) :: arraybundle
     character(len=ESMF_MAXSTR) :: thisname
@@ -758,12 +754,20 @@
 !!DEBUG  " num, recv id and obj id", k, si%idrecv(k), si%objrecv(k)
            enddo
 
+          ! unpack the top level State Attributes first
+          if (si%objrecv(1) == ESMF_ID_BASE%objectID) then
+            bptr => si%blindrecv(:,1)
+            offset = 0
+            call c_ESMC_BaseDeserialize(base, bptr, offset, localrc)
+            call c_ESMC_AttributeCopy(base, state%statep%base, localrc)
+          endif
+
            !!! TODO: 
            !!!   make a combined object id list here, so only one copy of
            !!!   the missing object is sent.
 
-!!DEBUG "ready to check object matches given list from ", j
-           do k=1, si%theircount
+           ! k from 2 because the top level State was number 1
+           do k=2, si%theircount
 !!DEBUG " checking remote id for object ", k, "value is ", si%idrecv(k)
              ihave = .false.
              do l=1, si%mycount
@@ -773,29 +777,18 @@
                 if ((si%idrecv(k) .eq. si%idsend(l)) &
                 .and. & 
      (ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) .eq. ESMF_TRUE) ) then
-                  !  THIS IS A HACK - to allow top level State to reconcile Attributes
-                  if (.not. (si%objrecv(k)==ESMF_ID_BASE%objectID .and. &
-                      si%objsend(l)==ESMF_ID_BASE%objectID)) then
-                  !  END OF HACK
                           ihave = .true.
 !!DEBUG "  objects match, no need to create proxy"
                      exit
-                  endif
                  endif
              enddo
+             
 !!DEBUG "  end of match loop for remote object ", k, "ihave flag is ", ihave
              if (.not. ihave) then
+             
 !!DEBUG " need to create local proxy object"
                 offset = 0  
                 select case (si%objrecv(k))
-                  !  THIS IS A HACK - to allow top level State to reconcile Attributes
-                   case (ESMF_ID_BASE%objectID)
-!!DEBUG "need to create proxy base, remote id=", si%idrecv(k)
-                    bptr => si%blindrecv(:,k)
-                    call c_ESMC_BaseDeserialize(base, bptr, offset, localrc)
-                    ! set this top level state's root attribute to the base's root attribute
-                    call c_ESMC_AttributeCopy(base, state%statep%base, localrc)
-                  !  END OF HACK
                    case (ESMF_ID_FIELDBUNDLE%objectID)
 !!DEBUG "need to create proxy bundle, remote id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
