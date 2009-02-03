@@ -37,6 +37,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
+#include <cstring>
 
 /**
  * This program may be used to generate a patch-interpolation weight matrix from
@@ -51,27 +52,49 @@ int main(int argc, char *argv[]) {
   Par::Init("PATCHLOG", false);
 
   Mesh srcmesh, dstmesh;
+  char *srcGridFile,*dstGridFile,*wghtFile;
+  bool argsOk,addPole;
 
   try {
 
-    if (argc != 4) {
-      if (Par::Rank() == 0) std::cerr << "Usage:" << argv[0] << " ingrid outgrid weightfile" << std::endl;
+    // Parse commandline
+    argsOk = false;
+    addPole = true;
+    if (argc == 4) {
+      srcGridFile=argv[1];
+      dstGridFile=argv[2];
+      wghtFile=argv[3];
+      argsOk=true;
+      addPole=true;
+    } else if (argc == 5) {
+      if (strcmp(argv[1],"-nopole")==0) {
+	srcGridFile=argv[2];
+	dstGridFile=argv[3];
+	wghtFile=argv[4];
+	argsOk=true;	
+	addPole=false;
+      }
+    }    
+  
+    if (!argsOk) {
+      if (Par::Rank() == 0) std::cerr << "Usage:" << argv[0] << " [-nopole]  ingrid outgrid weightfile" << std::endl;
       Throw() << "Bye" << std::endl;
     }
 
-     if (Par::Rank() == 0) std::cout << "Loading " << argv[1] << std::endl;
-     LoadNCDualMeshPar(srcmesh, argv[1]);
-     if (Par::Rank() == 0) std::cout << "Loading " << argv[2] << std::endl;
-     LoadNCDualMeshPar(dstmesh, argv[2]);
+    // Load files into Meshes
+    if (Par::Rank() == 0) std::cout << "Loading " << srcGridFile << std::endl;
+    LoadNCDualMeshPar(srcmesh, srcGridFile);
+    if (Par::Rank() == 0) std::cout << "Loading " << dstGridFile << std::endl;
+    LoadNCDualMeshPar(dstmesh, dstGridFile);
+    
+    // Commit the meshes
+    srcmesh.Commit();
+    dstmesh.Commit();
+    
 
-     // Commit the meshes
-     srcmesh.Commit();
-     dstmesh.Commit();
-
-
-     // Use the coordinate fields for interpolation purposes
-     MEField<> &scoord = *srcmesh.GetCoordField();
-     MEField<> &dcoord = *dstmesh.GetCoordField();
+    // Use the coordinate fields for interpolation purposes
+    MEField<> &scoord = *srcmesh.GetCoordField();
+    MEField<> &dcoord = *dstmesh.GetCoordField();
 
      // Set up parallel ghosting (necessary for patch)
      MEField<> *psc = &scoord;
@@ -80,9 +103,13 @@ int main(int argc, char *argv[]) {
 
      // Pole constraints
      IWeights pole_constraints;
-     UInt constraint_id = srcmesh.DefineContext("pole_constraints");
-     MeshAddPole(srcmesh, 1, constraint_id, pole_constraints);
-     MeshAddPole(srcmesh, 2, constraint_id, pole_constraints);
+
+     // Add poles if requested
+     if (addPole) {
+       UInt constraint_id = srcmesh.DefineContext("pole_constraints");
+       MeshAddPole(srcmesh, 1, constraint_id, pole_constraints);
+       MeshAddPole(srcmesh, 2, constraint_id, pole_constraints);
+     }
 
      // Only for Debug
      //WriteMesh(srcmesh, "src");
@@ -101,11 +128,14 @@ int main(int argc, char *argv[]) {
      if (Par::Rank() == 0) std::cout << "Forming patch weights..." << std::endl;
      interp(0, wts);
 
-     // Get the pole matrix on the right processors
-     wts.GatherToCol(pole_constraints);
-
-     // Take pole constraint out of matrix
-     wts.AssimilateConstraints(pole_constraints);
+     // Factor out poles if they exist
+     if (addPole) {
+       // Get the pole matrix on the right processors
+       wts.GatherToCol(pole_constraints);
+       
+       // Take pole constraint out of matrix
+       wts.AssimilateConstraints(pole_constraints);
+     }
 
      // Remove non-locally owned weights (assuming destination mesh decomposition)
      MEField<> *mask = dstmesh.GetField("mask");
@@ -113,13 +143,13 @@ int main(int argc, char *argv[]) {
      wts.Prune(dstmesh, mask);
 
      // Redistribute weights in an IO friendly decomposition
-     if (Par::Rank() == 0) std::cout << "Writing weights to " << argv[3] << std::endl;
+     if (Par::Rank() == 0) std::cout << "Writing weights to " << wghtFile << std::endl;
      GatherForWrite(wts);
 
 //wts.Print(Par::Out());
 
      // Write the weights
-     WriteNCMatFilePar(argv[1], argv[2], argv[3], wts, NCMATPAR_ORDER_SEQ);
+     WriteNCMatFilePar(srcGridFile, dstGridFile, wghtFile, wts, NCMATPAR_ORDER_SEQ);
 
   } 
    catch (std::exception &x) {
