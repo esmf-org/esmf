@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.134 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.135 2009/02/04 23:14:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.134 2009/01/21 21:37:59 cdeluca Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.135 2009/02/04 23:14:15 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -80,7 +80,7 @@
       type(ESMF_StaggerLoc)                       :: staggerloc8
       logical :: correct
 
-      integer :: im, jm, km
+      integer :: im, jm, km, ldecount
       real(ESMF_KIND_R8) :: xmin,xmax,ymin,ymax
       real(ESMF_KIND_R8), dimension(:), allocatable :: delta
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: fptr
@@ -529,7 +529,7 @@
       f3 = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
                         name="Field 0", iospec=ios, rc=rc)
-      call ESMF_FieldGet(f3, grid=grid3, rc=rc)
+      call ESMF_FieldGet(f3, grid=grid3, localDeCount=ldecount, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Field created with no data Test"
       call ESMF_GridGet(grid, name=gname, rc=rc)

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.16 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMCI_Array.h,v 1.17 2009/02/04 23:14:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -64,12 +64,12 @@ namespace ESMCI {
     // PET-local information
     ESMC_LocalArray **larrayList;     // [localDeCount]
     void **larrayBaseAddrList;        // [localDeCount]
-    int *exclusiveLBound;             // [dimCount*localDeCount]
-    int *exclusiveUBound;             // [dimCount*localDeCount]
-    int *computationalLBound;         // [dimCount*localDeCount]
-    int *computationalUBound;         // [dimCount*localDeCount]
-    int *totalLBound;                 // [dimCount*localDeCount]
-    int *totalUBound;                 // [dimCount*localDeCount]
+    int *exclusiveLBound;             // [redDimCount*localDeCount]
+    int *exclusiveUBound;             // [redDimCount*localDeCount]
+    int *computationalLBound;         // [redDimCount*localDeCount]
+    int *computationalUBound;         // [redDimCount*localDeCount]
+    int *totalLBound;                 // [redDimCount*localDeCount]
+    int *totalUBound;                 // [redDimCount*localDeCount]
     int tensorCount;                  // number of tensor dimensions
     int tensorElementCount;           // number of tensor elements per element
     int *undistLBound;                // [tensorCount]

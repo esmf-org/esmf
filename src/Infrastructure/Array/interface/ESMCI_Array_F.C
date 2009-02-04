@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.17 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMCI_Array_F.C,v 1.18 2009/02/04 23:14:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -220,7 +220,8 @@ extern "C" {
       // distgridToPackedArrayMap was provided -> do some error checking
       if ((*distgridToPackedArrayMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- distgridToPackedArrayMap array must be of rank 1", ESMC_CONTEXT, rc);
+          "- distgridToPackedArrayMap array must be of rank 1", ESMC_CONTEXT,
+          rc);
         return;
       }
       if ((*distgridToPackedArrayMap)->extent[0] < dimCount){
@@ -262,7 +263,8 @@ extern "C" {
       }
       if ((*undistLBound)->extent[0] < (*ptr)->getTensorCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- undistLBound array must at least be of size tensorCount", ESMC_CONTEXT, rc);
+          "- undistLBound array must at least be of size tensorCount", 
+          ESMC_CONTEXT, rc);
         return;
       }
       // fill in undistLBound
@@ -281,7 +283,8 @@ extern "C" {
       }
       if ((*undistUBound)->extent[0] < (*ptr)->getTensorCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- undistUBound array must at least be of size tensorCount", ESMC_CONTEXT, rc);
+          "- undistUBound array must at least be of size tensorCount", 
+          ESMC_CONTEXT, rc);
         return;
       }
       // fill in undistUBound
@@ -290,7 +293,7 @@ extern "C" {
       }
     }
 
-
+    int redDimCount = (*ptr)->getRank() - (*ptr)->getTensorCount();
     // fill exclusiveLBound
     if (*exclusiveLBound != NULL){
       // exclusiveLBound was provided -> do some error checking
@@ -299,9 +302,10 @@ extern "C" {
           "- exclusiveLBound array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
-      if ((*exclusiveLBound)->extent[0] < dimCount){
+      if ((*exclusiveLBound)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of exclusiveLBound must be of size 'dimCount'", ESMC_CONTEXT, rc);
+          "- 1st dimension of exclusiveLBound must be of size 'dimCount'",
+          ESMC_CONTEXT, rc);
         return;
       }
       if ((*exclusiveLBound)->extent[1] < localDeCount){
@@ -311,12 +315,13 @@ extern "C" {
         return;
       }
       // fill in the values: The interface allows to pass in exclusiveLBound
-      // arrays which are larger than dimCount x localDeCount. Consequently it
-      // is necessary to memcpy strips of contiguous data since it cannot be
+      // arrays which are larger than redDimCount x localDeCount. Consequently
+      // it is necessary to memcpy strips of contiguous data since it cannot be
       // assumed that all data ends up contiguous in the exclusiveLBound array.
       for (int i=0; i<localDeCount; i++)
         memcpy(&((*exclusiveLBound)->array[i*(*exclusiveLBound)->extent[0]]),
-          &(((*ptr)->getExclusiveLBound())[i*dimCount]), sizeof(int)*dimCount);
+          &(((*ptr)->getExclusiveLBound())[i*redDimCount]),
+          sizeof(int)*redDimCount);
     }
     // fill exclusiveUBound
     if (*exclusiveUBound != NULL){
@@ -326,9 +331,10 @@ extern "C" {
           "- exclusiveUBound array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
-      if ((*exclusiveUBound)->extent[0] < dimCount){
+      if ((*exclusiveUBound)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of exclusiveUBound must be of size 'dimCount'", ESMC_CONTEXT, rc);
+          "- 1st dimension of exclusiveUBound must be of size 'dimCount'", 
+          ESMC_CONTEXT, rc);
         return;
       }
       if ((*exclusiveUBound)->extent[1] < localDeCount){
@@ -338,12 +344,13 @@ extern "C" {
         return;
       }
       // fill in the values: The interface allows to pass in exclusiveUBound
-      // arrays which are larger than dimCount x localDeCount. Consequently it
-      // is necessary to memcpy strips of contiguous data since it cannot be
+      // arrays which are larger than redDimCount x localDeCount. Consequently
+      // it is necessary to memcpy strips of contiguous data since it cannot be
       // assumed that all data ends up contiguous in the exclusiveUBound array.
       for (int i=0; i<localDeCount; i++)
         memcpy(&((*exclusiveUBound)->array[i*(*exclusiveUBound)->extent[0]]),
-          &(((*ptr)->getExclusiveUBound())[i*dimCount]), sizeof(int)*dimCount);
+          &(((*ptr)->getExclusiveUBound())[i*redDimCount]),
+          sizeof(int)*redDimCount);
     }
     // fill computationalLBound
     if (*computationalLBound != NULL){
@@ -353,9 +360,10 @@ extern "C" {
           "- computationalLBound array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
-      if ((*computationalLBound)->extent[0] < dimCount){
+      if ((*computationalLBound)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of computationalLBound must be of size 'dimCount'", ESMC_CONTEXT, rc);
+          "- 1st dim of computationalLBound must be of size 'dimCount'", 
+          ESMC_CONTEXT, rc);
         return;
       }
       if ((*computationalLBound)->extent[1] < localDeCount){
@@ -365,15 +373,15 @@ extern "C" {
         return;
       }
       // fill in the values: The interface allows to pass in computationalLBound
-      // arrays which are larger than dimCount x localDeCount. Consequently it
-      // is necessary to memcpy strips of contiguous data since it cannot be
+      // arrays which are larger than redDimCount x localDeCount. Consequently
+      // it is necessary to memcpy strips of contiguous data since it cannot be
       // assumed that all data ends up contiguous in the computationalLBound
       // array.
       for (int i=0; i<localDeCount; i++)
         memcpy(&((*computationalLBound)->
           array[i*(*computationalLBound)->extent[0]]),
-          &(((*ptr)->getComputationalLBound())[i*dimCount]), 
-          sizeof(int)*dimCount);
+          &(((*ptr)->getComputationalLBound())[i*redDimCount]), 
+          sizeof(int)*redDimCount);
     }
     // fill computationalUBound
     if (*computationalUBound != NULL){
@@ -383,9 +391,10 @@ extern "C" {
           "- computationalUBound array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
-      if ((*computationalUBound)->extent[0] < dimCount){
+      if ((*computationalUBound)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of computationalUBound must be of size 'dimCount'", ESMC_CONTEXT, rc);
+          "- 1st dim of computationalUBound must be of size 'dimCount'", 
+          ESMC_CONTEXT, rc);
         return;
       }
       if ((*computationalUBound)->extent[1] < localDeCount){
@@ -395,15 +404,15 @@ extern "C" {
         return;
       }
       // fill in the values: The interface allows to pass in computationalUBound
-      // arrays which are larger than dimCount x localDeCount. Consequently it
-      // is necessary to memcpy strips of contiguous data since it cannot be
+      // arrays which are larger than redDimCount x localDeCount. Consequently
+      // it is necessary to memcpy strips of contiguous data since it cannot be
       // assumed that all data ends up contiguous in the computationalUBound
       // array.
       for (int i=0; i<localDeCount; i++)
         memcpy(&((*computationalUBound)->
           array[i*(*computationalUBound)->extent[0]]),
-          &(((*ptr)->getComputationalUBound())[i*dimCount]), 
-          sizeof(int) * dimCount);
+          &(((*ptr)->getComputationalUBound())[i*redDimCount]), 
+          sizeof(int) * redDimCount);
     }
     // fill totalLBound
     if (*totalLBound != NULL){
@@ -413,9 +422,10 @@ extern "C" {
           "- totalLBound array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
-      if ((*totalLBound)->extent[0] < dimCount){
+      if ((*totalLBound)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of totalLBound must be of size 'dimCount'", ESMC_CONTEXT, rc);
+          "- 1st dimension of totalLBound must be of size 'dimCount'", 
+          ESMC_CONTEXT, rc);
         return;
       }
       if ((*totalLBound)->extent[1] < localDeCount){
@@ -425,12 +435,13 @@ extern "C" {
         return;
       }
       // fill in the values: The interface allows to pass in totalLBound
-      // arrays which are larger than dimCount x localDeCount. Consequently it
-      // is necessary to memcpy strips of contiguous data since it cannot be
+      // arrays which are larger than redDimCount x localDeCount. Consequently
+      // it is necessary to memcpy strips of contiguous data since it cannot be
       // assumed that all data ends up contiguous in the totalLBound array.
       for (int i=0; i<localDeCount; i++)
         memcpy(&((*totalLBound)->array[i*(*totalLBound)->extent[0]]),
-          &(((*ptr)->getTotalLBound())[i*dimCount]), sizeof(int)*dimCount);
+          &(((*ptr)->getTotalLBound())[i*redDimCount]),
+          sizeof(int)*redDimCount);
     }
     // fill totalUBound
     if (*totalUBound != NULL){
@@ -440,9 +451,10 @@ extern "C" {
           "- totalUBound array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
-      if ((*totalUBound)->extent[0] < dimCount){
+      if ((*totalUBound)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of totalUBound must be of size 'dimCount'", ESMC_CONTEXT, rc);
+          "- 1st dimension of totalUBound must be of size 'dimCount'", 
+          ESMC_CONTEXT, rc);
         return;
       }
       if ((*totalUBound)->extent[1] < localDeCount){
@@ -452,12 +464,13 @@ extern "C" {
         return;
       }
       // fill in the values: The interface allows to pass in totalUBound
-      // arrays which are larger than dimCount x localDeCount. Consequently it
-      // is necessary to memcpy strips of contiguous data since it cannot be
+      // arrays which are larger than redDimCount x localDeCount. Consequently
+      // it is necessary to memcpy strips of contiguous data since it cannot be
       // assumed that all data ends up contiguous in the totalUBound array.
       for (int i=0; i<localDeCount; i++)
         memcpy(&((*totalUBound)->array[i*(*totalUBound)->extent[0]]),
-          &(((*ptr)->getTotalUBound())[i*dimCount]), sizeof(int)*dimCount);
+          &(((*ptr)->getTotalUBound())[i*redDimCount]),
+          sizeof(int)*redDimCount);
     }
     // fill computationalLWidth
     if (*computationalLWidth != NULL){
@@ -467,7 +480,7 @@ extern "C" {
           "- computationalLWidth array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
-      if ((*computationalLWidth)->extent[0] < dimCount){
+      if ((*computationalLWidth)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of computationalLWidth must be of size 'dimCount'",
           rc);
@@ -481,10 +494,10 @@ extern "C" {
       }
       // fill in values
       for (int i=0; i<localDeCount; i++)
-        for (int j=0; j<dimCount; j++)
+        for (int j=0; j<redDimCount; j++)
           (*computationalLWidth)->array[i*(*computationalLWidth)->extent[0]+j] =
-            ((*ptr)->getExclusiveLBound())[i*dimCount+j] -
-            ((*ptr)->getComputationalLBound())[i*dimCount+j];
+            ((*ptr)->getExclusiveLBound())[i*redDimCount+j] -
+            ((*ptr)->getComputationalLBound())[i*redDimCount+j];
     }
     // fill computationalUWidth
     if (*computationalUWidth != NULL){
@@ -494,7 +507,7 @@ extern "C" {
           "- computationalUWidth array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
-      if ((*computationalUWidth)->extent[0] < dimCount){
+      if ((*computationalUWidth)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of computationalUWidth must be of size 'dimCount'",
           rc);
@@ -508,10 +521,10 @@ extern "C" {
       }
       // fill in values
       for (int i=0; i<localDeCount; i++)
-        for (int j=0; j<dimCount; j++)
+        for (int j=0; j<redDimCount; j++)
           (*computationalUWidth)->array[i*(*computationalUWidth)->extent[0]+j] =
-            ((*ptr)->getComputationalUBound())[i*dimCount+j] -
-            ((*ptr)->getExclusiveUBound())[i*dimCount+j];
+            ((*ptr)->getComputationalUBound())[i*redDimCount+j] -
+            ((*ptr)->getExclusiveUBound())[i*redDimCount+j];
     }
     // fill totalLWidth
     if (*totalLWidth != NULL){
@@ -521,7 +534,7 @@ extern "C" {
           "- totalLWidth array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
-      if ((*totalLWidth)->extent[0] < dimCount){
+      if ((*totalLWidth)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of totalLWidth must be of size 'dimCount'",
           rc);
@@ -535,10 +548,10 @@ extern "C" {
       }
       // fill in values
       for (int i=0; i<localDeCount; i++)
-        for (int j=0; j<dimCount; j++)
+        for (int j=0; j<redDimCount; j++)
           (*totalLWidth)->array[i*(*totalLWidth)->extent[0]+j] =
-            ((*ptr)->getComputationalLBound())[i*dimCount+j] -
-            ((*ptr)->getTotalLBound())[i*dimCount+j];
+            ((*ptr)->getComputationalLBound())[i*redDimCount+j] -
+            ((*ptr)->getTotalLBound())[i*redDimCount+j];
     }
     // fill totalUWidth
     if (*totalUWidth != NULL){
@@ -548,7 +561,7 @@ extern "C" {
           "- totalUWidth array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
-      if ((*totalUWidth)->extent[0] < dimCount){
+      if ((*totalUWidth)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of totalUWidth must be of size 'dimCount'",
           rc);
@@ -562,10 +575,10 @@ extern "C" {
       }
       // fill in values
       for (int i=0; i<localDeCount; i++)
-        for (int j=0; j<dimCount; j++)
+        for (int j=0; j<redDimCount; j++)
           (*totalUWidth)->array[i*(*totalUWidth)->extent[0]+j] =
-            ((*ptr)->getTotalUBound())[i*dimCount+j] -
-            ((*ptr)->getComputationalUBound())[i*dimCount+j];
+            ((*ptr)->getTotalUBound())[i*redDimCount+j] -
+            ((*ptr)->getComputationalUBound())[i*redDimCount+j];
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -802,7 +815,8 @@ extern "C" {
     int tensorCount = (*array)->getTensorCount();
     if ((*tensorIndexArg)->extent[0] != tensorCount){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-        "- first dim of tensorIndexArg array must be of size tensorCount", ESMC_CONTEXT, rc);
+        "- first dim of tensorIndexArg array must be of size tensorCount", 
+        ESMC_CONTEXT, rc);
       return;
     }
     const int *undistLBound = (*array)->getUndistLBound();

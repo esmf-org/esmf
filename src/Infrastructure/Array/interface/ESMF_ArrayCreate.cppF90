@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.36 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.37 2009/02/04 23:14:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.36 2009/01/21 21:37:58 cdeluca Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.37 2009/02/04 23:14:15 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -211,23 +211,23 @@ contains
 ! \item[distgrid] @\
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and @\
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal @\
-!      to the rank of farray. @\
+!      to the rank of {\tt farrayPtr}. @\
 ! \item[{[copyflag]}] @\
 !      Specifies whether the Array object will reference the memory allocation @\
-!      provided by {\tt farray} directly or will copy the data from @\
-!      {\tt farray} into a new memory allocation. Valid options are @\
+!      provided by {\tt farrayPtr} directly or will copy the data from @\
+!      {\tt farrayPtr} into a new memory allocation. Valid options are @\
 !      {\tt ESMF\_DATA\_REF} (default) or {\tt ESMF\_DATA\_COPY}. @\
 !      Depending on the specific situation the {\tt ESMF\_DATA\_REF} option @\
-!      may be unsafe when specifying an array slice for {\tt farray}. @\
+!      may be unsafe when specifying an array slice for {\tt farrayPtr}. @\
 ! \item[{[distgridToArrayMap]}] @\
 !      List that contains as many elements as is indicated by @\
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
-!      the DistGrid object to a dimension in {\tt farray} by specifying the @\
+!      the DistGrid object to a dimension in {\tt farrayPtr} by specifying the @\
 !      appropriate Array dimension index. The default is to map all of @\
 !      {\tt distgrid}|s dimensions against the lower dimensions of the @\
-!      {\tt farray} argument in sequence, i.e. {\tt distgridToArrayMap = @\
+!      {\tt farrayPtr} argument in sequence, i.e. {\tt distgridToArrayMap = @\
 !      (/1, 2, .../)}. @\
-!      Unmapped {\tt farray} dimensions are not decomposed dimensions and @\
+!      Unmapped {\tt farrayPtr} dimensions are not decomposed dimensions and @\
 !      form a tensor of rank = Array.rank - DistGrid.dimCount. @\
 !      All {\tt distgridToArrayMap} entries must be greater than or equal @\
 !      to zero and smaller than or equal to the Array rank. It is erroneous @\
@@ -271,7 +271,7 @@ contains
 !      region with respect to the upper corner of the computational region. @\
 !      The default is a vector that contains the remaining number of elements @\
 !      in each direction as to fit the union of exclusive and computational @\
-!      region into the memory region provided by the {\tt farray} argument. @\
+!      region into the memory region provided by the {\tt farrayPtr} argument. @\
 ! \item[{[staggerLoc]}] @\
 !      Stagger location is an arbitrary integer index. This information is @\
 !      used to correctly apply connection transformations of the @\

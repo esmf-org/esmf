@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.57 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_Config.F90,v 1.58 2009/02/04 23:14:15 theurich Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -141,7 +141,7 @@
 ! Revised parameter table to fit Fortran 90 standard.
 
        integer,   parameter :: LSZ = 256  ! Maximum line size
-       integer,   parameter :: MSZ = 200  ! Used to size buffer; this is
+       integer,   parameter :: MSZ = 512  ! Used to size buffer; this is
                                           ! usually *less* than the number
                                           ! of non-blank/comment lines
                                           ! (because most lines are shorter

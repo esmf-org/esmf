@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.33 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.34 2009/02/04 23:14:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.33 2009/01/21 21:37:59 cdeluca Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.34 2009/02/04 23:14:15 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -111,7 +111,7 @@ contains
   ! Private name; call using ESMF_FieldGet()
   subroutine ESMF_FieldGetDefault(field, geomtype, grid, mesh, locstream, array, typekind, dimCount, &
     staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    maxHaloLWidth, maxHaloUWidth, name, iospec, rc) 
+    maxHaloLWidth, maxHaloUWidth, localDeCount, name, iospec, rc) 
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(inout) :: field    
@@ -128,6 +128,7 @@ contains
     integer, intent(out), optional :: ungriddedUBound(:)
     integer, intent(out), optional :: maxHaloLWidth(:)
     integer, intent(out), optional :: maxHaloUWidth(:)
+    integer, intent(out), optional :: localDeCount
     character(len=*), intent(out), optional :: name
     type(ESMF_IOSpec), intent(out), optional :: iospec ! NOT IMPLEMENTED
     integer, intent(out), optional :: rc     
@@ -170,10 +171,7 @@ contains
 !       specifying the appropriate {\tt field} dimension index. The default is to
 !       map all of the {\tt grid}|s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
-!       to one and smaller than or equal to the {\tt field} rank.
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry
-!       multiple times. The total ungridded dimensions in the {\tt field}
+!       The total ungridded dimensions in the {\tt field}
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
@@ -198,7 +196,7 @@ contains
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[maxHaloLWidth]}]
 !       Lower bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -209,7 +207,7 @@ contains
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -218,6 +216,9 @@ contains
 !       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method. 
 !       HALO OPERATION NOT IMPLEMENTED
+! \item [{[localDeCount]}]
+!       Upon return this holds the number of PET-local DEs defined in
+!       the DELayout associated with the Field object.
 ! \item [{[name]}]
 !       Name of queried item.
 ! \item [{[iospec]}]
@@ -338,6 +339,19 @@ contains
         endif
         call ESMF_ArrayGet(ftype%array, &
                            rank=dimCount, rc=rc)
+        if (ESMF_LogMsgFoundError(rc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+    endif
+
+    if (present(localDeCount)) then
+        if (ftype%datastatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+             "Cannot return localDeCount because no data attached to Field", &
+                             ESMF_CONTEXT, rc)) return
+        endif
+        call ESMF_ArrayGet(ftype%array, &
+                           localDeCount=localDeCount, rc=rc)
         if (ESMF_LogMsgFoundError(rc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -670,7 +684,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     integer :: i, j
     logical :: filled(ESMF_MAXDIM)
 
-    integer :: localDeCount, dimCount, l_localDe
+    integer :: localDeCount, dimCount, l_localDe, dimCount_repdim
     integer, allocatable :: arrayBnd(:, :)
     integer, allocatable :: undistBnd(:)
     integer, allocatable :: distgridToArrayMap(:)
@@ -793,33 +807,52 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     allocate(l_tlb(fieldrank), l_tub(fieldrank))
     allocate(l_ec(fieldrank), l_cc(fieldrank), l_tc(fieldrank))
 
+    ! count the number of ungridded dimension in Grid to Field mapping
+    dimCount_repdim = 0
+    do i = 1, gridrank
+        if(field%ftypep%gridToFieldMap(i) == 0) dimCount_repdim = dimCount_repdim + 1
+    enddo
+
     if (present(totalLBound) .or. present(totalUBound)) then
     
         ! Get Size of Array info
         call ESMF_ArrayGet(field%ftypep%array, dimCount=dimCount, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
 
         ! Allocate storage for Array info
+        ! size of undistBnd is total number of undistributed dimensions
+        ! including replicated dimensions
         allocate(arrayBnd(dimCount, 0:localDeCount-1))
-        allocate(undistBnd(fieldRank-dimCount))
+        allocate(undistBnd(fieldRank-dimCount+dimCount_repdim))
         allocate(distgridToPackedArrayMap(dimCount))
         allocate(distgridToArrayMap(dimCount))
               
-       ! get distributed dimension map
-       call ESMF_ArrayGet(field%ftypep%array, & 
-         distgridToPackedArrayMap=distgridToPackedArrayMap, &
-         distgridToArrayMap=distgridToArrayMap, rc=localrc)
+        ! get distributed dimension map
+        call ESMF_ArrayGet(field%ftypep%array, & 
+            distgridToPackedArrayMap=distgridToPackedArrayMap, &
+            distgridToArrayMap=distgridToArrayMap, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
     
         ! fill totalLBounds
         if (present(totalLBound)) then
             call ESMF_ArrayGet(field%ftypep%array, totalLBound=arrayBnd, & 
                 undistLBound=undistBnd, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
     
             ! set distributed dimensions
             filled=.false.
             do i=1, dimCount
-               l_tlb(distgridToArrayMap(i))=&
-                arrayBnd(distgridToPackedArrayMap(i),l_localDe)
-               filled(distgridToArrayMap(i))=.true.
+                if(distgridToPackedArrayMap(i) /= 0) then
+                   l_tlb(distgridToArrayMap(i))=&
+                    arrayBnd(distgridToPackedArrayMap(i),l_localDe)
+                   filled(distgridToArrayMap(i))=.true.
+                endif
             enddo
     
             ! set undistributed dimensions
@@ -836,13 +869,18 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         if (present(totalUBound)) then
             call ESMF_ArrayGet(field%ftypep%array, totalUBound=arrayBnd, & 
                 undistUBound=undistBnd, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
     
             ! set distributed dimensions
             filled=.false.
             do i=1, dimCount
-                l_tub(distgridToArrayMap(i))=&
-                arrayBnd(distgridToPackedArrayMap(i),l_localDe)
-               filled(distgridToArrayMap(i))=.true.
+                if(distgridToPackedArrayMap(i) /= 0) then
+                    l_tub(distgridToArrayMap(i))=&
+                    arrayBnd(distgridToPackedArrayMap(i),l_localDe)
+                    filled(distgridToArrayMap(i))=.true.
+                endif
             enddo
     
             ! set undistributed dimensions
@@ -1397,10 +1435,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       specifying the appropriate {\tt field} dimension index. The default is to
 !       map all of the {\tt grid}|s dimensions against the lowest dimensions of
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
-!       to one and smaller than or equal to the {\tt field} rank.
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry
-!       multiple times. The total ungridded dimensions in the {\tt field}
+!       The total ungridded dimensions in the {\tt field}
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
@@ -1425,7 +1460,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[maxHaloLWidth]}]
 !       Lower bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -1436,7 +1471,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[maxHaloUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
-!       of dimensions in the {\tt grid}.  However, ordering of the elements
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
@@ -1477,6 +1512,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     logical, dimension(ESMF_MAXDIM)        :: flipflop
     integer                                :: forderIndex, i
     integer                                :: gridrank, arrayrank, uglb_size, ugub_size
+    integer                                :: grid_repdimcount, gridrank_norep
     integer                                :: localDeCount, l_localDe
 
 
@@ -1522,23 +1558,42 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         endif 
     endif
 
-    if(present(maxHaloLWidth) ) then
-        if(size(maxHaloLWidth) .ne. gridrank) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-              "maxHaloLWidth size must equal to grid dimension count", &
-               ESMF_CONTEXT, rc)
-           return
-        endif 
+    ! set up local gridToFieldMap
+    grid_repdimcount = 0
+    if(present(gridToFieldMap)) then
+        l_g2fm(1:size(gridToFieldMap)) = gridToFieldMap
+        do i = 1, size(gridToFieldMap)
+            if(gridToFieldMap(i) == 0) grid_repdimcount = grid_repdimcount + 1
+        enddo
+    else
+        do i = 1, ESMF_MAXDIM
+            l_g2fm(i) = i
+        enddo
     endif
-
-    if(present(maxHaloUWidth) ) then
-        if(size(maxHaloUWidth) .ne. gridrank) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-              "maxHaloUWidth size must equal to grid dimension count", &
-               ESMF_CONTEXT, rc)
-           return
-        endif 
-    endif
+    gridrank_norep = gridrank - grid_repdimcount
+    ! gridToFieldMap elements must be in range 0...fieldRank and unique  
+    ! algorithm to check element uniqueness:  
+    !   run time: O(ESMF_MAXDIM)  
+    !   memory:   O(2*ESMF_MAXDIM)  
+    !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector  
+    flipflop = .false.  
+    do i = 1, gridrank
+       if(l_g2fm(i) .lt. 0 .and. l_g2fm(i) .gt. arrayrank) then  
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
+                 "- gridToFieldMap element must be within range 0...array rank", &  
+                   ESMF_CONTEXT, rc)   
+           return  
+       endif  
+       if(l_g2fm(i) /= 0) then
+           if(flipflop(l_g2fm(i))) then  
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
+                     "- gridToFieldMap element must be unique", &  
+                       ESMF_CONTEXT, rc)   
+               return  
+           endif  
+           flipflop(l_g2fm(i)) = .true.  
+       endif
+    enddo  
 
     ! User must either provide both ungriddedLBound and ungriddedUBound
     ! with same size or don't specify either one of them. There is no
@@ -1569,6 +1624,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
     ! the result Field/array rank
     arrayrank = gridrank + uglb_size
+    arrayrank = arrayrank - grid_repdimcount
 
     ! check argument validity
     if(present(totalLBound)) then
@@ -1596,46 +1652,34 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         endif 
     endif
 
-    ! set up local gridToFieldMap
-    if(present(gridToFieldMap)) then
-        l_g2fm(1:size(gridToFieldMap)) = gridToFieldMap
-    else
-        do i = 1, ESMF_MAXDIM
-            l_g2fm(i) = i
-        enddo
+    if(present(maxHaloLWidth) ) then
+        if(size(maxHaloLWidth) .ne. gridrank_norep) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+              "maxHaloLWidth size must equal to gridded dimension count", &
+               ESMF_CONTEXT, rc)
+           return
+        endif 
     endif
-    ! gridToFieldMap elements must be in range 1...fieldRank and unique  
-    ! algorithm to check element uniqueness:  
-    !   run time: O(ESMF_MAXDIM)  
-    !   memory:   O(2*ESMF_MAXDIM)  
-    !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector  
-    flipflop = .false.  
-    do i = 1, gridrank
-       if(l_g2fm(i) .lt. 1 .and. l_g2fm(i) .gt. arrayrank) then  
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
-                 "- gridToFieldMap element must be within range 1...array rank", &  
-                   ESMF_CONTEXT, rc)   
-           return  
-       endif  
-       if(flipflop(l_g2fm(i))) then  
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &   
-                 "- gridToFieldMap element must be unique", &  
-                   ESMF_CONTEXT, rc)   
-           return  
-       endif  
-       flipflop(l_g2fm(i)) = .true.  
-    enddo  
+
+    if(present(maxHaloUWidth) ) then
+        if(size(maxHaloUWidth) .ne. gridrank_norep) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+              "maxHaloUWidth size must equal to gridded dimension count", &
+               ESMF_CONTEXT, rc)
+           return
+        endif 
+    endif
 
     ! At this point input arguments are validated
     ! allocate the return value arrays
     allocate(l_alb(arrayrank), l_aub(arrayrank), l_ac(arrayrank))
     l_mhlw = 0
     if(present(maxHaloLWidth)) then
-        l_mhlw(1:gridrank) = maxHaloLWidth(1:gridrank)
+        l_mhlw(1:size(maxHaloLWidth)) = maxHaloLWidth
     endif
     l_mhuw = 0
     if(present(maxHaloUWidth)) then
-        l_mhuw(1:gridrank) = maxHaloUWidth(1:gridrank)
+        l_mhuw(1:size(maxHaloUWidth)) = maxHaloUWidth
     endif
 
     ! First we compute the ungridded bounds:
@@ -1643,18 +1687,22 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     ! compute ungridded Fortran array bounds
     f2gm = 0
     do i = 1, gridrank
-        f2gm(l_g2fm(i)) = i
+        if(l_g2fm(i) /= 0) f2gm(l_g2fm(i)) = i
     enddo
     forderIndex = 1
-    do i = 1, arrayrank
-        ! if the i-th dimension is ungridded
-        if(f2gm(i) .eq. 0) then
-            l_alb(i) = l_uglb(forderIndex)
-            l_aub(i) = l_ugub(forderIndex)
-            l_ac(i)  = l_aub(i) - l_alb(i) + 1
-            forderIndex = forderIndex + 1
-        endif
-    enddo
+    ! ungridded bounds info present indicates field has ungridded dimension
+    ! otherwise we don't have to worry about this.
+    if(uglb_size /= 0) then
+        do i = 1, arrayrank
+            ! if the i-th dimension is ungridded
+            if(f2gm(i) .eq. 0) then
+                l_alb(i) = l_uglb(forderIndex)
+                l_aub(i) = l_ugub(forderIndex)
+                l_ac(i)  = l_aub(i) - l_alb(i) + 1
+                forderIndex = forderIndex + 1
+            endif
+        enddo
+    endif
 
     ! Next compute the gridded bounds using the mapping
     ! from Field to Grid computed in last step

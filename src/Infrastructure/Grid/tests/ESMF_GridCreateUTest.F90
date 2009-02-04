@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.87 2009/01/28 22:27:41 peggyli Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.88 2009/02/04 23:14:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.87 2009/01/28 22:27:41 peggyli Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.88 2009/02/04 23:14:15 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -1234,7 +1234,7 @@ program ESMF_GridCreateUTest
   ! Create an array on an unallocated stagger location
   array=ESMF_ArrayCreateFromGrid(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
           gridToArrayMap=(/0,4,3/), ungriddedLBound=(/2,3/), ungriddedUBound=(/7,6/), &
-          rc=localrc)
+          totalLwidth=(/1,1/), totalUwidth=(/1,1/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! make sure array is valid

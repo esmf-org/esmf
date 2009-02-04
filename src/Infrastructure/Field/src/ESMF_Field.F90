@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.329 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.330 2009/02/04 23:14:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -176,7 +176,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.329 2009/01/21 21:37:59 cdeluca Exp $'
+    '$Id: ESMF_Field.F90,v 1.330 2009/02/04 23:14:15 theurich Exp $'
 
 !==============================================================================
 !
@@ -341,7 +341,7 @@ contains
       type(ESMF_FieldType), pointer :: ftypep
       integer :: exclLBounds(ESMF_MAXDIM)  ! exclusive grid lower bounds
       integer :: exclUBounds(ESMF_MAXDIM)  ! exclusive grid upper bounds
-      integer :: gridrank, arrayrank
+      integer :: gridrank, arrayrank, gridrank_norep
       integer :: i, lDE                        ! helper variables to verify bounds
       integer :: localDECount, dimCount        ! and distgrid
       integer, allocatable :: distgridToGridMap(:)
@@ -424,13 +424,6 @@ contains
                  ESMF_CONTEXT, rc)
              return
           endif 
-          ! Verify that array rank is greater than or equal to grid rank + ungridded bound rank
-          if ( arrayrank .lt. gridrank) then
-              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                 "grid rank + ungridded Bound rank not equal to array rank", &
-                  ESMF_CONTEXT, rc)
-              return
-          endif
           
           ! Verify the distgrids in array and grid match.
           if(.not. ESMF_DistGridMatch(gridDistGrid, arrayDistGrid, rc=localrc)) then
@@ -465,6 +458,18 @@ contains
              return
           endif 
 
+          ! Verify that array rank is greater than or equal to grid rank + ungridded bound rank
+          gridrank_norep = gridrank
+          do i = 1, dimCount
+            if(distgridToPackedArrayMap(i) == 0) gridrank_norep = gridrank_norep - 1
+          enddo
+          if ( arrayrank .lt. gridrank_norep) then
+              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                 "grid rank + ungridded Bound rank not equal to array rank", &
+                  ESMF_CONTEXT, rc)
+              return
+          endif
+
           ! verify array computational bounds match grid computational bounds per localDE
           do lDE=0, localDECount-1
               allocate(gridCompUBnd(dimCount), gridCompLBnd(dimCount))
@@ -478,17 +483,21 @@ contains
                  return
               endif 
               do i=1, dimCount
-                  if(gridCompLBnd(distgridToGridMap(i)) .ne. arrayCompLBnd(distgridToPackedArrayMap(i), lDE)) then
-                      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                         "grid computationalLBound does not match array computationalLBound", &
-                          ESMF_CONTEXT, rc)
-                      return
-                  endif
-                  if(gridCompUBnd(distgridToGridMap(i)) .ne. arrayCompUBnd(distgridToPackedArrayMap(i), lDE)) then
-                      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
-                         "grid computationalUBound does not match array computationalUBound", &
-                          ESMF_CONTEXT, rc)
-                      return
+                  if(distgridToPackedArrayMap(i) .ne. 0) then
+                      if(gridCompLBnd(distgridToGridMap(i)) .ne. &
+                        arrayCompLBnd(distgridToPackedArrayMap(i), lDE)) then
+                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                             "grid computationalLBound does not match array computationalLBound", &
+                              ESMF_CONTEXT, rc)
+                          return
+                      endif
+                      if(gridCompUBnd(distgridToGridMap(i)) .ne. &
+                        arrayCompUBnd(distgridToPackedArrayMap(i), lDE)) then
+                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                             "grid computationalUBound does not match array computationalUBound", &
+                              ESMF_CONTEXT, rc)
+                          return
+                      endif
                   endif
               enddo
               deallocate(gridCompUBnd, gridCompLBnd)

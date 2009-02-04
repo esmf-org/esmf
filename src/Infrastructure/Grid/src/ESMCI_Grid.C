@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.80 2009/01/28 22:11:59 peggyli Exp $
+// $Id: ESMCI_Grid.C,v 1.81 2009/02/04 23:14:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.80 2009/01/28 22:11:59 peggyli Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.81 2009/02/04 23:14:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -367,7 +367,7 @@ int Grid::addCoordArray(
     
     // fill in ArraySpec with information describing coordinate
     arrayspec->set(coordDimCount[coord], typekind);
-
+   
     //// Initialize distgridToArrayMap array to 0 to make all unspecified dimensions
     //// replicated
     for (int i=0; i<dimCount; i++) {
@@ -416,8 +416,7 @@ int Grid::addCoordArray(
     }
 
     // set size of computational lower bound 
-    // (needs to be total dimCount of distGrid even if coord dimCount < distgrid dimCount)
-    compLWidthIntInt->extent[0]=distDimCount;
+    compLWidthIntInt->extent[0]=coordDimCount[coord];
     
     // init ComputationalUWidth to 0
     for (int i=0; i<coordDistDimCount; i++) {
@@ -425,8 +424,7 @@ int Grid::addCoordArray(
     }
 
     // set size of computational upper bound 
-    // (needs to be total dimCount of distGrid even if coord dimCount < distgrid dimCount)
-    compUWidthIntInt->extent[0]=distDimCount;
+    compUWidthIntInt->extent[0]=coordDimCount[coord];;
     
     //// Expand the boundaries of the computational region of the Array 
     //// (distributed and undistributed) to hold the stagger padding
@@ -457,10 +455,14 @@ int Grid::addCoordArray(
       printf("%d ", compLWidthIntIntArray[i]);
     }
     printf("\n");
-     DEBUG */
+      DEBUG */
 
     //// Optionally fix the lower memory bounds of each DE's memory chunk
     if (indexflag==ESMF_INDEX_USER) {
+      // Set size of array based on coord dim
+      staggerMemLBoundIntInt->extent[0]=coordDimCount[coord];
+
+      // Fill Array
       j=0;
       for (int i=0; i<coordDimCount[coord]; i++) {
 	int gi=coordDimMap[coord][i];
