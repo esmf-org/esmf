@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: testing.tex,v 1.15 2008/04/08 16:45:23 donstark Exp $
+% CVS $Id: testing.tex,v 1.16 2009/02/04 21:10:57 donstark Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -188,7 +188,7 @@ handle this case, the unit test must verify results from each processor as in th
 
 \subsubsection{Test Harness}
 The Test Harness is a highly configurable test control system for conducting 
-thorough testing of the Remapping and Redistribution processes. The Test Harness 
+thorough testing of the Regridding and Redistribution processes. The Test Harness 
 consists of a single shared executable and a collection of customizable resource
 files that define an ensemble of test configurations tailored to each ESMF class.
 The Test Harness is integrated into the Unit test framework, enabling
@@ -216,19 +216,19 @@ used by the test harness routines. They contain a collection of
 same memory topology, distribution, and grid association. The problem descriptor 
 strings employ the Field Taxonomy to describe an ensemble of tests. For instance, a
 \textit{problem descriptor string} might describe the ensemble of all 
-remappings between a pair of two-dimensional blocks memory, each with a  specific
+regriddings between a pair of two-dimensional blocks memory, each with a  specific
 type of distribution and grid association. One such configuration could look like
 
 \begin{center}
 \begin{verbatim}
-[ B1 G1; B2 G2 ] =C=> [ B1 G1; B2 G2 ] @{+,+}
-[ B1 G1; B2 G2 ] =B=> [ B1 G1; B2 G2 ] @{+,+} 
+[ B1 G1; B2 G2 ] --> [ B1 G1; B2 G2 ] 
+[ B1 G1; B2 G2 ] =B=> [ B1 G1; B2 G2 ]
 \end{verbatim}
 \end{center}
 
-This pair of problem descriptor strings defines two types of remapping tests.
-The first describes an ensemble of conservative remapping tests between a 
-block distributed A-grid and a block distributed B-grid. The second string describes
+This pair of problem descriptor strings defines two types of regridding tests.
+The first describes an ensemble of redistributions between two block
+distributed grids. The second string describes
 an ensemble of first order bilinear remapping tests between the same two 
 distributed grids. See section~\ref{sec:harness} for a complete discussion of the 
 syntax and use of problem descriptor strings.
@@ -263,33 +263,34 @@ configuration is described in terms of the Field Taxonomy syntax and user provid
 strings. The intent is not to provide a exhaustive description of the test, but 
 rather to provide a useful description of the failed tests.
 
-Consider the previous example of the two descriptor strings describing an ensemble 
-of remapping tests. 
+Consider another example similar to the previous one, where two descriptor strings 
+describing an ensemble regridding tests. The first uses the patch method and the 
+second uses bilinear interpolation.
 
 \begin{center}
 \begin{verbatim}
-[ B1 G1; B2 G2 ] =C=> [ B1 G1; B2 G2 ] @{+,+}
-[ B1 G1; B2 G2 ] =B=> [ B1 G1; B2 G2 ] @{+,+} 
+[ B1 G1; B2 G2 ] =P=> [ B1 G1; B2 G2 ] 
+[ B1 G1; B2 G2 ] =B=> [ B1 G1; B2 G2 ] 
 \end{verbatim}
 \end{center}
 
 Suppose the associated specifier files indicate that the source  grid is rectilinear
 and is 100 X 50 in size. The destination grid is also rectilinear and is 80 X 20 
-in size. The remapping is conducted from the A-grid position of the source grid to 
-the B-grid stagger of the destination grid. Both grids are block distributed in two 
+in size. 
+Both grids are block distributed in two 
 ways, 1 X NPETS and NPETS X 1. And suppose that the first dimension of both the
-source and destination grids are periodic. If the test succeeds for the conservative
-remapping, but fails for one of the first order bilinear remapping configurations, the reported results
+source and destination grids are periodic. If the test succeeds for the bilinear
+regridding, but fails for one of the patch regridding configurations, the reported results
 could look something like
 
 \begin{verbatim}
-SUCCESS: [B1 G1; B2 G2 ] =C=> [B1 G1@(+,+); B2 G2@(+,+) ] 
-FAILURE: [B1{1} G1{100}+P; B2{npets} G2{50} ] =B=> [B1{1} G1{80}@(+,+)+P; B2{npets} G2{20}@(+,+) ] 
+SUCCESS: [B1 G1; B2 G2 ] =B=> [B1 G1; B2 G2 ] 
+FAILURE: [B1{1} G1{100}+P; B2{npets} G2{50} ] =P=> [B1{1} G1{80}+P; B2{npets} G2{20} ] 
      failure at line 101 of test.F90
-SUCCESS: [ B1{npets} G1{100} +P; B2{1} G2{50} ] =B=> [ B1{npets} G1{80}@(+,+)+P; B2{1} G2{20}@(+,+) ] 
+SUCCESS: [ B1{npets} G1{100} +P; B2{1} G2{50} ] =P=> [ B1{npets} G1{80}+P; B2{1} G2{20} ] 
 \end{verbatim}
 
-The report indicates that all the test configurations for the conservative remapping 
+The report indicates that all the test configurations for the bilinear regridding
 are successful. This is indicated by the key word SUCCESS which is followed by the 
 successful problem descriptor string. Since all of the tests in the first case pass,
 there is no need to include any of the specifier information. For the second
@@ -297,7 +298,8 @@ ensemble of tests, one configuration passed, while the other failed. In this cas
 since there is a mixture of successes and failures, the report includes 
 specifier information for all configurations to help indicate the source of the
 test failure. The supplemental information, while not a complete problem description
-since it lacks items such as the physical coordinates of the grid and the nature of the test field, includes information crucial to isolating the failed test.
+since it lacks items such as the physical coordinates of the grid and the nature of 
+the test field, includes information crucial to isolating the failed test.
 
 \subsubsection{System Tests}
 
