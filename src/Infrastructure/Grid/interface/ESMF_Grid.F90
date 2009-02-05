@@ -221,7 +221,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.101 2009/01/28 22:18:50 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.102 2009/02/05 21:58:00 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1541,6 +1541,7 @@ end subroutine ESMF_GridConvertIndex
     integer :: dimCount
     integer :: i,ungriddedDimCount, arrayDimCount, undistArrayDimCount, bndpos
     logical :: contains_nonzero
+    integer :: gridUsedDimCount
    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1608,19 +1609,23 @@ end subroutine ESMF_GridConvertIndex
        endif
     endif
 
-    ! calc full Array DimCount
-    ! Its the ungriddedDimCount + the number of non-zero entries in gridToArrayMap
-    arrayDimCount=ungriddedDimCount
+   ! calc the number of dimensions from the grid being used (e.g. with non-zero mapping)
     if (present(gridToArrayMap)) then
+       gridUsedDimCount=0
        do i=1,dimCount
           if (gridToArrayMap(i) .gt. 0) then
-	     arrayDimCount=arrayDimCount+1
+             gridUsedDimCount=gridUsedDimCount+1
           endif
        enddo
    else
        ! Default assumes all grid dims are used so add number of grid dims
-       arrayDimCount=arrayDimCount+dimCount
+       gridUsedDimCount=dimCount
    endif
+
+    ! calc full Array DimCount
+    ! Its the ungriddedDimCount + the number of non-zero entries in gridToArrayMap
+    arrayDimCount=ungriddedDimCount+gridUsedDimCount
+
 
     ! Make sure gridToArrayMap is correct size
     if (present(gridToArrayMap)) then
@@ -1683,8 +1688,8 @@ end subroutine ESMF_GridConvertIndex
     ! create Array
     array=ESMF_ArrayCreate(arrayspec=arrayspec, &
               distgrid=distgrid, distgridToArrayMap=distgridToArrayMap, &
-              computationalEdgeLWidth=compELWidth(1:dimCount), &
-              computationalEdgeUWidth=compEUWidth(1:dimCount), &
+              computationalEdgeLWidth=compELWidth(1:gridUsedDimCount), &
+              computationalEdgeUWidth=compEUWidth(1:gridUsedDimCount), &
               totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
               indexflag=indexflag, staggerLoc=localStaggerLoc%staggerloc, &
               undistLBound=arrayLBound, undistUBound=arrayUBound, name=name, &
@@ -1791,6 +1796,7 @@ end subroutine ESMF_GridConvertIndex
     logical :: filled(ESMF_MAXDIM)
     logical :: contains_nonzero   
     integer :: fieldDimCount
+    integer :: gridUsedDimCount
 
 
     ! Initialize return code; assume failure until success is certain
@@ -1857,23 +1863,27 @@ end subroutine ESMF_GridConvertIndex
        endif
     endif
     
+
     ! if the Grid is arbitrary, the array dimension will be different depending on how many
     ! grid dimensions are arbitrarily distributed
     if (decompType .eq. ESMF_GRID_NONARBITRARY) then
 
-       ! calc full Array DimCount
-       ! Its the ungriddedDimCount + the number of non-zero entries in gridToFieldMap
-       arrayDimCount=ungriddedDimCount
+       ! calc the number of dimensions from the grid being used (e.g. with non-zero mapping)
        if (present(gridToFieldMap)) then
+          gridUsedDimCount=0
           do i=1,dimCount
              if (gridToFieldMap(i) .gt. 0) then
-	        arrayDimCount=arrayDimCount+1
+                gridUsedDimCount=gridUsedDimCount+1
              endif
           enddo
-       else
+      else
           ! Default assumes all grid dims are used so add number of grid dims
-          arrayDimCount=arrayDimCount+dimCount
-       endif
+          gridUsedDimCount=dimCount
+      endif
+
+      ! calc full Array DimCount
+      ! Its the ungriddedDimCount + the number of non-zero entries in gridToArrayMap
+       arrayDimCount=ungriddedDimCount+gridUsedDimCount
 
        ! Make sure gridToFieldMap is correct size
        if (present(gridToFieldMap)) then
@@ -1912,7 +1922,7 @@ end subroutine ESMF_GridConvertIndex
        endif
 
        ! Check distgridToArrayMap
-       if (size(computationalEdgeLWidth) < dimCount) then
+       if (size(computationalEdgeLWidth) < gridUsedDimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
                       "- computationalEdgeLWidth is too small", & 
                              ESMF_CONTEXT, rc) 
@@ -1920,7 +1930,7 @@ end subroutine ESMF_GridConvertIndex
        endif
 
        ! Check distgridToArrayMap
-       if (size(computationalEdgeUWidth) < dimCount) then
+       if (size(computationalEdgeUWidth) < gridUsedDimCount) then
            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
                       "- computationalEdgeUWidth is too small", & 
                              ESMF_CONTEXT, rc) 
@@ -2189,10 +2199,9 @@ end subroutine ESMF_GridConvertIndex
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Indicates whether the indices in the grid are to be interpreted to form
-!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
-!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
-!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
+!      Indicates the indexing scheme to be used in the new Grid. Please see
+!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[destroyDistgrid]}]
 !      If true, when the Grid is destroyed the DistGrid will be destroyed also. 
 !      Defaults to false. 
@@ -2956,10 +2965,9 @@ end subroutine ESMF_GridConvertIndex
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Indicates whether the indices in the grid are to be interpreted to form
-!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
-!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
-!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
+!      Indicates the indexing scheme to be used in the new Grid. Please see
+!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
@@ -3934,10 +3942,9 @@ end subroutine ESMF_GridConvertIndex
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Indicates whether the indices in the grid are to be interpreted to form
-!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
-!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
-!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
+!      Indicates the indexing scheme to be used in the new Grid. Please see
+!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)
@@ -5304,7 +5311,8 @@ end subroutine ESMF_GridConvertIndex
 !     Specification of how the stagger locations should align with the cell
 !     index space. The array should be of size greater or equal to the Grid dimCount. 
 ! \item[{[indexflag]}]
-!    Flag that indicates how the DE-local indices are to be defined.
+!    Flag indicating the indexing scheme being used in the Grid. Please
+!    see Section~\ref{opt:indexflag} for the list of options. 
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -11640,10 +11648,9 @@ endif
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Indicates whether the indices in the grid are to be interpreted to form
-!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
-!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
-!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
+!      Indicates the indexing scheme to be used in the new Grid. Please see
+!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[destroyDistgrid]}]
 !      If true, when the Grid is destroyed the DistGrid will be destroyed also. 
 !      Defaults to false. 
@@ -12110,10 +12117,9 @@ endif
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Indicates whether the indices in the grid are to be interpreted to form
-!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
-!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
-!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
+!      Indicates the indexing scheme to be used in the new Grid. Please see
+!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
@@ -13103,10 +13109,9 @@ endif
 !      Only used when indexflag is {\tt ESMF\_INDEX\_USER}. May be overridden
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
-!      Indicates whether the indices in the grid are to be interpreted to form
-!      a flat pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}), fixed by the user
-!      for each DE ({\tt ESMF\_INDEX\_USER}),  or are to 
-!      be taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.      
+!      Indicates the indexing scheme to be used in the new Grid. Please see
+!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)

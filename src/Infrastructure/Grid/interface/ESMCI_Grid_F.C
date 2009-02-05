@@ -1012,7 +1012,7 @@ extern "C" {
 	
       } else {
 	// given the array get the exclusive bounds of the localDE
-	arrayLBnd=array->getExclusiveLBound()+localDE*distDimCount;
+	arrayLBnd=array->getExclusiveLBound()+localDE*coordDimCount[coord];
 	
 	for (int i=0; i<coordDimCount[coord]; i++) {
 	    (*_exclusiveLBound)->array[i]=arrayLBnd[i];
@@ -1042,7 +1042,7 @@ extern "C" {
 	}
       } else {
 	// given the array get the exclusive bounds of the localDE
-	arrayUBnd=array->getExclusiveUBound()+localDE*distDimCount;
+	arrayUBnd=array->getExclusiveUBound()+localDE*coordDimCount[coord];
 	
 	for (int i=0; i<coordDimCount[coord]; i++) {
 	    (*_exclusiveUBound)->array[i]=arrayUBnd[i];
@@ -1074,8 +1074,8 @@ extern "C" {
       } else {
 
 	// given the array get the exclusive bounds of the localDE
-	arrayLBnd=array->getExclusiveLBound()+localDE*distDimCount;
-	arrayUBnd=array->getExclusiveUBound()+localDE*distDimCount;
+	arrayLBnd=array->getExclusiveLBound()+localDE*coordDimCount[coord];
+	arrayUBnd=array->getExclusiveUBound()+localDE*coordDimCount[coord];
 	
 	for (int i=0; i<coordDimCount[coord]; i++) {
 	    (*_exclusiveCount)->array[i]=arrayUBnd[i]-arrayLBnd[i]+1;
@@ -1119,7 +1119,7 @@ extern "C" {
          }	  
       } else {
 	// given the array get the exclusive bounds of the localDE
-	arrayLBnd=array->getComputationalLBound()+localDE*distDimCount;
+	arrayLBnd=array->getComputationalLBound()+localDE*coordDimCount[coord];
 	
 	for (int i=0; i<coordDimCount[coord]; i++) {
 	    (*_computationalLBound)->array[i]=arrayLBnd[i];
@@ -1162,7 +1162,7 @@ extern "C" {
          }
       } else {
 	// given the array get the exclusive bounds of the localDE
-	arrayUBnd=array->getComputationalUBound()+localDE*distDimCount;
+	arrayUBnd=array->getComputationalUBound()+localDE*coordDimCount[coord];
 		
 	for (int i=0; i<coordDimCount[coord]; i++) {
 	    (*_computationalUBound)->array[i]=arrayUBnd[i];
@@ -1216,7 +1216,7 @@ extern "C" {
       }
 
       // now that we have the array get the total bounds of the localDE
-      arrayLBnd=array->getTotalLBound()+localDE*distDimCount;
+      arrayLBnd=array->getTotalLBound()+localDE*coordDimCount[coord];
   
       for (int i=0; i<coordDimCount[coord]; i++) {
 	  (*_totalLBound)->array[i]=arrayLBnd[i];
@@ -1238,7 +1238,7 @@ extern "C" {
       }
 
       // now that we have the array get the total bounds of the localDE
-      arrayUBnd=array->getTotalUBound()+localDE*distDimCount;
+      arrayUBnd=array->getTotalUBound()+localDE*coordDimCount[coord];
 
       for (int i=0; i<coordDimCount[coord]; i++) {
 	  (*_totalUBound)->array[i]=arrayUBnd[i];
@@ -1260,10 +1260,10 @@ extern "C" {
       }
 
       // now that we have the array get the total bounds of the localDE
-      arrayLBnd=array->getTotalLBound()+localDE*distDimCount;
+      arrayLBnd=array->getTotalLBound()+localDE*coordDimCount[coord];
 
       // now that we have the array get the total bounds of the localDE
-      arrayUBnd=array->getTotalUBound()+localDE*distDimCount;
+      arrayUBnd=array->getTotalUBound()+localDE*coordDimCount[coord];
 
       for (int i=0; i<coordDimCount[coord]; i++) {
 	  (*_totalCount)->array[i]=arrayUBnd[i]-arrayLBnd[i]+1;
