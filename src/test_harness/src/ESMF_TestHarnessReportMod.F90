@@ -33,8 +33,6 @@
 !-------------------------------------------------------------------------------
 ! !USES:
 
-! use ESMF_Mod
-! use ESMF_TestHarnessTypesMod
   use ESMF_TestHarnessUtilMod
 
   implicit none
@@ -89,13 +87,15 @@
 
     case( Harness_Redist )
       laction = "-->"
-    case( Harness_BilinearRemap )
+    case( Harness_BilinearRegrid )
       laction = "=B=>"
-    case( Harness_ConservRemap )
+    case( Harness_PatchRegrid )
+      laction = "=P=>"
+    case( Harness_ConservRegrid )
       laction = "=C=>"
-    case( Harness_2ndConservRemap )
+    case( Harness_2ndConservRegrid )
       laction = "=S=>"
-    case( Harness_NearNeighRemap )
+    case( Harness_NearNeighRegrid )
       laction = "=N=>"
     case( Harness_Error )
       ! error

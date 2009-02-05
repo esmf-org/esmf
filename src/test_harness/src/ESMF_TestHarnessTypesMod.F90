@@ -51,12 +51,13 @@
   ! Process Parameters
   integer, parameter :: Harness_Error            = 0
   integer, parameter :: Harness_Redist           = 1
-  integer, parameter :: Harness_BilinearRemap    = 2
-  integer, parameter :: Harness_ConservRemap     = 3
-  integer, parameter :: Harness_2ndConservRemap  = 4
-  integer, parameter :: Harness_ExchangeRemap    = 5
-  integer, parameter :: Harness_NearNeighRemap   = 6
-  integer, parameter :: Harness_UserProvRemap    = 7
+  integer, parameter :: Harness_BilinearRegrid   = 2
+  integer, parameter :: Harness_PatchRegrid      = 3
+  integer, parameter :: Harness_ConservRegrid    = 4
+  integer, parameter :: Harness_2ndConservRegrid = 5
+  integer, parameter :: Harness_ExchangeRegrid   = 6
+  integer, parameter :: Harness_NearNeighRegrid  = 7
+  integer, parameter :: Harness_UserProvRegrid   = 8
 
   ! Distribution Parameters
   integer, parameter :: Harness_DistError        = 100
@@ -70,13 +71,29 @@
   integer, parameter :: Harness_SphericalGrid    = 202
   integer, parameter :: Harness_UnstructuredGrid = 203
 
-
   ! Test Result Parameters
   integer, parameter :: HarnessTest_SUCCESS      = 1000
   integer, parameter :: HarnessTest_FAILURE      = 1001
   integer, parameter :: HarnessTest_UNDEFINED    = 1002
 
+  ! Physical and Mathematical Parameters
+  real(ESMF_KIND_R8), parameter :: zero   = 0.0
+  real(ESMF_KIND_R8), parameter :: one    = 1.0
+  real(ESMF_KIND_R8), parameter :: two    = 2.0
+  real(ESMF_KIND_R8), parameter :: three  = 3.0
+  real(ESMF_KIND_R8), parameter :: four   = 4.0
+  real(ESMF_KIND_R8), parameter :: five   = 5.0
+  real(ESMF_KIND_R8), parameter :: half   = 0.5
+  real(ESMF_KIND_R8), parameter :: quart  = 0.25
+  real(ESMF_KIND_R8), parameter :: bignum = 1.e+20
+  real(ESMF_KIND_R8), parameter :: tiny   = 1.e-14
+  real(ESMF_KIND_R8), parameter :: pi     = 3.14159265359
+  real(ESMF_KIND_R8), parameter :: pi2    = two*pi
+  real(ESMF_KIND_R8), parameter :: pih    = half*pi
+  real(ESMF_KIND_R8), parameter :: DtoR   = pi/180.0
+  real(ESMF_KIND_R8), parameter :: RtoD   = 180.0/pi
 
+!
 !-------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public
@@ -150,6 +167,7 @@
      integer :: nGspecs                   ! number of grid spec records
      type(grid_specification_record), pointer :: src_grid(:)
      type(grid_specification_record), pointer :: dst_grid(:)
+     type(test_function_record), pointer ::  testfunction(:)
   end type grid_record
 
 !-------------------------------------------------------------------------------
@@ -196,7 +214,7 @@
      character(ESMF_MAXSTR) :: testClass       ! test class
      character(ESMF_MAXSTR) :: reportType      ! test result report type 
      character(ESMF_MAXSTR) :: setupReportType ! setup report type 
-     integer :: numRecords                     ! number of problem descriptor records
+     integer :: numRecords                     ! number of problem descriptor filenames
      type(problem_descriptor_records), pointer :: rcrd(:)  ! problem descriptor recd 
      integer :: failures                       ! number of test failures
   end type harness_descriptor

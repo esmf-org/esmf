@@ -557,33 +557,69 @@ contains
   ! select type of test result report
   !-----------------------------------------------------------------------------
   select case (trim(adjustL(har%testClass)))
+     !--------------------------------------------------------------------------
+     ! Field Tests
+     !--------------------------------------------------------------------------
      case("ARRAY")
         do kfile=1,har%numRecords
            do kstr=1,har%rcrd(kfile)%numStrings
-              ! test of a single problem descriptor string w/ specifiers
-              call array_redist_test(har%rcrd(kfile)%str(kstr),har%failures,   &
+              !-----------------------------------------------------------------
+              ! test of a single problem descriptor string w/ all specifiers
+              !-----------------------------------------------------------------
+              if(har%rcrd(kfile)%str(kstr)%process%tag == Harness_Redist) then
+                 !--------------------------------------------------------------
+                 ! run the array test with redist 
+                 !--------------------------------------------------------------
+                 call array_redist_test(har%rcrd(kfile)%str(kstr),har%failures,&
                                      har%reportType, VM, localrc)
-              if (ESMF_LogMsgFoundError(localrc," error array redist test",    &
-                 rcToReturn=returnrc)) return
+                 if (ESMF_LogMsgFoundError(localrc," error array redist test", &
+                     rcToReturn=returnrc)) return
+              else
+                 !--------------------------------------------------------------
+                 ! run the array test with ssm
+                 !--------------------------------------------------------------
+!                call array_regrid_test(har%rcrd(kfile)%str(kstr),             &
+!                                  har%failures, har%reportType, VM, localrc)
+!                if (ESMF_LogMsgFoundError(localrc," error array ssm test",    &
+!                    rcToReturn=returnrc)) return
+              endif
            enddo  ! kstr
         enddo    ! kfile
 
-     case("ARRAYBUNDLE")
-     return
+!    case("ARRAYBUNDLE")
+!    return
 
+     !--------------------------------------------------------------------------
+     ! Field Tests
+     !--------------------------------------------------------------------------
      case("FIELD")
         do kfile=1,har%numRecords
            do kstr=1,har%rcrd(kfile)%numStrings
-              ! test of a single problem descriptor string w/ specifiers
-!             call field_remap_test(har%rcrd(kfile)%str(kstr),har%failures,     &
-!                                    har%reportType, VM, localrc)
-!             if (ESMF_LogMsgFoundError(localrc," error array remap test",      &
-!                rcToReturn=returnrc)) return
+              !-----------------------------------------------------------------
+              ! test of a single problem descriptor string w/ all specifiers
+              !-----------------------------------------------------------------
+              if(har%rcrd(kfile)%str(kstr)%process%tag == Harness_Redist) then
+                 !--------------------------------------------------------------
+                 ! run the field test with redist 
+                 !--------------------------------------------------------------
+                 call field_redist_test(har%rcrd(kfile)%str(kstr),             &
+                           har%failures, har%reportType, VM, localrc)
+                 if (ESMF_LogMsgFoundError(localrc," error field redist test", &
+                     rcToReturn=returnrc)) return
+              else
+                 !--------------------------------------------------------------
+                 ! run the field test with regrid
+                 !--------------------------------------------------------------
+                 call field_regrid_test(har%rcrd(kfile)%str(kstr),             &
+                           har%failures, har%reportType, VM, localrc)
+                 if (ESMF_LogMsgFoundError(localrc," error field regrid test", &
+                     rcToReturn=returnrc)) return
+              endif
            enddo  ! kstr
         enddo    ! kfile
 
-     case("FIELDBUNDLE")
-     return
+!    case("FIELDBUNDLE")
+!    return
 
      case default
      ! error - class unknown

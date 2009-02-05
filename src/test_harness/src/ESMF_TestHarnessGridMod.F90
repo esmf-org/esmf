@@ -68,9 +68,6 @@
   ! local character strings
   character(ESMF_MAXSTR) :: ltmp, lfilename
 
-  ! local grid records 
-  type(test_function_record), pointer :: testfunction(:)
-
   ! local integers variables
   integer :: localrc ! local error status
 
@@ -79,7 +76,7 @@
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
   rc = ESMF_RC_NOT_IMPL
-print*,'entering read grid specification'
+
   !-----------------------------------------------------------------------------
   ! open the grid file
   !-----------------------------------------------------------------------------
@@ -88,7 +85,7 @@ print*,'entering read grid specification'
                             rcToReturn=rc) ) return
 
   lfilename = Gfile%filename
-  print*,'Opening Grid specifier file  ',trim( lfilename )
+! print*,'Opening Grid specifier file  ',trim( lfilename )
   call ESMF_ConfigLoadFile(localcf, trim( lfilename ), rc=localrc )
   if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot load config file " // trim( lfilename ),                      &
@@ -104,15 +101,15 @@ print*,'entering read grid specification'
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
   if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot read config label map_type:" , rcToReturn=rc) ) return
-print*,' extract the grid specifier map_type'
+
   !-----------------------------------------------------------------------------
   ! Read the grid specifier file. The 'map_type' argument specifies the type 
-  ! of grid specification to be read ( redistrbution or remapping ).
+  ! of grid specification to be read ( redistrbution or regridding ).
   !-----------------------------------------------------------------------------
-print*,'action type:', trim(adjustL(ltmp))
   select case(trim(adjustL(ltmp)) )
+
      case('REDISTRIBUTION')
-       print*,' read grid specification for redistribution test'
+!      print*,' read grid specification for redistribution test'
        call read_redistribution_grid(lfilename, Gfile%nGspecs, Gfile%src_grid, &
                 Gfile%dst_grid,localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
@@ -120,11 +117,9 @@ print*,'action type:', trim(adjustL(ltmp))
 
      case('REGRID')
        print*,' read grid specification for regridding test'
-       call read_regridding_grid(lfilename, Gfile%nGspecs, Gfile%src_grid,     &
-                Gfile%dst_grid, testfunction, localrc)
-       print*,'output from read_regridding_grid'
-       print*,'  Gfile%nGspecs',  Gfile%nGspecs
-       print*,' filename:', trim(lfilename)
+       call read_regridding_grid(lfilename, Gfile%nGspecs, Gfile%src_grid,      &
+                Gfile%dst_grid, Gfile%testfunction, localrc)
+
 
        ! print out diagnostics
        print*,'Number of grid specs', Gfile%nGspecs
@@ -145,9 +140,9 @@ print*,'action type:', trim(adjustL(ltmp))
              print*,'DST grid units', Gfile%dst_grid(igrid)%gunits(irank)%string
            enddo
            print*,'-----------------------------------------------------'
-           print*,igrid,' testfunction ', trim(testfunction(igrid)%string)
-           do i=1,testfunction(igrid)%prank
-             print*,' testfunction parameters',testfunction(igrid)%param(i)
+           print*,igrid,' testfunction ', trim(Gfile%testfunction(igrid)%string)
+           do i=1,Gfile%testfunction(igrid)%prank
+             print*,' testfunction parameters',Gfile%testfunction(igrid)%param(i)
            enddo
            print*,'====================================================='
        enddo
@@ -551,9 +546,9 @@ print*,'action type:', trim(adjustL(ltmp))
   subroutine read_regridding_grid(lfilename, ngrids, src_grid, dst_grid,        &
                                  testfunction, rc)
   !-----------------------------------------------------------------------------
-  ! routine to read the grid specifier file for a remapping test. The routine
+  ! routine to read the grid specifier file for a regridding test. The routine
   ! reads a pair (source and destination) of grid specification needed for the 
-  ! remapping test.
+  ! regridding test.
   !
   ! The grid specification takes the form of a table with row entries
   ! (0) grid rank
@@ -607,7 +602,7 @@ print*,'action type:', trim(adjustL(ltmp))
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
   rc = ESMF_RC_NOT_IMPL
-print*,'inside read_regridding_grid'
+
   !-----------------------------------------------------------------------------
   ! open the grid file
   !-----------------------------------------------------------------------------
@@ -619,7 +614,7 @@ print*,'inside read_regridding_grid'
   if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot load config file " // trim( lfilename ),                      &
          rcToReturn=rc) ) return
-print*,'file opened'
+
   !----------------------------------------------------------------------------- 
   ! extract the grid type specifier as sanity check
   !-----------------------------------------------------------------------------
@@ -627,19 +622,17 @@ print*,'file opened'
   if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot find config label map_type", rcToReturn=rc) ) return  
 
-print*,' found lable map_type '
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
   if( ESMF_LogMsgFoundError(localrc,                                           &
-         "cannot find config label map_type:",                                &
+         "cannot find config label map_type:",                                 &
          rcToReturn=rc) ) return
-print*,'get attribute '
+
   if( trim(adjustL( ltmp )) /= 'REGRID' ) then 
      call ESMF_LogMsgSetError(                                                 &
-     ESMF_FAILURE, "Wrong grid type for remap test in file " //                &
+     ESMF_FAILURE, "Wrong grid type for regrid test in file " //               &
      trim( lfilename ),  rcToReturn=rc)
      return
   endif
-
   !-----------------------------------------------------------------------------
   ! search for the grid specifier table
   !-----------------------------------------------------------------------------
@@ -729,8 +722,6 @@ print*,'get attribute '
         new_row(krow) =  ngrid
      endif
   enddo    ! end  krow
-  print*,' inside read regridding_grid'
-  print*,' number of grids in read_regridding_grid',ngrid,nrows
   ngrids = ngrid
   !-----------------------------------------------------------------------------
   ! allocate storage for the grid information based on the calculated number of
@@ -746,7 +737,7 @@ print*,'get attribute '
   endif
   allocate( testfunction(ngrid), stat=allocRcToTest  )
   if (ESMF_LogMsgFoundAllocError(allocRcToTest, "test type"//                  &
-     " in read_reregridding_grid", rcToReturn=rc)) then
+     " in read_regridding_grid", rcToReturn=rc)) then
   endif
   !-----------------------------------------------------------------------------
   ! Read the grid specifications from the table:
@@ -860,7 +851,7 @@ print*,'get attribute '
         ! if tag not equal SRC post error
         if( trim(adjustL(gtag)) /= 'SRC' ) then
            call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
-                 "Source flag expected but not found in remapping" //          &
+                 "Source flag expected but not found in regridding" //         &
                  " grid specifier file" // trim(lfilename), rcToReturn=rc)
            return
         endif
@@ -935,7 +926,7 @@ print*,'get attribute '
         ! if tag not equal DST post error
         if( trim(adjustL(gtag)) /= 'DST' ) then
            call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
-                 "Destination flag expected but not found in remapping" //     &
+                 "Destination flag expected but not found in regridding" //    &
                  " grid specifier file " // trim(lfilename), rcToReturn=rc)
            return
         endif
@@ -1013,7 +1004,7 @@ print*,'get attribute '
         ! if tag not equal FUNCTION post error
         if( trim(adjustL(gtag)) /= 'FUNCTION' ) then
            call ESMF_LogMsgSetError( ESMF_FAILURE,                             &
-                 "Test Function flag expected but not found in remapping" //   &
+                 "Test Function flag expected but not found in regridding" //  &
                  " grid specifier file " // trim(lfilename), rcToReturn=rc)
            return
         endif
@@ -1156,4 +1147,4 @@ print*,'get attribute '
 
 !===============================================================================
   end module ESMF_TestHarnessGridMod
-!==============================================================================
+!===============================================================================

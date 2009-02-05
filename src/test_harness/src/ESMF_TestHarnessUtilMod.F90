@@ -35,7 +35,6 @@
 !-------------------------------------------------------------------------------
 ! !USES:
 
-! use ESMF_Mod
   use ESMF_TestHarnessTypesMod
 
 
@@ -480,43 +479,50 @@
 
           case('=B=>')
              ! remap method Bilinear
-             lname = 'Bilinear REMAP'
-             tag  = Harness_BilinearRemap
+             lname = 'Bilinear REGRID'
+             tag  = Harness_BilinearRegrid
+             symbol_loc(1) = ib
+             symbol_loc(2) = iregrid +2
+
+          case('=P=>')
+             ! remap method Bilinear
+             lname = 'patch REGRID'
+             tag  = Harness_PatchRegrid
              symbol_loc(1) = ib
              symbol_loc(2) = iregrid +2
 
           case('=C=>')
              ! remap method first order conservative
-             lname = 'Conservative REMAP'
-             tag  = Harness_ConservRemap
+             lname = 'Conservative REGRID'
+             tag  = Harness_ConservRegrid
              symbol_loc(1) = ib
              symbol_loc(2) = iregrid +2
 
           case('=S=>')
              ! remap method second order conservative
-             lname = '2nd Order Conservative REMAP'
-             tag  = Harness_2ndConservRemap
+             lname = '2nd Order Conservative REGRID'
+             tag  = Harness_2ndConservRegrid
              symbol_loc(1) = ib
              symbol_loc(2) = iregrid +2
 
           case('=E=>')
              ! remap method exchange grid
-             lname = 'Exchange Grid REMAP'
-             tag  = Harness_ExchangeRemap
+             lname = 'Exchange Grid REGRID'
+             tag  = Harness_ExchangeRegrid
              symbol_loc(1) = ib
              symbol_loc(2) = iregrid +2
 
           case('=N=>')
              ! remap method nearest neighbor
-             lname = 'Nearest Neighbor REMAP'
-             tag  = Harness_NearNeighRemap
+             lname = 'Nearest Neighbor REGRID'
+             tag  = Harness_NearNeighRegrid
              symbol_loc(1) = ib
              symbol_loc(2) = iregrid +2
 
           case('=U=>')
              ! remap method undefined/user provided
-             lname = 'User Provided REMAP'
-             tag  = Harness_UserProvRemap
+             lname = 'User Provided REGRID'
+             tag  = Harness_UserProvRegrid
              symbol_loc(1) = ib
              symbol_loc(2) = iregrid +2
 
