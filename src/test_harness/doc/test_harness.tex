@@ -71,7 +71,7 @@ The specifier files indicate which members of the family described by the \textt
 %%%%%%%%%%%%%%%%%%
 \subsubsection{Top level helper file}
 \label{sec:harness_toplevelfile}
-The top level helper file \texttt{test\_harness.rc} is unique to each class. It specifies the test class, it specifies whether or not to produce a test summary before runnig the tests, the style of test result reporting, and lists the names of the \textit{problem descriptor files}. These descriptor files are categorized into two sets. The first set lists the filenames associated with the \textbf{NONEXHAUSTIVE} test suite, while the second set lists the filenames associated with the \textbf{EXHAUSTIVE} test suite. The test harness specifies which level of testing through the ESMF environment variable \textbf{ESMF_TESTHARNESS}, which can be set to either \textbf{EXHAUSTIVE} or \textbf{NONEXHAUSTIVE}.
+The top level helper file \texttt{test\_harness.rc} is unique to each class. It specifies the test class, it specifies whether or not to produce a test summary before runnig the tests, the style of test result reporting, and lists the names of the \textit{problem descriptor files}. These descriptor files are categorized into two sets. The first set lists the filenames associated with the \textbf{NONEXHAUSTIVE} test suite, while the second set lists the filenames associated with the \textbf{EXHAUSTIVE} test suite. The test harness specifies which level of testing through the ESMF environment variable \textbf{ESMF\_TESTHARNESS}, which can be set to either \textbf{EXHAUSTIVE} or \textbf{NONEXHAUSTIVE}.
 
 Below is an example of the file \texttt{test\_harness.rc} for the \texttt{ESMF\_Field} class. Notice that comments are preceded by the {\#} sign, that single parameter values follow a single colon {:} punctuation mark, while tables of multiple parameter values follow, and are terminated by, a double set of colon {::} punctuation marks.  This file is read by the \texttt{ESMF\_Config} class methods, therefore must adhere to very specific syntax requirements. The entries can be in any order, but the name tags must be exact - including CAPITALIZATION. While it is not strictly necessary, the file names are enclosed in quotation marks, either single or double, to guarantee they are read correctly.
 \begin{verbatim}
@@ -576,19 +576,54 @@ The regridding grid specifier file contains a pair of 2D grids. The source grid 
 
 The one new piece of information for the regridding specifier files are the predefined test functions. The test functions provide a physical field to be interpolated and are generated as an analytical function of the grid coordinates. Supported options include:
 \begin{center}
-\begin{tabular}{| l | l |} 
+\begin{tabular}{| l | l | l |} 
 \multicolumn{2}{c}{ Test functions }  \\
 \hline 
 {\em name } & {\em function} & {\em parameters} \\
 \hline \hline
 constant & set value at all locations & value, relative error \\
 coordinate & set to a multiple of the coordinate values & scale, relative error \\
-periodic & periodic function of the grid coordinates & phases k and l, relative error \\
-pulse &  a gaussian pulse centered at the origin & width, relative error \\
+spherical harmonic & periodic function of the grid coordinates & amplitudes and phases, relative error \\
 \hline 
 \end{tabular}
 \end{center}
-All the test functions are defined on both periodic and unconnected domains. 
+
+The CONSTANT value test function sets the field to the value of the first parameter following the name. The second value is the relative error threshold. For example, the test function specification:
+
+\begin{center}
+\begin{verbatim}
+&   FUNCTION    CONSTANT   2.1 0.1  END
+\end{verbatim}
+\end{center}
+
+indicates that the field is set to the constant value of $2.1$, with a relative error threshold 
+of $0.1$. This test function specification holds for grids of any rank. 
+
+The COORDINATE test function sets the field to the value of the one of the grid coordinates multiplied by the value of the first parameter following the name. The second value is the relative error threshold. For example, the test function specification:
+
+\begin{center}
+\begin{verbatim}
+&   FUNCTION    COORDINATEX   0.5 0.1  END
+\end{verbatim}
+\end{center}
+
+indicates that the field is set to one half of the X coordinate values. For a 2D grid the coordinate options include COORDINATEX and COORDINATEY. For a 3D grid there is the additional option of COORDINATEZ. Again, the relative error threshold is $0.1$.
+This test function specification holds for grids of any rank. 
+
+The SPHERICAL\_HARMONIC test function sets the field to the periodic harmonic function 
+$|a+b| + a*\cos(2\pi * k_x * x/L_x ) + b*\sin(2\pi * l_y * x/L_y )$.
+The parameters follow the order
+
+\begin{center}
+\begin{verbatim}
+&   FUNCTION    SPHERICAL_HARMONIC  a   kx  b   ly    rel_error  END
+\end{verbatim}
+\end{center}
+
+This test function specification is only valid for 2D grids.     
+
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%
