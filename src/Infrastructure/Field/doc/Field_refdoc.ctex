@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.48 2009/01/07 21:20:42 feiliu Exp $
+% $Id: Field_refdoc.ctex,v 1.49 2009/02/06 20:46:59 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -47,6 +47,7 @@
 \input{Field_usage}
 \input{ESMF_FieldEx_fapi}
 \input{ESMF_FieldCreateEx_fapi}
+\input{ESMF_FieldRepDimEx_fapi}
 %\input{ESMF_FieldGetEx_fapi}
 %\input{ESMF_FieldSetEx_fapi}
 \input{ESMF_FieldRegridEx_fapi}
@@ -57,6 +58,7 @@
 \input{../Infrastructure/Field/doc/Field_usage}
 \input{../Infrastructure/Field/doc/ESMF_FieldEx_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldCreateEx_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldRepDimEx_fapi}
 %\input{../Infrastructure/Field/doc/ESMF_FieldGetEx_fapi}
 %\input{../Infrastructure/Field/doc/ESMF_FieldSetEx_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldRegridEx_fapi}

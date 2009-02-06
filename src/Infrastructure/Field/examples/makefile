@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.42 2008/09/26 21:18:19 theurich Exp $ 
+# $Id: makefile,v 1.43 2009/02/06 20:46:59 feiliu Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -10,7 +10,8 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
                  $(ESMF_EXDIR)/ESMF_FieldEx \
                  $(ESMF_EXDIR)/ESMF_FieldRegridEx \
                  $(ESMF_EXDIR)/ESMF_FieldSphereRegridEx \
-                 $(ESMF_EXDIR)/ESMF_FieldMeshRegridEx 
+                 $(ESMF_EXDIR)/ESMF_FieldMeshRegridEx \
+	             $(ESMF_EXDIR)/ESMF_FieldRepDimEx
 #                 $(ESMF_EXDIR)/ESMF_FieldGetEx
 #                 $(ESMF_EXDIR)/ESMF_FieldSetEx
 #                 $(ESMF_EXDIR)/ESMF_FieldFromUserEx \
@@ -21,20 +22,29 @@ EXAMPLES_RUN = run_ESMF_FieldCreateEx \
                run_ESMF_FieldEx \
                run_ESMF_FieldRegridEx \
                run_ESMF_FieldSphereRegridEx \
-               run_ESMF_FieldMeshRegridEx 
+               run_ESMF_FieldMeshRegridEx \
+               run_ESMF_FieldRepDimEx
 #               run_ESMF_FieldGetEx \
 #               run_ESMF_FieldSetEx \
 #               run_ESMF_FieldFromUserEx \
 #               run_ESMF_FieldGlobalEx \
 #               run_ESMF_FieldWriteEx 
+#               run_ESMF_FieldGetEx
+#                   run_ESMF_FieldSetEx
+#                   run_ESMF_FieldFromUserEx \
+#                   run_ESMF_FieldGlobalEx \
+#                   run_ESMF_FieldWriteEx 
 
 EXAMPLES_RUN_UNI = run_ESMF_FieldCreateEx_uni \
                    run_ESMF_FieldEx_uni \
                    run_ESMF_FieldRegridEx_uni \
                    run_ESMF_FieldSphereRegridEx_uni \
-                   run_ESMF_FieldMeshRegridEx_uni 
+                   run_ESMF_FieldMeshRegridEx_uni \
+                   run_ESMF_FieldRepDimEx_uni
 #                   run_ESMF_FieldGetEx_uni \
 #                   run_ESMF_FieldSetEx_uni \
+#                   run_ESMF_FieldGetEx_uni
+#                   run_ESMF_FieldSetEx_uni
 #                   run_ESMF_FieldFromUserEx_uni \
 #                   run_ESMF_FieldGlobalEx_uni \
 #                   run_ESMF_FieldWriteEx_uni
@@ -92,6 +102,15 @@ run_ESMF_FieldMeshRegridEx:
 
 run_ESMF_FieldMeshRegridEx_uni:
 	echo "PASS: ESMF_FieldMeshRegridEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldMeshRegridEx.stdout
+
+#
+# ESMF_FieldRepDimEx
+#
+run_ESMF_FieldRepDimEx:
+	$(MAKE) EXNAME=FieldRepDim NP=4 exfrun
+
+run_ESMF_FieldRepDimEx_uni:
+	echo "PASS: ESMF_FieldRepDimEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldRepDimEx.stdout
 
 #
 # ESMF_FieldGetEx

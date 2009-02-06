@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.4 2009/01/28 22:25:42 peggyli Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.5 2009/02/06 20:47:00 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.4 2009/01/28 22:25:42 peggyli Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.5 2009/02/06 20:47:00 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -69,7 +69,7 @@ module ESMF_FieldSetCoMod
 
 !------------------------------------------------------------------------------
 !BOPI 
-! !IROUTINE: ESMF_FieldSetCommit - finishes a Field started with FieldCreateEmpty
+! !IROUTINE: ESMF_FieldSetCommit - Finishes a Field started with FieldCreateEmpty
 !
 ! !INTERFACE:
   interface ESMF_FieldSetCommit
@@ -139,15 +139,14 @@ contains
 ! \begin{description} @\
 ! \item [field]  @\
 !       The {\tt ESMF\_Field} object to be completed and @\
-!       committed in this call.  The {\tt field} will have the same dimension @\
+!       committed in this call.  The Field will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farray}.  @\
 ! \item [grid]  @\
-!       The {\tt ESMF\_Grid} object to finish the Field.  The dimCount of the @\
-!       Grid must be smaller than or equal to the rank of the {\tt farray}. @\
+!       The {\tt ESMF\_Grid} object to finish the Field. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native fortran data array to be copied/referenced in the Field. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
-!       for the farray. @\
+!       for the {\tt farray}. @\
 ! \item[indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{opt:indexflag} for a list of valid indexflag options. @\
@@ -160,22 +159,25 @@ contains
 !       predefined values see Section \ref{sec:opt:staggerloc}. @\
 !       To create a custom stagger location see Section @\
 !       \ref{sec:usage:staggerloc:adv}. The default @\
-!       value is ESMF\_STAGGERLOC\_CENTER. @\
+!       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt grid}|s dimCount.  The list elements map each dimension @\
-!       of the {\tt grid} to a dimension in the {\tt field} by @\
-!       specifying the appropriate {\tt field} dimension index. The default is to @\
-!       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
-!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
-!       to one and smaller than or equal to the {\tt field} rank. @\
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
-!       multiple times. The total ungridded dimensions in the {\tt field} @\
-!       are the total {\tt field} dimensions less @\
-!       the dimensions in @\
-!       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
-!       stored in the {\t field}.   @\
+!       of the {\tt grid} to a dimension in the {\tt farray} by @\
+!       specifying the appropriate {\tt farray} dimension index. The @\
+!       default is to map all of the {\tt grid}|s dimensions against the @\
+!       lowest dimensions of the {\tt farray} in sequence, i.e. @\
+!       {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       Unmapped {\tt farray} dimensions are undistributed Field @\
+!       dimensions. @\
+!       All {\tt gridToFieldMap} entries must be greater than or equal @\
+!       to zero and smaller than or equal to the Field dimCount. It is erroneous @\
+!       to specify the same entry multiple times unless it is zero. @\
+!       If the Field dimCount is less than the Grid dimCount then the default @\
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero @\
+!       entry in the {\tt gridToFieldMap} indicates that the particular @\
+!       Grid dimension will be replicating the Field across the DEs along @\
+!       this direction. @\
 ! \item [{[ungriddedLBound]}] @\
 !       Lower bounds of the ungridded dimensions of the {\tt field}. @\
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
@@ -196,7 +198,7 @@ contains
 !       these ungridded dimensions is the same as their order in the {\tt field}. @\
 ! \item [{[maxHaloLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
-!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
@@ -207,7 +209,7 @@ contains
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[maxHaloUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
-!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
@@ -342,12 +344,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farrayPtr}.  @\
 ! \item [grid]  @\
-!       The {\tt ESMF\_Grid} object to finish the Field.  The dimCount of the @\
-!       Grid must be smaller than or equal to the rank of the {\tt farrayPtr}. @\
+!       The {\tt ESMF\_Grid} object to finish the Field. @\
 ! \item [farrayPtr] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native fortran data array to be copied/referenced in the Field. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
-!       for the farrayPtr. @\
+!       for the {\tt farrayPtr}. @\
 ! \item [{[copyflag]}] @\
 !       Indicates whether to copy the {\tt farrayPtr} or reference it directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
@@ -357,25 +358,28 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 !       predefined values see Section \ref{sec:opt:staggerloc}. @\
 !       To create a custom stagger location see Section @\
 !       \ref{sec:usage:staggerloc:adv}. The default @\
-!       value is ESMF\_STAGGERLOC\_CENTER. @\
+!       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt grid}|s dimCount.  The list elements map each dimension @\
-!       of the {\tt grid} to a dimension in the {\tt field} by @\
-!       specifying the appropriate {\tt field} dimension index. The default is to @\
-!       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
-!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
-!       to one and smaller than or equal to the {\tt field} rank. @\
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry @\
-!       multiple times. The total ungridded dimensions in the {\tt field} @\
-!       are the total {\tt field} dimensions less @\
-!       the dimensions in @\
-!       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
-!       stored in the {\t field}.   @\
+!       of the {\tt grid} to a dimension in the {\tt farrayPtr} by @\
+!       specifying the appropriate {\tt farrayPtr} dimension index. The @\
+!       default is to map all of the {\tt grid}|s dimensions against the @\
+!       lowest dimensions of the {\tt farrayPtr} in sequence, i.e. @\
+!       {\tt gridToFieldMap} = (/1,2,3,.../). @\
+!       Unmapped {\tt farrayPtr} dimensions are undistributed Field @\
+!       dimensions. @\
+!       All {\tt gridToFieldMap} entries must be greater than or equal @\
+!       to zero and smaller than or equal to the Field dimCount. It is erroneous @\
+!       to specify the same entry multiple times unless it is zero. @\
+!       If the Field dimCount is less than the Grid dimCount then the default @\
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero @\
+!       entry in the {\tt gridToFieldMap} indicates that the particular @\
+!       Grid dimension will be replicating the Field across the DEs along @\
+!       this direction. @\
 ! \item [{[maxHaloLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
-!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
@@ -386,7 +390,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[maxHaloUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
-!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
@@ -518,12 +522,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farray}.  @\
 ! \item [locstream]  @\
-!       The {\tt ESMF\_LocStream} object to finish the Field.  The dimCount of the @\
-!       LocStream must be smaller than or equal to the rank of the {\tt farray}. @\
+!       The {\tt ESMF\_LocStream} object to finish the Field. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native fortran data array to be copied/referenced in the Field. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
-!       for the farray. @\
+!       for the {\tt farray}. @\
 ! \item[indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{opt:indexflag} for a list of valid indexflag options. @\
@@ -546,6 +549,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
 !       the dimensions in @\
 !       the {\tt locstream}.  Ungridded dimensions must be in the same order they are @\
 !       stored in the {\t field}.   @\
+!       If the Field dimCount is less than the Locstream dimCount then the default @\
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero @\
+!       entry in the {\tt gridToFieldMap} indicates that the particular @\
+!       Locstream dimension will be replicating the Field across the DEs along @\
+!       this direction. @\
 ! \item [{[ungriddedLBound]}] @\
 !       Lower bounds of the ungridded dimensions of the {\tt field}. @\
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
@@ -676,12 +684,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farrayPtr}.  @\
 ! \item [locstream]  @\
-!       The {\tt ESMF\_LocStream} object to finish the Field.  The dimCount of the @\
-!       LocStream must be smaller than or equal to the rank of the {\tt farrayPtr}. @\
+!       The {\tt ESMF\_LocStream} object to finish the Field. @\
 ! \item [farrayPtr] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native fortran data array to be copied/referenced in the Field. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
-!       for the farrayPtr. @\
+!       for the {\tt farrayPtr}. @\
 ! \item [{[copyflag]}] @\
 !       Indicates whether to copy the {\tt farrayPtr} or reference it directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
@@ -701,6 +708,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 !       the dimensions in @\
 !       the {\tt locstream}.  Ungridded dimensions must be in the same order they are @\
 !       stored in the {\t field}.   @\
+!       If the Field dimCount is less than the Locstream dimCount then the default @\
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero @\
+!       entry in the {\tt gridToFieldMap} indicates that the particular @\
+!       Locstream dimension will be replicating the Field across the DEs along @\
+!       this direction. @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -814,12 +826,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farray}.  @\
 ! \item [mesh]  @\
-!       The {\tt ESMF\_Mesh} object to finish the Field.  The dimCount of the @\
-!       Mesh must be smaller than or equal to the rank of the {\tt farray}. @\
+!       The {\tt ESMF\_Mesh} object to finish the Field. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native fortran data array to be copied/referenced in the Field. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
-!       for the farray. @\
+!       for the {\tt farray}. @\
 ! \item[indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{opt:indexflag} for a list of valid indexflag options. @\
@@ -842,6 +853,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 !       the dimensions in @\
 !       the {\tt mesh}.  Ungridded dimensions must be in the same order they are @\
 !       stored in the {\t field}.   @\
+!       If the Field dimCount is less than the Mesh dimCount then the default @\
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero @\
+!       entry in the {\tt gridToFieldMap} indicates that the particular @\
+!       Mesh dimension will be replicating the Field across the DEs along @\
+!       this direction. @\
 ! \item [{[ungriddedLBound]}] @\
 !       Lower bounds of the ungridded dimensions of the {\tt field}. @\
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
@@ -972,12 +988,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farrayPtr}.  @\
 ! \item [mesh]  @\
-!       The {\tt ESMF\_Mesh} object to finish the Field.  The dimCount of the @\
-!       Mesh must be smaller than or equal to the rank of the {\tt farrayPtr}. @\
+!       The {\tt ESMF\_Mesh} object to finish the Field. @\
 ! \item [farrayPtr] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native fortran data array to be copied/referenced in the Field. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
-!       for the farrayPtr. @\
+!       for the {\tt farrayPtr}. @\
 ! \item [{[copyflag]}] @\
 !       Indicates whether to copy the {\tt farrayPtr} or reference it directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
@@ -997,6 +1012,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 !       the dimensions in @\
 !       the {\tt mesh}.  Ungridded dimensions must be in the same order they are @\
 !       stored in the {\t field}.   @\
+!       If the Field dimCount is less than the Mesh dimCount then the default @\
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero @\
+!       entry in the {\tt gridToFieldMap} indicates that the particular @\
+!       Mesh dimension will be replicating the Field across the DEs along @\
+!       this direction. @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -1114,10 +1134,9 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farray}.  @\
 ! \item [geombase]  @\
-!       The {\tt ESMF\_GeomBase} object to finish the Field.  The dimCount of the @\
-!       GeomBase must be smaller than or equal to the rank of the {\tt farray}. @\
+!       The {\tt ESMF\_GeomBase} object to finish the Field. @\
 ! \item [farray] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native fortran data array to be copied/referenced in the Field. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the farray. @\
 ! \item[indexflag] @\
@@ -1132,13 +1151,13 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 !       predefined values see Section \ref{sec:opt:staggerloc}. @\
 !       To create a custom stagger location see Section @\
 !       \ref{sec:usage:staggerloc:adv}. The default @\
-!       value is ESMF\_STAGGERLOC\_CENTER. @\
+!       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
-!       {\tt grid}|s dimCount.  The list elements map each dimension @\
-!       of the {\tt grid} to a dimension in the {\tt field} by @\
+!       {\tt geombase}|s dimCount.  The list elements map each dimension @\
+!       of the {\tt geombase} to a dimension in the {\tt field} by @\
 !       specifying the appropriate {\tt field} dimension index. The default is to @\
-!       map all of the {\tt grid}|s dimensions against the lowest dimensions of @\
+!       map all of the {\tt geombase}|s dimensions against the lowest dimensions of @\
 !       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../). @\
 !       The values of all {\tt gridToFieldMap} entries must be greater than or equal @\
 !       to one and smaller than or equal to the {\tt field} rank. @\
@@ -1146,8 +1165,13 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 !       multiple times. The total ungridded dimensions in the {\tt field} @\
 !       are the total {\tt field} dimensions less @\
 !       the dimensions in @\
-!       the {\tt grid}.  Ungridded dimensions must be in the same order they are @\
+!       the {\tt geombase}.  Ungridded dimensions must be in the same order they are @\
 !       stored in the {\t field}.   @\
+!       If the Field dimCount is less than the GeomBase dimCount then the default @\
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero @\
+!       entry in the {\tt gridToFieldMap} indicates that the particular @\
+!       Locstream dimension will be replicating the Field across the DEs along @\
+!       this direction. @\
 ! \item [{[ungriddedLBound]}] @\
 !       Lower bounds of the ungridded dimensions of the {\tt field}. @\
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded @\
@@ -1168,7 +1192,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 !       these ungridded dimensions is the same as their order in the {\tt field}. @\
 ! \item [{[maxHaloLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
-!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
 !       to 0.  If values for maxHaloLWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
@@ -1179,7 +1203,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[maxHaloUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
-!       of dimensions in the {\tt grid}.  However, ordering of the elements @\
+!       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
 !       to 0.  If values for maxHaloUWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
@@ -1220,7 +1244,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
     integer                        :: localrc, i, count @\
     integer                        :: fieldDimCount, fieldUngriddedDimCount @\
-    integer                        :: gridDimCount  @\
+    integer                        :: gridDimCount, gridDimCount_norep  @\
+    integer                        :: gridDimCount_repdim @\
     integer                        :: ungriddedIndex(ESMF_MAXDIM) @\
     integer                        :: distgridToArrayMap (ESMF_MAXDIM) @\
     integer                        :: undistLBound(ESMF_MAXDIM), undistUBound(ESMF_MAXDIM) @\
@@ -1287,13 +1312,27 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
         return @\
     endif @\
 @\
-    if(fieldDimCount .lt. gridDimCount) then @\
+    gridDimCount_repdim = 0 @\
+    if (present(gridToFieldMap)) then  @\
+         if (size(gridToFieldMap) .ne. gridDimCount) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
+          "- gridToFieldMap size must equal to grid_rank", & @\
+            ESMF_CONTEXT, rc)  @\
+          return @\
+         endif @\
+        do i = 1, gridDimCount @\
+            if(gridToFieldMap(i) == 0) gridDimCount_repdim = gridDimCount_repdim + 1 @\
+        enddo @\
+    endif @\
+    gridDimCount_norep = gridDimCount - gridDimCount_repdim @\
+@\
+    if(fieldDimCount .lt. gridDimCount_norep) then @\
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
             "- farray rank must be greater than or equal to grid rank", & @\
               ESMF_CONTEXT, rc)  @\
         return @\
     endif @\
-    if(fieldDimCount .gt. gridDimCount) then @\
+    if(fieldDimCount .gt. gridDimCount_norep) then @\
       if( (.not. present(ungriddedLBound)) .or. & @\
           (.not. present(ungriddedUBound)) ) then @\
         call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
@@ -1303,8 +1342,9 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
       endif @\
     endif @\
 @\
-    fieldUngriddedDimCount = fieldDimCount-gridDimCount @\
-    fieldUndistDimCount = fieldDimCount-gridDimCount @\
+    ! ungridded dimensions plus replicated dimensions @\
+    fieldUngriddedDimCount = fieldDimCount-gridDimCount + gridDimCount_repdim @\
+    fieldUndistDimCount = fieldDimCount-gridDimCount + gridDimCount_repdim @\
 @\
     ! Error Check Input @\
     if (present(gridToFieldMap)) then  @\
@@ -1335,18 +1375,18 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
     endif @\
 @\
     if (present(maxHaloLWidth)) then  @\
-         if (size(maxHaloLWidth) .ne. gridDimCount) then @\
+         if (size(maxHaloLWidth) .ne. gridDimCount_norep) then @\
     call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-          "- maxHaloLWidth must equal to grid dimCount", & @\
+          "- maxHaloLWidth must equal to gridded dimCount", & @\
             ESMF_CONTEXT, rc)  @\
     return @\
          endif @\
     endif @\
 @\
     if (present(maxHaloUWidth)) then  @\
-         if (size(maxHaloUWidth) .ne. gridDimCount) then @\
+         if (size(maxHaloUWidth) .ne. gridDimCount_norep) then @\
     call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-          "- maxHaloUWidth must equal to grid dimCount", & @\
+          "- maxHaloUWidth must equal to gridded dimCount", & @\
             ESMF_CONTEXT, rc)  @\
     return @\
          endif @\
@@ -1367,32 +1407,34 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
     !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector @\
     flipflop = .false. @\
     do i = 1, gridDimCount @\
-       if(localGridToFieldMap(i) .lt. 1 .or. & @\
+       if(localGridToFieldMap(i) .lt. 0 .or. & @\
          localGridToFieldMap(i) .gt. fieldDimCount) then @\
            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
-                 "- gridToFieldMap element must be within range 1...array rank", & @\
+                 "- gridToFieldMap element must be within range 0...array rank", & @\
                    ESMF_CONTEXT, rc)  @\
            return @\
        endif @\
-       if(flipflop(localGridToFieldMap(i))) then @\
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
-                 "- gridToFieldMap element must be unique", & @\
-                   ESMF_CONTEXT, rc)  @\
-           return @\
-       endif @\
-       flipflop(localGridToFieldMap(i)) = .true. @\
+       if(localGridToFieldMap(i) /= 0) then @\
+     if(flipflop(localGridToFieldMap(i))) then @\
+         call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
+           "- gridToFieldMap element must be unique", & @\
+             ESMF_CONTEXT, rc)  @\
+         return @\
+     endif @\
+     flipflop(localGridToFieldMap(i)) = .true. @\
+     endif @\
     enddo @\
 @\
     if(present(maxHaloLWidth)) then @\
-      localMaxHaloLWidth(1:gridDimCount) = & @\
-         maxHaloLWidth (1:gridDimCount) @\
+      localMaxHaloLWidth(1:gridDimCount_norep) = & @\
+         maxHaloLWidth (1:gridDimCount_norep) @\
     else @\
          localMaxHaloLWidth = 0 @\
     endif @\
 @\
     if(present(maxHaloUWidth)) then @\
-      localMaxHaloUWidth(1:gridDimCount) = & @\
-         maxHaloUWidth (1:gridDimCount) @\
+      localMaxHaloUWidth(1:gridDimCount_norep) = & @\
+         maxHaloUWidth (1:gridDimCount_norep) @\
     else @\
          localMaxHaloUWidth = 0 @\
     endif @\
@@ -1409,7 +1451,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
     ! Figure out which dims are ungridded @\
     isGridded = .false. @\
     do i=1, gridDimCount @\
-       isGridded(localGridToFieldMap(i)) = .true. @\
+       if(localGridToFieldMap(i) /= 0) isGridded(localGridToFieldMap(i)) = .true. @\
     enddo @\
 @\
     ! Use ungridded info to figure out the map from ungridded to field dims @\
@@ -1479,10 +1521,10 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
             distgridToArrayMap=distgridToArrayMap (1:gridDimCount), & @\
             undistLBound=undistLBound(1:fieldUndistDimCount), & @\
             undistUBound=undistUBound(1:fieldUndistDimCount), & @\
-            computationalEdgeLWidth=compELWidth(1:gridDimCount), & @\
-            computationalEdgeUWidth=compEUWidth(1:gridDimCount), & @\
-            totalLWidth=localMaxHaloLWidth(1:gridDimCount), & @\
-            totalUWidth=localMaxHaloUWidth(1:gridDimCount), & @\
+            computationalEdgeLWidth=compELWidth(1:gridDimCount_norep), & @\
+            computationalEdgeUWidth=compEUWidth(1:gridDimCount_norep), & @\
+            totalLWidth=localMaxHaloLWidth(1:gridDimCount_norep), & @\
+            totalUWidth=localMaxHaloUWidth(1:gridDimCount_norep), & @\
             rc=localrc) @\
             if (ESMF_LogMsgFoundError(localrc, & @\
                    ESMF_ERR_PASSTHRU, & @\
@@ -1497,10 +1539,10 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
     ! (The field Sets were all moved here in preparation for this) @\
     field%ftypep%gridToFieldMap(1:gridDimCount) = & @\
        localGridToFieldMap(1:gridDimCount) @\
-    field%ftypep%maxHaloLWidth(1:gridDimCount) = & @\
-       localMaxHaloLWidth (1:gridDimCount) @\
-    field%ftypep%maxHaloUWidth(1:gridDimCount) = & @\
-       localMaxHaloUWidth (1:gridDimCount) @\
+    field%ftypep%maxHaloLWidth(1:gridDimCount_norep) = & @\
+       localMaxHaloLWidth (1:gridDimCount_norep) @\
+    field%ftypep%maxHaloUWidth(1:gridDimCount_norep) = & @\
+       localMaxHaloUWidth (1:gridDimCount_norep) @\
     field%ftypep%ungriddedLBound(1:fieldUngriddedDimCount) = & @\
        localUngriddedLBound(1:fieldUngriddedDimCount) @\
     field%ftypep%ungriddedUBound(1:fieldUngriddedDimCount) = & @\
@@ -1559,7 +1601,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 !       The {\tt ESMF\_GeomBase} object to finish the Field.  The dimCount of the @\
 !       GeomBase must be smaller than or equal to the rank of the {\tt farrayPtr}. @\
 ! \item [farrayPtr] @\
-!       Native fortran data array to be copied/referenced in the {\tt field}. @\
+!       Native fortran data array to be copied/referenced in the Field. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the farrayPtr. @\
 ! \item [{[copyflag]}] @\
@@ -1571,7 +1613,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 !       predefined values see Section \ref{sec:opt:staggerloc}. @\
 !       To create a custom stagger location see Section @\
 !       \ref{sec:usage:staggerloc:adv}. The default @\
-!       value is ESMF\_STAGGERLOC\_CENTER. @\
+!       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt grid}|s dimCount.  The list elements map each dimension @\
@@ -1637,8 +1679,9 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     ! local variables @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
     integer                        :: localrc, i @\
-    integer                        :: fieldDimCount, fieldUngriddedDimCount @\
-    integer                        :: gridDimCount  @\
+    integer                        :: fieldDimCount @\
+    integer                        :: gridDimCount, gridDimCount_norep  @\
+    integer                        :: gridDimCount_repdim @\
     integer                        :: distgridToArrayMap (ESMF_MAXDIM) @\
     integer                        :: undistLBound(ESMF_MAXDIM), undistUBound(ESMF_MAXDIM) @\
     integer                        :: localGridToFieldMap (ESMF_MAXDIM) @\
@@ -1694,15 +1737,30 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
-    if(fieldDimCount .lt. gridDimCount) then @\
+    ! Error Check Input @\
+    gridDimCount_repdim = 0 @\
+    if (present(gridToFieldMap)) then  @\
+         if (size(gridToFieldMap) .ne. gridDimCount) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
+          "- gridToFieldMap size must equal to grid_rank", & @\
+            ESMF_CONTEXT, rc)  @\
+          return @\
+         endif @\
+        do i = 1, gridDimCount @\
+            if(gridToFieldMap(i) == 0) gridDimCount_repdim = gridDimCount_repdim + 1 @\
+        enddo @\
+    endif @\
+    gridDimCount_norep = gridDimCount - gridDimCount_repdim @\
+@\
+    if(fieldDimCount .lt. gridDimCount_norep) then @\
         call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-            "- farrayPtr rank must be greater than or equal to grid rank", & @\
+            "- farrayPtr rank must be greater than or equal to gridded dimension rank", & @\
               ESMF_CONTEXT, rc)  @\
         return @\
     endif @\
 @\
-    fieldUngriddedDimCount = fieldDimCount-gridDimCount @\
-    fieldUndistDimCount = fieldDimCount-gridDimCount @\
+    ! ungridded dimensions plus replicated dimensions @\
+    fieldUndistDimCount = fieldDimCount-gridDimCount + gridDimCount_repdim @\
 @\
     ! Error Check Input @\
     if (present(gridToFieldMap)) then  @\
@@ -1715,18 +1773,18 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     endif @\
 @\
     if (present(maxHaloLWidth)) then  @\
-         if (size(maxHaloLWidth) .ne. gridDimCount) then @\
+         if (size(maxHaloLWidth) .ne. gridDimCount_norep) then @\
     call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-          "- maxHaloLWidth must equal to grid dimCount", & @\
+          "- maxHaloLWidth must equal to gridded dimCount", & @\
             ESMF_CONTEXT, rc)  @\
     return @\
          endif @\
     endif @\
 @\
     if (present(maxHaloUWidth)) then  @\
-         if (size(maxHaloUWidth) .ne. gridDimCount) then @\
+         if (size(maxHaloUWidth) .ne. gridDimCount_norep) then @\
     call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &  @\
-          "- maxHaloUWidth must equal to grid dimCount", & @\
+          "- maxHaloUWidth must equal to gridded dimCount", & @\
             ESMF_CONTEXT, rc)  @\
     return @\
          endif @\
@@ -1747,32 +1805,34 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector @\
     flipflop = .false. @\
     do i = 1, gridDimCount @\
-       if(localGridToFieldMap(i) .lt. 1 .or. & @\
+       if(localGridToFieldMap(i) .lt. 0 .or. & @\
          localGridToFieldMap(i) .gt. fieldDimCount) then @\
            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
-                 "- gridToFieldMap element must be within range 1...array rank", & @\
+                 "- gridToFieldMap element must be within range 0...array rank", & @\
                    ESMF_CONTEXT, rc)  @\
            return @\
        endif @\
-       if(flipflop(localGridToFieldMap(i))) then @\
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
-                 "- gridToFieldMap element must be unique", & @\
-                   ESMF_CONTEXT, rc)  @\
-           return @\
-       endif @\
-       flipflop(localGridToFieldMap(i)) = .true. @\
+       if(localGridToFieldMap(i) /= 0) then @\
+        if(flipflop(localGridToFieldMap(i))) then @\
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &  @\
+              "- gridToFieldMap element must be unique", & @\
+                ESMF_CONTEXT, rc)  @\
+            return @\
+        endif @\
+        flipflop(localGridToFieldMap(i)) = .true. @\
+      endif @\
     enddo @\
 @\
     if(present(maxHaloLWidth)) then @\
-      localMaxHaloLWidth(1:gridDimCount) = & @\
-         maxHaloLWidth (1:gridDimCount) @\
+      localMaxHaloLWidth(1:gridDimCount_norep) = & @\
+         maxHaloLWidth (1:gridDimCount_norep) @\
     else @\
          localMaxHaloLWidth = 0 @\
     endif @\
 @\
     if(present(maxHaloUWidth)) then @\
-      localMaxHaloUWidth(1:gridDimCount) = & @\
-         maxHaloUWidth (1:gridDimCount) @\
+      localMaxHaloUWidth(1:gridDimCount_norep) = & @\
+         maxHaloUWidth (1:gridDimCount_norep) @\
     else @\
          localMaxHaloUWidth = 0 @\
     endif @\
@@ -1796,10 +1856,10 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
             distgridToArrayMap=distgridToArrayMap (1:gridDimCount), & @\
             undistLBound=undistLBound(1:fieldUndistDimCount), & @\
             undistUBound=undistUBound(1:fieldUndistDimCount), & @\
-            computationalEdgeLWidth=compELWidth(1:gridDimCount), & @\
-            computationalEdgeUWidth=compEUWidth(1:gridDimCount), & @\
-            totalLWidth=localMaxHaloLWidth(1:gridDimCount), & @\
-            totalUWidth=localMaxHaloUWidth(1:gridDimCount), & @\
+            computationalEdgeLWidth=compELWidth(1:gridDimCount_norep), & @\
+            computationalEdgeUWidth=compEUWidth(1:gridDimCount_norep), & @\
+            totalLWidth=localMaxHaloLWidth(1:gridDimCount_norep), & @\
+            totalUWidth=localMaxHaloUWidth(1:gridDimCount_norep), & @\
             indexflag=indexflag, rc=localrc) @\
             if (ESMF_LogMsgFoundError(localrc, & @\
                    ESMF_ERR_PASSTHRU, & @\
@@ -1814,10 +1874,10 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     ! (The field Sets were all moved here in preparation for this) @\
     field%ftypep%gridToFieldMap(1:gridDimCount) = & @\
        localGridToFieldMap(1:gridDimCount) @\
-    field%ftypep%maxHaloLWidth(1:gridDimCount) = & @\
-       localMaxHaloLWidth (1:gridDimCount) @\
-    field%ftypep%maxHaloUWidth(1:gridDimCount) = & @\
-       localMaxHaloUWidth (1:gridDimCount) @\
+    field%ftypep%maxHaloLWidth(1:gridDimCount_norep) = & @\
+       localMaxHaloLWidth (1:gridDimCount_norep) @\
+    field%ftypep%maxHaloUWidth(1:gridDimCount_norep) = & @\
+       localMaxHaloUWidth (1:gridDimCount_norep) @\
     field%ftypep%datastatus = ESMF_STATUS_READY @\
     field%ftypep%geombase  = geombase @\
     field%ftypep%gridstatus = ESMF_STATUS_READY @\
