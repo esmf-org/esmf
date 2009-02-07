@@ -156,7 +156,7 @@ ESMF_COMM
 
 On systems with a vendor-supplied MPI communications library the vendor library 
 is chosen by default for communications and ESMF_COMM need not be set. For other
-systems (e.g. Linux or Darwin) a multitude of MPI implementations is available
+systems (e.g. Linux or Darwin) a multitude of MPI implementations are available
 and ESMF_COMM must be set to indicate which implementation is used to build
 the ESMF library. Set ESMF_COMM according to your situation to: mpich, mpich2,
 lam, openmpi or intelmpi. ESMF_COMM may also be set to "user" indicating that
@@ -524,4 +524,4 @@ Please contact esmf_support@ucar.edu with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.98 2009/02/03 23:57:22 theurich Exp $
+ $Id: README,v 1.99 2009/02/07 01:26:49 w6ws Exp $
