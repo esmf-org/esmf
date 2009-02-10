@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.3 2009/02/03 17:36:15 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.4 2009/02/10 18:49:43 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -682,7 +682,7 @@ module ESMF_AttributeUpdateMod
 ! and change the value of one Attribute in the original Attribute package, 
 ! add a nested Attribute package, and delete one other of the Attributes in the
 ! original Attribute package.  These three changes represent, respectively, a
-! structural, value, and structural change to the Attribute hierarchy during
+! value change and two structural changes to the Attribute hierarchy during
 ! run time, which must be reconciled across the VM before the second gridded
 ! Component can be allowed to further manipulate the Attribute hierarchy.
 !EOE

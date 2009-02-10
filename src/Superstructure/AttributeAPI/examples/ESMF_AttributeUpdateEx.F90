@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.6 2009/02/03 17:36:15 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.7 2009/02/10 18:49:41 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -202,7 +202,7 @@ implicit none
 ! What 
 ! follows are the calls from the driver code that run the initialize, run, and finalize routines
 ! for each of the Components.  After these calls we will step through the first 
-! cycle as explained in the introduction, through the intialize routins of
+! cycle as explained in the introduction, through the intialize routines of
 ! gridded Component 1 to gridded Component 2 to the coupler Component.
 !EOE
 
