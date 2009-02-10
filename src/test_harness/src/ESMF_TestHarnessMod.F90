@@ -4647,7 +4647,8 @@
   type(grid_specification_record)::grid
 
   !
-  real(ESMF_KIND_R8) ::  create_uniform_coord, create_gaussian_coord
+  ! Comment out the following line, it was causing compile errors on some platforms.
+  !!real(ESMF_KIND_R8) ::  create_uniform_coord, create_gaussian_coord
   !-----------------------------------------------------------------------------
   select case( trim(grid%gtype(axis)%string) )
       case("UNIFORM")
