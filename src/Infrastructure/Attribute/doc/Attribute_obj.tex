@@ -1,4 +1,4 @@
-% $Id: Attribute_obj.tex,v 1.8 2009/01/21 21:37:58 cdeluca Exp $
+% $Id: Attribute_obj.tex,v 1.9 2009/02/10 18:52:24 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -8,7 +8,7 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-Each Attribute contains a name value pair in which the value can be any of several numeric, character, and logical types.  The allowable ESMF Attribute value types include:
+Each {\tt Attribute} contains a name value pair in which the value can be any of several numeric, character, and logical types.  The allowable ESMF {\tt Attribute} value types include:
 
 \begin{itemize}
 \item {\tt ESMF\_TYPEKIND\_I4}
@@ -25,4 +25,28 @@ Each Attribute contains a name value pair in which the value can be any of sever
 \item {\tt EMSF\_TYPEKIND\_Character} list
 \end{itemize}
 
-All Attributes also contain character strings specifying the convention, type, and object of the Attribute for the purpose of keeping track of Attribute packages.  All Attributes contain a list of pointers to other Attributes, which is empty until specified otherwise.  This list of Attribute pointers is what allows Attribute hierarchies to be built.  Using this feature an Attribute for one ESMF class can be linked to an Attribute in another ESMF class.
+The other member of the {\tt Attribute} class can be seen in Figure \ref{fig:AttributeClassUML}  which shows a UML representation of the ESMF {\tt Attribute} object.   For a more detailed view of how {\tt Attribute} packages and hierarchies are formed, see Figures \ref{fig:AttributePackageUML} and \ref{fig:AttributeHierarchyUML}, respectively.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=4in,height=6.5in]{AttributeClassUML}
+\caption{The structure of the {\tt Attribute} class}
+\label{fig:AttributeClassUML}
+\end{figure}
+\clearpage
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=5.5in,height=6in]{AttributePackageUML}
+\caption{The internal object organization for the representation of {\tt Attribute} packages}
+\label{fig:AttributePackageUML}
+\end{figure}
+\clearpage
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=5.5in,height=6in]{AttributeHierarchyUML}
+\caption{The internal object organization for the representation of {\tt Attribute} hierarchies}
+\label{fig:AttributeHierarchyUML}
+\end{figure}
+\clearpage

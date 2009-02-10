@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.16 2009/01/30 00:41:09 rokuingh Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.17 2009/02/10 18:52:25 rokuingh Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -19,6 +19,9 @@
 \usepackage[T1]{fontenc}
 \usepackage[dvips]{graphics,color}
 
+\usepackage{array}
+\setlength\extratabsurround{10pt}
+
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
@@ -33,7 +36,6 @@
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
 #ifdef STANDALONE
-% Title page
 \input{../../../doc/title_alldoc}
 
 \newpage
@@ -41,13 +43,6 @@
 
 \newpage
 #endif
-
-%\section{Synopsis}
-% #ifdef STANDALONE
-% \input{Attribute_syn}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Attribute/doc/Attribute_syn}
-% #endif
 
 \section{Attribute Class}
 
@@ -58,12 +53,12 @@
 \input{../Infrastructure/Attribute/doc/Attribute_desc}
 #endif
 
-%\subsection{Object Model}
-%#ifdef STANDALONE
-%\input{Attribute_obj}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Attribute/doc/Attribute_obj}
-%#endif
+\subsection{Object Model}
+#ifdef STANDALONE
+\input{Attribute_obj}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Attribute/doc/Attribute_obj}
+#endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
@@ -100,13 +95,6 @@
 #elif defined(CONSTITUENT)
 \input{../Superstructure/AttributeAPI/doc/ESMF_Attribute_fapi}
 #endif
-
-%#ifdef STANDALONE
-%\section{Bibliography}
-%\bibliography{Attribute} 
-%\bibliographystyle{plain}
-%\addcontentsline{toc}{section}{Bibliography}
-%#endif
 
 #ifdef STANDALONE
 \end{document}
