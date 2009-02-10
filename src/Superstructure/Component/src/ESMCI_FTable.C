@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.11 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMCI_FTable.C,v 1.12 2009/02/10 23:54:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.11 2009/01/21 21:38:02 cdeluca Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.12 2009/02/10 23:54:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -329,43 +329,19 @@ extern "C" {
 extern "C" {
   
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_setserviceslib"
-  void FTN(c_esmc_setserviceslib)(void *ptr, char *sharedObjArg,
-    char *routineArg, int *rc, 
-    ESMCI_FortranStrLenArg llen, ESMCI_FortranStrLenArg rlen){
+#define ESMC_METHOD "c_esmc_setvm"
+  void FTN(c_esmc_setvm)(void *ptr, void (*func)(), int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
-#ifdef ESMF_NO_DLFCN
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, 
-      "System does not support dynamic loading.", rc);
-    return;
-#else
-    string sharedObj(sharedObjArg, llen);
-    string routine(routineArg, rlen);
-    sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
-    routine.resize(routine.find_last_not_of(" ")+1);
-    void *lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
-    if (lib == NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "shared object not found", rc);
-      return;
-    }
-    void (*func)() = (void (*)())dlsym(lib, routine.c_str());
-    if ((void *)func == NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "routine not found", rc);
-      return;
-    }
-    ESMCI::FTable::setServices(ptr, func, &localrc);
+    ESMCI::FTable::setVM(ptr, func, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
-    if (rc) rc = ESMF_SUCCESS;
-#endif
+    if (rc) *rc = ESMF_SUCCESS;
   }
   
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_setvmlib"
-  void FTN(c_esmc_setvmlib)(void *ptr, char *sharedObjArg,
+#define ESMC_METHOD "c_esmc_setvmshobj"
+  void FTN(c_esmc_setvmshobj)(void *ptr, char *sharedObjArg,
     char *routineArg, int *rc, 
     ESMCI_FortranStrLenArg llen, ESMCI_FortranStrLenArg rlen){
     int localrc = ESMC_RC_NOT_IMPL;
@@ -394,8 +370,67 @@ extern "C" {
     ESMCI::FTable::setVM(ptr, func, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
-    if (rc) rc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 #endif
+  }
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_setservices"
+  void FTN(c_esmc_setservices)(void *ptr, void (*func)(), int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::FTable::setServices(ptr, func, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_setservicesshobj"
+  void FTN(c_esmc_setservicesshobj)(void *ptr, char *sharedObjArg,
+    char *routineArg, int *rc, 
+    ESMCI_FortranStrLenArg llen, ESMCI_FortranStrLenArg rlen){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+#ifdef ESMF_NO_DLFCN
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, 
+      "System does not support dynamic loading.", rc);
+    return;
+#else
+    string sharedObj(sharedObjArg, llen);
+    string routine(routineArg, rlen);
+    sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
+    routine.resize(routine.find_last_not_of(" ")+1);
+    void *lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
+    if (lib == NULL){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+        "shared object not found", rc);
+      return;
+    }
+    void (*func)() = (void (*)())dlsym(lib, routine.c_str());
+    if ((void *)func == NULL){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+        "routine not found", rc);
+      return;
+    }
+    ESMCI::FTable::setServices(ptr, func, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+    if (rc) *rc = ESMF_SUCCESS;
+#endif
+  }
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_setentrypoint"
+  void FTN(c_esmc_setentrypoint)(void *ptr, char *stage, void *func,
+    int *phase, int *rc, int slen){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::FTable::setTypedEP(ptr, stage, slen, phase, 0, ESMCI::FT_COMP2STAT,
+      func, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      return;
+    if (rc) *rc = ESMF_SUCCESS;
   }
   
 } // extern "C"
@@ -420,44 +455,16 @@ extern "C" {
 extern "C" {
 
   // ---------- Set Services ---------------
-  void FTN(esmf_gridcompsetservices)(void *ptr, void (*func)(), int *status){
-    ESMCI::FTable::setServices(ptr, func, status);
-  }
-     
-  void FTN(esmf_cplcompsetservices)(void *ptr, void (*func)(), int *status){
-    ESMCI::FTable::setServices(ptr, func, status);
-  }
-
   void FTN(esmf_usercompsetservices)(void *ptr, void (*func)(), int *status){
     ESMCI::FTable::setServices(ptr, func, status);
   }
 
   // ---------- Set VM ---------------
-  void FTN(esmf_gridcompsetvm)(void *ptr, void (*func)(), int *status){
-    ESMCI::FTable::setVM(ptr, func, status);
-  }
-     
-  void FTN(esmf_cplcompsetvm)(void *ptr, void (*func)(), int *status){
-    ESMCI::FTable::setVM(ptr, func, status);
-  }
-
   void FTN(esmf_usercompsetvm)(void *ptr, void (*func)(), int *status){
     ESMCI::FTable::setVM(ptr, func, status);
   }
 
   // ---------- Set Entry Point ---------------
-  void FTN(esmf_gridcompsetentrypoint)(void *ptr, char *tname, void *func,
-    int *phase, int *status, int slen){
-    ESMCI::FTable::setTypedEP(ptr, tname, slen, phase, 0, ESMCI::FT_COMP2STAT,
-      func, status);
-  }
-  
-  void FTN(esmf_cplcompsetentrypoint)(void *ptr, char *tname, void *func,
-    int *phase, int *status, int slen){
-    ESMCI::FTable::setTypedEP(ptr, tname, slen, phase, 0, ESMCI::FT_COMP2STAT,
-      func, status);
-  }
-
   void FTN(esmf_usercompsetentrypoint)(void *ptr, char *tname, void *func,
     int *phase, int *status, int slen){
     ESMCI::FTable::setTypedEP(ptr, tname, slen, phase, 0, ESMCI::FT_VOIDPINTP,
