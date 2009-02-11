@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.34 2009/01/21 21:37:59 cdeluca Exp $
+// $Id: ESMC_GridToMesh.C,v 1.35 2009/02/11 22:52:53 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -402,7 +402,10 @@ Par::Out() << std::endl;
      dir.Create(owned_shared.size(), &owned_shared[0], &lids[0]);
   
      std::vector<DDir<>::dentry> lookups;
-     dir.RemoteGID(notowned_shared.size(), &notowned_shared[0], lookups);
+     if (notowned_shared.size ())
+       dir.RemoteGID(notowned_shared.size(), &notowned_shared[0], lookups);
+     else
+       dir.RemoteGID(0, (UInt *) NULL, lookups);
 
      // Loop through the results.  Do a map lookup to find nodes--since the shared 
      // porition of the mesh is a hypersurface, this should be cheap enough to do.
