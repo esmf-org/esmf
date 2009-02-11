@@ -234,7 +234,7 @@ extern "C" {
     // it makes things less convoluted to do it this way. 
 
     // get some useful info
-    // distDimCount=grid->getDistDimCount();
+    distDimCount=grid->getDistDimCount();
     // undistDimCount=grid->getUndistDimCount();
     dimCount = grid->getDimCount();
 
@@ -271,15 +271,31 @@ extern "C" {
           "- distgridToGridMap array must be of rank 1", ESMC_NOT_PRESENT_FILTER(_rc));
         return;
       }
-      if ((*_distgridToGridMap)->extent[0] < dimCount){
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-          "- distgridToGridMap array must be of size = the distributed rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
-        return;
-      }
-      // fill in distgridToGridMap, and convert it to 1-based
-      distgridToGridMap=grid->getDistgridToGridMap();
-      for (int i=0; i<dimCount; i++) {
-	(*_distgridToGridMap)->array[i]=distgridToGridMap[i]+1;
+
+      ESMC_GridDecompType decompType;
+      decompType = grid->getDecompType();
+      if (decompType != ESMC_GRID_NONARBITRARY) {
+	  if ((*_distgridToGridMap)->extent[0] < dimCount){
+	      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+	       "- distgridToGridMap array must be of size = the distributed rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
+	      return;
+	  }
+	  // fill in distgridToGridMap, and convert it to 1-based
+	  distgridToGridMap=grid->getDistgridToGridMap();
+	  for (int i=0; i<dimCount; i++) {
+	      (*_distgridToGridMap)->array[i]=distgridToGridMap[i]+1;
+	  }
+      } else {
+	  if ((*_distgridToGridMap)->extent[0] < distDimCount){
+	      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+	       "- distgridToGridMap array must be of size = the distributed rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
+	      return;
+	  }
+	  // fill in distgridToGridMap, and convert it to 1-based
+	  distgridToGridMap=grid->getDistgridToGridMap();
+	  for (int i=0; i<distDimCount; i++) {
+	      (*_distgridToGridMap)->array[i]=distgridToGridMap[i]+1;
+	  }
       }
     }
 
