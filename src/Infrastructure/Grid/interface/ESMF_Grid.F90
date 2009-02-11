@@ -221,7 +221,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.102 2009/02/05 21:58:00 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.103 2009/02/11 16:38:05 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2081,7 +2081,7 @@ end subroutine ESMF_GridConvertIndex
        endif
 
        ! distgridToArrayMap is always an identity map no matter how the grid-field map is
-       do i=1,dimCount
+       do i=1,distDimCount
           distgridToArrayMap(i)=i
        enddo
 
@@ -2092,8 +2092,10 @@ end subroutine ESMF_GridConvertIndex
        ! if there are undistributed dimensions ...
        if (undistArrayDimCount .gt. 0) then      
 	  ! Copy ungriddedBound to undistBound
-          undistLBound=ungriddedLBound
-          undistUBound=ungriddedUBound
+	  do i=1,undistArrayDimCount
+            undistLBound(i)=ungriddedLBound(i)
+            undistUBound(i)=ungriddedUBound(i)
+	  enddo
        endif
     endif
 
