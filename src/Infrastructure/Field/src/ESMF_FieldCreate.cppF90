@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.44 2009/02/06 20:46:59 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.45 2009/02/12 18:53:39 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.44 2009/02/06 20:46:59 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.45 2009/02/12 18:53:39 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -2085,7 +2085,7 @@ end subroutine ESMF_FieldConstructNoDataPtr
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateGBData" @\
   function ESMF_FieldCreateGBData##mrank##D##mtypekind(geombase, & @\
-    farray, indexflag, copyflag,  gridToFieldMap, ungriddedLBound, & @\
+    farray, indexflag, copyflag,  staggerloc, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
 @\
     ! return value @\
@@ -2096,6 +2096,7 @@ end subroutine ESMF_FieldConstructNoDataPtr
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_IndexFlag), intent(in)            :: indexflag @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_StaggerLoc), intent(in), optional :: staggerloc @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
@@ -2120,9 +2121,10 @@ end subroutine ESMF_FieldConstructNoDataPtr
 @\
     call ESMF_FieldSetCommit( & @\
         ESMF_FieldCreateGBData##mrank##D##mtypekind, & @\
-        geombase, farray, indexflag, copyflag, & @\
-        gridToFieldMap, & @\
-        ungriddedLBound, ungriddedUBound, maxHaloLWidth, maxHaloUWidth, & @\
+        geombase, farray, indexflag=indexflag, copyflag=copyflag, & @\
+        staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, & @\
+        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, & @\
+        maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
         rc=localrc) @\
 @\
     if (ESMF_LogMsgFoundError(localrc, & @\
@@ -2250,7 +2252,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateGBDataPtr" @\
   function ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind(geombase, & @\
-    farrayPtr, copyflag,  gridToFieldMap, & @\
+    farrayPtr, copyflag, staggerloc, gridToFieldMap, & @\
     maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
 @\
     ! return value @\
@@ -2260,6 +2262,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
     type(ESMF_GeomBase) :: geombase                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_StaggerLoc), intent(in), optional :: staggerloc @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: maxHaloLWidth(:) @\
     integer, intent(in), optional :: maxHaloUWidth(:) @\
@@ -2282,9 +2285,9 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 @\
     call ESMF_FieldSetCommit( & @\
         ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind, & @\
-        geombase, farrayPtr, copyflag, & @\
-        gridToFieldMap, & @\
-        maxHaloLWidth, maxHaloUWidth, & @\
+        geombase, farrayPtr, copyflag=copyflag, & @\
+        staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, & @\
+        maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
         rc=localrc) @\
 @\
     if (ESMF_LogMsgFoundError(localrc, & @\
@@ -2843,9 +2846,12 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 @\
        ESMF_FieldCreateGridData##mrank##D##mtypekind = & @\
               ESMF_FieldCreateGBData##mrank##D##mtypekind(geombase, & @\
-                               farray, indexflag, copyflag,  gridToFieldMap, ungriddedLBound, & @\
-                               ungriddedUBound, maxHaloLWidth, maxHaloUWidth, & @\
-                               name, iospec, rc=localrc) @\
+                               farray, indexflag=indexflag, copyflag=copyflag, & @\
+                               staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, & @\
+                               ungriddedLBound=ungriddedLBound, & @\
+                               ungriddedUBound=ungriddedUBound, & @\
+                               maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
+                               name=name, iospec=iospec, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -3022,9 +3028,10 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 @\
        ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind = & @\
               ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind(geombase, & @\
-                               farrayPtr, copyflag,  gridToFieldMap, & @\
-                               maxHaloLWidth, maxHaloUWidth, & @\
-                               name, iospec, rc=localrc) @\
+                               farrayPtr, copyflag=copyflag, & @\
+                               staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, & @\
+                               maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
+                               name=name, iospec=iospec, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -3423,8 +3430,10 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 @\
        ESMF_FieldCreateLSData##mrank##D##mtypekind = & @\
               ESMF_FieldCreateGBData##mrank##D##mtypekind(geombase, & @\
-                               farray, indexflag, copyflag,  gridToFieldMap, ungriddedLBound, & @\
-                               ungriddedUBound, & @\
+                               farray, indexflag=indexflag, copyflag=copyflag, & @\
+                               gridToFieldMap=gridToFieldMap, & @\
+                               ungriddedLBound=ungriddedLBound, & @\
+                               ungriddedUBound=ungriddedUBound, & @\
                                name=name, iospec=iospec, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -3553,7 +3562,8 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 @\
        ESMF_FieldCreateLSDataPtr##mrank##D##mtypekind = & @\
               ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind(geombase, & @\
-                               farrayPtr, copyflag,  gridToFieldMap, & @\
+                               farrayPtr, copyflag=copyflag, & @\
+                               gridToFieldMap=gridToFieldMap, & @\
                                name=name, iospec=iospec, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -3953,8 +3963,10 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 @\
        ESMF_FieldCreateMeshData##mrank##D##mtypekind = & @\
               ESMF_FieldCreateGBData##mrank##D##mtypekind(geombase, & @\
-                               farray, indexflag, copyflag,  gridToFieldMap, ungriddedLBound, & @\
-                               ungriddedUBound, & @\
+                               farray, indexflag=indexflag, copyflag=copyflag, & @\
+                               gridToFieldMap=gridToFieldMap, & @\
+                               ungriddedLBound=ungriddedLBound, & @\
+                               ungriddedUBound=ungriddedUBound, & @\
                                name=name, iospec=iospec, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -4083,7 +4095,8 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 @\
        ESMF_FieldCreateMeshDataPtr##mrank##D##mtypekind = & @\
               ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind(geombase, & @\
-                               farrayPtr, copyflag,  gridToFieldMap, & @\
+                               farrayPtr, copyflag=copyflag, & @\
+                               gridToFieldMap=gridToFieldMap, & @\
                                name=name, iospec=iospec, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\

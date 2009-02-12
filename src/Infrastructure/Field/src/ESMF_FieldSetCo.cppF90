@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.5 2009/02/06 20:47:00 feiliu Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.6 2009/02/12 18:53:39 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.5 2009/02/06 20:47:00 feiliu Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.6 2009/02/12 18:53:39 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -296,7 +296,7 @@ contains
 @\
   ! Do General GeomBase SetCommit @\
   call ESMF_FieldSetCommitGB##mrank##D##mtypekind(field, geombase, farray, & @\
-    indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
+    indexflag, copyflag, localStaggerloc, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -474,7 +474,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 @\
   ! Do General GeomBase SetCommit @\
   call ESMF_FieldSetCommitGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
-    copyflag, gridToFieldMap, & @\
+    copyflag, localStaggerloc, gridToFieldMap, & @\
     maxHaloLWidth, maxHaloUWidth, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -639,8 +639,9 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
 @\
   ! Do General GeomBase SetCommit @\
   call ESMF_FieldSetCommitGB##mrank##D##mtypekind(field, geombase, farray, & @\
-    indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, rc=localrc) @\
+    indexflag=indexflag, copyflag=copyflag, gridToFieldMap=gridToFieldMap, & @\
+    ungriddedLBound=ungriddedLBound, & @\
+    ungriddedUBound=ungriddedUBound, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -777,7 +778,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 @\
   ! Do General GeomBase SetCommit @\
   call ESMF_FieldSetCommitGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
-    copyflag, gridToFieldMap, & @\
+    copyflag=copyflag, gridToFieldMap=gridToFieldMap, & @\
     rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -943,8 +944,9 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 @\
   ! Do General GeomBase SetCommit @\
   call ESMF_FieldSetCommitGB##mrank##D##mtypekind(field, geombase, farray, & @\
-    indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, rc=localrc) @\
+    indexflag=indexflag, copyflag=copyflag, gridToFieldMap=gridToFieldMap, & @\
+    ungriddedLBound=ungriddedLBound, & @\
+    ungriddedUBound=ungriddedUBound, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -1081,12 +1083,11 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 @\
   ! Do General GeomBase SetCommit @\
   call ESMF_FieldSetCommitGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
-    copyflag, gridToFieldMap, & @\
+    copyflag=copyflag, gridToFieldMap=gridToFieldMap, & @\
     rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
-@\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_FieldSetCommitMeshPtr##mrank##D##mtypekind  @\
@@ -1225,7 +1226,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitGB" @\
   subroutine ESMF_FieldSetCommitGB##mrank##D##mtypekind(field, geombase, farray, & @\
-    indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
+    indexflag, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
 @\
     ! input arguments @\
@@ -1234,6 +1235,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_STAGGERLOC), intent(in), optional :: staggerloc @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
@@ -1262,6 +1264,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
     integer                        :: fieldUndistDimCount                         @\
     logical                        :: flipflop(ESMF_MAXDIM) @\
     type(ESMF_IndexFlag)           :: g_indexflag @\
+    type(ESMF_STAGGERLOC)          :: localStaggerLoc @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -1515,6 +1518,12 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
+    if(present(staggerloc)) then @\
+        localStaggerLoc = staggerloc @\
+    else @\
+        localStaggerLoc = ESMF_STAGGERLOC_CENTER @\
+    endif @\
+@\
     ! Create Array with undistributed dimensions                                @\
     array = ESMF_ArrayCreate(farray, distgrid=distgrid, & @\
             indexflag=indexflag, copyflag=copyflag, & @\
@@ -1525,7 +1534,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
             computationalEdgeUWidth=compEUWidth(1:gridDimCount_norep), & @\
             totalLWidth=localMaxHaloLWidth(1:gridDimCount_norep), & @\
             totalUWidth=localMaxHaloUWidth(1:gridDimCount_norep), & @\
-            rc=localrc) @\
+            staggerloc=localStaggerLoc%staggerloc, rc=localrc) @\
             if (ESMF_LogMsgFoundError(localrc, & @\
                    ESMF_ERR_PASSTHRU, & @\
                    ESMF_CONTEXT, rc)) return @\
@@ -1664,14 +1673,15 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitGBPtr" @\
   subroutine ESMF_FieldSetCommitGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
-    copyflag, gridToFieldMap, & @\
+    copyflag, staggerloc, gridToFieldMap, & @\
     maxHaloLWidth, maxHaloUWidth, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
     type(ESMF_GeomBase) :: geombase            @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farrayPtr @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_STAGGERLOC), intent(in), optional :: staggerloc @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: maxHaloLWidth(:) @\
     integer, intent(in), optional :: maxHaloUWidth(:) @\
@@ -1694,6 +1704,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     integer                        :: fieldUndistDimCount                         @\
     logical                        :: flipflop(ESMF_MAXDIM) @\
     type(ESMF_IndexFlag)           :: indexflag @\
+    type(ESMF_STAGGERLOC)          :: localStaggerLoc @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -1851,16 +1862,20 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
+    if(present(staggerloc)) then @\
+        localStaggerloc = staggerloc @\
+    else @\
+        localStaggerLoc = ESMF_STAGGERLOC_CENTER @\
+    endif @\
+@\
     ! Create Array with undistributed dimensions                                @\
     array = ESMF_ArrayCreate(farrayPtr, distgrid=distgrid, copyflag=copyflag, & @\
             distgridToArrayMap=distgridToArrayMap (1:gridDimCount), & @\
-            undistLBound=undistLBound(1:fieldUndistDimCount), & @\
-            undistUBound=undistUBound(1:fieldUndistDimCount), & @\
             computationalEdgeLWidth=compELWidth(1:gridDimCount_norep), & @\
             computationalEdgeUWidth=compEUWidth(1:gridDimCount_norep), & @\
             totalLWidth=localMaxHaloLWidth(1:gridDimCount_norep), & @\
             totalUWidth=localMaxHaloUWidth(1:gridDimCount_norep), & @\
-            indexflag=indexflag, rc=localrc) @\
+            staggerloc=localStaggerLoc%staggerloc, rc=localrc) @\
             if (ESMF_LogMsgFoundError(localrc, & @\
                    ESMF_ERR_PASSTHRU, & @\
                    ESMF_CONTEXT, rc)) return @\
