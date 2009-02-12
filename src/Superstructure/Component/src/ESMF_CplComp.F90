@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.97 2009/02/10 23:54:17 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.98 2009/02/12 05:31:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.97 2009/02/10 23:54:17 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.98 2009/02/12 05:31:13 theurich Exp $'
 
 !==============================================================================
 !
@@ -385,7 +385,7 @@ end subroutine
 !------------------------------------------------------------------------------
     ! local vars
     integer :: localrc                       ! local error status
-    integer :: phaseArg = ESMF_SINGLEPHASE   ! default
+    integer :: phaseArg
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -393,6 +393,7 @@ end subroutine
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, comp, rc)
   
+    phaseArg = ESMF_SINGLEPHASE   ! default
     if (present(phase)) phaseArg = phase
   
     call c_ESMC_SetEntryPoint(comp, stage, routine, phaseArg, localrc)
