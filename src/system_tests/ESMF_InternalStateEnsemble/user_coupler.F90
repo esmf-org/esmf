@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1 2009/02/12 20:38:10 svasquez Exp $
+! $Id: user_coupler.F90,v 1.2 2009/02/12 22:12:04 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -38,7 +38,7 @@ module user_coupler
    end type
 
    type (dataWrapper) :: wrap1, wrap2, wrap3
-   type (testData), target :: data1, data2, data3
+   type (testData), target,save :: data1, data2, data3
 
 
   contains
