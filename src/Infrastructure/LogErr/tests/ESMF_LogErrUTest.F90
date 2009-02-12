@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.50 2009/01/21 21:38:00 cdeluca Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.51 2009/02/12 00:28:55 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.50 2009/01/21 21:38:00 cdeluca Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.51 2009/02/12 00:28:55 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -57,6 +57,7 @@
       character(10) :: todays_time
       character(80) :: filename
       integer :: my_v(8), log_v(8), k, init_sec
+      integer :: datetime_commbuf(8)
       integer, pointer :: rndseed(:)
       
 
@@ -65,7 +66,7 @@
       character (5) :: random_chars
 
       !LOCAL VARIABLES:
-      integer :: rc2, ran_num, i, input_status, my_pet
+      integer :: rc2, ran_num, i, input_status, my_pet, num_pets
       real :: r1
       logical :: is_error
       type(ESMF_Log) :: log1, log2, log3, log4, log5, log6, log7
@@ -135,7 +136,6 @@
       write(name, *) "Open ESMF_LOG_NONE Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
-
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -361,24 +361,33 @@
       print *, " rc = ", rc
 
       !------------------------------------------------------------------------
-
       print *, "Starting a no-op loop to wait before testing time and date"
       ! Get the local PET number
       call ESMF_VMGetGlobal(vm, rc=rc)
-      call ESMF_VMGet(vm, localPet=my_pet, rc=rc)
-      ! Loop according to Pet Number so each PET has a different time
-      call date_and_time(values=my_v)
-      init_sec = my_v(7)
-      do i=1, (((my_pet+1)*7) * 116931)
-         ! This call makes "todays_time" has a second difference between 
-         ! pets.
-         call date_and_time(values=my_v)
-         if( (my_v(7)-init_sec) .ge. (my_pet+1) ) then
-            call date_and_time(date=todays_date, time=todays_time)
-            !write(*,*)"my_pet, diff ", my_pet, (my_v(7)-init_sec)
-            exit
-         endif
+      call ESMF_VMGet(vm, localPet=my_pet, petCount=num_pets, rc=rc)
+
+      call date_and_time(date=todays_date, time=todays_time, values=my_v)
+
+      ! Each PET needs to have a time which is at least 1 second later
+      ! than its lower-numbered neighbor.
+
+      do, i=1, num_pets-1
+        if (my_pet == i-1) then
+          datetime_commbuf = my_v
+          call ESMF_VMSend (vm,  &
+            datetime_commbuf, count=size (datetime_commbuf), dst=i)
+        else if (my_pet == i) then
+          call ESMF_VMRecv (vm,  &
+            datetime_commbuf, count=size (datetime_commbuf), src=i-1)
+          do
+            call date_and_time (values=my_v, date=todays_date, time=todays_time)
+            if (datetime_commbuf(7) /= my_v(7)) exit
+          end do
+          datetime_commbuf = my_v
+        end if
+        call ESMF_VMBarrier (vm)
       end do
+
       print *, "Ending the no-op loop"
 
       ! Generate a random string using clock as seed and write it to log file
