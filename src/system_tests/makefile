@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.58 2009/02/12 20:31:45 svasquez Exp $ 
+# $Id: makefile,v 1.59 2009/02/12 20:39:54 svasquez Exp $ 
 
 ALL: build_system_tests
 
@@ -12,6 +12,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_Attribute \
 	    ESMF_SeqEnsemEx \
 	    ESMF_ConcurrentEnsemble \
+	    ESMF_InternalStateEnsemble \
             ESMF_RecursiveComponent \
             ESMF_ArrayScatterGather \
             ESMF_ArraySparseMatMul \
