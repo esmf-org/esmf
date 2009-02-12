@@ -124,8 +124,11 @@ void CommRel::BuildFromOwner(MeshDB  &dom, const std::vector<CommNode> &obj)
 
   UInt ndproc = bootStrap.domain_processors.size();
   UInt csize = msg.commSize();
-  
-  msg.setPattern(ndproc, &bootStrap.domain_processors[0]);
+ 
+  if (ndproc)
+    msg.setPattern(ndproc, &bootStrap.domain_processors[0]);
+  else
+    msg.setPattern(0, (UInt *)NULL);
 
   // Sizes.  For each domain object, we send the id_type and object type
   std::vector<UInt> send_size_all(csize, 0); // need vector proc can look up into (Map?)
@@ -145,7 +148,10 @@ void CommRel::BuildFromOwner(MeshDB  &dom, const std::vector<CommNode> &obj)
   }
 
   // Communicate the sizes
-  msg.setSizes(&sizes[0]);
+  if (ndproc)
+    msg.setSizes(&sizes[0]);
+  else
+    msg.setSizes((UInt *)NULL);
 
   // Fill buffers
   ci = bootStrap.domain_begin();
