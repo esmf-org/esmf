@@ -129,29 +129,29 @@ program ESMF_AttributeSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_GridCompSetVM(comp1, userm1_setvm, localrc)
+  call ESMF_GridCompSetVM(comp1, routine=userm1_setvm, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  call ESMF_GridCompSetServices(comp1, userm1_register, localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
-  call ESMF_GridCompSetVM(comp2, userm2_setvm, localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  call ESMF_GridCompSetServices(comp2, userm2_register, localrc)
+  call ESMF_GridCompSetServices(comp1, routine=userm1_register, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  call ESMF_CplCompSetVM(cplcomp, usercpl_setvm, localrc)
+  call ESMF_GridCompSetVM(comp2, routine=userm2_setvm, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  call ESMF_CplCompSetServices(cplcomp, usercpl_register, localrc)
+  call ESMF_GridCompSetServices(comp2, routine=userm2_register, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+  call ESMF_CplCompSetVM(cplcomp, routine=usercpl_setvm, rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  call ESMF_CplCompSetServices(cplcomp, routine=usercpl_register, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)

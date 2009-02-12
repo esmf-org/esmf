@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.5 2009/01/16 05:28:25 theurich Exp $
+! $Id: user_coupler.F90,v 1.6 2009/02/12 05:35:22 theurich Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -75,16 +75,16 @@
         print *, "in user coupler register routine"
   
         ! Register the callback routines.
-        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
-                                       ESMF_SINGLEPHASE, status)
+        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, routine=user_init, &
+          rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
-                                       ESMF_SINGLEPHASE, status)
+        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, routine=user_run, &
+          rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
-                                       ESMF_SINGLEPHASE, status)
+        call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, routine=user_final, &
+          rc=status)
         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 

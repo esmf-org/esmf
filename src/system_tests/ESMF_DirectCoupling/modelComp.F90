@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.8 2009/01/16 05:28:25 theurich Exp $
+! $Id: modelComp.F90,v 1.9 2009/02/12 05:35:22 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -62,14 +62,14 @@ module modelCompMod
     rc = ESMF_SUCCESS
 
     ! Register Init, Run, Finalize
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, compInit, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, routine=compInit, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, compRun, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, routine=compRun, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, compFinal, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, routine=compFinal, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine
@@ -113,15 +113,15 @@ module modelCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! SetServices for modelAComp
-    call ESMF_GridCompSetVM(modelAComp, modelACompSetVM, rc)
+    call ESMF_GridCompSetVM(modelAComp, routine=modelACompSetVM, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetServices(modelAComp, modelACompReg, rc)
+    call ESMF_GridCompSetServices(modelAComp, routine=modelACompReg, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! SetServices for modelBComp
-    call ESMF_GridCompSetVM(modelBComp, modelBCompSetVM, rc)
+    call ESMF_GridCompSetVM(modelBComp, routine=modelBCompSetVM, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetServices(modelBComp, modelBCompReg, rc)
+    call ESMF_GridCompSetServices(modelBComp, routine=modelBCompReg, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Create State and initialize modelAComp

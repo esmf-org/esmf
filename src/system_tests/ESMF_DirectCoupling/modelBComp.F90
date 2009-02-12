@@ -1,4 +1,4 @@
-! $Id: modelBComp.F90,v 1.6 2009/01/16 05:28:25 theurich Exp $
+! $Id: modelBComp.F90,v 1.7 2009/02/12 05:35:22 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -54,14 +54,14 @@ module modelBCompMod
     rc = ESMF_SUCCESS
 
     ! Register Init, Run, Finalize
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, compInit, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, routine=compInit, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, compRun, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, routine=compRun, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, compFinal, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, routine=compFinal, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine

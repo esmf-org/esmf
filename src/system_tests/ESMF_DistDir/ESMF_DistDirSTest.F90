@@ -1,4 +1,4 @@
-! $Id: ESMF_DistDirSTest.F90,v 1.11 2009/01/16 05:28:25 theurich Exp $
+! $Id: ESMF_DistDirSTest.F90,v 1.12 2009/02/12 05:35:22 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -90,12 +90,12 @@ program DistDir
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_GridCompSetVM(comp1, userm1_setvm, localrc)
+  call ESMF_GridCompSetVM(comp1, routine=userm1_setvm, rc=localrc)
   print *, "Comp1 SetVM finished, rc= ", localrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  call ESMF_GridCompSetServices(comp1, userm1_register, localrc)
+  call ESMF_GridCompSetServices(comp1, routine=userm1_register, rc=localrc)
   print *, "Comp1 SetServices finished, rc= ", localrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &

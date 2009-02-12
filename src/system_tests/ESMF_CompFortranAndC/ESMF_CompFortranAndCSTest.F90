@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.9 2009/01/16 05:28:24 theurich Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.10 2009/02/12 05:35:22 theurich Exp $
 !
 ! System test CompFortranAndC
 !  Description on Sourceforge under System Test #63029
@@ -127,11 +127,15 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-      call ESMF_GridCompSetServices(compInFortran, myRegistrationInFortran, rc)
+      call ESMF_GridCompSetVM(compInFortran, routine=mySetVMInFortran, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "CompInFortran SetVM finished, rc= ", rc
+      call ESMF_GridCompSetServices(compInFortran, &
+        routine=myRegistrationInFortran, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "CompInFortran Register finished, rc= ", rc
 
-      call ESMF_GridCompSetServices(compInC, my_RegistrationInC, rc)
+      call ESMF_GridCompSetServices(compInC, routine=my_RegistrationInC, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "CompInC Register finished, rc= ", rc
 
