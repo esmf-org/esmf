@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.19 2009/02/12 05:35:22 theurich Exp $
+! $Id: user_model.F90,v 1.20 2009/02/12 19:34:15 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -20,7 +20,7 @@
 
     implicit none
     
-    public user_register
+    public user_setvm, user_register
         
     type mydata 
       integer :: index
@@ -40,7 +40,7 @@
 !   !   private to the module.
  
   subroutine user_setvm(comp, rc)
-    type(ESMF_CplComp) :: comp
+    type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
 #ifdef ESMF_TESTWITHTHREADS
     type(ESMF_VM) :: vm
