@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.31 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.32 2009/02/12 23:49:41 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -85,7 +85,6 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
   try {
 
-
 /*
     if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
       srcgrid.setSphere();
@@ -94,6 +93,18 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     }
 */
 
+    // If a spherical grid, mesh the poles, if they exist
+    IWeights pole_constraints;
+    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
+      UInt constraint_id = srcmesh.DefineContext("pole_constraints");
+
+      // Why 7?  Ask Bob.
+      for (UInt i = 1; i <= 7; ++i) {
+        MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
+      }
+    }
+
+    // Get coordinate fields
     MEField<> &scoord = *srcmesh.GetCoordField();
     MEField<> &dcoord = *dstmesh.GetCoordField();
 
@@ -104,19 +115,6 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
       MEField<> *psc = &scoord;
       srcmesh.CreateGhost();
       srcmesh.GhostComm().SendFields(1, &psc, &psc);
-    }
-
-    // If a spherical grid, mesh the poles, if they exist
-    IWeights pole_constraints;
-    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
-
-      UInt constraint_id = srcmesh.DefineContext("pole_constraints");
-
-      // Why 7?  Ask Bob.
-      for (UInt i = 1; i <= 7; ++i) {
-        MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
-      }
-
     }
 
 /*
@@ -278,6 +276,19 @@ extern "C" void FTN(c_esmc_regrid_create_mesh)(ESMCI::VM **vmpp,
 
   try {
 
+    // If a spherical grid, mesh the poles, if they exist
+    IWeights pole_constraints;
+    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
+
+      UInt constraint_id = srcmesh.DefineContext("pole_constraints");
+
+      // Why 7?  Ask Bob.
+      for (UInt i = 1; i <= 7; ++i) {
+        MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
+      }
+
+    }
+
 
     MEField<> &scoord = *srcmesh.GetCoordField();
     MEField<> &dcoord = *dstmesh.GetCoordField();
@@ -291,18 +302,7 @@ extern "C" void FTN(c_esmc_regrid_create_mesh)(ESMCI::VM **vmpp,
       srcmesh.GhostComm().SendFields(1, &psc, &psc);
     }
 
-    // If a spherical grid, mesh the poles, if they exist
-    IWeights pole_constraints;
-    if (*regridScheme == ESMF_REGRID_SCHEME_FULL3D) {
 
-      UInt constraint_id = srcmesh.DefineContext("pole_constraints");
-
-      // Why 7?  Ask Bob.
-      for (UInt i = 1; i <= 7; ++i) {
-        MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
-      }
-
-    }
 
 /*
     WriteMesh(srcmesh, "src_grid");

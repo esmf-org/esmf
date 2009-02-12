@@ -91,6 +91,16 @@ int main(int argc, char *argv[]) {
     srcmesh.Commit();
     dstmesh.Commit();
     
+    // Pole constraints
+    IWeights pole_constraints;
+
+    // Add poles if requested
+    if (addPole) {
+      UInt constraint_id = srcmesh.DefineContext("pole_constraints");
+      MeshAddPole(srcmesh, 1, constraint_id, pole_constraints);
+      MeshAddPole(srcmesh, 2, constraint_id, pole_constraints);
+    }
+
 
     // Use the coordinate fields for interpolation purposes
     MEField<> &scoord = *srcmesh.GetCoordField();
@@ -100,16 +110,6 @@ int main(int argc, char *argv[]) {
      MEField<> *psc = &scoord;
      srcmesh.CreateGhost();
      srcmesh.GhostComm().SendFields(1, &psc, &psc);
-
-     // Pole constraints
-     IWeights pole_constraints;
-
-     // Add poles if requested
-     if (addPole) {
-       UInt constraint_id = srcmesh.DefineContext("pole_constraints");
-       MeshAddPole(srcmesh, 1, constraint_id, pole_constraints);
-       MeshAddPole(srcmesh, 2, constraint_id, pole_constraints);
-     }
 
      // Only for Debug
      //WriteMesh(srcmesh, "src");
