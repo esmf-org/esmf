@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.12 2009/02/10 23:54:17 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.13 2009/02/12 05:30:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.12 2009/02/10 23:54:17 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.13 2009/02/12 05:30:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -555,6 +555,8 @@ extern "C" {
 // VM-enabled CallBack loop     
 extern "C" {
      
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_FTableCallEntryPointVMHop"
 static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargo){
   // This routine is the first level that gets instantiated in new VM
   // The first argument must be of type (void *) and points to a derived
@@ -585,6 +587,8 @@ static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargo){
 }
 
 // call a function through VM
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_ftablecallentrypointvm"
 void FTN(c_esmc_ftablecallentrypointvm)(
   ESMCI::VM **ptr_vm_parent,  // p2 to the parent VM
   ESMCI::VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
@@ -634,6 +638,8 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   delete[] name;  // delete memory that "newtrim" allocated above
 }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_compwait"
 void FTN(c_esmc_compwait)(
   ESMCI::VM **ptr_vm_parent,  // p2 to the parent VM
   ESMCI::VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
