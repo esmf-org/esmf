@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.20 2009/02/12 19:34:15 theurich Exp $
+! $Id: user_model.F90,v 1.21 2009/02/13 16:56:14 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -61,7 +61,7 @@
     call ESMF_VMGetGlobal(vm, rc=rc)
     call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
     if (supportPthreads) then
-      call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
+      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
     endif
 #endif
 
