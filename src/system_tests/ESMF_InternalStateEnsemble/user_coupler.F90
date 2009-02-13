@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2009/02/12 22:12:04 svasquez Exp $
+! $Id: user_coupler.F90,v 1.3 2009/02/13 00:54:37 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -24,23 +24,6 @@ module user_coupler
   ! global data
   type(ESMF_RouteHandle), save :: routehandle1, routehandle2, routehandle3
     
-  ! Internal State Variables
-  type testData
-  sequence
-      type(ESMF_ArraySpec)  :: arrayspec
-      type(ESMF_DistGrid)   :: distgrid
-      type(ESMF_Array)      :: array
-  end type
-
-   type dataWrapper
-   sequence
-      type(testData), pointer :: p
-   end type
-
-   type (dataWrapper) :: wrap1, wrap2, wrap3
-   type (testData), target,save :: data1, data2, data3
-
-
   contains
 
 !-------------------------------------------------------------------------
@@ -62,14 +45,14 @@ module user_coupler
     print *, "User Coupler Register starting"
     
     ! Register the callback routines.
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, routine=user_init, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, user_run, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, routine=user_run, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, routine=user_final, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "Registered Initialize, Run, and Finalize routines"
