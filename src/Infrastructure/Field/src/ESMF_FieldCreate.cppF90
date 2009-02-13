@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.45 2009/02/12 18:53:39 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.46 2009/02/13 00:57:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.45 2009/02/12 18:53:39 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.46 2009/02/13 00:57:24 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -247,7 +247,7 @@ contains
 ! The arguments are:
 ! \begin{description}
 ! \item [grid] 
-!       Pointer to an {\tt ESMF\_Grid} object. 
+!       {\tt ESMF\_Grid} object. 
 ! \item [arrayspec]
 !       Data specification. 
 ! \item [{[staggerloc]}]
@@ -259,18 +259,20 @@ contains
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
-!       of the {\tt grid} to a dimension in the {\tt field} by
-!       specifying the appropriate {\tt field} dimension index. The default is to
-!       map all of the {\tt grid}|s dimensions against the lowest dimensions of
-!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
-!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
-!       to one and smaller than or equal to the {\tt field} rank.
-!       It is erroneous to specify the same {\tt gridToFieldMap} entry
-!       multiple times. The total ungridded dimensions in the {\tt field}
-!       are the total {\tt field} dimensions less
-!       the dimensions in
-!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
-!       stored in the {\t field}.  
+!       of the {\tt grid} to a dimension in the Field by
+!       specifying the appropriate Field dimension index. The
+!       default is to map all of the {\tt grid}|s dimensions against the
+!       lowest dimensions of the Field in sequence, i.e.
+!       {\tt gridToFieldMap} = (/1,2,3,.../).
+!       Unmapped Field dimensions are undistributed Field dimensions.
+!       All {\tt gridToFieldMap} entries must be greater than or equal
+!       to zero and smaller than or equal to the Field dimCount. It is erroneous
+!       to specify the same entry multiple times unless it is zero.
+!       If the Field dimCount is less than the Grid dimCount then the default
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero
+!       entry in the {\tt gridToFieldMap} indicates that the particular
+!       Grid dimension will be replicating the Field across the DEs along
+!       this direction.
 ! \item [{[ungriddedLBound]}]
 !       Lower bounds of the ungridded dimensions of the {\tt field}.
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
@@ -393,7 +395,7 @@ contains
 ! The arguments are:
 ! \begin{description}
 ! \item [grid] 
-!       Pointer to an {\tt ESMF\_Grid} object. 
+!       {\tt ESMF\_Grid} object. 
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid 
 !       predefined values see Section \ref{sec:opt:staggerloc}.
@@ -1412,7 +1414,7 @@ end subroutine ESMF_FieldConstructNoDataPtr
     logical :: flipflop(ESMF_MAXDIM)
 
 
-    ! Initialize pointers
+    ! Initialize
     localrc = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
     nullify(ftype)
@@ -1725,7 +1727,7 @@ end subroutine ESMF_FieldConstructNoDataPtr
     integer :: l_uglb(ESMF_MAXDIM), l_ugub(ESMF_MAXDIM)
     type (ESMF_IndexFlag) :: arrayIndexFlag, gridIndexFlag    
 
-    ! Initialize pointers
+    ! Initialize
     localrc = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
     nullify(ftype)
@@ -1960,7 +1962,7 @@ end subroutine ESMF_FieldConstructNoDataPtr
 #define FieldCreateGBDataDoc() \
 !---------------------------------------------------------------------------- @\
 !BOPI @\
-! !IROUTINE: ESMF_FieldCreate - Create a Field from Fortran array pointer @\
+! !IROUTINE: ESMF_FieldCreate - Create a Field from Fortran array @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
@@ -1998,7 +2000,7 @@ end subroutine ESMF_FieldConstructNoDataPtr
 !       Native fortran data array to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
-! \item[indexflag] @\
+! \item [indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{opt:indexflag} for a list of valid indexflag options. @\
 ! \item [{[copyflag]}] @\
@@ -2122,7 +2124,7 @@ end subroutine ESMF_FieldConstructNoDataPtr
     call ESMF_FieldSetCommit( & @\
         ESMF_FieldCreateGBData##mrank##D##mtypekind, & @\
         geombase, farray, indexflag=indexflag, copyflag=copyflag, & @\
-        staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, & @\
+        gridToFieldMap=gridToFieldMap, & @\
         ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, & @\
         maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
         rc=localrc) @\
@@ -2286,7 +2288,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
     call ESMF_FieldSetCommit( & @\
         ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind, & @\
         geombase, farrayPtr, copyflag=copyflag, & @\
-        staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, & @\
+        gridToFieldMap=gridToFieldMap, & @\
         maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
         rc=localrc) @\
 @\
@@ -2438,7 +2440,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
     type(ESMF_StaggerLoc)  :: localStaggerLoc
     type(ESMF_IndexFlag)   :: g_indexflag
 
-    ! Initialize pointers
+    ! Initialize
     localrc = ESMF_RC_NOT_IMPL
 
     ! Initialize return code   
@@ -2615,7 +2617,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
     type(ESMF_GeomBase) :: geombase
     type(ESMF_StaggerLoc) :: localStaggerloc
 
-    ! Initialize pointers
+    ! Initialize
     localrc = ESMF_RC_NOT_IMPL
 
     ! Initialize return code   
@@ -2819,7 +2821,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
     type(ESMF_GeomBase) :: geombase @\
     type(ESMF_StaggerLoc) :: localStaggerloc@\
 @\
-    ! Initialize pointers@\
+    ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
 @\
     ! Initialize return code   @\
@@ -3001,7 +3003,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
     type(ESMF_GeomBase) :: geombase @\
     type(ESMF_StaggerLoc) :: localStaggerloc@\
 @\
-    ! Initialize pointers@\
+    ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
 @\
     ! Initialize return code   @\
@@ -3133,7 +3135,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
     integer :: localrc                          !  Local error code
     type(ESMF_GeomBase) :: geombase
 
-    ! Initialize pointers
+    ! Initialize 
     localrc = ESMF_RC_NOT_IMPL
 
     ! Initialize return code   
@@ -3257,7 +3259,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
     integer :: localrc                       !  Local error code
     type(ESMF_GeomBase) :: geombase
 
-    ! Initialize pointers
+    ! Initialize
     localrc = ESMF_RC_NOT_IMPL
 
     ! Initialize return code   
@@ -3410,7 +3412,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
     integer :: localrc                       !  Local error code@\
     type(ESMF_GeomBase) :: geombase @\
 @\
-    ! Initialize pointers@\
+    ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
 @\
     ! Initialize return code   @\
@@ -3542,7 +3544,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
     integer :: localrc                       !  Local error code@\
     type(ESMF_GeomBase) :: geombase @\
 @\
-    ! Initialize pointers@\
+    ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
 @\
     ! Initialize return code   @\
@@ -3666,7 +3668,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
     integer :: localrc                          !  Local error code
     type(ESMF_GeomBase) :: geombase
 
-    ! Initialize pointers
+    ! Initialize
     localrc = ESMF_RC_NOT_IMPL
 
     ! Initialize return code   
@@ -3790,7 +3792,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
     integer :: localrc                       !  Local error code
     type(ESMF_GeomBase) :: geombase
 
-    ! Initialize pointers
+    ! Initialize
     localrc = ESMF_RC_NOT_IMPL
 
     ! Initialize return code   
@@ -3943,7 +3945,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
     integer :: localrc                       !  Local error code@\
     type(ESMF_GeomBase) :: geombase @\
 @\
-    ! Initialize pointers@\
+    ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
 @\
     ! Initialize return code   @\
@@ -4075,7 +4077,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
     integer :: localrc                       !  Local error code@\
     type(ESMF_GeomBase) :: geombase @\
 @\
-    ! Initialize pointers@\
+    ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
 @\
     ! Initialize return code   @\
