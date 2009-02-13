@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.46 2009/02/13 00:57:24 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.47 2009/02/13 20:51:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.46 2009/02/13 00:57:24 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.47 2009/02/13 20:51:21 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -715,7 +715,6 @@ contains
               computationalEdgeUWidth=compEUWidth(1:gridDimCount_norep), & 
               totalLWidth=maxHaloLWidth, totalUWidth=maxHaloUWidth, & 
               indexflag=indexflag, &                                                              
-              staggerLoc=0,        & 
               undistLBound=arrayLBound, undistUBound=arrayUBound, &
               name=name, &
               rc=localrc)
@@ -1967,7 +1966,7 @@ end subroutine ESMF_FieldConstructNoDataPtr
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateGBData<rank><type><kind>(geombase, & @\
-!   farray, indexflag, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
+!   farray, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
 !   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
 ! @\
 ! !RETURN VALUE: @\
@@ -1978,7 +1977,6 @@ end subroutine ESMF_FieldConstructNoDataPtr
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
 !   type(ESMF_IndexFlag), intent(in)            :: indexflag @\
 !   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
-!   type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
 !   integer, intent(in), optional :: gridToFieldMap(:)     @\
 !   integer, intent(in), optional :: ungriddedLBound(:) @\
 !   integer, intent(in), optional :: ungriddedUBound(:) @\
@@ -2007,12 +2005,6 @@ end subroutine ESMF_FieldConstructNoDataPtr
 !       Whether to copy the contents of the {\tt farray} or reference it directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
 !       {\tt ESMF\_DATA\_REF}. @\
-! \item [{[staggerloc]}] @\
-!       Stagger location of data in grid cells.  For valid  @\
-!       predefined values see Section \ref{sec:opt:staggerloc}. @\
-!       To create a custom stagger location see Section @\
-!       \ref{sec:usage:staggerloc:adv}.  The default @\
-!       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt grid}|s dimCount.  The list elements map each dimension @\
@@ -2087,7 +2079,7 @@ end subroutine ESMF_FieldConstructNoDataPtr
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateGBData" @\
   function ESMF_FieldCreateGBData##mrank##D##mtypekind(geombase, & @\
-    farray, indexflag, copyflag,  staggerloc, gridToFieldMap, ungriddedLBound, & @\
+    farray, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
 @\
     ! return value @\
@@ -2098,7 +2090,6 @@ end subroutine ESMF_FieldConstructNoDataPtr
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_IndexFlag), intent(in)            :: indexflag @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
-    type(ESMF_StaggerLoc), intent(in), optional :: staggerloc @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
@@ -2158,7 +2149,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateGBDataPtr<rank><type><kind>(geombase, & @\
-!   farrayPtr, copyflag, staggerloc, gridToFieldMap, & @\
+!   farrayPtr, copyflag, gridToFieldMap, & @\
 !   maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
 ! @\
 ! !RETURN VALUE: @\
@@ -2168,7 +2159,6 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 !   type(ESMF_GeomBase) :: geombase                  @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
 !   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
-!   type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
 !   integer, intent(in), optional :: gridToFieldMap(:)     @\
 !   integer, intent(in), optional :: maxHaloLWidth(:) @\
 !   integer, intent(in), optional :: maxHaloUWidth(:) @\
@@ -2192,12 +2182,6 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 !       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
 !       {\tt ESMF\_DATA\_REF}. @\
-! \item [{[staggerloc]}] @\
-!       Stagger location of data in grid cells.  For valid  @\
-!       predefined values see Section \ref{sec:opt:staggerloc}. @\
-!       To create a custom stagger location see Section @\
-!       \ref{sec:usage:staggerloc:adv}.  The default @\
-!       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt grid}|s dimCount.  The list elements map each dimension @\
@@ -2254,7 +2238,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateGBDataPtr" @\
   function ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind(geombase, & @\
-    farrayPtr, copyflag, staggerloc, gridToFieldMap, & @\
+    farrayPtr, copyflag, gridToFieldMap, & @\
     maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
 @\
     ! return value @\
@@ -2264,7 +2248,6 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
     type(ESMF_GeomBase) :: geombase                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
-    type(ESMF_StaggerLoc), intent(in), optional :: staggerloc @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: maxHaloLWidth(:) @\
     integer, intent(in), optional :: maxHaloUWidth(:) @\
@@ -2849,7 +2832,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
        ESMF_FieldCreateGridData##mrank##D##mtypekind = & @\
               ESMF_FieldCreateGBData##mrank##D##mtypekind(geombase, & @\
                                farray, indexflag=indexflag, copyflag=copyflag, & @\
-                               staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, & @\
+                               gridToFieldMap=gridToFieldMap, & @\
                                ungriddedLBound=ungriddedLBound, & @\
                                ungriddedUBound=ungriddedUBound, & @\
                                maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
@@ -3031,7 +3014,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
        ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind = & @\
               ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind(geombase, & @\
                                farrayPtr, copyflag=copyflag, & @\
-                               staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, & @\
+                               gridToFieldMap=gridToFieldMap, & @\
                                maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
                                name=name, iospec=iospec, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
