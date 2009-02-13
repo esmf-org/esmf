@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.21 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.22 2009/02/13 01:36:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -62,16 +62,16 @@ module ESMF_VMComponentUTest_gcomp_mod
     rc = ESMF_SUCCESS
 
     ! register INIT method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, mygcomp_init, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, routine=mygcomp_init, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! register RUN method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, routine=mygcomp_run, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! register FINAL method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, mygcomp_final, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, routine=mygcomp_final, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine !--------------------------------------------------------------
@@ -85,16 +85,16 @@ module ESMF_VMComponentUTest_gcomp_mod
     rc = ESMF_SUCCESS
 
     ! register INIT method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, mygcomp_init, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, routine=mygcomp_init, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! register RUN method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, routine=mygcomp_run, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! register FINAL method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, mygcomp_final, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, routine=mygcomp_final, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine !--------------------------------------------------------------
@@ -169,7 +169,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.21 2009/01/21 21:38:02 cdeluca Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.22 2009/02/13 01:36:09 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -206,10 +206,11 @@ program ESMF_VMComponentUTest
       gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
   
-      call ESMF_GridCompSetVM(gcomp(i), mygcomp_setvm, loop_rc)
+      call ESMF_GridCompSetVM(gcomp(i), routine=mygcomp_setvm, rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
 
-      call ESMF_GridCompSetServices(gcomp(i), mygcomp_register_nexh, loop_rc)
+      call ESMF_GridCompSetServices(gcomp(i), routine=mygcomp_register_nexh, &
+        rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
 
     enddo
@@ -241,10 +242,11 @@ program ESMF_VMComponentUTest
       gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 20
   
-      call ESMF_GridCompSetVM(gcomp(i), mygcomp_setvm, loop_rc)
+      call ESMF_GridCompSetVM(gcomp(i), routine=mygcomp_setvm, rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
 
-      call ESMF_GridCompSetServices(gcomp(i), mygcomp_register_exh, loop_rc)
+      call ESMF_GridCompSetServices(gcomp(i), routine=mygcomp_register_exh, &
+        rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 20
 
     enddo

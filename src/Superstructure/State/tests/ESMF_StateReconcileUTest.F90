@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.19 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.20 2009/02/13 01:36:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -181,14 +181,14 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_removeUTest_Multi_Proc_Only
-    call ESMF_GridCompSetServices(comp1, comp_dummy, rc)
+    call ESMF_GridCompSetServices(comp1, routine=comp_dummy, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_removeUTest_Multi_Proc_Only
-    call ESMF_GridCompSetServices(comp2, comp_dummy, rc)
+    call ESMF_GridCompSetServices(comp2, routine=comp_dummy, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -196,7 +196,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_removeUTest_Multi_Proc_Only
     call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, &
-                                        comp1_init, ESMF_SINGLEPHASE, rc)
+      routine=comp1_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -204,7 +204,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_removeUTest_Multi_Proc_Only
     call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETINIT, &
-                                        comp2_init, ESMF_SINGLEPHASE, rc)
+      routine=comp2_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -304,14 +304,14 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_removeUTest_Multi_Proc_Only
-    call ESMF_GridCompSetServices(comp1, comp_dummy, rc)
+    call ESMF_GridCompSetServices(comp1, routine=comp_dummy, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_removeUTest_Multi_Proc_Only
-    call ESMF_GridCompSetServices(comp2, comp_dummy, rc)
+    call ESMF_GridCompSetServices(comp2, routine=comp_dummy, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -319,7 +319,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_removeUTest_Multi_Proc_Only
     call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, &
-                                        comp1_init, ESMF_SINGLEPHASE, rc)
+      routine=comp1_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -327,7 +327,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_removeUTest_Multi_Proc_Only
     call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETINIT, &
-                                        comp2_init, ESMF_SINGLEPHASE, rc)
+      routine=comp2_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -431,14 +431,14 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_removeUTest_Multi_Proc_Only
-    call ESMF_GridCompSetServices(comp1, comp_dummy, rc)
+    call ESMF_GridCompSetServices(comp1, routine=comp_dummy, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_removeUTest_Multi_Proc_Only
-    call ESMF_GridCompSetServices(comp2, comp_dummy, rc)
+    call ESMF_GridCompSetServices(comp2, routine=comp_dummy, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetServices"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -446,7 +446,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_removeUTest_Multi_Proc_Only
     call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, &
-                                        comp1_init, ESMF_SINGLEPHASE, rc)
+      routine=comp1_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -454,7 +454,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_removeUTest_Multi_Proc_Only
     call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETINIT, &
-                                        comp2_init, ESMF_SINGLEPHASE, rc)
+      routine=comp2_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

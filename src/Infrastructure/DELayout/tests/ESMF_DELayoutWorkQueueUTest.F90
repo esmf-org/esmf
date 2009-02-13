@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.16 2009/01/22 04:56:36 theurich Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.17 2009/02/13 01:36:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -32,8 +32,8 @@ module ESMF_DELayoutWQUTest_mod
     
     ! Run this VM default mode: mpi-only, no threads
     
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, routine=mygcomp_run, &
+      rc=rc)
     if (rc /= ESMF_SUCCESS) return  ! bail out
     
   end subroutine !--------------------------------------------------------------
@@ -201,7 +201,7 @@ program ESMF_DELayoutWQUTest
   !NEX_UTest
   write(name, *) "GridCompSetServices() - round 1"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_GridCompSetServices(gcomp, mygcomp_register, rc)
+  call ESMF_GridCompSetServices(gcomp, routine=mygcomp_register, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
@@ -233,9 +233,9 @@ program ESMF_DELayoutWQUTest
   write(name, *) "GridCompSetServices() - round 2"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   if (supportPthreads) then
-    call ESMF_GridCompSetVM(gcomp, mygcomp_setvm_withthreads, rc)
+    call ESMF_GridCompSetVM(gcomp, routine=mygcomp_setvm_withthreads, rc=rc)
   endif
-  call ESMF_GridCompSetServices(gcomp, mygcomp_register, rc)
+  call ESMF_GridCompSetServices(gcomp, routine=mygcomp_register, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
   !NEX_UTest

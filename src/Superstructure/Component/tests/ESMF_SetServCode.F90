@@ -1,4 +1,4 @@
-! $Id: ESMF_SetServCode.F90,v 1.12 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_SetServCode.F90,v 1.13 2009/02/13 01:36:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -69,12 +69,12 @@ contains
        ! Initialize return code
        rc = ESMF_SUCCESS
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init1, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run1, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final1, &
-                                                     ESMF_SINGLEPHASE, rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, routine=my_init1, &
+         rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, routine=my_run1, &
+         rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, routine=my_final1, &
+         rc=rc)
                                                      
     end subroutine SetServ1
 
@@ -86,12 +86,12 @@ contains
        ! Initialize return code
        rc = ESMF_SUCCESS
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init2, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run2, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final2, &
-                                                     ESMF_SINGLEPHASE, rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, routine=my_init2, &
+         rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, routine=my_run2, &
+         rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, routine=my_final2, &
+         rc=rc)
 
     end subroutine SetServ2
 

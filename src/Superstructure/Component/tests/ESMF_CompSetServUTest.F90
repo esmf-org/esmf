@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.14 2009/01/23 02:43:13 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.15 2009/02/13 01:36:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -110,7 +110,7 @@
     !NEX_UTest
 !   !  Set Services
 
-    call ESMF_GridCompSetServices(comp1, SetServ1, rc)
+    call ESMF_GridCompSetServices(comp1, routine=SetServ1, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Setting Component Services"
@@ -136,7 +136,7 @@
     !EX_UTest
 !   !  Re-Set Services
 
-    call ESMF_GridCompSetServices(comp1, SetServ2, rc)
+    call ESMF_GridCompSetServices(comp1, routine=SetServ2, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Setting Component Services"
@@ -215,7 +215,7 @@
     !EX_UTest
 !   !  Set Services
 
-    call ESMF_GridCompSetServices(comp1, SetServ1, rc)
+    call ESMF_GridCompSetServices(comp1, routine=SetServ1, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Setting Component Services"
