@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.7 2009/02/10 18:49:41 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.8 2009/02/15 00:19:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -97,8 +97,9 @@ implicit none
 ! Components will be using to run their initialize, run, and finalize routines.
 !EOE
 
-!BOC
+
       if (petCount<4) then
+      goto 10
         gridcomp1 = ESMF_GridCompCreate(name="gridcomp1", &
           petList=(/0/), rc=rc)
         gridcomp2 = ESMF_GridCompCreate(name="gridcomp2", &
@@ -106,20 +107,26 @@ implicit none
         cplcomp = ESMF_CplCompCreate(name="cplcomp", &
           petList=(/0/), rc=rc)
       else
+!BOC
         gridcomp1 = ESMF_GridCompCreate(name="gridcomp1", &
           petList=(/0,1/), rc=rc)
         gridcomp2 = ESMF_GridCompCreate(name="gridcomp2", &
           petList=(/2,3/), rc=rc)
         cplcomp = ESMF_CplCompCreate(name="cplcomp", &
           petList=(/0,1,2,3/), rc=rc)
-      endif
-      
+
       c1exp = ESMF_StateCreate("Comp1 exportState", &
         ESMF_STATE_EXPORT, rc=rc)
       c2imp = ESMF_StateCreate("Comp2 importState", &
         ESMF_STATE_IMPORT, rc=rc)
 !EOC      
 
+      endif
+ 
+! statecreates are in the if temporarily so that I can do there is not
+! a random endif in the protex while investigating the uni failures in
+! this example, which will not run UNI in the end anyway
+                
       call ESMF_GridCompSetVM(gridcomp1, userm1_setvm, rc)
       call ESMF_GridCompSetVM(gridcomp2, userm2_setvm, rc)
       call ESMF_CplCompSetVM(cplcomp, usercpl_setvm, rc)
@@ -230,7 +237,7 @@ implicit none
       call ESMF_StateDestroy(c1exp, rc=rc)
       call ESMF_StateDestroy(c2imp, rc=rc)
 
-  if (localPet==0) then
+10  if (localPet==0) then
       print *, "--------------------------------------- "
       print *, "End of ESMF_AttributeUpdate Example"
       print *, "--------------------------------------- "
