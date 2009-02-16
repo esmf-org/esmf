@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.82 2009/02/05 21:58:00 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.83 2009/02/16 19:14:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.82 2009/02/05 21:58:00 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.83 2009/02/16 19:14:31 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -4896,8 +4896,8 @@ int Grid::serialize(
 // !ARGUMENTS:
   char *buffer,          // inout - byte stream to fill
   int *length,           // inout - buf length
-  int *offset)           // inout - original offset, updated to point 
-                         //         to first free byte after current obj info
+  int *offset,           // inout - original offset
+  const ESMC_AttReconcileFlag &attreconflag) // attreconcile flag
 {
                          
 //
@@ -4973,7 +4973,7 @@ int Grid::serialize(
     loffset=*offset;
 
     // First, serialize the base class,
-    localrc = ESMC_Base::ESMC_Serialize(buffer, length, &loffset);
+    localrc = ESMC_Base::ESMC_Serialize(buffer, length, &loffset, attreconflag);
 
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
@@ -5046,7 +5046,7 @@ int Grid::serialize(
       for (int c=0; c<dimCount; c++) {
 	if (coordExists[s][c]) {
            //// Serialize the Array
-	  localrc = coordArrayList[s][c]->serialize(buffer, length, &loffset);
+	  localrc = coordArrayList[s][c]->serialize(buffer, length, &loffset, attreconflag);
 	  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
 				      ESMF_ERR_PASSTHRU, &rc)) return rc;  
 	}
@@ -5065,7 +5065,7 @@ int Grid::serialize(
       for (int i=0; i<ESMC_GRIDITEM_COUNT; i++) {
 	if (itemExists[s][i]) {
            //// Serialize the Array
-	  localrc = itemArrayList[s][i]->serialize(buffer, length, &loffset);
+	  localrc = itemArrayList[s][i]->serialize(buffer, length, &loffset, attreconflag);
 	  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
 				      ESMF_ERR_PASSTHRU, &rc)) return rc;  
 	}
@@ -5137,8 +5137,9 @@ int Grid::deserialize(
 //
 // !ARGUMENTS:
   char *buffer,          // in - byte stream to read
-  int *offset){          // inout - original offset, updated to point 
-                         //         to first free byte after current obj info
+  int *offset,          // inout - original offset 
+  const ESMC_AttReconcileFlag &attreconflag) // attreconcile flag
+{
 //
 // !DESCRIPTION:
 //    Turn a stream of bytes into an object.
@@ -5172,7 +5173,7 @@ int Grid::deserialize(
   loffset=*offset;
 
   // First, deserialize the base class
-  localrc = ESMC_Base::ESMC_Deserialize(buffer, &loffset);
+  localrc = ESMC_Base::ESMC_Deserialize(buffer, &loffset, attreconflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -5248,7 +5249,7 @@ int Grid::deserialize(
     for (int c=0; c<dimCount; c++) {
       if (coordExists[s][c]) {
 	coordArrayList[s][c]=new Array;
-	coordArrayList[s][c]->deserialize(buffer, &loffset);
+	coordArrayList[s][c]->deserialize(buffer, &loffset, attreconflag);
       } else {
 	coordArrayList[s][c]=ESMC_NULL_POINTER;
       }
@@ -5279,7 +5280,7 @@ int Grid::deserialize(
     for (int i=0; i<ESMC_GRIDITEM_COUNT; i++) {
       if (itemExists[s][i]) {
 	itemArrayList[s][i]=new Array;
-	itemArrayList[s][i]->deserialize(buffer, &loffset);
+	itemArrayList[s][i]->deserialize(buffer, &loffset, attreconflag);
       } else {
 	itemArrayList[s][i]=ESMC_NULL_POINTER;
       }

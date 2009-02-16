@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.14 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.15 2009/02/16 19:14:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -2330,13 +2330,15 @@ end function
 ! !IROUTINE: ESMF_FieldBundleSerialize - Serialize bundle info into a byte stream
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleSerialize(bundle, buffer, length, offset, rc) 
+      subroutine ESMF_FieldBundleSerialize(bundle, buffer, length, offset, &
+                                          attreconflag, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: bundle 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
+      type(ESMF_AttReconcileFlag), optional :: attreconflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -2359,6 +2361,8 @@ end function
 !           Current write offset in the current buffer.  This will be
 !           updated by this routine and return pointing to the next
 !           available byte in the buffer.
+!     \item[{[attreconflag]}]
+!           Flag to tell if Attribute serialization is to be done
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2368,6 +2372,7 @@ end function
       integer :: localrc                     ! Error status
       integer :: i
       type(ESMF_FieldBundleType), pointer :: bp   ! bundle type
+      type(ESMF_AttReconcileFlag) :: lattreconflag
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2376,10 +2381,17 @@ end function
       ! check inputs
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)      
 
+      ! deal with optional attreconflag
+      if (present(attreconflag)) then
+        lattreconflag = attreconflag
+      else
+        lattreconflag = ESMF_ATTRECONCILE_OFF
+      endif
+
       ! shortcut to internals
       bp => bundle%btypep
-
-      call c_ESMC_BaseSerialize(bp%base, buffer(1), length, offset, localrc)
+      
+      call c_ESMC_BaseSerialize(bp%base, buffer(1), length, offset, lattreconflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -2394,7 +2406,7 @@ end function
                                  ESMF_CONTEXT, rc)) return
 
       if (bp%gridstatus .eq. ESMF_STATUS_READY) then
-          call ESMF_GridSerialize(bp%grid, buffer, length, offset, localrc)
+          call ESMF_GridSerialize(bp%grid, buffer, length, offset, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -2403,7 +2415,8 @@ end function
 
       ! TODO: decide if these need to be sent before or after
       do i = 1, bp%field_count
-          call ESMF_FieldSerialize(bp%flist(i), buffer, length, offset, localrc)
+          call ESMF_FieldSerialize(bp%flist(i), buffer, length, offset, &
+                                  attreconflag=lattreconflag, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -2421,7 +2434,8 @@ end function
 ! !IROUTINE: ESMF_FieldBundleDeserialize - Deserialize a byte stream into a FieldBundle
 !
 ! !INTERFACE:
-      function ESMF_FieldBundleDeserialize(vm, buffer, offset, rc) 
+      function ESMF_FieldBundleDeserialize(vm, buffer, offset, &
+                                          attreconflag, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_FieldBundle) :: ESMF_FieldBundleDeserialize   
@@ -2430,6 +2444,7 @@ end function
       type(ESMF_VM), intent(in) :: vm
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
+      type(ESMF_AttReconcileFlag), optional :: attreconflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -2449,6 +2464,8 @@ end function
 !           Current read offset in the current buffer.  This will be
 !           updated by this routine and return pointing to the next
 !           unread byte in the buffer.
+!     \item[{[attreconflag]}]
+!           Flag to tell if Attribute serialization is to be done
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2458,12 +2475,20 @@ end function
       integer :: localrc, status             ! Error status, allocation status
       integer :: i
       type(ESMF_FieldBundleType), pointer :: bp   ! bundle type
+      type(ESMF_AttReconcileFlag) :: lattreconflag
 
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
       status = ESMF_RC_NOT_IMPL
+
+      ! deal with optional attreconflag
+      if (present(attreconflag)) then
+        lattreconflag = attreconflag
+      else
+        lattreconflag = ESMF_ATTRECONCILE_OFF
+      endif
 
       ! in case of error, make sure this is invalid.
       nullify(ESMF_FieldBundleDeserialize%btypep)
@@ -2481,7 +2506,7 @@ end function
                                  ESMF_CONTEXT, rc)) return
 
       ! this overwrites the name and adds attributes to the base obj.
-      call c_ESMC_BaseDeserialize(bp%base, buffer(1), offset, localrc)
+      call c_ESMC_BaseDeserialize(bp%base, buffer(1), offset, lattreconflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -2496,7 +2521,7 @@ end function
                                  ESMF_CONTEXT, rc)) return
 
       if (bp%gridstatus .eq. ESMF_STATUS_READY) then
-          bp%grid = ESMF_GridDeserialize(vm, buffer, offset, localrc)
+          bp%grid = ESMF_GridDeserialize(vm, buffer, offset, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -2509,7 +2534,8 @@ end function
                                      ESMF_CONTEXT, rc)) return
 
       do i = 1, bp%field_count
-          bp%flist(i) = ESMF_FieldDeserialize(vm, buffer, offset, localrc)
+          bp%flist(i) = ESMF_FieldDeserialize(vm, buffer, offset, &
+                                      attreconflag=lattreconflag, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
@@ -2518,12 +2544,14 @@ end function
           endif
           !  here we relink the Field Attribute hierarchies to the FieldBundle
           !  Attribute hierarchies, as they were before
-          call c_ESMC_AttributeSetLink(bp%base, bp%flist(i)%ftypep%base, localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+            call c_ESMC_AttributeSetLink(bp%base, bp%flist(i)%ftypep%base, localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
               deallocate(bp%flist)
               return
+            endif
           endif
       enddo
 

@@ -1,4 +1,4 @@
-% $Id: State_usage.tex,v 1.13 2009/01/21 21:38:02 cdeluca Exp $
+% $Id: State_usage.tex,v 1.14 2009/02/16 19:14:31 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@ to replace the name placeholders with real data objects.
 States can also be filled with data items that do not yet 
 have data allocated.  Fields, FieldBundles, and Arrays each have 
 methods that support their creation without actual data 
-allocation - the grid and metadata are set up but no
+allocation - the Grid and Attributes are set up but no
 Fortran array of data values is allocated.  In this approach, 
 when a State is passed into its associated Gridded Component's 
 initialize method, the incomplete Arrays, Fields, and 
@@ -83,23 +83,24 @@ object.   As States are passed between components if any object
 in a State was not created in unison on all the current PETs 
 then some PETs have no object to pass into a
 communication method (e.g. regrid or data redistribution).
-A State method called reconcile must be called to broadcast 
+The {\tt ESMF\_StateReconcile()} method must be called to broadcast 
 information about these objects to all PETs in a component;
-after which all PETs have a single uniform view of all objects.  
+after which all PETs have a single uniform view of all objects and metadata.  
 
 If components are running in sequential mode on all available PETs
-and States are being passed between them there is no need to make
-the reconcile call since all PETs have a uniform view of the objects.
+and States are being passed between them there is no need to call 
+{\tt ESMF\_StateReconcile} since all PETs have a uniform view of the objects.
 However, if components are running on a subset of the PETs, as is
 usually the case when running in concurrent mode, then when States
 are passed into components which contain a superset of those PETs,
-for example, a Coupler Component, all PETs must call reconcile
+for example, a Coupler Component, all PETs must call {\tt ESMF\_StateReconcile}
 on the States before using them in any ESMF communication methods.
-The reconcile process broadcasts metadata information about objects
+The reconciliation process broadcasts information about objects
 which exist only on a subset of the PETs.  On PETs missing those
 objects it creates a {\it proxy} object which contains any
-attributes of the original object plus enough information for it
+qualities of the original object plus enough information for it
 to be a data source or destination for a regrid or data redistribution
-operation. 
+operation.  There is an option to turn off metadata reconciliation in the 
+{\tt ESMF\_StateReconcile} call.
 
 

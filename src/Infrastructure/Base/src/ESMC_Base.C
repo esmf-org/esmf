@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.116 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMC_Base.C,v 1.117 2009/02/16 19:14:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.116 2009/01/21 21:37:58 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.117 2009/02/16 19:14:31 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -628,8 +628,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 //
 // !ARGUMENTS:
       char *buffer,          // in - byte stream to read
-      int *offset) {         // inout - original offset, updated to point 
-                             //  to first free byte after current obj info
+      int *offset,           // inout - original offset
+      const ESMC_AttReconcileFlag &attreconflag) {  // in - attreconcile flag
 //
 // !DESCRIPTION:
 //    Turn a stream of bytes into an object.
@@ -667,7 +667,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     root.setBase(this);
 
     // Deserialize the Attribute hierarchy
-    localrc = root.ESMC_Deserialize(buffer, offset);
+    if (attreconflag == ESMF_ATTRECONCILE_ON) {
+      localrc = root.ESMC_Deserialize(buffer,offset);
+    }
         
   return ESMF_SUCCESS;
 
@@ -761,8 +763,8 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
 // !ARGUMENTS:
       char *buffer,          // inout - byte stream to fill
       int *length,           // inout - buf length; realloc'd here if needed
-      int *offset) const {   // inout - original offset, updated to point 
-                             //  to first free byte after current obj info
+      int *offset,           // inout - original offset
+      const ESMC_AttReconcileFlag &attreconflag) const {   // in - attreconcile flag
 //
 // !DESCRIPTION:
 //    Turn info in base class into a stream of bytes.
@@ -805,7 +807,9 @@ static int globalCount = 0;   //TODO: this should be a counter per VM context
     *offset = (cp - buffer);
 
     // Serialize the Attribute hierarchy
-    rc = root.ESMC_Serialize(buffer,length,offset);
+    if (attreconflag == ESMF_ATTRECONCILE_ON) { 
+      rc = root.ESMC_Serialize(buffer,length,offset);
+    }
     
   return ESMF_SUCCESS;
 

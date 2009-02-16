@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.30 2009/01/21 21:38:00 cdeluca Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.31 2009/02/16 19:14:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -374,6 +374,7 @@ char *name = NULL;
       char *buf,                // in/out - a byte stream buffer
       int *length,              // in/out - number of allocated bytes
       int *offset,              // in/out - current offset in the stream
+      ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
       int *rc) {                // out - return code
 // 
 // !DESCRIPTION:
@@ -389,7 +390,7 @@ char *name = NULL;
     return;
   }
 
-  *rc = (*localarray)->ESMC_LocalArraySerialize(buf, length, offset);
+  *rc = (*localarray)->ESMC_LocalArraySerialize(buf, length, offset, *attreconflag);
 
   return;
 
@@ -412,6 +413,7 @@ char *name = NULL;
       ESMC_LocalArray **localarray,       // in/out - empty localarray object to fill in
       char *buf,                // in - byte stream buffer
       int *offset,              // in/out - current offset in the stream
+      ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
       int *rc) {                // out - return code
 // 
 // !DESCRIPTION:
@@ -425,7 +427,7 @@ char *name = NULL;
   // create a new localarray object to deserialize into
   *localarray = new ESMC_LocalArray;
 
-  (*localarray)->ESMC_LocalArrayDeserialize(buf, offset);
+  (*localarray)->ESMC_LocalArrayDeserialize(buf, offset, *attreconflag);
 
   if (rc) *rc = ESMF_SUCCESS;
 
@@ -451,6 +453,7 @@ char *name = NULL;
       char *buf,                // in/out - a byte stream buffer
       int *length,              // in/out - number of allocated bytes
       int *offset,              // in/out - current offset in the stream
+      ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
       int *rc) {                // out - return code
 // 
 // !DESCRIPTION:
@@ -469,7 +472,7 @@ char *name = NULL;
     return;
   }
 
-  *rc = (*localarray)->ESMC_LocalArraySerializeNoData(buf, length, offset);
+  *rc = (*localarray)->ESMC_LocalArraySerializeNoData(buf, length, offset, *attreconflag);
 
   return;
 
@@ -492,6 +495,7 @@ char *name = NULL;
       ESMC_LocalArray **localarray,       // in/out - empty localarray object to fill in
       char *buf,                // in - byte stream buffer
       int *offset,              // in/out - current offset in the stream
+      ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
       int *rc) {                // out - return code
 // 
 // !DESCRIPTION:
@@ -506,7 +510,7 @@ char *name = NULL;
   // create a new localarray object to deserialize into
   *localarray = new ESMC_LocalArray;
 
-  (*localarray)->ESMC_LocalArrayDeserializeNoData(buf, offset);
+  (*localarray)->ESMC_LocalArrayDeserializeNoData(buf, offset, *attreconflag);
 
   if (rc) *rc = ESMF_SUCCESS;
 

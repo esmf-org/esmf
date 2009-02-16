@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.18 2009/02/04 23:14:15 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.19 2009/02/16 19:14:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -842,20 +842,20 @@ extern "C" {
   }
   
   void FTN(c_esmc_arrayserialize)(ESMCI::Array **array, char *buf, int *length,
-    int *offset, int *rc){
+    int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayserialize()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->serialize(
-      buf, length, offset),
+      buf, length, offset, *attreconflag),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN(c_esmc_arraydeserialize)(ESMCI::Array **array, char *buf,
-    int *offset, int *rc){
+    int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraydeserialize()"
     // Initialize return code; assume routine not implemented
@@ -863,7 +863,7 @@ extern "C" {
     *array = new ESMCI::Array;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->deserialize(
-      buf, offset),
+      buf, offset, *attreconflag),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

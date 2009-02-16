@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.54 2009/02/03 17:34:18 rokuingh Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.55 2009/02/16 19:14:32 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.54 2009/02/03 17:34:18 rokuingh Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.55 2009/02/16 19:14:32 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -136,12 +136,12 @@
 ! !IROUTINE: ESMF_StateReconcile -- Reconcile State data across all PETs in a VM
 !
 ! !INTERFACE:
-      subroutine ESMF_StateReconcile(state, vm, options, rc)
+      subroutine ESMF_StateReconcile(state, vm, attreconflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
       type(ESMF_VM), intent(in) :: vm
-      character (len = *), intent(in), optional :: options              
+      type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag        
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -154,6 +154,10 @@
 !     before operating on any data inside that {\tt ESMF\_State}.
 !     After calling {\tt ESMF\_StateReconcile} all {\tt PET}s will have
 !     a common view of all objects contained in this {\tt ESMF\_State}.
+!     The option to reconcile the metadata associated with the objects
+!     contained in this {\tt ESMF\_State} also exists.  The default behavior
+!     for this capability is to {\it not} reconcile metadata unless told
+!     otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -161,17 +165,22 @@
 !       {\tt ESMF\_State} to reconcile.
 !     \item[vm]
 !       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.
-!     \item[{[options]}]
-!       Currently unused.  Here for possible future expansion in the
-!       options for the reconciliation process.
+!     \item[{[attreconflag]}]
+!       Flag to tell if Attribute reconciliation is to be done as well as data reconciliation
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!     NOTE:  The options for {\tt attreconflag} include:
+!            \begin{enumerate}
+!              \item ESMF\_ATTRECONCILE\_ON will allow reconciliatio of metadata (Attributes)
+!              \item ESMF\_ATTRECONCILE\_OFF is the default behavior, this option turns off
+!                                            the metadata reconciliation
+!            \end{enumerate}
 !EOP
     integer :: localrc
     type(ESMF_StateItemInfo), dimension(:), pointer :: stateinfo
-
+    type(ESMF_AttReconcileFlag) :: lattreconflag
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -193,22 +202,28 @@
     ! hash the ID lists so we can send a single number (or short list of
     ! numbers) instead of having to build and send the list each time.
      
+    ! Set the optional ESMF_AttReconcileFlag
+    if(present(attreconflag)) then
+      lattreconflag = attreconflag
+    else
+      lattreconflag = ESMF_ATTRECONCILE_OFF
+    endif
 
     ! This recursively descends the state objects and collects information
     ! about each one.
     nullify(stateinfo)
-    call ESMF_StateInfoBuild(state, stateinfo, vm, localrc)
+    call ESMF_StateInfoBuild(state, stateinfo, vm, lattreconflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return
     
     ! This one sends missing objects from the PETs which contain them
     ! to the PETs which do not.
-    call ESMF_StateProxyCreate(state, stateinfo, vm, localrc)
+    call ESMF_StateProxyCreate(state, stateinfo, vm, lattreconflag, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return
-
+    
     ! This frees resources which were allocated during the building of
     ! the information blocks during the InfoBuild call.
     call ESMF_StateInfoDrop(stateinfo, rc=localrc)
@@ -217,10 +232,12 @@
                               ESMF_CONTEXT, rc)) return
 
     ! Reset the change flags in the Attribute hierarchy
-    call c_ESMC_AttributeUpdateReset(state%statep%base, localrc);
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+      call c_ESMC_AttributeUpdateReset(state%statep%base, localrc);
+      if (ESMF_LogMsgFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return
+    endif
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -235,12 +252,13 @@
 ! !IROUTINE: ESMF_StateInfoBuild -- Collect information for contained objects
 !
 ! !INTERFACE:
-      subroutine ESMF_StateInfoBuild(state, stateInfoList, vm, rc)
+      subroutine ESMF_StateInfoBuild(state, stateInfoList, vm, attreconflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
       type(ESMF_StateItemInfo), dimension(:), pointer :: stateInfoList
       type(ESMF_VM), intent(in) :: vm
+      type(ESMF_AttReconcileFlag), intent(in) :: attreconflag        
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -259,16 +277,17 @@
 !       {\tt ESMF\_VM} will exchange information about objects which might
 !       only be known to one or more PETs, and ensure all PETs in this VM
 !       have a consistent view of the object list in this {\tt ESMF\_State}.
+!     \item[{[attreconflag]}]
+!       Flag to tell if Attribute reconciliation is to be done as well as data reconciliation
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-    integer :: i, localrc
+    integer :: i, localrc, attreconstart
     type(ESMF_StateItem), pointer :: stateitem
     type(ESMF_StateItemInfo), pointer :: si
     type(ESMF_State) :: wrapper
-    type(ESMF_Base) :: base
     integer(ESMF_KIND_I4), pointer, dimension(:) :: bptr
     integer :: offset, mypet
     type(ESMF_VMId) :: VMdummyID
@@ -307,7 +326,11 @@
     si => stateInfoList(1)
     
     ! (+1) to allow top level State space to reconcile Attributes
-    si%mycount = state%statep%datacount + 1
+    if (attreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+      si%mycount = state%statep%datacount + 1
+    else
+      si%mycount = state%statep%datacount
+    endif
     if (si%mycount .gt. 0) then
         allocate(si%idsend(si%mycount), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
@@ -328,19 +351,29 @@
     endif
 
     ! (+1) to allow top level State space to reconcile Attributes
-    si%mycount = state%statep%datacount + 1
-
-    offset = 0
-    call c_ESMC_GetID(state%statep%base, si%idsend(1), localrc)
-    call c_ESMC_GetVMId(state%statep%base, si%vmidsend(1), localrc)
-    si%objsend(1) = ESMF_ID_BASE%objectID
-    bptr => si%blindsend(:,1)
-    call c_ESMC_BaseSerialize(state%statep%base, bptr(1), bufsize, offset, localrc)
+    if (attreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+      si%mycount = state%statep%datacount + 1
+      offset = 0
+      call c_ESMC_GetID(state%statep%base, si%idsend(1), localrc)
+      call c_ESMC_GetVMId(state%statep%base, si%vmidsend(1), localrc)
+      si%objsend(1) = ESMF_ID_BASE%objectID
+      bptr => si%blindsend(:,1)
+      call c_ESMC_BaseSerialize(state%statep%base, bptr(1), bufsize, offset, &
+        attreconflag, localrc)
+      attreconstart = 2
+    else
+      si%mycount = state%statep%datacount
+      attreconstart = 1
+    endif
 
     !  start from 2, top level State is number 1
-    do i=2, si%mycount
+    do i=attreconstart, si%mycount
         ! i-1 because we are starting from 2, all else should be i
-        stateitem => state%statep%datalist(i-1)
+        if (attreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+          stateitem => state%statep%datalist(i-1)
+        else
+          stateitem => state%statep%datalist(i)
+        endif
         offset = 0
         select case (stateitem%otype%ot)
            case (ESMF_STATEITEM_FIELDBUNDLE%ot)
@@ -349,7 +382,7 @@
              si%objsend(i) = ESMF_ID_FIELDBUNDLE%objectID
              bptr => si%blindsend(:,i)
              call ESMF_FieldBundleSerialize(stateitem%datap%fbp, bptr, bufsize, &
-                                       offset, localrc)
+                                       offset, attreconflag=attreconflag, rc=localrc)
 !!DEBUG "serialized bundle, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_FIELD%ot)
@@ -357,8 +390,8 @@
              call c_ESMC_GetVMId(stateitem%datap%fp%ftypep, si%vmidsend(i), localrc)
              si%objsend(i) = ESMF_ID_FIELD%objectID
              bptr => si%blindsend(:,i)
-             call ESMF_FieldSerialize(stateitem%datap%fp, bptr, &
-                                       bufsize, offset, localrc)
+             call ESMF_FieldSerialize(stateitem%datap%fp, bptr, bufsize, &
+                                       offset, attreconflag=attreconflag, rc=localrc)
 !!DEBUG "serialized field, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_ARRAY%ot)
@@ -367,7 +400,7 @@
              si%objsend(i) = ESMF_ID_ARRAY%objectID
              bptr => si%blindsend(:,i)
              call c_ESMC_ArraySerialize(stateitem%datap%ap, bptr(1), &
-                                       bufsize, offset, localrc)
+                                       bufsize, offset, attreconflag, localrc)
 !!DEBUG "serialized array, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
@@ -376,7 +409,7 @@
              si%objsend(i) = ESMF_ID_ARRAYBUNDLE%objectID
              bptr => si%blindsend(:,i)
              call c_ESMC_ArrayBundleSerialize(stateitem%datap%abp, bptr(1), &
-                                       bufsize, offset, localrc)
+                                       bufsize, offset, attreconflag, localrc)
 !!DEBUG "serialized arraybundle, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_STATE%ot)
@@ -385,7 +418,8 @@
              si%objsend(i) = ESMF_ID_STATE%objectID
              bptr => si%blindsend(:,i)
              wrapper%statep => stateitem%datap%spp
-             call ESMF_StateSerialize(wrapper, bptr, bufsize, offset, localrc)
+             call ESMF_StateSerialize(wrapper, bptr, bufsize, offset, &
+              attreconflag=attreconflag, rc=localrc)
 !!DEBUG "serialized substate, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_NAME%ot)
@@ -526,12 +560,13 @@
 ! !IROUTINE: ESMF_StateProxyCreate -- Create missing objects
 !
 ! !INTERFACE:
-      subroutine ESMF_StateProxyCreate(state, stateInfoList, vm, rc)
+      subroutine ESMF_StateProxyCreate(state, stateInfoList, vm, attreconflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
       type(ESMF_StateItemInfo), dimension(:), pointer :: stateInfoList
       type(ESMF_VM), intent(in) :: vm
+      type(ESMF_AttReconcileFlag), intent(in) :: attreconflag        
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -557,12 +592,14 @@
 !       {\tt ESMF\_VM} will exchange information about objects which might
 !       only be known to one or more PETs, and ensure all PETs in this VM
 !       have a consistent view of the object list in this {\tt ESMF\_State}.
+!     \item[{[attreconflag]}]
+!       Flag to tell if Attribute reconciliation is to be done as well as data reconciliation
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-    integer :: pets, mypet, i, j, k, l, m, localrc
+    integer :: pets, mypet, i, j, k, l, m, localrc, attreconstart
     integer(ESMF_KIND_I4) :: count(1)
     type(ESMF_State) :: substate
     type(ESMF_Base) :: base
@@ -754,20 +791,26 @@
 !!DEBUG  " num, recv id and obj id", k, si%idrecv(k), si%objrecv(k)
            enddo
 
-          ! unpack the top level State Attributes first
+        ! unpack the top level State Attributes first
+        if (attreconflag%value == ESMF_ATTRECONCILE_ON%value) then
           if (si%objrecv(1) == ESMF_ID_BASE%objectID) then
             bptr => si%blindrecv(:,1)
             offset = 0
-            call c_ESMC_BaseDeserialize(base, bptr, offset, localrc)
+            call c_ESMC_BaseDeserialize(base, bptr, offset, &
+              attreconflag, localrc)
             call c_ESMC_AttributeCopy(base, state%statep%base, localrc)
           endif
+          attreconstart = 2
+        else
+          attreconstart = 1
+        endif
 
            !!! TODO: 
            !!!   make a combined object id list here, so only one copy of
            !!!   the missing object is sent.
 
            ! k from 2 because the top level State was number 1
-           do k=2, si%theircount
+           do k=attreconstart, si%theircount
 !!DEBUG " checking remote id for object ", k, "value is ", si%idrecv(k)
              ihave = .false.
              do l=1, si%mycount
@@ -792,7 +835,8 @@
                    case (ESMF_ID_FIELDBUNDLE%objectID)
 !!DEBUG "need to create proxy bundle, remote id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
-                    bundle = ESMF_FieldBundleDeserialize(vm, bptr, offset, localrc)
+                    bundle = ESMF_FieldBundleDeserialize(vm, bptr, offset, &
+                      attreconflag=attreconflag, rc=localrc)
 !!DEBUG "created bundle, ready to set id and add to local state"
                     call c_ESMC_SetVMId(bundle%btypep, si%vmidrecv(k), localrc)
                     call ESMF_StateAdd(state, bundle, proxyflag=.true., &
@@ -802,7 +846,8 @@
                    case (ESMF_ID_FIELD%objectID)
 !!DEBUG "need to create proxy field, remote id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
-                    field = ESMF_FieldDeserialize(vm, bptr, offset, localrc)
+                    field = ESMF_FieldDeserialize(vm, bptr, offset, &
+                      attreconflag=attreconflag, rc=localrc)
 !!DEBUG "created field, ready to set id and add to local state"
                     call c_ESMC_SetVMId(field%ftypep, si%vmidrecv(k), localrc)
                     call ESMF_StateAdd(state, field, proxyflag=.true., &
@@ -812,7 +857,8 @@
                    case (ESMF_ID_ARRAY%objectID)
 !!DEBUG "need to create proxy array, remote id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
-                    call c_ESMC_ArrayDeserialize(array, bptr, offset, localrc)
+                    call c_ESMC_ArrayDeserialize(array, bptr, offset, &
+                      attreconflag, localrc)
                     ! Set init code
                     call ESMF_ArraySetInitCreated(array, rc=localrc)
 !!DEBUG "created array, ready to set id and add to local state"
@@ -825,7 +871,7 @@
 !!DEBUG "need to create proxy arraybundle, remote id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     call c_ESMC_ArrayBundleDeserialize(arraybundle, bptr, &
-                      offset, localrc)
+                      offset, attreconflag, localrc)
                     ! Set init code
                     call ESMF_ArrayBundleSetInitCreated(arraybundle, rc=localrc)
 !!DEBUG "created arraybundle, ready to set id and add to local state"
@@ -837,7 +883,8 @@
                    case (ESMF_ID_STATE%objectID)
 !!DEBUG "need to create proxy substate, remote id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
-                    substate = ESMF_StateDeserialize(vm, bptr, offset, localrc)
+                    substate = ESMF_StateDeserialize(vm, bptr, offset, &
+                      attreconflag=attreconflag, rc=localrc)
 !!DEBUG "created substate, ready to set id and add to local state"
                     call c_ESMC_SetVMId(substate%statep, si%vmidrecv(k), localrc)
                     call ESMF_StateAdd(state, substate, proxyflag=.true., &
@@ -908,7 +955,7 @@
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
-           call ESMF_StateInfoBuild(state, stateInfoList, vm, localrc)
+           call ESMF_StateInfoBuild(state, stateInfoList, vm, attreconflag, localrc)
            if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return

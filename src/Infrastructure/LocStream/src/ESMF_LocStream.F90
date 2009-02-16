@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.11 2009/01/21 21:38:00 cdeluca Exp $
+! $Id: ESMF_LocStream.F90,v 1.12 2009/02/16 19:14:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.11 2009/01/21 21:38:00 cdeluca Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.12 2009/02/16 19:14:31 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -2543,6 +2543,7 @@ end subroutine ESMF_LocStreamGetBounds
 !EOPI
       type(ESMF_LocStreamType),pointer :: lstypep
       integer :: i,localrc
+      type(ESMF_AttReconcileFlag) :: attreconflag
 
 
       ! Initialize
@@ -2556,7 +2557,9 @@ end subroutine ESMF_LocStreamGetBounds
       lstypep => locstream%lstypep
 
      ! Serialize Base
-     call c_ESMC_BaseSerialize(lstypep%base, buffer(1), length, offset, localrc)
+     attreconflag = ESMF_ATTRECONCILE_OFF
+     call c_ESMC_BaseSerialize(lstypep%base, buffer(1), length, offset, &
+      attreconflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -2587,7 +2590,8 @@ end subroutine ESMF_LocStreamGetBounds
                                  ESMF_CONTEXT, rc)) return
 
          ! Serialize key Array
-         call c_ESMC_ArraySerialize(lstypep%keys(i), buffer(1), length, offset, localrc)
+         call c_ESMC_ArraySerialize(lstypep%keys(i), buffer(1), length, offset, &
+          attreconflag, localrc)
          if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -2643,6 +2647,7 @@ end subroutine ESMF_LocStreamGetBounds
       integer :: localrc
       type(ESMF_LocStreamType),pointer :: lstypep
       integer :: i
+      type(ESMF_AttReconcileFlag) :: attreconflag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -2654,7 +2659,9 @@ end subroutine ESMF_LocStreamGetBounds
                                      ESMF_CONTEXT, rc)) return
 
      ! Deserialize Base
-     call c_ESMC_BaseDeserialize(lstypep%base, buffer(1),  offset, localrc)
+     attreconflag = ESMF_ATTRECONCILE_OFF
+     call c_ESMC_BaseDeserialize(lstypep%base, buffer(1),  offset, &
+      attreconflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -2715,7 +2722,8 @@ end subroutine ESMF_LocStreamGetBounds
                                  ESMF_CONTEXT, rc)) return
 
          ! Deserialize key Array
-         call c_ESMC_ArrayDeserialize(lstypep%keys(i), buffer(1), offset, localrc)
+         call c_ESMC_ArrayDeserialize(lstypep%keys(i), buffer(1), offset, &
+          attreconflag, localrc)
          if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return

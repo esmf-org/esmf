@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.26 2009/01/21 21:38:00 cdeluca Exp $
+// $Id: ESMC_LocalArray.h,v 1.27 2009/02/16 19:14:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -132,12 +132,15 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
       int *lbounds, int *ubounds, int *rc);
 
     // required methods inherited and overridden from the ESMC_Base class
-    int ESMC_LocalArrayDeserialize(char *buffer, int *boffset);
-    int ESMC_LocalArrayDeserializeNoData(char *buffer, int *boffset);
+    int ESMC_LocalArrayDeserialize(char *buffer, int *boffset, 
+      const ESMC_AttReconcileFlag &attreconflag);
+    int ESMC_LocalArrayDeserializeNoData(char *buffer, int *boffset, 
+      const ESMC_AttReconcileFlag &attreconflag);
     int ESMC_LocalArrayPrint(const char *options = NULL) const;
-    int ESMC_LocalArraySerialize(char *buffer, int *length, int *boffset) const;
-    int ESMC_LocalArraySerializeNoData(char *buffer, int *length, int *boffset)
-      const;
+    int ESMC_LocalArraySerialize(char *buffer, int *length, int *boffset,
+      const ESMC_AttReconcileFlag &attreconflag) const;
+    int ESMC_LocalArraySerializeNoData(char *buffer, int *length, int *boffset,
+      const ESMC_AttReconcileFlag &attreconflag) const;
     int ESMC_LocalArrayWrite(const char *options, const char *filename) const;
     int ESMC_LocalArrayValidate(const char *options) const;
 

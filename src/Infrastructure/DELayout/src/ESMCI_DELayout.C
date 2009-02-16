@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.16 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMCI_DELayout.C,v 1.17 2009/02/16 19:14:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.16 2009/01/21 21:37:58 cdeluca Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.17 2009/02/16 19:14:31 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1443,7 +1443,8 @@ int DELayout::serialize(
   // Serialize the Base class
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  localrc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
+  ESMC_AttReconcileFlag attreconflag = ESMF_ATTRECONCILE_OFF;
+  localrc = this->ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -1543,7 +1544,8 @@ DELayout *DELayout::deserialize(
   // Deserialize the Base class
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  localrc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
+  ESMC_AttReconcileFlag attreconflag = ESMF_ATTRECONCILE_OFF;
+  localrc = a->ESMC_Base::ESMC_Deserialize(buffer,offset,attreconflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return NULL;
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.8 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.9 2009/02/16 19:14:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.8 2009/01/21 21:37:58 cdeluca Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.9 2009/02/16 19:14:31 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1035,8 +1035,8 @@ int ArrayBundle::serialize(
 // !ARGUMENTS:
   char *buffer,          // inout - byte stream to fill
   int *length,           // inout - buf length
-  int *offset)const{     // inout - original offset, updated to point 
-                         //         to first free byte after current obj info
+  int *offset,           // inout - original offset
+  const ESMC_AttReconcileFlag &attreconflag) const {   // in - attreconcile flag
 //
 // !DESCRIPTION:
 //    Turn info in ArrayBundle class into a stream of bytes.
@@ -1062,7 +1062,7 @@ int ArrayBundle::serialize(
   // Serialize the Base class
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
+  localrc = ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize the ArrayBundle with all its Arrays
@@ -1073,7 +1073,7 @@ int ArrayBundle::serialize(
   cp = (char *)ip;
   *offset = (cp - buffer);
   for (int i=0; i<arrayCount; i++){
-    localrc = arrayList[i]->serialize(buffer, length, offset);
+    localrc = arrayList[i]->serialize(buffer,length,offset,attreconflag);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
       return rc;
   }
@@ -1098,8 +1098,8 @@ int ArrayBundle::deserialize(
 //
 // !ARGUMENTS:
   char *buffer,          // in - byte stream to read
-  int *offset){          // inout - original offset, updated to point 
-                         //         to first free byte after current obj info
+  int *offset,           // inout - original offset
+  const ESMC_AttReconcileFlag &attreconflag) {  // in - attreconcile flag
 //
 // !DESCRIPTION:
 //    Turn a stream of bytes into an object.
@@ -1118,7 +1118,7 @@ int ArrayBundle::deserialize(
   // Deserialize the Base class
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  localrc = ESMC_Base::ESMC_Deserialize(buffer, offset);
+  localrc = ESMC_Base::ESMC_Deserialize(buffer,offset,attreconflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Deserialize the ArrayBundle with all its Arrays
@@ -1131,7 +1131,7 @@ int ArrayBundle::deserialize(
   arrayList = new Array*[arrayCount];
   for (int i=0; i<arrayCount; i++){
     arrayList[i] = new Array;
-    arrayList[i]->deserialize(buffer, offset);
+    arrayList[i]->deserialize(buffer,offset,attreconflag);
   }
   arrayCreator = true;  // deserialize creates local Array objects
   

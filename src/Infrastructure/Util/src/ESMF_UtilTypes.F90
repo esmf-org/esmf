@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.72 2009/02/03 23:57:22 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.73 2009/02/16 19:14:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -514,6 +514,21 @@
         ESMF_ATTPACKNEST_ON = ESMF_AttPackNestFlag(1)
 
 !------------------------------------------------------------------------------
+!     ! ESMF_AttReconcileFlag
+!
+!     ! Interface flag for Attribute reconcile
+
+      type ESMF_AttReconcileFlag
+      sequence
+      !private
+        integer :: value
+      end type
+
+      type(ESMF_AttReconcileFlag), parameter ::  &
+        ESMF_ATTRECONCILE_OFF = ESMF_AttReconcileFlag(0), &
+        ESMF_ATTRECONCILE_ON = ESMF_AttReconcileFlag(1)
+
+!------------------------------------------------------------------------------
 !BOPI
 !
 ! !PUBLIC TYPES:
@@ -564,6 +579,7 @@
       public ESMF_DePinFlag, ESMF_DE_PIN_PET, ESMF_DE_PIN_VAS
       public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
       public ESMF_AttPackNestFlag, ESMF_ATTPACKNEST_OFF, ESMF_ATTPACKNEST_ON
+      public ESMF_AttReconcileFlag, ESMF_ATTRECONCILE_OFF, ESMF_ATTRECONCILE_ON
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR

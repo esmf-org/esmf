@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.4 2009/02/10 18:49:43 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.5 2009/02/16 19:14:31 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -610,9 +610,9 @@ module ESMF_AttributeUpdateMod
 
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_StateReconcile(importState, vm, rc=rc)
+    call ESMF_StateReconcile(importState, vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_StateReconcile(exportState, vm, rc=rc)
+    call ESMF_StateReconcile(exportState, vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 !EOC
    

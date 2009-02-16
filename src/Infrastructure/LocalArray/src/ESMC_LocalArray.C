@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.37 2009/01/21 21:38:00 cdeluca Exp $
+// $Id: ESMC_LocalArray.C,v 1.38 2009/02/16 19:14:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_LocalArray.C,v 1.37 2009/01/21 21:38:00 cdeluca Exp $";
+static const char *const version = "$Id: ESMC_LocalArray.C,v 1.38 2009/02/16 19:14:31 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for Fortran calls
@@ -1142,8 +1142,8 @@ template int ESMC_LocalArray::getData(int *index, ESMC_I4 *data);
 // !ARGUMENTS:
       char *buffer,          // inout - byte stream to fill
       int *length,           // inout - buf length; realloc'd here if needed
-      int *boffset) const {   // inout - original offset, updated to point
-                             //  to first free byte after current obj info
+      int *boffset,           // inout - original offset
+      const ESMC_AttReconcileFlag &attreconflag) const {   // in - attreconcile flag
 //
 // !DESCRIPTION:
 //    Turn info in LocalArray class into a stream of bytes.
@@ -1166,7 +1166,7 @@ template int ESMC_LocalArray::getData(int *index, ESMC_I4 *data);
     }
 
     // Serialize the Base class first.
-    rc = this->ESMC_Base::ESMC_Serialize(buffer, length, boffset);
+    rc = this->ESMC_Base::ESMC_Serialize(buffer,length,boffset,attreconflag);
 
     // now the stuff specific to LocalArray
     ip = (int *)(buffer + *boffset);
@@ -1220,8 +1220,8 @@ template int ESMC_LocalArray::getData(int *index, ESMC_I4 *data);
 //
 // !ARGUMENTS:
       char *buffer,          // in - byte stream to read
-      int *boffset) {         // inout - original offset, updated to point
-                             //  to first free byte after current obj info
+      int *boffset,           // inout - original offset
+      const ESMC_AttReconcileFlag &attreconflag) {  // in - attreconcile flag
 //
 // !DESCRIPTION:
 //    Turn a stream of bytes into an object.
@@ -1235,7 +1235,7 @@ template int ESMC_LocalArray::getData(int *index, ESMC_I4 *data);
   int *ip;
 
   // Deserialize the Base class first.
-  localrc = ESMC_Base::ESMC_Deserialize(buffer, boffset);
+  localrc = ESMC_Base::ESMC_Deserialize(buffer,boffset,attreconflag);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -1304,8 +1304,8 @@ template int ESMC_LocalArray::getData(int *index, ESMC_I4 *data);
 // !ARGUMENTS:
       char *buffer,          // inout - byte stream to fill
       int *length,           // inout - buf length; realloc'd here if needed
-      int *boffset) const {   // inout - original offset, updated to point
-                             //  to first free byte after current obj info
+      int *boffset,           // inout - original offset
+      const ESMC_AttReconcileFlag &attreconflag) const {   // in - attreconcile flag
 //
 // !DESCRIPTION:
 //    Turn info in LocalArray class into a stream of bytes.
@@ -1328,7 +1328,7 @@ template int ESMC_LocalArray::getData(int *index, ESMC_I4 *data);
     }
 
     // SerializeNoData the Base class first.
-    rc = ESMC_Base::ESMC_Serialize(buffer, length, boffset);
+    rc = ESMC_Base::ESMC_Serialize(buffer,length,boffset,attreconflag);
 
     // now the stuff specific to LocalArray
     ip = (int *)(buffer + *boffset);
@@ -1364,8 +1364,8 @@ template int ESMC_LocalArray::getData(int *index, ESMC_I4 *data);
 //
 // !ARGUMENTS:
       char *buffer,          // in - byte stream to read
-      int *boffset) {         // inout - original offset, updated to point
-                             //  to first free byte after current obj info
+      int *boffset,           // inout - original offset
+      const ESMC_AttReconcileFlag &attreconflag) {  // in - attreconcile flag
 //
 // !DESCRIPTION:
 //    Turn a stream of bytes into an object.
@@ -1378,7 +1378,7 @@ template int ESMC_LocalArray::getData(int *index, ESMC_I4 *data);
     rc = ESMC_RC_NOT_IMPL;
 
     // DeserializeNoData the Base class first.
-    rc = ESMC_Base::ESMC_Deserialize(buffer, boffset);
+    rc = ESMC_Base::ESMC_Deserialize(buffer,boffset,attreconflag);
 
     // now the stuff specific to LocalArray
     ip = (int *)(buffer + *boffset);

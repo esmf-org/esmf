@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.36 2009/02/04 23:14:15 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.37 2009/02/16 19:14:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.36 2009/02/04 23:14:15 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.37 2009/02/16 19:14:31 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2421,8 +2421,8 @@ int Array::serialize(
 // !ARGUMENTS:
   char *buffer,          // inout - byte stream to fill
   int *length,           // inout - buf length
-  int *offset)const{     // inout - original offset, updated to point 
-                         //         to first free byte after current obj info
+  int *offset,           // inout - original offset
+  const ESMC_AttReconcileFlag &attreconflag) const {   // in - attreconcile flag
 //
 // !DESCRIPTION:
 //    Turn info in array class into a stream of bytes.
@@ -2450,11 +2450,11 @@ int Array::serialize(
   // Serialize the Base class,
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
+  localrc = ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize the DistGrid
-  localrc = distgrid->serialize(buffer, length, offset);
+  localrc = distgrid->serialize(buffer,length,offset);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize Array meta data
@@ -2508,8 +2508,8 @@ int Array::deserialize(
 //
 // !ARGUMENTS:
   char *buffer,          // in - byte stream to read
-  int *offset){          // inout - original offset, updated to point 
-                         //         to first free byte after current obj info
+  int *offset,           // inout - original offset
+  const ESMC_AttReconcileFlag &attreconflag) {  // in - attreconcile flag
 //
 // !DESCRIPTION:
 //    Turn a stream of bytes into an object.
@@ -2530,11 +2530,11 @@ int Array::deserialize(
   // Deserialize the Base class
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  localrc = ESMC_Base::ESMC_Deserialize(buffer, offset);
+  localrc = ESMC_Base::ESMC_Deserialize(buffer,offset,attreconflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   // Deserialize the DistGrid
-  distgrid = DistGrid::deserialize(buffer, offset);
+  distgrid = DistGrid::deserialize(buffer,offset);
   distgridCreator = true;  // deserialize creates a local object
   // Pull DELayout out of DistGrid
   delayout = distgrid->getDELayout();

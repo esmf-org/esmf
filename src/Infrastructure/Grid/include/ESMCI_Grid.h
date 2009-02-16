@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.55 2009/01/28 22:20:12 peggyli Exp $
+// $Id: ESMCI_Grid.h,v 1.56 2009/02/16 19:14:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -327,12 +327,13 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   int serialize(
                 char *buffer,   // inout - byte stream to fill
                 int *length,    // inout - buf length
-                int *offset);   // inout - original offset, updated to point 
-                                //         to first free byte after current obj info
+                int *offset,    // inout - original offset
+                const ESMC_AttReconcileFlag &attreconflag);  // attreconcile flag
 
   int deserialize(
                   char *buffer,          // in - byte stream to read
-                  int *offset);          // inout - original offset, updated to point 
+                  int *offset,           // inout - original offset
+                  const ESMC_AttReconcileFlag &attreconflag);  // attreconcile flag 
 
   // create fully formed grid
  static Grid *create(int nameLen,                                // (in)

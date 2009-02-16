@@ -1,4 +1,4 @@
-// $Id: ESMC_InternArray.C,v 1.17 2009/01/21 21:37:59 cdeluca Exp $
+// $Id: ESMC_InternArray.C,v 1.18 2009/02/16 19:14:31 rokuingh Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_InternArray.C,v 1.17 2009/01/21 21:37:59 cdeluca Exp $";
+            "$Id: ESMC_InternArray.C,v 1.18 2009/02/16 19:14:31 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2019,8 +2019,9 @@
 
     // First, serialize the base class, then the localarray part, then
     // finally the data unique to arrays.
-    rc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
-    rc = ESMC_LocalArray::ESMC_Serialize(buffer, length, offset);
+    ESMC_AttReconcileFlag attreconflag = ESMF_ATTRECONCILE_OFF;
+    rc = ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag);
+    rc = ESMC_LocalArray::ESMC_Serialize(buffer,length,offset,attreconflag);
 
     //  then serialize here just the additional data contained in an array:
     //  the AI info and the halo widths.
@@ -2080,8 +2081,9 @@
 
     // First, deserialize the base class, then the localarray part, then
     // finally the data unique to arrays.
-    rc = ESMC_Base::ESMC_Deserialize(buffer, offset);
-    rc = ESMC_LocalArray::ESMC_Deserialize(buffer, offset);
+    ESMC_AttReconcileFlag attreconflag = ESMF_ATTRECONCILE_OFF;
+    rc = ESMC_Base::ESMC_Deserialize(buffer,offset,attreconflag);
+    rc = ESMC_LocalArray::ESMC_Deserialize(buffer,offset,attreconflag);
 
     //  then deserialize here just the additional data contained in an array:
     //  the AI info and the halo widths.
@@ -2154,8 +2156,9 @@
 
     // First, serialize the base class, then the localarray part, then
     // finally the data unique to arrays.
-    rc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
-    rc = ESMC_LocalArray::ESMC_LocalArraySerializeNoData(buffer, length, offset);
+    ESMC_AttReconcileFlag attreconflag = ESMF_ATTRECONCILE_OFF;
+    rc = ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag);
+    rc = ESMC_LocalArray::ESMC_LocalArraySerializeNoData(buffer,length,offset,attreconflag);
 
     //  then serialize here just the additional data contained in an array:
     //  the AI info and the halo widths.
@@ -2212,8 +2215,9 @@
     int i, *ip, rc;
 
     // call base, then localarray.
-    this->ESMC_Base::ESMC_Deserialize(buffer, offset);
-    this->ESMC_LocalArray::ESMC_LocalArrayDeserializeNoData(buffer, offset);
+    ESMC_AttReconcileFlag attreconflag = ESMF_ATTRECONCILE_OFF;
+    this->ESMC_Base::ESMC_Deserialize(buffer,offset,attreconflag);
+    this->ESMC_LocalArray::ESMC_LocalArrayDeserializeNoData(buffer,offset,attreconflag);
 
     //  then deserialize here just the additional data contained in an array:
     //  the AI info and the halo widths.

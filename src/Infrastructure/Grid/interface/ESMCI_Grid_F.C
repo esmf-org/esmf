@@ -2238,20 +2238,20 @@ extern "C" {
 
 
   void FTN(c_esmc_gridserialize)(ESMCI::Grid **grid, char *buf, int *length,
-    int *offset, int *rc){
+    int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridserialize()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*grid)->serialize(
-      buf, length, offset),
+      buf, length, offset, *attreconflag),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN(c_esmc_griddeserialize)(ESMCI::Grid **grid, char *buf,
-    int *offset, int *rc){
+    int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_griddeserialize()"
     // Initialize return code; assume routine not implemented
@@ -2259,7 +2259,7 @@ extern "C" {
     *grid = new ESMCI::Grid;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*grid)->deserialize(
-      buf, offset),
+      buf, offset, *attreconflag),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

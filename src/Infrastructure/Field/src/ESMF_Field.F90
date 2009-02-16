@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.330 2009/02/04 23:14:15 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.331 2009/02/16 19:14:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -176,7 +176,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.330 2009/02/04 23:14:15 theurich Exp $'
+    '$Id: ESMF_Field.F90,v 1.331 2009/02/16 19:14:31 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -961,13 +961,15 @@ contains
 ! !IROUTINE: ESMF_FieldSerialize - Serialize field info into a byte stream
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldSerialize(field, buffer, length, offset, rc) 
+      subroutine ESMF_FieldSerialize(field, buffer, length, offset, &
+                                    attreconflag, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field 
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
+      type(ESMF_AttReconcileFlag), optional :: attreconflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -990,6 +992,8 @@ contains
 !           Current write offset in the current buffer.  This will be
 !           updated by this routine and return pointing to the next
 !           available byte in the buffer.
+!     \item[{[attreconflag]}]
+!           Flag to tell if Attribute serialization is to be done
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -998,6 +1002,7 @@ contains
 
       integer :: localrc
       type(ESMF_FieldType), pointer :: fp    ! field type
+      type(ESMF_AttReconcileFlag) :: lattreconflag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1006,10 +1011,17 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
+      ! deal with optional attreconflag
+      if (present(attreconflag)) then
+        lattreconflag = attreconflag
+      else
+        lattreconflag = ESMF_ATTRECONCILE_OFF
+      endif
+
       ! shortcut to internals
       fp => field%ftypep
 
-      call c_ESMC_BaseSerialize(fp%base, buffer(1), length, offset, localrc)
+      call c_ESMC_BaseSerialize(fp%base, buffer(1), length, offset, lattreconflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -1034,7 +1046,7 @@ contains
 
       if (fp%datastatus .eq. ESMF_STATUS_READY) then
           call c_ESMC_ArraySerialize(fp%array, buffer(1),&
-                                    length, offset, localrc)
+                                    length, offset, lattreconflag, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -1052,7 +1064,8 @@ contains
 ! !IROUTINE: ESMF_FieldDeserialize - Deserialize a byte stream into a Field
 !
 ! !INTERFACE:
-      function ESMF_FieldDeserialize(vm, buffer, offset, rc) 
+      function ESMF_FieldDeserialize(vm, buffer, offset, &
+                                    attreconflag, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldDeserialize   
@@ -1061,6 +1074,7 @@ contains
       type(ESMF_VM), intent(in) :: vm
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
+      type(ESMF_AttReconcileFlag), optional :: attreconflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1080,6 +1094,8 @@ contains
 !           Current read offset in the current buffer.  This will be
 !           updated by this routine and return pointing to the next
 !           unread byte in the buffer.
+!     \item[{[attreconflag]}]
+!           Flag to tell if Attribute serialization is to be done
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1089,10 +1105,18 @@ contains
       integer :: localrc
       type(ESMF_FieldType), pointer :: fp    ! field type
       integer staggerloc
+      type(ESMF_AttReconcileFlag) :: lattreconflag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if  (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! deal with optional attreconflag
+      if (present(attreconflag)) then
+        lattreconflag = attreconflag
+      else
+        lattreconflag = ESMF_ATTRECONCILE_OFF
+      endif
 
       ! In case of error, make sure this is invalid.
       nullify(ESMF_FieldDeserialize%ftypep)
@@ -1109,7 +1133,7 @@ contains
                                  ESMF_CONTEXT, rc)) return
 
       ! This overwrites the name and adds attributes to the base obj.
-      call c_ESMC_BaseDeserialize(fp%base, buffer(1), offset, localrc)
+      call c_ESMC_BaseDeserialize(fp%base, buffer(1), offset, lattreconflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
@@ -1132,7 +1156,7 @@ contains
       endif
 
       if (fp%datastatus .eq. ESMF_STATUS_READY) then
-          call c_ESMC_ArrayDeserialize(fp%array, buffer(1), offset, localrc)
+          call c_ESMC_ArrayDeserialize(fp%array, buffer(1), offset, lattreconflag, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
