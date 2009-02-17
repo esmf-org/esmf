@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.331 2009/02/16 19:14:31 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.332 2009/02/17 06:13:27 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -115,6 +115,7 @@ module ESMF_FieldMod
     logical                       :: array_internal   ! .true. if field%array is
                                                       ! internally allocated
     logical                       :: is_proxy         ! .true. for a proxy field
+    integer                       :: dimCount         ! field dimension count
     integer                       :: gridToFieldMap(ESMF_MAXDIM)
     integer                       :: ungriddedLBound(ESMF_MAXDIM)
     integer                       :: ungriddedUBound(ESMF_MAXDIM)
@@ -176,7 +177,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.331 2009/02/16 19:14:31 rokuingh Exp $'
+    '$Id: ESMF_Field.F90,v 1.332 2009/02/17 06:13:27 peggyli Exp $'
 
 !==============================================================================
 !
@@ -349,6 +350,9 @@ contains
       integer, allocatable :: arrayCompUBnd(:, :), arrayCompLBnd(:, :)
       integer, allocatable :: gridCompUBnd(:), gridCompLBnd(:)
       type(ESMF_DistGrid)  :: arrayDistGrid, gridDistGrid
+      type(ESMF_GridDecompType) :: decompType
+      type(ESMF_GeomType) :: geomType
+      type(ESMF_Grid) :: grid
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -383,6 +387,23 @@ contains
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
+	  ! get the grid decomp type if geombase is grid
+	  decompType = ESMF_GRID_NONARBITRARY
+    	  call ESMF_GeomBaseGet(ftypep%geombase, geomType=geomType, rc=localrc)
+    	  if (ESMF_LogMsgFoundError(localrc, &  
+        	ESMF_ERR_PASSTHRU, &  
+        	ESMF_CONTEXT, rc)) return  
+
+    	  if (geomType .eq. ESMF_GEOMTYPE_GRID) then
+             call ESMF_GeomBaseGet(ftypep%geombase, grid=grid, rc=localrc)
+             if (ESMF_LogMsgFoundError(localrc, &  
+          	    ESMF_ERR_PASSTHRU, &  
+           	    ESMF_CONTEXT, rc)) return  
+       	     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
+             if (ESMF_LogMsgFoundError(localrc, &  
+          	    ESMF_ERR_PASSTHRU, &  
+           	    ESMF_CONTEXT, rc)) return  
+          endif   
           ! get grid dim and extents for the local piece
           call ESMF_GeomBaseGet(ftypep%geombase, dimCount=gridrank, &
                             distgrid=gridDistGrid, localDECount=localDECount, rc=localrc)
@@ -406,7 +427,6 @@ contains
               endif 
           enddo
       endif
-
       ! make sure there is data before asking it questions.
       if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
           call ESMF_ArrayValidate(array=ftypep%array, rc=localrc)
@@ -433,6 +453,10 @@ contains
               return
           endif
 
+          ! cannot use distgridToGridMap to index arrayCompBnds and compare with
+          ! gridCompBnds, skip the check for arb. array for now, need to figure
+          ! out how to validate -- P.Li
+          if (decompType .eq. ESMF_Grid_NONARBITRARY) then
           ! Verify that the computational bounds of array and grid contained
           ! in the field match.
           allocate(distgridToGridMap(dimCount))
@@ -503,6 +527,7 @@ contains
               deallocate(gridCompUBnd, gridCompLBnd)
           enddo
           deallocate(distgridToGridMap, arrayCompUBnd, arrayCompLBnd, distgridToPackedArrayMap)
+      endif
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
