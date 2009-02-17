@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.34 2009/02/04 23:14:15 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.35 2009/02/17 06:25:52 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.34 2009/02/04 23:14:15 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.35 2009/02/17 06:25:52 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -109,7 +109,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-  subroutine ESMF_FieldGetDefault(field, geomtype, grid, mesh, locstream, array, typekind, dimCount, &
+  subroutine ESMF_FieldGetDefault(field, geomtype, grid, mesh, locstream, &
+    array, typekind, dimCount, memDimCount, &
     staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     maxHaloLWidth, maxHaloUWidth, localDeCount, name, iospec, rc) 
 !
@@ -122,6 +123,7 @@ contains
     type(ESMF_Array), intent(out), optional :: array     
     type(ESMF_TypeKind), intent(out), optional :: typekind
     integer, intent(out), optional :: dimCount
+    integer, intent(out), optional :: memDimCount
     type(ESMF_StaggerLoc), intent(out), optional :: staggerloc 
     integer, intent(out), optional :: gridToFieldMap(:)    
     integer, intent(out), optional :: ungriddedLBound(:)
@@ -160,6 +162,10 @@ contains
 !       TypeKind specifier for Field.
 ! \item [{[dimCount]}]
 !       Number of dimensions in {\tt field} data.
+! \item [{[memDimCount]}]
+!       Number of dimensions in the physical memory of the {\tt field} data. It is 
+!       identical to dimCount when the corresponding grid is a non-arbitrary grid.
+!       It is less than dimCount when the grid is arbitrarily distributed.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
@@ -230,6 +236,8 @@ contains
 !------------------------------------------------------------------------------
     type(ESMF_FieldType), pointer :: ftype
     integer :: localrc
+    type(ESMF_GridDecompType) :: decompType
+    type(ESMF_GeomType) :: localGeomType
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -240,13 +248,17 @@ contains
 
     ! Get Field pointer
     ftype => field%ftypep
+ 
+    ! set default decomp type to non-arb.
+    decompType = ESMF_GRID_NONARBITRARY
 
     ! Get the geometry type
+    call ESMF_GeomBaseGet(ftype%geombase, geomtype=localGeomType, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                              ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rc)) return
     if (present(geomtype)) then
-      call ESMF_GeomBaseGet(ftype%geombase, geomtype=geomtype, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+        geomType = localGeomType
     endif
 
     if (present(grid)) then
@@ -331,17 +343,26 @@ contains
                                   ESMF_CONTEXT, rc)) return
     endif
 
-    if (present(dimCount)) then
+    if (present(memDimCount)) then
         if (ftype%datastatus .ne. ESMF_STATUS_READY) then
             if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
              "Cannot return dimCount because no data attached to Field", &
                              ESMF_CONTEXT, rc)) return
         endif
         call ESMF_ArrayGet(ftype%array, &
-                           rank=dimCount, rc=rc)
+                           rank=memDimCount, rc=rc)
         if (ESMF_LogMsgFoundError(rc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+    endif
+
+    if (present(dimCount)) then
+        if (ftype%datastatus .ne. ESMF_STATUS_READY) then
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+             "Cannot return dimCount because no data attached to Field", &
+                             ESMF_CONTEXT, rc)) return
+        endif
+	dimCount = ftype%dimCount
     endif
 
     if (present(localDeCount)) then
