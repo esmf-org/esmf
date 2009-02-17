@@ -274,7 +274,7 @@ extern "C" {
 
       ESMC_GridDecompType decompType;
       decompType = grid->getDecompType();
-      if (decompType != ESMC_GRID_NONARBITRARY) {
+      if (decompType == ESMC_GRID_NONARBITRARY) {
 	  if ((*_distgridToGridMap)->extent[0] < dimCount){
 	      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
 	       "- distgridToGridMap array must be of size = the distributed rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
@@ -286,7 +286,8 @@ extern "C" {
 	      (*_distgridToGridMap)->array[i]=distgridToGridMap[i]+1;
 	  }
       } else {
-	  if ((*_distgridToGridMap)->extent[0] < distDimCount){
+	int totaldim = (*_distgridToGridMap)->extent[0];
+	  if (totaldim < distDimCount){
 	      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
 	       "- distgridToGridMap array must be of size = the distributed rank of the Grid", ESMC_NOT_PRESENT_FILTER(_rc));
 	      return;
@@ -295,6 +296,9 @@ extern "C" {
 	  distgridToGridMap=grid->getDistgridToGridMap();
 	  for (int i=0; i<distDimCount; i++) {
 	      (*_distgridToGridMap)->array[i]=distgridToGridMap[i]+1;
+	  }
+	  for (int i=distDimCount; i<totaldim; i++) {
+	    (*_distgridToGridMap)->array[i]=0;
 	  }
       }
     }
