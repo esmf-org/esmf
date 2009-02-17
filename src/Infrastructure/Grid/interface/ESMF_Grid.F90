@@ -221,7 +221,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.104 2009/02/16 19:14:31 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.105 2009/02/17 06:17:09 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1785,7 +1785,7 @@ end subroutine ESMF_GridConvertIndex
     integer, pointer :: gridLBound(:),gridUBound(:)
     integer, pointer :: arrayDimType(:),gridDimType(:)
     integer, pointer :: arrayDimInd(:)
-    integer, pointer :: distgridToGridMap(:)
+    integer, pointer :: distgridToGridMap(:), distDim(:)
     integer :: dimCount,distDimCount,undistDimCount, arrayDimCount
     integer :: i,j,ungriddedDimCount, undistArrayDimCount, bndpos
     integer :: gridComputationalEdgeLWidth(ESMF_MAXDIM)
@@ -1797,6 +1797,7 @@ end subroutine ESMF_GridConvertIndex
     logical :: contains_nonzero   
     integer :: fieldDimCount
     integer :: gridUsedDimCount
+    integer :: repdim, arbdim
 
 
     ! Initialize return code; assume failure until success is certain
@@ -1882,7 +1883,7 @@ end subroutine ESMF_GridConvertIndex
       endif
 
       ! calc full Array DimCount
-      ! Its the ungriddedDimCount + the number of non-zero entries in gridToArrayMap
+      ! Its the ungriddedDimCount + the number of non-zero entries in gridToFieldMap
        arrayDimCount=ungriddedDimCount+gridUsedDimCount
 
        ! Make sure gridToFieldMap is correct size
@@ -2040,14 +2041,28 @@ end subroutine ESMF_GridConvertIndex
        call ESMF_DistGridGet(distgrid, dimCount=distDimCount, rc=localrc)    
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-       ! assuming there is no replicated dimension in an arbitrarily distributed grid
-       arrayDimCount=ungriddedDimCount+distDimCount
-       fieldDimCount=ungriddedDimCount+dimCount
+
+       if (present(gridToFieldMap)) then
+          gridUsedDimCount=0
+          do i=1,dimCount
+             if (gridToFieldMap(i) .gt. 0) then
+                gridUsedDimCount=gridUsedDimCount+1
+             endif
+          enddo
+      else
+          ! Default assumes all grid dims are used so add number of grid dims
+          gridUsedDimCount=dimCount
+      endif
+
+      ! calc full Array DimCount
+      ! Its the ungriddedDimCount + the number of non-zero entries in gridToFieldMap
+       fieldDimCount=ungriddedDimCount+gridUsedDimCount
 
        ! Make sure gridToFieldMap is correct size
+       ! check for replicated dimension
        if (present(gridToFieldMap)) then
           do i=1,dimCount
-             if ((gridToFieldMap(i) <1) .or. (gridToFieldMap(i) > fieldDimCount)) then
+             if ((gridToFieldMap(i) <0) .or. (gridToFieldMap(i) > fieldDimCount)) then
                  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
                       "- gridToFieldMap value is outside range", & 
                           ESMF_CONTEXT, rc) 
@@ -2055,6 +2070,17 @@ end subroutine ESMF_GridConvertIndex
              endif
           enddo
        endif
+
+       ! set default GridToFieldMap
+       if (present(gridToFieldMap)) then
+         localGridToFieldMap(1:dimCount)=gridToFieldMap(1:dimCount)
+       else
+          do i=1,dimCount
+            localGridToFieldMap(i)=i
+          enddo
+       endif  
+
+       arrayDimCount=ungriddedDimCount+distDimCount-(dimCount-gridUsedDimCount)
 
        ! Check distgridToArrayMap
        if (size(distgridToArrayMap) < distDimCount) then
@@ -2080,11 +2106,40 @@ end subroutine ESMF_GridConvertIndex
            return 
        endif
 
-       ! distgridToArrayMap is always an identity map no matter how the grid-field map is
+       allocate(distgridToGridmap(dimCount))
+       call ESMF_GridGet(grid, distgridToGridMap=distgridToGridmap, &
+		arbdim=arbdim, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! distDim is the map from grid dimension to distgrid dimension
+       allocate(distDim(dimCount))
+       j=1
+       do i=1,dimCount
+	if (distgridToGridMap(i) .ne. 0) then 
+           distDim(i)=arbdim
+        else
+           if (j .ne. arbdim) then
+              distDim(i) = j
+              j = j+1
+           else
+              distDim(i)=j+1
+              j=j+2
+           endif
+        endif
+       enddo
+       
+       ! initialized distgridToArrayMap to an identity map
        do i=1,distDimCount
           distgridToArrayMap(i)=i
        enddo
 
+       ! find the replicated dimension in distgrid and set distgridToArrayMap to 0
+       do i=1,dimCount
+          if (localGridToFieldMap(i) .eq. 0) distgridToArrayMap(distDim(i)) = 0
+       enddo
+       deallocate(distDim, distgridToGridMap)
+              
        computationalEdgeLWidth(:)=0
        computationalEdgeUWidth(:)=0
 
