@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.35 2009/02/17 06:25:52 peggyli Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.36 2009/02/17 15:56:38 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.35 2009/02/17 06:25:52 peggyli Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.36 2009/02/17 15:56:38 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -253,11 +253,11 @@ contains
     decompType = ESMF_GRID_NONARBITRARY
 
     ! Get the geometry type
-    call ESMF_GeomBaseGet(ftype%geombase, geomtype=localGeomType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
     if (present(geomtype)) then
+        call ESMF_GeomBaseGet(ftype%geombase, geomtype=localGeomType, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         geomType = localGeomType
     endif
 
