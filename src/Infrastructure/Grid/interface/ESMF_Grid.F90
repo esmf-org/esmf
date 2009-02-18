@@ -221,7 +221,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.105 2009/02/17 06:17:09 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.106 2009/02/18 20:05:31 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1785,9 +1785,9 @@ end subroutine ESMF_GridConvertIndex
     integer, pointer :: gridLBound(:),gridUBound(:)
     integer, pointer :: arrayDimType(:),gridDimType(:)
     integer, pointer :: arrayDimInd(:)
-    integer, pointer :: distgridToGridMap(:), distDim(:)
+    integer, pointer :: distgridToGridMap(:)
     integer :: dimCount,distDimCount,undistDimCount, arrayDimCount
-    integer :: i,j,ungriddedDimCount, undistArrayDimCount, bndpos
+    integer :: i,j,k,ungriddedDimCount, undistArrayDimCount, bndpos
     integer :: gridComputationalEdgeLWidth(ESMF_MAXDIM)
     integer :: gridComputationalEdgeUWidth(ESMF_MAXDIM)
     integer :: tmpArrayComputationalEdgeLWidth(ESMF_MAXDIM)
@@ -1797,8 +1797,8 @@ end subroutine ESMF_GridConvertIndex
     logical :: contains_nonzero   
     integer :: fieldDimCount
     integer :: gridUsedDimCount
-    integer :: repdim, arbdim
-
+    integer :: arbdim, rep_arb, rep_noarb, arraydim
+    logical :: found
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2080,7 +2080,13 @@ end subroutine ESMF_GridConvertIndex
           enddo
        endif  
 
-       arrayDimCount=ungriddedDimCount+distDimCount-(dimCount-gridUsedDimCount)
+       ! If there is replicated dimension, check if they are arbitrarily distributed dimension
+       ! The array dimension varies depends whether the replicated dimensions are arb. or not
+       allocate(distgridToGridMap(dimCount))
+       call ESMF_GridGet(grid, distgridToGridMap=distgridToGridMap, &
+		arbdim=arbdim, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Check distgridToArrayMap
        if (size(distgridToArrayMap) < distDimCount) then
@@ -2089,6 +2095,51 @@ end subroutine ESMF_GridConvertIndex
                           ESMF_CONTEXT, rc) 
            return 
        endif
+
+       ! count how many replicated dimensions are not arbitrary and if any of replicated dimension
+       ! is arbitrary.  Assuming if one arbitrary dim is replicated, all the arbitrary dimension
+       ! should also be replicated.  This check is done in ESMF_FieldCreate already
+
+       ! initialze distgridToArrayMap
+       do i=1,distDimCount
+	   distgridToArrayMap(i)= i
+       enddo
+
+       ! if there is any replicated dimensions, reassign distgridToArrayMap
+       if (gridUsedDimCount < dimCount) then
+         rep_arb = 0
+         rep_noarb = 0
+         k = 1
+         do i=1,dimCount
+           found = .false.
+	   if (localGridToFieldMap(i) .eq. 0) then
+	     do j=1,dimCount
+		if (distgridToGridMap(j) .eq. i) then
+		  found = .true.
+		  exit
+	        endif
+             enddo
+	     if (found) then 
+                distgridToArrayMap(arbdim) = 0
+		rep_arb = 1
+             else
+		rep_noarb = rep_noarb+1
+		if (k .eq. arbdim) k = k + 1
+                distgridToArrayMap(k) = 0
+		k=k+1
+             endif
+           endif
+         enddo
+         j=1
+         do i=1,distDimCount
+	  if (distgridToArrayMap(i) .ne. 0) then 
+	     distgridToArrayMap(i)= j
+	     j=j+1
+          endif
+         enddo
+       endif
+
+       arrayDimCount=ungriddedDimCount+distDimCount-rep_noarb-rep_arb
 
        ! Check computationalEdgeLWidth
        if (size(computationalEdgeLWidth) < ArrayDimCount) then
@@ -2106,39 +2157,7 @@ end subroutine ESMF_GridConvertIndex
            return 
        endif
 
-       allocate(distgridToGridmap(dimCount))
-       call ESMF_GridGet(grid, distgridToGridMap=distgridToGridmap, &
-		arbdim=arbdim, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! distDim is the map from grid dimension to distgrid dimension
-       allocate(distDim(dimCount))
-       j=1
-       do i=1,dimCount
-	if (distgridToGridMap(i) .ne. 0) then 
-           distDim(i)=arbdim
-        else
-           if (j .ne. arbdim) then
-              distDim(i) = j
-              j = j+1
-           else
-              distDim(i)=j+1
-              j=j+2
-           endif
-        endif
-       enddo
-       
-       ! initialized distgridToArrayMap to an identity map
-       do i=1,distDimCount
-          distgridToArrayMap(i)=i
-       enddo
-
-       ! find the replicated dimension in distgrid and set distgridToArrayMap to 0
-       do i=1,dimCount
-          if (localGridToFieldMap(i) .eq. 0) distgridToArrayMap(distDim(i)) = 0
-       enddo
-       deallocate(distDim, distgridToGridMap)
+       deallocate(distgridToGridMap)
               
        computationalEdgeLWidth(:)=0
        computationalEdgeUWidth(:)=0
