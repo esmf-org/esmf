@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.48 2009/02/17 06:10:10 peggyli Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.49 2009/02/18 20:00:02 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.48 2009/02/17 06:10:10 peggyli Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.49 2009/02/18 20:00:02 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -1548,6 +1548,8 @@ end subroutine ESMF_FieldConstructNoDataPtr
 		    endif
 		  enddo
 		  ! all arb. dimension are replication, jump out of the first do loop
+	          ! fieldDimCount should be the same as the memDimCount
+		  fieldDimCount = memDimCount
 		  exit
                 endif	
 	     endif
