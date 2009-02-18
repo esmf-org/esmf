@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.2 2009/02/13 00:54:37 theurich Exp $
+! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.3 2009/02/18 23:32:30 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -12,8 +12,8 @@
 !    ensemble can be written using the ESMF using different initial 
 !    conditions.
 !
-!    Three gridded components running on 2 independent PETs and each define a 
-!    2D source Array 100x150. The fourth gridded component defines a three
+!    Three gridded components running on 2 independent PETs each define a 
+!    2D source Array 100x150. The fourth gridded component defines three
 !    destination Arrays also 100x150 and also runs on 2 PETs. None of the components
 !    have any PETs in common to allow them to run concurrently
 !
@@ -39,6 +39,9 @@
 !    Finally the fourth gridded component compares the data stored in the
 !    destination Arrays to the expected values as a measure of the accuracy 
 !    of the ArrayRedist() method.
+!
+!    On the first time through the loop, the first 3 components run concurrently,
+!    on subsequent times all the components run concurrently.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
