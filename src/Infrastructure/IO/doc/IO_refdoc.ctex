@@ -1,0 +1,113 @@
+% $Id: 
+
+#define INCLUDE_UML
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{graphicx}
+\usepackage{html}
+\usepackage{times}
+\usepackage{alltt}
+\usepackage[T1]{fontenc}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{\Large {\bf IO Reference}}
+\newcommand{\myauthors}{\large {\it Nancy Collins, Earl Schwab}}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../doc/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+% -------------
+% IO Background
+% -------------
+
+%\section{IO Utility}
+%#ifdef STANDALONE
+%\input{IO_background.tex}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/IO/doc/IO_background.tex}
+%#endif
+
+% ---------------
+% IO Requirements
+% ---------------
+%\newpage
+%\section{IO Requirements}
+%#ifdef STANDALONE
+%\input{IO_req.tex}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/IO/doc/IO_req.tex}
+%#endif
+
+% --------
+% IO Class
+% --------
+\newpage
+\section{IO Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{IO_background}
+%\input{IO_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/IO/doc/IO_background}
+%\input{../Infrastructure/IO/doc/IO_desc}
+#endif
+
+%\subsection{Use and Examples}
+%#ifdef STANDALONE
+%\input{IO_usage}
+%\input{ESMF_IOEx_fapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/IO/doc/IO_usage}
+%\input{../Infrastructure/IO/doc/ESMF_IOEx_fapi}
+%#endif
+
+\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+\input{IO_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/IO/doc/IO_rest}
+#endif
+
+%\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+\input{IO_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/IO/doc/IO_implnotes}
+#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+\input{ESMF_IO_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/IO/doc/ESMF_IO_fapi}
+#endif
+
+#ifdef STANDALONE
+%\section{Bibliography}
+\newpage
+\bibliography{IO} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif
