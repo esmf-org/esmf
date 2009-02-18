@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2008/01/03 22:20:56 theurich Exp $
+# $Id: makefile,v 1.5 2009/02/18 15:59:22 rokuingh Exp $
 
 ALL: build_here
 
@@ -12,9 +12,7 @@ include $(ESMF_DIR)/makefile
 # The DIRS line needs to contain all subdirectories which exist 
 # directly below this directory, and have either library,
 # example/test code, or documents which need to be generated.
-DIRS	  = src interface doc tests
-# TODO:FIELDINTEGRATION Restore State tests once FieldCreateNoData works
-# tests examples
+DIRS	  = src interface doc tests examples
 
 CLEANDIRS   =
 CLEANFILES  =
