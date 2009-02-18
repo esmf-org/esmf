@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.90 2009/02/18 06:53:39 eschwab Exp $
+% $Id: ESMF_refdoc.ctex,v 1.91 2009/02/18 21:52:31 eschwab Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -155,7 +155,7 @@
 
 #include "../Infrastructure/IO/doc/IO_refdoc.ctex"
 
-%#include "../Infrastructure/IOSpec/doc/IOSpec_refdoc.ctex"
+#include "../Infrastructure/IOSpec/doc/IOSpec_refdoc.ctex"
 
 \newpage
 
