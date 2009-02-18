@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.3 2009/02/18 23:32:30 svasquez Exp $
+! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.4 2009/02/18 23:37:10 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -42,6 +42,9 @@
 !
 !    On the first time through the loop, the first 3 components run concurrently,
 !    on subsequent times all the components run concurrently.
+!
+!    Note: This system test runs on 8 or a single PET. When run on a single PET
+!          the test runs sequentially.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
