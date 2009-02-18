@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.21 2009/02/16 19:14:32 rokuingh Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.22 2009/02/18 01:33:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
 
     print *, "i am comp1_init"
 
-    field1 = ESMF_FieldCreateNoData(name="Comp1 Field", rc=localrc)
+    field1 = ESMF_FieldCreateEmpty(name="Comp1 Field", rc=localrc)
   
     call ESMF_StateAdd(istate, field1, rc=localrc)
     
@@ -56,7 +56,7 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
 
     print *, "i am comp2_init"
 
-    field2 = ESMF_FieldCreateNoData(name="Comp2 Field", rc=localrc)
+    field2 = ESMF_FieldCreateEmpty(name="Comp2 Field", rc=localrc)
     
     call ESMF_StateAdd(istate, field2, rc=localrc)
 
@@ -82,7 +82,7 @@ end module ESMF_StateReconcileEx_Mod
     program ESMF_StateReconcileEx
 
 !------------------------------------------------------------------------------
-!ESMF_EXremoveAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_StateReconcileEx - State reconciliation
@@ -171,6 +171,8 @@ end module ESMF_StateReconcileEx_Mod
     ! but to make this example very short, they are called inline below.
     ! This is o.k. because the SetServices routine must execute from within
     ! the parent component VM.
+    call ESMF_GridCompSetVM(comp1, comp_dummy, rc)
+    call ESMF_GridCompSetVM(comp2, comp_dummy, rc)
     call ESMF_GridCompSetServices(comp1, comp_dummy, rc)
     call ESMF_GridCompSetServices(comp2, comp_dummy, rc)
 
