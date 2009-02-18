@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.1 2009/02/17 06:14:39 peggyli Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.2 2009/02/18 20:02:52 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -280,6 +280,59 @@
 
   if (memDimCount .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_FieldDestroy(field)
+
+  !----------------------------------------------------------------------------
+  ! Test Set 6:  Create a 1D field on a 3D Arbitrary Grid with the arb.dimensions as the
+  !  replicated dimension
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Create a 1D field on a 3D arb grid with the arb. dims as the replicated dim"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  field = ESMF_FieldCreate(grid3d, arrayspec1D,gridToFieldMap=(/0,0,1/), rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) correct = .false.
+
+  if (memDimCount .ne. 1) correct = .false.
+  if (dimCount .ne. 1) correct = .false.  
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_FieldDestroy(field)
+
+  !----------------------------------------------------------------------------
+  ! Test Set 7:  Create a 2D field on a 3D Arbitrary Grid with the arb.dimensions as the
+  !  replicated dimension and one ungridded dim
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Create a 2D field on a 3D arb grid with the arb.dims as the replicated dim and one ungridded dim"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  field = ESMF_FieldCreate(grid3d, arrayspec2D,gridToFieldMap=(/0,0,1/), &
+          ungriddedLBound=(/1/), ungriddedUBound=(/10/),rc=localrc)
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) correct = .false.
+
+  if (memDimCount .ne. 2) correct = .false.
+  if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
