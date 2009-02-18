@@ -221,7 +221,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.106 2009/02/18 20:05:31 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.107 2009/02/18 20:39:45 feiliu Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2106,9 +2106,9 @@ end subroutine ESMF_GridConvertIndex
        enddo
 
        ! if there is any replicated dimensions, reassign distgridToArrayMap
+       rep_arb = 0
+       rep_noarb = 0
        if (gridUsedDimCount < dimCount) then
-         rep_arb = 0
-         rep_noarb = 0
          k = 1
          do i=1,dimCount
            found = .false.
