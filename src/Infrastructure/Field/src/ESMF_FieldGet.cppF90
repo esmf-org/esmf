@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.36 2009/02/17 15:56:38 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.37 2009/02/19 21:54:47 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.36 2009/02/17 15:56:38 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.37 2009/02/19 21:54:47 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -706,7 +706,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     logical :: filled(ESMF_MAXDIM)
 
     integer :: localDeCount, dimCount, l_localDe, dimCount_repdim
-    integer, allocatable :: arrayBnd(:, :)
+    integer, allocatable :: arrayBnd(:, :), arrayCompBnd(:,:), arrayExclBnd(:,:)
     integer, allocatable :: undistBnd(:)
     integer, allocatable :: distgridToArrayMap(:)
     integer, allocatable :: distgridToPackedArrayMap(:)
@@ -834,7 +834,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         if(field%ftypep%gridToFieldMap(i) == 0) dimCount_repdim = dimCount_repdim + 1
     enddo
 
-    if (present(totalLBound) .or. present(totalUBound)) then
+    if (present(totalLBound) .or. present(totalUBound) .or. &
+        present(computationalLBound) .or. present(computationalUBound) .or. &
+        present(exclusiveLBound) .or. present(exclusiveUBound)) then
     
         ! Get Size of Array info
         call ESMF_ArrayGet(field%ftypep%array, dimCount=dimCount, rc=localrc)
@@ -846,6 +848,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         ! size of undistBnd is total number of undistributed dimensions
         ! including replicated dimensions
         allocate(arrayBnd(dimCount, 0:localDeCount-1))
+        allocate(arrayCompBnd(dimCount, 0:localDeCount-1))
+        allocate(arrayExclBnd(dimCount, 0:localDeCount-1))
         allocate(undistBnd(fieldRank-dimCount+dimCount_repdim))
         allocate(distgridToPackedArrayMap(dimCount))
         allocate(distgridToArrayMap(dimCount))
@@ -858,9 +862,11 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
     
-        ! fill totalLBounds
-        if (present(totalLBound)) then
+        ! fill lower Bounds
+        if (present(totalLBound) .or. present(computationalLBound) &
+            .or. present(exclusiveLBound)) then
             call ESMF_ArrayGet(field%ftypep%array, totalLBound=arrayBnd, & 
+                computationalLBound=arrayCompBnd, exclusiveLBound=arrayExclBnd, &
                 undistLBound=undistBnd, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -872,6 +878,10 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
                 if(distgridToPackedArrayMap(i) /= 0) then
                    l_tlb(distgridToArrayMap(i))=&
                     arrayBnd(distgridToPackedArrayMap(i),l_localDe)
+                   l_clb(distgridToArrayMap(i))=&
+                    arrayCompBnd(distgridToPackedArrayMap(i),l_localDe)
+                   l_elb(distgridToArrayMap(i))=&
+                    arrayExclBnd(distgridToPackedArrayMap(i),l_localDe)
                    filled(distgridToArrayMap(i))=.true.
                 endif
             enddo
@@ -881,14 +891,18 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             do i=1, fieldRank
                if (.not. filled(i)) then
                    l_tlb(i)=undistBnd(j)
+                   l_clb(i)=undistBnd(j)
+                   l_elb(i)=undistBnd(j)
                    j=j+1;
                endif
             enddo
         endif
     
-        ! fill totalUBounds
-        if (present(totalUBound)) then
+        ! fill upper bounds
+        if (present(totalUBound) .or. present(computationalUBound) &
+            .or. present(exclusiveUBound)) then
             call ESMF_ArrayGet(field%ftypep%array, totalUBound=arrayBnd, & 
+                computationalUBound=arrayCompBnd, exclusiveUBound=arrayExclBnd, &
                 undistUBound=undistBnd, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -899,7 +913,11 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             do i=1, dimCount
                 if(distgridToPackedArrayMap(i) /= 0) then
                     l_tub(distgridToArrayMap(i))=&
-                    arrayBnd(distgridToPackedArrayMap(i),l_localDe)
+                        arrayBnd(distgridToPackedArrayMap(i),l_localDe)
+                    l_cub(distgridToArrayMap(i))=&
+                        arrayCompBnd(distgridToPackedArrayMap(i),l_localDe)
+                    l_eub(distgridToArrayMap(i))=&
+                        arrayExclBnd(distgridToPackedArrayMap(i),l_localDe)
                     filled(distgridToArrayMap(i))=.true.
                 endif
             enddo
@@ -909,49 +927,53 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
             do i=1, fieldRank
                if (.not. filled(i)) then
                    l_tub(i)=undistBnd(j)
+                   l_cub(i)=undistBnd(j)
+                   l_eub(i)=undistBnd(j)
                    j=j+1;
                endif
            enddo
         endif
         ! deallocate data
         deallocate(arrayBnd)
+        deallocate(arrayCompBnd)
+        deallocate(arrayExclBnd)
         deallocate(undistBnd)
         deallocate(distgridToPackedArrayMap)
         deallocate(distgridToArrayMap)
     endif
 
-    ! get grid info 
-    call ESMF_GeomBaseGetPLocalDE(field%ftypep%geombase, localDe=localDe, & 
-            computationalLBound=gridCompLBnd, &
-            computationalUBound=gridCompUBnd, &
-            exclusiveLBound=gridExclLBnd, &
-            exclusiveUBound=gridExclUBnd, &
-            rc=localrc) 
-
-
-    ! fill in Grid bounds 
-    filled=.false. 
-    do i=1, gridrank 
-        if(field%ftypep%gridToFieldMap(i) .gt. 0) then
-            l_clb(field%ftypep%gridToFieldMap(i)) = gridCompLBnd(i)
-            l_cub(field%ftypep%gridToFieldMap(i)) = gridCompUBnd(i)
-            l_elb(field%ftypep%gridToFieldMap(i)) = gridExclLBnd(i) 
-            l_eub(field%ftypep%gridToFieldMap(i)) = gridExclUBnd(i) 
-            filled(field%ftypep%gridToFieldMap(i))=.true. 
-        endif
-    enddo
- 
-    ! fill in ungridded bounds
-    j=1
-    do i=1,fieldrank
-       if (.not. filled(i)) then
-            l_clb(i) = field%ftypep%ungriddedLBound(j)
-            l_cub(i) = field%ftypep%ungriddedUBound(j)
-            l_elb(i) = field%ftypep%ungriddedLBound(j)
-            l_eub(i) = field%ftypep%ungriddedUBound(j)
-            j=j+1
-       endif
-    enddo
+!    ! get grid info 
+!    call ESMF_GeomBaseGetPLocalDE(field%ftypep%geombase, localDe=localDe, & 
+!            computationalLBound=gridCompLBnd, &
+!            computationalUBound=gridCompUBnd, &
+!            exclusiveLBound=gridExclLBnd, &
+!            exclusiveUBound=gridExclUBnd, &
+!            rc=localrc) 
+!
+!
+!    ! fill in Grid bounds 
+!    filled=.false. 
+!    do i=1, gridrank 
+!        if(field%ftypep%gridToFieldMap(i) .gt. 0) then
+!            l_clb(field%ftypep%gridToFieldMap(i)) = gridCompLBnd(i)
+!            l_cub(field%ftypep%gridToFieldMap(i)) = gridCompUBnd(i)
+!            l_elb(field%ftypep%gridToFieldMap(i)) = gridExclLBnd(i) 
+!            l_eub(field%ftypep%gridToFieldMap(i)) = gridExclUBnd(i) 
+!            filled(field%ftypep%gridToFieldMap(i))=.true. 
+!        endif
+!    enddo
+! 
+!    ! fill in ungridded bounds
+!    j=1
+!    do i=1,fieldrank
+!       if (.not. filled(i)) then
+!            l_clb(i) = field%ftypep%ungriddedLBound(j)
+!            l_cub(i) = field%ftypep%ungriddedUBound(j)
+!            l_elb(i) = field%ftypep%ungriddedLBound(j)
+!            l_eub(i) = field%ftypep%ungriddedUBound(j)
+!            j=j+1
+!       endif
+!    enddo
 
     do i = 1, fieldrank 
         l_cc(i) = l_cub(i) - l_clb(i) + 1

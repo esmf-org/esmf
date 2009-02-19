@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.50 2009/02/18 20:39:17 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.51 2009/02/19 21:54:47 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.50 2009/02/18 20:39:17 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.51 2009/02/19 21:54:47 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1819,8 +1819,6 @@ end subroutine ESMF_FieldConstructNoDataPtr
     integer :: fieldUndistDimCount 
     integer :: i,j
     integer :: localGridToFieldMap(ESMF_MAXDIM)
-    integer :: localMaxHaloLWidth (ESMF_MAXDIM)
-    integer :: localMaxHaloUWidth (ESMF_MAXDIM)
     logical :: flipflop(ESMF_MAXDIM)
     type(ESMF_CopyFlag)    :: l_copyflag
     type (ESMF_IndexFlag) :: arrayIndexFlag, gridIndexFlag    
@@ -2034,17 +2032,6 @@ end subroutine ESMF_FieldConstructNoDataPtr
         l_copyflag = ESMF_DATA_REF
     endif
  
-    ! Set default gridToFieldMap
-    localGridToFieldMap = -1
-    if (present(gridToFieldMap)) then  
-      localGridToFieldMap(1:gridDimCount) = &  
-         gridToFieldMap (1:gridDimCount)  
-    else  
-      do i = 1, gridDimCount  
-        localGridToFieldMap(i) = i  
-      enddo  
-    endif  
-
     ! gridToFieldMap elements must be in range 1...fieldRank and unique  
     ! algorithm to check element uniqueness:  
     !   run time: O(ESMF_MAXDIM)  

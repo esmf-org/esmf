@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.3 2009/02/18 20:39:17 feiliu Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.4 2009/02/19 21:54:47 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -53,8 +53,11 @@
   integer :: localCount, localCount1
   integer, allocatable :: localIndices(:,:)
   integer                 :: localrc
-  type(ESMF_Field)        :: field, field1
+  type(ESMF_Field)        :: field, field1, field2
   real, dimension(:,:), allocatable   :: farray
+  real, dimension(:), pointer   :: fptr1d
+  real, dimension(:,:), pointer   :: fptr2d
+  real, dimension(:,:,:), pointer   :: fptr3d
   logical :: correct
   integer :: memDimCount, dimCount
 
@@ -167,6 +170,7 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
+  write(name, *) "Create an field using an 2D arb. grid and 1D array"
   call ESMF_FieldGet(field, array=array1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -183,8 +187,30 @@
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+  !NEX_UTest
+  write(name, *) "Create an field using an 2D arb. grid and 1D Fortran array"
+  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_FieldSetCommit(field2, grid2d, farray=fptr1d, &
+      indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) correct = .false.
+
+  if (memDimCount .ne. 1) correct = .false.
+  if (dimCount .ne. 2) correct = .false.  
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_FieldDestroy(field)
   call ESMF_FieldDestroy(field1)
+  call ESMF_FieldDestroy(field2)
 
   !----------------------------------------------------------------------------=
   ! Test Set 2:  Create a 2D field on a 3D Arbitrary Grid with one replicated dim
@@ -235,8 +261,30 @@
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+  !NEX_UTest
+  write(name, *) "Create an field using an 3D arb. grid and 1D Fortran array"
+  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_FieldSetCommit(field2, grid3d, farray=fptr1d, gridToFieldMap=(/1,2,0/), &
+      indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) correct = .false.
+
+  if (memDimCount .ne. 1) correct = .false.
+  if (dimCount .ne. 2) correct = .false.  
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_FieldDestroy(field)
   call ESMF_FieldDestroy(field1)
+  call ESMF_FieldDestroy(field2)
 
   !----------------------------------------------------------------------------=
   ! Test Set 3:  Create a 3D field on a 3D Arbitrary Grid 
@@ -281,8 +329,30 @@
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+  !NEX_UTest
+  write(name, *) "Create an field using an 3D arb. grid and 2D Fortran array"
+  call ESMF_FieldGet(field, farray=fptr2d, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_FieldSetCommit(field2, grid3d, farray=fptr2d, &
+      indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) correct = .false.
+
+  if (memDimCount .ne. 2) correct = .false.
+  if (dimCount .ne. 3) correct = .false.  
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_FieldDestroy(field)
   call ESMF_FieldDestroy(field1)
+  call ESMF_FieldDestroy(field2)
 
   !----------------------------------------------------------------------------=
   ! Test Set 4:  Create a 4D field on a 3D Arbitrary Grid 
@@ -330,8 +400,31 @@
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+  !NEX_UTest
+  write(name, *) "Create an field using an 3D arb. grid and 3D Fortran array"
+  call ESMF_FieldGet(field, farray=fptr3d, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_FieldSetCommit(field2, grid3d, farray=fptr3d, &
+    ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
+    indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) correct = .false.
+
+  if (memDimCount .ne. 3) correct = .false.
+  if (dimCount .ne. 4) correct = .false.  
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_FieldDestroy(field)
   call ESMF_FieldDestroy(field1)
+  call ESMF_FieldDestroy(field2)
 
   !----------------------------------------------------------------------------=
   ! Test Set 5:  Create a 3D field on a 3D Arbitrary Grid with one replicated grid 
@@ -376,8 +469,32 @@
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+  !NEX_UTest
+  write(name, *) "Create an field using an 3D arb. grid and 2D Fortran array"
+  call ESMF_FieldGet(field, farray=fptr2d, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_FieldSetCommit(field2, grid3d, farray=fptr2d, &
+    ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
+    gridToFieldMap=(/1,2,0/), &
+    indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) correct = .false.
+
+  if (memDimCount .ne. 2) correct = .false.
+  if (dimCount .ne. 3) correct = .false.  
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_FieldDestroy(field)
   call ESMF_FieldDestroy(field1)
+  call ESMF_FieldDestroy(field2)
 
   !----------------------------------------------------------------------------
   ! Test Set 6:  Create a 1D field on a 3D Arbitrary Grid with the arb.dimensions as the
@@ -420,8 +537,31 @@
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+  !NEX_UTest
+  write(name, *) "Create an field using an 3D arb. grid and 1D Fortran array"
+  call ESMF_FieldGet(field, farray=fptr1d, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_FieldSetCommit(field2, grid3d, farray=fptr1d, &
+    gridToFieldMap=(/0,0,1/), &
+    indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) correct = .false.
+
+  if (memDimCount .ne. 1) correct = .false.
+  if (dimCount .ne. 1) correct = .false.  
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_FieldDestroy(field)
   call ESMF_FieldDestroy(field1)
+  call ESMF_FieldDestroy(field2)
 
   !----------------------------------------------------------------------------
   ! Test Set 7:  Create a 2D field on a 3D Arbitrary Grid with the arb.dimensions as the
@@ -466,8 +606,32 @@
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+  !NEX_UTest
+  write(name, *) "Create an field using an 3D arb. grid and 2D Fortran array"
+  call ESMF_FieldGet(field, farray=fptr2d, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_FieldSetCommit(field2, grid3d, farray=fptr2d, &
+    ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
+    gridToFieldMap=(/0,0,1/), &
+    indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) correct = .false.
+
+  if (memDimCount .ne. 2) correct = .false.
+  if (dimCount .ne. 2) correct = .false.  
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_FieldDestroy(field)
   call ESMF_FieldDestroy(field1)
+  call ESMF_FieldDestroy(field2)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)
