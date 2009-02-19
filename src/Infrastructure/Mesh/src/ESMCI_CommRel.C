@@ -185,7 +185,7 @@ void CommRel::BuildFromOwner(MeshDB  &dom, const std::vector<CommNode> &obj)
     SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
 
     // Loop range items for this proc
-    while (proc == ri->processor && ri != bootStrap.range_end() ) {
+    while (ri != bootStrap.range_end () && proc == ri->processor ) {
       if (ri == bootStrap.range_end()) {
         std::cout << "P:" << msg.commRank() << " hit end too quickly" << std::endl;
         throw("CommRel hit end of range prematruely");
@@ -810,7 +810,7 @@ void CommRel::send_fields(UInt _nfields, _field *const *_sfields, _field *const 
     UInt proc = *p;
     SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
 
-    while (proc == ri->processor && ri != range_end() ) {
+    while (ri != range_end() && proc == ri->processor ) {
       if (ri == range_end()) {
         std::cout << "P:" << msg.commRank() << " hit end too quickly" << std::endl;
         throw("send fields, CommRel hit end of range prematruely");
