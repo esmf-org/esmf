@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.51 2009/02/19 21:54:47 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.52 2009/02/20 22:32:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.51 2009/02/19 21:54:47 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.52 2009/02/20 22:32:09 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -2995,6 +2995,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
     integer :: localrc                       !  Local error code@\
     type(ESMF_GeomBase) :: geombase @\
     type(ESMF_StaggerLoc) :: localStaggerloc@\
+    type(ESMF_GridDecompType)      :: decompType @\
 @\
     ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
@@ -3008,12 +3009,33 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)@\
 @\
 @\
+    call ESMF_GridGetDecompType(grid, decompType, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, &   @\
+        ESMF_ERR_PASSTHRU, &   @\
+        ESMF_CONTEXT, rc)) return   @\
+@\
+    if (decompType .eq. ESMF_GRID_ARBITRARY) then @\
+        if ((present(maxHaloLWidth)) .or. (present(maxHaloUWidth))) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, &  @\
+                 "- indexflag, maxHaloLWidth or maxHaloUWidth are not allowed for arbitrary grid", & @\
+                 ESMF_CONTEXT, rc)  @\
+           return @\
+        endif @\
+    endif @\
     ! Set default values.  @\
-    if (present(staggerloc)) then@\
-       localStaggerloc = staggerloc@\
-    else  @\
-       localStaggerLoc = ESMF_STAGGERLOC_CENTER  @\
-    endif  @\
+    if (present(staggerloc)) then @\
+       if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. & @\
+ 	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, &  @\
+                 "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &  @\
+                 ESMF_CONTEXT, rc)  @\
+           return @\
+	 else @\
+	    localStaggerloc=staggerloc @\
+	 endif @\
+    else   @\
+       localStaggerLoc = ESMF_STAGGERLOC_CENTER   @\
+    endif   @\
 @\
     ! Create GeomBase from Grid@\
     geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)@\
@@ -3177,6 +3199,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
     integer :: localrc                       !  Local error code@\
     type(ESMF_GeomBase) :: geombase @\
     type(ESMF_StaggerLoc) :: localStaggerloc@\
+    type(ESMF_GridDecompType)      :: decompType @\
 @\
     ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
@@ -3190,12 +3213,33 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)@\
 @\
 @\
+    call ESMF_GridGetDecompType(grid, decompType, rc=localrc) @\
+    if (ESMF_LogMsgFoundError(localrc, &   @\
+        ESMF_ERR_PASSTHRU, &   @\
+        ESMF_CONTEXT, rc)) return   @\
+@\
+    if (decompType .eq. ESMF_GRID_ARBITRARY) then @\
+        if ((present(maxHaloLWidth)) .or. (present(maxHaloUWidth))) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, &  @\
+                 "- indexflag, maxHaloLWidth or maxHaloUWidth are not allowed for arbitrary grid", & @\
+                 ESMF_CONTEXT, rc)  @\
+           return @\
+        endif @\
+    endif @\
     ! Set default values.  @\
-    if (present(staggerloc)) then@\
-       localStaggerloc = staggerloc@\
-    else  @\
-       localStaggerLoc = ESMF_STAGGERLOC_CENTER  @\
-    endif  @\
+    if (present(staggerloc)) then @\
+       if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. & @\
+ 	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, &  @\
+                 "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &  @\
+                 ESMF_CONTEXT, rc)  @\
+           return @\
+	 else @\
+	    localStaggerloc=staggerloc @\
+	 endif @\
+    else   @\
+       localStaggerLoc = ESMF_STAGGERLOC_CENTER   @\
+    endif   @\
 @\
     ! Create GeomBase from Grid@\
     geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)@\
