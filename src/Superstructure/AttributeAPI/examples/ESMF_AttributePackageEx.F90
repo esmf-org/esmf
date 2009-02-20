@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.3 2009/01/30 00:40:30 rokuingh Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.4 2009/02/20 05:42:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@ program ESMF_AttributePackageEx
 ! \subsubsection{Example: Intermediate Attribute usage: Attribute Packages}
 !
 ! This example is slightly more complex than the example presented in section 
-! \ref{AttributeEx} and illustrates the use of the ESMF\_Attribute class to create 
+! \ref{AttributeEx} and illustrates the use of the Attribute class to create 
 ! Attribute hierarchies using Attribute packages.  A gridded Component
 ! is used in conjunction with two States, a FieldBundle, and various realistic
 ! Fields to create an Attribute hierarchy and copy it from one State to another.  
@@ -29,7 +29,7 @@ program ESMF_AttributePackageEx
 ! The Attribute package nesting capability is demonstrated by nesting the standard
 ! ESMF supplied packages for the Fields inside a user specified Attribute package
 ! with a customized convention.
-! The first thing we must do is declare variables and initialize the ESMF.
+! The first thing we must do is declare variables and initialize ESMF.
 !EOE
 
 

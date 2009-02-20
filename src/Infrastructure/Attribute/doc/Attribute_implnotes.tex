@@ -1,4 +1,4 @@
-% $Id: Attribute_implnotes.tex,v 1.12 2009/02/16 19:14:31 rokuingh Exp $
+% $Id: Attribute_implnotes.tex,v 1.13 2009/02/20 05:42:42 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -12,7 +12,7 @@ This section covers Attribute memory deallocation, the use of {\tt ESMF\_Attribu
 
 \subsubsection{Attribute Memory Deallocation}
 
-The {\tt ESMF\_Attribute} class presents a somewhat different paradigm with respect to memory deallocation than other ESMF objects.  The {\tt ESMF\_AttributeRemove()} call can be issued to remove any Attribute from an ESMF object or an Attribute package on an ESMF object.  This call is also enabled to remove entire Attribute packages with one call, which would remove any nested Attribute packages as well.  The user is {\bf not} required to remove all Attributes that are used in a model run.  The entire Attribute hierarchy will be removed automatically by ESMF, provided the ESMF objects which contain them are properly destroyed.  
+The Attribute class presents a somewhat different paradigm with respect to memory deallocation than other ESMF objects.  The {\tt ESMF\_AttributeRemove()} call can be issued to remove any Attribute from an ESMF object or an Attribute package on an ESMF object.  This call is also enabled to remove entire Attribute packages with one call, which would remove any nested Attribute packages as well.  The user is {\bf not} required to remove all Attributes that are used in a model run.  The entire Attribute hierarchy will be removed automatically by ESMF, provided the ESMF objects which contain them are properly destroyed.  
 
 \subsubsection{Using {\tt ESMF\_AttributeGet()} to retrieve Attribute lists}
 
@@ -27,7 +27,7 @@ Another consideration when using nested Attribute packages is to remember to spe
 \subsubsection{Attributes in a Distributed Environment}
 \label{sec:Att:Dist}
 
-The  {\tt ESMF\_Attribute} class is slightly different than other ESMF objects in the context of building a consistent view of the metadata across the VM.  To better explain the ESMF capabilities for ensuring the integrity of Attributes in a distributed environment, a small working vocabulary of ESMF Attributes will be presented.  Three types of changes to an Attribute hierarchy need to be specified, these are: 1. {\bf link changes} are structural links created when two separate Attribute hierarchies are linked, 2. {\bf structural changes} are changes which occur when Attributes or Attribute packages are added or removed within a single level of an Attribute hierarchy, and 3. {\bf value changes} occur when the value portion of any single Attribute is modified.  These definitions will help to describe how {\tt ESMF\_StateReconcile()} and {\tt ESMF\_AttributeUpdate()} can be effectively used to ensure a consistent view of metadata throughout a model run.
+The Attribute class is slightly different than other ESMF objects in the context of building a consistent view of the metadata across the VM.  To better explain the ESMF capabilities for ensuring the integrity of Attributes in a distributed environment, a small working vocabulary of ESMF Attributes will be presented.  Three types of changes to an Attribute hierarchy need to be specified, these are: 1. {\bf link changes} are structural links created when two separate Attribute hierarchies are linked, 2. {\bf structural changes} are changes which occur when Attributes or Attribute packages are added or removed within a single level of an Attribute hierarchy, and 3. {\bf value changes} occur when the value portion of any single Attribute is modified.  These definitions will help to describe how {\tt ESMF\_StateReconcile()} and {\tt ESMF\_AttributeUpdate()} can be effectively used to ensure a consistent view of metadata throughout a model run.
 
 The {\tt ESMF\_StateReconcile()} call is used to create a consistent view of ESMF objects over the entire VM in the initialization phase of a model run.  All Attributes that are attached to an ESMF object contained in the State, i.e. an object that is being reconciled, can also be reconciled.  This is done by setting a flag in the {\tt ESMF\_StateReconcile()} call, see the State documentation for details.  This means that, at the conclusion of {\tt ESMF\_StateReconcile()} there is a one-to-one correspondence between Attribute hierarchies and the objects to which they belong.  This is the only place where link changes in an Attribute hierarchy can be resolved.
 

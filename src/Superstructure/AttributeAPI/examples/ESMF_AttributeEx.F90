@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.7 2009/01/30 00:40:30 rokuingh Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.8 2009/02/20 05:42:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -19,7 +19,7 @@ program ESMF_AttributeEx
 !BOE
 ! \subsubsection{Example: Basic Attribute usage} \label{AttributeEx}
 !
-! This example illustrates the most basic usage of the ESMF\_Attribute class.  
+! This example illustrates the most basic usage of the Attribute class.  
 ! This demonstration of Attribute manipulation is limited to the gridded 
 ! Component, but the same principles apply to the coupler Component, State, 
 ! Grid, FieldBundle, Field, and Array.  The
@@ -27,7 +27,7 @@ program ESMF_AttributeEx
 ! working with Attributes with different types and lists, removing Attributes,
 ! and getting default Attributes.  Various other uses of 
 ! {\tt ESMF\_AttributeGet()} is covered in detail in the last section.  The
-! first thing we must do is declare variables and initialize the ESMF.
+! first thing we must do is declare variables and initialize ESMF.
 !EOE
 
 
