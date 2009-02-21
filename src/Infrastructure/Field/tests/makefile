@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.57 2009/02/17 06:15:06 peggyli Exp $ 
+# $Id: makefile,v 1.58 2009/02/21 00:03:15 peggyli Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -27,7 +27,8 @@ ifeq ($(ESMF_TESTHARNESS), EXHAUSTIVE)
 endif
 endif
 
-TESTS_RUN_UNI = RUN_ESMF_FieldStressUTestUNI
+TESTS_RUN_UNI = RUN_ESMF_FieldArbGridUTestUNI \
+		RUN_ESMF_FieldStressUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -50,6 +51,9 @@ RUN_ESMF_FieldCreateGetUTest:
 
 RUN_ESMF_FieldArbGridUTest:
 	$(MAKE) TNAME=FieldArbGrid NP=4 ftest
+
+RUN_ESMF_FieldArbGridUTestUNI:
+	$(MAKE) TNAME=FieldArbGrid NP=1 ftest
 
 #
 # FieldStress
