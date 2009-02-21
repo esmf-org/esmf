@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.110 2009/02/12 05:31:13 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.111 2009/02/21 05:40:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -91,16 +91,16 @@ module ESMF_GridCompMod
   public ESMF_GridCompIsPetLocal
   
   ! routines with dummy procedure arguments
-  public :: ESMF_GridCompSetVM
-  public :: ESMF_GridCompSetServices
   public :: ESMF_GridCompSetEntryPoint
+  public :: ESMF_GridCompSetServices
+  public :: ESMF_GridCompSetVM
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.110 2009/02/12 05:31:13 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.111 2009/02/21 05:40:00 theurich Exp $'
 
 !==============================================================================
 !
@@ -109,16 +109,16 @@ module ESMF_GridCompMod
 !==============================================================================
 
 !------------------------------------------------------------------------------
-  interface ESMF_GridCompSetVM
-    module procedure ESMF_GridCompSetVM
-    module procedure ESMF_GridCompSetVMShObj
+  interface ESMF_GridCompSetServices
+    module procedure ESMF_GridCompSetServices
+    module procedure ESMF_GridCompSetServicesShObj
   end interface
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-  interface ESMF_GridCompSetServices
-    module procedure ESMF_GridCompSetServices
-    module procedure ESMF_GridCompSetServicesShObj
+  interface ESMF_GridCompSetVM
+    module procedure ESMF_GridCompSetVM
+    module procedure ESMF_GridCompSetVMShObj
   end interface
 !------------------------------------------------------------------------------
 
@@ -130,42 +130,130 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompSetEntryPoint"
+!BOPI
+! !IROUTINE: ESMF_GridCompSetEntryPoint - Set user routine as entry point for standard Component method
+!
+! !INTERFACE:
+  subroutine ESMF_GridCompSetEntryPoint(gridcomp, stage, routine, phase, rc)
+
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in) :: gridcomp
+    character(*),        intent(in) :: stage
+    interface
+      subroutine routine(gridcomp, importState, exportState, clock, rc)
+        use ESMF_CompMod
+        use ESMF_StateMod
+        use ESMF_ClockMod
+        implicit none
+        type(ESMF_GridComp)         :: gridcomp
+        type(ESMF_State)            :: importState
+        type(ESMF_State)            :: exportState
+        type(ESMF_Clock)            :: clock
+        integer, intent(out)        :: rc
+      end subroutine
+    end interface
+    integer, intent(in),  optional  :: phase
+    integer, intent(out), optional  :: rc 
+!
+! !DESCRIPTION:
+! Registers a user-supplied {\tt routine} as the entry point for one of the
+! predefined Component {\tt stage}s. After this call the {\tt routine} becomes
+! accessible via the standard Component API method for this {\tt stage}.
+!    
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   An {\tt ESMF\_GridComp} object.
+! \item[stage]
+!   One of a set of predefined Component stages - e.g. {\tt ESMF\_SETINIT}, 
+!   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. !!!need to reference here!!!
+! \item[routine]
+!   The user-supplied subroutine to be associated for this {\tt stage}.
+!   This subroutine does not have to be public.
+! \item[{[phase]}] 
+!   The {\tt phase} number for multi-phase stages. For single phase 
+!   stages the {\tt phase} argument can be omitted. The default setting
+!   is {\tt ESMF\_SINGLEPHASE}.
+! \item[{[rc]}] 
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+! The Component writer must supply a subroutine with the exact interface 
+! shown below, including the {\tt intent}. Arguments must not be declared
+! as optional, and the types and order must match.
+!
+! !INTERFACE:
+!   interface
+!     subroutine subroutineName (gridcomp, importState, exportState, clock, rc)
+!       type(ESMF_GridComp)  :: gridcomp     ! must not be optional
+!       type(ESMF_State)     :: importState  ! must not be optional
+!       type(ESMF_State)     :: exportState  ! must not be optional
+!       type(ESMF_Clock)     :: clock        ! must not be optional
+!       integer, intent(out) :: rc           ! must not be optional
+!     end subroutine
+!   end interface
+!
+!EOPI
+!------------------------------------------------------------------------------
+    ! local vars
+    integer :: localrc                       ! local error status
+    integer :: phaseArg
+
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
+  
+    phaseArg = ESMF_SINGLEPHASE   ! default
+    if (present(phase)) phaseArg = phase
+  
+    call c_ESMC_SetEntryPoint(gridcomp, stage, routine, phaseArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCompSetVM"
+#define ESMF_METHOD "ESMF_GridCompSetServices"
 !BOPI
-! !IROUTINE: ESMF_GridCompSetVM - Set GridComp VM properties in routine
+! !IROUTINE: ESMF_GridCompSetServices - Call user routine to register GridComp methods
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridCompSetVM()
-  recursive subroutine ESMF_GridCompSetVM(comp, routine, rc)
+  recursive subroutine ESMF_GridCompSetServices(gridcomp, routine, rc)
+!
 ! !ARGUMENTS:
-    use ESMF_CompMod
-    implicit none
-    type(ESMF_GridComp)             :: comp
+    type(ESMF_GridComp)             :: gridcomp
     interface
-      subroutine routine(comp, rc)
+      subroutine routine(gridcomp, rc)
         use ESMF_CompMod
         implicit none
-        type(ESMF_GridComp)         :: comp
+        type(ESMF_GridComp)         :: gridcomp
         integer, intent(out)        :: rc
       end subroutine
     end interface
     integer, intent(out), optional  :: rc 
 !
 ! !DESCRIPTION:
-!  Call into user provided routine which is responsible for setting
-!  component's VM properties.
+! Optionally call into user provided {\tt routine} which is responsible for
+! for setting Component's VM properties. The named {\tt routine} must exist
+! in the shared object file specified in the {\tt sharedObj} argument.
 !    
-!  The arguments are:
-!  \begin{description}
-!  \item[comp]
-!  Gridded component.
-!  \item[routine]
-!  Routine to be called.
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   Gridded component.
+! \item[routine]
+!   Routine to be called.
 ! \item[{[rc]}]
-!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 !EOPI
@@ -177,9 +265,118 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, comp, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
-    call c_ESMC_SetVM(comp, routine, localrc)
+    call c_ESMC_SetServices(gridcomp, routine, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompSetServicesShObj"
+!BOPI
+! !IROUTINE: ESMF_GridCompSetServices - Call user routine, located in shared object, to register GridComp methods
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_GridCompSetServices()
+  recursive subroutine ESMF_GridCompSetServicesShObj(gridcomp, sharedObj, &
+    routine, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp),     intent(inout)         :: gridcomp
+    character(len=*),        intent(in)            :: sharedObj
+    character(len=*),        intent(in)            :: routine
+    integer,                 intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Call into user provided routine which is responsible for setting
+! Component's Initialize(), Run() and Finalize() services. The named
+! {\tt routine} must exist in the shared object file specified in the
+! {\tt sharedObj} argument.
+!    
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   Gridded Component.
+! \item[sharedObj]
+!   Name of shared object that contains {\tt routine}.
+! \item[routine]
+!   Name of routine to be called.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    ! local vars
+    integer :: localrc                       ! local error status
+
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
+  
+    call c_ESMC_SetServicesShObj(gridcomp, sharedObj, routine, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompSetVM"
+!BOPI
+! !IROUTINE: ESMF_GridCompSetVM - Call user routine to set GridComp VM properies
+!
+! !INTERFACE:
+  recursive subroutine ESMF_GridCompSetVM(gridcomp, routine, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)             :: gridcomp
+    interface
+      subroutine routine(gridcomp, rc)
+        use ESMF_CompMod
+        implicit none
+        type(ESMF_GridComp)         :: gridcomp
+        integer, intent(out)        :: rc
+      end subroutine
+    end interface
+    integer, intent(out), optional  :: rc 
+!
+! !DESCRIPTION:
+! Call into user provided routine which is responsible for setting
+! component's VM properties.
+!    
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   Gridded component.
+! \item[routine]
+!   Routine to be called.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    ! local vars
+    integer :: localrc                       ! local error status
+
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
+  
+    call c_ESMC_SetVM(gridcomp, routine, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -192,7 +389,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetVMShObj"
 !BOPI
-! !IROUTINE: ESMF_GridCompSetVM - Set GridComp VM properties in routine located in shared object
+! !IROUTINE: ESMF_GridCompSetVM - Call user routine, located in shared object, to set GridComp VM properies
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCompSetVM()
@@ -233,173 +430,6 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, comp, rc)
   
     call c_ESMC_SetVMShObj(comp, sharedObj, routine, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCompSetServices"
-!BOPI
-! !IROUTINE: ESMF_GridCompSetServices - Register GridComp interface routines
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_GridCompSetServices()
-  recursive subroutine ESMF_GridCompSetServices(comp, routine, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_GridComp)             :: comp
-    interface
-      subroutine routine(comp, rc)
-        use ESMF_CompMod
-        implicit none
-        type(ESMF_GridComp)         :: comp
-        integer, intent(out)        :: rc
-      end subroutine
-    end interface
-    integer, intent(out), optional  :: rc 
-!
-! !DESCRIPTION:
-!  Call into user provided routine which is responsible for setting
-!  component's Initialize(), Run() and Finalize() services.
-!    
-!  The arguments are:
-!  \begin{description}
-!  \item[comp]
-!  Gridded component.
-!  \item[routine]
-!  Routine to be called.
-! \item[{[rc]}]
-!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    ! local vars
-    integer :: localrc                       ! local error status
-
-    ! Initialize return code; assume failure until success is certain
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, comp, rc)
-  
-    call c_ESMC_SetServices(comp, routine, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCompSetServicesShObj"
-!BOPI
-! !IROUTINE: ESMF_GridCompSetServices - Register GridComp interface routines located in shared object
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_GridCompSetServices()
-  recursive subroutine ESMF_GridCompSetServicesShObj(comp, sharedObj, routine, &
-    rc)
-!
-! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)         :: comp
-    character(len=*),        intent(in)            :: sharedObj
-    character(len=*),        intent(in)            :: routine
-    integer,                 intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call into user provided routine which is responsible for setting
-!  component's Initialize(), Run() and Finalize() services. The named
-!  {\tt routine} must exist in the shared object file specified in the
-!  {\tt sharedObj} argument.
-!    
-!  The arguments are:
-!  \begin{description}
-!  \item[comp]
-!  Gridded component.
-!  \item[sharedObj]
-!  Name of shared object that contains {\tt routine}.
-!  \item[routine]
-!  Name of routine to be called.
-! \item[{[rc]}]
-!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    ! local vars
-    integer :: localrc                       ! local error status
-
-    ! Initialize return code; assume failure until success is certain
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, comp, rc)
-  
-    call c_ESMC_SetServicesShObj(comp, sharedObj, routine, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCompSetEntryPoint"
-!BOPI
-! !IROUTINE: ESMF_GridCompSetEntryPoint
-!
-! !INTERFACE:
-  subroutine ESMF_GridCompSetEntryPoint(comp, stage, routine, phase, rc)
-
-! !ARGUMENTS:
-    use ESMF_CompMod
-    implicit none
-    type(ESMF_GridComp)             :: comp
-    character(*), intent(in)        :: stage
-    interface
-      subroutine routine(comp, importState, exportState, clock, rc)
-        use ESMF_CompMod
-        use ESMF_StateMod
-        use ESMF_ClockMod
-        implicit none
-        type(ESMF_GridComp)         :: comp
-        type(ESMF_State)            :: importState, exportState
-        type(ESMF_Clock)            :: clock
-        integer, intent(out)        :: rc
-      end subroutine
-    end interface
-    integer, intent(in),  optional  :: phase
-    integer, intent(out), optional  :: rc 
-!
-! !DESCRIPTION:
-!  Registers a user-supplied initialization, run, or finalize call-back
-!  routine for a gridded component.
-!EOPI
-!------------------------------------------------------------------------------
-    ! local vars
-    integer :: localrc                       ! local error status
-    integer :: phaseArg
-
-    ! Initialize return code; assume failure until success is certain
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, comp, rc)
-  
-    phaseArg = ESMF_SINGLEPHASE   ! default
-    if (present(phase)) phaseArg = phase
-  
-    call c_ESMC_SetEntryPoint(comp, stage, routine, phaseArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

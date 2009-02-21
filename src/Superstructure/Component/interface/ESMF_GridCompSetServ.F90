@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompSetServ.F90,v 1.16 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_GridCompSetServ.F90,v 1.17 2009/02/21 05:40:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -18,6 +18,7 @@
 !
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_GridCompGetInternalState - Get private data block pointer
 !
@@ -69,74 +70,65 @@
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompSetEntryPoint - Set name of GridComp subroutines
+! !IROUTINE: ESMF_GridCompSetEntryPoint - Set user routine as entry point for standard Component method
 !
 ! !INTERFACE:
-!      subroutine ESMF_GridCompSetEntryPoint(comp, subroutineType, &
-!                                            subroutineName, phase, rc)
+!  subroutine ESMF_GridCompSetEntryPoint(gridcomp, stage, routine, phase, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_GridComp), intent(inout) :: comp
-!      character(len=*), intent(in) :: subroutineType
-!      subroutine, intent(in) :: subroutineName
-!      integer, intent(in) :: phase
-!      integer, intent(out) :: rc
+!    use ESMF_CompMod
+!    type(ESMF_GridComp), intent(in) :: gridcomp
+!    character(*),        intent(in) :: stage
+!    subroutine                      :: routine
+!    integer, intent(in),  optional  :: phase
+!    integer, intent(out), optional  :: rc 
 !
 ! !DESCRIPTION:
-!  Intended to be called by an {\tt ESMF\_GridComp} during its SetServices
-!  routine. An {\tt ESMF\_GridComp} calls {\tt ESMF\_GridCompSetEntryPoint}
-!  for each of the predefined initialize, run, and finalize routines, 
-!  to assocate the internal subroutine to be called for each function. 
-!  If multiple phases for init, run, or finalize are needed, this can be 
-!  called with phase numbers.
-!
-!  After this subroutine returns, the framework knows how to call the
-!  initialize, run, and finalize routines for this component.
+! Registers a user-supplied {\tt routine} as the entry point for one of the
+! predefined Component {\tt stage}s. After this call the {\tt routine} becomes
+! accessible via the standard Component API method for this {\tt stage}.
 !    
-!  The arguments are:
-!  \begin{description}
-!   \item[comp]
-!    An {\tt ESMF\_GridComp} object.
-!   \item[subroutineType]
-!    One of a set of predefined subroutine types - e.g. {\tt ESMF\_SETINIT}, 
-!    {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}.
-!   \item[subroutineName]
-!    The name of the user-supplied {\tt gridcomp} subroutine to be associated with the
-!    {\tt subroutineType}.   This subroutine does not have to be
-!    public to the module.
-!   \item[phase] 
-!    For {\tt ESMF\_GridComp}s which need to initialize or run or finalize 
-!    with mutiple phases, the phase number which 
-!    corresponds to this subroutine name.
-!    For single phase subroutines use the
-!    parameter {\tt ESMF\_SINGLEPHASE}.   The {\tt ESMF\_GridComp} writer 
-!    must document
-!    the requirements of the {\tt ESMF\_GridComp} for how and when 
-!    the multiple phases are expected to be called.
-!   \item[rc] 
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!    Note: unlike most other ESMF routines, this argument is not optional
-!    because of implementation considerations.
-!   \end{description}
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   An {\tt ESMF\_GridComp} object.
+! \item[stage]
+!   One of a set of predefined Component stages - e.g. {\tt ESMF\_SETINIT}, 
+!   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. !!!need to reference here!!!
+! \item[routine]
+!   The user-supplied subroutine to be associated for this {\tt stage}.
+!   This subroutine does not have to be public.
+! \item[{[phase]}] 
+!   The {\tt phase} number for multi-phase stages. For single phase 
+!   stages the {\tt phase} argument can be omitted. The default setting
+!   is {\tt ESMF\_SINGLEPHASE}.
+! \item[{[rc]}] 
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
 !
-! The component writer must supply a subroutine with the exact interface 
-! shown below. Arguments must not be declared as optional, and the types and
-! order must match.
+! The Component writer must supply a subroutine with the exact interface 
+! shown below, including the {\tt intent}. Arguments must not be declared
+! as optional, and the types and order must match.
 !
 ! !INTERFACE:
-!      interface
-!        subroutine subroutineName (comp, importState, exportState, clock, rc)
-!          type(ESMF\_GridComp) :: comp                     ! must not be optional
-!          type(ESMF\_State)    :: importState, exportState ! must not be optional
-!          type(ESMF\_Clock)    :: clock                    ! must not be optional
-!          integer, intent(out) :: rc                       ! must not be optional
-!        end subroutine
-!      end interface
+!   interface
+!     subroutine routine(gridcomp, importState, exportState, clock, rc)
+!       type(ESMF_GridComp)  :: gridcomp     ! must not be optional
+!       type(ESMF_State)     :: importState  ! must not be optional
+!       type(ESMF_State)     :: exportState  ! must not be optional
+!       type(ESMF_Clock)     :: clock        ! must not be optional
+!       integer, intent(out) :: rc           ! must not be optional
+!     end subroutine
+!   end interface
 !
 !EOP
+!------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_GridCompSetInternalState - Set private data block pointer
 !
@@ -178,178 +170,193 @@
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompSetServices - Register GridComp interface routines
+! !IROUTINE: ESMF_GridCompSetServices - Call user routine to register GridComp methods
 !
 ! !INTERFACE:
-!      subroutine ESMF_GridCompSetServices(comp, subroutineName, rc)
+! recursive subroutine ESMF_GridCompSetServices(gridcomp, routine, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_GridComp) :: comp
-!      subroutine :: subroutineName
-!      integer, intent(out) :: rc
+!   type(ESMF_GridComp)             :: gridcomp
+!   subroutine                      :: routine
+!   integer, intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
-!  Call a gridded {\tt ESMF\_GridComp}'s setservices registration routine.  
-!  The parent component must first create an {\tt ESMF\_GridComp}, then
-!  call this routine.  The arguments are the object returned from the create
-!  call, plus the user-supplied, public, well-known subroutine name
-!  that is the registration routine for this {\tt ESMF\_GridComp}. 
-!  This name must be documented by the {\tt ESMF\_GridComp} provider.
-!
-!  After this subroutine returns, the framework knows how to call
-!  the initialize, run, and finalize routines for the {\tt ESMF\_GridComp}.
+! Call into user provided {\tt routine} which is responsible for
+! for setting Component's Initialize(), Run() and Finalize() services.
 !    
-!  The arguments are:
-!  \begin{description}
-!   \item[gridcomp]
-!    An {\tt ESMF\_GridComp} object.
-!   \item[subroutineName]
-!    The public name of the {\tt gridcomp}'s 
-!    {\tt ESMF\_GridCompSetServices} call.  
-!    An {\tt ESMF\_GridComp} writer must provide this information.
-!    Note that this is the actual subroutine, not a character string.
-!   \item[rc] 
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!    Note: unlike most other ESMF routines, this argument is not optional
-!    because of implementation considerations.
-!   \end{description}
-!
-! The component writer must supply a subroutine with the exact interface 
-! shown below. Arguments must not be declared as optional, and the types and
-! order must match.
-!
-! !INTERFACE:
-!      interface
-!        subroutine subroutineName (comp, rc)
-!          type(ESMF\_GridComp) :: comp   ! must not be optional
-!          integer, intent(out) :: rc     ! must not be optional
-!        end subroutine
-!      end interface
-!
-! !DESCRIPTION:
-!  The subroutine, when called by the framework, must make successive calls to
-!  {\tt ESMF\_GridCompSetEntryPoint} to preset callback routines for initialization,
-!  run, and finalization for a coupler component.
-!
-!EOP
-
-!BOP
-! !IROUTINE: ESMF_GridCompSetServices - Register GridComp interface routines located in shared object
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_GridCompSetServices()
-!  recursive subroutine ESMF_GridCompSetServicesLib(comp, sharedObj, routine, rc)
-!
-! !ARGUMENTS:
-!      type(ESMF_GridComp),     intent(inout)         :: comp
-!      character(len=*),        intent(in)            :: sharedObj
-!      character(len=*),        intent(in)            :: routine
-!      integer,                 intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call into user provided routine which is responsible for setting
-!  component's Initialize(), Run() and Finalize() services. The named
-!  {\tt routine} must exist in the shared object file specified in the
-!  {\tt sharedObj} argument.
-!    
-!  The arguments are:
-!  \begin{description}
-!  \item[comp]
-!  Gridded component.
-!  \item[sharedObj]
-!  Name of shared object that contains {\tt routine}.
-!  \item[routine]
-!  Name of routine to be called.
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   Gridded Component.
+! \item[routine]
+!   Routine to be called.
 ! \item[{[rc]}]
-!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
-
-!BOP
-! !IROUTINE: ESMF_GridCompSetVM - Set GridComp VM properties
+! The Component writer must supply a subroutine with the exact interface 
+! shown below, including the {\tt intent}. Arguments must not be declared
+! as optional, and the types and order must match.
 !
 ! !INTERFACE:
-!      subroutine ESMF_GridCompSetVM(comp, subroutineName, rc)
-!
-! !ARGUMENTS:
-!      type(ESMF_GridComp) :: comp
-!      subroutine :: subroutineName
-!      integer, intent(out) :: rc
-!
-! !DESCRIPTION:
-!  Call a {\tt ESMF\_GridComp}'s setVM routine to give the child component
-!  the opportunity to its VM properties.
-!  The parent component must first create an {\tt ESMF\_GridComp}, then
-!  optionally call this routine. The arguments are the object returned from
-!  the create call, plus the user-supplied, public subroutine name
-!  that is the setVM routine for this {\tt ESMF\_GridComp}. 
-!  This name must be documented by the {\tt ESMF\_GridComp} provider.
-!
-!  The arguments are:
-!  \begin{description}
-!   \item[gridcomp]
-!    An {\tt ESMF\_GridComp} object.
-!   \item[subroutineName]
-!    The public name of the {\tt gridcomp}'s setVM call.
-!    An {\tt ESMF\_GridComp} writer must provide this information.
-!    Note that this is the actual subroutine, not a character string.
-!   \item[rc] 
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!    Note: unlike most other ESMF routines, this argument is not optional
-!    because of implementation considerations.
-!   \end{description}
-!
-! The component writer must supply a subroutine with the exact interface 
-! shown below. Arguments must not be declared as optional, and the types and
-! order must match.
-!
-! !INTERFACE:
-!      interface
-!        subroutine subroutineName (comp, rc)
-!          type(ESMF\_GridComp) :: comp   ! must not be optional
-!          integer, intent(out) :: rc     ! must not be optional
-!        end subroutine
-!      end interface
+!   interface
+!     subroutine routine(gridcomp, rc)
+!       type(ESMF_GridComp)  :: gridcomp   ! must not be optional
+!       integer, intent(out) :: rc         ! must not be optional
+!     end subroutine
+!   end interface
 !
 ! !DESCRIPTION:
-!  The subroutine, when called by the framework, is expected to use any of the
-!  {\tt ESMF\_GridCompSetVMxxx()} methods to set the properties of the VM
-!  associated with the gridded component.
+! The {\tt routine}, when called by the framework, must make successive calls to
+! {\tt ESMF\_GridCompSetEntryPoint()} to preset callback routines for standard
+! Component Initialize(), Run() and Finalize() methods.
 !
 !EOP
+!------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompSetVM - Set GridComp VM properties in routine located in shared object
+! !IROUTINE: ESMF_GridCompSetServices - Call user routine, located in shared object, to register GridComp methods
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridCompSetVM()
-!  recursive subroutine ESMF_GridCompSetVMLib(comp, sharedObj, routine, rc)
+! ! Private name; call using ESMF_GridCompSetServices()
+!  recursive subroutine ESMF_GridCompSetServicesShObj(gridcomp, sharedObj, routine, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_GridComp),     intent(inout)         :: comp
-!      character(len=*),        intent(in)            :: sharedObj
-!      character(len=*),        intent(in)            :: routine
-!      integer,                 intent(out), optional :: rc 
+!   type(ESMF_GridComp),     intent(inout)         :: gridcomp
+!   character(len=*),        intent(in)            :: sharedObj
+!   character(len=*),        intent(in)            :: routine
+!   integer,                 intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call into user provided routine which is responsible for setting
-!  component's VM properties. The named
-!  {\tt routine} must exist in the shared object file specified in the
-!  {\tt sharedObj} argument.
+! Call into user provided routine which is responsible for setting
+! Component's Initialize(), Run() and Finalize() services. The named
+! {\tt routine} must exist in the shared object file specified in the
+! {\tt sharedObj} argument.
 !    
-!  The arguments are:
-!  \begin{description}
-!  \item[comp]
-!  Gridded component.
-!  \item[sharedObj]
-!  Name of shared object that contains {\tt routine}.
-!  \item[routine]
-!  Name of routine to be called.
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   Gridded Component.
+! \item[sharedObj]
+!   Name of shared object that contains {\tt routine}.
+! \item[routine]
+!   Name of routine to be called.
 ! \item[{[rc]}]
-!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
+! !INTERFACE:
+!   interface
+!     subroutine routine(gridcomp, rc)
+!       type(ESMF_GridComp)  :: gridcomp   ! must not be optional
+!       integer, intent(out) :: rc         ! must not be optional
+!     end subroutine
+!   end interface
+!
+! !DESCRIPTION:
+! The {\tt routine}, when called by the framework, must make successive calls to
+! {\tt ESMF\_GridCompSetEntryPoint()} to preset callback routines for standard
+! Component Initialize(), Run() and Finalize() methods.
+!
 !EOP
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompSetVM - Call user routine to set GridComp VM properies
+!
+! !INTERFACE:
+! recursive subroutine ESMF_GridCompSetVM(gridcomp, routine, rc)
+!
+! !ARGUMENTS:
+!   type(ESMF_GridComp)             :: gridcomp
+!   subroutine                      :: routine
+!   integer, intent(out), optional  :: rc 
+!
+! !DESCRIPTION:
+! Optionally call into user provided {\tt routine} which is responsible for
+! for setting Component's VM properties. 
+!
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   Gridded Component.
+! \item[routine]
+!   Routine to be called.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+! The Component writer must supply a subroutine with the exact interface 
+! shown below, including the {\tt intent}. Arguments must not be declared
+! as optional, and the types and order must match.
+!
+! !INTERFACE:
+!   interface
+!     subroutine routine(gridcomp, rc)
+!       type(ESMF_GridComp)  :: gridcomp    ! must not be optional
+!       integer, intent(out) :: rc          ! must not be optional
+!     end subroutine
+!   end interface
+!
+! !DESCRIPTION:
+! The subroutine, when called by the framework, is expected to use any of the
+! {\tt ESMF\_GridCompSetVMxxx()} methods to set the properties of the VM
+! associated with the Gridded Component.
+!
+!EOP
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompSetVM - Call user routine, located in shared object, to set GridComp VM properies
+!
+! !INTERFACE:
+! ! Private name; call using ESMF_GridCompSetVM()
+!  recursive subroutine ESMF_GridCompSetVMLib(gridcomp, sharedObj, routine, rc)
+!
+! !ARGUMENTS:
+!   type(ESMF_GridComp),     intent(inout)         :: gridcomp
+!   character(len=*),        intent(in)            :: sharedObj
+!   character(len=*),        intent(in)            :: routine
+!   integer,                 intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Optionally call into user provided {\tt routine} which is responsible for
+! for setting Component's VM properties. The named {\tt routine} must exist
+! in the shared object file specified in the {\tt sharedObj} argument.
+!    
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   Gridded Component.
+! \item[routine]
+!   Routine to be called.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+! The Component writer must supply a subroutine with the exact interface 
+! shown below, including the {\tt intent}. Arguments must not be declared
+! as optional, and the types and order must match.
+!
+! !INTERFACE:
+!   interface
+!     subroutine routine(gridcomp, rc)
+!       type(ESMF_GridComp)  :: gridcomp    ! must not be optional
+!       integer, intent(out) :: rc          ! must not be optional
+!     end subroutine
+!   end interface
+!
+! !DESCRIPTION:
+! The subroutine, when called by the framework, is expected to use any of the
+! {\tt ESMF\_GridCompSetVMxxx()} methods to set the properties of the VM
+! associated with the Gridded Component.
+!
+!EOP
+!------------------------------------------------------------------------------
