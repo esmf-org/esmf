@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.19 2009/01/21 21:38:02 cdeluca Exp $
+% CVS $Id: code_conv_gen.tex,v 1.20 2009/02/23 23:58:34 rokuingh Exp $
 
 \subsection{Docs: Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -201,7 +201,7 @@ a standard format that clearly indicates that the methods are overloaded;
 see {\tt ESMF\_FieldCreate()} for an example.
 
 \item The {\it Reference Manual} shall include for each class a thorough
-sepcification of behavior, including any default values or behaviors.
+specification of behavior, including any default values or behaviors.
 Description of options can reference {\it <Class> Options} sections.
 All descriptions should contain complete sentences with periods,
 e.g. "This method sets invalid values for an {\tt ESMF\_FieldBundle} object."
@@ -362,14 +362,14 @@ The first line of every file in ESMF
   must be its CVS version identification. For example, each \LaTeX
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.19 2009/01/21 21:38:02 cdeluca Exp $ 
+% $Id: code_conv_gen.tex,v 1.20 2009/02/23 23:58:34 rokuingh Exp $ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.19 2009/01/21 21:38:02 cdeluca Exp $'
+character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.20 2009/02/23 23:58:34 rokuingh Exp $'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}

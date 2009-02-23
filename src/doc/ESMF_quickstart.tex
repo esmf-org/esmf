@@ -170,6 +170,9 @@ and you wish to use it, download the corresponding files into the
 SourceForge site {\tt http://sourceforge.net/projects/esmfcontrib} for more 
 information.
 
+\item[ESMF\_ETCDIR]
+If a user wants to add Attribute package specification files for their own customized Attribute packages, this is where they should go.  ESMF will look in this directory for files that specify which Attributes are in an Attribute package for certain ESMF objects, and what the appropriate initial values would be for those Attributes.  The format for these Attribute package specification files is to be defined in a future ESMF release.  This environment variable is largely for internal use at this point. 
+
 \item[ESMF\_INSTALL\_PREFIX]
 This variable specifies the prefix of the installation path used during the
 installation process accessible thought the install target. Libraries, F90
