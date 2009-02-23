@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.97 2008/12/11 19:51:39 w6ws Exp $
+# $Id: makefile,v 1.98 2009/02/23 23:57:40 rokuingh Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -32,7 +32,7 @@ include $(ESMF_DIR)/build/common.mk
 DIRS = src
 
 CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_OBJDIR) $(ESMF_TESTDIR) $(ESMF_EXDIR) \
-	    $(ESMF_BUILD)/src/include
+	    $(ESMF_BUILD)/src/include $(ESMF_ETCDIR)
 CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod $(ESMF_BUILD)/obj \
 	      $(ESMF_BUILD)/test $(ESMF_BUILD)/quick_start \
               $(ESMF_BUILD)/release $(ESMF_BUILD)/examples \
