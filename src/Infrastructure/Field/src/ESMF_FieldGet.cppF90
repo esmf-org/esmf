@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.37 2009/02/19 21:54:47 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.38 2009/02/23 22:15:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.37 2009/02/19 21:54:47 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.38 2009/02/23 22:15:06 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -161,11 +161,17 @@ contains
 ! \item [{[typekind]}]
 !       TypeKind specifier for Field.
 ! \item [{[dimCount]}]
-!       Number of dimensions in {\tt field} data.
+!       Number of geometrical dimensions in {\tt field}.
+!       For an detailed discussion of this parameter, please see 
+!       Section \ref{sec:field:usage:createArbGrid} and
+!       Section \ref{sec:field:usage:createArbGridRep}. 
 ! \item [{[memDimCount]}]
 !       Number of dimensions in the physical memory of the {\tt field} data. It is 
 !       identical to dimCount when the corresponding grid is a non-arbitrary grid.
 !       It is less than dimCount when the grid is arbitrarily distributed.
+!       For an detailed discussion of this parameter, please see 
+!       Section \ref{sec:field:usage:createArbGrid} and
+!       Section \ref{sec:field:usage:createArbGridRep}. 
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
@@ -699,8 +705,6 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! \end{description}
 !EOP
 !------------------------------------------------------------------------------
-    integer :: gridCompLBnd(ESMF_MAXDIM), gridCompUBnd(ESMF_MAXDIM)
-    integer :: gridExclLBnd(ESMF_MAXDIM), gridExclUBnd(ESMF_MAXDIM)
     integer :: gridrank, fieldrank, localrc
     integer :: i, j
     logical :: filled(ESMF_MAXDIM)
@@ -941,39 +945,6 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         deallocate(distgridToPackedArrayMap)
         deallocate(distgridToArrayMap)
     endif
-
-!    ! get grid info 
-!    call ESMF_GeomBaseGetPLocalDE(field%ftypep%geombase, localDe=localDe, & 
-!            computationalLBound=gridCompLBnd, &
-!            computationalUBound=gridCompUBnd, &
-!            exclusiveLBound=gridExclLBnd, &
-!            exclusiveUBound=gridExclUBnd, &
-!            rc=localrc) 
-!
-!
-!    ! fill in Grid bounds 
-!    filled=.false. 
-!    do i=1, gridrank 
-!        if(field%ftypep%gridToFieldMap(i) .gt. 0) then
-!            l_clb(field%ftypep%gridToFieldMap(i)) = gridCompLBnd(i)
-!            l_cub(field%ftypep%gridToFieldMap(i)) = gridCompUBnd(i)
-!            l_elb(field%ftypep%gridToFieldMap(i)) = gridExclLBnd(i) 
-!            l_eub(field%ftypep%gridToFieldMap(i)) = gridExclUBnd(i) 
-!            filled(field%ftypep%gridToFieldMap(i))=.true. 
-!        endif
-!    enddo
-! 
-!    ! fill in ungridded bounds
-!    j=1
-!    do i=1,fieldrank
-!       if (.not. filled(i)) then
-!            l_clb(i) = field%ftypep%ungriddedLBound(j)
-!            l_cub(i) = field%ftypep%ungriddedUBound(j)
-!            l_elb(i) = field%ftypep%ungriddedLBound(j)
-!            l_eub(i) = field%ftypep%ungriddedUBound(j)
-!            j=j+1
-!       endif
-!    enddo
 
     do i = 1, fieldrank 
         l_cc(i) = l_cub(i) - l_clb(i) + 1
