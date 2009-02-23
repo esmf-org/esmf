@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.248 2009/01/12 18:18:56 theurich Exp $
+#  $Id: common.mk,v 1.249 2009/02/23 23:55:28 rokuingh Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -196,6 +196,10 @@ ifndef ESMF_TESTHARNESS
 export ESMF_TESTHARNESS = default
 endif
 
+ifndef ESMF_ETCDIR
+export ESMF_ETCDIR = default
+endif
+
 #-------------------------------------------------------------------------------
 # For some variables having the literal string "default" is ok; 
 # for others, look for this string and override it.
@@ -345,6 +349,10 @@ ifeq ($(ESMF_TESTHARNESS),default)
 export ESMF_TESTHARNESS = NONEXHAUSTIVE
 endif
 
+ifeq ($(ESMF_ETCDIR),default)
+export ESMF_ETCDIR = $(ESMF_BUILD)/src/etc
+endif
+
 #-------------------------------------------------------------------------------
 # If INSTALL environment variables are not set give them default values
 #-------------------------------------------------------------------------------
@@ -408,7 +416,7 @@ endif
 # - the system tests and demos (not sure about the unit tests and examples) 
 # are compiled with the current dir set to the src dir (this is
 # i think because if there are multiple .o files, it gets complicated to make
-# them, get their names to link them, and then remove just them if you're 
+# them, get their names to link them, and then remove just them if you are 
 # working in the test or examples dir - but still, it should be fixed.)
 #-------------------------------------------------------------------------------
 
@@ -1067,6 +1075,11 @@ chkdir_include:
 	  echo Making directory $(ESMF_INCDIR) for include files; \
 	  mkdir -p $(ESMF_INCDIR) ; fi
 
+chkdir_etc:
+	@if [ ! -d $(ESMF_ETCDIR) ]; then \
+	  echo Making directory $(ESMF_ETCDIR) for Attribute package files; \
+	  mkdir -p $(ESMF_ETCDIR) ; fi
+
 chkdir_examples:
 	@if [ ! -d $(ESMF_EXDIR) ]; then \
 	  echo Making directory $(ESMF_EXDIR) for examples output; \
@@ -1169,7 +1182,7 @@ lib: info
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
 	@echo " or the more extensive: $(MAKE) all_tests"
 
-build_libs: chkdir_lib include
+build_libs: chkdir_lib include etc
 	cd $(ESMF_DIR) ; $(MAKE) ACTION=tree_lib tree
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	cd $(ESMF_DIR) ; $(MAKE) defer
@@ -1180,9 +1193,10 @@ ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
 endif
 
 # Build only stuff in and below the current dir.
-build_here: chkdir_lib chkdir_include
+build_here: chkdir_lib chkdir_include chkdir_etc
 	$(MAKE) ACTION=tree_include tree
 	$(MAKE) ACTION=tree_lib tree
+	$(MAKE) ACTION=tree_etc tree
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	$(MAKE) defer
 endif
@@ -1210,11 +1224,24 @@ include: chkdir_include $(if $(findstring ON,$(ESMF_DEFER_LIB_BUILD)),chkdir_lib
 	cd $(ESMF_DIR) ;\
 	$(MAKE) ACTION=tree_include tree
 
-# action for 'tree' target.
+# action for 'tree' include target.
 tree_include:
 	@for hfile in ${STOREH} foo ; do \
 	  if [ $$hfile != "foo" ]; then \
 	    cp -fp ../include/$$hfile $(ESMF_INCDIR) ; \
+	  fi ; \
+	done
+
+# copy private attpack files into src/etc directory.
+etc: chkdir_etc $(if $(findstring ON,$(ESMF_DEFER_LIB_BUILD)),chkdir_lib)
+	cd $(ESMF_DIR) ;\
+	$(MAKE) ACTION=tree_etc tree
+
+# action for 'tree' etc target.
+tree_etc:
+	@for etcfile in ${STOREETC} foo ; do \
+	  if [ $$etcfile != "foo" ]; then \
+	    cp -fp ../etc/$$etcfile $(ESMF_ETCDIR) ; \
 	  fi ; \
 	done
 
