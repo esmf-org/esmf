@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.12 2009/02/03 17:36:15 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.13 2009/02/23 23:56:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.12 2009/02/03 17:36:15 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.13 2009/02/23 23:56:26 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1286,9 +1286,10 @@ contains
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
         else  @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+          localrc = ESMF_FAILURE @\
         endif @\
       endif @\
  @\
@@ -1312,9 +1313,10 @@ contains
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
         else  @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+          localrc = ESMF_FAILURE @\
         endif @\
       endif @\
  @\
@@ -1470,9 +1472,10 @@ contains
         if(present(defaultvalueList)) then @\
           valueList = defaultvalueList @\
         else  @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+          localrc = ESMF_FAILURE @\
         endif @\
       endif @\
  @\
@@ -1495,9 +1498,10 @@ contains
         if(present(defaultvalueList)) then @\
           valueList = defaultvalueList @\
         else  @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+          localrc = ESMF_FAILURE @\
         endif @\
       endif @\
  @\
@@ -1653,9 +1657,10 @@ contains
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
         else  @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+          localrc = ESMF_FAILURE @\
         endif @\
       endif @\
  @\
@@ -1678,9 +1683,10 @@ contains
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
         else  @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+          localrc = ESMF_FAILURE @\
         endif @\
       endif @\
  @\
@@ -1852,9 +1858,10 @@ contains
         if(present(defaultvalueList)) then @\
           valueList = defaultvalueList @\
         else  @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+          localrc = ESMF_FAILURE @\
         endif @\
       endif @\
  @\
@@ -1879,9 +1886,10 @@ contains
         if(present(defaultvalueList)) then @\
           valueList = defaultvalueList @\
         else  @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+          localrc = ESMF_FAILURE @\
         endif @\
       endif @\
  @\
@@ -2028,9 +2036,10 @@ contains
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
         else  @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+          localrc = ESMF_FAILURE @\
         endif @\
       endif @\
  @\
@@ -2051,15 +2060,16 @@ contains
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
         else  @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @\
+                     ESMF_CONTEXT, rc) @\
+          localrc = ESMF_FAILURE @\
         endif @\
       endif @\
  @\
     endif @\
  @\
-      if (present(rc)) rc = ESMF_SUCCESS @\
+      if (present(rc)) rc = localrc @\
  @\
       end subroutine mclass##AttGetChar @\
  @\
@@ -2216,9 +2226,10 @@ contains
           if (present(rc)) rc = ESMF_SUCCESS @\
           return @\
         else  @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+          localrc = ESMF_FAILURE @\
         endif @\
       endif @\
  @\
@@ -2244,9 +2255,10 @@ contains
           if (present(rc)) rc = ESMF_SUCCESS @\
           return @\
         else  @\
-          if(ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                    "Attribute not found, and no default given", & @ \
+                     ESMF_CONTEXT, rc) @\
+          localrc = ESMF_FAILURE @\
         endif @\
       endif @\
  @\
