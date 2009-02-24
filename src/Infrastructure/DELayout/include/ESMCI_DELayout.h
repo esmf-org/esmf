@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.13 2009/01/21 21:37:58 cdeluca Exp $
+// $Id: ESMCI_DELayout.h,v 1.14 2009/02/24 22:25:05 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -187,11 +187,8 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
       int len, ESMC_TypeKind dtk, int rootDE);
     int ESMC_DELayoutGatherV(void *srcdata, void *destdata, 
       int *blen, int *bdestdispl, int rootDE);
-    // InternArrayComm.C uses the following DELayoutComm, so leave it for now
-  public:  
     int ESMC_DELayoutGatherV(void *srcdata, void *destdata, 
       int *blen, int *bdestdispl, ESMC_TypeKind dtk, int rootDE);
-  private:
     int ESMC_DELayoutFindDEtoPET(int npets);
     int ESMC_DELayoutFillLocal(int mypet);        
     
