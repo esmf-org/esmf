@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.19 2009/02/12 05:35:22 theurich Exp $
+! $Id: user_model2.F90,v 1.20 2009/02/24 00:01:59 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -19,6 +19,8 @@ module user_model2
   use ESMF_Mod
 
   implicit none
+  
+  private
     
   public userm2_setvm, userm2_register
   
