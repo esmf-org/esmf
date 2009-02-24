@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.44 2009/02/23 22:15:06 feiliu Exp $ 
+# $Id: makefile,v 1.45 2009/02/24 19:46:09 theurich Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -118,10 +118,10 @@ run_ESMF_FieldRepDimEx_uni:
 #
 # ESMF_FieldRepDimEx
 #
-run_ESMF_FieldRepDimEx:
+run_ESMF_FieldArbGridEx:
 	$(MAKE) EXNAME=FieldArbGrid NP=4 exfrun
 
-run_ESMF_FieldRepDimEx_uni:
+run_ESMF_FieldArbGridEx_uni:
 	$(MAKE) EXNAME=FieldArbGrid NP=1 exfrun
 
 #
