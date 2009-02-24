@@ -1,0 +1,224 @@
+! $Id: ESMF_FieldArbGridEx.F90,v 1.1 2009/02/24 15:00:33 feiliu Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2009, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+!
+    program ESMF_FieldArgGridEx
+
+!------------------------------------------------------------------------------
+!ESMF_EXAMPLE        String used by test script to count examples.
+!==============================================================================
+! !PROGRAM: ESMF_FieldArgGridEx - Field with replicated dimension
+!
+! !DESCRIPTION:
+!
+! This program shows examples of Field with replicated dimension
+!-----------------------------------------------------------------------------
+#include "ESMF.h"
+    ! ESMF Framework module
+    use ESMF_TestMod
+    use ESMF_Mod
+    implicit none
+    
+    type(ESMF_Grid) :: grid3d
+    type(ESMF_VM) :: vm
+    type(ESMF_ArraySpec) :: arrayspec2D
+    integer :: ind1d, xdim, ydim, zdim, total, x, y
+    integer :: i, remain
+    integer :: myPet, petCount, halfPets
+    integer :: localCount
+    integer, allocatable :: localIndices(:,:)
+    integer                 :: finalrc, rc
+    type(ESMF_Field)        :: field
+    logical :: correct
+    integer :: memDimCount, dimCount
+
+!   !Set finalrc to success
+    finalrc = ESMF_SUCCESS
+
+    call ESMF_Initialize(vm=vm, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+    ! Calculate localIndices and localCount for a 100x200 2D arbitrary grid with 
+    ! an optional undistributed 3rd dimenison of size 4
+    ! get global VM
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+    ! grid dimension: xdim and ydim are arbitrarily distributed
+    xdim = 100
+    ydim = 200
+    zdim = 4
+  
+    ! calculate the localcount and the local indices based on the total number of PETS
+    total = xdim*ydim
+    halfPets = petCount/2
+    ! let's make the first half pet twice of the cells of the second half
+    localCount = total/(petCount+halfPets)
+    remain = total-localCount*(petCount+halfPets)
+    if (myPet < halfPets) localCount = localCount*2
+    if (myPet == petCount-1) localCount = localCount+remain
+    ! car deal the cells with the first half of the Pets gets two each time
+    ! the remaining cells are given to the last Pet
+    allocate(localIndices(localCount,2))
+  
+    if (myPet < halfPets) then
+       ind1d = myPet*2
+       do i=1,localCount,2
+         y = mod(ind1d,ydim)+1
+         x = ind1d/ydim+1
+         localIndices(i,1)=y
+         localIndices(i,2)=x
+         if (y<ydim) then
+           localIndices(i+1,1)=y+1
+           localIndices(i+1,2)=x
+         else
+           localIndices(i+1,1)=1
+           localIndices(i+1,2)=x+1
+         endif
+         ind1d = ind1d+petCount+halfPets
+       enddo 
+    else
+       ind1d=myPet+halfPets
+       do i=1,localCount
+         y = mod(ind1d,ydim)+1
+         x = ind1d/ydim+1
+         localIndices(i,1)=y
+         localIndices(i,2)=x
+         ind1d = ind1d+petCount+halfPets
+       enddo
+    endif
+    if (myPet == petCount-1) then
+      ind1d = total-remain+1
+      do i=localCount-remain+1,localCount
+         y = mod(ind1d,ydim)+1
+         x = ind1d/ydim+1
+         localIndices(i,1)=y
+         localIndices(i,2)=x
+         ind1d = ind1d+1
+      enddo
+    endif
+   
+    correct=.true.
+    rc=ESMF_SUCCESS
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Field on arbitrarily distributed Grid}
+!\label{sec:field:usage:createArbGrid}
+!
+!  With the introduction of Field on arbitrarily distributed Grid, Field has two kinds of dimension
+!  count: one associated geometrical (or physical) dimensionality, the other one associated with its
+!  memory index space representation. Field and Grid dimCount reflect the physical index 
+!  space of the objects. A new type of dimCount  memDimCount should be added to both of these entities. 
+!  memDimCount gives the number of dimensions of the memory index space of the objects.
+!  This would be the dimension of the pointer pulled out of Field and the
+!  size of the bounds vector, for example. 
+!
+!  For non-arbitrary Grids memDimCount=dimCount, but for grids and fields with
+!  arbitrary dimensions memDimCount = dimCount - (number of Arb dims) + 1
+!  (Internally Field can use the Arb info from the grid to create the mapping
+!  from the Field Array to the DistGrid)
+!
+!  When creating a Field size(GridToFieldMap)=dimCount for both Arb and Non-arb grids
+!  This array specifies the mapping of Field to Grid identically for both Arb and Nonarb grids 
+!  If a zero occurs in an entry corresponding to any arbitrary dimension, then
+!  a zero must occur in every entry corresponding to an arbitrary dimension (i.e.
+!  all arbitrary dimensions must either be all replicated or all not replicated,
+!  they can't be broken apart).
+!
+!  In this example an {\tt ESMF\_Field} is created from an arbitrarily distributed {\tt ESMF\_Grid} and 
+!  an {\tt ESMF\_Arrayspec}. A user can also use other {\tt ESMF\_FieldCreate()} methods to create 
+!  such a Field, this example illustrates the key concepts and use of Field on arbitrary distributed Grid.
+!  
+!  The Grid is 3 dimensional in physics index space but the first two dimension are collapsed into
+!  a single memory index space. Thus the result Field is 3D in physics index space and 2D in memory index
+!  space. This is made obvious with the 2D arrayspec used to create this Field.
+!
+!EOE
+
+!BOC
+    ! create a 3D grid with the first 2 dimensions collapsed and arbitrarily distributed
+    grid3d = ESMF_GridCreateShapeTile("arb3dgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+      minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
+      localIndices=localIndices,localCount=localCount,rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! create a 2D arrayspec
+    call ESMF_ArraySpecSet(arrayspec2D, rank=2, typekind=ESMF_TYPEKIND_R4, &
+         rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! create a 2D Field using the Grid and the arrayspec
+    field = ESMF_FieldCreate(grid3d, arrayspec2D, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  
+    call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=rc)
+    if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  
+    ! verify that the dimension counts are correct
+    if (memDimCount .ne. 2) correct = .false.
+    if (dimCount .ne. 3) correct = .false.  
+!EOC
+    call ESMF_FieldDestroy(field, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Field on arbitrarily distributed Grid}
+!\label{sec:field:usage:createArbGridRep}
+!
+!  The next example is slightly more complicated than the previous example in
+!  that the Field also contains ungridded dimension and its gridded dimension
+!  is replicated on the arbitrarily distributed dimension of the Grid.
+! 
+!  The same 3D Grid and 2D arrayspec are used but a gridToFieldMap argument
+!  is supplied to the {\tt ESMF\_FieldCreate()} call. The first 2 entries of
+!  the map are 0, the last (3rd) entry is 1. The 3rd dimension of the Grid is
+!  mapped to the first dimension of the Field, this dimension is then replicated
+!  on the arbitrarily distributed dimensions of the Grid. In addition, the
+!  Field also has one ungridded dimension. Thus the final dimension count of the
+!  Field is 2 for both physics index space and memory index space.
+!
+!EOE
+!BOC
+    field = ESMF_FieldCreate(grid3d, arrayspec2D,gridToFieldMap=(/0,0,1/), &
+            ungriddedLBound=(/1/), ungriddedUBound=(/10/),rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  
+    call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=rc)
+    if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  
+    if (memDimCount .ne. 2) correct = .false.
+    if (dimCount .ne. 2) correct = .false.  
+!EOC
+    print *, "Field with replicated dimension returned"
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!-------------------------------------------------------------------------
+     call ESMF_Finalize(rc=rc)
+!-------------------------------------------------------------------------
+
+    if (rc.NE.ESMF_SUCCESS .or. (.not. correct)) finalrc = ESMF_FAILURE
+
+    if (finalrc.EQ.ESMF_SUCCESS) then
+        print *, "PASS: ESMF_FieldArgGridEx.F90"
+    else
+        print *, "FAIL: ESMF_FieldArgGridEx.F90"
+    end if
+end program ESMF_FieldArgGridEx
