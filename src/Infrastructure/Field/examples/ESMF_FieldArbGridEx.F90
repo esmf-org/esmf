@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.1 2009/02/24 15:00:33 feiliu Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.2 2009/02/24 15:31:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -179,20 +179,21 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Field on arbitrarily distributed Grid}
+!\subsubsection{Field on arbitrarily distributed Grid with replicated dimension and ungridded bounds}
 !\label{sec:field:usage:createArbGridRep}
 !
-!  The next example is slightly more complicated than the previous example in
+!  The next example is slightly more complicated in
 !  that the Field also contains ungridded dimension and its gridded dimension
 !  is replicated on the arbitrarily distributed dimension of the Grid.
 ! 
-!  The same 3D Grid and 2D arrayspec are used but a gridToFieldMap argument
+!  The same 3D Grid and 2D arrayspec in the previous example
+!  are used but a gridToFieldMap argument
 !  is supplied to the {\tt ESMF\_FieldCreate()} call. The first 2 entries of
 !  the map are 0, the last (3rd) entry is 1. The 3rd dimension of the Grid is
 !  mapped to the first dimension of the Field, this dimension is then replicated
 !  on the arbitrarily distributed dimensions of the Grid. In addition, the
 !  Field also has one ungridded dimension. Thus the final dimension count of the
-!  Field is 2 for both physics index space and memory index space.
+!  Field is 2 in both physics and memory index space.
 !
 !EOE
 !BOC
