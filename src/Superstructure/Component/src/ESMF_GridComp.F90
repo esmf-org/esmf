@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.111 2009/02/21 05:40:00 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.112 2009/02/24 06:58:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.111 2009/02/21 05:40:00 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.112 2009/02/24 06:58:26 theurich Exp $'
 
 !==============================================================================
 !
@@ -242,9 +242,8 @@ contains
     integer, intent(out), optional  :: rc 
 !
 ! !DESCRIPTION:
-! Optionally call into user provided {\tt routine} which is responsible for
-! for setting Component's VM properties. The named {\tt routine} must exist
-! in the shared object file specified in the {\tt sharedObj} argument.
+! Call into user provided {\tt routine} which is responsible for
+! for setting Component's Initialize(), Run() and Finalize() services.
 !    
 ! The arguments are:
 ! \begin{description}
@@ -284,29 +283,32 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCompSetServices()
-  recursive subroutine ESMF_GridCompSetServicesShObj(gridcomp, sharedObj, &
-    routine, rc)
+  recursive subroutine ESMF_GridCompSetServicesShObj(gridcomp, routine, &
+    sharedObj, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)         :: gridcomp
-    character(len=*),        intent(in)            :: sharedObj
     character(len=*),        intent(in)            :: routine
+    character(len=*),        intent(in),  optional :: sharedObj
     integer,                 intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 ! Call into user provided routine which is responsible for setting
 ! Component's Initialize(), Run() and Finalize() services. The named
 ! {\tt routine} must exist in the shared object file specified in the
-! {\tt sharedObj} argument.
+! {\tt sharedObj} argument. All of the platform specific details about 
+! dynamic linking and loading apply.
 !    
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   Gridded Component.
-! \item[sharedObj]
-!   Name of shared object that contains {\tt routine}.
 ! \item[routine]
 !   Name of routine to be called.
+! \item[{[sharedObj]}]
+!   Name of shared object that contains {\tt routine}. If the {\tt sharedObj}
+!   argument is not provided the executable itself will be searched for
+!   {\tt routine}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -315,6 +317,7 @@ contains
 !------------------------------------------------------------------------------
     ! local vars
     integer :: localrc                       ! local error status
+    character(len=0) :: emptyString
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -322,7 +325,11 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
-    call c_ESMC_SetServicesShObj(gridcomp, sharedObj, routine, localrc)
+    if (present(sharedObj)) then
+      call c_ESMC_SetServicesShObj(gridcomp, routine, sharedObj, localrc)
+    else
+      call c_ESMC_SetServicesShObj(gridcomp, routine, emptyString, localrc)
+    endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -393,43 +400,51 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCompSetVM()
-  recursive subroutine ESMF_GridCompSetVMShObj(comp, sharedObj, routine, rc)
+  recursive subroutine ESMF_GridCompSetVMShObj(gridcomp, routine, sharedObj, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)         :: comp
-    character(len=*),        intent(in)            :: sharedObj
+    type(ESMF_GridComp),     intent(inout)         :: gridcomp
     character(len=*),        intent(in)            :: routine
+    character(len=*),        intent(in),  optional :: sharedObj
     integer,                 intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call into user provided routine which is responsible for setting
-!  component's VM properties. The named {\tt routine} must exist in 
-!  the shared object file specified in the {\tt sharedObj} argument.
+! Optionally call into user provided {\tt routine} which is responsible for
+! for setting Component's VM properties. The named {\tt routine} must exist
+! in the shared object file specified in the {\tt sharedObj} argument. All of
+! the platform specific details about dynamic linking and loading apply.
 !    
-!  The arguments are:
-!  \begin{description}
-!  \item[comp]
-!  Gridded component.
-!  \item[sharedObj]
-!  Name of shared object that contains {\tt routine}.
-!  \item[routine]
-!  Name of routine to be called.
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   Gridded Component.
+! \item[routine]
+!   Routine to be called.
+! \item[{[sharedObj]}]
+!   Name of shared object that contains {\tt routine}. If the {\tt sharedObj}
+!   argument is not provided the executable itself will be searched for
+!   {\tt routine}.
 ! \item[{[rc]}]
-!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
     ! local vars
     integer :: localrc                       ! local error status
-
+    character(len=0) :: emptyString
+    
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, comp, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
-    call c_ESMC_SetVMShObj(comp, sharedObj, routine, localrc)
+    if (present(sharedObj)) then
+      call c_ESMC_SetVMShObj(gridcomp, routine, sharedObj, localrc)
+    else
+      call c_ESMC_SetVMShObj(gridcomp, routine, emptyString, localrc)
+    endif
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

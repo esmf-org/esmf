@@ -1,6 +1,10 @@
-# $Id: makefile,v 1.1 2009/01/12 21:37:47 theurich Exp $ 
+# $Id: makefile,v 1.2 2009/02/24 06:58:26 theurich Exp $ 
 
 LOCAL_SHARED_OBJECTS  = user_model1.so user_coupler.so
+
+# share the symbol table of the main executable to allow dynamic
+# linking against its symbols, too
+ESMF_F90LINKOPTS = -Wl,-export-dynamic
 
 ALL: tree_build_system_tests $(LOCAL_SHARED_OBJECTS)
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.13 2009/02/12 05:30:53 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.14 2009/02/24 06:58:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.13 2009/02/12 05:30:53 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.14 2009/02/24 06:58:26 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -341,9 +341,9 @@ extern "C" {
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setvmshobj"
-  void FTN(c_esmc_setvmshobj)(void *ptr, char *sharedObjArg,
-    char *routineArg, int *rc, 
-    ESMCI_FortranStrLenArg llen, ESMCI_FortranStrLenArg rlen){
+  void FTN(c_esmc_setvmshobj)(void *ptr, char *routineArg, 
+    char *sharedObjArg, int *rc, 
+    ESMCI_FortranStrLenArg rlen, ESMCI_FortranStrLenArg llen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 #ifdef ESMF_NO_DLFCN
@@ -351,16 +351,20 @@ extern "C" {
       "System does not support dynamic loading.", rc);
     return;
 #else
-    string sharedObj(sharedObjArg, llen);
-    string routine(routineArg, rlen);
-    sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
-    routine.resize(routine.find_last_not_of(" ")+1);
-    void *lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
+    void *lib;
+    if (llen>0){
+      string sharedObj(sharedObjArg, llen);
+      sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
+      lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
+    }else
+      lib = dlopen(NULL, RTLD_LAZY);  // search in executable
     if (lib == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
         "shared object not found", rc);
       return;
     }
+    string routine(routineArg, rlen);
+    routine.resize(routine.find_last_not_of(" ")+1);
     void (*func)() = (void (*)())dlsym(lib, routine.c_str());
     if ((void *)func == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
@@ -387,9 +391,9 @@ extern "C" {
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setservicesshobj"
-  void FTN(c_esmc_setservicesshobj)(void *ptr, char *sharedObjArg,
-    char *routineArg, int *rc, 
-    ESMCI_FortranStrLenArg llen, ESMCI_FortranStrLenArg rlen){
+  void FTN(c_esmc_setservicesshobj)(void *ptr, char *routineArg, 
+    char *sharedObjArg, int *rc, 
+    ESMCI_FortranStrLenArg rlen, ESMCI_FortranStrLenArg llen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 #ifdef ESMF_NO_DLFCN
@@ -397,16 +401,20 @@ extern "C" {
       "System does not support dynamic loading.", rc);
     return;
 #else
-    string sharedObj(sharedObjArg, llen);
-    string routine(routineArg, rlen);
-    sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
-    routine.resize(routine.find_last_not_of(" ")+1);
-    void *lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
+    void *lib;
+    if (llen>0){
+      string sharedObj(sharedObjArg, llen);
+      sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
+      lib = dlopen(sharedObj.c_str(), RTLD_LAZY);
+    }else
+      lib = dlopen(NULL, RTLD_LAZY);  // search in executable
     if (lib == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
         "shared object not found", rc);
       return;
     }
+    string routine(routineArg, rlen);
+    routine.resize(routine.find_last_not_of(" ")+1);
     void (*func)() = (void (*)())dlsym(lib, routine.c_str());
     if ((void *)func == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 

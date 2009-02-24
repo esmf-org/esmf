@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3 2009/02/12 05:35:22 theurich Exp $
+! $Id: user_model2.F90,v 1.4 2009/02/24 06:58:26 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -211,3 +211,12 @@ module user_model2
 
 end module user_model2
 !\end{verbatim}
+
+
+subroutine userm2_reg(comp, rc)
+  use ESMF_Mod
+  use user_model2
+  type(ESMF_GridComp) :: comp
+  integer, intent(out) :: rc
+  call userm2_register(comp, rc)
+end subroutine

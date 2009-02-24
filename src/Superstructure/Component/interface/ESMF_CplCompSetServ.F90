@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompSetServ.F90,v 1.18 2009/02/21 05:40:00 theurich Exp $
+! $Id: ESMF_CplCompSetServ.F90,v 1.19 2009/02/24 06:58:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -223,28 +223,31 @@
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_CplCompSetServices()
-!  recursive subroutine ESMF_CplCompSetServicesShObj(cplcomp, sharedObj, routine, rc)
+!  recursive subroutine ESMF_CplCompSetServicesShObj(cplcomp, routine, sharedObj, rc)
 !
 ! !ARGUMENTS:
 !   type(ESMF_CplComp),      intent(inout)         :: cplcomp
-!   character(len=*),        intent(in)            :: sharedObj
 !   character(len=*),        intent(in)            :: routine
+!   character(len=*),        intent(in),  optional :: sharedObj
 !   integer,                 intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 ! Call into user provided routine which is responsible for setting
 ! Component's Initialize(), Run() and Finalize() services. The named
 ! {\tt routine} must exist in the shared object file specified in the
-! {\tt sharedObj} argument.
+! {\tt sharedObj} argument. All of the platform specific details about 
+! dynamic linking and loading apply.
 !    
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
 !   Coupler Component.
-! \item[sharedObj]
-!   Name of shared object that contains {\tt routine}.
 ! \item[routine]
 !   Name of routine to be called.
+! \item[{[sharedObj]}]
+!   Name of shared object that contains {\tt routine}. If the {\tt sharedObj}
+!   argument is not provided the executable itself will be searched for
+!   {\tt routine}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -317,18 +320,19 @@
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_CplCompSetVM()
-!  recursive subroutine ESMF_CplCompSetVMLib(cplcomp, sharedObj, routine, rc)
+!  recursive subroutine ESMF_CplCompSetVMLib(cplcomp, routine, sharedObj, rc)
 !
 ! !ARGUMENTS:
 !   type(ESMF_CplComp),      intent(inout)         :: cplcomp
-!   character(len=*),        intent(in)            :: sharedObj
 !   character(len=*),        intent(in)            :: routine
+!   character(len=*),        intent(in),  optional :: sharedObj
 !   integer,                 intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 ! Optionally call into user provided {\tt routine} which is responsible for
 ! for setting Component's VM properties. The named {\tt routine} must exist
-! in the shared object file specified in the {\tt sharedObj} argument.
+! in the shared object file specified in the {\tt sharedObj} argument. All of
+! the platform specific details about dynamic linking and loading apply.
 !    
 ! The arguments are:
 ! \begin{description}
@@ -336,6 +340,10 @@
 !   Coupler Component.
 ! \item[routine]
 !   Routine to be called.
+! \item[{[sharedObj]}]
+!   Name of shared object that contains {\tt routine}. If the {\tt sharedObj}
+!   argument is not provided the executable itself will be searched for
+!   {\tt routine}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
