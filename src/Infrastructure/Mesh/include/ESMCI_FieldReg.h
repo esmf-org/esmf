@@ -78,7 +78,16 @@ void ReleaseDBFields();
 void Commit(MeshDB &);
 
 UInt NumFields() const { return Fields.size();}
-MEFieldBase **ListOfFields() { return &Fields[0]; }
+MEFieldBase **ListOfFields() { 
+// Note that if Fields is empty, most STLs seem to return a NULL pointer
+// when returning &Fields[0].  However the Microsoft STL aborts the
+// program.  So we need an explicit check here.
+  if (Fields.size() == 0) {
+//    std::cerr << "Mesh::ListOfFields: Warning: Fields.size = 0.  Returning NULL" << std::endl;
+    return NULL;
+  }
+  return &Fields[0];
+}
 
 typedef std::map<std::string, MEField<>*> FMapType;
 typedef Map_Ptr_Adapt_iterator<FMapType, FMapType::const_iterator, MEField<>, const MEField<>&, const MEField<> *> MEField_const_iterator;
