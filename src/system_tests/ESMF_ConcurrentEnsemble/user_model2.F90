@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.2 2009/02/13 00:54:37 theurich Exp $
+! $Id: user_model2.F90,v 1.3 2009/02/25 20:18:33 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -208,7 +208,7 @@ module user_model2
 
     print *, "User Comp2 Final starting"
 
-    call ESMF_StateGet(importState, "array data", array, rc=rc)
+    call ESMF_StateGet(exportState, "array data", array, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArrayGet(array, distgrid=distgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
