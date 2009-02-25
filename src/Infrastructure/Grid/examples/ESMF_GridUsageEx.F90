@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.50 2009/02/04 23:14:15 theurich Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.51 2009/02/25 06:16:13 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -56,6 +56,8 @@ program ESMF_GridCreateEx
       type(ESMF_StaggerLoc) :: staggerloc
       integer :: localPet, petCount
       integer :: lDE,localDECount
+      integer :: xdim, ydim, zdim
+      integer :: ind, localCount, remain
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -78,10 +80,9 @@ program ESMF_GridCreateEx
 ! to create many common grid shapes, including
 ! rectangle, bipole sphere, and tripole sphere. 
 !
-! The {\tt ESMF\_GridCreateShapeTile()} method will eventually support 
-! the three types of distributions described in 
-! Section~\ref{sec:desc:dist}. It currently supports 
-! two of these types: regular and irregular.
+! In v4.0.0, the {\tt ESMF\_GridCreateShapeTile()} method supports 
+! all three types of distributions described in 
+! Section~\ref{sec:desc:dist}: regular, irregular and arbitrary.
 !
 ! The ESMF Grid is cell based and so for all distribution 
 ! options the methods take as input the number of cells to describe
@@ -243,15 +244,19 @@ endif
 
 
 !BOE
-! Arbitrary distribution has not yet been implemented.
-! The design is that the user specifies the global minimum and maximum
+! To create an grid with arbitrary distribution, the user specifies the global minimum and maximum
 ! ranges of the index space with the
-! arguments {\tt minIndex} and {\tt maxIndex}, and through a {\tt localIndices}
-! argument specifies the set of index space locations residing on the local PET.
+! arguments {\tt minIndex} and {\tt maxIndex}, the total number of cells and their index space locations 
+! residing on the local PET through a {\tt localCount} and a {\tt localIndices}
+! argument. {\tt localIndices} is a 2D array with size {\tt (localCount, n)} where n is the total number
+! dimensions distributed arbitrarily.    
 ! Again, if {\tt minIndex} is  not specified, then the bottom of the 
 ! index range is assumed to be (1,1,...). 
 ! The dimension of the Grid is equal to the size of {\tt maxIndex}. 
-!
+! If n (number of arbitrarily distributed dimension) is less than the grid dimension, an optional
+! argument {\tt distDim} is used to specify which of the grid dimension is arbitrarily distributed.
+! If not given, the first n dimensions are assumed to be distributed.
+!  
 ! The following example creates a 2D Grid of dimensions 5x5, and places
 ! the diagonal elements (i.e. indices (i,i) where i goes from 1 to 5)
 ! on the local PET. The remaining PETs would individually declare
@@ -259,27 +264,37 @@ endif
 !EOE
 
 !BOC
-   ! allocate memory for local
-   allocate( localIndices(2,5) )
+   ! allocate memory for localIndices
+   allocate( localIndices(5,2) )
    ! Set local indices
-   localIndices(:,1)=(/1,1/)
-   localIndices(:,2)=(/2,2/)
-   localIndices(:,3)=(/3,3/)
-   localIndices(:,4)=(/4,4/)
-   localIndices(:,5)=(/5,5/)
+   localIndices(1,:)=(/1,1/)
+   localIndices(2,:)=(/2,2/)
+   localIndices(3,:)=(/3,3/)
+   localIndices(4,:)=(/4,4/)
+   localIndices(5,:)=(/5,5/)
 
-   ! Create Grid
-!  grid2D=ESMF_GridCreateShapeTile(maxIndex=(/5,5/), & ! NOT YET IMPLEMENTED
-!         localIndices=localIndices, rc=rc)   
+   ! Create a 2D Arbitrarily distributed Grid
+   grid2D=ESMF_GridCreateShapeTile(maxIndex=(/5,5/), & 
+         localIndices=localIndices, localCount=5, rc=rc)   
 !EOC
+
+!BOE
+!
+! To create a 3D Grid of dimensions 5x6x5 with the first and the third dimensions distributed arbitrarily,
+! {\tt distDim} is used.
+!EOE
+
+!BOC
+   ! Create a 3D Grid with the 1st and 3rd dimension arbitrarily distributed
+   grid3D=ESMF_GridCreateShapeTile(maxIndex=(/5,6,5/), & 
+         localIndices=localIndices, localCount=5, distDim=(/1,3/), rc=rc)   
 
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
-!   call ESMF_GridDestroy(grid2D, rc=rc)
-   deallocate( localIndices )
-
-
+   call ESMF_GridDestroy(grid2D, rc=rc)
+   call ESMF_GridDestroy(grid3D, rc=rc)
+   deallocate(localIndices)
 
 !
 
@@ -829,6 +844,141 @@ endif
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid3D, rc=rc)
 
+!BOE
+!\subsubsection{Creating an Arbitrarily Distributed Rectilinear Grid with
+!                a Non-Distributed Vertical Dimension}
+! \label{example:ArbGridWithUndistDim}
+!
+! There are more restrictions in defining an arbitrarily distributed grid.  
+! First, there is always one DE per PET.  Secondly, only local index (ESMF_INDEX_LOCAL)
+! is supported. Third, only one stagger location, i.e. ESMF_STAGGERLOC_CENTER is allowed
+! and last there is no extra paddings on the edge of the grid.  
+!
+! This example demonstrates how a user can build a 3D grid with its rectilinear 
+! horizontal Grid distributed arbitrarily and a non-distributed vertical dimension.
+!
+!EOE
+
+!BOC
+   !-------------------------------------------------------------------
+   ! Set up the local index array:  Assuming the grid is 360x180x10.  First
+   ! calculate the localCount and localIndices array for each PET based on
+   ! the total number of PETS. The cells are evenly distributed in all the
+   ! PETs. If the total number of cells are not divisible by the total PETs, 
+   ! the remaining cells are assigned to the last PET.  The cells are card 
+   ! dealed to each PET in y dimension first, i.e. (1,1) -> PET 0, (1,2)->
+   ! PET 1, (1,3)-> PET 2, and so forth.  
+   !-------------------------------------------------------------------
+   xdim = 360
+   ydim = 180
+   zdim = 10
+   localCount = (xdim*ydim)/petCount
+   remain = (xdim*ydim)-localCount*petCount
+   if (localPet == petCount-1) localCount = localCount+remain
+
+   allocate(localIndices(localCount,2))
+   ind = localPet
+   do i=1, localCount
+      localIndices(i,1)=mod(ind,ydim)+1
+      localIndices(i,2)=ind/ydim + 1
+      ind = ind + petCount
+   enddo
+   if (localPet == petCount-1) then
+      ind = xdim*ydim-remain+1
+      do i=localCount-remain+1,localCount
+         localIndices(i,1)=mod(ind,ydim)+1
+         localIndices(i,2)=ind/ydim+1
+         ind = ind + 1
+      enddo
+   endif
+
+   print *, 'localCount, remain', localCount, remain
+   !-------------------------------------------------------------------
+   ! Create the Grid:  Allocate space for the Grid object.  
+   ! the minIndex hasn't been set, so it defaults to (1,1,...). The
+   ! default coordDep1 and coordDep2 are (/ESMF_GRID_ARBDIM/) where 
+   ! ESMF_GRID_ARBDIM represents the collapsed dimension for the 
+   ! arbitrarily distributed grid dimensions.  For the undistributed
+   ! grid dimension, the default value for coordDep3 is (/3/).  The
+   ! default values for coordDepX in the arbitrary distribution are
+   ! different from the non-arbitrary distributions.
+   !-------------------------------------------------------------------
+   grid3D=ESMF_GridCreateShapeTile( &
+	    maxIndex = (/xdim, ydim, zdim/), &
+            localIndices = localIndices, &
+            localCount = localCount, &
+            rc=rc)
+
+   print *, 'created arb grid 1'
+   !-------------------------------------------------------------------
+   ! Allocate coordinate storage for the center stagger location, the 
+   ! only stagger location supported for the arbitrary distribution  
+   !-------------------------------------------------------------------
+   call ESMF_GridAddCoord(grid3D, &
+          staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=rc)
+
+   !------------------------------------------------------------------
+   ! Fill in the coordinates for the center stagger location. There is
+   ! always one DE per PET, so localDE is always 0
+   !------------------------------------------------------------------
+   call ESMF_GridGetCoord(grid3D, coordDim=1, localDE=0, &
+          staggerLoc=ESMF_STAGGERLOC_CENTER,       &
+          computationalLBound=lbnd,                 &
+          computationalUBound=ubnd,                 &
+          fptr=centerX, rc=rc)
+
+   print *, 'x gridcoord bound', lbnd(1), ubnd(1)
+
+   !----------------------------------------------------------------
+   ! Calculate and set coordinates in the first dimension.
+   !----------------------------------------------------------------
+   do i=lbnd(1),ubnd(1)
+      centerX(i) = (localIndices(i,1)-0.5)*(360.0/xdim)
+   enddo
+
+
+   !----------------------------------------------------------------
+   ! Get the local bounds of the global indexing for the second
+   ! coordinate array on the local DE, and the pointer to the array.
+   !----------------------------------------------------------------
+   call ESMF_GridGetCoord(grid3D, coordDim=2, localDE=0,    &
+          staggerloc=ESMF_STAGGERLOC_CENTER,                  &
+          computationalLBound=lbnd, computationalUBound=ubnd, &
+          fptr=centerY, rc=rc)
+
+   print *, 'y gridcoord bound', lbnd(1), ubnd(1)
+
+   !----------------------------------------------------------------
+   ! Calculate and set coordinates in the second dimension.
+   !----------------------------------------------------------------
+   do j=lbnd(1),ubnd(1)
+      centerY(j) = (localIndices(j,2)-0.5)*(180.0/ydim)-90.0 
+   enddo
+
+   !----------------------------------------------------------------
+   ! Get the local bounds of the global indexing for the third
+   ! coordinate array on the local DE, and the pointer to the array.
+   !----------------------------------------------------------------
+   call ESMF_GridGetCoord(grid3D, coordDim=3, localDE=0,   &
+          staggerloc=ESMF_STAGGERLOC_CENTER,               &
+          computationalLBound=lbnd, computationalUBound=ubnd,&
+          fptr=centerZ, rc=rc)
+
+   print *, 'z gridcoord bound', lbnd(1), ubnd(1)
+
+   !----------------------------------------------------------------
+   ! Calculate and set the vertical coordinates
+   !----------------------------------------------------------------
+   do k=lbnd(1),ubnd(1)
+      centerZ(k) = 4000.0*( (1./zdim)*(k-1))**2
+   enddo
+
+!EOC
+   !-------------------------------------------------------------------
+   ! Clean up to prepare for the next example.
+   !-------------------------------------------------------------------
+   call ESMF_GridDestroy(grid3D, rc=rc)
+
 
 !BOE
 !\subsubsection{Creating an Empty Grid in a Parent Component 
@@ -980,6 +1130,10 @@ endif
    call ESMF_DistGridDestroy(distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+!BOE
+! Note only the center stagger location ESMF_STAGGERLOC_CENTER is supported in the arbitrarily
+! distributed grid.
+!EOE
 
 #ifdef LOCAL_NOT_IMPL
 !BOEI
@@ -1011,11 +1165,11 @@ endif
 ! the corresponding coordinate dimension
 ! maps to.  For example, {\tt coordDep1=(/1,2/)} means that
 ! the first dimension of coordinate 1 maps to index
-! dimension 1 and the second maps to index dimension 2. If
-! the {\tt coordDep} arrays are not specified, 
-! then {\tt coordDep1} defaults to {/1,2..,gridDimCount/}.  This default
+! dimension 1 and the second maps to index dimension 2. 
+! For a grid with non-arbitrary distribution, the default
+! values for {\tt coordDep1}, {\tt coordDep2} and {\tt coordDep3}
+! are {\tt /1,2..,gridDimCount/}.  This default  
 ! thus specifies a curvilinear grid.  
-!
 !
 ! The following call demonstrates the creation of a
 ! 10x20 2D rectilinear grid where the first coordinate
@@ -1071,13 +1225,62 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!
 call ESMF_GridDestroy(grid2D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+!BOE
+! For an arbitrarily distributed grid, the default value of a coordinate
+! array dimension is {\tt /ESMF_GRID_ARBDIM/} if the index dimension is arbitrarily
+! distributed and is {\tt n} where n is the index dimension itself when it is not
+! distributed. The following call is equivalent to the example in 
+! Section~\ref{example:ArbGridWithUndistDim} 
+!EOE
+
+   print *, 'Before using ESMF_GRID_ARBDIM'
+!BOC
+   grid3D=ESMF_GridCreateShapeTile( &
+	    maxIndex = (/xdim, ydim, zdim/), &
+            localIndices = localIndices, &
+            localCount = localCount,	 &
+ 	    coordDep1 = (/ESMF_GRID_ARBDIM/), &
+	    coordDep2 = (/ESMF_GRID_ARBDIM/), &
+	    coordDep3 = (/3/), &
+            rc=rc)
+!EOC 
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+call ESMF_GridDestroy(grid3D,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! The following call uses non-default {\tt coordDep1}, {\tt coordDep2}, 
+! and {\tt coordDep3} to create a 3D curvilinear grid with its horizontal
+! dimensions arbitrarily distributed. 
+!EOE
+
+   print *, 'Before using /ESMF_GRID_ARBDIM,3/'
+
+!BOC
+   grid3D=ESMF_GridCreateShapeTile( &
+	    maxIndex = (/xdim, ydim, zdim/), &
+            localIndices = localIndices, &
+            localCount = localCount,	 &
+ 	    coordDep1 = (/ESMF_GRID_ARBDIM, 3/), &
+	    coordDep2 = (/ESMF_GRID_ARBDIM, 3/), &
+	    coordDep3 = (/ESMF_GRID_ARBDIM, 3/), &
+            rc=rc)
+!EOC 
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+call ESMF_GridDestroy(grid3D,rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
 !\subsubsection{Accessing Grid Coordinates}
