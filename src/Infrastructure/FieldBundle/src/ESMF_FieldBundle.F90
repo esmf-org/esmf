@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.15 2009/02/16 19:14:31 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.16 2009/02/25 00:11:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -41,10 +41,8 @@
       use ESMF_VMMod
       use ESMF_LogErrMod
       use ESMF_IOSpecMod
-      use ESMF_InternArrayDataMapMod
       use ESMF_StaggerLocMod
       use ESMF_GridMod
-      use ESMF_InternArrayMod
       use ESMF_FieldMod
       use ESMF_FieldCreateMod
       use ESMF_FieldGetMod
@@ -94,7 +92,7 @@
       type ESMF_LocalFieldBundle
       sequence
       !private
-        type(ESMF_InternArray) :: packed_data               ! local packed array
+!        type(ESMF_InternArray) :: packed_data               ! local packed array
         type(ESMF_Status) :: gridstatus
         type(ESMF_Status) :: arraystatus
         integer :: accesscount
@@ -969,7 +967,7 @@ end function
       type(ESMF_FieldBundleCongrntData) :: pattern    ! values to compare against
       type(ESMF_FieldBundleCongrntData) :: candidate  ! values being compared
       type(ESMF_Field), pointer :: fieldp
-      type(ESMF_InternArray) :: array
+!      type(ESMF_InternArray) :: array
 !      type(ESMF_FieldDataMap) :: datamap
 
       ! Initialize return code; assume routine not implemented
@@ -1763,11 +1761,13 @@ end function
 ! !IROUTINE: ESMF_FieldBundleWrite - Save a FieldBundle to an external destination
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleWrite(bundle, subarray, iospec, rc)
+      subroutine ESMF_FieldBundleWrite(bundle, &
+      iospec, rc)
+      !subarray, 
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: bundle
-      type(ESMF_InternArray), pointer, optional :: subarray
+!      type(ESMF_InternArray), pointer, optional :: subarray
       type(ESMF_IOSpec), intent(in), optional :: iospec 
       integer, intent(out), optional :: rc
 !

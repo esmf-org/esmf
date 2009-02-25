@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.66 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_StateUTest.F90,v 1.67 2009/02/25 00:11:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.66 2009/01/21 21:38:02 cdeluca Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.67 2009/02/25 00:11:52 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -152,10 +152,7 @@
       !------------------------------------------------------------------------
       !EX______UTest 
       ! This test is commented out until bug 1707501 
-      ! is resolved.  The failure was on an InternArray object,
-      ! which was switched over to new Array in 10/07.   
-      ! The code to create and destroy the InternArray prior to 
-      ! this test was deleted.  To reinstate this test the code
+      ! is resolved. To reinstate this test the code
       ! to create and destroy an Array before this test needs to
       ! be restored.
       ! 

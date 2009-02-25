@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.hcppF90,v 1.10 2009/01/21 21:38:00 cdeluca Exp $
+! $Id: ESMF_LocalArrayMacros.hcppF90,v 1.11 2009/02/25 00:11:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -683,11 +683,11 @@
  @\
       ! Allocate a new buffer if requested and return a copy @\
       if (copyreq) then @\
-        call c_ESMC_IArrayGetLbounds(larray, mrank, lb, localrc) @\
+        call c_ESMC_LocalArrayGetLbounds(larray, mrank, lb, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
-        call c_ESMC_IArrayGetUbounds(larray, mrank, ub, localrc) @\
+        call c_ESMC_LocalArrayGetUbounds(larray, mrank, ub, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
@@ -800,11 +800,11 @@
         ESMF_CONTEXT, rc)) return @\
  @\
       ! Allocate a new buffer and return a copy @\
-      call c_ESMC_IArrayGetLbounds(arrayIn, mrank, lb, localrc) @\
+      call c_ESMC_LocalArrayGetLbounds(arrayIn, mrank, lb, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
-      call c_ESMC_IArrayGetUbounds(arrayIn, mrank, ub, localrc) @\
+      call c_ESMC_LocalArrayGetUbounds(arrayIn, mrank, ub, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
