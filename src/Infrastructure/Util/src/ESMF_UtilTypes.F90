@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.74 2009/02/25 05:30:52 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.75 2009/02/25 06:36:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -232,7 +232,6 @@
          ESMF_ID_DELAYOUT = ESMF_ObjectID(13, "ESMF_DELayout"), &
          ESMF_ID_CONFIG = ESMF_ObjectID(14, "ESMF_Config"), &
          ESMF_ID_ARRAY = ESMF_ObjectID(16, "ESMF_Array"), &
-         ESMF_ID_INTERNDG = ESMF_ObjectID(17, "ESMF_InternDG"), &
          ESMF_ID_COMMTABLE = ESMF_ObjectID(21, "ESMF_CommTable"), &
          ESMF_ID_ROUTETABLE = ESMF_ObjectID(22, "ESMF_RouteTable"), &
          ESMF_ID_ROUTE = ESMF_ObjectID(23, "ESMF_Route"), &
@@ -247,7 +246,6 @@
          ESMF_ID_GRIDCOMPONENT = ESMF_ObjectID(33, "ESMF_GridComponent"), &
          ESMF_ID_CPLCOMPONENT = ESMF_ObjectID(34, "ESMF_CplComponent"), &
          ESMF_ID_COMPONENT = ESMF_ObjectID(35, "ESMF_Component"), &
-         ESMF_ID_INTERNARRAY = ESMF_ObjectID(36, "ESMF_InternArray"), &
          ESMF_ID_NONE = ESMF_ObjectID(99, "ESMF_None")
 
 
@@ -635,7 +633,6 @@
       public ESMF_ID_CLOCK, ESMF_ID_ARRAYSPEC, ESMF_ID_LOCALARRAY
       public ESMF_ID_ARRAYBUNDLE, ESMF_ID_VM, ESMF_ID_DELAYOUT
       public ESMF_ID_CONFIG, ESMF_ID_ARRAY
-      public ESMF_ID_INTERNARRAY, ESMF_ID_INTERNDG
       public ESMF_ID_COMMTABLE, ESMF_ID_ROUTETABLE, ESMF_ID_ROUTE
       public ESMF_ID_ROUTEHANDLE, ESMF_ID_FIELDDATAMAP, ESMF_ID_FIELD
       public ESMF_ID_FIELDBUNDLE, ESMF_ID_TRANSFORMVALUES
