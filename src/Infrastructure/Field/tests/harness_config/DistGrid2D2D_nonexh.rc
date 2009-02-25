@@ -1,0 +1,66 @@
+#######################################################################################
+#
+#  NONEXHAUSTIVE DistGrid Specifier for 2D to 2D remapping
+#          reduced configuration for running with two PE
+#
+#######################################################################################
+#
+#
+#                       Block Decomposition Specifier File
+# This resource file specifies the block or block-cyclic memory distribution of memory in 
+# terms of either fixed values or as a function of the total number of PETs. This functionality
+# allows automatic scaling of the distribution space as a function of the machine resources.
+#
+# For all tests, both a source and destination decomposition is required. The specification 
+# syntax consists of a collection of entries which specify a pair of distributions in terms 
+# of either absolute distribution sizes, or relative sizes in terms of the total number of PETs.
+# Entries:
+# 1. descriptive string (enclosed by quote marks ')
+# 2. tag indicating source specifiers  (enclosed by quote marks ')
+# 3. rank of the source distribution (integer)
+# 4. source specifiers for each dimension of the distribution  (operators enclosed by quote 
+#    marks ', and values are real numbers)
+# 5. tag indicating destination specifiers  (enclosed by quote marks ')
+# 6. rank of the destination distribution (integer)
+# 7. destination specifiers for each dimension of the distribution  (operators enclosed by 
+#    quote marks ', and values are real numbers)
+# 8. end tag  (enclosed by quote marks ')
+#
+# Specifier Syntax:
+# - to set the distribution dimension to a set value: ==
+# - to set the distribution dimension to a scalar multiple of the base dimension size: =*
+# - to set the distribution dimension to a value plus a constant: =+
+# Note: The product of all the base dimension sizes is equal to NPETS.
+#
+# Examples:
+# A. 2x3 distribution redistributed to a 3x2 distribution
+#    '(2,3)-->(3,2)'  'SRC' 2  'D1==' 2  'D2==' 3  'DST' 2  'D1==' 3  'D2==' 2  'END'  
+# B. 1xNPETS distribution redistributed to a 2*sqrt(NPETS) X (1/2)*sqrt(NPETS) distribution 
+#    '(1,n)-->(2*m,m/2)'  'SRC' 2  'D1==' 1  'D2=*' 1  'DST' 2  'D1=*' 2  'D2=*' 0.5  'END'  
+# C. 1x2*NPETS distribution redistributed to a 2*sqrt(NPETS)-1 X (1/2)*sqrt(NPETS) distribution 
+#    '(1,2*n)-->((2*m)-1,m/2)' 'SRC' 2 'D1==' 1 'D2=*' 2 'DST' 2 'D1=*' 2 'D1=+' -1 'D2=*' 0.5 'END'  
+# D. 1xNPETS distribution redistributed to a 2*sqrt(NPETS) X (1/2)*sqrt(NPETS) distribution 
+#    '(1,n)-->(2*(m-1),m/2)' 'SRC' 2 'D1==' 1 'D2=*' 1 'DST' 2 'D1=+'-1 'D1=*' 2 'D2=*' 0.5 'END'  
+#  NOTE: the order of the operators is important
+
+##################################################
+# descriptive | source | source | operator | destination | dest | operator | end
+# string      |  tag   |  rank  |  & value |     tag     | rank | & value  | tag
+##################################################
+
+# table specifing 2D to 2D distributions
+distgrid_block_2d2d::
+
+# fixed distribution sizes
+ '(1,1)-->(1,1)'      'SRC' 2  'D1==' 1  'D2==' 1     'DST' 2  'D1==' 1    'D2==' 1  'END'  
+
+# 1x1 to 1D distribution (DEs = PETS)
+ '(1,1)-->(1,n)'      'SRC' 2  'D1==' 1  'D2==' 1     'DST' 2  'D1==' 1    'D2=*' 1  'END'  
+
+# 1x1 to 1D distribution (DEs > PETS)
+ '(1,1)-->(1,2*n)'    'SRC' 2  'D1==' 1  'D2==' 1     'DST' 2  'D1==' 1    'D2=*' 2  'END'  
+
+# 1D to 1D distribution (DEs = PETS)
+ '(1,n)-->(1,n)'      'SRC' 2  'D1==' 1  'D2=*' 1     'DST' 2  'D1==' 1    'D2=*' 1  'END'  
+::
+
