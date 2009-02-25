@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.100 2009/02/24 06:58:26 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.101 2009/02/25 23:01:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.100 2009/02/24 06:58:26 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.101 2009/02/25 23:01:21 theurich Exp $'
 
 !==============================================================================
 !
@@ -128,327 +128,6 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompSetEntryPoint"
-!BOPI
-! !IROUTINE: ESMF_CplCompSetEntryPoint - Set user routine as entry point for standard Component method
-!
-! !INTERFACE:
-  subroutine ESMF_CplCompSetEntryPoint(cplcomp, stage, routine, phase, rc)
-
-! !ARGUMENTS:
-    type(ESMF_CplComp), intent (in) :: cplcomp
-    character(*),       intent(in)  :: stage
-    interface
-      subroutine routine(cplcomp, importState, exportState, clock, rc)
-        use ESMF_CompMod
-        use ESMF_StateMod
-        use ESMF_ClockMod
-        implicit none
-        type(ESMF_CplComp)          :: cplcomp
-        type(ESMF_State)            :: importState
-        type(ESMF_State)            :: exportState
-        type(ESMF_Clock)            :: clock
-        integer, intent(out)        :: rc
-      end subroutine
-    end interface
-    integer, intent(in),  optional  :: phase
-    integer, intent(out), optional  :: rc 
-!
-! !DESCRIPTION:
-! Registers a user-supplied {\tt routine} as the entry point for one of the
-! predefined Component {\tt stage}s. After this call the {\tt routine} becomes
-! accessible via the standard Component API method for this {\tt stage}.
-!    
-! The arguments are:
-! \begin{description}
-! \item[cplcomp]
-!   An {\tt ESMF\_CplComp} object.
-! \item[stage]
-!   One of a set of predefined Component stages - e.g. {\tt ESMF\_SETINIT}, 
-!   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. !!!need to reference here!!!
-! \item[routine]
-!   The user-supplied subroutine to be associated for this {\tt stage}.
-!   This subroutine does not have to be public.
-! \item[{[phase]}] 
-!   The {\tt phase} number for multi-phase stages. For single phase 
-!   stages the {\tt phase} argument can be omitted. The default setting
-!   is {\tt ESMF\_SINGLEPHASE}.
-! \item[{[rc]}]
-!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-! The Component writer must supply a subroutine with the exact interface 
-! shown below, including the {\tt intent}. Arguments must not be declared
-! as optional, and the types and order must match.
-!
-! !INTERFACE:
-!   interface
-!     subroutine routine(cplcomp, importState, exportState, clock, rc)
-!       type(ESMF_CplComp )  :: cplcomp      ! must not be optional
-!       type(ESMF_State)     :: importState  ! must not be optional
-!       type(ESMF_State)     :: exportState  ! must not be optional
-!       type(ESMF_Clock)     :: clock        ! must not be optional
-!       integer, intent(out) :: rc           ! must not be optional
-!     end subroutine
-!   end interface
-!
-!EOPI
-!------------------------------------------------------------------------------
-    ! local vars
-    integer :: localrc                       ! local error status
-    integer :: phaseArg
-
-    ! Initialize return code; assume failure until success is certain
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
-  
-    phaseArg = ESMF_SINGLEPHASE   ! default
-    if (present(phase)) phaseArg = phase
-  
-    call c_ESMC_SetEntryPoint(cplcomp, stage, routine, phaseArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompSetServices"
-!BOPI
-! !IROUTINE: ESMF_CplCompSetServices - Call user routine to register CplComp methods
-!
-! !INTERFACE:
-  recursive subroutine ESMF_CplCompSetServices(cplcomp, routine, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_CplComp)              :: cplcomp
-    interface
-      subroutine routine(cplcomp, rc)
-        use ESMF_CompMod
-        implicit none
-        type(ESMF_CplComp)          :: cplcomp
-        integer, intent(out)        :: rc
-      end subroutine
-    end interface
-    integer, intent(out), optional  :: rc 
-!
-! !DESCRIPTION:
-! Call into user provided {\tt routine} which is responsible for
-! for setting Component's Initialize(), Run() and Finalize() services.
-!    
-! The arguments are:
-! \begin{description}
-! \item[cplcomp]
-!   Coupler Component.
-! \item[routine]
-!   Routine to be called.
-! \item[{[rc]}]
-!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    ! local vars
-    integer :: localrc                       ! local error status
-
-    ! Initialize return code; assume failure until success is certain
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
-  
-    call c_ESMC_SetServices(cplcomp, routine, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompSetServicesShObj"
-!BOPI
-! !IROUTINE: ESMF_CplCompSetServices - Call user routine, located in shared object, to register CplComp methods
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_CplCompSetServices()
-  recursive subroutine ESMF_CplCompSetServicesShObj(cplcomp, routine, &
-    sharedObj, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_CplComp),      intent(inout)         :: cplcomp
-    character(len=*),        intent(in)            :: routine
-    character(len=*),        intent(in),  optional :: sharedObj
-    integer,                 intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-! Call into user provided routine which is responsible for setting
-! Component's Initialize(), Run() and Finalize() services. The named
-! {\tt routine} must exist in the shared object file specified in the
-! {\tt sharedObj} argument. All of the platform specific details about 
-! dynamic linking and loading apply.
-!    
-! The arguments are:
-! \begin{description}
-! \item[cplcomp]
-!   Coupler Component.
-! \item[routine]
-!   Name of routine to be called.
-! \item[{[sharedObj]}]
-!   Name of shared object that contains {\tt routine}. If the {\tt sharedObj}
-!   argument is not provided the executable itself will be searched for
-!   {\tt routine}.
-! \item[{[rc]}]
-!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    ! local vars
-    integer :: localrc                       ! local error status
-    character(len=0) :: emptyString
-
-    ! Initialize return code; assume failure until success is certain
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
-  
-    if (present(sharedObj)) then
-      call c_ESMC_SetServicesShObj(cplcomp, routine, sharedObj, localrc)
-    else
-      call c_ESMC_SetServicesShObj(cplcomp, routine, emptyString, localrc)
-    endif
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompSetVM"
-!BOPI
-! !IROUTINE: ESMF_CplCompSetVM - Call user routine to set CplComp VM properies
-!
-! !INTERFACE:
-  recursive subroutine ESMF_CplCompSetVM(cplcomp, routine, rc)
-! !ARGUMENTS:
-    type(ESMF_CplComp)              :: cplcomp
-    interface
-      subroutine routine(cplcomp, rc)
-        use ESMF_CompMod
-        implicit none
-        type(ESMF_CplComp)          :: cplcomp
-        integer, intent(out)        :: rc
-      end subroutine
-    end interface
-    integer, intent(out), optional  :: rc 
-!
-! !DESCRIPTION:
-! Optionally call into user provided {\tt routine} which is responsible for
-! for setting Component's VM properties. 
-!
-! The arguments are:
-! \begin{description}
-! \item[cplcomp]
-!   Coupler Component.
-! \item[routine]
-!   Routine to be called.
-! \item[{[rc]}]
-!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    ! local vars
-    integer :: localrc                       ! local error status
-
-    ! Initialize return code; assume failure until success is certain
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
-  
-    call c_ESMC_SetVM(cplcomp, routine, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompSetVMShObj"
-!BOPI
-! !IROUTINE: ESMF_CplCompSetVM - Set CplComp VM properties in routine located in shared object
-! !INTERFACE:
-  ! Private name; call using ESMF_CplCompSetVM()
-  recursive subroutine ESMF_CplCompSetVMShObj(cplcomp, routine, sharedObj, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_CplComp),      intent(inout)         :: cplcomp
-    character(len=*),        intent(in)            :: routine
-    character(len=*),        intent(in),  optional :: sharedObj
-    integer,                 intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-! Optionally call into user provided {\tt routine} which is responsible for
-! for setting Component's VM properties. The named {\tt routine} must exist
-! in the shared object file specified in the {\tt sharedObj} argument. All of
-! the platform specific details about dynamic linking and loading apply.
-!    
-! The arguments are:
-! \begin{description}
-! \item[cplcomp]
-!   Coupler Component.
-! \item[routine]
-!   Routine to be called.
-! \item[{[sharedObj]}]
-!   Name of shared object that contains {\tt routine}. If the {\tt sharedObj}
-!   argument is not provided the executable itself will be searched for
-!   {\tt routine}.
-! \item[{[rc]}]
-!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    ! local vars
-    integer :: localrc                       ! local error status
-    character(len=0) :: emptyString
-
-    ! Initialize return code; assume failure until success is certain
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
-  
-    if (present(sharedObj)) then
-      call c_ESMC_SetVMShObj(cplcomp, routine, sharedObj, localrc)
-    else
-      call c_ESMC_SetVMShObj(cplcomp, routine, emptyString, localrc)
-    endif
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
-!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -820,6 +499,60 @@ contains
         end subroutine ESMF_CplCompGet
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CplCompGetInternalState - Get private data block pointer
+!
+! !INTERFACE:
+!      subroutine ESMF_CplCompGetInternalState(cplcomp, dataPointer, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_CplComp), intent(inout) :: cplcomp
+!      type(any), pointer, intent(in) :: dataPointer
+!      integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!  Available to be called by an {\tt ESMF\_CplComp} at any time after 
+!  {\tt ESMF\_CplCompSetInternalState} has been called.
+!  Since init, run, and finalize must be separate subroutines data that
+!  they need to share in common can either be module global data, or can
+!  be allocated in a private data block and the address of that block
+!  can be registered with the framework and retrieved by this call.
+!  When running multiple instantiations of an {\tt ESMF\_CplComp}, 
+!  for example during ensemble runs, 
+!  it may be simpler to maintain private data specific to 
+!  each run with private data blocks.  A corresponding 
+!  {\tt ESMF\_CplCompSetInternalState} call sets the data pointer to 
+!  this block, and this call retrieves the data pointer.   
+!  Note that the {\tt dataPointer} argument needs to be a derived type
+!  which contains only a pointer of the type of the data block defined
+!  by the user.  When making this call the pointer needs to be unassociated.
+!  When the call returns the pointer will now reference the original
+!  data block which was set during the previous call to
+!  {\tt ESMF\_CplCompSetInternalState}.
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[cplcomp]
+!    An {\tt ESMF\_CplComp} object.
+!   \item[dataPointer]
+!    A derived type, containing only an unassociated pointer 
+!    to the private data block.
+!    The framework will fill in the pointer. When this call returns the
+!    pointer is set to the same address set during 
+!    {\tt ESMF\_CplCompSetInternalState}.
+!    This level of indirection is needed to reliably set and retrieve 
+!    the data block no matter which architecture or compiler is used.  
+!   \item[rc] 
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    Note: unlike most other ESMF routines, this argument is not optional
+!    because of implementation considerations.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompInitialize"
 !BOP
@@ -904,6 +637,65 @@ contains
         if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_CplCompInitialize
 
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompIsPetLocal"
+!BOP
+! !IROUTINE: ESMF_CplCompIsPetLocal - Inquire if this component is to execute on the calling PET.
+!
+! !INTERFACE:
+      recursive function ESMF_CplCompIsPetLocal(cplcomp, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_CplCompIsPetLocal
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp), intent(inout) :: cplcomp
+      integer, intent(out), optional  :: rc 
+!
+! !DESCRIPTION:
+!  Inquire if this {\tt ESMF\_CplComp} object is to execute on the calling PET.
+!
+!  The return value is {\tt .true.} if the component is to execute on the 
+!  calling PET, {\tt .false.} otherwise.
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[cplcomp] 
+!    {\tt ESMF\_CplComp} queried.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+    integer :: localrc                     ! local error status
+    logical :: localresult
+
+    ! Initialize return code; assume failure until success is certain       
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
+
+    ! Initialize output value in case of error
+    ESMF_CplCompIsPetLocal = .false.
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
+    ! call CompClass method
+    localresult = ESMF_CompIsPetLocal(cplcomp%compp, localrc)
+    ! if (ESMF_LogPassFoundError(localrc, rc)) return
+    if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+    ! Set return values
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ESMF_CplCompIsPetLocal = localresult
+    
+  end function ESMF_CplCompIsPetLocal
+    
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1015,7 +807,7 @@ contains
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
         integer :: localrc                  ! local return code
 
         ! Initialize return code; assume routine not implemented
@@ -1188,6 +980,496 @@ contains
         if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_CplCompSet
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetEntryPoint"
+!BOP
+! !IROUTINE: ESMF_CplCompSetEntryPoint - Set user routine as entry point for standard Component method
+!
+! !INTERFACE:
+  subroutine ESMF_CplCompSetEntryPoint(cplcomp, stage, routine, phase, rc)
+
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent (in) :: cplcomp
+    character(*),       intent(in)  :: stage
+    interface
+      subroutine routine(cplcomp, importState, exportState, clock, rc)
+        use ESMF_CompMod
+        use ESMF_StateMod
+        use ESMF_ClockMod
+        implicit none
+        type(ESMF_CplComp)          :: cplcomp
+        type(ESMF_State)            :: importState
+        type(ESMF_State)            :: exportState
+        type(ESMF_Clock)            :: clock
+        integer, intent(out)        :: rc
+      end subroutine
+    end interface
+    integer, intent(in),  optional  :: phase
+    integer, intent(out), optional  :: rc 
+!
+! !DESCRIPTION:
+! Registers a user-supplied {\tt routine} as the entry point for one of the
+! predefined Component {\tt stage}s. After this call the {\tt routine} becomes
+! accessible via the standard Component API method for this {\tt stage}.
+!    
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   An {\tt ESMF\_CplComp} object.
+! \item[stage]
+!   One of a set of predefined Component stages - e.g. {\tt ESMF\_SETINIT}, 
+!   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. !!!need to reference here!!!
+! \item[routine]
+!   The user-supplied subroutine to be associated for this {\tt stage}.
+!   This subroutine does not have to be public.
+! \item[{[phase]}] 
+!   The {\tt phase} number for multi-phase stages. For single phase 
+!   stages the {\tt phase} argument can be omitted. The default setting
+!   is {\tt ESMF\_SINGLEPHASE}.
+! \item[{[rc]}] 
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+! The Component writer must supply a subroutine with the exact interface 
+! shown below, including the {\tt intent}. Arguments must not be declared
+! as optional, and the types and order must match.
+!
+! !INTERFACE:
+!   interface
+!     subroutine routine(cplcomp, importState, exportState, clock, rc)
+!       type(ESMF_CplComp)   :: cplcomp      ! must not be optional
+!       type(ESMF_State)     :: importState  ! must not be optional
+!       type(ESMF_State)     :: exportState  ! must not be optional
+!       type(ESMF_Clock)     :: clock        ! must not be optional
+!       integer, intent(out) :: rc           ! must not be optional
+!     end subroutine
+!   end interface
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! local vars
+    integer :: localrc                       ! local error status
+    integer :: phaseArg
+
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
+  
+    phaseArg = ESMF_SINGLEPHASE   ! default
+    if (present(phase)) phaseArg = phase
+  
+    call c_ESMC_SetEntryPoint(cplcomp, stage, routine, phaseArg, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CplCompSetInternalState - Set private data block pointer
+!
+! !INTERFACE:
+!      subroutine ESMF_CplCompSetInternalState(cplcomp, dataPointer, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_CplComp), intent(inout) :: cplcomp
+!      type(any), pointer, intent(in) :: dataPointer
+!      integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!  Available to be called by an {\tt ESMF\_CplComp} at any time, but 
+!  expected to be
+!  most useful when called during the registration process, or initialization.
+!  Since init, run, and finalize must be separate subroutines data that
+!  they need to share in common can either be module global data, or can
+!  be allocated in a private data block and the address of that block
+!  can be registered with the framework and retrieved by subsequent calls.
+!  When running multiple instantiations of an {\tt ESMF\_CplComp}, 
+!  for example during
+!  ensemble runs, it may be simpler to maintain private data specific to 
+!  each run with private data blocks.  A corresponding 
+!  {\tt ESMF\_CplCompGetInternalState} call retrieves the data pointer.
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[cplcomp] 
+!    An {\tt ESMF\_CplComp} object.
+!   \item[dataPointer]
+!    A pointer to the private data block, wrapped in a derived type which
+!    contains only a pointer to the block.  This level of indirection is
+!    needed to reliably set and retrieve the data block no matter which
+!    architecture or compiler is used.  
+!   \item[rc] 
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    Note: unlike most other ESMF routines, this argument is not optional
+!    because of implementation considerations.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetServices"
+!BOP
+! !IROUTINE: ESMF_CplCompSetServices - Call user routine to register CplComp methods
+!
+! !INTERFACE:
+  recursive subroutine ESMF_CplCompSetServices(cplcomp, routine, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp)              :: cplcomp
+    interface
+      subroutine routine(cplcomp, rc)
+        use ESMF_CompMod
+        implicit none
+        type(ESMF_CplComp)          :: cplcomp
+        integer, intent(out)        :: rc
+      end subroutine
+    end interface
+    integer, intent(out), optional  :: rc 
+!
+! !DESCRIPTION:
+! Call into user provided {\tt routine} which is responsible for
+! for setting Component's Initialize(), Run() and Finalize() services.
+!    
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   Coupler Component.
+! \item[routine]
+!   Routine to be called.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+! The Component writer must supply a subroutine with the exact interface 
+! shown below, including the {\tt intent}. Arguments must not be declared
+! as optional, and the types and order must match.
+!
+! !INTERFACE:
+!   interface
+!     subroutine routine(cplcomp, rc)
+!       type(ESMF_CplComp)   :: cplcomp    ! must not be optional
+!       integer, intent(out) :: rc         ! must not be optional
+!     end subroutine
+!   end interface
+!
+! !DESCRIPTION:
+! The {\tt routine}, when called by the framework, must make successive calls to
+! {\tt ESMF\_CplCompSetEntryPoint()} to preset callback routines for standard
+! Component Initialize(), Run() and Finalize() methods.
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! local vars
+    integer :: localrc                       ! local error status
+
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
+  
+    call c_ESMC_SetServices(cplcomp, routine, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetServicesShObj"
+!BOP
+! !IROUTINE: ESMF_CplCompSetServices - Call user routine, located in shared object, to register CplComp methods
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_CplCompSetServices()
+  recursive subroutine ESMF_CplCompSetServicesShObj(cplcomp, routine, &
+    sharedObj, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp),      intent(inout)         :: cplcomp
+    character(len=*),        intent(in)            :: routine
+    character(len=*),        intent(in),  optional :: sharedObj
+    integer,                 intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Call into user provided routine which is responsible for setting
+! Component's Initialize(), Run() and Finalize() services. The named
+! {\tt routine} must exist in the shared object file specified in the
+! {\tt sharedObj} argument. All of the platform specific details about 
+! dynamic linking and loading apply.
+!    
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   Coupler Component.
+! \item[routine]
+!   Name of routine to be called.
+! \item[{[sharedObj]}]
+!   Name of shared object that contains {\tt routine}. If the {\tt sharedObj}
+!   argument is not provided the executable itself will be searched for
+!   {\tt routine}.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+! !INTERFACE:
+!   interface
+!     subroutine routine(cplcomp, rc)
+!       type(ESMF_CplComp)   :: cplcomp    ! must not be optional
+!       integer, intent(out) :: rc         ! must not be optional
+!     end subroutine
+!   end interface
+!
+! !DESCRIPTION:
+! The {\tt routine}, when called by the framework, must make successive calls to
+! {\tt ESMF\_CplCompSetEntryPoint()} to preset callback routines for standard
+! Component Initialize(), Run() and Finalize() methods.
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! local vars
+    integer :: localrc                       ! local error status
+    character(len=0) :: emptyString
+
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
+  
+    if (present(sharedObj)) then
+      call c_ESMC_SetServicesShObj(cplcomp, routine, sharedObj, localrc)
+    else
+      call c_ESMC_SetServicesShObj(cplcomp, routine, emptyString, localrc)
+    endif
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetVM"
+!BOP
+! !IROUTINE: ESMF_CplCompSetVM - Call user routine to set CplComp VM properies
+!
+! !INTERFACE:
+  recursive subroutine ESMF_CplCompSetVM(cplcomp, routine, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp)              :: cplcomp
+    interface
+      subroutine routine(cplcomp, rc)
+        use ESMF_CompMod
+        implicit none
+        type(ESMF_CplComp)          :: cplcomp
+        integer, intent(out)        :: rc
+      end subroutine
+    end interface
+    integer, intent(out), optional  :: rc 
+!
+! !DESCRIPTION:
+! Optionally call into user provided {\tt routine} which is responsible for
+! for setting Component's VM properties. 
+!
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   Coupler Component.
+! \item[routine]
+!   Routine to be called.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+! The Component writer must supply a subroutine with the exact interface 
+! shown below, including the {\tt intent}. Arguments must not be declared
+! as optional, and the types and order must match.
+!
+! !INTERFACE:
+!   interface
+!     subroutine routine(cplcomp, rc)
+!       type(ESMF_CplComp)   :: cplcomp     ! must not be optional
+!       integer, intent(out) :: rc          ! must not be optional
+!     end subroutine
+!   end interface
+!
+! !DESCRIPTION:
+! The subroutine, when called by the framework, is expected to use any of the
+! {\tt ESMF\_CplCompSetVMxxx()} methods to set the properties of the VM
+! associated with the Coupler Component.
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! local vars
+    integer :: localrc                       ! local error status
+
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
+  
+    call c_ESMC_SetVM(cplcomp, routine, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetVMShObj"
+!BOP
+! !IROUTINE: ESMF_CplCompSetVM - Set CplComp VM properties in routine located in shared object
+! !INTERFACE:
+  ! Private name; call using ESMF_CplCompSetVM()
+  recursive subroutine ESMF_CplCompSetVMShObj(cplcomp, routine, sharedObj, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp),      intent(inout)         :: cplcomp
+    character(len=*),        intent(in)            :: routine
+    character(len=*),        intent(in),  optional :: sharedObj
+    integer,                 intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Optionally call into user provided {\tt routine} which is responsible for
+! for setting Component's VM properties. The named {\tt routine} must exist
+! in the shared object file specified in the {\tt sharedObj} argument. All of
+! the platform specific details about dynamic linking and loading apply.
+!    
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   Coupler Component.
+! \item[routine]
+!   Routine to be called.
+! \item[{[sharedObj]}]
+!   Name of shared object that contains {\tt routine}. If the {\tt sharedObj}
+!   argument is not provided the executable itself will be searched for
+!   {\tt routine}.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+! The Component writer must supply a subroutine with the exact interface 
+! shown below, including the {\tt intent}. Arguments must not be declared
+! as optional, and the types and order must match.
+!
+! !INTERFACE:
+!   interface
+!     subroutine routine(cplcomp, rc)
+!       type(ESMF_CplComp)   :: cplcomp     ! must not be optional
+!       integer, intent(out) :: rc          ! must not be optional
+!     end subroutine
+!   end interface
+!
+! !DESCRIPTION:
+! The subroutine, when called by the framework, is expected to use any of the
+! {\tt ESMF\_CplCompSetVMxxx()} methods to set the properties of the VM
+! associated with the Coupler Component.
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! local vars
+    integer :: localrc                       ! local error status
+    character(len=0) :: emptyString
+
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
+  
+    if (present(sharedObj)) then
+      call c_ESMC_SetVMShObj(cplcomp, routine, sharedObj, localrc)
+    else
+      call c_ESMC_SetVMShObj(cplcomp, routine, emptyString, localrc)
+    endif
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetVMMaxPEs"
+!BOPI
+! !IROUTINE: ESMF_CplCompSetVMMaxPEs - Define a VM for this CplComp
+!
+! !INTERFACE:
+  subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, max, &
+                       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp),  intent(inout)         :: cplcomp
+    integer,             intent(in),  optional :: max
+    integer,             intent(in),  optional :: pref_intra_process
+    integer,             intent(in),  optional :: pref_intra_ssi
+    integer,             intent(in),  optional :: pref_inter_ssi
+    integer,             intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!     Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[cplcomp] 
+!      {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
+!     \item[{[max]}] 
+!      Maximum number of PEs per PET.
+!     \item[{[pref\_intra\_process]}] 
+!      Intra process communication preference.
+!     \item[{[pref\_intra\_ssi]}] 
+!      Intra SSI communication preference.
+!     \item[{[pref\_inter\_ssi]}] 
+!      Inter process communication preference.
+!     \item[{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+    integer :: localrc                     ! local error localrc
+
+    ! Initialize return code; assume failure until success is certain       
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
+    ! call CompClass method
+    call ESMF_CompSetVMMaxPEs(cplcomp%compp, max, &
+                   pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rc)) return
+
+    ! Set return values
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_CplCompSetVMMaxPEs
+!------------------------------------------------------------------------------
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVMMaxThreads"
@@ -1309,66 +1591,6 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompSetVMMaxPEs"
-!BOPI
-! !IROUTINE: ESMF_CplCompSetVMMaxPEs - Define a VM for this CplComp
-!
-! !INTERFACE:
-  subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, max, &
-                       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_CplComp),  intent(inout)         :: cplcomp
-    integer,             intent(in),  optional :: max
-    integer,             intent(in),  optional :: pref_intra_process
-    integer,             intent(in),  optional :: pref_intra_ssi
-    integer,             intent(in),  optional :: pref_inter_ssi
-    integer,             intent(out), optional :: rc           
-!
-! !DESCRIPTION:
-!     Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[cplcomp] 
-!      {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
-!     \item[{[max]}] 
-!      Maximum number of PEs per PET.
-!     \item[{[pref\_intra\_process]}] 
-!      Intra process communication preference.
-!     \item[{[pref\_intra\_ssi]}] 
-!      Intra SSI communication preference.
-!     \item[{[pref\_inter\_ssi]}] 
-!      Inter process communication preference.
-!     \item[{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-    integer :: localrc                     ! local error localrc
-
-    ! Initialize return code; assume failure until success is certain       
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-        localrc = ESMF_RC_NOT_IMPL
-
-    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
-
-    ! call CompClass method
-    call ESMF_CompSetVMMaxPEs(cplcomp%compp, max, &
-                   pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                       ESMF_CONTEXT, rc)) return
-
-    ! Set return values
-    if (present(rc)) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_CplCompSetVMMaxPEs
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompValidate"
 !BOP
 ! !IROUTINE: ESMF_CplCompValidate -- Ensure the CplComp is internally consistent
@@ -1406,6 +1628,58 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_CplCompValidate
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompWait"
+!BOP
+! !IROUTINE: ESMF_CplCompWait - Wait for a CplComp to return
+!
+! !INTERFACE:
+  subroutine ESMF_CplCompWait(cplcomp, blockingFlag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(inout)               :: cplcomp
+    type (ESMF_BlockingFlag), intent(in), optional  :: blockingFlag
+    integer,            intent(out), optional       :: rc           
+!
+! !DESCRIPTION:
+!     When executing asychronously, wait for an {\tt ESMF\_CplComp} to return.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[cplcomp] 
+!      {\tt ESMF\_CplComp} to wait for.
+!     \item[{[blockingFlag]}]
+!    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!    for a list of valid blocking options. Default option is
+!    {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!    across each VAS but does not synchronize PETs that run in different VASs.
+!     \item[{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+    integer :: localrc                     ! local error localrc
+
+    ! Initialize return code; assume failure until success is certain       
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
+    ! call CompClass method
+    call ESMF_CompWait(cplcomp%compp, blockingFlag, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rc)) return
+
+    ! Set return values
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_CplCompWait
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1461,7 +1735,7 @@ contains
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
         integer :: localrc                        ! local return code
 
         ! Initialize return code; assume routine not implemented
@@ -1483,116 +1757,6 @@ contains
 
 
 
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompWait"
-!BOP
-! !IROUTINE: ESMF_CplCompWait - Wait for a CplComp to return
-!
-! !INTERFACE:
-  subroutine ESMF_CplCompWait(cplcomp, blockingFlag, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_CplComp), intent(inout)               :: cplcomp
-    type (ESMF_BlockingFlag), intent(in), optional  :: blockingFlag
-    integer,            intent(out), optional       :: rc           
-!
-! !DESCRIPTION:
-!     When executing asychronously, wait for an {\tt ESMF\_CplComp} to return.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[cplcomp] 
-!      {\tt ESMF\_CplComp} to wait for.
-!     \item[{[blockingFlag]}]
-!    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
-!    for a list of valid blocking options. Default option is
-!    {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
-!    across each VAS but does not synchronize PETs that run in different VASs.
-!     \item[{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-
-    integer :: localrc                     ! local error localrc
-
-    ! Initialize return code; assume failure until success is certain       
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-        localrc = ESMF_RC_NOT_IMPL
-
-    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
-
-    ! call CompClass method
-    call ESMF_CompWait(cplcomp%compp, blockingFlag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                       ESMF_CONTEXT, rc)) return
-
-    ! Set return values
-    if (present(rc)) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_CplCompWait
-!------------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompIsPetLocal"
-!BOP
-! !IROUTINE: ESMF_CplCompIsPetLocal - Inquire if this component is to execute on the calling PET.
-!
-! !INTERFACE:
-      recursive function ESMF_CplCompIsPetLocal(cplcomp, rc)
-!
-! !RETURN VALUE:
-      logical :: ESMF_CplCompIsPetLocal
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp), intent(inout) :: cplcomp
-      integer, intent(out), optional  :: rc 
-!
-! !DESCRIPTION:
-!  Inquire if this {\tt ESMF\_CplComp} object is to execute on the calling PET.
-!
-!  The return value is {\tt .true.} if the component is to execute on the 
-!  calling PET, {\tt .false.} otherwise.
-!    
-!  The arguments are:
-!  \begin{description}
-!   \item[cplcomp] 
-!    {\tt ESMF\_CplComp} queried.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
-    integer :: localrc                     ! local error status
-    logical :: localresult
-
-    ! Initialize return code; assume failure until success is certain       
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-        localrc = ESMF_RC_NOT_IMPL
-
-    ! Initialize output value in case of error
-    ESMF_CplCompIsPetLocal = .false.
-
-    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
-
-    ! call CompClass method
-    localresult = ESMF_CompIsPetLocal(cplcomp%compp, localrc)
-    ! if (ESMF_LogPassFoundError(localrc, rc)) return
-    if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-    ! Set return values
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    ESMF_CplCompIsPetLocal = localresult
-    
-  end function ESMF_CplCompIsPetLocal
-    
-!------------------------------------------------------------------------------
 
 end module ESMF_CplCompMod
 
