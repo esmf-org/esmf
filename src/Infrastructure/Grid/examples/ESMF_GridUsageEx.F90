@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.51 2009/02/25 06:16:13 peggyli Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.52 2009/02/25 22:18:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -850,9 +850,10 @@ endif
 ! \label{example:ArbGridWithUndistDim}
 !
 ! There are more restrictions in defining an arbitrarily distributed grid.  
-! First, there is always one DE per PET.  Secondly, only local index (ESMF_INDEX_LOCAL)
-! is supported. Third, only one stagger location, i.e. ESMF_STAGGERLOC_CENTER is allowed
-! and last there is no extra paddings on the edge of the grid.  
+! First, there is always one DE per PET.  Secondly, only local index
+! ({\tt ESMF\_INDEX\_LOCAL}) is supported. Third, only one stagger location,
+! i.e. {\tt ESMF\_STAGGERLOC\_CENTER} is allowed and last there is no extra
+! paddings on the edge of the grid.  
 !
 ! This example demonstrates how a user can build a 3D grid with its rectilinear 
 ! horizontal Grid distributed arbitrarily and a non-distributed vertical dimension.
@@ -1131,8 +1132,8 @@ endif
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
-! Note only the center stagger location ESMF_STAGGERLOC_CENTER is supported in the arbitrarily
-! distributed grid.
+! Note only the center stagger location {\tt ESMF\_STAGGERLOC\_CENTER} is 
+! supported in the arbitrarily distributed grid.
 !EOE
 
 #ifdef LOCAL_NOT_IMPL
@@ -1233,7 +1234,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 !BOE
 ! For an arbitrarily distributed grid, the default value of a coordinate
-! array dimension is {\tt /ESMF_GRID_ARBDIM/} if the index dimension is arbitrarily
+! array dimension is {\tt ESMF\_GRID\_ARBDIM} if the index dimension is arbitrarily
 ! distributed and is {\tt n} where n is the index dimension itself when it is not
 ! distributed. The following call is equivalent to the example in 
 ! Section~\ref{example:ArbGridWithUndistDim} 
