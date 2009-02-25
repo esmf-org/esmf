@@ -1285,6 +1285,363 @@
 
   ! local integers
   integer :: localrc ! local error status
+  integer :: iDfile, iGfile, iD, iG, ix
+  integer :: test_status
+  integer :: localPET
+  integer :: libflag
+
+  ! local characters
+  character(ESMF_MAXSTR) :: liG, liD
+
+  ! debug
+  real(ESMF_KIND_R8), pointer :: fptr2(:,:)
+  integer :: i1, i2, de, localDeCount, dimCount 
+  integer, allocatable ::  localDeList(:)
+  type(ESMF_LocalArray), allocatable :: larrayList(:)
+  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  type(ESMF_IndexFlag) :: indexflag
+
+  ! initialize return flag
+  localrc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
+
+  ! initialize test counter
+  test_failure = 0
+
+  !-----------------------------------------------------------------------------
+  ! for a single problem descriptor string, loop through each specifier file
+  ! combination
+  ! Create source and destination distributions, Fields and conduct regrid
+  !-----------------------------------------------------------------------------
+  print*,'-----------------======field regrid test==========-----------------------'
+
+  do iDfile=1,PDS%nDfiles         ! distribution specifier files
+    do iGfile=1,PDS%nGfiles       ! grid specifier files
+      do iD=1, PDS%Dfiles(iDfile)%nDspecs   ! entries in distribution specifier
+        do iG=1, PDS%Gfiles(iGfile)%nGspecs ! entries in grid specifier file
+          print*,'field regrid create source'
+          !---------------------------------------------------------------------
+          ! create source distribution
+          !---------------------------------------------------------------------
+          call create_distribution(PDS%SrcMem, PDS%Dfiles(iDfile)%src_dist(iD),&
+                    PDS%Gfiles(iGfile)%src_grid(iG), src_distgrid, VM, localrc)
+          write(liG,"(i5)") iG 
+          write(liD,"(i5)") iD 
+          if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
+             // " with string "  // trim(adjustL(PDS%pds)) //                  &
+             " with entry "  // trim(adjustL(liD)) // " of file " //           &
+             trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
+             // " and entry " // trim(adjustL(liG)) // " of file " //          &
+             trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
+             rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! create source grid from from distribution
+          !---------------------------------------------------------------------
+          call create_grid_from_distgrid(gridSrc, src_distgrid, PDS%SrcMem,    &
+                      PDS%Gfiles(iGfile)%src_grid(iG),  &
+                      PDS%Dfiles(iDfile)%src_dist(iD), localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error creating source array "     &
+             // " with string "  // trim(adjustL(PDS%pds)) //                  &
+             " with entry "  // trim(adjustL(liD)) // " of file " //           &
+             trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
+             // " and entry " // trim(adjustL(liG)) // " of file " //          &
+             trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
+             rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! create array spec
+          !---------------------------------------------------------------------
+          !---------------------------------------------------------------------
+          ! set the dimensionality of actual data storage to the memory size 
+          ! specified by the problem descriptor string
+          !---------------------------------------------------------------------
+          call ESMF_ArraySpecSet(SrcArraySpec, typekind=ESMF_TYPEKIND_R8,      &
+                         rank=PDS%SrcMem%memRank, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error creating ArraySpecSet",     &
+                         rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! create source field from grid and arrayspec
+          !---------------------------------------------------------------------
+          srcField = ESMF_FieldCreate(grid=gridSrc, arrayspec=SrcArraySpec,    &
+                  staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error creating source field",     &
+                  rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! populate src field with test function for regridding test
+          !---------------------------------------------------------------------
+          call populate_field(srcField, gridSrc, PDS%SrcMem,                   &
+                   PDS%Gfiles(iGfile)%src_grid(iG),                            &
+                   PDS%Gfiles(iGfile)%testfunction(iG), localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error initializing value in " //  &
+             "source array ", rcToReturn=rc)) return
+
+!-------------------------------------------------------------------------------
+! Destination
+!-------------------------------------------------------------------------------
+          print*,'field regrid create destination'
+          !---------------------------------------------------------------------
+          ! Create Destination distribution
+          !---------------------------------------------------------------------
+          call create_distribution(PDS%DstMem, PDS%Dfiles(iDfile)%dst_dist(iD),&
+                    PDS%Gfiles(iGfile)%dst_grid(iG), dst_distgrid, VM, localrc)
+          write(liG,"(i5)") iG 
+          write(liD,"(i5)") iD 
+          if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
+             // " with string "  // trim(adjustL(PDS%pds)) //                  &
+             " with entry "  // trim(adjustL(liD)) // " of file " //           &
+             trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
+             // " and entry " // trim(adjustL(liG)) // " of file " //          &
+             trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
+             rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! create destination grid from from distribution
+          !---------------------------------------------------------------------
+          call create_grid_from_distgrid(gridDst, dst_distgrid, PDS%DstMem,    &
+                      PDS%Gfiles(iGfile)%dst_grid(iG),    &
+                      PDS%Dfiles(iDfile)%src_dist(iD), localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error creating source array "     &
+             // " with string "  // trim(adjustL(PDS%pds)) //                  &
+             " with entry "  // trim(adjustL(liD)) // " of file " //           &
+             trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
+             // " and entry " // trim(adjustL(liG)) // " of file " //          &
+             trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
+             rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! create array spec
+          !---------------------------------------------------------------------
+          !---------------------------------------------------------------------
+          ! set the dimensionality of actual data storage to the memory size
+          ! specified by the problem descriptor string
+          !---------------------------------------------------------------------
+          call ESMF_ArraySpecSet(DstArraySpec, typekind=ESMF_TYPEKIND_R8,      &
+                         rank=PDS%DstMem%memRank, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error creating dst ArraySpecSet", &
+                         rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! create source field from grid and arrayspec
+          !---------------------------------------------------------------------
+          dstField = ESMF_FieldCreate(gridDst, DstArraySpec,                   &
+                  staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error creating dst field",        &
+                  rcToReturn=rc)) return
+
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  !!!!!! NEED TO FIX THIS WHEN GRID AND MESH RECOGNIZE UNITS !!!!!!!
+  !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
+  ! check that the grid units agree. If they don't log an error. Eventually the 
+  ! mesh class should be able to reconcile different units.
+  !-----------------------------------------------------------------------------
+         do ix=1, PDS%Gfiles(iGfile)%src_grid(iG)%grank
+           if( trim(PDS%Gfiles(iGfile)%src_grid(iG)%gunits(ix)%string) .ne.    &
+               trim(PDS%Gfiles(iGfile)%dst_grid(iG)%gunits(ix)%string) ) then
+
+               print*,'ERROR: source and destination grid units do not agree' 
+               print*,'Source units are: ',                                    &
+                 trim(PDS%Gfiles(iGfile)%src_grid(iG)%gunits(ix)%string),      &
+                 ' while destination units are: ',                             &
+                 trim(PDS%Gfiles(iGfile)%dst_grid(iG)%gunits(ix)%string)
+
+                call ESMF_LogMsgSetError( ESMF_FAILURE,"Incompatible grid" //  &
+                       " units.",rcToReturn=localrc)
+                return
+           endif
+         enddo      ! ix
+
+  !-----------------------------------------------------------------------------
+  ! Now conduct the interpolation
+  !
+  ! the test consists of interpolating an analytical test function evaluated
+  ! on a source grid onto a destination grid, and checking that the result 
+  ! agrees with the analytical solution to within a set tolerance.
+  !-----------------------------------------------------------------------------
+          print*,'field regrid store'
+          !---------------------------------------------------------------------
+          ! select the correct regridding method and do a Field Regrid store
+          !---------------------------------------------------------------------
+          select case( PDS%process%tag )
+             case( Harness_BilinearRegrid )
+                call ESMF_FieldRegridStore(srcField, dstField, routeHandle,    &
+                        regridMethod=ESMF_REGRID_METHOD_BILINEAR, rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc,"Field Bilinear Regrid " //  &
+                        "store failed", rcToReturn=rc)) return
+
+             case( Harness_PatchRegrid )
+                libflag = 0  ! flag to catch if framework built w/ LAPACK and BLAS libs
+
+#ifdef ESMF_LAPACK
+                libflag = 1  ! 
+                call ESMF_FieldRegridStore(srcField, dstField, routeHandle,    &
+                        regridMethod=ESMF_REGRID_METHOD_PATCH, rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc,"Field Patch Regrid " //
+                        "store failed", rcToReturn=rc)) return
+#endif
+
+                if(libflag==0) call ESMF_LogMsgSetError( ESMF_FAILURE,"Patch " // &
+                       "regridding requires LAPACK & BLAS libraries. These" // &
+                       " libraries appear not to have been set. The "//        &
+                       " environment variable ESMF_LAPACK must be set ON," //  &
+                       " and ESMF_LAPACK_LIBS set to the LAPACK and BLAS "//   &
+                       " library paths",rcToReturn=localrc)
+
+             case( Harness_ConservRegrid )
+                call ESMF_LogMsgSetError( ESMF_FAILURE,"Conservative " //      &
+                       "regridding not currently supported",rcToReturn=localrc)
+                return
+             case( Harness_2ndConservRegrid )
+                call ESMF_LogMsgSetError( ESMF_FAILURE,"Conservative " //      &
+                       "regridding not currently supported",rcToReturn=localrc)
+                return
+             case( Harness_NearNeighRegrid )
+                call ESMF_LogMsgSetError( ESMF_FAILURE,"Nearest Neighbor " //  &
+                       "regridding not currently supported",rcToReturn=localrc)
+                return
+             case( Harness_Error )
+               ! error - invalid regrid method
+                call ESMF_LogMsgSetError( ESMF_FAILURE,"Invalid regrid " //    &
+                       "method.",rcToReturn=localrc)
+             case default
+               ! error
+                call ESMF_LogMsgSetError( ESMF_FAILURE,"Invalid regrid " //    &
+                       "method.",rcToReturn=localrc)
+          end select
+
+          !---------------------------------------------------------------------
+          ! regrid run
+          !---------------------------------------------------------------------
+          print*,'field regrid run'
+          call ESMF_FieldRegridRun(srcField, dstField, routeHandle, localrc)
+          if (ESMF_LogMsgFoundError(localrc,"Field Regrid run failed for " //  &
+                  " forward failed ", rcToReturn=rc)) return
+
+  !-----------------------------------------------------------------------------
+  ! Check regrid     
+  !-----------------------------------------------------------------------------
+          print*,'check field regrid'
+          !---------------------------------------------------------------------
+          ! compare interpolated array values with the exact solution
+          !---------------------------------------------------------------------
+          call check_field(test_status, dstField, gridDst,                     &
+                           PDS%Gfiles(iGfile)%dst_grid(iG),                    &
+                           PDS%Gfiles(iGfile)%testfunction(iG), localrc) 
+          if (ESMF_LogMsgFoundError(localrc,"redistribution array " //         &
+                  " comparison failed ", rcToReturn=rc)) return
+
+          PDS%test_record(iDfile,iGfile)%test_status(iD,iG) = test_status
+
+          if( test_status == HarnessTest_FAILURE ) then 
+             test_failure = test_failure + 1
+          endif
+
+          call ESMF_VMGet(VM, localPet=localPET, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"can not get local pet ",          &
+                  rcToReturn=rc)) return
+
+          call report_descriptor_string(PDS, iG, iD, iGfile, iDfile,           &
+                                        reportType, localPET, localrc)
+          if (ESMF_LogMsgFoundError(localrc,"redistribution array " //         &
+                  " test report failed ", rcToReturn=rc)) return
+
+  !-----------------------------------------------------------------------------
+  ! Clean up!!!
+  !-----------------------------------------------------------------------------
+          !---------------------------------------------------------------------
+          ! release handles
+          !---------------------------------------------------------------------
+          call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"Regrid routehandle Release failed",&
+                 rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! release Fields
+          !---------------------------------------------------------------------
+          call ESMF_FieldDestroy(srcField, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"SRC Field Regrid Release failed", &
+                 rcToReturn=rc)) return
+
+          call ESMF_FieldDestroy(dstField, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"DST Field Regrid Release failed", &
+                 rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! release Grids
+          !---------------------------------------------------------------------
+          call ESMF_GridDestroy(gridSrc, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"SRC grid Release failed",         &
+                 rcToReturn=rc)) return
+
+          call ESMF_GridDestroy(gridDst, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"DST Grid Release failed",         &
+                 rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! Destroy DistGrid objects before running next test
+          !---------------------------------------------------------------------
+          call ESMF_DistGridDestroy(src_distgrid, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
+             rcToReturn=rc)) return
+
+          call ESMF_DistGridDestroy(dst_distgrid, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
+             rcToReturn=rc)) return
+
+
+          !---------------------------------------------------------------------
+
+        enddo  ! iG
+      enddo  ! iD
+    enddo  ! iGfile
+  enddo   ! iDfile
+  !-----------------------------------------------------------------------------
+  ! if I've gotten this far without an error, then the routine has succeeded.
+  !-----------------------------------------------------------------------------
+  rc = ESMF_SUCCESS
+  
+  print*,'Regrid Completed'
+  !-----------------------------------------------------------------------------
+  end subroutine field_regrid_test
+  !-----------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  subroutine field_redist_test(PDS, test_failure, reportType, VM, rc)
+  !-----------------------------------------------------------------------------
+  ! routine conducts the field redist test by redistributing from a source 
+  ! field to a destination and back again to the return field
+  !-----------------------------------------------------------------------------
+  ! arguments
+  type(problem_descriptor_strings), intent(inout) :: PDS
+  character(ESMF_MAXSTR), intent(in   ) :: reportType 
+  type(ESMF_VM), intent(in   ) :: VM
+  integer, intent(inout) :: test_failure
+  integer, intent(  out) :: rc
+
+  ! local parameters
+  real(ESMF_KIND_R8), parameter :: initvalue = 0.0
+
+  ! local ESMF Types
+  type(ESMF_Grid) :: gridSrc
+  type(ESMF_Grid) :: gridReturn
+  type(ESMF_Grid) :: gridDst
+  type(ESMF_Field) :: srcField
+  type(ESMF_Field) :: dstField
+  type(ESMF_Field) :: returnField
+  type(ESMF_ArraySpec) :: SrcArraySpec
+  type(ESMF_ArraySpec) :: DstArraySpec
+  type(ESMF_DistGrid) :: src_distgrid, dst_distgrid
+  type(ESMF_RouteHandle) :: routeHandle_forward
+  type(ESMF_RouteHandle) :: routeHandle_backward
+
+  ! local integers
+  integer :: localrc ! local error status
   integer :: iDfile, iGfile, iD, iG
   integer :: test_status
   integer :: localPET
@@ -1371,11 +1728,15 @@
           !---------------------------------------------------------------------
           ! populate src field with test function for regridding test
           !---------------------------------------------------------------------
-          call populate_field(srcField, gridSrc, PDS%SrcMem,                   &
-                   PDS%Gfiles(iGfile)%src_grid(iG),                            &
-                   PDS%Gfiles(iGfile)%testfunction(iG), localrc)
-          if (ESMF_LogMsgFoundError(localrc,"error initializing value in " //  &
-             "source array ", rcToReturn=rc)) return
+!!!! need to populate as in array redist test
+
+          !---------------------------------------------------------------------
+          ! create return field from grid and arrayspec
+          !---------------------------------------------------------------------
+          returnField = ESMF_FieldCreate(grid=gridReturn, arrayspec=SrcArraySpec, &
+                  staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"error creating source field",     &
+                  rcToReturn=rc)) return
 
 !-------------------------------------------------------------------------------
 ! Destination
@@ -1430,80 +1791,45 @@
                   rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
-  ! Now conduct the interpolation
-  !
-  ! the test consists of interpolating an analytical test function evaluated
-  ! on a source grid onto a destination grid, and checking that the result 
-  ! agrees with the analytical solution to within a set tolerance.
+  ! Now conduct the forward redist test
   !-----------------------------------------------------------------------------
-          !---------------------------------------------------------------------
-          ! select the correct regridding method and do a Field Regrid store
-          !---------------------------------------------------------------------
-          select case( PDS%process%tag )
-             case( Harness_BilinearRegrid )
-                call ESMF_FieldRegridStore(srcField, dstField, routeHandle,    &
-                        regridMethod=ESMF_REGRID_METHOD_BILINEAR, rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc,"Field Bilinear Regrid " //  &
+          ! forward redist
+          call ESMF_FieldRedistStore(srcField, dstField, routeHandle_forward,  &
+                        rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"Field Redist " //                 &
                         "store failed", rcToReturn=rc)) return
 
-             case( Harness_PatchRegrid )
-                libflag = 0  ! flag to catch if framework built w/ LAPACK and BLAS libs
-
-#ifdef ESMF_LAPACK
-                libflag = 1  ! 
-                call ESMF_FieldRegridStore(srcField, dstField, routeHandle,    &
-                        regridMethod=ESMF_REGRID_METHOD_PATCH, rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc,"Field Patch Regrid " //
-                        "store failed", rcToReturn=rc)) return
-#endif
-
-                if(libflag==0) call ESMF_LogMsgSetError( ESMF_FAILURE,"Patch " // &
-                       "regridding requires LAPACK & BLAS libraries. These" // &
-                       " libraries appear not to have been set. The "//        &
-                       " environment variable ESMF_LAPACK must be set ON," //  &
-                       " and ESMF_LAPACK_LIBS set to the LAPACK and BLAS "//   &
-                       " library paths",rcToReturn=localrc)
-
-             case( Harness_ConservRegrid )
-                call ESMF_LogMsgSetError( ESMF_FAILURE,"Conservative " //      &
-                       "regridding not currently supported",rcToReturn=localrc)
-                return
-             case( Harness_2ndConservRegrid )
-                call ESMF_LogMsgSetError( ESMF_FAILURE,"Conservative " //      &
-                       "regridding not currently supported",rcToReturn=localrc)
-                return
-             case( Harness_NearNeighRegrid )
-                call ESMF_LogMsgSetError( ESMF_FAILURE,"Nearest Neighbor " //  &
-                       "regridding not currently supported",rcToReturn=localrc)
-                return
-             case( Harness_Error )
-               ! error - invalid regrid method
-                call ESMF_LogMsgSetError( ESMF_FAILURE,"Invalid regrid " //    &
-                       "method.",rcToReturn=localrc)
-             case default
-               ! error
-                call ESMF_LogMsgSetError( ESMF_FAILURE,"Invalid regrid " //    &
-                       "method.",rcToReturn=localrc)
-          end select
-
           !---------------------------------------------------------------------
-          ! regrid run
+          ! redist run
           !---------------------------------------------------------------------
-          call ESMF_FieldRegridRun(srcField, dstField, routeHandle, localrc)
-          if (ESMF_LogMsgFoundError(localrc,"Field Regrid run failed for " //  &
+          call ESMF_FieldRedist(srcField, dstField, routeHandle_forward,       &
+                                rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"Field Redist run failed for " //  &
                   " forward failed ", rcToReturn=rc)) return
+
+  !-----------------------------------------------------------------------------
+  ! backward redist
+  !-----------------------------------------------------------------------------
+          call ESMF_FieldRedistStore(dstField, returnField,                    &
+                                     routeHandle_backward, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"Field Redist " //                 &
+                        "store failed", rcToReturn=rc)) return
+
+          !---------------------------------------------------------------------
+          ! redist run
+          !---------------------------------------------------------------------
+          call ESMF_FieldRedist(dstField, returnField, routeHandle_backward,   &
+                                rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"Field Redist run failed for " //  &
+                  " backward failed ", rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
   ! Check redistribution
   !-----------------------------------------------------------------------------
           !---------------------------------------------------------------------
-          ! compare interpolated array values with the exact solution
           !---------------------------------------------------------------------
-          call check_field(test_status, dstField, gridDst,                     &
-                           PDS%Gfiles(iGfile)%dst_grid(iG),                    &
-                           PDS%Gfiles(iGfile)%testfunction(iG), localrc) 
-          if (ESMF_LogMsgFoundError(localrc,"redistribution array " //         &
-                  " comparison failed ", rcToReturn=rc)) return
+!!!!! to do: check the redist - should be similar to the array redist check 
+!!!!! except that you need to extract the values from a field rather than an array 
 
           PDS%test_record(iDfile,iGfile)%test_status(iD,iG) = test_status
 
@@ -1526,7 +1852,11 @@
           !---------------------------------------------------------------------
           ! release handles
           !---------------------------------------------------------------------
-          call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+          call ESMF_FieldRegridRelease(routeHandle_forward, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"Regrid routehandle Release failed",&
+                 rcToReturn=rc)) return
+
+          call ESMF_FieldRegridRelease(routeHandle_backward, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"Regrid routehandle Release failed",&
                  rcToReturn=rc)) return
 
@@ -1535,6 +1865,10 @@
           !---------------------------------------------------------------------
           call ESMF_FieldDestroy(srcField, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc,"SRC Field Regrid Release failed", &
+                 rcToReturn=rc)) return
+
+          call ESMF_FieldDestroy(returnField, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc,"Return Field Regrid Release failed", &
                  rcToReturn=rc)) return
 
           call ESMF_FieldDestroy(dstField, rc=localrc)
@@ -1563,175 +1897,6 @@
           if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
              rcToReturn=rc)) return
 
-
-          !---------------------------------------------------------------------
-
-        enddo  ! iG
-      enddo  ! iD
-    enddo  ! iGfile
-  enddo   ! iDfile
-  !-----------------------------------------------------------------------------
-  ! if I've gotten this far without an error, then the routine has succeeded.
-  !-----------------------------------------------------------------------------
-  rc = ESMF_SUCCESS
-  
-  print*,'Regrid Completed'
-  !-----------------------------------------------------------------------------
-  end subroutine field_regrid_test
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-  subroutine field_redist_test(PDS, test_failure, reportType, VM, rc)
-  !-----------------------------------------------------------------------------
-  !
-  !-----------------------------------------------------------------------------
-  ! arguments
-  type(problem_descriptor_strings), intent(inout) :: PDS
-  character(ESMF_MAXSTR), intent(in   ) :: reportType 
-  type(ESMF_VM), intent(in   ) :: VM
-  integer, intent(inout) :: test_failure
-  integer, intent(  out) :: rc
-
-  ! local parameters
-  real(ESMF_KIND_R8), parameter :: initvalue = 0.0
-
-  ! local ESMF Types
-  type(ESMF_Array) :: src_array, return_array, dst_array
-  type(ESMF_DistGrid) :: src_distgrid, dst_distgrid
-  type(ESMF_RouteHandle) :: redistHandle_forward, redistHandle_reverse
-
-  ! local integers
-  integer :: localrc ! local error status
-  integer :: iDfile, iGfile, iD, iG
-  integer :: test_status
-  integer :: localPET
-
-  ! local characters
-  character(ESMF_MAXSTR) :: liG, liD
-
-  ! debug
-  real(ESMF_KIND_R8), pointer :: fptr2(:,:)
-  integer :: i1, i2, de, localDeCount, dimCount 
-  integer, allocatable ::  localDeList(:)
-  type(ESMF_LocalArray), allocatable :: larrayList(:)
-  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
-  type(ESMF_IndexFlag) :: indexflag
-
-  ! initialize return flag
-  localrc = ESMF_RC_NOT_IMPL
-  rc = ESMF_RC_NOT_IMPL
-
-  ! initialize test counter
-  test_failure = 0
-
-  !-----------------------------------------------------------------------------
-  ! for a single problem descriptor string, loop through each specifier file
-  ! combination
-  ! Create source and destination distributions, Fields and conduct regrid
-  !-----------------------------------------------------------------------------
-  print*,'-----------------======array redist test==========-----------------------'
-
-  do iDfile=1,PDS%nDfiles         ! distribution specifier files
-    do iGfile=1,PDS%nGfiles       ! grid specifier files
-      do iD=1, PDS%Dfiles(iDfile)%nDspecs   ! entries in distribution specifier
-        do iG=1, PDS%Gfiles(iGfile)%nGspecs ! entries in grid specifier file
-          !---------------------------------------------------------------------
-          ! create source distribution
-          !---------------------------------------------------------------------
-          call create_distribution(PDS%SrcMem, PDS%Dfiles(iDfile)%src_dist(iD),&
-                    PDS%Gfiles(iGfile)%src_grid(iG), src_distgrid, VM, localrc)
-          print*,'               '
-          write(liG,"(i5)") iG 
-          write(liD,"(i5)") iD 
-          if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
-             // " with string "  // trim(adjustL(PDS%pds)) //                  &
-             " with entry "  // trim(adjustL(liD)) // " of file " //           &
-             trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
-             // " and entry " // trim(adjustL(liG)) // " of file " //          &
-             trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
-             rcToReturn=rc)) return
-
-          !---------------------------------------------------------------------
-          ! Create Destination distribution and array
-          !---------------------------------------------------------------------
-          call create_distribution(PDS%DstMem, PDS%Dfiles(iDfile)%dst_dist(iD),&
-                    PDS%Gfiles(iGfile)%dst_grid(iG), dst_distgrid, VM, localrc)
-          write(liG,"(i5)") iG 
-          write(liD,"(i5)") iD 
-          if (ESMF_LogMsgFoundError(localrc,"error creating source distgrid "  &
-             // " with string "  // trim(adjustL(PDS%pds)) //                  &
-             " with entry "  // trim(adjustL(liD)) // " of file " //           &
-             trim(adjustL(PDS%Dfiles(iDfile)%filename))                        &
-             // " and entry " // trim(adjustL(liG)) // " of file " //          &
-             trim(adjustL(PDS%Gfiles(iGfile)%filename)),                       &
-             rcToReturn=rc)) return
-
-  !-----------------------------------------------------------------------------
-  ! Now conduct the remapping test
-  !
-  ! the test consists of a forward redistribution from the source
-  ! distribution to the destination distribution, and a second backward
-  ! redistribution from the destination back to the source distribution.
-  !-----------------------------------------------------------------------------
-          !---------------------------------------------------------------------
-          ! redistribution store for forward direction
-          !---------------------------------------------------------------------
-          if (ESMF_LogMsgFoundError(localrc,"Array redist store failed for" // &
-                  " forward direction", rcToReturn=rc)) return
-
-          !---------------------------------------------------------------------
-          ! remap run
-          !---------------------------------------------------------------------
-          if (ESMF_LogMsgFoundError(localrc,"Array redist run failed for " //  &
-                  " forward failed ", rcToReturn=rc)) return
-
-          !---------------------------------------------------------------------
-          ! release handles
-          !---------------------------------------------------------------------
-          if (ESMF_LogMsgFoundError(localrc,"redistribution release for" //    &
-                  " forward failed ", rcToReturn=rc)) return
-
-  !-----------------------------------------------------------------------------
-  ! Check redistribution
-  !-----------------------------------------------------------------------------
-          !---------------------------------------------------------------------
-          ! compare interpolated array values with the exact solution
-          !---------------------------------------------------------------------
-          if (ESMF_LogMsgFoundError(localrc,"redistribution array " //         &
-                  " comparison failed ", rcToReturn=rc)) return
-
-          PDS%test_record(iDfile,iGfile)%test_status(iD,iG) = test_status
-
-          if( test_status == HarnessTest_FAILURE ) then 
-             test_failure = test_failure + 1
-          endif
-
-          call ESMF_VMGet(VM, localPet=localPET, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"can not get local pet ",          &
-                  rcToReturn=rc)) return
-
-          call report_descriptor_string(PDS, iG, iD, iGfile, iDfile,           &
-                                        reportType, localPET, localrc)
-          if (ESMF_LogMsgFoundError(localrc,"redistribution array " //         &
-                  " test report failed ", rcToReturn=rc)) return
-
-  !-----------------------------------------------------------------------------
-  ! Clean up!!!!!!
-  !-----------------------------------------------------------------------------
-          !---------------------------------------------------------------------
-          ! Destroy Array objects before moving to next test
-          !---------------------------------------------------------------------
-
-          !---------------------------------------------------------------------
-          ! Destroy DistGrid objects before running next test
-          !---------------------------------------------------------------------
-          call ESMF_DistGridDestroy(src_distgrid, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
-             rcToReturn=rc)) return
-
-          call ESMF_DistGridDestroy(dst_distgrid, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc,"unable to destroy src_distgrid",  &
-             rcToReturn=rc)) return
 
           !---------------------------------------------------------------------
 
@@ -1924,11 +2089,19 @@
     if (ESMF_LogMsgFoundError(localrc,"error creating distgrid",               &
        rcToReturn=rc)) return
 
-! print*,'==============Dist Grid Create info=============      '
-!      print*,' Min index ', BIndx
-!      print*,' Max index ', EIndx
-!      print*,' Decomp Order ', decompOrder
-! print*,'      '
+    !---------------------------------------------------------------------------
+    ! debug
+    !---------------------------------------------------------------------------
+    if( debug_flag ) then
+        print*,'==============Dist Grid Create info=============      '
+        print*,' Min index ', BIndx
+        print*,' Max index ', EIndx
+        print*,' Decomp Order ', decompOrder
+        print*,'      '
+    endif
+    !---------------------------------------------------------------------------
+    ! debug
+    !---------------------------------------------------------------------------
 
   else
     ! singlely periodic connection
@@ -2293,26 +2466,6 @@
   allocate( ubnd(GridRank) )
 
   !-----------------------------------------------------------------------------
-  !  Check if on a sphere, if so, if units are any form of degrees, convert 
-  !  units to rad - this is to get around issue of weight generator not
-  !  understanding different units being equivalent on the sphere. 
-  !-----------------------------------------------------------------------------
-  do k=1, GridRank
-  if( (trim(Grid_info%gtype(k)%string) == "UNIFORM_POLE" ) .or.                &
-     (trim(Grid_info%gtype(k)%string) == "UNIFORM_PERIODIC")) then
-
-     if( (trim(Grid_info%gunits(k)%string) == "DEGREES")  .or.                 &
-         (trim(Grid_info%gunits(k)%string) == "DEG")  .or.                     &
-         (trim(Grid_info%gunits(k)%string) == "DEG_E")  .or.                   &
-         (trim(Grid_info%gunits(k)%string) == "DEG_N") ) then 
-             
-       Grid_info%grange(k,1) = DtoR*Grid_info%grange(k,1)
-       Grid_info%grange(k,2) = DtoR*Grid_info%grange(k,2)
-     endif
-  endif
-  enddo
-
-  !-----------------------------------------------------------------------------
   ! Allocate coordinates
   !-----------------------------------------------------------------------------
   call ESMF_GridAddCoord(Grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
@@ -2354,11 +2507,38 @@
       !-------------------------------------------------------------------------
       do j=lbnd(2),ubnd(2)
          do i=lbnd(1),ubnd(1)
-           coordX2D(i,j) = create_coord(i, Grid_info, 1)
-           coordY2D(i,j) = create_coord(j, Grid_info, 2)
-!          print*,'coord',i,j,coordX2D(i,j),coordY2D(i,j)
+           coordX2D(i,j) = create_coord(i, Grid_info, 1, localrc)
+           if (ESMF_LogMsgFoundError(localrc,"error getting x coordinates",    &
+                            rcToReturn=rc)) return
+
+           coordY2D(i,j) = create_coord(j, Grid_info, 2, localrc)
+           if (ESMF_LogMsgFoundError(localrc,"error getting y coordinates",    &
+                            rcToReturn=rc)) return
+           !--------------------------------------------------------------------
+           ! debug
+           !--------------------------------------------------------------------
+           if( debug_flag ) then
+              print*,'coord values ',i,j,coordX2D(i,j),coordY2D(i,j)
+           endif
+           !--------------------------------------------------------------------
+           ! debug
+           !--------------------------------------------------------------------
          enddo    ! i loop
       enddo    ! j loop
+
+      !-------------------------------------------------------------------------
+      ! debug
+      !-------------------------------------------------------------------------
+      if( debug_flag ) then
+         print*,'Set Coordinates'
+         print*,'x/y(1,1)',coordX2D(lbnd(1),lbnd(2)),coordY2D(lbnd(1),lbnd(2))
+         print*,'x/y(1,n)',coordX2D(lbnd(1),ubnd(2)),coordY2D(lbnd(1),ubnd(2))
+        print*,'x/y(n,n)',coordX2D(ubnd(1),ubnd(2)),coordY2D(ubnd(1),ubnd(2))
+      endif
+      !-------------------------------------------------------------------------
+      ! debug
+      !-------------------------------------------------------------------------
+
 
       case(3)
       !-------------------------------------------------------------------------
@@ -2391,9 +2571,15 @@
       do k=lbnd(3),ubnd(3)
          do j=lbnd(2),ubnd(2)
             do i=lbnd(1),ubnd(1)
-              coordX3D(i,j,k) = create_coord(i, Grid_info, 1)
-              coordY3D(i,j,k) = create_coord(j, Grid_info, 2)
-              coordZ3D(i,j,k) = create_coord(k, Grid_info, 3)
+              coordX3D(i,j,k) = create_coord(i, Grid_info, 1, localrc)
+              if (ESMF_LogMsgFoundError(localrc,"error getting x coordinates", &
+                            rcToReturn=rc)) return
+              coordY3D(i,j,k) = create_coord(j, Grid_info, 2, localrc)
+              if (ESMF_LogMsgFoundError(localrc,"error getting y coordinates", &
+                            rcToReturn=rc)) return
+              coordZ3D(i,j,k) = create_coord(k, Grid_info, 3, localrc)
+              if (ESMF_LogMsgFoundError(localrc,"error getting z coordinates", &
+                            rcToReturn=rc)) return
             enddo    ! i loop
          enddo    ! j loop
       enddo    ! k loop
@@ -4639,37 +4825,49 @@
  !------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  real(ESMF_KIND_R8) function create_coord(index, grid, axis) 
+  real(ESMF_KIND_R8) function create_coord(index, grid, axis, rc) 
   !-----------------------------------------------------------------------------
   ! selects coordinate value based upon specified grid type.
   !-----------------------------------------------------------------------------
-  integer::index, axis
+  integer, intent(in   ) :: index, axis
+  integer, intent(inout) :: rc
   type(grid_specification_record)::grid
 
+  !-----------------------------------------------------------------------------
   !
-  ! Comment out the following line, it was causing compile errors on some platforms.
-  !!real(ESMF_KIND_R8) ::  create_uniform_coord, create_gaussian_coord
   !-----------------------------------------------------------------------------
   select case( trim(grid%gtype(axis)%string) )
-      case("UNIFORM")
-         create_coord = create_uniform_coord(index, grid%grange(axis,2),       &
+    case("UNI")
+       create_coord = create_uniform_coord(index, grid%grange(axis,2),         &
                             grid%grange(axis,1), grid%gsize(axis))
-      case("UNIFORM_POLE")
-         create_coord = create_uniform_coord(index, grid%grange(axis,2),       &
+    case("UNIFORM")
+       create_coord = create_uniform_coord(index, grid%grange(axis,2),         &
                             grid%grange(axis,1), grid%gsize(axis))
-      case("UNIFORM_PERIODIC")
-         create_coord = create_uniform_coord(index, grid%grange(axis,2),       &
+    case("UNIFORM_POLE")
+       create_coord = create_uniform_coord(index, grid%grange(axis,2),         &
                             grid%grange(axis,1), grid%gsize(axis))
-      case("GAUSSIAN")
-         create_coord = create_gaussian_coord(index, grid%grange(axis,2),       &
+    case("UNIFORM_PERIODIC")
+       create_coord = create_uniform_coord(index, grid%grange(axis,2),         &
                             grid%grange(axis,1), grid%gsize(axis))
-      case("GAUSSIAN_POLE")
-         create_coord = create_gaussian_coord(index, grid%grange(axis,2),       &
+    case("GAUSS")
+       create_coord = create_gaussian_coord(index, grid%grange(axis,2),        &
                             grid%grange(axis,1), grid%gsize(axis))
-      case("GAUSSIAN_PERIODIC")
-         create_coord = create_gaussian_coord(index, grid%grange(axis,2),       &
+    case("GAUSSIAN")
+       create_coord = create_gaussian_coord(index, grid%grange(axis,2),        &
                             grid%grange(axis,1), grid%gsize(axis))
-      end select
+    case("GAUSSIAN_POLE")
+       create_coord = create_gaussian_coord(index, grid%grange(axis,2),        &
+                            grid%grange(axis,1), grid%gsize(axis))
+    case("GAUSSIAN_PERIODIC")
+       create_coord = create_gaussian_coord(index, grid%grange(axis,2),        &
+                            grid%grange(axis,1), grid%gsize(axis))
+    case default
+       print*,'Unsupported grid type',trim(grid%gtype(axis)%string)
+       call ESMF_LogMsgSetError( ESMF_FAILURE,"Unsupported grid type " //       &
+               trim(grid%gtype(axis)%string), rcToReturn=rc)
+       return
+
+  end select
 
   !-----------------------------------------------------------------------------
   end function create_coord
@@ -4707,18 +4905,31 @@
   ! create_uniform_coord(ncells) = finish
   !-----------------------------------------------------------------------------
   integer :: k, ncells
-  real(ESMF_KIND_R8) :: finish, start
+  real(ESMF_KIND_R8) :: finish, start, coord
   real(ESMF_KIND_R8), allocatable :: root(:), w(:)
 
-  !!! not correct, currently just creates a uniform grid. Need to fix.
+  ! allocate work space
   allocate( root(ncells), w(ncells) )
+
+  !-----------------------------------------------------------------------------
+  ! compute all the roots (we only are asking for one, but I can't figure out 
+  ! how to only compute the one we want).
+  !-----------------------------------------------------------------------------
   call legendre_roots(ncells,root,w)
-  create_gaussian_coord =  pih - root(ncells+1-k)
+
+  !-----------------------------------------------------------------------------
+  ! pih - root(ncells+1-k) constructs gaussian grid on the interval -pi to pi
+  ! shift to 0:2*(root(ncells)-pih)
+  !-----------------------------------------------------------------------------
+  coord =  root(ncells) - root(ncells+1-k) 
+
+  ! adjust range from start to finish 
+  create_gaussian_coord = coord * 0.5*(finish - start)/(root(ncells)-pih) + start
 
   !-----------------------------------------------------------------------------
   ! clean up
   !-----------------------------------------------------------------------------
-  deallocate( root, w)
+  deallocate( root, w )
 
   !-----------------------------------------------------------------------------
   end function create_gaussian_coord

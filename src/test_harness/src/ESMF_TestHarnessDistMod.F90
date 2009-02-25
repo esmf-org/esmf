@@ -123,7 +123,7 @@
   if( ESMF_LogMsgFoundError(localrc, "cannot create config object",           &
                             rcToReturn=localrc) ) return
 
-  if( debug_flag ) print*,'Opening Dist specifier file  ',trim( Dfile%filename )
+  print*,'Opening Dist specifier file  ',trim( Dfile%filename )
 
   call ESMF_ConfigLoadFile(localcf, trim( Dfile%filename ), rc=localrc )
   if( ESMF_LogMsgFoundError(localrc,                                           &

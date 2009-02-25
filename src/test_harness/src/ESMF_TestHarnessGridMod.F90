@@ -85,7 +85,7 @@
                             rcToReturn=rc) ) return
 
   lfilename = Gfile%filename
-! print*,'Opening Grid specifier file  ',trim( lfilename )
+  print*,'Opening Grid specifier file  ',trim( lfilename )
   call ESMF_ConfigLoadFile(localcf, trim( lfilename ), rc=localrc )
   if( ESMF_LogMsgFoundError(localrc,                                           &
          "cannot load config file " // trim( lfilename ),                      &
@@ -109,7 +109,7 @@
   select case(trim(adjustL(ltmp)) )
 
      case('REDISTRIBUTION')
-!      print*,' read grid specification for redistribution test'
+       print*,' read grid specification for redistribution test'
        call read_redistribution_grid(lfilename, Gfile%nGspecs, Gfile%src_grid, &
                 Gfile%dst_grid,localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
@@ -119,35 +119,41 @@
        print*,' read grid specification for regridding test'
        call read_regridding_grid(lfilename, Gfile%nGspecs, Gfile%src_grid,      &
                 Gfile%dst_grid, Gfile%testfunction, localrc)
-
-
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
+               rcToReturn=rc)) return
+       
+       if( debug_flag ) then
+       !------------------------------------------------------------------------
        ! print out diagnostics
+       !------------------------------------------------------------------------
        print*,'Number of grid specs', Gfile%nGspecs
        do igrid=1, Gfile%nGspecs
            print*,'====================================================='
-           print*,igrid,'SRC rank', Gfile%src_grid(igrid)%grank
+           print*,igrid,'SRC rank: ', Gfile%src_grid(igrid)%grank
            do irank=1, Gfile%src_grid(igrid)%grank
-             print*,'SRC grid type', Gfile%src_grid(igrid)%gtype(irank)%string
-             print*,'SRC size/range', Gfile%src_grid(igrid)%gsize(irank),'/',  &
+             print*,'SRC grid type: ', Gfile%src_grid(igrid)%gtype(irank)%string
+             print*,'SRC size/range:', Gfile%src_grid(igrid)%gsize(irank),'/',  &
                     Gfile%src_grid(igrid)%grange(irank,1),Gfile%src_grid(igrid)%grange(irank,2) 
-             print*,'SRC grid units', Gfile%src_grid(igrid)%gunits(irank)%string
+             print*,'SRC grid units: ', Gfile%src_grid(igrid)%gunits(irank)%string
            enddo
-           print*,igrid,'DST rank', Gfile%dst_grid(igrid)%grank
+           print*,igrid,'DST rank: ', Gfile%dst_grid(igrid)%grank
            do irank=1, Gfile%dst_grid(igrid)%grank
-             print*,'DST grid type', Gfile%dst_grid(igrid)%gtype(irank)%string
-             print*,'DST size/range', Gfile%dst_grid(igrid)%gsize(irank),'/',  &
+             print*,'DST grid type: ', Gfile%dst_grid(igrid)%gtype(irank)%string
+             print*,'DST size/range: ', Gfile%dst_grid(igrid)%gsize(irank),'/',  &
                     Gfile%dst_grid(igrid)%grange(irank,1),Gfile%dst_grid(igrid)%grange(irank,2) 
-             print*,'DST grid units', Gfile%dst_grid(igrid)%gunits(irank)%string
+             print*,'DST grid units: ', Gfile%dst_grid(igrid)%gunits(irank)%string
            enddo
            print*,'-----------------------------------------------------'
-           print*,igrid,' testfunction ', trim(Gfile%testfunction(igrid)%string)
+           print*,igrid,' testfunction: ', trim(Gfile%testfunction(igrid)%string)
            do i=1,Gfile%testfunction(igrid)%prank
-             print*,' testfunction parameters',Gfile%testfunction(igrid)%param(i)
+             print*,' testfunction parameters: ',Gfile%testfunction(igrid)%param(i)
            enddo
            print*,'====================================================='
        enddo
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
-               rcToReturn=rc)) return
+       !------------------------------------------------------------------------
+       ! print out diagnostics
+       !------------------------------------------------------------------------
+       endif
 
      case default
        ! error
