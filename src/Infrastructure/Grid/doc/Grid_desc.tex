@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.46 2009/02/04 23:14:15 theurich Exp $
+% $Id: Grid_desc.tex,v 1.47 2009/02/25 06:33:29 peggyli Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -19,9 +19,7 @@ methods such as regridding.
 In the current release (v3.1.0)
 the functionality in this class is partially implemented.  
 Multi-tile grids are not supported, and edge connectivities 
-are not implemented and default to aperiodic.  Both regular and 
-irregular distributions can be defined, but arbitrary
-distributions have not yet been implemented.  
+are not implemented and default to aperiodic.  
 Other constraints of the current
 implementation are noted in the usage section and in the API
 descriptions.
@@ -89,8 +87,7 @@ The range of supported grids in ESMF can be defined by:
 more logically rectangular grid Tiles with connectivities specified
 between cells.  For more details see section \ref{sec:ShapeShortcut}.
 \item Types of distributions supported.  ESMF supports  regular,
-irregular, or arbitrary distributions of data.  Note that arbitrary
-distributions have not been implemented as of v3.1.0.
+irregular, or arbitrary distributions of data.  
 For more details see section \ref{sec:desc:dist}.
 \item Types of coordinates supported.  ESMF supports uniform, rectilinear,
 and curvilinear coordinates.  For more details see section \ref{sec:coordspec}.
@@ -150,8 +147,10 @@ unequal numbers of contiguous grid cells are assigned to each
 DE in the distributed dimension.  An {\bf arbitrary} distribution is
 one in which any grid cell can be assigned to any DE.  Any of these
 distribution options can be applied to any of the grid shapes (i.e.,
-rectangle) or types (i.e., rectilinear).  Arbitrary distributions
-have not been implemented as of v3.1.0.
+rectangle) or types (i.e., rectilinear).  Support for arbitrary distribution 
+is limited in v4.0.0, see section \ref{sec:desc:dist} for
+more detail descriptions.
+
 
 Figure \ref{fig:GridDecomps} illustrates options for distribution.
 \begin{figure}
@@ -244,7 +243,8 @@ However, to achieve other types of staggering, the user may alter
 or eliminate this padding by using the appropriate options when adding
 coordinates to a Grid. 
  
-For examples and a full description of the stagger interface 
+In v4.0.0, only the cell center stagger location is supported for an
+arbitrarily distributed grid. For examples and a full description of the stagger interface 
 see Section~\ref{sec:usage:staggerloc}. 
 
 \subsubsection{Options for Building Grids}
@@ -297,7 +297,7 @@ the {\tt ESMF\_GridSetCommitShapeTile()} method.
 The {\tt ESMF\_GridSetCommitShapeTile()} creates the 
 grid and sets the appropriate flag to indicate that
 its usable (the status equals {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}
-after the commit). The Grid is implicitly in a valid state after being commited. 
+after the commit). The Grid is implicitly in a valid state after being committed. 
 
 For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()}
 call must occur on the same or a subset of the PETs as the
