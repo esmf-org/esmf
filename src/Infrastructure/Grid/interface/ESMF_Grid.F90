@@ -221,7 +221,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.107 2009/02/18 20:39:45 feiliu Exp $'
+      '$Id: ESMF_Grid.F90,v 1.108 2009/02/25 06:25:23 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -4895,6 +4895,7 @@ end subroutine ESMF_GridConvertIndex
     logical, pointer     :: isDist(:)
     integer, pointer     :: local1DIndices(:)
     integer              :: ind
+    logical              :: found
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -5118,13 +5119,20 @@ end subroutine ESMF_GridConvertIndex
               ESMF_CONTEXT, rc)) return
 
    if (present(coordDep1)) then
-      ! error checking, the first dimension has to be ESMF_GRID_ARBDIM
-      if (coordDep1(1) .ne. ESMF_GRID_ARBDIM) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep1(1) is not equal to ESMF_GRID_ARBDIM", & 
+      ! error checking, if this dimension is arbitrary, one of the 
+      ! coordinate dimension has to be be ESMF_GRID_ARBDIM
+      if (isDist(1)) then
+	found = .false.
+	do i=1,size(coordDep1)
+	  if (coordDep1(i) .eq. ESMF_GRID_ARBDIM) found = .true.
+        enddo
+	if (.not. found) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 "- coordDep1 does not contain ESMF_GRID_ARBDIM", & 
                  ESMF_CONTEXT, rc) 
-	return
-      endif
+	    return
+        endif
+      endif	
       coordDimCount(1)=size(coordDep1)
       coordDimMap(1,:)=0
       do i=1,size(coordDep1)
@@ -5141,13 +5149,20 @@ end subroutine ESMF_GridConvertIndex
    endif
 
    if (present(coordDep2)) then
-      ! error checking, the first dimension has to be ESMF_GRID_ARBDIM
-      if (coordDep2(1) .ne. ESMF_GRID_ARBDIM) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep2(1) is not equal to ESMF_GRID_ARBDIM", & 
+      ! error checking, one of the dimensions has to be ESMF_GRID_ARBDIM
+      ! if dimension 2 is arbitrary
+      if (isDist(2)) then
+	found = .false.
+	do i=1,size(coordDep2)
+	  if (coordDep2(i) .eq. ESMF_GRID_ARBDIM) found = .true.
+        enddo
+	if (.not. found) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 "- coordDep2 does not contain ESMF_GRID_ARBDIM", & 
                  ESMF_CONTEXT, rc) 
-	return
-      endif
+	    return
+        endif
+      endif	
       coordDimCount(2)=size(coordDep2)
       coordDimMap(2,:)=0
       do i=1,size(coordDep2)
@@ -5165,13 +5180,20 @@ end subroutine ESMF_GridConvertIndex
 
    if (dimCount .gt. 2) then
       if (present(coordDep3)) then 
-        ! error checking, the first dimension has to be ESMF_GRID_ARBDIM
-        if (coordDep3(1) .ne. ESMF_GRID_ARBDIM) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                   "- coordDep3(1) is not equal to ESMF_GRID_ARBDIM", & 
-                   ESMF_CONTEXT, rc) 
-	  return
-        endif
+        ! error checking, one of the dimensions has to be ESMF_GRID_ARBDIM
+        ! if dimension 3 is arbitrary
+        if (isDist(3)) then
+	  found = .false.
+	  do i=1,size(coordDep3)
+	    if (coordDep3(i) .eq. ESMF_GRID_ARBDIM) found = .true.
+          enddo
+	  if (.not. found) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 "- coordDep3 does not contain ESMF_GRID_ARBDIM", & 
+                 ESMF_CONTEXT, rc) 
+	    return
+          endif
+        endif	
         coordDimCount(3)=size(coordDep3)
         coordDimMap(3,:)=0
         do i=1,size(coordDep3)
@@ -14104,6 +14126,7 @@ endif
     integer, pointer     :: distDimLocal(:)
     logical, pointer     :: isDist(:)
     integer, pointer     :: local1DIndices(:)
+    logical              :: found
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -14332,13 +14355,20 @@ endif
               ESMF_CONTEXT, rc)) return
 
    if (present(coordDep1)) then
-      ! error checking, the first dimension has to be ESMF_GRID_ARBDIM
-      if (coordDep1(1) .ne. ESMF_GRID_ARBDIM) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep1(1) is not equal to ESMF_GRID_ARBDIM", & 
+      ! error checking, if this dimension is arbitrary, one of the 
+      ! coordinate dimension has to be be ESMF_GRID_ARBDIM
+      if (isDist(1)) then
+	found = .false.
+	do i=1,size(coordDep1)
+	  if (coordDep1(i) .eq. ESMF_GRID_ARBDIM) found = .true.
+        enddo
+	if (.not. found) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 "- coordDep1 does not contain ESMF_GRID_ARBDIM", & 
                  ESMF_CONTEXT, rc) 
-	return
-      endif
+	    return
+        endif
+      endif	
       coordDimCount(1)=size(coordDep1)
       coordDimMap(1,:)=0
       do i=1,size(coordDep1)
@@ -14355,13 +14385,20 @@ endif
    endif
 
    if (present(coordDep2)) then
-      ! error checking, the first dimension has to be ESMF_GRID_ARBDIM
-      if (coordDep2(1) .ne. ESMF_GRID_ARBDIM) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep2(1) is not equal to ESMF_GRID_ARBDIM", & 
+      ! error checking, one of the dimensions has to be ESMF_GRID_ARBDIM
+      ! if dimension 2 is arbitrary
+      if (isDist(2)) then
+	found = .false.
+	do i=1,size(coordDep2)
+	  if (coordDep2(i) .eq. ESMF_GRID_ARBDIM) found = .true.
+        enddo
+	if (.not. found) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 "- coordDep2 does not contain ESMF_GRID_ARBDIM", & 
                  ESMF_CONTEXT, rc) 
-	return
-      endif
+	    return
+        endif
+      endif	
       coordDimCount(2)=size(coordDep2)
       coordDimMap(2,:)=0
       do i=1,size(coordDep2)
@@ -14379,13 +14416,20 @@ endif
 
    if (dimCount .gt. 2) then
       if (present(coordDep3)) then 
-        ! error checking, the first dimension has to be ESMF_GRID_ARBDIM
-        if (coordDep3(1) .ne. ESMF_GRID_ARBDIM) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
-                   "- coordDep3(1) is not equal to ESMF_GRID_ARBDIM", & 
-                   ESMF_CONTEXT, rc) 
-	  return
-        endif
+        ! error checking, one of the dimensions has to be ESMF_GRID_ARBDIM
+        ! if dimension 3 is arbitrary
+        if (isDist(3)) then
+	  found = .false.
+	  do i=1,size(coordDep3)
+	    if (coordDep3(i) .eq. ESMF_GRID_ARBDIM) found = .true.
+          enddo
+	  if (.not. found) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 "- coordDep3 does not contain ESMF_GRID_ARBDIM", & 
+                 ESMF_CONTEXT, rc) 
+	    return
+          endif
+        endif	
         coordDimCount(3)=size(coordDep3)
         coordDimMap(3,:)=0
         do i=1,size(coordDep3)
