@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.13 2009/02/16 19:14:31 rokuingh Exp $
+// $Id: ESMCI_Util.h,v 1.14 2009/02/25 05:30:52 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -97,6 +97,15 @@ enum ESMC_AttPackNestFlag { ESMF_ATTPACKNEST_OFF=0,
 // Attribute reconcile type
 enum ESMC_AttReconcileFlag { ESMF_ATTRECONCILE_OFF=0,
                             ESMF_ATTRECONCILE_ON};
+
+// Attribute reconcile type
+enum ESMC_AttCopyFlag { ESMF_ATTCOPY_HYBRID=0,
+                        ESMF_ATTCOPY_REFERENCE,
+                        ESMF_ATTCOPY_VALUE};
+
+// Attribute reconcile type
+enum ESMC_AttTreeFlag { ESMF_ATTTREE_OFF=0,
+                        ESMF_ATTTREE_ON};
 
 // are the index numbers relative to a local chunk or the overall
 // combined igrid?

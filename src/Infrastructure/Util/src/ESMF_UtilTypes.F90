@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.73 2009/02/16 19:14:31 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.74 2009/02/25 05:30:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -529,6 +529,37 @@
         ESMF_ATTRECONCILE_ON = ESMF_AttReconcileFlag(1)
 
 !------------------------------------------------------------------------------
+!     ! ESMF_AttCopyFlag
+!
+!     ! Interface flag for Attribute copy
+
+      type ESMF_AttCopyFlag
+      sequence
+      !private
+        integer :: value
+      end type
+
+      type(ESMF_AttCopyFlag), parameter ::  &
+        ESMF_ATTCOPY_HYBRID = ESMF_AttCopyFlag(0), &
+        ESMF_ATTCOPY_REFERENCE = ESMF_AttCopyFlag(1), &
+        ESMF_ATTCOPY_VALUE = ESMF_AttCopyFlag(2)
+
+!------------------------------------------------------------------------------
+!     ! ESMF_AttTreeFlag
+!
+!     ! Interface flag for Attribute tree
+
+      type ESMF_AttTreeFlag
+      sequence
+      !private
+        integer :: value
+      end type
+
+      type(ESMF_AttTreeFlag), parameter ::  &
+        ESMF_ATTTREE_OFF = ESMF_AttTreeFlag(0), &
+        ESMF_ATTTREE_ON = ESMF_AttTreeFlag(1)
+
+!------------------------------------------------------------------------------
 !BOPI
 !
 ! !PUBLIC TYPES:
@@ -580,6 +611,9 @@
       public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
       public ESMF_AttPackNestFlag, ESMF_ATTPACKNEST_OFF, ESMF_ATTPACKNEST_ON
       public ESMF_AttReconcileFlag, ESMF_ATTRECONCILE_OFF, ESMF_ATTRECONCILE_ON
+      public ESMF_AttCopyFlag, ESMF_ATTCOPY_HYBRID, ESMF_ATTCOPY_REFERENCE, &
+                               ESMF_ATTCOPY_VALUE
+      public ESMF_AttTreeFlag, ESMF_ATTTREE_OFF, ESMF_ATTTREE_ON
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
