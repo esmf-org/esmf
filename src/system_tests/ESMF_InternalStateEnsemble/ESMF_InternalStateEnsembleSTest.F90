@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.2 2009/02/13 00:54:37 theurich Exp $
+! $Id: ESMF_InternalStateEnsembleSTest.F90,v 1.3 2009/02/25 22:09:38 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -8,17 +8,17 @@
 !
 ! !DESCRIPTION:
 ! System test InternalStateEnsemble.  
-!    The purpose of this system test is to demonstrate how a ensemble can 
+!    The purpose of this system test is to demonstrate how an ensemble can 
 !    be written using internal States
 !
-!    A gridded component defines three internal States each with a
-!    2D source Array 100x150. A second gridded component also defines internal
+!    A Gridded Component defines three internal States each with a
+!    2D source Array 100x150. A second gridded component also defines three internal
 !    States with three destination Arrays also 100x150.
 !
-!    The coupler component reconciles import and export States which contain 
+!    The Coupler Component reconciles import and export States which contain 
 !    source and destination Arrays, respectively.    
 !
-!    The following concurrent loop is repeated five times using a clock.
+!    The following sequential loop is repeated five times using a clock.
 !   
 !    On the first time through the loop, Component 1 intializes it's source Array
 !    in its first internal State to all ones, initializes its source Array in its
@@ -28,8 +28,8 @@
 !    in its export State.
 !
 !    The Coupler Component redistribures the Arrays in the export State
-!    to the import State of the second gridded Component by calling ArrayRedist.
-!    Finally the second gridded component compares the data stored in the
+!    to the import State of the second Gridded Component by calling ArrayRedist.
+!    Finally the second Gridded Component compares the data stored in the
 !    destination Arrays to the expected values as a measure of the accuracy 
 !    of the ArrayRedist() method.
 
