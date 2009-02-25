@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.22 2009/02/24 00:01:59 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.23 2009/02/25 05:28:39 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -143,7 +143,8 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
                           
     ! copy all Attribute information into export State
-    call ESMF_AttributeCopy(importState, exportState, rc=rc)
+    call ESMF_AttributeCopy(importState, exportState, &
+      ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
   
   end subroutine user_run

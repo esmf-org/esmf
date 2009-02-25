@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.55 2009/02/16 19:14:32 rokuingh Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.56 2009/02/25 05:29:45 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.55 2009/02/16 19:14:32 rokuingh Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.56 2009/02/25 05:29:45 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -798,7 +798,8 @@
             offset = 0
             call c_ESMC_BaseDeserialize(base, bptr, offset, &
               attreconflag, localrc)
-            call c_ESMC_AttributeCopy(base, state%statep%base, localrc)
+            call c_ESMC_AttributeCopy(base, state%statep%base, &
+              ESMF_ATTCOPY_VALUE, ESMF_ATTTREE_OFF, localrc)
           endif
           attreconstart = 2
         else

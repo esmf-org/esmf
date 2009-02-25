@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeStateUTest.F90,v 1.5 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_AttributeStateUTest.F90,v 1.6 2009/02/25 05:29:18 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeStateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeStateUTest.F90,v 1.5 2009/01/21 21:38:02 cdeluca Exp $'
+      '$Id: ESMF_AttributeStateUTest.F90,v 1.6 2009/02/25 05:29:18 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -954,7 +954,8 @@ program ESMF_AttributeStateUTest
 
       !NEX_UTest
       ! Copy an Attribute hierarchy from state1 to state2
-      call ESMF_AttributeCopy(state, state2, rc=rc)
+      call ESMF_AttributeCopy(state, state2, ESMF_ATTCOPY_VALUE, &
+        ESMF_ATTTREE_OFF, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Copy an Attribute hierarchy from state1 to state2"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

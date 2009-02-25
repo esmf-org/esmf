@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.13 2009/02/23 23:56:26 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.14 2009/02/25 05:29:18 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.13 2009/02/23 23:56:26 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.14 2009/02/25 05:29:18 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -155,7 +155,7 @@ module ESMF_AttributeMod
       interface ESMF_AttributeCopy
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_StateAttributeCopyAll
+        module procedure ESMF_StateAttributeCopy
         
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that copy
@@ -510,11 +510,13 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeCopy() 
-!     subroutine ESMF_AttributeCopyAll(<object1>, <object2>, rc)
+!     subroutine ESMF_AttributeCopyAll(<object1>, <object2>, attcopyflag, atttreeflag, rc)
 !
 ! !ARGUMENTS:
 !     <object1>, see below for supported values  
 !     <object2>, see below for supported values 
+!     type(ESMF_AttCopyFlag), intent(in) :: attcopyflag
+!     type(ESMF_AttTreeFlag), intent(in) :: atttreeflag
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -534,10 +536,29 @@ contains
 !           An {\tt ESMF} object.
 !     \item [<object2>]
 !           An {\tt ESMF} object.
+!     \item [attcopyflag]
+!           A flag to determine if the copy is to be by reference, value,
+!           or both
+!     \item [atttreeflag]
+!           A flag to determine if the copy is supposed to descend the 
+!           Attribute hierarchy
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!     NOTE:  The options for {\tt attcopyflag} include:
+!            \begin{enumerate}
+!              \item ESMF\_ATTCOPY\_HYBRID will copy the top base level
+!		     Attributes by value, and all others by reference
+!              \item ESMF\_ATTCOPY\_REFERENCE will copy all Attributes by reference
+!              \item ESMF\_ATTCOPY\_VALUE will copy all Attributes by value
+!            \end{enumerate}
+!            The options for {\tt atttreeflag} include:
+!            \begin{enumerate}
+!              \item ESMF\_ATTTREE\_OFF will only descend the first base level 
+!                    of the Attribute hierarchy
+!              \item ESMF\_ATTTREE\_ON will descend the entire Attribute hierarchy
+!            \end{enumerate}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -5627,17 +5648,19 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateAttributeCopyAll"
+^define ESMF_METHOD "ESMF_StateAttributeCopy"
 !BOPI
-! !IROUTINE: ESMF_StateAttributeCopyAll - Copy an Attribute hierarchy between states
+! !IROUTINE: ESMF_StateAttributeCopy - Copy an Attribute hierarchy between states
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeCopy()
-      subroutine ESMF_StateAttributeCopyAll(state1, state2, rc)
+      subroutine ESMF_StateAttributeCopy(state1, state2, attcopyflag, atttreeflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state1  
-      type(ESMF_State), intent(inout) :: state2 
+      type(ESMF_State), intent(inout) :: state2
+      type(ESMF_AttCopyFlag), intent(in) :: attcopyflag
+      type(ESMF_AttTreeFlag), intent(in) :: atttreeflag
       integer, intent(out), optional :: rc   
 
 !
@@ -5650,6 +5673,11 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
 !      An {\tt ESMF\_State} object.
 !     \item [state2]
 !      An {\tt ESMF\_State} object.
+!     \item [attcopyflag]
+!      A flag to determine if the copy is to be by reference, value, or both
+!     \item [atttreeflag]
+!      A flag to determine if the copy is supposed to descend the Attribute 
+!      hierarchy
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5678,14 +5706,15 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_AttributeCopyAll(state1%statep%base, state2%statep%base, localrc)
+      call c_ESMC_AttributeCopy(state1%statep%base, state2%statep%base, &
+                                attcopyflag, atttreeflag, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateAttributeCopyAll
+      end subroutine ESMF_StateAttributeCopy
 
 
 !------------------------------------------------------------------------------

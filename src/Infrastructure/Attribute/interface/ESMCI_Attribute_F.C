@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.9 2009/02/03 17:37:57 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.10 2009/02/25 05:28:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.9 2009/02/03 17:37:57 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.10 2009/02/25 05:28:16 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1973,6 +1973,8 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **source,              // in/out - base object
       ESMC_Base **destination,         // in/out - base object
+      ESMC_AttCopyFlag *attcopyflag,   // in - attcopyflag
+      ESMC_AttTreeFlag *atttreeflag,   // in - atttreeflag
       int *rc) {                       // in/out - return code
 // 
 // !DESCRIPTION:
@@ -1999,69 +2001,43 @@ extern "C" {
     return;
   }
   
-  status = (**destination).root.AttributeCopy((**source).root);
-  if (status != ESMF_SUCCESS) {
+  if (!attcopyflag) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed attributecopy", &status);
+                         "bad ESMC_AttCopyFlag", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+  
+  if (!atttreeflag) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad ESMC_AttTreeFlag", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+  
+  if (*attcopyflag == ESMF_ATTCOPY_VALUE && *atttreeflag == ESMF_ATTTREE_OFF) {
+      status = (**destination).root.AttributeCopyValue((**source).root);
+      if (status != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed attributecopyvalue", &status);
+      }
+  }
+  else if (*attcopyflag == ESMF_ATTCOPY_HYBRID) {
+      status = (**destination).root.AttributeCopyHybrid((**source).root);
+      if (status != ESMF_SUCCESS) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed attributecopyhybrid", &status);
+      }
+  }
+  else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "invalid attribute copy flag combination", &status);
   }
   
   if (rc) *rc = status;
   return;
 
 }  // end c_ESMC_AttributeCopy
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeCopyAll - copy an attribute hierarchy between objects
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributecopyall)(
-//
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributecopyall()"
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **source,              // in/out - base object
-      ESMC_Base **destination,         // in/out - base object
-      int *rc) {                       // in/out - return code
-// 
-// !DESCRIPTION:
-//     Copy the Attribute hierarchy from Base1 to Base2
-//
-//EOP
-
-  int status;
-  
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!source) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad source base", &status);
-    if (rc) *rc = status;    
-    return;
-  }
-  
-  if (!destination) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad destination base", &status);
-    if (rc) *rc = status;    
-    return;
-  }
-
-  status = (**destination).root.AttributeCopyAll(*source);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed attributecopyall", &status);
-  }
-  
-  if (rc) *rc = status;
-  return;
-
-}  // end c_ESMC_AttributeCopyAll
 
 //-----------------------------------------------------------------------------
 //BOP

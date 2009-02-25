@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.10 2009/02/03 17:37:57 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.11 2009/02/25 05:28:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -119,9 +119,12 @@ class Attribute
       const string &purpose, const string &object);
     
     // copy an attribute hierarchy
-    int AttributeCopy(const Attribute &source);
-    int AttributeCopyAll(ESMC_Base *source);
-
+    int  AttributeCopy(const Attribute &source);
+    int  AttributeCopyHybrid(const Attribute &source);
+//    int  AttributeCopyReference(const Attribute &source);
+//    int  AttributeCopyReferenceTree(const Attribute &source);
+    int  AttributeCopyValue(const Attribute &source);
+//    int  AttributeCopyValueTree(const Attribute &source);
     
     // count the number of objects in an attribute hierarchy
     int AttributeCountTree(const string &convention, const string &purpose,  
@@ -225,7 +228,7 @@ class Attribute
       int numitems, void *datap);
     int AttrModifyValue(const ESMC_TypeKind &typekind, int numitems, 
       void *datap);
-    Attribute& operator=(const Attribute &source);
+    Attribute& operator=(const Attribute& source);
     ~Attribute(void);
     int ESMC_Deserialize(char *buffer, int *offset);
     int ESMC_Serialize(char *buffer, int *length, int *offset) const;
@@ -273,7 +276,8 @@ extern "C" {
   void FTN(c_esmc_attributewritexml)(ESMC_Base **base, char *convention, char *purpose,
                                   char *object, char *targetobj, int *rc, 
                                   int clen, int plen, int olen, int tlen);
-  void FTN(c_esmc_attributecopyall)(ESMC_Base **source, ESMC_Base **destination, int *rc);
+  void FTN(c_esmc_attributecopy)(ESMC_Base **source, ESMC_Base **destination, 
+                                ESMC_AttCopyFlag *attcopyflag, ESMC_AttTreeFlag *atttreeflag, int *rc);
   void FTN(c_esmc_attributedestroy)(ESMC_Base **base, char *name, int *rc, int nlen);
   void FTN(c_esmc_attributegetcount)(ESMC_Base **base, int *count, int *rc);
   void FTN(c_esmc_attributegetinfoname)(ESMC_Base **base, char *name, 

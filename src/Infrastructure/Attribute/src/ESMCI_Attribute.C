@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.14 2009/02/03 17:37:57 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.15 2009/02/25 05:28:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.14 2009/02/03 17:37:57 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.15 2009/02/25 05:28:16 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -669,7 +669,7 @@ namespace ESMCI {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeCopy"
 //BOPI
-// !IROUTINE:  AttributeCopy - copy {\tt Attributes} between objects 
+// !IROUTINE:  AttributeCopy - copy all {\tt Attribute} data 
 //
 // !INTERFACE:
       int Attribute::AttributeCopy(
@@ -678,17 +678,36 @@ namespace ESMCI {
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      const Attribute &source) {  // in - the source object
+        const Attribute &source) {   // in - source
 // 
 // !DESCRIPTION:
-//     All {\tt Attributes} associated with the source object are copied to the
-//     destination object (*this) without copying through links.
+//     All of the {\tt Attribute} data associated with the source object is 
+//     copied.
 //
 //EOPI
 
-  int i, localrc;
-  Attribute *attr;
+  int localrc;
 
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // TODO: should check for self copy!!!
+
+  // first clear destinations value arguments
+  vi = 0;
+  vip.clear();
+  vtl = 0;
+  vlp.clear();
+  vf = 0;
+  vfp.clear();
+  vd = 0;
+  vdp.clear();
+  vb = ESMF_FALSE;
+  vbp.clear();
+  vcp = "";
+  vcpp.clear();
+  
+  // now reset all Attribute info
   attrName = source.attrName;
   tk = source.tk;
   items = source.items;
@@ -704,62 +723,40 @@ namespace ESMCI {
 
   valueChange = ESMF_TRUE;
 
-  if (items == 1) {
-        if (tk == ESMC_TYPEKIND_I4)
+  if (source.items == 1) {
+        if (source.tk == ESMC_TYPEKIND_I4)
             vi = source.vi;  
-        else if (tk == ESMC_TYPEKIND_I8)
+        else if (source.tk == ESMC_TYPEKIND_I8)
             vtl = source.vtl;  
-        else if (tk == ESMC_TYPEKIND_R4)
+        else if (source.tk == ESMC_TYPEKIND_R4)
             vf = source.vf;  
-        else if (tk == ESMC_TYPEKIND_R8)
+        else if (source.tk == ESMC_TYPEKIND_R8)
             vd = source.vd;  
-        else if (tk == ESMC_TYPEKIND_LOGICAL)
+        else if (source.tk == ESMC_TYPEKIND_LOGICAL)
             vb = source.vb;
-        else if (tk == ESMC_TYPEKIND_CHARACTER)
+        else if (source.tk == ESMC_TYPEKIND_CHARACTER)
             vcp = source.vcp;
-  } else if (items > 1) {
+  } else if (source.items > 1) {
     // items > 1, alloc space for a list and do the copy
-          if (tk == ESMC_TYPEKIND_I4) {
-              vip.clear();
-              vip.reserve(items);
+          if (source.tk == ESMC_TYPEKIND_I4) {
+              vip.reserve(source.items);
               vip = source.vip;
-          } else if (tk == ESMC_TYPEKIND_I8) {
-              vlp.clear();
-              vlp.reserve(items);
+          } else if (source.tk == ESMC_TYPEKIND_I8) {
+              vlp.reserve(source.items);
               vlp = source.vlp;
-          } else if (tk == ESMC_TYPEKIND_R4) {
-              vfp.clear();
-              vfp.reserve(items);
+          } else if (source.tk == ESMC_TYPEKIND_R4) {
+              vfp.reserve(source.items);
               vfp = source.vfp;
-          } else if (tk == ESMC_TYPEKIND_R8) {
-              vdp.clear();
-              vdp.reserve(items);
+          } else if (source.tk == ESMC_TYPEKIND_R8) {
+              vdp.reserve(source.items);
               vdp = source.vdp;
-          } else if (tk == ESMC_TYPEKIND_LOGICAL){
-              vbp.clear();
-              vbp.reserve(items);
+          } else if (source.tk == ESMC_TYPEKIND_LOGICAL){
+              vbp.reserve(source.items);
               vbp = source.vbp;
-          } else if (tk == ESMC_TYPEKIND_CHARACTER) {
-              vcpp.clear();
-              vcpp.reserve(items);
+          } else if (source.tk == ESMC_TYPEKIND_CHARACTER) {
+              vcpp.reserve(source.items);
               vcpp = source.vcpp;
           }
-  }
-
-  // if Attribute list, copy it.
-  for (i=0; i<source.attrCount; i++) {
-    if(source.attrList.at(i)->attrRoot != ESMF_TRUE) {
-      attr = new Attribute(ESMF_FALSE);
-      attr->attrBase = this->attrBase; 
-      localrc = attr->AttributeCopy(*(source.attrList.at(i)));
-      localrc = AttributeSet(attr);
-      if (localrc != ESMF_SUCCESS) {
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                             "AttributeCopy bailed", 
-                             &localrc);
-          return ESMF_FAILURE;
-      }
-    }
   }
 
   return ESMF_SUCCESS;
@@ -767,35 +764,137 @@ namespace ESMCI {
 }  // end AttributeCopy
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeCopyAll"
+#define ESMC_METHOD "AttributeCopyHybrid"
 //BOPI
-// !IROUTINE:  AttributeCopyAll - copy {\tt Attributes} between objects 
+// !IROUTINE:  AttributeCopyHybrid - copy {\tt Attributes} between ESMF objects
 //
 // !INTERFACE:
-      int Attribute::AttributeCopyAll(
-// 
+      int Attribute::AttributeCopyHybrid(
+//
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
+//
 // !ARGUMENTS:
-      ESMC_Base *source) {  // in - the source object
-// 
+        const Attribute &source) {   // in - source
+//
 // !DESCRIPTION:
-//     All {\tt Attributes} associated with the source object are copied to the
-//     destination object (*this).
+//   Copy all {\tt Attribute} data, copy by value all {\tt Attributes} in this
+//   base level, and copy by reference all {\tt Attributes} in lower base levels.
 //
 //EOPI
-
-  int localrc;
-
+  int i, localrc;
+  Attribute *attr;
+  
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
-  
-  *this = source->root;
-  
+
+  // call local copy on this Attribute 
+  localrc = AttributeCopy(source);
+  if (localrc != ESMF_SUCCESS) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                          "AttributeCopyHybrid() bailed in AttributeCopy()", 
+                          &localrc);
+      return ESMF_FAILURE;
+  }
+
+  // if this base level copy by value, if not copy by value
+  for (i=0; i<source.attrCount; i++) {
+    if(source.attrList.at(i)->attrRoot != ESMF_TRUE) {
+      attr = new Attribute(ESMF_FALSE);
+      // set new attr to point to its intented destination and recurse
+      (attr->attrBase) = (this->attrBase); 
+      localrc = attr->AttributeCopyValue(*(source.attrList.at(i)));
+      if (localrc != ESMF_SUCCESS) {
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                             "AttributeCopyValue() bailed in recursion", 
+                             &localrc);
+          return ESMF_FAILURE;
+      }
+      localrc = AttributeSet(attr);
+      if (localrc != ESMF_SUCCESS) {
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                             "AttributeCopyHybrid() bailed in AttributeSet()", 
+                             &localrc);
+          return ESMF_FAILURE;
+      }
+      // update of count and flags is handled in AttributeSet()
+    }
+    else {
+      attr = source.attrList.at(i);
+      attrList.push_back(attr);
+      // update count and flags
+      attrCount++;
+      structChange = ESMF_TRUE;
+      linkChange = ESMF_TRUE;
+    }
+  }
+
   return ESMF_SUCCESS;
 
-}  // end AttributeCopyAll
+ } // end AttributeCopyHybrid
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeCopyValue"
+//BOPI
+// !IROUTINE:  AttributeCopyValue - copy {\tt Attributes} between ESMF objects
+//
+// !INTERFACE:
+      int Attribute::AttributeCopyValue(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+        const Attribute &source) {   // in - source
+//
+// !DESCRIPTION:
+//   Copy all {\tt Attribute} data and copy by value all {\tt Attributes} in 
+//   this base level.
+//
+//EOPI
+  int i, localrc;
+  Attribute *attr;
+  
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // call local copy on source
+  localrc = AttributeCopy(source);
+  if (localrc != ESMF_SUCCESS) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                          "AttributeCopyValue() bailed in AttributeCopy()", 
+                          &localrc);
+      return ESMF_FAILURE;
+  }
+
+  // copy base level Attributes by value
+  for (i=0; i<source.attrCount; i++) {
+    if(source.attrList.at(i)->attrRoot != ESMF_TRUE) {
+      attr = new Attribute(ESMF_FALSE);
+      // set new attr to point to its intented destination and recurse
+      (attr->attrBase) = (this->attrBase); 
+      localrc = attr->AttributeCopyValue(*(source.attrList.at(i)));
+      if (localrc != ESMF_SUCCESS) {
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                             "AttributeCopyValue() bailed in recursion", 
+                             &localrc);
+          return ESMF_FAILURE;
+      }
+      // add newly initialized attr to destination
+      localrc = AttributeSet(attr);
+      if (localrc != ESMF_SUCCESS) {
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                             "AttributeCopyValue() bailed in AttributeSet()", 
+                             &localrc);
+          return ESMF_FAILURE;
+      }
+      // update of count and flags is handled in AttributeSet()
+    }
+  }
+
+  return ESMF_SUCCESS;
+
+ } // end AttributeCopyValue
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeCountTree"
@@ -3497,6 +3596,7 @@ namespace ESMCI {
   vdp.reserve(0);
   vb = ESMF_FALSE;
   vbp.reserve(0);
+  
 
 } // end Attribute
 //-----------------------------------------------------------------------------
@@ -3705,101 +3805,39 @@ namespace ESMCI {
  } // end AttrModifyValue
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeCopy(=)"
+#define ESMC_METHOD "AttributeOperator="
 //BOPI
-// !IROUTINE:  AttributeCopy(=) - assignment operator for {\tt Attribute}
+// !IROUTINE:  Attribute - generic operator=
 //
 // !INTERFACE:
       Attribute& Attribute::operator=(
 //
-// !RETURN VALUE:
-//    Updated desination {\tt Attribute}
-//
 // !ARGUMENTS:
-        const Attribute &source) {   // in - Attribute
-//
+      const Attribute& source) {
+// 
+// !RETURN VALUE:
+//    {\tt Attribute} object.
+// 
 // !DESCRIPTION:
-//   Copy an {\tt Attribute}, including contents, to destination (this).
+//    Generic operator= call AttributeCopyValue.
 //
 //EOPI
-  int i, localrc;
-  Attribute *attr;
 
-  attrName = source.attrName;
-  tk = source.tk;
-  items = source.items;
-  slen = source.slen;
-  attrRoot = source.attrRoot;
+  int localrc;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  localrc = AttributeCopyValue(source);
+  if (localrc != ESMF_SUCCESS) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                          "AttributeOperator= bailed in AttributeCopyValue()", 
+                          &localrc);
+  }
   
-  attrConvention = source.attrConvention;
-  attrPurpose = source.attrPurpose;
-  attrObject = source.attrObject;
-  attrPack = source.attrPack;
-  attrPackHead = source.attrPackHead;
-  attrNested = source.attrNested;
-
-  valueChange = ESMF_TRUE;
-
-  if (items == 1) {
-        if (tk == ESMC_TYPEKIND_I4)
-            vi = source.vi;  
-        else if (tk == ESMC_TYPEKIND_I8)
-            vtl = source.vtl;  
-        else if (tk == ESMC_TYPEKIND_R4)
-            vf = source.vf;  
-        else if (tk == ESMC_TYPEKIND_R8)
-            vd = source.vd;  
-        else if (tk == ESMC_TYPEKIND_LOGICAL)
-            vb = source.vb;
-        else if (tk == ESMC_TYPEKIND_CHARACTER)
-            vcp = source.vcp;
-  } else if (items > 1) {
-    // items > 1, alloc space for a list and do the copy
-          if (tk == ESMC_TYPEKIND_I4) {
-              vip.clear();
-              vip.reserve(items);
-              vip = source.vip;
-          } else if (tk == ESMC_TYPEKIND_I8) {
-              vlp.clear();
-              vlp.reserve(items);
-              vlp = source.vlp;
-          } else if (tk == ESMC_TYPEKIND_R4) {
-              vfp.clear();
-              vfp.reserve(items);
-              vfp = source.vfp;
-          } else if (tk == ESMC_TYPEKIND_R8) {
-              vdp.clear();
-              vdp.reserve(items);
-              vdp = source.vdp;
-          } else if (tk == ESMC_TYPEKIND_LOGICAL){
-              vbp.clear();
-              vbp.reserve(items);
-              vbp = source.vbp;
-          } else if (tk == ESMC_TYPEKIND_CHARACTER) {
-              vcpp.clear();
-              vcpp.reserve(items);
-              vcpp = source.vcpp;
-          }
-  }
-
-  // if Attribute list, copy it.
-  for (i=0; i<source.attrCount; i++) {
-    if(source.attrList.at(i)->attrRoot == ESMF_FALSE) {
-      attr = new Attribute(ESMF_FALSE);
-      *attr = *(source.attrList.at(i));
-      localrc = AttributeSet(attr);
-    }
-    else {
-      attr = source.attrList.at(i);
-      attrList.push_back(attr);
-      attrCount++;
-      structChange = ESMF_TRUE;
-    }
-  }
-
   return (*this);
 
- } // end Attribute::operator=
+}  // end AttributeOperator=
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "~Attribute()"
