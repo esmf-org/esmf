@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.59 2009/02/12 20:39:54 svasquez Exp $ 
+# $Id: makefile,v 1.60 2009/02/26 06:51:37 theurich Exp $ 
 
 ALL: build_system_tests
 
@@ -21,7 +21,6 @@ DIRS      = ESMF_CompCreate \
             ESMF_ArrayRedist3D \
             ESMF_DirectCoupling \
             ESMF_ArrayBundleSparseMatMul \
-            ESMF_DistDir \
             ESMF_FieldSparseMatMul \
             ESMF_ConcurrentComponent \
             ESMF_FieldConcurrentComp \

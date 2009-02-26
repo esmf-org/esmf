@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.6 2008/09/26 05:53:54 cdeluca Exp $
+# $Id: makefile,v 1.7 2009/02/26 06:51:37 theurich Exp $
 
 ALL: build_here 
 
-SOURCEC	  = ESMC_SparseMsgVM.C ESMC_DistDir.C ESMC_GridToMesh.C
+SOURCEC	  = ESMC_GridToMesh.C
 SOURCEF	  = ESMF_GeomBase.F90
 SOURCEH	  = 
 
