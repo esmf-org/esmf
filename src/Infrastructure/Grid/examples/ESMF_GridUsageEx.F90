@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.52 2009/02/25 22:18:47 theurich Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.53 2009/02/26 23:44:41 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -288,6 +288,7 @@ endif
    ! Create a 3D Grid with the 1st and 3rd dimension arbitrarily distributed
    grid3D=ESMF_GridCreateShapeTile(maxIndex=(/5,6,5/), & 
          localIndices=localIndices, localCount=5, distDim=(/1,3/), rc=rc)   
+!EOC
 
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
@@ -295,8 +296,6 @@ endif
    call ESMF_GridDestroy(grid2D, rc=rc)
    call ESMF_GridDestroy(grid3D, rc=rc)
    deallocate(localIndices)
-
-!
 
 #ifdef LOCAL_NOT_IMPL
 !BOEI
@@ -850,10 +849,9 @@ endif
 ! \label{example:ArbGridWithUndistDim}
 !
 ! There are more restrictions in defining an arbitrarily distributed grid.  
-! First, there is always one DE per PET.  Secondly, only local index
-! ({\tt ESMF\_INDEX\_LOCAL}) is supported. Third, only one stagger location,
-! i.e. {\tt ESMF\_STAGGERLOC\_CENTER} is allowed and last there is no extra
-! paddings on the edge of the grid.  
+! First, there is always one DE per PET.  Secondly, only local index ({\tt ESMF\_INDEX\_LOCAL})
+! is supported. Third, only one stagger location, i.e. {\tt ESMF\_STAGGERLOC\_CENTER} is allowed
+! and last there is no extra paddings on the edge of the grid.  
 !
 ! This example demonstrates how a user can build a 3D grid with its rectilinear 
 ! horizontal Grid distributed arbitrarily and a non-distributed vertical dimension.
@@ -893,7 +891,6 @@ endif
       enddo
    endif
 
-   print *, 'localCount, remain', localCount, remain
    !-------------------------------------------------------------------
    ! Create the Grid:  Allocate space for the Grid object.  
    ! the minIndex hasn't been set, so it defaults to (1,1,...). The
@@ -910,10 +907,9 @@ endif
             localCount = localCount, &
             rc=rc)
 
-   print *, 'created arb grid 1'
    !-------------------------------------------------------------------
    ! Allocate coordinate storage for the center stagger location, the 
-   ! only stagger location supported for the arbitrary distribution  
+   ! only stagger location supported for the arbitrary distribution.
    !-------------------------------------------------------------------
    call ESMF_GridAddCoord(grid3D, &
           staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=rc)
@@ -928,7 +924,6 @@ endif
           computationalUBound=ubnd,                 &
           fptr=centerX, rc=rc)
 
-   print *, 'x gridcoord bound', lbnd(1), ubnd(1)
 
    !----------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension.
@@ -947,8 +942,6 @@ endif
           computationalLBound=lbnd, computationalUBound=ubnd, &
           fptr=centerY, rc=rc)
 
-   print *, 'y gridcoord bound', lbnd(1), ubnd(1)
-
    !----------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension.
    !----------------------------------------------------------------
@@ -964,8 +957,6 @@ endif
           staggerloc=ESMF_STAGGERLOC_CENTER,               &
           computationalLBound=lbnd, computationalUBound=ubnd,&
           fptr=centerZ, rc=rc)
-
-   print *, 'z gridcoord bound', lbnd(1), ubnd(1)
 
    !----------------------------------------------------------------
    ! Calculate and set the vertical coordinates
@@ -1132,8 +1123,8 @@ endif
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
-! Note only the center stagger location {\tt ESMF\_STAGGERLOC\_CENTER} is 
-! supported in the arbitrarily distributed grid.
+! Note only the center stagger location {\tt ESMF\_STAGGERLOC\_CENTER} is supported 
+! in the arbitrarily distributed grid.
 !EOE
 
 #ifdef LOCAL_NOT_IMPL
@@ -1235,12 +1226,11 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOE
 ! For an arbitrarily distributed grid, the default value of a coordinate
 ! array dimension is {\tt ESMF\_GRID\_ARBDIM} if the index dimension is arbitrarily
-! distributed and is {\tt n} where n is the index dimension itself when it is not
+! distributed and is {\tt n} where {\tt n} is the index dimension itself when it is not
 ! distributed. The following call is equivalent to the example in 
-! Section~\ref{example:ArbGridWithUndistDim} 
+! Section \ref{example:ArbGridWithUndistDim} 
 !EOE
 
-   print *, 'Before using ESMF_GRID_ARBDIM'
 !BOC
    grid3D=ESMF_GridCreateShapeTile( &
 	    maxIndex = (/xdim, ydim, zdim/), &
@@ -1263,8 +1253,6 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! and {\tt coordDep3} to create a 3D curvilinear grid with its horizontal
 ! dimensions arbitrarily distributed. 
 !EOE
-
-   print *, 'Before using /ESMF_GRID_ARBDIM,3/'
 
 !BOC
    grid3D=ESMF_GridCreateShapeTile( &
@@ -1291,7 +1279,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! enables the user to set data 
 ! for one stagger location across the whole Grid, using ESMF Arrays. 
 ! For example, the following sets the coordinates in the first dimension 
-! (e.g. x) for the center stagger location to 
+! (e.g. x) for the corner stagger location to 
 ! those in the ESMF Array {\tt arrayCoordX}.
 !EOE
 
@@ -1308,7 +1296,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
               rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-
+  print *, "setcoord1"
 !BOC
    call ESMF_GridSetCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CORNER, &
@@ -1383,6 +1371,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
    call ESMF_GridAddCoord(grid2D,&
           staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
 
 ! Don't run without correct number of DEs
   call ESMF_GridGet(grid2D, localDECount=localDECount, rc=rc)
@@ -1658,11 +1647,11 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! referring to the maximums contain a 'U' for upper. The parameters referring 
 ! to the minimums contain an 'L' for lower. The bounds and associated
 ! quantities are almost always given on a per DE basis. The three types of
-! bounds exclusiveBounds, computationalBounds, and totalBounds refer
+! bounds {\tt exclusiveBounds}, {\tt computationalBounds}, and {\tt totalBounds} refer
 ! to the ranges of the exlusive region, the computational region, and the
 ! total region. Each of these bounds also has a corresponding count parameter
 ! which gives the number of items across that region (on a DE) in each dimension.
-! (e.g. totalCount(d)=totallUBound(i)-totalLBound(i)+1). Width parameters
+! (e.g. {\tt totalCount(d)=totallUBound(i)-totalLBound(i)+1}). Width parameters
 ! give the spacing between two different types of region. The
 ! {\tt computationalWidth} argument gives the spacing between the exclusive
 ! region and the computational region. The {\tt totalWidth} argument gives the 
@@ -1673,6 +1662,13 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! each DE. The exceptions to the per DE rule are
 ! {\tt computationalEdgeWidth}, {\tt staggerEdgeWidth}, and {\tt gridEdgeWidth}
 ! which give the spacing only on the DEs along the boundary of the Grid.
+!
+! All the above bound discussions only apply to the grid with non-arbitrary distributions,
+! i.e., regular or irregular distributions.  For an arbitrarily distributed grid, 
+! only center stagger location is supported and there is no padding around the grid.
+! Thus, the exclusive bounds, the total bounds and the computational bounds are identical 
+! and {\tt computationalEdgeWidth}, {\tt staggerEdgeWidth}, and {\tt gridEdgeWidth}
+! are all zeros.
 !EOE
 
 !BOE
@@ -1854,7 +1850,7 @@ endif
 ! Grid and the stagger location in the Grid. 
 !
 ! The information that needs to be obtained from the Grid
-! is the distgrid and distgridToGridMap to ensure that the new Array
+! is the <\tt distgrid> and <\tt distgridToGridMap> to ensure that the new Array
 ! has the correct size and distribution and that its 
 ! dimensions are mapped correctly to the Grid. These
 ! are obtained using the {\tt ESMF\_GridGet} method. 
@@ -1866,8 +1862,8 @@ endif
 ! stagger location and the arguments {\tt computationalEdgeLWidth}  and
 ! {\tt computationalEdgeUWidth}. 
 !
-! The following is an example of using information from the Grid
-! to create an Array corresponding to a stagger location.
+! The following is an example of using information from a 2D Grid with non-arbitrary 
+! distribution to create an Array corresponding to a stagger location.
 !
 !EOE
 
@@ -1910,6 +1906,47 @@ endif
    call ESMF_GridDestroy(grid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    call ESMF_DistGridDestroy(distgrid2D, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!BOE
+! Creating an Array for a Grid with arbitrary distribution is different. 
+! For a 2D Grid with both dimension arbitrarily distributed, the Array dimension
+! is 1.  For a 3D Grid with two arbitrarily distributed dimensions and one
+! undistributed dimension, the Array dimension is 2.  In general,
+! if the Array does not have any ungridded dimension, the Array dimension 
+! should be 1 plus the number of undistributed dimensions of the Grid.
+!
+! The following is an example of creating an Array for a 3D Grid with 2 
+! arbitrarily distributed dimensions such as the one defined in Section~\ref{example:ArbGridWithUndistDim}.
+!EOE
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Setup For Example
+!!!!!!!!!!!!!!!!!!!!!!
+    grid3D=ESMF_GridCreateShapeTile( &
+	    maxIndex = (/xdim, ydim, zdim/), &
+            localIndices = localIndices, &
+            localCount = localCount, &
+            rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+ 
+!BOC
+    ! Get distGrid from Grid
+    call ESMF_GridGet(grid3D, distgrid=distgrid, rc=rc)
+
+    ! construct ArraySpec
+    call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R8, rc=rc)
+
+    ! Create an Array based on the presence of distributed dimensions
+    array=ESMF_ArrayCreate(arrayspec=arrayspec,distgrid=distgrid, rc=rc)
+
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+!!!!!!!!!!!!!!!!!!!!!!!
+! Cleanup after Example
+!!!!!!!!!!!!!!!!!!!!!!
+   call ESMF_GridDestroy(grid3D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
@@ -2392,6 +2429,7 @@ endif
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    call ESMF_DistGridDestroy(distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
 
 
 #ifdef LOCAL_NOT_IMPL
