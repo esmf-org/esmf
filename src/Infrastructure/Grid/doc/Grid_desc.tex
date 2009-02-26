@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.47 2009/02/25 06:33:29 peggyli Exp $
+% $Id: Grid_desc.tex,v 1.48 2009/02/26 23:47:13 peggyli Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -148,7 +148,7 @@ DE in the distributed dimension.  An {\bf arbitrary} distribution is
 one in which any grid cell can be assigned to any DE.  Any of these
 distribution options can be applied to any of the grid shapes (i.e.,
 rectangle) or types (i.e., rectilinear).  Support for arbitrary distribution 
-is limited in v4.0.0, see section \ref{sec:desc:dist} for
+is limited in v4.0.0, See section \ref{example:ArbGridWithUndistDim} for
 more detail descriptions.
 
 
@@ -304,11 +304,10 @@ call must occur on the same or a subset of the PETs as the
 {\tt ESMF\_GridCreateEmpty()} call. The 
 {\tt ESMF\_GridSetCommitShapeTile()} call uses the VM for
 the context in which it's executed and the "empty" Grid contains
-no information about the VM in which it was run.  This means that if the
+no information about the VM in which it was run.  If the
 {\tt ESMF\_GridSetCommitShapeTile()} call occurs
 in a subset of the PETs in which the {\tt ESMF\_GridCreateEmpty()} was 
-executed that the Grid is created only in that subset. Inside the subset
-the Grid will be fine, but outside the subset the Grid objects will
+executed, the Grid is created only in that subset. The grid objects outside the subset will
 still be "empty" and not usable. 
 
 The following table summarizes possible call sequences
