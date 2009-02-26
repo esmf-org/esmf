@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.113 2009/02/25 23:01:21 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.114 2009/02/26 06:52:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -37,16 +37,14 @@ module ESMF_GridCompMod
 ! !USES:
   use ESMF_UtilTypesMod
   use ESMF_LogErrMod
-  use ESMF_BaseMod
   use ESMF_IOSpecMod
   use ESMF_VMMod
-  use ESMF_LogErrMod
   use ESMF_ConfigMod
-  use ESMF_ClockMod
   use ESMF_ClockTypeMod
-  use ESMF_GridMod
+  use ESMF_ClockMod
   use ESMF_StateTypesMod
   use ESMF_StateMod
+  use ESMF_GridMod
   use ESMF_CompMod
   use ESMF_InitMacrosMod
 
@@ -59,48 +57,36 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
+! - ESMF-public methods:
   public ESMF_GridCompCreate
   public ESMF_GridCompDestroy
-
-  public ESMF_GridCompGet
-  public ESMF_GridCompSet
- 
-  public ESMF_GridCompGetInit
-  public ESMF_GridCompValidate
-  public ESMF_GridCompPrint
- 
-  ! These do argument processing and then call the user-provided routines.
-  public ESMF_GridCompInitialize
-  public ESMF_GridCompRun
   public ESMF_GridCompFinalize
-
-  ! Other routines the user might request to setup.
-  public ESMF_GridCompWriteRestart
+  public ESMF_GridCompGet
+  public ESMF_GridCompInitialize
+  public ESMF_GridCompIsPetLocal
+  public ESMF_GridCompPrint
   public ESMF_GridCompReadRestart
-  !public ESMF_GridCompWrite
-  !public ESMF_GridCompRead
-
-  ! Procedures for VM-enabled mode      
+  public ESMF_GridCompRun
+  public ESMF_GridCompSet
+  public ESMF_GridCompSetEntryPoint
+  public ESMF_GridCompSetServices
+  public ESMF_GridCompSetVM
+  public ESMF_GridCompSetVMMaxPEs
   public ESMF_GridCompSetVMMaxThreads
   public ESMF_GridCompSetVMMinThreads
-  public ESMF_GridCompSetVMMaxPEs
-  ! Return from user-provided routines
+  public ESMF_GridCompValidate
   public ESMF_GridCompWait
-  
-  ! function to simplify user code pet-conditionals
-  public ESMF_GridCompIsPetLocal
-  
-  ! routines with dummy procedure arguments
-  public :: ESMF_GridCompSetEntryPoint
-  public :: ESMF_GridCompSetServices
-  public :: ESMF_GridCompSetVM
+  public ESMF_GridCompWriteRestart
+
+! - ESMF-internal methods:
+  public ESMF_GridCompGetInit
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.113 2009/02/25 23:01:21 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.114 2009/02/26 06:52:58 theurich Exp $'
 
 !==============================================================================
 !
@@ -137,24 +123,23 @@ contains
 ! !IROUTINE: ESMF_GridCompCreate - Create a Gridded Component
 !
 ! !INTERFACE:
-      recursive function ESMF_GridCompCreate(name, gridcomptype, grid, &
-        config, configFile, clock, petList, contextflag, parentVm, rc)
+  recursive function ESMF_GridCompCreate(name, gridcomptype, grid, config, &
+    configFile, clock, petList, contextflag, parentVm, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_GridComp) :: ESMF_GridCompCreate
+    type(ESMF_GridComp) :: ESMF_GridCompCreate
 !
 ! !ARGUMENTS:
-      !external :: services
-      character(len=*),        intent(in),    optional :: name
-      type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
-      type(ESMF_Grid),         intent(inout),    optional :: grid
-      type(ESMF_Config),       intent(inout),    optional :: config
-      character(len=*),        intent(in),    optional :: configFile
-      type(ESMF_Clock),        intent(inout), optional :: clock
-      integer,                 intent(in),    optional :: petList(:)
-      type(ESMF_ContextFlag),  intent(in),    optional :: contextflag
-      type(ESMF_VM),           intent(inout),    optional :: parentVm
-      integer,                 intent(out),   optional :: rc 
+    character(len=*),        intent(in),    optional :: name
+    type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
+    type(ESMF_Grid),         intent(inout), optional :: grid
+    type(ESMF_Config),       intent(inout), optional :: config
+    character(len=*),        intent(in),    optional :: configFile
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: petList(:)
+    type(ESMF_ContextFlag),  intent(in),    optional :: contextflag
+    type(ESMF_VM),           intent(inout), optional :: parentVm
+    integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !  This interface creates an {\tt ESMF\_GridComp} object. By default, a
@@ -224,7 +209,6 @@ contains
 !
 !EOP
 !------------------------------------------------------------------------------
-
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
         integer :: localrc                               ! local error status
@@ -264,7 +248,7 @@ contains
         ESMF_INIT_SET_CREATED(ESMF_GridCompCreate)
         if (present(rc)) rc = ESMF_SUCCESS
 
-        end function ESMF_GridCompCreate
+  end function ESMF_GridCompCreate
 !------------------------------------------------------------------------------
 
 
@@ -275,11 +259,11 @@ contains
 ! !IROUTINE: ESMF_GridCompDestroy - Release resources for a GridComp
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompDestroy(gridcomp, rc)
+  subroutine ESMF_GridCompDestroy(gridcomp, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp) :: gridcomp
-      integer, intent(out), optional :: rc
+    type(ESMF_GridComp)            :: gridcomp
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Releases all resources associated with this {\tt ESMF\_GridComp}.
@@ -295,7 +279,7 @@ contains
 !     \end{description}
 !
 !EOP
-
+!------------------------------------------------------------------------------
         ! local vars
         integer :: localrc                       ! local error status
 
@@ -330,39 +314,9 @@ contains
         ! Set return code if user specified it
         if (present(rc)) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_GridCompDestroy
-
+  end subroutine ESMF_GridCompDestroy
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCompGetInit"
-!BOPI
-! !IROUTINE:  ESMF_GridCompGetInit - Get initialization status.
 
-! !INTERFACE:
-    function ESMF_GridCompGetInit(d)
-!
-! !ARGUMENTS:
-       type(ESMF_GridComp), intent(in), optional :: d
-       ESMF_INIT_TYPE :: ESMF_GridCompGetInit
-!
-! !DESCRIPTION:
-!      Get the initialization status of the Deep class {\tt GridComp}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_GridComp} from which to retreive status.
-!     \end{description}
-!
-!EOPI
-
-       if (present(d)) then
-         ESMF_GridCompGetInit = ESMF_INIT_GET(d)
-       else
-         ESMF_GridCompGetInit = ESMF_INIT_CREATED
-       endif
-
-    end function ESMF_GridCompGetInit
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -371,17 +325,17 @@ contains
 ! !IROUTINE: ESMF_GridCompFinalize - Call the GridComp's finalize routine
 !
 ! !INTERFACE:
-      recursive subroutine ESMF_GridCompFinalize(gridcomp, importState, &
-                                   exportState, clock, phase, blockingflag, rc)
+  recursive subroutine ESMF_GridCompFinalize(gridcomp, importState, &
+    exportState, clock, phase, blockingflag, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_GridComp)                              :: gridcomp
-      type (ESMF_State),        intent(inout), optional :: importState
-      type (ESMF_State),        intent(inout), optional :: exportState
-      type (ESMF_Clock),        intent(inout),    optional :: clock
-      integer,                  intent(in),    optional :: phase
-      type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-      integer,                  intent(out),   optional :: rc 
+    type (ESMF_GridComp)                              :: gridcomp
+    type (ESMF_State),        intent(inout), optional :: importState
+    type (ESMF_State),        intent(inout), optional :: exportState
+    type (ESMF_Clock),        intent(inout), optional :: clock
+    integer,                  intent(in),    optional :: phase
+    type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                  intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !  Call the associated user-supplied finalization code for 
@@ -429,6 +383,7 @@ contains
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
         integer :: localrc                        ! local return code
 
         ! Assume failure until success
@@ -448,7 +403,9 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_GridCompFinalize
+  end subroutine ESMF_GridCompFinalize
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -457,20 +414,20 @@ contains
 ! !IROUTINE: ESMF_GridCompGet - Query a GridComp for information
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompGet(gridcomp, name, gridcomptype, &
-        grid, config, configFile, clock, vm, contextflag, rc)
+  subroutine ESMF_GridCompGet(gridcomp, name, gridcomptype, grid, config, &
+    configFile, clock, vm, contextflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp),     intent(inout)            :: gridcomp
-      character(len=*),        intent(out), optional :: name
-      type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
-      type(ESMF_Grid),         intent(out), optional :: grid
-      type(ESMF_Config),       intent(out), optional :: config
-      character(len=*),        intent(out), optional :: configFile
-      type(ESMF_Clock),        intent(out), optional :: clock
-      type(ESMF_VM),           intent(out), optional :: vm
-      type(ESMF_ContextFlag),  intent(out), optional :: contextflag
-      integer,                 intent(out), optional :: rc             
+    type(ESMF_GridComp),     intent(inout)         :: gridcomp
+    character(len=*),        intent(out), optional :: name
+    type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
+    type(ESMF_Grid),         intent(out), optional :: grid
+    type(ESMF_Config),       intent(out), optional :: config
+    character(len=*),        intent(out), optional :: configFile
+    type(ESMF_Clock),        intent(out), optional :: clock
+    type(ESMF_VM),           intent(out), optional :: vm
+    type(ESMF_ContextFlag),  intent(out), optional :: contextflag
+    integer,                 intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -506,6 +463,7 @@ contains
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
         integer :: localrc                        ! local return code
 
         ! Assume failure until success
@@ -521,7 +479,8 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_GridCompGet
+  end subroutine ESMF_GridCompGet
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -586,17 +545,17 @@ contains
 ! !IROUTINE: ESMF_GridCompInitialize - Call the GridComp's initialize routine
 
 ! !INTERFACE:
-      recursive subroutine ESMF_GridCompInitialize(gridcomp, importState, &
-                                  exportState, clock, phase, blockingflag, rc)
+  recursive subroutine ESMF_GridCompInitialize(gridcomp, importState, &
+    exportState, clock, phase, blockingflag, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_GridComp)                              :: gridcomp
-      type (ESMF_State),        intent(inout), optional :: importState
-      type (ESMF_State),        intent(inout), optional :: exportState
-      type (ESMF_Clock),        intent(inout), optional :: clock
-      integer,                  intent(in),    optional :: phase
-      type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-      integer,                  intent(out),   optional :: rc 
+    type(ESMF_GridComp)                              :: gridcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !  Call the associated user initialization code for a gridcomp.
@@ -643,6 +602,7 @@ contains
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
         integer :: localrc                        ! local return code
 
         ! Assume failure until success
@@ -662,23 +622,25 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_GridCompInitialize
+  end subroutine ESMF_GridCompInitialize
+!------------------------------------------------------------------------------
 
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompIsPetLocal"
 !BOP
 ! !IROUTINE: ESMF_GridCompIsPetLocal - Inquire if this component is to execute on the calling PET.
 !
 ! !INTERFACE:
-      recursive function ESMF_GridCompIsPetLocal(gridcomp, rc)
+  recursive function ESMF_GridCompIsPetLocal(gridcomp, rc)
 !
 ! !RETURN VALUE:
-      logical :: ESMF_GridCompIsPetLocal
+    logical :: ESMF_GridCompIsPetLocal
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp), intent(inout) :: gridcomp
-      integer, intent(out), optional  :: rc 
+    type(ESMF_GridComp), intent(inout)         :: gridcomp
+    integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !  Inquire if this {\tt ESMF\_GridComp} object is to execute on the calling PET.
@@ -695,7 +657,7 @@ contains
 !   \end{description}
 !
 !EOP
-
+!------------------------------------------------------------------------------
     integer :: localrc                     ! local error status
     logical :: localresult
 
@@ -720,6 +682,8 @@ contains
     ESMF_GridCompIsPetLocal = localresult
     
   end function ESMF_GridCompIsPetLocal
+!------------------------------------------------------------------------------
+
     
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -728,12 +692,12 @@ contains
 ! !IROUTINE:  ESMF_GridCompPrint - Print the contents of a GridComp
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompPrint(gridcomp, options, rc)
+  subroutine ESMF_GridCompPrint(gridcomp, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp) :: gridcomp
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
+    type(ESMF_GridComp)                        :: gridcomp
+    character (len = *), intent(in),  optional :: options
+    integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !  Prints information about an {\tt ESMF\_GridComp} to {\tt stdout}. \\
@@ -756,6 +720,7 @@ contains
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
        integer :: localrc                        ! local return code
 
        ! Assume failure until success
@@ -764,15 +729,15 @@ contains
 
        ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
-
-     !jw  call ESMF_LogWrite("Gridded Component:", ESMF_LOG_INFO)
        print *, "Gridded Component:"
        call ESMF_CompPrint(gridcomp%compp, options, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        if (present(rc)) rc = ESMF_SUCCESS
-       end subroutine ESMF_GridCompPrint
+  end subroutine ESMF_GridCompPrint
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -781,16 +746,16 @@ contains
 ! !IROUTINE: ESMF_GridCompReadRestart - Call the GridComp's restore routine
 !
 ! !INTERFACE:
-      recursive subroutine ESMF_GridCompReadRestart(gridcomp, iospec, clock, &
-                                                    phase, blockingflag, rc)
+  recursive subroutine ESMF_GridCompReadRestart(gridcomp, iospec, clock, &
+    phase, blockingflag, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_GridComp), intent(inout) :: gridcomp
-      type (ESMF_IOSpec), intent(inout), optional :: iospec
-      type (ESMF_Clock), intent(inout), optional :: clock
-      integer, intent(in), optional :: phase
-      type (ESMF_BlockingFlag), intent(in), optional :: blockingflag
-      integer, intent(out), optional :: rc 
+      type(ESMF_GridComp),     intent(inout)           :: gridcomp
+      type(ESMF_IOSpec),       intent(inout), optional :: iospec
+      type(ESMF_Clock),        intent(inout), optional :: clock
+      integer,                 intent(in),    optional :: phase
+      type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+      integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !  Call the associated user restore code for a {\tt gridcomp}.
@@ -832,6 +797,7 @@ contains
 !   \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
         integer :: localrc                        ! local return code
 
         ! Assume failure until success
@@ -849,7 +815,9 @@ contains
            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_GridCompReadRestart
+  end subroutine ESMF_GridCompReadRestart
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -858,17 +826,17 @@ contains
 ! !IROUTINE: ESMF_GridCompRun - Call the GridComp's run routine
 !
 ! !INTERFACE:
-      recursive subroutine ESMF_GridCompRun(gridcomp, importState, exportState,&
-                                            clock, phase, blockingflag, rc)
+  recursive subroutine ESMF_GridCompRun(gridcomp, importState, exportState,&
+    clock, phase, blockingflag, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_GridComp)                              :: gridcomp
-      type (ESMF_State),        intent(inout), optional :: importState
-      type (ESMF_State),        intent(inout), optional :: exportState
-      type (ESMF_Clock),        intent(inout),    optional :: clock
-      integer,                  intent(in),    optional :: phase
-      type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
-      integer,                  intent(out),   optional :: rc 
+    type (ESMF_GridComp)                              :: gridcomp
+    type (ESMF_State),        intent(inout), optional :: importState
+    type (ESMF_State),        intent(inout), optional :: exportState
+    type (ESMF_Clock),        intent(inout), optional :: clock
+    integer,                  intent(in),    optional :: phase
+    type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                  intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !  Call the associated user run code for an {\tt ESMF\_GridComp}.
@@ -917,6 +885,7 @@ contains
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
         integer :: localrc                        ! local return code
 
         ! Assume failure until success
@@ -936,7 +905,9 @@ contains
            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_GridCompRun
+  end subroutine ESMF_GridCompRun
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -945,18 +916,18 @@ contains
 ! !IROUTINE: ESMF_GridCompSet - Set or reset information about the GridComp
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompSet(gridcomp, name, gridcomptype, grid, &
-                                  config, configFile, clock, rc)
+  subroutine ESMF_GridCompSet(gridcomp, name, gridcomptype, grid, config, &
+    configFile, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp),     intent(inout)         :: gridcomp
-      character(len=*),        intent(in),  optional :: name
-      type(ESMF_GridCompType), intent(in),  optional :: gridcomptype 
-      type(ESMF_Grid),        intent(inout),  optional :: grid
-      type(ESMF_Config),       intent(inout),  optional :: config
-      character(len=*),        intent(in),  optional :: configFile
-      type(ESMF_Clock),        intent(inout),  optional :: clock
-      integer,                 intent(out), optional :: rc             
+    type(ESMF_GridComp),     intent(inout)           :: gridcomp
+    character(len=*),        intent(in),    optional :: name
+    type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
+    type(ESMF_Grid),         intent(inout), optional :: grid
+    type(ESMF_Config),       intent(inout), optional :: config
+    character(len=*),        intent(in),    optional :: configFile
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(out),   optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -992,6 +963,7 @@ contains
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
         integer :: localrc                        ! local return code
 
         ! Assume failure until success
@@ -1011,7 +983,9 @@ contains
            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_GridCompSet
+  end subroutine ESMF_GridCompSet
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1031,11 +1005,11 @@ contains
         use ESMF_StateMod
         use ESMF_ClockMod
         implicit none
-        type(ESMF_GridComp)         :: gridcomp
-        type(ESMF_State)            :: importState
-        type(ESMF_State)            :: exportState
-        type(ESMF_Clock)            :: clock
-        integer, intent(out)        :: rc
+        type(ESMF_GridComp)         :: gridcomp     ! must not be optional
+        type(ESMF_State)            :: importState  ! must not be optional
+        type(ESMF_State)            :: exportState  ! must not be optional
+        type(ESMF_Clock)            :: clock        ! must not be optional
+        integer, intent(out)        :: rc           ! must not be optional
       end subroutine
     end interface
     integer, intent(in),  optional  :: phase
@@ -1065,19 +1039,8 @@ contains
 ! \end{description}
 !
 ! The Component writer must supply a subroutine with the exact interface 
-! shown below, including the {\tt intent}. Arguments must not be declared
-! as optional, and the types and order must match.
-!
-! !INTERFACE:
-!   interface
-!     subroutine routine(gridcomp, importState, exportState, clock, rc)
-!       type(ESMF_GridComp)  :: gridcomp     ! must not be optional
-!       type(ESMF_State)     :: importState  ! must not be optional
-!       type(ESMF_State)     :: exportState  ! must not be optional
-!       type(ESMF_Clock)     :: clock        ! must not be optional
-!       integer, intent(out) :: rc           ! must not be optional
-!     end subroutine
-!   end interface
+! shown above for the {\tt routine} argument. Arguments in {\tt routine} must
+! not be declared as optional, and the types, intent and order must match.
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1437,11 +1400,11 @@ contains
 ! !IROUTINE: ESMF_GridCompSetVMMaxPEs - Define a VM for this GridComp
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompSetVMMaxPEs(gridcomp, max, &
-                       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_GridCompSetVMMaxPEs(gridcomp, max, pref_intra_process, &
+    pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(inout)            :: gridcomp
+    type(ESMF_GridComp), intent(inout)         :: gridcomp
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1468,7 +1431,7 @@ contains
 !     \end{description}
 !
 !EOPI
-
+!------------------------------------------------------------------------------
     integer :: localrc                     ! local error status
 
     ! Initialize return code; assume failure until success is certain       
@@ -1490,6 +1453,7 @@ contains
   end subroutine ESMF_GridCompSetVMMaxPEs
 !------------------------------------------------------------------------------
 
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetVMMaxThreads"
@@ -1497,11 +1461,11 @@ contains
 ! !IROUTINE: ESMF_GridCompSetVMMaxThreads - Define a VM for this GridComp
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompSetVMMaxThreads(gridcomp, max, &
-                     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_GridCompSetVMMaxThreads(gridcomp, max, pref_intra_process, &
+    pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(inout)            :: gridcomp
+    type(ESMF_GridComp), intent(inout)         :: gridcomp
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1528,7 +1492,7 @@ contains
 !     \end{description}
 !
 !EOPI
-
+!------------------------------------------------------------------------------
     integer :: localrc                     ! local error status
 
     ! Initialize return code; assume failure until success is certain       
@@ -1548,6 +1512,8 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_GridCompSetVMMaxThreads
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1556,11 +1522,11 @@ contains
 ! !IROUTINE: ESMF_GridCompSetVMMinThreads - Define a VM for this GridComp
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompSetVMMinThreads(gridcomp, max, &
-                    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_GridCompSetVMMinThreads(gridcomp, max, pref_intra_process, &
+    pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(inout)            :: gridcomp
+    type(ESMF_GridComp), intent(inout)         :: gridcomp
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1587,7 +1553,7 @@ contains
 !     \end{description}
 !
 !EOPI
-
+!------------------------------------------------------------------------------
     integer :: localrc                     ! local error status
 
     ! Initialize return code; assume failure until success is certain       
@@ -1609,6 +1575,7 @@ contains
   end subroutine ESMF_GridCompSetVMMinThreads
 !------------------------------------------------------------------------------
 
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompValidate"
@@ -1616,12 +1583,12 @@ contains
 ! !IROUTINE: ESMF_GridCompValidate - Check validity of a GridComp
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompValidate(gridcomp, options, rc)
+  subroutine ESMF_GridCompValidate(gridcomp, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp) :: gridcomp
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
+    type(ESMF_GridComp)                        :: gridcomp
+    character (len = *), intent(in),  optional :: options
+    integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !   Currently all this method does is to check that the 
@@ -1638,6 +1605,7 @@ contains
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
       integer :: localrc                        ! local return code
 
       ! Initialize return code; assume routine not implemented
@@ -1657,7 +1625,8 @@ contains
       ! If all checks pass return success
       if (present(rc)) rc = ESMF_SUCCESS
  
-      end subroutine ESMF_GridCompValidate
+  end subroutine ESMF_GridCompValidate
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -1670,9 +1639,9 @@ contains
   subroutine ESMF_GridCompWait(gridcomp, blockingFlag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(inout)              :: gridcomp
-    type (ESMF_BlockingFlag), intent(in), optional  :: blockingFlag
-    integer,             intent(out), optional      :: rc           
+    type(ESMF_GridComp),     intent(inout)         :: gridcomp
+    type(ESMF_BlockingFlag), intent(in),  optional :: blockingFlag
+    integer,                 intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !     When executing asychronously, wait for an {\tt ESMF\_GridComp} to return.
@@ -1691,7 +1660,7 @@ contains
 !     \end{description}
 !
 !EOP
-
+!------------------------------------------------------------------------------
     integer :: localrc                     ! local error status
 
     ! Initialize return code; assume failure until success is certain       
@@ -1720,16 +1689,16 @@ contains
 ! !IROUTINE: ESMF_GridCompWriteRestart - Call the GridComp's checkpoint routine
 !
 ! !INTERFACE:
-      recursive subroutine ESMF_GridCompWriteRestart(gridcomp, iospec, clock, &
-                                                     phase, blockingflag, rc)
+  recursive subroutine ESMF_GridCompWriteRestart(gridcomp, iospec, clock, &
+    phase, blockingflag, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_GridComp), intent(inout) :: gridcomp
-      type (ESMF_IOSpec), intent(inout), optional :: iospec
-      type (ESMF_Clock), intent(inout), optional :: clock
-      integer, intent(in), optional :: phase
-      type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
-      integer, intent(out), optional :: rc 
+    type(ESMF_GridComp),     intent(inout)           :: gridcomp
+    type(ESMF_IOSpec),       intent(inout), optional :: iospec
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !  Call the associated user checkpoint code for an {\tt ESMF\_GridComp}.
@@ -1768,6 +1737,7 @@ contains
 !   \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
         integer :: localrc                        ! local return code
 
         ! Assume failure until success
@@ -1784,8 +1754,43 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_GridCompWriteRestart
+  end subroutine ESMF_GridCompWriteRestart
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompGetInit"
+!BOPI
+! !IROUTINE:  ESMF_GridCompGetInit - Get initialization status.
+
+! !INTERFACE:
+  function ESMF_GridCompGetInit(d)
+!
+! !RETURN VALUE:
+    ESMF_INIT_TYPE :: ESMF_GridCompGetInit
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in), optional :: d
+!
+! !DESCRIPTION:
+!      Get the initialization status of the Deep class {\tt GridComp}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [d]
+!           {\tt ESMF\_GridComp} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+       if (present(d)) then
+         ESMF_GridCompGetInit = ESMF_INIT_GET(d)
+       else
+         ESMF_GridCompGetInit = ESMF_INIT_CREATED
+       endif
+
+  end function ESMF_GridCompGetInit
 !------------------------------------------------------------------------------
 
 end module ESMF_GridCompMod
-

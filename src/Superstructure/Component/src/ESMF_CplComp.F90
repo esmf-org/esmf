@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.101 2009/02/25 23:01:21 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.102 2009/02/26 06:52:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -37,14 +37,11 @@ module ESMF_CplCompMod
 ! !USES:
   use ESMF_UtilTypesMod
   use ESMF_LogErrMod
-  use ESMF_BaseMod
   use ESMF_IOSpecMod
   use ESMF_VMMod
-  use ESMF_LogErrMod
   use ESMF_ConfigMod
-  use ESMF_ClockMod
   use ESMF_ClockTypeMod
-  use ESMF_GridMod
+  use ESMF_ClockMod
   use ESMF_StateTypesMod
   use ESMF_StateMod
   use ESMF_CompMod
@@ -58,48 +55,37 @@ module ESMF_CplCompMod
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
+
+! - ESMF-public methods:
   public ESMF_CplCompCreate
   public ESMF_CplCompDestroy
-
-  public ESMF_CplCompGet
-  public ESMF_CplCompSet
- 
-  public ESMF_CplCompValidate
-  public ESMF_CplCompGetInit
-  public ESMF_CplCompPrint
- 
-  ! These do argument processing and then call the user-provided routines.
-  public ESMF_CplCompInitialize
-  public ESMF_CplCompRun
   public ESMF_CplCompFinalize
-
-  ! Other routines the user might request to setup.
-  public ESMF_CplCompWriteRestart
+  public ESMF_CplCompGet
+  public ESMF_CplCompInitialize
+  public ESMF_CplCompIsPetLocal
+  public ESMF_CplCompPrint
   public ESMF_CplCompReadRestart
-  !public ESMF_CplCompWrite
-  !public ESMF_CplCompRead
-
-  ! Procedures for VM-enabled mode      
+  public ESMF_CplCompRun
+  public ESMF_CplCompSet
+  public ESMF_CplCompSetEntryPoint
+  public ESMF_CplCompSetServices
+  public ESMF_CplCompSetVM
+  public ESMF_CplCompSetVMMaxPEs
   public ESMF_CplCompSetVMMaxThreads
   public ESMF_CplCompSetVMMinThreads
-  public ESMF_CplCompSetVMMaxPEs
-  ! Return from user-provided routines
+  public ESMF_CplCompValidate
   public ESMF_CplCompWait
+  public ESMF_CplCompWriteRestart
 
-  ! function to simplify user code pet-conditionals
-  public ESMF_CplCompIsPetLocal
-
-  ! routines with dummy procedure arguments
-  public :: ESMF_CplCompSetEntryPoint
-  public :: ESMF_CplCompSetServices
-  public :: ESMF_CplCompSetVM
+! - ESMF-internal methods:
+  public ESMF_CplCompGetInit
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.101 2009/02/25 23:01:21 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.102 2009/02/26 06:52:58 theurich Exp $'
 
 !==============================================================================
 !
@@ -129,7 +115,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompCreate"
@@ -137,21 +122,21 @@ contains
 ! !IROUTINE: ESMF_CplCompCreate - Create a Coupler Component
 !
 ! !INTERFACE:
-      recursive function ESMF_CplCompCreate(name, config, configFile, &
-                                    clock, petList, contextflag, parentVm, rc)
+  recursive function ESMF_CplCompCreate(name, config, configFile, clock, &
+    petList, contextflag, parentVm, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_CplComp) :: ESMF_CplCompCreate
+    type(ESMF_CplComp) :: ESMF_CplCompCreate
 !
 ! !ARGUMENTS:
-      character(len=*),       intent(in),  optional :: name
-      type(ESMF_Config),      intent(inout),  optional :: config
-      character(len=*),       intent(in),  optional :: configFile
-      type(ESMF_Clock),       intent(inout),  optional :: clock
-      integer,                intent(in),  optional :: petList(:)
-      type(ESMF_ContextFlag), intent(in),  optional :: contextflag
-      type(ESMF_VM),          intent(inout),  optional :: parentVm
-      integer,                intent(out), optional :: rc 
+    character(len=*),       intent(in),     optional :: name
+    type(ESMF_Config),      intent(inout),  optional :: config
+    character(len=*),       intent(in),     optional :: configFile
+    type(ESMF_Clock),       intent(inout),  optional :: clock
+    integer,                intent(in),     optional :: petList(:)
+    type(ESMF_ContextFlag), intent(in),     optional :: contextflag
+    type(ESMF_VM),          intent(inout),  optional :: parentVm
+    integer,                intent(out),    optional :: rc 
 !
 ! !DESCRIPTION:
 !  This interface creates an {\tt ESMF\_CplComp} object. By default, a
@@ -209,7 +194,7 @@ contains
 !   \end{description}
 !
 !EOP
-
+!------------------------------------------------------------------------------
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
         integer :: localrc                                ! local error localrc
@@ -246,7 +231,8 @@ contains
         ESMF_INIT_SET_CREATED(ESMF_CplCompCreate)
         if (present(rc)) rc = ESMF_SUCCESS
 
-        end function ESMF_CplCompCreate
+  end function ESMF_CplCompCreate
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -256,11 +242,11 @@ contains
 ! !IROUTINE: ESMF_CplCompDestroy - Release resources for a CplComp
 
 ! !INTERFACE:
-      subroutine ESMF_CplCompDestroy(cplcomp, rc)
+  subroutine ESMF_CplCompDestroy(cplcomp, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp) :: cplcomp
-      integer, intent(out), optional :: rc
+    type(ESMF_CplComp)             :: cplcomp
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Releases all resources associated with this {\tt ESMF\_CplComp}.
@@ -276,7 +262,7 @@ contains
 !     \end{description}
 !
 !EOP
-
+!------------------------------------------------------------------------------
         ! local vars
         integer :: localrc                       ! local error localrc
 
@@ -310,39 +296,8 @@ contains
         ! Set return code if user specified it
         if (present(rc)) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_CplCompDestroy
-
+  end subroutine ESMF_CplCompDestroy
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompGetInit"
-!BOPI
-! !IROUTINE:  ESMF_CplCompGetInit - Get initialization status.
-
-! !INTERFACE:
-    function ESMF_CplCompGetInit(d)
-!
-! !ARGUMENTS:
-       type(ESMF_CplComp), intent(in), optional :: d
-       ESMF_INIT_TYPE :: ESMF_CplCompGetInit
-!
-! !DESCRIPTION:
-!      Get the initialization status of the Deep class {\tt CplComp}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_CplComp} from which to retreive status.
-!     \end{description}
-!
-!EOPI
-
-       if (present(d)) then
-         ESMF_CplCompGetInit = ESMF_INIT_GET(d)
-       else
-         ESMF_CplCompGetInit = ESMF_INIT_CREATED
-       endif
-
-    end function ESMF_CplCompGetInit
 
 
 !------------------------------------------------------------------------------
@@ -352,18 +307,18 @@ contains
 ! !IROUTINE: ESMF_CplCompFinalize - Call the CplComp's finalize routine
 !
 ! !INTERFACE:
-    recursive subroutine ESMF_CplCompFinalize(cplcomp, importState, &
-                                  exportState, clock, phase, blockingflag, rc)
+  recursive subroutine ESMF_CplCompFinalize(cplcomp, importState, exportState, &
+    clock, phase, blockingflag, rc)
 !
 !
 ! !ARGUMENTS:
-      type (ESMF_CplComp) :: cplcomp
-      type (ESMF_State), intent(inout), optional :: importState
-      type (ESMF_State), intent(inout), optional :: exportState
-      type (ESMF_Clock), intent(inout), optional :: clock
-      integer, intent(in), optional :: phase
-      type (ESMF_BlockingFlag), intent(in), optional :: blockingflag
-      integer, intent(out), optional :: rc 
+      type(ESMF_CplComp)                               :: cplcomp
+      type(ESMF_State),        intent(inout), optional :: importState
+      type(ESMF_State),        intent(inout), optional :: exportState
+      type(ESMF_Clock),        intent(inout), optional :: clock
+      integer,                 intent(in),    optional :: phase
+      type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+      integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !  Call the associated user-supplied finalization routine for 
@@ -411,6 +366,7 @@ contains
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
         integer :: localrc                       ! local return code
 
         ! Assume failure until success
@@ -429,7 +385,8 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_CplCompFinalize
+  end subroutine ESMF_CplCompFinalize
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -439,18 +396,18 @@ contains
 ! !IROUTINE: ESMF_CplCompGet - Query a CplComp for information
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompGet(cplcomp, name, config, configFile, clock, &
-        vm, contextflag, rc)
+  subroutine ESMF_CplCompGet(cplcomp, name, config, configFile, clock, vm, &
+    contextflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp),     intent(inout)            :: cplcomp
-      character(len=*),       intent(out), optional :: name
-      type(ESMF_Config),      intent(out), optional :: config
-      character(len=*),       intent(out), optional :: configFile
-      type(ESMF_Clock),       intent(out), optional :: clock
-      type(ESMF_VM),          intent(out), optional :: vm
-      type(ESMF_ContextFlag), intent(out), optional :: contextflag
-      integer,                intent(out), optional :: rc             
+    type(ESMF_CplComp),     intent(inout)         :: cplcomp
+    character(len=*),       intent(out), optional :: name
+    type(ESMF_Config),      intent(out), optional :: config
+    character(len=*),       intent(out), optional :: configFile
+    type(ESMF_Clock),       intent(out), optional :: clock
+    type(ESMF_VM),          intent(out), optional :: vm
+    type(ESMF_ContextFlag), intent(out), optional :: contextflag
+    integer,                intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -482,6 +439,7 @@ contains
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
         integer :: localrc                  ! local return code
 
         ! Assume failure until success
@@ -496,7 +454,9 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_CplCompGet
+  end subroutine ESMF_CplCompGet
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 !BOP
@@ -559,18 +519,18 @@ contains
 ! !IROUTINE: ESMF_CplCompInitialize - Call the CplComp's initialize routine
 !
 ! !INTERFACE:
-      recursive subroutine ESMF_CplCompInitialize(cplcomp, importState, &
-                                   exportState, clock, phase, blockingflag, rc)
+  recursive subroutine ESMF_CplCompInitialize(cplcomp, importState, &
+    exportState, clock, phase, blockingflag, rc)
 !
 !
 ! !ARGUMENTS:
-      type (ESMF_CplComp) :: cplcomp
-      type (ESMF_State), intent(inout), optional :: importState
-      type (ESMF_State), intent(inout), optional :: exportState
-      type (ESMF_Clock), intent(inout), optional :: clock
-      integer, intent(in), optional :: phase
-      type (ESMF_BlockingFlag), intent(in), optional :: blockingflag
-      integer, intent(out), optional :: rc 
+    type(ESMF_CplComp)                               :: cplcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !  Call the associated user initialization code for an {\tt ESMF\_CplComp}.
@@ -617,6 +577,7 @@ contains
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
         integer :: localrc                        ! local return code
 
         ! Assume failure until success
@@ -635,23 +596,25 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_CplCompInitialize
+  end subroutine ESMF_CplCompInitialize
+!------------------------------------------------------------------------------
 
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompIsPetLocal"
 !BOP
 ! !IROUTINE: ESMF_CplCompIsPetLocal - Inquire if this component is to execute on the calling PET.
 !
 ! !INTERFACE:
-      recursive function ESMF_CplCompIsPetLocal(cplcomp, rc)
+  recursive function ESMF_CplCompIsPetLocal(cplcomp, rc)
 !
 ! !RETURN VALUE:
-      logical :: ESMF_CplCompIsPetLocal
+    logical :: ESMF_CplCompIsPetLocal
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp), intent(inout) :: cplcomp
-      integer, intent(out), optional  :: rc 
+    type(ESMF_CplComp), intent(inout)         :: cplcomp
+    integer,            intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !  Inquire if this {\tt ESMF\_CplComp} object is to execute on the calling PET.
@@ -668,7 +631,7 @@ contains
 !   \end{description}
 !
 !EOP
-
+!------------------------------------------------------------------------------
     integer :: localrc                     ! local error status
     logical :: localresult
 
@@ -694,8 +657,8 @@ contains
     ESMF_CplCompIsPetLocal = localresult
     
   end function ESMF_CplCompIsPetLocal
-    
 !------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -704,12 +667,12 @@ contains
 ! !IROUTINE:  ESMF_CplCompPrint - Print the contents of a CplComp
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompPrint(cplcomp, options, rc)
+  subroutine ESMF_CplCompPrint(cplcomp, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp) :: cplcomp
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
+    type(ESMF_CplComp)                        :: cplcomp
+    character(len = *), intent(in),  optional :: options
+    integer,            intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !  Prints information about an {\tt ESMF\_CplComp} to {\tt stdout}. \\
@@ -732,6 +695,7 @@ contains
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
        integer :: localrc              ! local return code
 
        ! Assume failure until success
@@ -740,7 +704,6 @@ contains
 
        ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
-     !jw  call ESMF_LogWrite("Coupler Component:", ESMF_LOG_INFO)
        print *, "Coupler Component:"
        call ESMF_CompPrint(cplcomp%compp, options, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -749,6 +712,8 @@ contains
        ! Return success
        if (present(rc)) rc = ESMF_SUCCESS
        end subroutine ESMF_CplCompPrint
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -757,16 +722,16 @@ contains
 ! !IROUTINE: ESMF_CplCompReadRestart -- Call the CplComp's restore routine
 !
 ! !INTERFACE:
-     recursive subroutine ESMF_CplCompReadRestart(cplcomp, iospec, clock, &
-                                                  phase, blockingflag, rc)
+  recursive subroutine ESMF_CplCompReadRestart(cplcomp, iospec, clock, phase, &
+    blockingflag, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_CplComp), intent(inout) :: cplcomp
-      type (ESMF_IOSpec), intent(inout), optional :: iospec
-      type (ESMF_Clock), intent(inout), optional :: clock
-      integer, intent(in), optional :: phase
-      type (ESMF_BlockingFlag), intent(in), optional :: blockingflag
-      integer, intent(out), optional :: rc 
+    type(ESMF_CplComp),      intent(inout)           :: cplcomp
+    type(ESMF_IOSpec),       intent(inout), optional :: iospec
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !  Call the associated user restore code for an {\tt ESMF\_CplComp}.
@@ -808,6 +773,7 @@ contains
 !   \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
         integer :: localrc                  ! local return code
 
         ! Initialize return code; assume routine not implemented
@@ -824,7 +790,9 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_CplCompReadRestart
+  end subroutine ESMF_CplCompReadRestart
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -833,17 +801,17 @@ contains
 ! !IROUTINE: ESMF_CplCompRun - Call the CplComp's run routine
 !
 ! !INTERFACE:
-    recursive subroutine ESMF_CplCompRun(cplcomp, importState, exportState, &
-                                         clock, phase, blockingflag, rc)
+  recursive subroutine ESMF_CplCompRun(cplcomp, importState, exportState, &
+    clock, phase, blockingflag, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_CplComp) :: cplcomp
-      type (ESMF_State), intent(inout), optional :: importState
-      type (ESMF_State), intent(inout), optional :: exportState
-      type (ESMF_Clock), intent(inout), optional :: clock
-      integer, intent(in), optional :: phase
-      type (ESMF_BlockingFlag), intent(in), optional :: blockingflag
-      integer, intent(out), optional :: rc 
+    type(ESMF_CplComp)                               :: cplcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !  Call the associated user run code for an {\tt ESMF\_CplComp}.
@@ -893,6 +861,7 @@ contains
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
         integer :: localrc                     ! local return code
 
         ! Initialize return code; assume routine not implemented
@@ -912,7 +881,8 @@ contains
 
         ! Return success
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_CplCompRun
+  end subroutine ESMF_CplCompRun
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -922,15 +892,15 @@ contains
 ! !IROUTINE: ESMF_CplCompSet - Set or reset information about the CplComp
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompSet(cplcomp, name, config, configFile, clock, rc)
+  subroutine ESMF_CplCompSet(cplcomp, name, config, configFile, clock, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp), intent(inout) :: cplcomp
-      character(len=*), intent(in), optional :: name
-      type(ESMF_Config), intent(inout), optional :: config
-      character(len=*), intent(in), optional :: configFile
-      type(ESMF_Clock), intent(inout), optional :: clock
-      integer, intent(out), optional :: rc             
+    type(ESMF_CplComp), intent(inout)           :: cplcomp
+    character(len=*),   intent(in),    optional :: name
+    type(ESMF_Config),  intent(inout), optional :: config
+    character(len=*),   intent(in),    optional :: configFile
+    type(ESMF_Clock),   intent(inout), optional :: clock
+    integer,            intent(out),   optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -962,6 +932,7 @@ contains
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
         integer :: localrc                    ! local return code
 
         ! Initialize return code; assume routine not implemented
@@ -978,7 +949,8 @@ contains
                ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_CplCompSet
+  end subroutine ESMF_CplCompSet
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -999,11 +971,11 @@ contains
         use ESMF_StateMod
         use ESMF_ClockMod
         implicit none
-        type(ESMF_CplComp)          :: cplcomp
-        type(ESMF_State)            :: importState
-        type(ESMF_State)            :: exportState
-        type(ESMF_Clock)            :: clock
-        integer, intent(out)        :: rc
+        type(ESMF_CplComp)          :: cplcomp      ! must not be optional
+        type(ESMF_State)            :: importState  ! must not be optional
+        type(ESMF_State)            :: exportState  ! must not be optional
+        type(ESMF_Clock)            :: clock        ! must not be optional
+        integer, intent(out)        :: rc           ! must not be optional
       end subroutine
     end interface
     integer, intent(in),  optional  :: phase
@@ -1033,19 +1005,8 @@ contains
 ! \end{description}
 !
 ! The Component writer must supply a subroutine with the exact interface 
-! shown below, including the {\tt intent}. Arguments must not be declared
-! as optional, and the types and order must match.
-!
-! !INTERFACE:
-!   interface
-!     subroutine routine(cplcomp, importState, exportState, clock, rc)
-!       type(ESMF_CplComp)   :: cplcomp      ! must not be optional
-!       type(ESMF_State)     :: importState  ! must not be optional
-!       type(ESMF_State)     :: exportState  ! must not be optional
-!       type(ESMF_Clock)     :: clock        ! must not be optional
-!       integer, intent(out) :: rc           ! must not be optional
-!     end subroutine
-!   end interface
+! shown above for the {\tt routine} argument. Arguments in {\tt routine} must
+! not be declared as optional, and the types, intent and order must match.
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1129,8 +1090,8 @@ contains
       subroutine routine(cplcomp, rc)
         use ESMF_CompMod
         implicit none
-        type(ESMF_CplComp)          :: cplcomp
-        integer, intent(out)        :: rc
+        type(ESMF_CplComp)          :: cplcomp  ! must not be optional
+        integer, intent(out)        :: rc       ! must not be optional
       end subroutine
     end interface
     integer, intent(out), optional  :: rc 
@@ -1150,18 +1111,9 @@ contains
 ! \end{description}
 !
 ! The Component writer must supply a subroutine with the exact interface 
-! shown below, including the {\tt intent}. Arguments must not be declared
-! as optional, and the types and order must match.
+! shown above for the {\tt routine} argument. Arguments in {\tt routine} must
+! not be declared as optional, and the types, intent and order must match.
 !
-! !INTERFACE:
-!   interface
-!     subroutine routine(cplcomp, rc)
-!       type(ESMF_CplComp)   :: cplcomp    ! must not be optional
-!       integer, intent(out) :: rc         ! must not be optional
-!     end subroutine
-!   end interface
-!
-! !DESCRIPTION:
 ! The {\tt routine}, when called by the framework, must make successive calls to
 ! {\tt ESMF\_CplCompSetEntryPoint()} to preset callback routines for standard
 ! Component Initialize(), Run() and Finalize() methods.
@@ -1224,6 +1176,10 @@ contains
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
+! The Component writer must supply a subroutine with the exact interface 
+! shown for {\tt routine} below. Arguments must not be declared
+! as optional, and the types, intent and order must match.
+!
 ! !INTERFACE:
 !   interface
 !     subroutine routine(cplcomp, rc)
@@ -1276,8 +1232,8 @@ contains
       subroutine routine(cplcomp, rc)
         use ESMF_CompMod
         implicit none
-        type(ESMF_CplComp)          :: cplcomp
-        integer, intent(out)        :: rc
+        type(ESMF_CplComp)          :: cplcomp  ! must not be optional
+        integer, intent(out)        :: rc       ! must not be optional
       end subroutine
     end interface
     integer, intent(out), optional  :: rc 
@@ -1297,18 +1253,9 @@ contains
 ! \end{description}
 !
 ! The Component writer must supply a subroutine with the exact interface 
-! shown below, including the {\tt intent}. Arguments must not be declared
-! as optional, and the types and order must match.
+! shown above for the {\tt routine} argument. Arguments in {\tt routine} must
+! not be declared as optional, and the types, intent and order must match.
 !
-! !INTERFACE:
-!   interface
-!     subroutine routine(cplcomp, rc)
-!       type(ESMF_CplComp)   :: cplcomp     ! must not be optional
-!       integer, intent(out) :: rc          ! must not be optional
-!     end subroutine
-!   end interface
-!
-! !DESCRIPTION:
 ! The subroutine, when called by the framework, is expected to use any of the
 ! {\tt ESMF\_CplCompSetVMxxx()} methods to set the properties of the VM
 ! associated with the Coupler Component.
@@ -1369,8 +1316,8 @@ contains
 ! \end{description}
 !
 ! The Component writer must supply a subroutine with the exact interface 
-! shown below, including the {\tt intent}. Arguments must not be declared
-! as optional, and the types and order must match.
+! shown for {\tt routine} below. Arguments must not be declared
+! as optional, and the types, intent and order must match.
 !
 ! !INTERFACE:
 !   interface
@@ -1417,8 +1364,8 @@ contains
 ! !IROUTINE: ESMF_CplCompSetVMMaxPEs - Define a VM for this CplComp
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, max, &
-                       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, max, pref_intra_process, &
+    pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
@@ -1448,7 +1395,7 @@ contains
 !     \end{description}
 !
 !EOPI
-
+!------------------------------------------------------------------------------
     integer :: localrc                     ! local error localrc
 
     ! Initialize return code; assume failure until success is certain       
@@ -1470,6 +1417,7 @@ contains
   end subroutine ESMF_CplCompSetVMMaxPEs
 !------------------------------------------------------------------------------
 
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVMMaxThreads"
@@ -1477,11 +1425,11 @@ contains
 ! !IROUTINE: ESMF_CplCompSetVMMaxThreads - Define a VM for this CplComp
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetVMMaxThreads(cplcomp, max, &
-                     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_CplCompSetVMMaxThreads(cplcomp, max, pref_intra_process, &
+    pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),  intent(inout)            :: cplcomp
+    type(ESMF_CplComp),  intent(inout)         :: cplcomp
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1508,7 +1456,7 @@ contains
 !     \end{description}
 !
 !EOPI
-
+!------------------------------------------------------------------------------
     integer :: localrc                     ! local error localrc
 
     ! Initialize return code; assume failure until success is certain       
@@ -1528,6 +1476,8 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_CplCompSetVMMaxThreads
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1536,8 +1486,8 @@ contains
 ! !IROUTINE: ESMF_CplCompSetVMMinThreads - Define a VM for this CplComp
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetVMMinThreads(cplcomp, max, &
-                        pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_CplCompSetVMMinThreads(cplcomp, max, pref_intra_process, &
+    pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
@@ -1567,7 +1517,7 @@ contains
 !     \end{description}
 !
 !EOPI
-
+!------------------------------------------------------------------------------
     integer :: localrc                     ! local error localrc
 
     ! Initialize return code; assume failure until success is certain       
@@ -1589,6 +1539,7 @@ contains
   end subroutine ESMF_CplCompSetVMMinThreads
 !------------------------------------------------------------------------------
 
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompValidate"
@@ -1596,12 +1547,12 @@ contains
 ! !IROUTINE: ESMF_CplCompValidate -- Ensure the CplComp is internally consistent
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompValidate(cplcomp, options, rc)
+  subroutine ESMF_CplCompValidate(cplcomp, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp) :: cplcomp
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
+    type(ESMF_CplComp)                         :: cplcomp
+    character (len = *), intent(in),  optional :: options
+    integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !   Currently all this method does is to check that the 
@@ -1618,7 +1569,7 @@ contains
 !   \end{description}
 !
 !EOP
-
+!------------------------------------------------------------------------------
       call ESMF_CompValidate(cplcomp%compp, options, rc)
  
       ! Check Init Status
@@ -1627,7 +1578,9 @@ contains
       ! If all checks pass return success
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_CplCompValidate
+  end subroutine ESMF_CplCompValidate
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1639,9 +1592,9 @@ contains
   subroutine ESMF_CplCompWait(cplcomp, blockingFlag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp), intent(inout)               :: cplcomp
-    type (ESMF_BlockingFlag), intent(in), optional  :: blockingFlag
-    integer,            intent(out), optional       :: rc           
+    type(ESMF_CplComp),      intent(inout)         :: cplcomp
+    type(ESMF_BlockingFlag), intent(in),  optional :: blockingFlag
+    integer,                 intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !     When executing asychronously, wait for an {\tt ESMF\_CplComp} to return.
@@ -1660,7 +1613,7 @@ contains
 !     \end{description}
 !
 !EOP
-
+!------------------------------------------------------------------------------
     integer :: localrc                     ! local error localrc
 
     ! Initialize return code; assume failure until success is certain       
@@ -1681,6 +1634,7 @@ contains
   end subroutine ESMF_CplCompWait
 !------------------------------------------------------------------------------
 
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompWriteRestart"
@@ -1688,16 +1642,16 @@ contains
 ! !IROUTINE: ESMF_CplCompWriteRestart -- Call the CplComp's checkpoint routine
 
 ! !INTERFACE:
-    recursive subroutine ESMF_CplCompWriteRestart(cplcomp, iospec, clock, &
-                                                  phase, blockingflag, rc)
+  recursive subroutine ESMF_CplCompWriteRestart(cplcomp, iospec, clock, &
+    phase, blockingflag, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_CplComp), intent(inout) :: cplcomp
-      type (ESMF_IOSpec), intent(inout), optional :: iospec
-      type (ESMF_Clock), intent(inout), optional :: clock
-      integer, intent(in), optional :: phase
-      type (ESMF_BlockingFlag), intent(in), optional :: blockingflag
-      integer, intent(out), optional :: rc 
+    type(ESMF_CplComp),      intent(inout)           :: cplcomp
+    type(ESMF_IOSpec),       intent(inout), optional :: iospec
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !  Call the associated user checkpoint code for an {\tt ESMF\_CplComp}.
@@ -1736,6 +1690,7 @@ contains
 !   \end{description}
 !
 !EOPI
+!------------------------------------------------------------------------------
         integer :: localrc                        ! local return code
 
         ! Initialize return code; assume routine not implemented
@@ -1753,10 +1708,43 @@ contains
 
         ! Return success
         if (present(rc)) rc = ESMF_SUCCESS
-        end subroutine ESMF_CplCompWriteRestart
+  end subroutine ESMF_CplCompWriteRestart
+!------------------------------------------------------------------------------
 
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompGetInit"
+!BOPI
+! !IROUTINE:  ESMF_CplCompGetInit - Get initialization status.
 
+! !INTERFACE:
+  function ESMF_CplCompGetInit(d)
+!
+! !RETURN VALUE:
+    ESMF_INIT_TYPE :: ESMF_CplCompGetInit
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(in), optional :: d
+!
+! !DESCRIPTION:
+!      Get the initialization status of the Deep class {\tt CplComp}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[d]
+!           {\tt ESMF\_CplComp} from which to retreive status.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+       if (present(d)) then
+         ESMF_CplCompGetInit = ESMF_INIT_GET(d)
+       else
+         ESMF_CplCompGetInit = ESMF_INIT_CREATED
+       endif
+
+  end function ESMF_CplCompGetInit
+!------------------------------------------------------------------------------
 
 end module ESMF_CplCompMod
-
