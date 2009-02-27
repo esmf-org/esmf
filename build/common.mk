@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.250 2009/02/25 21:02:37 w6ws Exp $
+#  $Id: common.mk,v 1.251 2009/02/27 22:42:32 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -491,6 +491,7 @@ DO_L2H		= $(ESMF_TEMPLATES)/scripts/do_l2h
 # test script variables
 UNIT_TESTS_CONFIG   = $(ESMF_TESTDIR)/unit_tests.config
 SYS_TESTS_CONFIG    = $(ESMF_TESTDIR)/sys_tests.config
+EXAMPLES_CONFIG     = $(ESMF_EXDIR)/examples.config
 TEST_HARNESS_LIST   = $(ESMF_TESTDIR)/test_harness.list
 ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
@@ -2220,6 +2221,7 @@ examples: chkdir_examples build_libs
 	  echo "" ; \
 	  $(MAKE) err ; \
 	fi
+	$(MAKE) MULTI="Multiprocessor" config_examples
 	-$(MAKE) ACTION=tree_examples tree
 	$(MAKE) check_examples
 
@@ -2230,6 +2232,7 @@ tree_examples: tree_build_examples tree_run_examples
 # examples_uni
 #
 examples_uni: chkdir_examples build_libs
+	$(MAKE) MULTI="Uniprocessor" config_examples
 	-$(MAKE) ACTION=tree_examples_uni tree
 	$(MAKE) check_examples
 
@@ -2239,6 +2242,7 @@ tree_examples_uni: tree_build_examples tree_run_examples_uni
 # build_examples
 #
 build_examples: reqfile_libesmf reqdir_lib chkdir_examples
+	$(MAKE) config_examples
 	$(MAKE) ACTION=tree_build_examples tree
 	@echo "ESMF examples built successfully."
 
@@ -2266,6 +2270,10 @@ run_examples:  reqdir_examples
 	  echo "" ; \
 	  $(MAKE) err ; \
 	fi
+	@if [ -f $(EXAMPLES_CONFIG) ] ; then \
+	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(EXAMPLES_CONFIG) > $(EXAMPLES_CONFIG).temp; \
+	   $(ESMF_MV) $(EXAMPLES_CONFIG).temp $(EXAMPLES_CONFIG); \
+	fi
 	-$(MAKE) ACTION=tree_run_examples tree
 	$(MAKE) check_examples
 
@@ -2275,10 +2283,28 @@ tree_run_examples: $(EXAMPLES_RUN)
 # run_examples_uni
 #
 run_examples_uni:  reqdir_examples
+	@if [ -f $(EXAMPLES_CONFIG) ] ; then \
+	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(EXAMPLES_CONFIG) > $(EXAMPLES_CONFIG).temp; \
+	$(ESMF_MV) $(EXAMPLES_CONFIG).temp $(EXAMPLES_CONFIG); \
+        fi
 	-$(MAKE) ACTION=tree_run_examples_uni tree 
 	$(MAKE) check_examples
 
 tree_run_examples_uni: $(EXAMPLES_RUN_UNI)
+
+
+#
+# echo into a file how the examples were run, so when the perl scripts run 
+# it needs to know multi vs uni so it knows what examples were run.
+#
+config_examples:
+	@echo "# This file used by test scripts, please do not delete." > $(EXAMPLES_CONFIG)
+ifeq ($(MULTI),)
+	@echo " Last run Noprocessor" >> $(EXAMPLES_CONFIG)
+else
+	@echo " Last run" $(MULTI) >> $(EXAMPLES_CONFIG)
+endif
+
 
 #
 # run the examples, either redirecting the stdout from the command line, or

@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: examples_results.pl,v 1.5 2008/04/11 01:18:28 svasquez Exp $
+# $Id: examples_results.pl,v 1.6 2009/02/27 22:43:15 svasquez Exp $
 # This subroutine is called at the end of the examples, "check_examples" and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 # The results are either complete results or a summary.
@@ -22,6 +22,36 @@ use File::Find;
 @file_lines = ();	# file lines
 @ex_x_files = ();	# examples executable files
 
+
+        # Open the examples config file
+        $ok=open(F,"$EX_DIR/examples.config");
+        if (!(defined $ok)) {
+                print "\n\n";
+                if ($SUMMARY) { # Print only if full output requested
+                        print "EXAMPLES SUMMARY\n";
+                }
+                print "NOTE: Unable to open $EX_DIR/examples.config file.\n";
+                print "Either the 'gmake ESMF_BOPT=$ESMF_BOPT build_examples_tests' has not been run ";
+                print "or the 'gmake ESMF_BOPT=$ESMF_BOPT' did not build successfully. \n\n";
+
+                return 0;
+        }
+        # Get flag from examples_config file.
+        # processor = 0 for uni_processor
+        # processor = 1 for multi_processor
+        foreach $line (<F>){
+			push(file_lines, $line);
+                        $count=grep(/Uniprocessor/, @file_lines);
+                        if ($count == 1) {
+                                $processor=0;
+                        }
+                        $count=grep(/Multiprocessor/, @file_lines);
+                        if ($count == 1) {
+                                $processor=1;
+                        }
+        }
+
+
 	#Find all files
 	find(\&allFiles, '.'); 
 	sub allFiles {
@@ -30,8 +60,8 @@ use File::Find;
 	}	
 	# Get all example files
 	@ex_files=grep (/Ex/, @all_files);
-	# Find the example files with the "ESMF_EXAMPLE" string
-	# grep for "ESMF_EXAMPLE"
+	# Find the example files 
+	# grep for "ESMF_EXAMPLE" and/or  "ESMF_MULTI_PROC_EXAMPLE" depending on "processor".
 	$count=0;
 	$ex_count=0;
 	foreach $file ( @ex_files) {
@@ -40,11 +70,28 @@ use File::Find;
 			push(file_lines, $line);
 			}
 			close ($file);
-			$count=grep ( /ESMF_EXAMPLE/, @file_lines);
-			if ($count != 0) {
-				push (act_ex_files, $file);
+			if ( $processor == 0) {
+                                # Get the uni-PET examples
+                                $count=grep ( /ESMF_EXAMPLE/, @file_lines);
+                                if ($count != 0) {
+                                        push (act_ex_files, $file);
                                         $ex_count=$ex_count + 1;
-				}
+                                }
+                        }
+                        else {
+                                # Get the mult-PET only examples
+                                $count=grep ( /ESMF_MULTI_PROC_EXAMPLE/, @file_lines);
+                                if ($count != 0) {
+                                        push (act_ex_files, $file);
+                                        $ex_count=$ex_count + 1;
+                                }
+                                # Include the uni-PET system tests
+                                $count=grep ( /ESMF_EXAMPLE/, @file_lines);
+                                if ($count != 0) {
+                                        push (act_ex_files, $file);
+                                        $ex_count=$ex_count + 1;
+                                }
+                        }
                         @file_lines=();
 	}
 	if ( $ex_count == 0 ) {
@@ -212,12 +259,20 @@ use File::Find;
                 else { # Print only if full output requested
                         print "\n\nEXAMPLES SUMMARY\n";
                 }
-		if ($ex_count == 1) {
-			print "Found $example_count example, $pass_count passed and $fail_count failed.\n\n";
-		}
-		else {
-			print "Found $example_count examples, $pass_count passed and $fail_count failed.\n\n";
-		}
+                print "Found $ex_count ";
+                if ($processor == 0) {
+                        print "single processor ";
+                }
+                else {
+                        print "multi-processor ";
+                }
+                if ($examples_count == 1) {
+                        print "example, ";
+                }
+                else {
+                        print "examples, ";
+                }
+                print "$pass_count passed and $fail_count failed.\n\n";
 
                 # Write test results to be read by regression tests scripts.
                 $results_file="$EX_DIR/examples_results";
