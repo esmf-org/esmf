@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2008/09/09 22:43:53 dneckels Exp $
+# $Id: makefile,v 1.14 2009/02/27 22:53:45 svasquez Exp $
 
 ALL: build_examples
 run: run_examples
@@ -21,7 +21,7 @@ EXAMPLES_BUILD    = \
 
 EXAMPLES_RUN      = run_ESMF_MeshEx 
 
-EXAMPLES_RUN_UNI  = run_ESMF_MeshEx_uni 
+EXAMPLES_RUN_UNI  =
 
 
 include $(ESMF_DIR)/makefile
@@ -45,5 +45,3 @@ run_ESMF_MeshEx:
 	cp -r data $(ESMF_EXDIR)
 	$(MAKE) EXNAME=Mesh NP=6 exfrun
 
-run_ESMF_MeshEx_uni:
-	echo "PASS: ESMF_MeshEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_MeshEx.stdout

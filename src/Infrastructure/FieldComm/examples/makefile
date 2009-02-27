@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2008/09/26 04:16:50 cdeluca Exp $
+# $Id: makefile,v 1.17 2009/02/27 22:52:43 svasquez Exp $
 
 ALL:  build_examples
 
@@ -16,9 +16,7 @@ EXAMPLES_RUN = run_ESMF_FieldCommEx \
 	       run_ESMF_FieldRedistEx \
 	       run_ESMF_FieldSMMEx
                
-EXAMPLES_RUN_UNI = run_ESMF_FieldCommEx_uni \
-		   run_ESMF_FieldRedistEx_uni \
-		   run_ESMF_FieldSMMEx_uni
+EXAMPLES_RUN_UNI = 
                    
 
 
@@ -37,8 +35,6 @@ CLOBBERDIRS =
 run_ESMF_FieldCommEx:
 	$(MAKE) EXNAME=FieldComm NP=4 exfrun
 
-run_ESMF_FieldCommEx_uni:
-	echo "PASS: ESMF_FieldCommEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldCommEx.stdout
 
 #
 # ESMF_FieldRedistEx
@@ -46,8 +42,6 @@ run_ESMF_FieldCommEx_uni:
 run_ESMF_FieldRedistEx:
 	$(MAKE) EXNAME=FieldRedist NP=4 exfrun
 
-run_ESMF_FieldRedistEx_uni:
-	echo "PASS: ESMF_FieldRedistEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldRedistEx.stdout
 
 #
 # ESMF_FieldSMMEx
@@ -55,6 +49,4 @@ run_ESMF_FieldRedistEx_uni:
 run_ESMF_FieldSMMEx:
 	$(MAKE) EXNAME=FieldSMM NP=4 exfrun
 
-run_ESMF_FieldSMMEx_uni:
-	echo "PASS: ESMF_FieldSMMEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldSMMEx.stdout
 

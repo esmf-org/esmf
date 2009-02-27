@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.45 2009/02/24 19:46:09 theurich Exp $ 
+# $Id: makefile,v 1.46 2009/02/27 22:50:34 svasquez Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -37,12 +37,7 @@ EXAMPLES_RUN = run_ESMF_FieldCreateEx \
 #                   run_ESMF_FieldGlobalEx \
 #                   run_ESMF_FieldWriteEx 
 
-EXAMPLES_RUN_UNI = run_ESMF_FieldCreateEx_uni \
-                   run_ESMF_FieldEx_uni \
-                   run_ESMF_FieldRegridEx_uni \
-                   run_ESMF_FieldSphereRegridEx_uni \
-                   run_ESMF_FieldMeshRegridEx_uni \
-                   run_ESMF_FieldRepDimEx_uni \
+EXAMPLES_RUN_UNI = run_ESMF_FieldRepDimEx_uni \
                    run_ESMF_FieldArbGridEx_uni
 #                   run_ESMF_FieldGetEx_uni \
 #                   run_ESMF_FieldSetEx_uni \
@@ -66,8 +61,6 @@ CLOBBERDIRS =
 run_ESMF_FieldEx:
 	$(MAKE) EXNAME=Field NP=4 exfrun
 
-run_ESMF_FieldEx_uni:
-	echo "PASS: ESMF_FieldEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldEx.stdout
 
 #
 # ESMF_FieldCreateEx
@@ -75,26 +68,18 @@ run_ESMF_FieldEx_uni:
 run_ESMF_FieldCreateEx:
 	$(MAKE) EXNAME=FieldCreate NP=4 exfrun
 
-run_ESMF_FieldCreateEx_uni:
-	echo "PASS: ESMF_FieldCreateEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldCreateEx.stdout
-
 #
 # ESMF_FieldRegridEx
 #
 run_ESMF_FieldRegridEx:
 	$(MAKE) EXNAME=FieldRegrid NP=4 exfrun
 
-run_ESMF_FieldRegridEx_uni:
-	echo "PASS: ESMF_FieldRegridEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldRegridEx.stdout
 
 #
 # ESMF_FieldSphereRegridEx
 #
 run_ESMF_FieldSphereRegridEx:
 	$(MAKE) EXNAME=FieldSphereRegrid NP=4 exfrun
-
-run_ESMF_FieldSphereRegridEx_uni:
-	echo "PASS: ESMF_FieldSphereRegridEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldSphereRegridEx.stdout
 
 #
 # ESMF_FieldMeshRegridEx
@@ -103,17 +88,11 @@ run_ESMF_FieldMeshRegridEx:
 	cp -rf  ESMF_FieldMeshRegridExData $(ESMF_EXDIR)
 	$(MAKE) EXNAME=FieldMeshRegrid NP=6 exfrun
 
-run_ESMF_FieldMeshRegridEx_uni:
-	echo "PASS: ESMF_FieldMeshRegridEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldMeshRegridEx.stdout
-
 #
 # ESMF_FieldRepDimEx
 #
 run_ESMF_FieldRepDimEx:
 	$(MAKE) EXNAME=FieldRepDim NP=4 exfrun
-
-run_ESMF_FieldRepDimEx_uni:
-	echo "PASS: ESMF_FieldRepDimEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldRepDimEx.stdout
 
 #
 # ESMF_FieldRepDimEx

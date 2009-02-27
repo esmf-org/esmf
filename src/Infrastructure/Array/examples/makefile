@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2007/12/14 23:31:27 theurich Exp $
+# $Id: makefile,v 1.18 2009/02/27 22:45:46 svasquez Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -23,13 +23,7 @@ EXAMPLES_RUN      = run_ESMF_ArrayFarrayEx \
                     run_ESMF_ArrayRedistEx \
                     run_ESMF_ArraySparseMatMulEx
 
-EXAMPLES_RUN_UNI  = run_ESMF_ArrayFarrayEx_uni \
-                    run_ESMF_ArrayFarrayHaloEx_uni \
-                    run_ESMF_ArrayLarrayEx_uni \
-                    run_ESMF_ArrayEx_uni \
-                    run_ESMF_ArrayScatterGatherEx_uni \
-                    run_ESMF_ArrayRedistEx_uni \
-                    run_ESMF_ArraySparseMatMulEx_uni
+EXAMPLES_RUN_UNI  = 
 
 
 include $(ESMF_DIR)/makefile
@@ -46,42 +40,28 @@ CLOBBERDIRS =
 run_ESMF_ArrayLarrayEx:
 	$(MAKE) EXNAME=ArrayLarray NP=4 exfrun
 
-run_ESMF_ArrayLarrayEx_uni:
-	$(MAKE) EXNAME=ArrayLarray NP=1 exfrun
 
 run_ESMF_ArrayFarrayHaloEx:
 	$(MAKE) EXNAME=ArrayFarrayHalo NP=4 exfrun
 
-run_ESMF_ArrayFarrayHaloEx_uni:
-	$(MAKE) EXNAME=ArrayFarrayHalo NP=1 exfrun
 
 run_ESMF_ArrayFarrayEx:
 	$(MAKE) EXNAME=ArrayFarray NP=4 exfrun
 
-run_ESMF_ArrayFarrayEx_uni:
-	$(MAKE) EXNAME=ArrayFarray NP=1 exfrun
 
 run_ESMF_ArrayEx:
 	$(MAKE) EXNAME=Array NP=4 exfrun
 
-run_ESMF_ArrayEx_uni:
-	$(MAKE) EXNAME=Array NP=1 exfrun
 
 run_ESMF_ArrayScatterGatherEx:
 	$(MAKE) EXNAME=ArrayScatterGather NP=4 exfrun
 
-run_ESMF_ArrayScatterGatherEx_uni:
-	$(MAKE) EXNAME=ArrayScatterGather NP=1 exfrun
 
 run_ESMF_ArrayRedistEx:
 	env P4_GLOBMEMSIZE=41943040 $(MAKE) EXNAME=ArrayRedist NP=4 exfrun
 
-run_ESMF_ArrayRedistEx_uni:
-	$(MAKE) EXNAME=ArrayRedist NP=1 exfrun
 
 run_ESMF_ArraySparseMatMulEx:
 	$(MAKE) EXNAME=ArraySparseMatMul NP=4 exfrun
 
-run_ESMF_ArraySparseMatMulEx_uni:
-	$(MAKE) EXNAME=ArraySparseMatMul NP=1 exfrun
 

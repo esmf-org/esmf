@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2008/05/08 02:27:13 theurich Exp $
+# $Id: makefile,v 1.3 2009/02/27 22:48:02 svasquez Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -11,7 +11,7 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_ArrayBundleEx
 
 EXAMPLES_RUN      = run_ESMF_ArrayBundleEx
 
-EXAMPLES_RUN_UNI  = run_ESMF_ArrayBundleEx_uni
+EXAMPLES_RUN_UNI  = 
 
 
 include $(ESMF_DIR)/makefile
@@ -28,6 +28,4 @@ CLOBBERDIRS =
 run_ESMF_ArrayBundleEx:
 	$(MAKE) EXNAME=ArrayBundle NP=4 exfrun
 
-run_ESMF_ArrayBundleEx_uni:
-	$(MAKE) EXNAME=ArrayBundle NP=1 exfrun
 

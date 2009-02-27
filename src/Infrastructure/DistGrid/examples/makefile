@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2008/09/26 04:16:48 cdeluca Exp $
+# $Id: makefile,v 1.17 2009/02/27 22:49:26 svasquez Exp $
 
 ALL: build_examples
 run: run_examples
@@ -11,7 +11,7 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_DistGridEx
 
 EXAMPLES_RUN      = run_ESMF_DistGridEx
 
-EXAMPLES_RUN_UNI  = run_ESMF_DistGridEx_uni
+EXAMPLES_RUN_UNI  = 
 
 
 include $(ESMF_DIR)/makefile
@@ -28,5 +28,3 @@ CLOBBERDIRS =
 run_ESMF_DistGridEx:
 	$(MAKE) EXNAME=DistGrid NP=4 exfrun
 
-run_ESMF_DistGridEx_uni:
-	$(MAKE) EXNAME=DistGrid NP=1 exfrun

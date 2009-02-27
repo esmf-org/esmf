@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2009/01/30 00:40:30 rokuingh Exp $
+# $Id: makefile,v 1.5 2009/02/27 22:55:40 svasquez Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -18,8 +18,7 @@ EXAMPLES_RUN      = run_ESMF_AttributeEx \
                     run_ESMF_AttributeUpdateEx
 
 EXAMPLES_RUN_UNI  = run_ESMF_AttributeEx_uni \
-                    run_ESMF_AttributePackageEx_uni \
-                    run_ESMF_AttributeUpdateEx_uni
+                    run_ESMF_AttributePackageEx_uni
 
 ESMF_AttributeUpdateEx.o : $(ESMF_EXAMPLE_AttributeUpdate_OBJS)
 
@@ -56,6 +55,4 @@ run_ESMF_AttributePackageEx_uni:
 run_ESMF_AttributeUpdateEx:
 	$(MAKE) EXNAME=AttributeUpdate NP=4 exfrun
 
-run_ESMF_AttributeUpdateEx_uni:
-	$(MAKE) EXNAME=AttributeUpdate NP=1 exfrun
 
