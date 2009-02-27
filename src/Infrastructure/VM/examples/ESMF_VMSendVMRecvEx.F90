@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvEx.F90,v 1.10 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_VMSendVMRecvEx.F90,v 1.11 2009/02/27 22:54:34 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -11,7 +11,7 @@
 !==============================================================================
 
 !==============================================================================
-!ESMF_EXAMPLE        String used by test script to count examples.
+!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 !------------------------------------------------------------------------------

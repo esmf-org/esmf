@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.44 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.45 2009/02/27 22:47:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -11,7 +11,7 @@
 !==============================================================================
 
 !==============================================================================
-!ESMF_EXAMPLE        String used by test script to count examples.
+!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 program ESMF_ArrayEx
@@ -65,8 +65,6 @@ program ESMF_ArrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-  if (petCount /= 4) goto 10 ! TODO: use EXAMPLES_MULTI_ONLY once available
   
 !BOE
 ! \subsubsection{Array creation with automatic memory allocation}

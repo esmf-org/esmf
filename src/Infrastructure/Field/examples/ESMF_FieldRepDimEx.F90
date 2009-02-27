@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.2 2009/02/06 20:46:59 feiliu Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.3 2009/02/27 22:50:59 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
     program ESMF_FieldRepDimEx
 
 !------------------------------------------------------------------------------
-!ESMF_EXAMPLE        String used by test script to count examples.
+!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 ! !PROGRAM: ESMF_FieldRepDimEx - Field with replicated dimension
 !

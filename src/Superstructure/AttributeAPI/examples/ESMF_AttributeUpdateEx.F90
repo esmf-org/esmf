@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.8 2009/02/15 00:19:47 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.9 2009/02/27 22:56:21 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -12,7 +12,7 @@
 
 
 !==============================================================================
-!ESMF_EXAMPLE        String used by test script to count examples.
+!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 program ESMF_AttributeUpdateEx

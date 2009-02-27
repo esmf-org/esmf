@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMEx.F90,v 1.6 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldSMMEx.F90,v 1.7 2009/02/27 22:53:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
      program FieldSMMEx
 
 !-------------------------------------------------------------------------
-!ESMF_EXAMPLE        String used by test script to count examples.
+!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !
 ! !PROGRAM: ESMF_FieldSMMEx - Field SMMribution
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMEx.F90,v 1.6 2009/01/21 21:37:59 cdeluca Exp $'
+    '$Id: ESMF_FieldSMMEx.F90,v 1.7 2009/02/27 22:53:06 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
