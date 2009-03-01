@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.20 2009/02/16 19:14:31 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.21 2009/03/01 09:02:25 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -16,8 +16,10 @@ Attributes are meant to be used as a tool for the user to help internally docume
 
 \begin{itemize}
 \item Array
+\item ArrayBundle
 \item CplComp
 \item GridComp
+\item DistGrid
 \item FieldBundle
 \item Field
 \item Grid
@@ -44,7 +46,7 @@ Attribute hierarchies are linked in a "shallow" manner, meaning that the Attribu
 
 \subsubsection{Attribute Packages}
 
-At this time, only select ESMF objects are enabled to contain Attribute packages.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as "CF" (see below) and "general".  These specifiers are used to enforce compliance with several existing metadata standards.  One can use an ESMF supplied standard Attribute package, specify their own Attribute packages, or add customized Attributes to the ESMF supplied Attribute packages.  Working with Attribute packages is quite involved, at present, but significant effort in automation of these metadata capabilities in ESMF is anticipated in future releases. 
+At this time, all ESMF objects which are enabled to contain Attributes can also contain Attribute packages.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as "CF" (see below) and "general".  These specifiers are used to enforce compliance with several existing metadata standards.  One can use an ESMF supplied standard Attribute package, specify their own Attribute packages, or add customized Attributes to the ESMF supplied Attribute packages.  Working with Attribute packages is quite involved, at present, but significant effort in automation of these metadata capabilities in ESMF is anticipated in future releases. 
 
 The standard Attribute packages supplied by ESMF exist for the following ESMF objects:
 
@@ -100,6 +102,28 @@ The ESMF standard Attribute packages are based on the Climate and Forecast (CF) 
 
 \begin{tabular}{|p{4cm}|p{4cm}|p{6cm}|}
 \hline
+\multicolumn{3}{|c|}{{\bf \large Field Attribute Packages}} \\
+\hline\hline
+{\bf Convention} & {\bf Purpose} & {\bf Name} \\
+\hline\hline
+{\tt ESG} & {\tt general} & {\bf Field CF extended +} \\
+& & \\
+& & {\tt export}  \\
+ & & {\tt import} \\ 
+\hline
+{\tt CF} & {\tt extended} & {\bf Field CF general +} \\
+& & \\
+& & {\tt standard\_name}\\ 
+\hline
+{\tt CF} & {\tt general} & {\tt long\_name}\\
+     & & {\tt name} \\
+     & & {\tt units}  \\
+\hline
+\end{tabular}
+\label{FieldAttributePackages}
+
+\begin{tabular}{|p{4cm}|p{4cm}|p{6cm}|}
+\hline
 \multicolumn{3}{|c|}{{\bf \large Grid Attribute Packages}} \\
 \hline\hline
 {\bf Convention} & {\bf Purpose} & {\bf Name} \\
@@ -123,28 +147,6 @@ The ESMF standard Attribute packages are based on the Climate and Forecast (CF) 
 \label{GridAttributePackages}
 
 \vspace{18pt}
-
-\begin{tabular}{|p{4cm}|p{4cm}|p{6cm}|}
-\hline
-\multicolumn{3}{|c|}{{\bf \large Field Attribute Packages}} \\
-\hline\hline
-{\bf Convention} & {\bf Purpose} & {\bf Name} \\
-\hline\hline
-{\tt ESG} & {\tt general} & {\bf Field CF extended +} \\
-& & \\
-& & {\tt export}  \\
- & & {\tt import} \\ 
-\hline
-{\tt CF} & {\tt extended} & {\bf Field CF general +} \\
-& & \\
-& & {\tt standard\_name}\\ 
-\hline
-{\tt CF} & {\tt general} & {\tt long\_name}\\
-     & & {\tt name} \\
-     & & {\tt units}  \\
-\hline
-\end{tabular}
-\label{FieldAttributePackages}
 
 \vspace{18pt}
 
