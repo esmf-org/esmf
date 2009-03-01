@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2008/10/09 17:01:02 rokuingh Exp $ 
+# $Id: makefile,v 1.2 2009/03/01 09:01:40 rokuingh Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -7,7 +7,9 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Superstructure/AttributeAPI/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeABundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeCplCompUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeDistGridUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeFieldUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeFBundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeGridCompUTest \
@@ -15,7 +17,9 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeStateUTest
 
 TESTS_RUN     = RUN_ESMF_AttributeArrayUTest \
+		RUN_ESMF_AttributeABundleUTest \
 		RUN_ESMF_AttributeCplCompUTest \
+		RUN_ESMF_AttributeDistGridUTest \
 		RUN_ESMF_AttributeFieldUTest \
 		RUN_ESMF_AttributeFBundleUTest \
 		RUN_ESMF_AttributeGridCompUTest \
@@ -23,7 +27,9 @@ TESTS_RUN     = RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttributeStateUTest
 
 TESTS_RUN_UNI = RUN_ESMF_AttributeArrayUTestUNI \
+		RUN_ESMF_AttributeABundleUTestUNI \
 		RUN_ESMF_AttributeCplCompUTestUNI \
+		RUN_ESMF_AttributeDistGridUTestUNI \
 		RUN_ESMF_AttributeFieldUTestUNI \
 		RUN_ESMF_AttributeFBundleUTestUNI \
 		RUN_ESMF_AttributeGridCompUTestUNI \
@@ -52,6 +58,14 @@ RUN_ESMF_AttributeArrayUTest:
 RUN_ESMF_AttributeArrayUTestUNI:
 	$(MAKE) TNAME=AttributeArray NP=1 ftest
 
+# --- ArrayBundle
+
+RUN_ESMF_AttributeABundleUTest:
+	$(MAKE) TNAME=AttributeABundle NP=4 ftest
+
+RUN_ESMF_AttributeABundleUTestUNI:
+	$(MAKE) TNAME=AttributeABundle NP=1 ftest
+
 # --- CplComp
 
 RUN_ESMF_AttributeCplCompUTest:
@@ -59,6 +73,14 @@ RUN_ESMF_AttributeCplCompUTest:
 
 RUN_ESMF_AttributeCplCompUTestUNI:
 	$(MAKE) TNAME=AttributeCplComp NP=1 ftest
+
+# --- DistGrid
+
+RUN_ESMF_AttributeDistGridUTest:
+	$(MAKE) TNAME=AttributeDistGrid NP=4 ftest
+
+RUN_ESMF_AttributeDistGridUTestUNI:
+	$(MAKE) TNAME=AttributeDistGrid NP=1 ftest
 
 # --- Field
 

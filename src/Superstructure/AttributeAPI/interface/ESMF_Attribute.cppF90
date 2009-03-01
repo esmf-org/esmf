@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.14 2009/02/25 05:29:18 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.15 2009/03/01 09:01:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -55,9 +55,11 @@ module ESMF_AttributeMod
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_ArrayMod
+  Use ESMF_ArrayBundleMod
   use ESMF_CompMod
   use ESMF_CplCompMod
   use ESMF_GridCompMod
+  use ESMF_DistGridMod
   use ESMF_FieldMod
   use ESMF_FieldBundleMod
   use ESMF_GridMod
@@ -86,8 +88,9 @@ module ESMF_AttributeMod
 !------------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
-!     The following routines apply to {\tt ESMF\_Array}, {\tt ESMF\_Field},
-!     {\tt ESMF\_FieldBundle}, {\tt ESMF\_Grid}, and {\tt ESMF\_State}.  
+!     The following routines apply to {\tt ESMF\_Array}, {\tt ESMF\_ArrayBundle},
+!     {\ESMF_DistGrid}, {\tt ESMF\_Field},{\tt ESMF\_FieldBundle}, {\tt ESMF\_Grid}, 
+!     and {\tt ESMF\_State}.  
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
@@ -108,7 +111,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.14 2009/02/25 05:29:18 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.15 2009/03/01 09:01:36 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -124,15 +127,16 @@ module ESMF_AttributeMod
       interface ESMF_AttributeAdd
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_ArrayAttAddPack
         module procedure ESMF_ArrayAttAddPackCstm
+        module procedure ESMF_ArrayBundleAttAddPackCstm
         module procedure ESMF_CplCompAttAddPack
         module procedure ESMF_CplCompAttAddPackCstm
         module procedure ESMF_GridCompAttAddPack
         module procedure ESMF_GridCompAttAddPackCstm
+        module procedure ESMF_DistGridAttAddPackCstm
         module procedure ESMF_FieldAttAddPack
         module procedure ESMF_FieldAttAddPackCstm
-        module procedure ESMF_FBundleAttAddPack
+        module procedure ESMF_FieldBundleAttAddPack
         module procedure ESMF_FieldBundleAttAddPackCstm
         module procedure ESMF_GridAttAddPack
         module procedure ESMF_GridAttAddPackCstm
@@ -174,8 +178,10 @@ module ESMF_AttributeMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_ArrayAttRemove
+        module procedure ESMF_ArrayBundleAttRemove
         module procedure ESMF_CplCompAttRemove
         module procedure ESMF_GridCompAttRemove
+        module procedure ESMF_DistGridAttRemove
         module procedure ESMF_FieldAttRemove
         module procedure ESMF_FieldBundleAttRemove
         module procedure ESMF_GridAttRemove
@@ -208,6 +214,16 @@ module ESMF_AttributeMod
         module procedure ESMF_ArrayAttGetInfoByNum
         module procedure ESMF_ArrayAttGetCount
 
+        TypeKindInterfaceMacro(ESMF_ArrayBundleAttGet)
+	TypeKindInterfaceMacro(ESMF_ArrayBundleAttGet1D)
+        module procedure ESMF_ArrayBundleAttGetLgcl
+        module procedure ESMF_ArrayBundleAttGetLgclList
+        module procedure ESMF_ArrayBundleAttGetChar
+        module procedure ESMF_ArrayBundleAttGetCharList
+        module procedure ESMF_ArrayBundleAttGetInfoByNam
+        module procedure ESMF_ArrayBundleAttGetInfoByNum
+        module procedure ESMF_ArrayBundleAttGetCount
+
         TypeKindInterfaceMacro(ESMF_CplCompAttGet)
 	TypeKindInterfaceMacro(ESMF_CplCompAttGet1D)
         module procedure ESMF_CplCompAttGetLgcl
@@ -227,6 +243,16 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttGetInfoByNam
         module procedure ESMF_GridCompAttGetInfoByNum
         module procedure ESMF_GridCompAttGetCount
+
+        TypeKindInterfaceMacro(ESMF_DistGridAttGet)
+	TypeKindInterfaceMacro(ESMF_DistGridAttGet1D)
+        module procedure ESMF_DistGridAttGetLgcl
+        module procedure ESMF_DistGridAttGetLgclList
+        module procedure ESMF_DistGridAttGetChar
+        module procedure ESMF_DistGridAttGetCharList
+        module procedure ESMF_DistGridAttGetInfoByNam
+        module procedure ESMF_DistGridAttGetInfoByNum
+        module procedure ESMF_DistGridAttGetCount
 
         TypeKindInterfaceMacro(ESMF_FieldAttGet)
 	TypeKindInterfaceMacro(ESMF_FieldAttGet1D)
@@ -291,6 +317,13 @@ module ESMF_AttributeMod
         module procedure ESMF_ArrayAttSetChar
         module procedure ESMF_ArrayAttSetCharList
 
+	TypeKindInterfaceMacro(ESMF_ArrayBundleAttSet)
+	TypeKindInterfaceMacro(ESMF_ArrayBundleAttSet1D)
+        module procedure ESMF_ArrayBundleAttSetLgcl
+        module procedure ESMF_ArrayBundleAttSetLgclList
+        module procedure ESMF_ArrayBundleAttSetChar
+        module procedure ESMF_ArrayBundleAttSetCharList
+
 	TypeKindInterfaceMacro(ESMF_CplCompAttSet)
 	TypeKindInterfaceMacro(ESMF_CplCompAttSet1D)
         module procedure ESMF_CplCompAttSetLgcl
@@ -311,6 +344,13 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttSetLinkGridComp
         module procedure ESMF_GridCompAttSetLinkState
 
+	TypeKindInterfaceMacro(ESMF_DistGridAttSet)
+	TypeKindInterfaceMacro(ESMF_DistGridAttSet1D)
+        module procedure ESMF_DistGridAttSetLgcl
+        module procedure ESMF_DistGridAttSetLgclList
+        module procedure ESMF_DistGridAttSetChar
+        module procedure ESMF_DistGridAttSetCharList
+
 	TypeKindInterfaceMacro(ESMF_FieldAttSet)
 	TypeKindInterfaceMacro(ESMF_FieldAttSet1D)
         module procedure ESMF_FieldAttSetLgcl
@@ -324,7 +364,7 @@ module ESMF_AttributeMod
         module procedure ESMF_FieldBundleAttSetLgclList
         module procedure ESMF_FieldBundleAttSetChar
         module procedure ESMF_FieldBundleAttSetCharList
-        module procedure ESMF_FBundleAttSetLinkField
+        module procedure ESMF_FieldBundleAttSetLinkField
 
 	TypeKindInterfaceMacro(ESMF_GridAttSet)
 	TypeKindInterfaceMacro(ESMF_GridAttSet1D)
@@ -359,10 +399,12 @@ module ESMF_AttributeMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_ArrayAttWrite
+        module procedure ESMF_ArrayBundleAttWrite
         module procedure ESMF_CplCompAttWrite
         module procedure ESMF_GridCompAttWrite
+        module procedure ESMF_DistGridAttWrite
         module procedure ESMF_FieldAttWrite
-        module procedure ESMF_FBundleAttWrite
+        module procedure ESMF_FieldBundleAttWrite
         module procedure ESMF_GridAttWrite
         module procedure ESMF_StateAttWrite
 
@@ -382,12 +424,10 @@ module ESMF_AttributeMod
       interface ESMF_AttributeUpdate
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_ArrayAttUpdate
         module procedure ESMF_CplCompAttUpdate
         module procedure ESMF_GridCompAttUpdate
         module procedure ESMF_FieldAttUpdate
-        module procedure ESMF_FBundleAttUpdate
-        module procedure ESMF_GridAttUpdate
+        module procedure ESMF_FieldBundleAttUpdate
         module procedure ESMF_StateAttUpdate
 
 ! !DESCRIPTION:
@@ -426,7 +466,6 @@ contains
 !     to the ESG convention.
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_CplComp), intent(inout) :: comp  
 !     \item type(ESMF\_GridComp), intent(inout) :: comp  
 !     \item type(ESMF\_Field), intent(inout) :: field  
@@ -475,8 +514,10 @@ contains
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
 !     \item type(ESMF\_CplComp), intent(inout) :: comp  
 !     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -588,8 +629,10 @@ contains
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
 !     \item type(ESMF\_CplComp), intent(inout) :: comp  
 !     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -666,8 +709,10 @@ contains
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
 !     \item type(ESMF\_CplComp), intent(inout) :: comp  
 !     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -707,8 +752,10 @@ contains
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
 !     \item type(ESMF\_CplComp), intent(inout) :: comp  
 !     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -754,8 +801,10 @@ contains
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
 !     \item type(ESMF\_CplComp), intent(inout) :: comp  
 !     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -799,8 +848,10 @@ contains
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
 !     \item type(ESMF\_CplComp), intent(inout) :: comp  
 !     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -855,8 +906,10 @@ contains
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
 !     \item type(ESMF\_CplComp), intent(inout) :: comp  
 !     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
@@ -3264,7 +3317,7 @@ contains
 !-------------------------------------------------------------------------
 !  ARRAY
 !-------------------------------------------------------------------------
-
+#ifdef 0
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayAttAddPack"
@@ -3356,7 +3409,7 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayAttAddPack
-
+#endif
 !------------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_Array, array, array)
@@ -3371,7 +3424,7 @@ GetCountNameNumberMacro(ESMF_Array, array, array)
 TypeKind3DeclarationMacro(AttSet, ESMF_Array, array, array)
 AttSetLogicalMacro(ESMF_Array, array, array)
 AttSetCharacterMacro(ESMF_Array, array, array)
-
+#ifdef 0
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayAttUpdate"
@@ -3430,7 +3483,7 @@ AttSetCharacterMacro(ESMF_Array, array, array)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayAttUpdate
-
+#endif
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayAttWrite"
@@ -3570,6 +3623,316 @@ AttSetCharacterMacro(ESMF_Array, array, array)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayAttWrite
+
+!-------------------------------------------------------------------------
+!  ARRAYBUNDLE
+!-------------------------------------------------------------------------
+#ifdef 0
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayBundleAttAddPack"
+!BOPI
+! !IROUTINE: ESMF_ArrayBundleAttAddPack - Create an arraybundle Attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeAdd()
+      subroutine ESMF_ArrayBundleAttAddPack(arraybundle, convention, purpose, &
+        attpacknestflag, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_ArrayBundle), intent(inout) :: arraybundle  
+      character (len = *), intent(in) :: convention
+      character (len = *), intent(in) :: purpose
+      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Sets up the Attribute package for the {\tt arraybundle}.
+!     The Attribute package defines the convention, purpose, and object type 
+!     of the associated Attributes.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [arraybundle]
+!      An {\tt ESMF\_ArrayBundle} object.
+!     \item [convention]
+!      The convention of the Attribute package.
+!     \item [purpose]
+!      The purpose of the Attribute package.
+!     \item [attpacknestflag]
+!      The flag to tell whether this Attribute package is to be nested or not, possible values
+!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character (len=len_trim(convention)) :: fconvention
+      character (len=len_trim(purpose)) :: fpurpose
+      character (len=*), parameter :: fobject='arraybundle'
+      character (len=*), parameter :: name1 = 'name'
+      character (len=*), parameter :: name2 = 'standard_name'
+      character (len=*), parameter :: name3 = 'long_name'
+      character (len=*), parameter :: name4 = 'units'
+      character (len=*), parameter :: name5 = 'import'
+      character (len=*), parameter :: name6 = 'export'
+      type(ESMF_AttPackNestFlag) :: attpacknest
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundle,rc)
+
+      fconvention = convention
+      fpurpose = purpose
+
+       if (present(attpacknestflag)) then
+        attpacknest = attpacknestflag
+      else
+        attpacknest = ESMF_ATTPACKNEST_OFF
+      endif
+
+      call c_ESMC_AttPackCreate(arraybundle, fconvention, &
+        fpurpose, fobject, attpacknest, localrc)
+      call c_ESMC_AttPackAddAttribute(arraybundle, name1, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(arraybundle, name2, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(arraybundle, name3, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(arraybundle, name4, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(arraybundle, name5, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(arraybundle, name6, fconvention, &
+        fpurpose, fobject, localrc)
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayBundleAttAddPack
+# endif
+!------------------------------------------------------------------------------
+
+AttAddPackCustomMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttRemoveMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+
+TypeKind3DeclarationMacro(AttGet, ESMF_ArrayBundle, arraybundle, arraybundle)
+AttGetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttGetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+
+GetCountNameNumberMacro(ESMF_ArrayBundle, arraybundle, arraybundle)      
+
+TypeKind3DeclarationMacro(AttSet, ESMF_ArrayBundle, arraybundle, arraybundle)
+AttSetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttSetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+#ifdef 0
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayBundleAttUpdate"
+!BOPI
+! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeUpdate()
+      subroutine ESMF_ArrayBundleAttUpdate(arraybundle, vm, rootList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_ArrayBundle), intent(inout) :: arraybundle
+      type(ESMF_VM), intent(in) :: vm
+      integer, dimension(:), intent(in) :: rootList
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Update an Attribute hierarchy.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [arraybundle]
+!      An {\tt ESMF\_ArrayBundle} object.
+!     \item [vm]
+!      The virtural machine over which this Attribute hierarchy 
+!      should be updated.
+!     \item [rootList]
+!      The list of "root" PETs that are to be used to update.
+!     \item [{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, count                           ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundle,rc)
+
+      call ESMF_ArrayBundleValidate(arraybundle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      count = size(rootList)
+      call c_ESMC_AttributeUpdate(arraybundle, vm, rootList, count, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayBundleAttUpdate
+#endif
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayBundleAttWrite"
+!BOPI
+! !IROUTINE: ESMF_AttributeWrite - Print the Attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeWrite()
+      subroutine ESMF_ArrayBundleAttWrite(arraybundle, convention, purpose, &
+        attwriteflag, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_ArrayBundle), intent(inout) :: arraybundle  
+      character (len = *), intent(in), optional :: convention
+      character (len = *), intent(in), optional :: purpose
+      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Print the Attribute package for the {\tt arraybundle}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the associated Attributes.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [arraybundle]
+!      An {\tt ESMF\_ArrayBundle} object.
+!     \item [convention]
+!      The convention of the Attribute package.
+!     \item [purpose]
+!      The purpose of the Attribute package.
+!     \item [attwriteflag]
+!      Flag to determine the format for writing the Attributes.
+!     \item [{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, directional                           ! Error status
+      character(len=*), parameter :: fconvention='N/A'
+      character(len=*), parameter :: fpurpose='N/A'
+      character(len=*), parameter :: fobject='arraybundle'
+      character(len=*), parameter :: ftarobj='arraybundle'
+      type(ESMF_AttWriteFlag) :: writeflag
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundle,rc)
+
+      call ESMF_ArrayBundleValidate(arraybundle, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      directional = 0
+      if (present(convention)) then
+        directional = 1 ! convention only
+      endif
+      
+      if (present(purpose)) then
+        directional = 2 ! purpose only
+      endif
+      
+      if (present(convention) .AND. present(purpose)) then
+        directional = 3 ! convention and purpose
+      endif
+      
+      if (present(attwriteflag)) then
+        writeflag = attwriteflag
+      else
+        writeflag = ESMF_ATTWRITE_TAB
+      endif
+      
+      if (directional == 0) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
+        call c_ESMC_AttributeWriteTab(arraybundle, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
+        call c_ESMC_AttributeWriteXML(arraybundle, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      else if (directional == 1) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
+        call c_ESMC_AttributeWriteTab(arraybundle, convention, &
+          fpurpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
+        call c_ESMC_AttributeWriteXML(arraybundle, convention, &
+          fpurpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      else if (directional == 2) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
+        call c_ESMC_AttributeWriteTab(arraybundle, fconvention, &
+          purpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
+        call c_ESMC_AttributeWriteXML(arraybundle, fconvention, &
+          purpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      else if (directional == 3) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
+        call c_ESMC_AttributeWriteTab(arraybundle, convention, &
+          purpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
+        call c_ESMC_AttributeWriteXML(arraybundle, convention, &
+          purpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      end if
+      
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArrayBundleAttWrite
 
 !-------------------------------------------------------------------------
 !  CplComp
@@ -4610,6 +4973,252 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
       end subroutine ESMF_GridCompAttWrite
 
 !-------------------------------------------------------------------------
+!  DISTGRID
+!-------------------------------------------------------------------------
+
+#ifdef 0
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_DistGridAttAddPack"
+!BOPI
+! !IROUTINE: ESMF_DistGridAttAddPack - Create an distgrid Attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeAdd()
+      subroutine ESMF_DistGridAttAddPack(distgrid, convention, purpose, &
+        attpacknestflag, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGrid), intent(inout) :: distgrid  
+      character (len = *), intent(in) :: convention
+      character (len = *), intent(in) :: purpose
+      type(ESMF_AttPackNestFlag), intent(in), optional :: attpacknestflag
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Sets up the Attribute package for the {\tt distgrid}.
+!     The Attribute package defines the convention, purpose, and object type 
+!     of the associated Attributes.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [distgrid]
+!      An {\tt ESMF\_DistGrid} object.
+!     \item [convention]
+!      The convention of the Attribute package.
+!     \item [purpose]
+!      The purpose of the Attribute package.
+!     \item [attpacknestflag]
+!      The flag to tell whether this Attribute package is to be nested or not, possible values
+!      are {\bf ESMF\_ATTPACKNEST\_ON} and {\bf ESMF\_ATTPACKNEST\_OFF}.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc                           ! Error status
+      character (len=len_trim(convention)) :: fconvention
+      character (len=len_trim(purpose)) :: fpurpose
+      type(ESMF_AttPackNestFlag) :: attpacknest
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit,distgrid,rc)
+
+      fconvention = convention
+      fpurpose = purpose
+
+       if (present(attpacknestflag)) then
+        attpacknest = attpacknestflag
+      else
+        attpacknest = ESMF_ATTPACKNEST_OFF
+      endif
+
+      ! There is no standard Attribute package for DistGrid at this point
+      call c_ESMC_AttPackCreate(distgrid, fconvention, &
+        fpurpose, fobject, attpacknest, localrc)
+      call c_ESMC_AttPackAddAttribute(distgrid, name1, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(distgrid, name2, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(distgrid, name3, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(distgrid, name4, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(distgrid, name5, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(distgrid, name6, fconvention, &
+        fpurpose, fobject, localrc)
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridAttAddPack
+#endif
+!------------------------------------------------------------------------------
+
+AttAddPackCustomMacro(ESMF_DistGrid, distgrid, distgrid)
+AttRemoveMacro(ESMF_DistGrid, distgrid, distgrid)
+
+TypeKind3DeclarationMacro(AttGet, ESMF_DistGrid, distgrid, distgrid)
+AttGetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
+AttGetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
+
+GetCountNameNumberMacro(ESMF_DistGrid, distgrid, distgrid)      
+
+TypeKind3DeclarationMacro(AttSet, ESMF_DistGrid, distgrid, distgrid)
+AttSetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
+AttSetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_DistGridAttWrite"
+!BOPI
+! !IROUTINE: ESMF_AttributeWrite - Print the Attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeWrite()
+      subroutine ESMF_DistGridAttWrite(distgrid, convention, purpose, &
+        attwriteflag, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGrid), intent(inout) :: distgrid  
+      character (len = *), intent(in), optional :: convention
+      character (len = *), intent(in), optional :: purpose
+      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Print the Attribute package for the {\tt distgrid}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the associated Attributes.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [distgrid]
+!      An {\tt ESMF\_DistGrid} object.
+!     \item [convention]
+!      The convention of the Attribute package.
+!     \item [purpose]
+!      The purpose of the Attribute package.
+!     \item [attwriteflag]
+!      Flag to determine the format for writing the Attributes.
+!     \item [{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc, directional                           ! Error status
+      character(len=*), parameter :: fconvention='N/A'
+      character(len=*), parameter :: fpurpose='N/A'
+      character(len=*), parameter :: fobject='distgrid'
+      character(len=*), parameter :: ftarobj='distgrid'
+      type(ESMF_AttWriteFlag) :: writeflag
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit,distgrid,rc)
+
+      call ESMF_DistGridValidate(distgrid, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      directional = 0
+      if (present(convention)) then
+        directional = 1 ! convention only
+      endif
+      
+      if (present(purpose)) then
+        directional = 2 ! purpose only
+      endif
+      
+      if (present(convention) .AND. present(purpose)) then
+        directional = 3 ! convention and purpose
+      endif
+      
+      if (present(attwriteflag)) then
+        writeflag = attwriteflag
+      else
+        writeflag = ESMF_ATTWRITE_TAB
+      endif
+      
+      if (directional == 0) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
+        call c_ESMC_AttributeWriteTab(distgrid, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
+        call c_ESMC_AttributeWriteXML(distgrid, fconvention, &
+          fpurpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      else if (directional == 1) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
+        call c_ESMC_AttributeWriteTab(distgrid, convention, &
+          fpurpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
+        call c_ESMC_AttributeWriteXML(distgrid, convention, &
+          fpurpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      else if (directional == 2) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
+        call c_ESMC_AttributeWriteTab(distgrid, fconvention, &
+          purpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
+        call c_ESMC_AttributeWriteXML(distgrid, fconvention, &
+          purpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      else if (directional == 3) then
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
+        call c_ESMC_AttributeWriteTab(distgrid, convention, &
+          purpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
+        call c_ESMC_AttributeWriteXML(distgrid, convention, &
+          purpose, fobject, ftarobj, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      endif
+      end if
+      
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridAttWrite
+
+!-------------------------------------------------------------------------
 !  FIELD
 !-------------------------------------------------------------------------
 
@@ -4926,13 +5535,13 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FBundleAttAddPack"
+^define ESMF_METHOD "ESMF_FieldBundleAttAddPack"
 !BOPI
-! !IROUTINE: ESMF_FBundleAttAddPack - Create the Attribute package
+! !IROUTINE: ESMF_FielBundleAttAddPack - Create the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeAdd()
-      subroutine ESMF_FBundleAttAddPack(fieldbundle, convention, purpose, &
+      subroutine ESMF_FieldBundleAttAddPack(fieldbundle, convention, purpose, &
         attpacknestflag, rc)
 !
 ! !ARGUMENTS:
@@ -4992,7 +5601,7 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FBundleAttAddPack
+      end subroutine ESMF_FieldBundleAttAddPack
 
 !------------------------------------------------------------------------------
 
@@ -5011,14 +5620,14 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FBundleAttSetLinkField"
+^define ESMF_METHOD "ESMF_FieldBundleAttSetLinkField"
 !BOP
 ! !IROUTINE: ESMF_AttributeSet - Link a FieldBundle Attribute hierarchy to that 
 !                                {\bf of a Field}
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_FBundleAttSetLinkField(fieldbundle, field, rc)
+      subroutine ESMF_FieldBundleAttSetLinkField(fieldbundle, field, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle
@@ -5063,17 +5672,17 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FBundleAttSetLinkField
+      end subroutine ESMF_FieldBundleAttSetLinkField
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FBundleAttUpdate"
+^define ESMF_METHOD "ESMF_FieldBundleAttUpdate"
 !BOPI
 ! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeUpdate()
-      subroutine ESMF_FBundleAttUpdate(fieldbundle, vm, rootList, rc)
+      subroutine ESMF_FieldBundleAttUpdate(fieldbundle, vm, rootList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle
@@ -5122,17 +5731,17 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FBundleAttUpdate
+      end subroutine ESMF_FieldBundleAttUpdate
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FBundleAttWrite"
+^define ESMF_METHOD "ESMF_FieldBundleAttWrite"
 !BOPI
-! !IROUTINE: ESMF_FBundleAttWrite - Print the Attribute package
+! !IROUTINE: ESMF_FieldBundleAttWrite - Print the Attribute package
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_FBundleAttWrite(fieldbundle, convention, purpose, &
+      subroutine ESMF_FieldBundleAttWrite(fieldbundle, convention, purpose, &
         attwriteflag, rc)
 !
 ! !ARGUMENTS:
@@ -5262,7 +5871,7 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FBundleAttWrite
+      end subroutine ESMF_FieldBundleAttWrite
 
 !-------------------------------------------------------------------------
 !  GRID
@@ -5314,6 +5923,20 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
       character (len=len_trim(convention)) :: fconvention
       character (len=len_trim(purpose)) :: fpurpose
       character (len=*), parameter :: fobject='grid'
+      character (len=*), parameter :: name1 = 'area'
+      character (len=*), parameter :: name2 = 'dimension_order'
+      character (len=*), parameter :: name3 = 'discretization_type'
+      character (len=*), parameter :: name4 = 'geometry_type'
+      character (len=*), parameter :: name5 = 'grid_type'
+      character (len=*), parameter :: name6 = 'horizontal_dimension_value'
+      character (len=*), parameter :: name7 = 'IsConformal'
+      character (len=*), parameter :: name8 = 'IsRegular'
+      character (len=*), parameter :: name9 = 'IsUniform'
+      character (len=*), parameter :: name10 = 'north_pole_location'
+      character (len=*), parameter :: name11 = 'number_of_cells'
+      character (len=*), parameter :: name12 = 'number_of_dimensions'
+      character (len=*), parameter :: name13 = 'pole_covered'
+      character (len=*), parameter :: name14 = 'vertical_dimension_value'
       type(ESMF_AttPackNestFlag) :: attpacknest
 
       ! Initialize return code; assume failure until success is certain
@@ -5331,8 +5954,40 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
         attpacknest = ESMF_ATTPACKNEST_OFF
       endif
 
-      ! no standard attribute package for Grid at this time
-      localrc = ESMF_SUCCESS
+      call c_ESMC_AttPackCreate(grid, fconvention, &
+        fpurpose, fobject, attpacknest, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name1, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name2, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name3, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name4, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name5, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name6, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name7, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name8, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name9, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name10, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name11, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name12, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name13, fconvention, &
+        fpurpose, fobject, localrc)
+      call c_ESMC_AttPackAddAttribute(grid, name14, fconvention, &
+        fpurpose, fobject, localrc)
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5352,7 +6007,7 @@ GetCountNameNumberMacro(ESMF_Grid, grid, grid)
 TypeKind3DeclarationMacro(AttSet, ESMF_Grid, grid, grid)
 AttSetLogicalMacro(ESMF_Grid, grid, grid)
 AttSetCharacterMacro(ESMF_Grid, grid, grid)
-
+#ifdef 0
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_GridAttUpdate"
@@ -5412,7 +6067,7 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridAttUpdate
-
+#endif
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_GridAttWrite"
@@ -6267,8 +6922,10 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
 !     \item type(ESMF\_CplComp), intent(inout) :: comp  
 !     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
 !     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
