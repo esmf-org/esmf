@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: examples_results.pl,v 1.6 2009/02/27 22:43:15 svasquez Exp $
+# $Id: examples_results.pl,v 1.7 2009/03/02 06:05:31 svasquez Exp $
 # This subroutine is called at the end of the examples, "check_examples" and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 # The results are either complete results or a summary.
@@ -259,7 +259,7 @@ use File::Find;
                 else { # Print only if full output requested
                         print "\n\nEXAMPLES SUMMARY\n";
                 }
-                print "Found $ex_count ";
+                print "Found $example_count ";
                 if ($processor == 0) {
                         print "single processor ";
                 }
