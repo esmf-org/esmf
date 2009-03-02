@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.15 2009/03/01 09:01:36 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.16 2009/03/02 19:11:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.15 2009/03/01 09:01:36 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.16 2009/03/02 19:11:47 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -3424,6 +3424,7 @@ GetCountNameNumberMacro(ESMF_Array, array, array)
 TypeKind3DeclarationMacro(AttSet, ESMF_Array, array, array)
 AttSetLogicalMacro(ESMF_Array, array, array)
 AttSetCharacterMacro(ESMF_Array, array, array)
+
 #ifdef 0
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
@@ -3719,7 +3720,7 @@ AttSetCharacterMacro(ESMF_Array, array, array)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayBundleAttAddPack
-# endif
+#endif
 !------------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
@@ -5657,7 +5658,7 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
+      !ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
       call ESMF_FieldBundleValidate(fieldbundle, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -5718,7 +5719,7 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-      !call ESMF_FieldBundleValidate(fieldbundle, rc=localrc)
+      call ESMF_FieldBundleValidate(fieldbundle, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
