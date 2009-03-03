@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.7 2009/02/27 22:47:18 svasquez Exp $
+! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.8 2009/03/03 17:23:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -38,6 +38,11 @@ program ESMF_ArrayScatterGatherEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+  if (petCount /= 4) then
+    finalrc = ESMF_FAILURE
+    goto 10
+  endif
   
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------

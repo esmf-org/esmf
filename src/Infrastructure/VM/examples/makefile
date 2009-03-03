@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2009/02/27 22:55:00 svasquez Exp $
+# $Id: makefile,v 1.23 2009/03/03 17:23:24 theurich Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -26,8 +26,11 @@ EXAMPLES_RUN      = run_ESMF_VMDefaultBasicsEx \
                     run_ESMF_VMComponentEx
 
 EXAMPLES_RUN_UNI  = run_ESMF_VMDefaultBasicsEx_uni \
+                    run_ESMF_VMGetMPICommunicatorEx_uni \
                     run_ESMF_VMUserMpiEx_uni \
                     run_ESMF_VMUserMpiCommEx_uni \
+                    run_ESMF_VMSendVMRecvEx_uni \
+                    run_ESMF_VMScatterVMGatherEx_uni \
                     run_ESMF_VMAllFullReduceEx_uni \
                     run_ESMF_VMComponentEx_uni
 
@@ -52,6 +55,9 @@ run_ESMF_VMDefaultBasicsEx_uni:
 run_ESMF_VMGetMPICommunicatorEx:
 	$(MAKE) EXNAME=VMGetMPICommunicator NP=4 exfrun
 
+run_ESMF_VMGetMPICommunicatorEx_uni:
+	$(MAKE) EXNAME=VMGetMPICommunicator NP=1 exfrun
+
 run_ESMF_VMUserMpiEx:
 	$(MAKE) EXNAME=VMUserMpi NP=4 exfrun
 
@@ -67,8 +73,14 @@ run_ESMF_VMUserMpiCommEx_uni:
 run_ESMF_VMSendVMRecvEx:
 	$(MAKE) EXNAME=VMSendVMRecv NP=4 exfrun
 
+run_ESMF_VMSendVMRecvEx_uni:
+	$(MAKE) EXNAME=VMSendVMRecv NP=1 exfrun
+
 run_ESMF_VMScatterVMGatherEx:
 	$(MAKE) EXNAME=VMScatterVMGather NP=4 exfrun
+
+run_ESMF_VMScatterVMGatherEx_uni:
+	$(MAKE) EXNAME=VMScatterVMGather NP=1 exfrun
 
 run_ESMF_VMAllFullReduceEx:
 	$(MAKE) EXNAME=VMAllFullReduce NP=4 exfrun

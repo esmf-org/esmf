@@ -1,4 +1,4 @@
-! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.14 2009/02/27 22:54:34 svasquez Exp $
+! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.15 2009/03/03 17:23:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -11,7 +11,7 @@
 !==============================================================================
 
 !==============================================================================
-!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
+!ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 !------------------------------------------------------------------------------

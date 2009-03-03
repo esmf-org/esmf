@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.13 2009/02/27 22:47:18 svasquez Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.14 2009/03/03 17:23:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -119,7 +119,11 @@ program ESMF_ArrayFarrayEx
   call ESMF_VMGet(vm, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
-
+  if (petCount /= 4) then
+    finalrc = ESMF_FAILURE
+    goto 10
+  endif
+  
 !BOE
 ! On each PET {\tt farrayE} can be accessed directly to initialize the entire
 ! PET-local array.
