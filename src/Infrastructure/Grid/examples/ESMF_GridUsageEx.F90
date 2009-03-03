@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.53 2009/02/26 23:44:41 peggyli Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.54 2009/03/03 17:22:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -1850,7 +1850,7 @@ endif
 ! Grid and the stagger location in the Grid. 
 !
 ! The information that needs to be obtained from the Grid
-! is the <\tt distgrid> and <\tt distgridToGridMap> to ensure that the new Array
+! is the {\tt distgrid} and {\tt distgridToGridMap} to ensure that the new Array
 ! has the correct size and distribution and that its 
 ! dimensions are mapped correctly to the Grid. These
 ! are obtained using the {\tt ESMF\_GridGet} method. 
