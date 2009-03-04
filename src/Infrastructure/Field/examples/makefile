@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.46 2009/02/27 22:50:34 svasquez Exp $ 
+# $Id: makefile,v 1.47 2009/03/04 00:02:00 theurich Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -11,8 +11,8 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
                  $(ESMF_EXDIR)/ESMF_FieldRegridEx \
                  $(ESMF_EXDIR)/ESMF_FieldSphereRegridEx \
                  $(ESMF_EXDIR)/ESMF_FieldMeshRegridEx \
-	             $(ESMF_EXDIR)/ESMF_FieldRepDimEx \
-	             $(ESMF_EXDIR)/ESMF_FieldArbGridEx
+                 $(ESMF_EXDIR)/ESMF_FieldRepDimEx \
+                 $(ESMF_EXDIR)/ESMF_FieldArbGridEx
 #                 $(ESMF_EXDIR)/ESMF_FieldGetEx
 #                 $(ESMF_EXDIR)/ESMF_FieldSetEx
 #                 $(ESMF_EXDIR)/ESMF_FieldFromUserEx \
@@ -26,26 +26,8 @@ EXAMPLES_RUN = run_ESMF_FieldCreateEx \
                run_ESMF_FieldMeshRegridEx \
                run_ESMF_FieldRepDimEx \
                run_ESMF_FieldArbGridEx
-#               run_ESMF_FieldGetEx \
-#               run_ESMF_FieldSetEx \
-#               run_ESMF_FieldFromUserEx \
-#               run_ESMF_FieldGlobalEx \
-#               run_ESMF_FieldWriteEx 
-#               run_ESMF_FieldGetEx
-#                   run_ESMF_FieldSetEx
-#                   run_ESMF_FieldFromUserEx \
-#                   run_ESMF_FieldGlobalEx \
-#                   run_ESMF_FieldWriteEx 
 
-EXAMPLES_RUN_UNI = run_ESMF_FieldRepDimEx_uni \
-                   run_ESMF_FieldArbGridEx_uni
-#                   run_ESMF_FieldGetEx_uni \
-#                   run_ESMF_FieldSetEx_uni \
-#                   run_ESMF_FieldGetEx_uni
-#                   run_ESMF_FieldSetEx_uni
-#                   run_ESMF_FieldFromUserEx_uni \
-#                   run_ESMF_FieldGlobalEx_uni \
-#                   run_ESMF_FieldWriteEx_uni
+EXAMPLES_RUN_UNI = run_ESMF_FieldArbGridEx_uni
 
 include $(ESMF_DIR)/makefile
 
