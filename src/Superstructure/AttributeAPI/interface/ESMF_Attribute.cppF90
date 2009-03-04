@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.16 2009/03/02 19:11:47 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.17 2009/03/04 00:31:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.16 2009/03/02 19:11:47 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.17 2009/03/04 00:31:22 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -5658,7 +5658,7 @@ AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check input variables
-      !ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
       call ESMF_FieldBundleValidate(fieldbundle, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
