@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.38 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.39 2009/03/04 19:44:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.38 2009/01/21 21:37:58 cdeluca Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.39 2009/03/04 19:44:06 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -248,7 +248,7 @@ contains
 !     of size {\tt (dimCount, localDeCount)}.
 !   \item[{[totalLWidth]}]
 !     Upon return this holds the lower width of the total memory regions for
-!     all PET-local DEs. {\tt computationalUWidth} must be allocated to be
+!     all PET-local DEs. {\tt totalLWidth} must be allocated to be
 !     of size {\tt (dimCount, localDeCount)}.
 !   \item[{[totalUWidth]}]
 !     Upon return this holds the upper width of the total memory regions for
@@ -267,7 +267,7 @@ contains
 !     {\tt size(minIndexPDimPPatch) == (/dimCount, patchCount/)}.
 !   \item[{[maxIndexPDimPPatch]}]
 !     Upper index space corner per {\tt dim}, per {\tt patch}, with
-!     {\tt size(minIndexPDimPPatch) == (/dimCount, patchCount/)}.
+!     {\tt size(maxIndexPDimPPatch) == (/dimCount, patchCount/)}.
 !   \item[{[patchListPDe]}]
 !     List of patch id numbers, one for each DE, with
 !     {\tt size(patchListPDe) == (/deCount/)}
