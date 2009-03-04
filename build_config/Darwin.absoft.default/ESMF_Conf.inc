@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.12 2009/01/21 21:37:57 cdeluca Exp $
+$Id: ESMF_Conf.inc,v 1.13 2009/03/04 23:36:57 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -23,17 +23,7 @@ be one of the following:
 #define ESMF_IOFlushMacro(unit,status) call flush (unit)
 
 #if 0
-In the past we had problems with initializers using Absoft up to version 9.0. 
-We get errors like the following at compile time:
-
-tmod-2612 tmod: INTERNAL 
-  Internal: IR xlate; SOURCE line: 48, file: src/Infrastructure/TimeMgr/interface/ESMF_Time.F90; INTERNAL site: 1437, tag: 0, val: -1
-tmod-2612 tmod: INTERNAL 
-  Internal: IR xlate; SOURCE line: 48, file: src/Infrastructure/TimeMgr/interface/ESMF_Time.F90; INTERNAL site: 18466, tag: 0, val: -1
-error on line 353, source file line 467, invalid identifier after handle
-Contact technical support at support@absoft.com
-
+Absoft up to version 9.0 does not seem to support F95 initializer feature
 #endif
-
 
 #define ESMF_NO_INITIALIZERS 1
