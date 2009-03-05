@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.10 2009/01/21 21:37:57 cdeluca Exp $
+$Id: ESMF_Conf.inc,v 1.11 2009/03/05 00:08:58 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -23,8 +23,7 @@ be one of the following:
 #define ESMF_IOFlushMacro(unit,status) call flush (unit)
 
 #if 0
-in theory absoft supports initializers, but in practice with the number
-of modules we include, it seems to cause problems when enabled.
+Absoft up to version 9.0 does not seem to support F95 initializer feature
 #endif
 
 #define ESMF_NO_INITIALIZERS 1

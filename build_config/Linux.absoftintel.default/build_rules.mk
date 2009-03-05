@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.15 2009/01/12 18:23:05 theurich Exp $
+# $Id: build_rules.mk,v 1.16 2009/03/05 00:08:58 theurich Exp $
 #
 # Linux.absoftintel.default
 #
@@ -79,16 +79,68 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
 ESMF_F90IMOD        = -p
 
 ############################################################
-# Force Fortran symbols lower case
+# Construct the ABISTRING
 #
-ESMF_F90COMPILEOPTS += -YEXT_NAMES=LCS -YEXT_SFX=_
+ifeq ($(ESMF_MACHINE),x86_64)
+ifeq ($(ESMF_ABI),32)
+ESMF_ABISTRING := $(ESMF_MACHINE)_32
+endif
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := x86_64_small
+endif
+endif
+
+############################################################
+# Set memory model compiler flags according to ABISTRING
+#
+ifeq ($(ESMF_ABISTRING),x86_64_32)
+ESMF_CXXCOMPILEOPTS       += -m32
+ESMF_CXXLINKOPTS          += -m32
+ESMF_F90COMPILEOPTS       += -m32
+ESMF_F90LINKOPTS          += -m32
+endif
+ifeq ($(ESMF_ABISTRING),x86_64_small)
+ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
+ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
+ESMF_F90LINKOPTS          += -m64 -mcmodel=small
+endif
+ifeq ($(ESMF_ABISTRING),x86_64_medium)
+ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
+ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
+ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
+endif
 
 ############################################################
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
-ESMF_CXXCOMPILEOPTS +=  -pthread
+ESMF_CXXCOMPILEOPTS += -pthread
 ESMF_CXXLINKOPTS    += -pthread
+endif
+
+############################################################
+# Fortran symbol convention
+#
+ifeq ($(ESMF_FORTRANSYMBOLS),default)
+ESMF_F90COMPILEOPTS       += -YEXT_NAMES=LCS -YEXT_SFX=_
+ESMF_F90LINKOPTS          += -YEXT_NAMES=LCS -YEXT_SFX=_
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+else
+ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_singleunderscore)
+ESMF_F90COMPILEOPTS       += -YEXT_NAMES=LCS -YEXT_SFX=_
+ESMF_F90LINKOPTS          += -YEXT_NAMES=LCS -YEXT_SFX=_
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+else
+ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_doubleunderscore)
+ESMF_F90COMPILEOPTS       += -YEXT_NAMES=LCS -YEXT_SFX=__
+ESMF_F90LINKOPTS          += -YEXT_NAMES=LCS -YEXT_SFX=__
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
+else
+$(error "ESMF_FORTRANSYMBOLS = $(ESMF_FORTRANSYMBOLS)" not supported by ESMF and/or this platform)
+endif
+endif
 endif
 
 ############################################################
