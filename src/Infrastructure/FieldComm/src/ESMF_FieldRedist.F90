@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.11 2009/01/21 21:37:59 cdeluca Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.12 2009/03/05 20:43:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.11 2009/01/21 21:37:59 cdeluca Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.12 2009/03/05 20:43:54 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -229,39 +229,56 @@ contains
 !   type(ESMF_Field),         intent(inout)         :: dstField  
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
 !   <type>(ESMF_KIND_<kind>), intent(in)            :: factor 
-!   integer,                  intent(in), optional  :: srcToDstTransposeMap(:) 
+!   integer,                  intent(in),  optional :: srcToDstTransposeMap(:) 
 !   integer,                  intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
-! 
-! Store an Field redistribution operation from {\tt srcField} to {\tt dstField}. 
-! PETs that
-! specify a {\tt factor} argument must use the <type><kind> overloaded interface. Other 
-! PETs call into the interface without {\tt factor} argument. If multiple PETs specify 
-! the {\tt factor} argument its type and kind as well as its value must match across 
-! all PETs. If none of the PETs specifies a {\tt factor} argument the default will be a  
-! factor of 1. 
+! \label{FieldRedistStoreTK}
+! {\tt ESMF\_FieldRedistStore()} is a collective method across all PETs of the
+! current Component. The interface of the method is overloaded, allowing 
+! -- in principle -- each PET to call into {\tt ESMF\_FieldRedistStore()}
+! through a different entry point. Restrictions apply as to which combinations
+! are sensible. All other combinations result in ESMF run time errors. The
+! complete semantics of the {\tt ESMF\_FieldRedistStore()} method, as provided
+! through the separate entry points shown in \ref{FieldRedistStoreTK} and
+! \ref{FieldRedistStoreNF}, is described in the following paragraphs as a whole.
+!
+! Store a Field redistribution operation from {\tt srcField} to {\tt dstField}.
+! Interface \ref{FieldRedistStoreTK} allows PETs to specify a {\tt factor}
+! argument. PETs not specifying a {\tt factor} argument call into interface
+! \ref{FieldRedistStoreNF}. If multiple PETs specify the {\tt factor} argument
+! its type and kind, as well as its value must match across all PETs. If none
+! of the PETs specify a {\tt factor} argument the default will be a factor of
+! 1. The resulting factor is applied to the data during redistribution, allowing
+! scaling of the data, e.g. for unit transformation.
 !  
 ! Both {\tt srcField} and {\tt dstField} are interpreted as sequentialized 
-! vectors. The 
-! sequence is defined by the order of DistGrid dimensions and the order of 
-! patches within the DistGrid or by user-supplied arbitrary sequence indices. See 
-! section \ref{Array:SparseMatMul} for details on the definition of {\em sequence indices}. 
-! Redistribution corresponds to an identity mapping of the source Field vector to 
-! the destination Field vector. 
+! vectors. The sequence is defined by the order of DistGrid dimensions and the
+! order of patches within the DistGrid or by user-supplied arbitrary sequence
+! indices. See section \ref{Array:SparseMatMul} for details on the definition
+! of {\em sequence indices}.
+!
+! Source Field, destination Field, and the factor may be of different
+! <type><kind>. Further, source and destination Fields may differ in shape,
+! however, the number of elements must match. 
 !  
-! Source and destination Fields may be of different <type><kind>. Further source 
-! and destination Fields may differ in shape, however, the number of elements 
-! must match. 
+! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
+! to an identity mapping of the sequentialized source Field to the
+! sequentialized destination Field. If the {\tt srcToDstTransposeMap}
+! argument is provided it must be identical on all PETs. The
+! {\tt srcToDstTransposeMap} allows source and destination Field dimensions to
+! be transposed during the redistribution. The number of source and destination
+! Field dimensions must be equal under this condition and the size of mapped
+! dimensions must match.
 !  
-! It is erroneous to specify the identical Field object for srcField and dstField 
-! arguments. 
+! It is erroneous to specify the identical Field object for {\tt srcField} and
+! {\tt dstField} arguments. 
 !  
 ! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-! {\tt ESMF\_FieldRedist()} on any pair of Fields that are congruent and typekind 
-! conform with the srcField, dstField pair. Congruent Fields possess matching 
-! DistGrids and the shape of the local array tiles matches between the Fields for 
-! every DE. 
+! {\tt ESMF\_FieldRedist()} on any pair of Fields that are congruent and
+! typekind conform with the {\tt srcField}, {\tt dstField} pair. Congruent
+! Fields possess matching DistGrids and the shape of the local Array tiles
+! matches between the Fields for every DE.
 !
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -276,19 +293,21 @@ contains
 ! The arguments are: 
 ! \begin{description} 
 ! \item [srcField]  
-!       {\tt ESMF\_Field} with source data. 
+!   {\tt ESMF\_Field} with source data. 
 ! \item [dstField] 
-!       {\tt ESMF\_Field} with destination data. 
+!   {\tt ESMF\_Field} with destination data. 
 ! \item [routehandle] 
-!       Handle to the precomputed Route. 
+!   Handle to the precomputed Route. 
 ! \item [factor]
-!       FActor by which to multiply source data. Default is 1.
+!   Factor by which to multiply data. Default is 1. See full method
+!   description above for details on the interplay with other PETs.
 ! \item [{[srcToDstTransposeMap]}] 
-!       List with as many entries as there are dimensions in {\tt srcField}. Each 
-! entry maps the corresponding {\tt srcField} dimension against the specified {\tt dstField} 
-! dimension. Mixing of distributed and undistributed dimensions is supported.  
+!   List with as many entries as there are dimensions in {\tt srcField}. Each
+!   entry maps the corresponding {\tt srcField} dimension against the specified
+!   {\tt dstField} dimension. Mixing of distributed and undistributed
+!   dimensions is supported.
 ! \item [{[rc]}]  
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
 !EOP 
@@ -534,43 +553,57 @@ contains
 !   type(ESMF_Field),         intent(inout)         :: srcField  
 !   type(ESMF_Field),         intent(inout)         :: dstField  
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!   integer,                  intent(in), optional  :: srcToDstTransposeMap(:) 
+!   integer,                  intent(in),  optional :: srcToDstTransposeMap(:) 
 !   integer,                  intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
 ! 
-! Store an Field redistribution operation from {\tt srcField} to {\tt dstField}. 
-! PETs that
-! specify a {\tt factor} argument must use the <type><kind> overloaded interface. Other 
-! PETs call into the interface without {\tt factor} argument. If multiple PETs specify 
-! the {\tt factor} argument its type and kind as well as its value must match across 
-! all PETs. If none of the PETs specifies a {\tt factor} argument the default will be a  
-! factor of 1. 
+! \label{FieldRedistStoreNF}
+! {\tt ESMF\_FieldRedistStore()} is a collective method across all PETs of the
+! current Component. The interface of the method is overloaded, allowing 
+! -- in principle -- each PET to call into {\tt ESMF\_FieldRedistStore()}
+! through a different entry point. Restrictions apply as to which combinations
+! are sensible. All other combinations result in ESMF run time errors. The
+! complete semantics of the {\tt ESMF\_FieldRedistStore()} method, as provided
+! through the separate entry points shown in \ref{FieldRedistStoreTK} and
+! \ref{FieldRedistStoreNF}, is described in the following paragraphs as a whole.
+!
+! Store a Field redistribution operation from {\tt srcField} to {\tt dstField}.
+! Interface \ref{FieldRedistStoreTK} allows PETs to specify a {\tt factor}
+! argument. PETs not specifying a {\tt factor} argument call into interface
+! \ref{FieldRedistStoreNF}. If multiple PETs specify the {\tt factor} argument
+! its type and kind, as well as its value must match across all PETs. If none
+! of the PETs specify a {\tt factor} argument the default will be a factor of
+! 1. The resulting factor is applied to the data during redistribution, allowing
+! scaling of the data, e.g. for unit transformation.
 !  
 ! Both {\tt srcField} and {\tt dstField} are interpreted as sequentialized 
-! vectors. The 
-! sequence is defined by the order of DistGrid dimensions and the order of 
-! patches within the DistGrid or by user-supplied arbitrary sequence indices. See 
-! section \ref{Array:SparseMatMul} for details on the definition of {\em sequence indices}. 
-! Redistribution corresponds to an identity mapping of the source Field vector to 
-! the destination Field vector. 
+! vectors. The sequence is defined by the order of DistGrid dimensions and the
+! order of patches within the DistGrid or by user-supplied arbitrary sequence
+! indices. See section \ref{Array:SparseMatMul} for details on the definition
+! of {\em sequence indices}.
+!
+! Source Field, destination Field, and the factor may be of different
+! <type><kind>. Further, source and destination Fields may differ in shape,
+! however, the number of elements must match. 
 !  
-! Source and destination Fields may be of different <type><kind>. Further source 
-! and destination Fields may differ in shape, however, the number of elements 
-! must match. 
+! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
+! to an identity mapping of the sequentialized source Field to the
+! sequentialized destination Field. If the {\tt srcToDstTransposeMap}
+! argument is provided it must be identical on all PETs. The
+! {\tt srcToDstTransposeMap} allows source and destination Field dimensions to
+! be transposed during the redistribution. The number of source and destination
+! Field dimensions must be equal under this condition and the size of mapped
+! dimensions must match.
 !  
-! It is erroneous to specify the identical Field object for srcField and dstField 
-! arguments. 
+! It is erroneous to specify the identical Field object for {\tt srcField} and
+! {\tt dstField} arguments. 
 !  
 ! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-! {\tt ESMF\_FieldRedist()} on any pair of Fields that are congruent and typekind 
-! conform with the srcField, dstField pair. Congruent Fields possess matching 
-! DistGrids and the shape of the local array tiles matches between the Fields for 
-! every DE. 
-!
-! This method is overloaded for:\newline
-! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
-! {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
+! {\tt ESMF\_FieldRedist()} on any pair of Fields that are congruent and
+! typekind conform with the {\tt srcField}, {\tt dstField} pair. Congruent
+! Fields possess matching DistGrids and the shape of the local Array tiles
+! matches between the Fields for every DE.
 ! \newline
 !  
 ! This call is collective across the current VM.  
@@ -581,17 +614,18 @@ contains
 ! The arguments are: 
 ! \begin{description} 
 ! \item [srcField]  
-!       {\tt ESMF\_Field} with source data. 
+!   {\tt ESMF\_Field} with source data. 
 ! \item [dstField] 
-!       {\tt ESMF\_Field} with destination data. 
+!   {\tt ESMF\_Field} with destination data. 
 ! \item [routehandle] 
-!       Handle to the precomputed Route. 
+!   Handle to the precomputed Route. 
 ! \item [{[srcToDstTransposeMap]}] 
-!       List with as many entries as there are dimensions in {\tt srcField}. Each 
-! entry maps the corresponding {\tt srcField} dimension against the specified {\tt dstField} 
-! dimension. Mixing of distributed and undistributed dimensions is supported.  
+!   List with as many entries as there are dimensions in {\tt srcField}. Each
+!   entry maps the corresponding {\tt srcField} dimension against the specified
+!   {\tt dstField} dimension. Mixing of distributed and undistributed
+!   dimensions is supported.
 ! \item [{[rc]}]  
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
 !EOP 
