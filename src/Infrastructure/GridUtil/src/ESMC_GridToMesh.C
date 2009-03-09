@@ -1,4 +1,4 @@
-// $Id: ESMC_GridToMesh.C,v 1.35 2009/02/11 22:52:53 w6ws Exp $
+// $Id: ESMC_GridToMesh.C,v 1.36 2009/03/09 22:02:35 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -399,7 +399,10 @@ Par::Out() << std::endl;
      DDir<> dir;
    
      std::vector<UInt> lids(owned_shared.size(), 0);
-     dir.Create(owned_shared.size(), &owned_shared[0], &lids[0]);
+     if (owned_shared.size ())
+       dir.Create(owned_shared.size(), &owned_shared[0], &lids[0]);
+     else
+       dir.Create(0, (UInt*) NULL, 0);
   
      std::vector<DDir<>::dentry> lookups;
      if (notowned_shared.size ())
