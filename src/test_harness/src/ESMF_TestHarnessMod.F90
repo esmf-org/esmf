@@ -1661,6 +1661,8 @@
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
   rc = ESMF_RC_NOT_IMPL
+  ! Setting to fail per the Don's email of 3/9/09.
+  test_status = HarnessTest_FAILURE
 
   ! initialize test counter
   test_failure = 0
@@ -2759,10 +2761,10 @@
 
              case("SPHERICAL_HARMONIC")
               ! (a+b) + acos(k*2pi*x/Lx) + b*sin(l*2pi*y/Ly)
-              TestFunction%param(1) = a 
-              TestFunction%param(2) = kx
-              TestFunction%param(3) = b
-              TestFunction%param(4) = ly
+	      a = TestFunction%param(1) 
+              kx = TestFunction%param(2)
+              b = TestFunction%param(3)
+              lY = TestFunction%param(4)
               lenk = Grid_info%grange(1,2) - Grid_info%grange(1,1)
               lenl = Grid_info%grange(2,2) - Grid_info%grange(2,1)
                exp2D(i,j) =  abs(a+b) +a*cos(pi2*kx*coordX2D(i,j)/lenk) +        &
@@ -3032,10 +3034,10 @@
 
              case("SPHERICAL_HARMONIC")
               ! (a+b) + acos(k*2pi*x/Lx) + b*sin(l*2pi*y/Ly)
-              TestFunction%param(1) = a
-              TestFunction%param(2) = kx
-              TestFunction%param(3) = b
-              TestFunction%param(4) = ly
+              a = TestFunction%param(1)
+              kx = TestFunction%param(2)
+              b = TestFunction%param(3)
+              ly = TestFunction%param(4)
               lenk = Grid_info%grange(1,2) - Grid_info%grange(1,1)
               lenl = Grid_info%grange(2,2) - Grid_info%grange(2,1)
               exact = abs(a+b) +a*cos(pi2*kx*coordX2D(i,j)/lenk) +        &
