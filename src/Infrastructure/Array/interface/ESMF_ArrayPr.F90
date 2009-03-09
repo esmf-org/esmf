@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayPr.F90,v 1.6 2009/01/21 21:37:58 cdeluca Exp $
+! $Id: ESMF_ArrayPr.F90,v 1.7 2009/03/09 19:36:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_ArrayPrMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayPr.F90,v 1.6 2009/01/21 21:37:58 cdeluca Exp $'
+    '$Id: ESMF_ArrayPr.F90,v 1.7 2009/03/09 19:36:02 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -327,35 +327,59 @@ contains
 !   integer,                    intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Store an Array redistribution operation from {\tt srcArray} to
-!   {\tt dstArray}. PETs that specify a {\tt factor} argument must use the
-!   <type><kind> overloaded interface. Other PETs call into the interface
-!   without {\tt factor} argument. If multiple PETs specify the {\tt factor}
-!   argument its type and kind as well as its value must match across all
-!   PETs. If none of the PETs specifies a {\tt factor} argument the default
-!   will be a factor of 1.
+! \label{ArrayRedistStoreTK}
+! {\tt ESMF\_ArrayRedistStore()} is a collective method across all PETs of the
+! current Component. The interface of the method is overloaded, allowing 
+! -- in principle -- each PET to call into {\tt ESMF\_ArrayRedistStore()}
+! through a different entry point. Restrictions apply as to which combinations
+! are sensible. All other combinations result in ESMF run time errors. The
+! complete semantics of the {\tt ESMF\_ArrayRedistStore()} method, as provided
+! through the separate entry points shown in \ref{ArrayRedistStoreTK} and
+! \ref{ArrayRedistStoreNF}, is described in the following paragraphs as a whole.
 !
-!   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
-!   vectors. The sequence is defined by the order of DistGrid dimensions and 
-!   the order of patches within the DistGrid or by user-supplied arbitrary
-!   sequence indices. See section \ref{Array:SparseMatMul} for details on the
-!   definition of {\em sequence indices}. Redistribution corresponds to an
-!   identity mapping of the source Array vector to the destination Array vector.
+! Store an Array redistribution operation from {\tt srcArray} to {\tt dstArray}.
+! Interface \ref{ArrayRedistStoreTK} allows PETs to specify a {\tt factor}
+! argument. PETs not specifying a {\tt factor} argument call into interface
+! \ref{ArrayRedistStoreNF}. If multiple PETs specify the {\tt factor} argument,
+! its type and kind, as well as its value must match across all PETs. If none
+! of the PETs specify a {\tt factor} argument the default will be a factor of
+! 1. The resulting factor is applied to all of the source data during
+! redistribution, allowing scaling of the data, e.g. for unit transformation.
+!  
+! Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized 
+! vectors. The sequence is defined by the order of DistGrid dimensions and the
+! order of patches within the DistGrid or by user-supplied arbitrary sequence
+! indices. See section \ref{Array:SparseMatMul} for details on the definition
+! of {\em sequence indices}.
 !
-!   Source and destination Arrays may be of different <type><kind>. Further
-!   source and destination Arrays may differ in shape, however, the number
-!   of elements must match.
+! Source Array, destination Array, and the factor may be of different
+! <type><kind>. Further, source and destination Arrays may differ in shape,
+! however, the number of elements must match. 
+!  
+! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
+! to an identity mapping of the sequentialized source Array to the
+! sequentialized destination Array. If the {\tt srcToDstTransposeMap}
+! argument is provided it must be identical on all PETs. The
+! {\tt srcToDstTransposeMap} allows source and destination Array dimensions to
+! be transposed during the redistribution. The number of source and destination
+! Array dimensions must be equal under this condition and the size of mapped
+! dimensions must match.
+!  
+! It is erroneous to specify the identical Array object for {\tt srcArray} and
+! {\tt dstArray} arguments. 
+!  
+! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+! {\tt ESMF\_ArrayRedist()} on any pair of Arrays that are congruent and
+! typekind conform with the {\tt srcArray}, {\tt dstArray} pair. Congruent
+! Arrays possess matching DistGrids and the shape of the local Array tiles
+! matches between the Arrays for every DE.
 !
-!   It is erroneous to specify the identical Array object for {\tt srcArray} and
-!   {\tt dstArray} arguments.
-!
-!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayRedist()} on any pair of Arrays that are congruent
-!   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
-!   Congruent Arrays possess matching DistGrids and the shape of the local
-!   array tiles matches between the Arrays for every DE.\newline
-!
-!   This call is {\em collective} across the current VM.
+! This method is overloaded for:\newline
+! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
+! {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
+! \newline
+!  
+! This call is {\em collective} across the current VM.  
 !
 !   \begin{description}
 !   \item [srcArray]
@@ -364,7 +388,7 @@ contains
 !     {\tt ESMF\_Array} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[factor]}]
+!   \item [factor]
 !     Factor by which to multipy source data. Default is 1.
 !   \item [{[srcToDstTransposeMap]}]
 !     List with as many entries as there are dimensions in {\tt srcArray}. Each
@@ -642,35 +666,55 @@ contains
     integer,                    intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Store an Array redistribution operation from {\tt srcArray} to
-!   {\tt dstArray}. PETs that specify a {\tt factor} argument must use the
-!   <type><kind> overloaded interface. Other PETs call into the interface
-!   without {\tt factor} argument. If multiple PETs specify the {\tt factor}
-!   argument its type and kind as well as its value must match across all
-!   PETs. If none of the PETs specifies a {\tt factor} argument the default
-!   will be a factor of 1.
+! \label{ArrayRedistStoreNF}
+! {\tt ESMF\_ArrayRedistStore()} is a collective method across all PETs of the
+! current Component. The interface of the method is overloaded, allowing 
+! -- in principle -- each PET to call into {\tt ESMF\_ArrayRedistStore()}
+! through a different entry point. Restrictions apply as to which combinations
+! are sensible. All other combinations result in ESMF run time errors. The
+! complete semantics of the {\tt ESMF\_ArrayRedistStore()} method, as provided
+! through the separate entry points shown in \ref{ArrayRedistStoreTK} and
+! \ref{ArrayRedistStoreNF}, is described in the following paragraphs as a whole.
 !
-!   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
-!   vectors. The sequence is defined by the order of DistGrid dimensions and 
-!   the order of patches within the DistGrid or by user-supplied arbitrary
-!   sequence indices. See section \ref{Array:SparseMatMul} for details on the
-!   definition of {\em sequence indices}. Redistribution corresponds to an
-!   identity mapping of the source Array vector to the destination Array vector.
+! Store an Array redistribution operation from {\tt srcArray} to {\tt dstArray}.
+! Interface \ref{ArrayRedistStoreTK} allows PETs to specify a {\tt factor}
+! argument. PETs not specifying a {\tt factor} argument call into interface
+! \ref{ArrayRedistStoreNF}. If multiple PETs specify the {\tt factor} argument,
+! its type and kind, as well as its value must match across all PETs. If none
+! of the PETs specify a {\tt factor} argument the default will be a factor of
+! 1. The resulting factor is applied to all of the source data during
+! redistribution, allowing scaling of the data, e.g. for unit transformation.
+!  
+! Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized 
+! vectors. The sequence is defined by the order of DistGrid dimensions and the
+! order of patches within the DistGrid or by user-supplied arbitrary sequence
+! indices. See section \ref{Array:SparseMatMul} for details on the definition
+! of {\em sequence indices}.
 !
-!   Source and destination Arrays may be of different <type><kind>. Further
-!   source and destination Arrays may differ in shape, however, the number
-!   of elements must match.
-!
-!   It is erroneous to specify the identical Array object for {\tt srcArray} and
-!   {\tt dstArray} arguments.
-!
-!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayRedist()} on any pair of Arrays that are congruent
-!   and typekind conform with the {\tt srcArray}, {\tt dstArray} pair. 
-!   Congruent Arrays possess matching DistGrids and the shape of the local
-!   array tiles matches between the Arrays for every DE.\newline
-!
-!   This call is {\em collective} across the current VM.
+! Source Array, destination Array, and the factor may be of different
+! <type><kind>. Further, source and destination Arrays may differ in shape,
+! however, the number of elements must match. 
+!  
+! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
+! to an identity mapping of the sequentialized source Array to the
+! sequentialized destination Array. If the {\tt srcToDstTransposeMap}
+! argument is provided it must be identical on all PETs. The
+! {\tt srcToDstTransposeMap} allows source and destination Array dimensions to
+! be transposed during the redistribution. The number of source and destination
+! Array dimensions must be equal under this condition and the size of mapped
+! dimensions must match.
+!  
+! It is erroneous to specify the identical Array object for {\tt srcArray} and
+! {\tt dstArray} arguments. 
+!  
+! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+! {\tt ESMF\_ArrayRedist()} on any pair of Arrays that are congruent and
+! typekind conform with the {\tt srcArray}, {\tt dstArray} pair. Congruent
+! Arrays possess matching DistGrids and the shape of the local Array tiles
+! matches between the Arrays for every DE.
+! \newline
+!  
+! This call is {\em collective} across the current VM.  
 !
 !   \begin{description}
 !   \item [srcArray]

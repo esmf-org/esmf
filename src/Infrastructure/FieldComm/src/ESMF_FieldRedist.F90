@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.13 2009/03/09 17:53:00 theurich Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.14 2009/03/09 19:36:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.13 2009/03/09 17:53:00 theurich Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.14 2009/03/09 19:36:02 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -249,8 +249,8 @@ contains
 ! \ref{FieldRedistStoreNF}. If multiple PETs specify the {\tt factor} argument,
 ! its type and kind, as well as its value must match across all PETs. If none
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
-! 1. The resulting factor is applied to the data during redistribution, allowing
-! scaling of the data, e.g. for unit transformation.
+! 1. The resulting factor is applied to all of the source data during
+! redistribution, allowing scaling of the data, e.g. for unit transformation.
 !  
 ! Both {\tt srcField} and {\tt dstField} are interpreted as sequentialized 
 ! vectors. The sequence is defined by the order of DistGrid dimensions and the
@@ -285,7 +285,7 @@ contains
 ! {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
 ! \newline
 !  
-! This call is collective across the current VM.  
+! This call is {\em collective} across the current VM.  
 ! 
 ! For examples and associated documentations using this method see Section  
 ! \ref{sec:field:usage:redist_1dptr}. 
@@ -574,8 +574,8 @@ contains
 ! \ref{FieldRedistStoreNF}. If multiple PETs specify the {\tt factor} argument,
 ! its type and kind, as well as its value must match across all PETs. If none
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
-! 1. The resulting factor is applied to the data during redistribution, allowing
-! scaling of the data, e.g. for unit transformation.
+! 1. The resulting factor is applied to all of the source data during
+! redistribution, allowing scaling of the data, e.g. for unit transformation.
 !  
 ! Both {\tt srcField} and {\tt dstField} are interpreted as sequentialized 
 ! vectors. The sequence is defined by the order of DistGrid dimensions and the
@@ -606,7 +606,7 @@ contains
 ! matches between the Fields for every DE.
 ! \newline
 !  
-! This call is collective across the current VM.  
+! This call is {\em collective} across the current VM.  
 ! 
 ! For examples and associated documentations using this method see Section  
 ! \ref{sec:field:usage:redist_1dptr}. 
