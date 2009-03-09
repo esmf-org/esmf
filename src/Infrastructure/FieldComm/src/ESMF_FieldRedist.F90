@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.12 2009/03/05 20:43:54 theurich Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.13 2009/03/09 17:53:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.12 2009/03/05 20:43:54 theurich Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.13 2009/03/09 17:53:00 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -246,7 +246,7 @@ contains
 ! Store a Field redistribution operation from {\tt srcField} to {\tt dstField}.
 ! Interface \ref{FieldRedistStoreTK} allows PETs to specify a {\tt factor}
 ! argument. PETs not specifying a {\tt factor} argument call into interface
-! \ref{FieldRedistStoreNF}. If multiple PETs specify the {\tt factor} argument
+! \ref{FieldRedistStoreNF}. If multiple PETs specify the {\tt factor} argument,
 ! its type and kind, as well as its value must match across all PETs. If none
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to the data during redistribution, allowing
@@ -571,7 +571,7 @@ contains
 ! Store a Field redistribution operation from {\tt srcField} to {\tt dstField}.
 ! Interface \ref{FieldRedistStoreTK} allows PETs to specify a {\tt factor}
 ! argument. PETs not specifying a {\tt factor} argument call into interface
-! \ref{FieldRedistStoreNF}. If multiple PETs specify the {\tt factor} argument
+! \ref{FieldRedistStoreNF}. If multiple PETs specify the {\tt factor} argument,
 ! its type and kind, as well as its value must match across all PETs. If none
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to the data during redistribution, allowing
