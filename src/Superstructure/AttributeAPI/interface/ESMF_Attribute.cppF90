@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.17 2009/03/04 00:31:22 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.18 2009/03/10 04:42:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.17 2009/03/04 00:31:22 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.18 2009/03/10 04:42:26 theurich Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1363,7 +1363,7 @@ contains
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                     "Attribute not found, and no default given", & @ \
                      ESMF_CONTEXT, rc) @\
-          localrc = ESMF_FAILURE @\
+          return @\
         endif @\
       endif @\
  @\
@@ -1390,7 +1390,7 @@ contains
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                     "Attribute not found, and no default given", & @ \
                      ESMF_CONTEXT, rc) @\
-          localrc = ESMF_FAILURE @\
+          return @\
         endif @\
       endif @\
  @\
@@ -1549,7 +1549,7 @@ contains
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                     "Attribute not found, and no default given", & @ \
                      ESMF_CONTEXT, rc) @\
-          localrc = ESMF_FAILURE @\
+          return @\
         endif @\
       endif @\
  @\
@@ -1575,7 +1575,7 @@ contains
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                     "Attribute not found, and no default given", & @ \
                      ESMF_CONTEXT, rc) @\
-          localrc = ESMF_FAILURE @\
+          return @\
         endif @\
       endif @\
  @\
@@ -1734,7 +1734,7 @@ contains
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                     "Attribute not found, and no default given", & @ \
                      ESMF_CONTEXT, rc) @\
-          localrc = ESMF_FAILURE @\
+          return @\
         endif @\
       endif @\
  @\
@@ -1760,7 +1760,7 @@ contains
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                     "Attribute not found, and no default given", & @ \
                      ESMF_CONTEXT, rc) @\
-          localrc = ESMF_FAILURE @\
+          return @\
         endif @\
       endif @\
  @\
@@ -1935,7 +1935,7 @@ contains
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                     "Attribute not found, and no default given", & @ \
                      ESMF_CONTEXT, rc) @\
-          localrc = ESMF_FAILURE @\
+          return @\
         endif @\
       endif @\
  @\
@@ -1963,7 +1963,7 @@ contains
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                     "Attribute not found, and no default given", & @ \
                      ESMF_CONTEXT, rc) @\
-          localrc = ESMF_FAILURE @\
+          return @\
         endif @\
       endif @\
  @\
@@ -2113,7 +2113,7 @@ contains
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                     "Attribute not found, and no default given", & @ \
                      ESMF_CONTEXT, rc) @\
-          localrc = ESMF_FAILURE @\
+          return @\
         endif @\
       endif @\
  @\
@@ -2137,7 +2137,7 @@ contains
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                     "Attribute not found, and no default given", & @\
                      ESMF_CONTEXT, rc) @\
-          localrc = ESMF_FAILURE @\
+          return @\
         endif @\
       endif @\
  @\
@@ -2303,7 +2303,7 @@ contains
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                     "Attribute not found, and no default given", & @ \
                      ESMF_CONTEXT, rc) @\
-          localrc = ESMF_FAILURE @\
+          return @\
         endif @\
       endif @\
  @\
@@ -2332,7 +2332,7 @@ contains
           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                     "Attribute not found, and no default given", & @ \
                      ESMF_CONTEXT, rc) @\
-          localrc = ESMF_FAILURE @\
+          return @\
         endif @\
       endif @\
  @\
@@ -3317,7 +3317,7 @@ contains
 !-------------------------------------------------------------------------
 !  ARRAY
 !-------------------------------------------------------------------------
-#ifdef 0
+^ifdef 0
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayAttAddPack"
@@ -3409,7 +3409,7 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayAttAddPack
-#endif
+^endif
 !------------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_Array, array, array)
@@ -3425,7 +3425,7 @@ TypeKind3DeclarationMacro(AttSet, ESMF_Array, array, array)
 AttSetLogicalMacro(ESMF_Array, array, array)
 AttSetCharacterMacro(ESMF_Array, array, array)
 
-#ifdef 0
+^ifdef 0
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayAttUpdate"
@@ -3484,7 +3484,7 @@ AttSetCharacterMacro(ESMF_Array, array, array)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayAttUpdate
-#endif
+^endif
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayAttWrite"
@@ -3628,7 +3628,7 @@ AttSetCharacterMacro(ESMF_Array, array, array)
 !-------------------------------------------------------------------------
 !  ARRAYBUNDLE
 !-------------------------------------------------------------------------
-#ifdef 0
+^ifdef 0
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayBundleAttAddPack"
@@ -3720,7 +3720,7 @@ AttSetCharacterMacro(ESMF_Array, array, array)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayBundleAttAddPack
-#endif
+^endif
 !------------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
@@ -3735,7 +3735,7 @@ GetCountNameNumberMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 TypeKind3DeclarationMacro(AttSet, ESMF_ArrayBundle, arraybundle, arraybundle)
 AttSetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttSetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
-#ifdef 0
+^ifdef 0
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayBundleAttUpdate"
@@ -3794,7 +3794,7 @@ AttSetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayBundleAttUpdate
-#endif
+^endif
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayBundleAttWrite"
@@ -4977,7 +4977,7 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 !  DISTGRID
 !-------------------------------------------------------------------------
 
-#ifdef 0
+^ifdef 0
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_DistGridAttAddPack"
@@ -5063,7 +5063,7 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridAttAddPack
-#endif
+^endif
 !------------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_DistGrid, distgrid, distgrid)
@@ -6008,7 +6008,7 @@ GetCountNameNumberMacro(ESMF_Grid, grid, grid)
 TypeKind3DeclarationMacro(AttSet, ESMF_Grid, grid, grid)
 AttSetLogicalMacro(ESMF_Grid, grid, grid)
 AttSetCharacterMacro(ESMF_Grid, grid, grid)
-#ifdef 0
+^ifdef 0
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_GridAttUpdate"
@@ -6068,7 +6068,7 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridAttUpdate
-#endif
+^endif
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_GridAttWrite"
