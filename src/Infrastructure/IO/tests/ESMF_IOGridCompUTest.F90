@@ -1,4 +1,4 @@
-! $Id: ESMF_IOGridCompUTest.F90,v 1.1 2009/03/09 05:59:17 eschwab Exp $
+! $Id: ESMF_IOGridCompUTest.F90,v 1.2 2009/03/10 05:48:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_IOGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_IOGridCompUTest.F90,v 1.1 2009/03/09 05:59:17 eschwab Exp $'
+      '$Id: ESMF_IOGridCompUTest.F90,v 1.2 2009/03/10 05:48:08 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -112,7 +112,7 @@ print *, "this print statement prevents mpi abort!"
     !  Read an XML file containing Attributes
     !-------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX__UTest
       ! Read an XML file to populate the Attribute package of a GridComp Test
       call ESMF_IORead(io, "esmf_gridcomp.xml", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -124,7 +124,7 @@ print *, "this print statement prevents mpi abort!"
     !-------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX__UTest
       ! Get ESG "name" Attribute from a GridComp Test
       attrname = 'name'
       attrvalue = 'GEOS'
@@ -141,7 +141,7 @@ print *, 'attrvalue = ', attrvalue
 print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX__UTest
       ! Get ESG "full_name" Attribute from a GridComp Test
       attrname = 'full_name'
       attrvalue = 'Goddard Earth Observing System Model'
@@ -158,7 +158,7 @@ print *, 'attrvalue = ', attrvalue
 print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX__UTest
       ! Get ESG "agency" Attribute from a GridComp Test
       attrname = 'agency'
       attrvalue = 'NASA'
@@ -175,7 +175,7 @@ print *, 'attrvalue = ', attrvalue
 print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX__UTest
       ! Get ESG "institution" Attribute from a GridComp Test
       attrname = 'institution'
       attrvalue = 'Global Modeling and Assimilation Office (GMAO)'
@@ -192,7 +192,7 @@ print *, 'attrvalue = ', attrvalue
 print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX__UTest
       ! Get ESG "version" Attribute from a GridComp Test
       attrname = 'version'
       attrvalue = '5'
@@ -209,7 +209,7 @@ print *, 'attrvalue = ', attrvalue
 print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX__UTest
       ! Get ESG "author" Attribute from a GridComp Test
       attrname = 'author'
       attrvalue = 'Max Suarez'
@@ -226,7 +226,7 @@ print *, 'attrvalue = ', attrvalue
 print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX__UTest
       ! Get ESG "discipline" Attribute from a GridComp Test
       attrname = 'discipline'
       attrvalue = 'Atmosphere'
@@ -243,7 +243,7 @@ print *, 'attrvalue = ', attrvalue
 print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX__UTest
       ! Get ESG "physical_domain" Attribute from a GridComp Test
       attrname = 'physical_domain'
       attrvalue = 'Earth System'
@@ -260,7 +260,7 @@ print *, 'attrvalue = ', attrvalue
 print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX__UTest
       ! Get ESG "coding_language" Attribute from a GridComp Test
       attrname = 'coding_language'
       attrvalue = 'Fortran 90'
@@ -277,7 +277,7 @@ print *, 'attrvalue = ', attrvalue
 print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX__UTest
       ! Get ESG "model_component_framework" Attribute from a GridComp Test
       attrname = 'model_component_framework'
       attrvalue = 'ESMF (Earth System Modeling Framework)'
@@ -294,7 +294,7 @@ print *, 'attrvalue = ', attrvalue
 print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX__UTest
       ! Get ESG "comment" Attribute from a GridComp Test
       attrname = 'comment'
       attrvalue = 'ESMF GridComp Attribute IO Test'
@@ -311,7 +311,7 @@ print *, 'attrvalue = ', attrvalue
 print *, 'outChar = ', outChar
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX__UTest
       ! Get ESG "references" Attribute from a GridComp Test
       attrname = 'references'
       attrvalue = 'http://gmao.gsfc.nasa.gov/systems/geos5'
