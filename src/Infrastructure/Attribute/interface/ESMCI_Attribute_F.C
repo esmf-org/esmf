@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.10 2009/02/25 05:28:16 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.11 2009/03/13 23:01:07 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.10 2009/02/25 05:28:16 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.11 2009/03/13 23:01:07 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1279,7 +1279,7 @@ extern "C" {
       return;
   }
 
-  if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
+  if (!value) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", &status);
       if (rc) *rc = status;
@@ -1490,7 +1490,7 @@ extern "C" {
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
   for (unsigned int i=0; i<(*count); i++) {
-    if (!(valueList[j]) || (lens[i] <= 0)) {
+    if (!(valueList[j])) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", &status);
       if (rc) *rc = status;
@@ -2863,7 +2863,7 @@ extern "C" {
       return;
   }
 
-  if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
+  if (!value) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", &status);
       if (rc) *rc = status;
@@ -2966,7 +2966,7 @@ extern "C" {
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
   for (unsigned int i=0; i<(*count); i++) {
-    if (!(valueList[j]) || (lens[i] <= 0)) {
+    if (!(valueList[j])) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", &status);
       if (rc) *rc = status;
