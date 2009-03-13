@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.1 2009/03/01 09:01:39 rokuingh Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.2 2009/03/13 23:00:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.1 2009/03/01 09:01:39 rokuingh Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.2 2009/03/13 23:00:13 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -63,7 +63,8 @@ program ESMF_AttributeArrayBundleUTest
       real(kind=8)                     :: inR8, outR8, defaultR8, dfltoutR8
       real(kind=8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l
       real(kind=8), dimension(5)       :: outR8l
-      character(ESMF_MAXSTR)                     :: inChar, outChar, defaultChar, dfltoutChar
+      character(ESMF_MAXSTR)                     :: inChar, outChar, defaultChar, dfltoutChar, &
+                                                    inEmpty, outEmpty
       character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl
       character(ESMF_MAXSTR), dimension(5)       :: outCharl
       logical                          :: inLog, outLog, defaultLog, dfltoutLog
@@ -105,11 +106,64 @@ program ESMF_AttributeArrayBundleUTest
 
 
 !-------------------------------------------------------------------------
-!  ARRAY
+!  ARRAYBUNDLE
 !-------------------------------------------------------------------------
     
 #ifdef ESMF_TESTEXHAUSTIVE
 
+    !-------------------------------------------------------------------------
+    !  Empty value
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add an empty value character Attribute to an ArrayBundle Test
+      call ESMF_AttributeSet(arraybundle, name="EmptyValue", value="", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding an empty value character Attribute to an ArrayBundle Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get an empty value character from an ArrayBundle Test
+      call ESMF_AttributeGet(arraybundle, name="EmptyValue", value=outEmpty, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an empty value character Attribute from an ArrayBundle Test"
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(""==outEmpty), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Empty value from variable
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add an empty value character to an ArrayBundle Test
+      call ESMF_AttributeSet(arraybundle, name="EmptyValue", value=inEmpty, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding an empty value character Attribute to an ArrayBundle Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get an empty value character from an ArrayBundle Test
+      call ESMF_AttributeGet(arraybundle, name="EmptyValue", value=outEmpty, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an empty value character Attribute from an ArrayBundle Test"
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(""==outEmpty), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Get an Attribute which was not set
+    !-------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get an ESMF_I4 Attribute from an ArrayBundle Test
+      call ESMF_AttributeGet(arraybundle, name="NotHere", value=outI4, rc=rc)
+      write(failMsg, *) "Did not return ESMF_FAILURE or wrong value"
+      write(name, *) "Getting a nonexistent Attribute from an ArrayBundle Test"
+      call ESMF_Test((rc/=ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      
     !-------------------------------------------------------------------------
     !  ESMF_I4
     !-------------------------------------------------------------------------
@@ -646,6 +700,20 @@ program ESMF_AttributeArrayBundleUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+    !-------------------------------------------------------------------------
+    !  Get an Attribute which was not set from an Attribute package
+    !-------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get an ESMF_I4 Attribute from an ArrayBundle Test
+      call ESMF_AttributeGet(arraybundle, name="NotHere", value=outI4, &
+        convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_FAILURE or wrong value"
+      write(name, *) "Getting a nonexistent Attribute from an ArrayBundle Test"
+      call ESMF_Test((rc/=ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      
       attrname = "Custom1"
       attrvalue = "m/s"
       
