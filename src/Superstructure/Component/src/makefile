@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2008/09/26 05:53:55 cdeluca Exp $
+# $Id: makefile,v 1.33 2009/03/14 06:09:42 rokuingh Exp $
 
 ALL: build_here 
 
@@ -8,6 +8,9 @@ SOURCEH	  =
 
 # If you have public .h files in this dir, list them here
 STOREH    = ESMCI_FTable.h
+
+# etc files
+STOREETC  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
