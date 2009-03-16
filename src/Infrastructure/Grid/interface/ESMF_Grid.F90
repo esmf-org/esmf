@@ -221,7 +221,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.108 2009/02/25 06:25:23 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.109 2009/03/16 18:22:18 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3670,9 +3670,9 @@ end subroutine ESMF_GridConvertIndex
      enddo
   endif
   
-  do i=1,deCount
-     write(*,*) i,"min=",deBlockList(:,1,i)," max=",deBlockList(:,2,i)
-  enddo
+!  do i=1,deCount
+!     write(*,*) i,"min=",deBlockList(:,1,i)," max=",deBlockList(:,2,i)
+!  enddo
 
 
    
