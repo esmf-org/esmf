@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2009/01/14 16:38:23 rosalind Exp $
+# $Id: makefile,v 1.17 2009/03/16 04:47:44 oehmke Exp $
 
 # leave alone.
 ALL: build_here 
@@ -67,7 +67,9 @@ SOURCEC	  = \
            ESMCI_WriteWeightsPar.C \
            ESMCI_MeshCXX.C
 
-SOURCEF	  = ESMF_Mesh_C.F90 
+SOURCEF	  = ESMF_Mesh_C.F90 \
+	    ESMF_SolverUtil_C.F90 \
+
 SOURCEH	  = ESMCI_MeshCXX.h
 
 # List all .h files which should be copied to common include dir

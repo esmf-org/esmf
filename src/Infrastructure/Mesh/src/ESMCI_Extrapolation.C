@@ -367,10 +367,12 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
       MeshObj *tri = new MeshObj(MeshObj::ELEMENT, tri_id, 0, rank);
         
       std::vector<MeshObj*> tri_nodes;
-    
-      tri_nodes.push_back(pnode);
-      tri_nodes.push_back(elem.Relations[side_nodes[0]].obj);
+
+      // Order of triangles is important so normals point in correct direction    
       tri_nodes.push_back(elem.Relations[side_nodes[1]].obj);
+      tri_nodes.push_back(elem.Relations[side_nodes[0]].obj);
+      tri_nodes.push_back(pnode);
+
         
       mesh.add_element(tri, tri_nodes, 2, tri_topo);
     
@@ -419,13 +421,13 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
     new_coords[2] /= nfound;
 
     // Move coords onto the spehere
-    double r = std::sqrt(new_coords[0]*new_coords[0] +
-                 new_coords[1]*new_coords[1] +
-                 new_coords[2]*new_coords[2]);
+    double rr = 1.0/std::sqrt(new_coords[0]*new_coords[0] +
+                              new_coords[1]*new_coords[1] +
+                              new_coords[2]*new_coords[2]);
 
-    new_coords[0] *= r;
-    new_coords[1] *= r;
-    new_coords[2] *= r;
+    new_coords[0] *= rr;
+    new_coords[1] *= rr;
+    new_coords[2] *= rr;
 
     pole_coord[0] = new_coords[0];
     pole_coord[1] = new_coords[1];

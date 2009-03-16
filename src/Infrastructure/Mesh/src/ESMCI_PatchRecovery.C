@@ -33,6 +33,10 @@
 
 #ifdef ESMF_LAPACK
 extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
+
+extern "C" void FTN(dgelsd)(int *,int *, int*, double*, int*, double*, int*,double*, double*, int*, double *, int*, int *, int *);
+
+extern "C" void FTN(f_esmf_lapack_iworksize)(int *,int *);
 #endif
 
           
@@ -244,6 +248,229 @@ mc()
 }
 
 //#define RESIDUALS
+// XXX
+
+/**
+ * The default creates the pseudo-inverse and applies, in case we
+ * need sensitivities of coef wrt field values.
+ */
+template <typename Real>
+struct DGELSD_Solver {
+void operator()(UInt ncoef, int ldb, int m, int n, int nrhs, std::vector<double> &mat, std::vector<Real> &rhs, Real coeff[])
+{
+
+#ifdef ESMF_LAPACK
+
+#ifdef RESIDUALS
+Par::Out() << "A(" << m << "," << n << ")=" << std::endl;
+for (UInt i = 0; i < m; i++) {
+for (UInt j = 0; j < n; j++) {
+Par::Out() << std::setw(10) << mat[j*m+i] << " ";
+}
+Par::Out() << std::endl;
+}
+#endif
+
+ // variables for solver call
+ int info, rank;
+
+ // Set condition number (how bad of a matrix to accept)
+ double rcond=1.0/10000000.0;
+ 
+ // TODO: much of this memory will be the same size every time, it would be good to have
+ //       a scheme to hold onto it and allow its reuse
+
+ // Set up B=I for calculating pseudo-inverse
+ std::vector<double> id_rhs(ldb*ldb, 0);
+ for (int i = 0; i < m; i++) id_rhs[i*ldb + i] = 1.0;
+
+  // calculate minimum of m and n
+  int minmn=std::min(m,n);
+
+  // Allocate s matrix
+  std::vector<double> s(minmn, 0);
+
+  // calculate iworksize
+  int iworksize=0;
+  FTN(f_esmf_lapack_iworksize)(&minmn, &iworksize);
+
+  // Allocate iwork buffer
+  std::vector<int> iwork(iworksize, 0);
+ 
+  // calculate work size, by using solver with lwork = -1
+  int tmplwork=-1;
+  double tmpwork=0;
+  FTN(dgelsd)(
+	      &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &s[0], &rcond, &rank, &tmpwork, &tmplwork, &iwork[0], &info); 
+  int worksize = int(tmpwork);
+
+
+  // allocate work vector
+  std::vector<double> work(worksize, 0);
+  
+
+  // Call solver
+  FTN(dgelsd)(
+	      &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &s[0], &rcond, &rank, &work[0], &worksize, &iwork[0], &info);
+  if (info !=0) Throw() << "Bad dgelsd solve, info=" << info;
+
+
+// Apply the pseudo inverse
+  std::vector<Real> b = rhs; // ughh
+  for (int i = 0; i < n; i++) {
+    for (int nr = 0; nr < nrhs; nr++) rhs[nr*ldb+i] = 0;
+    for (int j = 0; j < m; j++) {
+      for (int nr = 0; nr < nrhs; nr++) {
+         rhs[nr*ldb+i] += id_rhs[j*ldb+i]*b[nr*ldb+j];
+      }
+    }
+  }
+
+#ifdef RESIDUALS
+Par::Out() << "PAInv=" << std::endl;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+Par::Out() << std::setw(15) << id_rhs[j*ldb+i];
+    }
+Par::Out() << std::endl;
+  }
+
+Par::Out() << "B=" << std::endl;
+    for (int j = 0; j < m; j++) {
+      for (int nr = 0; nr < nrhs; nr++) {
+         Par::Out() << std::setw(15) << b[nr*ldb+j].val();
+      }
+      Par::Out() << std::endl;
+    }
+#endif
+
+  // fill return array
+  for (UInt r = 0; r < (UInt) nrhs; r++) {
+    for (UInt c = 0; c < ncoef; c++) {
+      coeff[r*ncoef+c] = rhs[r*ldb+c];
+    }
+  }
+
+#else
+  Throw() << "Please reconfigure with lapack enabled";
+#endif
+
+}
+
+};
+
+/**
+ * A specialization for double that does not build the full pseudo inverse, but just
+ * solves the system 
+ */
+template <>
+struct DGELSD_Solver<double> {
+void operator()(UInt ncoef, int ldb, int m, int n, int nrhs, std::vector<double> &mat, std::vector<double> &rhs, double coeff[])
+{
+
+#ifdef ESMF_LAPACK
+
+#ifdef RESIDUALS
+std::vector<double> saverhs = rhs;
+std::vector<double> matsav = mat;
+#endif
+
+ // variables for solver call
+ int info, rank;
+
+ // Set condition number (how bad of a matrix to accept)
+ double rcond=1.0/10000000.0;
+ 
+ // TODO: much of this memory will be the same size every time, it would be good to have
+ //       a scheme to hold onto it and allow its reuse
+
+
+  // calculate minimum of m and n
+  int minmn=std::min(m,n);
+
+  // Allocate s matrix
+  std::vector<double> s(minmn, 0);
+
+  // calculate iworksize
+  int iworksize=0;
+  FTN(f_esmf_lapack_iworksize)(&minmn, &iworksize);
+
+  // Allocate iwork buffer
+  std::vector<int> iwork(iworksize, 0);
+ 
+  // calculate work size, by using solver with lwork = -1
+  int tmplwork=-1;
+  double tmpwork=0;
+  FTN(dgelsd)(
+	      &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &s[0], &rcond, &rank, &tmpwork, &tmplwork, &iwork[0], &info);
+  
+  int worksize = int(tmpwork);
+
+  // allocate work vector
+  std::vector<double> work(worksize, 0);
+  
+  // Call solver
+  FTN(dgelsd)(
+	      &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &s[0], &rcond, &rank, &work[0], &worksize, &iwork[0], &info);
+
+  if (info !=0) Throw() << "Bad dgelsd solve, info=" << info;
+
+
+#ifdef RESIDUALS
+Par::Out() << "A(" << m << "," << n << ")=" << std::endl;
+for (UInt i = 0; i < m; i++) {
+for (UInt j = 0; j < n; j++) {
+Par::Out() << std::setw(10) << matsav[j*m+i] << " ";
+}
+Par::Out() << std::endl;
+}
+#endif
+
+#ifdef RESIDUALS
+// Weird ; rhs comes back (Nxnrhs), so no ldb, just nsamples
+Par::Out() << "rcond=" << rcond << std::endl;
+std::vector<double> tst(m,0);
+
+Par::Out() << "rhs:" << std::endl;
+for (UInt s = 0; s < (UInt) nrhs; s++) {
+  for (UInt i = 0; i < m; i++) {
+    Par::Out() << saverhs[s*ldb+i] << " ";
+  }
+  Par::Out() << std::endl;
+}
+
+double err = 0;
+for (UInt s = 0; s < (UInt) nrhs; s++) {
+Par::Out() << "A*x=" << std::endl;
+    for (UInt i = 0; i < m; i++) {
+      tst[i] = 0;
+      for (UInt j = 0; j < ncoef; j++) {
+        tst[i] += matsav[j*m + i]*rhs[s*ldb+j];
+      }
+Par::Out() << tst[i] << " ";
+      err += (tst[i]-saverhs[s*ldb+i])*(tst[i]-saverhs[s*ldb+i]);
+    }
+Par::Out() << std::endl;
+}
+Par::Out() << "err=" << err << std::endl;
+if (err > 1e-10) Par::Out() << "\tnsamples=" << m << std::endl;
+#endif
+
+  for (UInt r = 0; r < (UInt) nrhs; r++) {
+    for (UInt c = 0; c < ncoef; c++) {
+      coeff[r*ncoef+c] = rhs[r*ldb+c];
+    }
+  }
+
+#else
+  Throw() << "Please reconfigure with lapack enabled";
+#endif
+
+}
+
+};
+
+
 
 /**
  * The default creates the pseudo-inverse and applies, in case we
@@ -454,8 +681,9 @@ void PatchRecov<NFIELD,Real>::CreatePatch(
     
     const intgRule *ir = 0;
     // Need to have enough points to fully constrain matrix
+    // start with 2, because symmetry of 1 at poles (the only place 1 will be used) causes problems with l.s. solver
     // Come up with a better max than pdeg+4
-     for (UInt q = 1; q <= pdeg+4; q++) {
+     for (UInt q = 2; q <= pdeg+4; q++) {
       ir = GetIntg(selem)->ChangeOrder(q);
       if (num_elems*ir->npoints() >= ncoef) {
 /*
@@ -476,11 +704,6 @@ Par::Out() << "Patch irule deg=" << q <<", pdeg:" << pdeg << ", nelem:" << num_e
     return;
   }
 */
-
-
-  const static int lwork = 1*1024*1024;
-  static double work[lwork];
-  //static std::vector<double> work(lwork, 0);
 
   if (elems.size() == 0) Throw() << "PatchRecovery, found no elements, node:" << node.get_id();
 
@@ -521,8 +744,9 @@ std::cout << "threshold  tripped.  nsamples=" << nsamples << ", ncoef=" << ncoef
 
       const intgRule *ir = 0;
       // Need to have enough points to fully constrain matrix
+      // start with 2, because symmetry of 1 at poles (the only place 1 will be used) causes problems with l.s. solver
       // Come up with a better max than pdeg+4
-      for (UInt q = 1; q <= pdeg+4; q++) {
+      for (UInt q = 2; q <= pdeg+4; q++) {
         ir = GetIntg(selem)->ChangeOrder(q);
         if (num_elems*ir->npoints() >= ncoef) {
           break;
@@ -561,105 +785,13 @@ Par::Out() << std::endl;
       cur_rhs += field.dim();
   } // f
 
-  DGELSY_Solver<Real> s;
-  s(ncoef, ldb, m, n, nrhs, mat, rank, &work[0], lwork, info, rhs, &coeff[0]);
 
-#ifdef NOTNOT
-  std::vector<int> jpvt(ncoef, 0);
-  //int lwork = std::max(std::min(m,n)+2*n+1, 2*std::min(m,n)+nrhs);
-  // TODO figure this out
-  double rcond=0.0000000000001;
+  // Do least squares solve to get coefficients
+  DGELSD_Solver<Real> s;
+  s(ncoef, ldb, m, n, nrhs, mat, rhs, &coeff[0]);
 
-#ifdef RESIDUALS
-std::vector<double> saverhs = rhs;
-std::vector<double> matsav = mat;
-#endif
 
-#ifdef OLDWAY
-  FTN(dgelsy)(
-    &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
-#else
-  std::vector<double> id_rhs(ldb*ldb, 0);
-  // Set up B=I
-  for (int i = 0; i < m; i++) id_rhs[i*ldb + i] = 1.0;
-
-  FTN(dgelsy)(
-    &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
-#ifdef RESIDUALS
-std::cout << "A(" << m << "," << n << ")=" << std::endl;
-for (UInt i = 0; i < m; i++) {
-for (UInt j = 0; j < n; j++) {
-std::cout << std::setw(10) << matsav[j*nsamples+i] << " ";
-}
-std::cout << std::endl;
-}
-std::cout << "Pinv(A)=" << std::endl;
-for (UInt i = 0; i < n; i++) {
-for (UInt j = 0; j < m; j++) {
-std::cout << std::setw(10) << id_rhs[j*ldb+i] << " ";
-}
-std::cout << std::endl;
-}
-//std::cout << "jpvt:";
-//std::copy(jpvt.begin(), jpvt.end(), std::ostream_iterator<int>(std::cout, " "));
-#endif
-
-// Apply the pseudo inverse
-  std::vector<Real> b = rhs; // ughh
-  for (int i = 0; i < n; i++) {
-    for (int nr = 0; nr < nrhs; nr++) rhs[nr*ldb+i] = 0;
-    for (int j = 0; j < m; j++) {
-      for (int nr = 0; nr < nrhs; nr++) {
-         rhs[nr*ldb+i] += id_rhs[j*ldb+i]*b[nr*ldb+j];
-      }
-    }
-  }
-
-#endif
-
-//std::cout << "info=" << info << std::endl;
-
-  // copy data into the field
-  //std::copy(rhs.begin(), rhs.end(), coef.data(node));
-/*
-std::cout << "answer=" << std::endl;
-std::copy(rhs.begin(), rhs.end(), std::ostream_iterator<double>(std::cout, ", ")); std::cout << std::endl;
-*/
-
-#ifdef RESIDUALS
-// Wierd ; rhs comes back (Nxnrhs), so no ldb, just nsamples
-std::cout << "rcond=" << rcond << std::endl;
-std::vector<double> tst(nsamples,0);
-double err = 0;
-for (UInt s = 0; s < (UInt) nrhs; s++) {
-std::cout << "A*x=" << std::endl;
-    for (UInt i = 0; i < nsamples; i++) {
-      tst[i] = 0;
-      for (UInt j = 0; j < ncoef; j++) {
-        tst[i] += matsav[j*nsamples + i]*rhs[s*ldb+j];
-      }
-std::cout << tst[i] << " ";
-      err += (tst[i]-saverhs[s*ldb+i])*(tst[i]-saverhs[s*ldb+i]);
-    }
-std::cout << std::endl;
-}
-std::cout << "err=" << err << std::endl;
-if (err > 1e-10) std::cout << "\tnsamples=" << nsamples << std::endl;
-#endif
-/*
-std::cout << "A * answerr=" << std::endl;
-std::copy(tst.begin(), tst.end(), std::ostream_iterator<double>(std::cout, ", ")); std::cout << std::endl;
-*/
-
-  // fill return array
-  for (UInt r = 0; r < (UInt) nrhs; r++) {
-    for (UInt c = 0; c < ncoef; c++) {
-      coeff[r*ncoef+c] = rhs[r*ldb+c];
-    }
-  }
-  //std::copy(&rhs[0], &rhs[nrhs*ncoef], coeff.begin());
-#endif // NOTNOT
-
+  // Patch is ok if we've gotten this far
   patch_ok = true;
 }
 
