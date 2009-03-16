@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.115 2009/03/03 06:43:47 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.116 2009/03/16 20:25:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.115 2009/03/03 06:43:47 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.116 2009/03/16 20:25:13 theurich Exp $'
 
 !==============================================================================
 !
@@ -164,7 +164,8 @@ contains
 !   {\tt ESMF\_GridComp} model type, where model includes 
 !   {\tt ESMF\_ATM, ESMF\_LAND, ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.  
 !   Note that this has no meaning to the framework, it is an
-!   annotation for user code to query.
+!   annotation for user code to query. See section
+!   \ref{opt:gridcomptype} for a complete list of valid types.
 ! \item[{[grid]}]
 !   Default {\tt ESMF\_Grid} associated with this {\tt gridcomp}. Note that
 !   it is perfectly ok to not pass a Grid in for this argument. This argument is 
@@ -444,7 +445,8 @@ contains
 ! \item[{[name]}]
 !   Return the name of the {\tt ESMF\_GridComp}.
 ! \item[{[gridcomptype]}]
-!   Return the model type of this {\tt ESMF\_GridComp}.
+!   Return the model type of this {\tt ESMF\_GridComp}. See section
+!   \ref{opt:gridcomptype} for a complete list of valid types.
 ! \item[{[grid]}]
 !   Return the {\tt ESMF\_Grid} associated with this {\tt ESMF\_GridComp}.
 ! \item[{[config]}]
@@ -954,7 +956,8 @@ contains
 ! \item[{[name]}]
 !   Set the name of the {\tt ESMF\_GridComp}.
 ! \item[{[gridcomptype]}]
-!   Set the model type for this {\tt ESMF\_GridComp}.
+!   Set the model type for this {\tt ESMF\_GridComp}. See section
+!   \ref{opt:gridcomptype} for a complete list of valid types.
 ! \item[{[grid]}]
 !   Set the {\tt ESMF\_Grid} associated with the {\tt ESMF\_GridComp}.
 ! \item[{[config]}]
