@@ -1,4 +1,4 @@
-// $Id: ESMC_ComponentUTest.C,v 1.7 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMC_ComponentUTest.C,v 1.8 2009/03/17 05:21:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -85,9 +85,9 @@ void myRegistrationInC(ESMC_GridComp gcomp, int *rc){
   printf("I am in myRegistrationInC()\n");
   ESMC_GridCompPrint(gcomp, "");
   
-  ESMC_GridCompSetEntryPoint(gcomp, ESMC_SetInit, myInitInC, 0);
-  ESMC_GridCompSetEntryPoint(gcomp, ESMC_SetRun, myRunInC, 0);
-  ESMC_GridCompSetEntryPoint(gcomp, ESMC_SetFinal, myFinalInC, 0);
+  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, myInitInC, 1);
+  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, myRunInC, 1);
+  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, myFinalInC, 1);
     
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -150,9 +150,9 @@ void myCplRegistrationInC(ESMC_CplComp cplcomp, int *rc){
   printf("I am in myCplRegistrationInC()\n");
   ESMC_CplCompPrint(cplcomp, "");
   
-  ESMC_CplCompSetEntryPoint(cplcomp, ESMC_SetInit, myCplInitInC, 0);
-  ESMC_CplCompSetEntryPoint(cplcomp, ESMC_SetRun, myCplRunInC, 0);
-  ESMC_CplCompSetEntryPoint(cplcomp, ESMC_SetFinal, myCplFinalInC, 0);
+  ESMC_CplCompSetEntryPoint(cplcomp, ESMF_SETINIT, myCplInitInC, 1);
+  ESMC_CplCompSetEntryPoint(cplcomp, ESMF_SETRUN, myCplRunInC, 1);
+  ESMC_CplCompSetEntryPoint(cplcomp, ESMF_SETFINAL, myCplFinalInC, 1);
     
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -280,7 +280,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_GridCompInitialize() w/ myRegistrationInC() methods");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridCompInitialize(gcomp, importState, exportState, clock, 0);
+  rc = ESMC_GridCompInitialize(gcomp, importState, exportState, clock, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -288,7 +288,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_GridCompRun() w/ myRegistrationInC() methods");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridCompRun(gcomp, importState, exportState, clock, 0);
+  rc = ESMC_GridCompRun(gcomp, importState, exportState, clock, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -296,7 +296,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_GridCompFinalize() w/ myRegistrationInC() methods");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridCompFinalize(gcomp, importState, exportState, clock, 0);
+  rc = ESMC_GridCompFinalize(gcomp, importState, exportState, clock, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -330,7 +330,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_GridCompInitialize() w/ my_RegistrationInFortran() meths");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridCompInitialize(gcomp, importState, exportState, clock, 0);
+  rc = ESMC_GridCompInitialize(gcomp, importState, exportState, clock, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -338,7 +338,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_GridCompRun() w/ my_RegistrationInFortran() meths");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridCompRun(gcomp, importState, exportState, clock, 0);
+  rc = ESMC_GridCompRun(gcomp, importState, exportState, clock, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -346,7 +346,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_GridCompFinalize() w/ my_RegistrationInFortran() meths");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridCompFinalize(gcomp, importState, exportState, clock, 0);
+  rc = ESMC_GridCompFinalize(gcomp, importState, exportState, clock, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -390,7 +390,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_CplCompInitialize() w/ myCplRegistrationInC() methods");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_CplCompInitialize(cplcomp, importState, exportState, clock, 0);
+  rc = ESMC_CplCompInitialize(cplcomp, importState, exportState, clock, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -398,7 +398,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_CplCompRun() w/ myCplRegistrationInC() methods");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_CplCompRun(cplcomp, importState, exportState, clock, 0);
+  rc = ESMC_CplCompRun(cplcomp, importState, exportState, clock, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -406,7 +406,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_CplCompFinalize() w/ myCplRegistrationInC() methods");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_CplCompFinalize(cplcomp, importState, exportState, clock, 0);
+  rc = ESMC_CplCompFinalize(cplcomp, importState, exportState, clock, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -440,7 +440,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_CplCompInitialize() w/ my_RegistrationInFortran() meths");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_CplCompInitialize(cplcomp, importState, exportState, clock, 0);
+  rc = ESMC_CplCompInitialize(cplcomp, importState, exportState, clock, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -448,7 +448,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_CplCompRun() w/ my_RegistrationInFortran() meths");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_CplCompRun(cplcomp, importState, exportState, clock, 0);
+  rc = ESMC_CplCompRun(cplcomp, importState, exportState, clock, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -456,7 +456,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_CplCompFinalize() w/ my_RegistrationInFortran() meths");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_CplCompFinalize(cplcomp, importState, exportState, clock, 0);
+  rc = ESMC_CplCompFinalize(cplcomp, importState, exportState, clock, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   

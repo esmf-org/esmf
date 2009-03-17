@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.9 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMCI_Comp.C,v 1.10 2009/03/17 05:21:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.9 2009/01/21 21:38:02 cdeluca Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.10 2009/03/17 05:21:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // prototypes for fortran interface routines
@@ -141,7 +141,7 @@ int Comp::setEntryPoint(
 //
 // !ARGUMENTS:
 //
-    const char *functionType,                           // in: function type
+    enum method method,                           // in: method type
     void (*functionPtr)(Comp *, State *, State *, Clock **, int *), // in: 
     int phase                                           // in: phase
   ){
@@ -161,14 +161,35 @@ int Comp::setEntryPoint(
     return rc;
   }
 
-  int slen = strlen(functionType);
-  char *tname = new char[slen+1];
-  strcpy(tname, functionType);
-  FTable::setTypedEP(this, tname, strlen(functionType),
-    &phase, 0, FT_COMP2STAT, (void *)functionPtr, &localrc);
+  char *methodString;
+  switch(method){
+  case ESMCI::SETINIT:
+    methodString = "Initialize";
+    break;
+  case ESMCI::SETRUN:
+    methodString = "Run";
+    break;
+  case ESMCI::SETFINAL:
+    methodString = "Finalize";
+    break;
+  case ESMCI::SETWRITERESTART:
+    methodString = "WriteRestart";
+    break;
+  case ESMCI::SETREADRESTART:
+    methodString = "ReadRestart";
+    break;
+  case ESMCI::SETREGISTER:
+    methodString = "Register";
+    break;
+  default:
+    break;
+  }
+  int slen = strlen(methodString);
+
+  FTable::setTypedEP(this, methodString, slen, &phase, 0, 
+    FT_COMP2STAT, (void *)functionPtr, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  delete [] tname;
   
   // return successfully
   rc = ESMF_SUCCESS;

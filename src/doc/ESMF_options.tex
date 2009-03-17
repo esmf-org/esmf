@@ -1,6 +1,28 @@
-% $Id: ESMF_options.tex,v 1.32 2009/02/04 23:14:15 theurich Exp $
+% $Id: ESMF_options.tex,v 1.33 2009/03/17 05:21:36 theurich Exp $
 
-\section{Global Options and Parameters}
+\section{Global Options, Flags and Parameters}
+
+\subsection{Options}
+
+\subsubsection{ESMF\_Method}
+\label{opt:method}
+{\sf DESCRIPTION:\\}  
+Specify standard ESMF Component method.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_SETFINAL]
+      Finalize method.
+\item [ESMF\_SETINIT]
+      Initialize method.
+\item [ESMF\_SETREADRESTART]
+      ReadRestart method.
+\item [ESMF\_SETRUN]
+      Run method.
+\item [ESMF\_SETWRITERESTART]
+      WriteRestart method.
+\end{description}
+
 
 \subsection{Flags}
 

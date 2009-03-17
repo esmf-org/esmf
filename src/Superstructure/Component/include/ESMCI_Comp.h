@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.10 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMCI_Comp.h,v 1.11 2009/03/17 05:21:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@ class Comp{
     F90ClassHolder fortranclass;
   public:
     int setServices(void (*func)(Comp *, int *));
-    int setEntryPoint(const char *functionType,
+    int setEntryPoint(enum method method,
       void (*functionPtr)(Comp *, State *, State *, Clock **, int *),
       int phase);
     void *getInternalState(int *rc)const;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.43 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMC_Comp.C,v 1.44 2009/03/17 05:21:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -33,23 +33,15 @@
 #include "ESMCI_Comp.h"
 #include "ESMC_Clock.h"
 #include "ESMCI_Clock.h"
+#include "ESMCI_FTable.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Comp.C,v 1.43 2009/01/21 21:38:02 cdeluca Exp $";
+static const char *const version = "$Id: ESMC_Comp.C,v 1.44 2009/03/17 05:21:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
-
-  
-// initilalize global character constants to be used by user code written in C
-const char *ESMC_SetInit         = "ESMF_Initialize";
-const char *ESMC_SetRun          = "ESMF_Run";
-const char *ESMC_SetFinal        = "ESMF_Finalize";
-const char *ESMC_SetWriteRestart = "ESMF_WriteRestart";
-const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
-
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -134,7 +126,7 @@ int ESMC_GridCompSetServices(ESMC_GridComp comp,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCompSetEntryPoint()"
-int ESMC_GridCompSetEntryPoint(ESMC_GridComp comp, const char *functionType,
+int ESMC_GridCompSetEntryPoint(ESMC_GridComp comp, enum ESMC_Method method,
   void (*func)(ESMC_GridComp, ESMC_State, ESMC_State, ESMC_Clock *, int *),
   int phase){
 
@@ -143,10 +135,11 @@ int ESMC_GridCompSetEntryPoint(ESMC_GridComp comp, const char *functionType,
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   // typecast into ESMCI type
+  enum ESMCI::method methodArg = (enum ESMCI::method)method;
   ESMCI::GridComp *compp = (ESMCI::GridComp *)comp;
 
   // call into ESMCI method  
-  localrc = compp->setEntryPoint(functionType,
+  localrc = compp->setEntryPoint(methodArg,
     (void(*)(ESMCI::Comp *, ESMCI::State *, ESMCI::State *, ESMCI::Clock **,
     int *))func, phase);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
@@ -397,7 +390,7 @@ int ESMC_CplCompSetServices(ESMC_CplComp comp,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_CplCompSetEntryPoint()"
-int ESMC_CplCompSetEntryPoint(ESMC_CplComp comp, const char *functionType,
+int ESMC_CplCompSetEntryPoint(ESMC_CplComp comp, enum ESMC_Method method,
   void (*func)(ESMC_CplComp, ESMC_State, ESMC_State, ESMC_Clock *, int *),
   int phase){
 
@@ -406,10 +399,11 @@ int ESMC_CplCompSetEntryPoint(ESMC_CplComp comp, const char *functionType,
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   // typecast into ESMCI type
+  enum ESMCI::method methodArg = (enum ESMCI::method)method;
   ESMCI::CplComp *compp = (ESMCI::CplComp *)comp;
 
   // call into ESMCI method  
-  localrc = compp->setEntryPoint(functionType,
+  localrc = compp->setEntryPoint(methodArg,
     (void(*)(ESMCI::Comp *, ESMCI::State *, ESMCI::State *, ESMCI::Clock **,
     int *))func, phase);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))

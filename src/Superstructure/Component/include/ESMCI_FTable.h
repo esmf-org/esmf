@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.5 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMCI_FTable.h,v 1.6 2009/03/17 05:21:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -49,6 +49,8 @@ namespace ESMCI {
 enum dtype { DT_VOIDP=1, DT_FORTRAN_UDT_POINTER };
 enum ftype { FT_VOID=1, FT_INT, FT_2INT, FT_INTP, FT_VOIDP, FT_VOIDPINTP,
               FT_INITFINAL, FT_RUN, FT_COMP1STAT, FT_COMP2STAT, FT_COMPSLIST };
+enum method { SETINIT=1, SETRUN, SETFINAL, SETWRITERESTART, SETREADRESTART,
+  SETREGISTER };
 typedef void (*VoidFunc)(void);
 typedef void (*IntFunc)(int);
 typedef void (*Int2Func)(int, int);

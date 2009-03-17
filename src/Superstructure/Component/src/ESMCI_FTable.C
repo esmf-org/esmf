@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.14 2009/02/24 06:58:26 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.15 2009/03/17 05:21:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.14 2009/02/24 06:58:26 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.15 2009/03/17 05:21:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -188,14 +188,39 @@ extern "C" {
   }
   
   // call a function 
-  void FTN(c_esmc_ftablecallentrypoint)(ESMCI::FTable **ptr, char *type, 
-    int *phase, int *status, int slen) {
+  void FTN(c_esmc_ftablecallentrypoint)(ESMCI::FTable **ptr, 
+    enum ESMCI::method *method, int *phase, int *status){
     int funcrc;
     char *name;
     int localrc = ESMC_RC_NOT_IMPL;
     *status = ESMC_RC_NOT_IMPL;
 
-    newtrim(type, slen, phase, NULL, &name);
+    char *methodString;
+    switch(*method){
+    case ESMCI::SETINIT:
+      methodString = "Initialize";
+      break;
+    case ESMCI::SETRUN:
+      methodString = "Run";
+      break;
+    case ESMCI::SETFINAL:
+      methodString = "Finalize";
+      break;
+    case ESMCI::SETWRITERESTART:
+      methodString = "WriteRestart";
+      break;
+    case ESMCI::SETREADRESTART:
+      methodString = "ReadRestart";
+      break;
+    case ESMCI::SETREGISTER:
+      methodString = "Register";
+      break;
+    default:
+      break;
+    }
+    
+    int slen = strlen(methodString);
+    newtrim(methodString, slen, phase, NULL, &name);
     //printf("after newtrim, name = '%s'\n", name);
 
     // TODO: two return codes here - one is whether we could find
@@ -253,16 +278,41 @@ extern "C" {
     delete[] name;
   }
 
-  void FTN(c_esmc_ftablesetstateargs)(ESMCI::FTable **ptr, char *type,
-    int *phase, void *comp, void *importState, void *exportState, void *clock,
-    int *status, int slen) {
+  void FTN(c_esmc_ftablesetstateargs)(ESMCI::FTable **ptr, 
+    enum ESMCI::method *method, int *phase, void *comp, void *importState,
+    void *exportState, void *clock, int *status){
     char *fname;
     int acount = 5;
     void *alist[5];
 
     *status = ESMC_RC_NOT_IMPL;
 
-    newtrim(type, slen, phase, NULL, &fname);
+    char *methodString;
+    switch(*method){
+    case ESMCI::SETINIT:
+      methodString = "Initialize";
+      break;
+    case ESMCI::SETRUN:
+      methodString = "Run";
+      break;
+    case ESMCI::SETFINAL:
+      methodString = "Finalize";
+      break;
+    case ESMCI::SETWRITERESTART:
+      methodString = "WriteRestart";
+      break;
+    case ESMCI::SETREADRESTART:
+      methodString = "ReadRestart";
+      break;
+    case ESMCI::SETREGISTER:
+      methodString = "Register";
+      break;
+    default:
+      break;
+    }
+    
+    int slen = strlen(methodString);
+    newtrim(methodString, slen, phase, NULL, &fname);
     //printf("after newtrim, name = '%s'\n", fname);
 
     alist[0] = (void *)comp;
@@ -430,12 +480,36 @@ extern "C" {
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setentrypoint"
-  void FTN(c_esmc_setentrypoint)(void *ptr, char *stage, void *func,
-    int *phase, int *rc, int slen){
+  void FTN(c_esmc_setentrypoint)(void *ptr, enum ESMCI::method *method,
+    void *func, int *phase, int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
-    ESMCI::FTable::setTypedEP(ptr, stage, slen, phase, 0, ESMCI::FT_COMP2STAT,
-      func, &localrc);
+    char *methodString;
+    switch(*method){
+    case ESMCI::SETINIT:
+      methodString = "Initialize";
+      break;
+    case ESMCI::SETRUN:
+      methodString = "Run";
+      break;
+    case ESMCI::SETFINAL:
+      methodString = "Finalize";
+      break;
+    case ESMCI::SETWRITERESTART:
+      methodString = "WriteRestart";
+      break;
+    case ESMCI::SETREADRESTART:
+      methodString = "ReadRestart";
+      break;
+    case ESMCI::SETREGISTER:
+      methodString = "Register";
+      break;
+    default:
+      break;
+    }
+    int slen = strlen(methodString);
+    ESMCI::FTable::setTypedEP(ptr, methodString, slen, phase, 0,
+      ESMCI::FT_COMP2STAT, func, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
       return;
     if (rc) *rc = ESMF_SUCCESS;
@@ -462,32 +536,41 @@ extern "C" {
 // these interface subroutine names MUST be in lower case
 extern "C" {
 
-  // ---------- Set Services ---------------
-  void FTN(esmf_usercompsetservices)(void *ptr, void (*func)(), int *status){
-    ESMCI::FTable::setServices(ptr, func, status);
-  }
-
-  // ---------- Set VM ---------------
-  void FTN(esmf_usercompsetvm)(void *ptr, void (*func)(), int *status){
-    ESMCI::FTable::setVM(ptr, func, status);
-  }
-
-  // ---------- Set Entry Point ---------------
-  void FTN(esmf_usercompsetentrypoint)(void *ptr, char *tname, void *func,
-    int *phase, int *status, int slen){
-    ESMCI::FTable::setTypedEP(ptr, tname, slen, phase, 0, ESMCI::FT_VOIDPINTP,
-      func,  status);
-  }
-
-  // ---------- Set Internal State ---------------
+  // ---------- GridComp ---------------
   void FTN(esmf_gridcompsetinternalstate)(ESMCI::FTable ***ptr, void **datap,
     int *status){
     ESMCI::FTable::setDP(ptr, datap, status);
   }
   
+  void FTN(esmf_gridcompgetinternalstate)(ESMCI::FTable ***ptr, void **datap,
+    int *status){
+    ESMCI::FTable::getDP(ptr, datap, status);
+  }
+
+  // ---------- CplComp ---------------
   void FTN(esmf_cplcompsetinternalstate)(ESMCI::FTable ***ptr, void **datap,
     int *status){
     ESMCI::FTable::setDP(ptr, datap, status);
+  }
+
+  void FTN(esmf_cplcompgetinternalstate)(ESMCI::FTable ***ptr, void **datap,
+    int *status){
+    ESMCI::FTable::getDP(ptr, datap, status);
+  }
+
+  // ---------- UserComp ---------------
+  void FTN(esmf_usercompsetservices)(void *ptr, void (*func)(), int *status){
+    ESMCI::FTable::setServices(ptr, func, status);
+  }
+
+  void FTN(esmf_usercompsetvm)(void *ptr, void (*func)(), int *status){
+    ESMCI::FTable::setVM(ptr, func, status);
+  }
+
+  void FTN(esmf_usercompsetentrypoint)(void *ptr, char *tname, void *func,
+    int *phase, int *status, int slen){
+    ESMCI::FTable::setTypedEP(ptr, tname, slen, phase, 0, ESMCI::FT_VOIDPINTP,
+      func,  status);
   }
 
   void FTN(esmf_usercompsetinternalstate)(ESMCI::FTable ***ptr, char *name, 
@@ -515,17 +598,6 @@ extern "C" {
   
     delete[] tbuf;
     if (status) *status = localrc;
-  }
-
-  // ---------- Get Internal State ---------------
-  void FTN(esmf_gridcompgetinternalstate)(ESMCI::FTable ***ptr, void **datap,
-    int *status){
-    ESMCI::FTable::getDP(ptr, datap, status);
-  }
-  
-  void FTN(esmf_cplcompgetinternalstate)(ESMCI::FTable ***ptr, void **datap,
-    int *status){
-    ESMCI::FTable::getDP(ptr, datap, status);
   }
 
   void FTN(esmf_usercompgetinternalstate)(ESMCI::FTable ***ptr, char *name,
@@ -600,13 +672,13 @@ static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargo){
 void FTN(c_esmc_ftablecallentrypointvm)(
   ESMCI::VM **ptr_vm_parent,  // p2 to the parent VM
   ESMCI::VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
-  void **vm_info,           // p2 to member which holds info returned by enter
-  void **vm_cargo,          // p2 to member which holds cargo
+  void **vm_info,             // p2 to member which holds info returned by enter
+  void **vm_cargo,            // p2 to member which holds cargo
   ESMCI::FTable **ptr,        // p2 to the ftable of this component
-  char *type,               // string holding type of called entry point
-  int *phase,               // phase selector
-  int *status,              // return error code in status
-  int slen) {               // additional F90 argument associated with type
+  enum ESMCI::method *method, // method type
+  int *phase,                 // phase selector
+  int *status                 // return error code in status
+  ){
        
   // local variables
   int localrc;              // local return code
@@ -616,7 +688,32 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   if (status) *status = ESMC_RC_NOT_IMPL;
   localrc = ESMC_RC_NOT_IMPL;
 
-  newtrim(type, slen, phase, NULL, &name);
+  char *methodString;
+  switch(*method){
+  case ESMCI::SETINIT:
+    methodString = "Initialize";
+    break;
+  case ESMCI::SETRUN:
+    methodString = "Run";
+    break;
+  case ESMCI::SETFINAL:
+    methodString = "Finalize";
+    break;
+  case ESMCI::SETWRITERESTART:
+    methodString = "WriteRestart";
+    break;
+  case ESMCI::SETREADRESTART:
+    methodString = "ReadRestart";
+    break;
+  case ESMCI::SETREGISTER:
+    methodString = "Register";
+    break;
+  default:
+    break;
+  }
+
+  int slen = strlen(methodString);
+  newtrim(methodString, slen, phase, NULL, &name);
 
   // Things get a little confusing here with pointers, so I will define
   // some temp. variables that make matters a little clearer I hope:
@@ -698,7 +795,7 @@ void FTN(c_esmc_compwait)(
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
-// This section includes all the FTable routines
+// This section implements the FTable class
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -837,7 +934,7 @@ void FTable::setServices(void *ptr, void (*func)(), int *status) {
   // table is destroyed.  for now, it is a leak; small, and only shows up
   // when you delete a component which does not happen often, thankfully.
   tablerc = new int;
-  localrc = (tabptr)->setFuncPtr("register", (void *)func, f90comp, tablerc);
+  localrc = (tabptr)->setFuncPtr("Register", (void *)func, f90comp, tablerc);
 
   // TODO: decide what to do if tablerc comes back
   // with an error.  for now, ignore it and look at localrc only.
@@ -875,8 +972,9 @@ void FTable::setServices(void *ptr, void (*func)(), int *status) {
   
   // call into register routine using the component's VM
   void *vm_cargo;
+  enum method reg = SETREGISTER;
   FTN(c_esmc_ftablecallentrypointvm)(&vm_parent, &vmplan_p, &vm_info,
-    &vm_cargo, &tabptr, "register", NULL, &localrc, 8);
+    &vm_cargo, &tabptr, &reg, NULL, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
     status)) return;
   

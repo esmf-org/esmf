@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.178 2009/03/03 06:43:46 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.179 2009/03/17 05:21:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -91,17 +91,24 @@ module ESMF_CompMod
     ESMF_OTHER  = ESMF_GridCompType(6)
 
 !------------------------------------------------------------------------------
-! ! ESMF Entry Point Names
+! ! ESMF Method Type
+!
+  type ESMF_Method
+    sequence
+    private
+    integer :: method
+  end type
 
-  character(len=20), parameter :: ESMF_SETINIT         = "ESMF_Initialize"
-  character(len=20), parameter :: ESMF_SETRUN          = "ESMF_Run"
-  character(len=20), parameter :: ESMF_SETFINAL        = "ESMF_Finalize"
-  character(len=20), parameter :: ESMF_SETWRITERESTART = "ESMF_WriteRestart"
-  character(len=20), parameter :: ESMF_SETREADRESTART  = "ESMF_ReadRestart"
- 
+  type(ESMF_Method), parameter :: &
+    ESMF_SETINIT          = ESMF_Method(1), &
+    ESMF_SETRUN           = ESMF_Method(2), &
+    ESMF_SETFINAL         = ESMF_Method(3), &
+    ESMF_SETWRITERESTART  = ESMF_Method(4), &
+    ESMF_SETREADRESTART   = ESMF_Method(5)
+    
 !------------------------------------------------------------------------------
 ! ! ESMF Phase number
-  integer, parameter :: ESMF_SINGLEPHASE = 0
+  integer, parameter :: ESMF_SINGLEPHASE = 1    ! deprecated!!!!
 
 !------------------------------------------------------------------------------
 ! ! wrapper for Component objects going across F90/C++ boundary
@@ -207,7 +214,8 @@ module ESMF_CompMod
 ! !PUBLIC TYPES:
   public ESMF_GridCompType, ESMF_ATM, ESMF_LAND, ESMF_OCEAN, &
     ESMF_SEAICE, ESMF_RIVER, ESMF_OTHER
-  public ESMF_SETINIT, ESMF_SETRUN, ESMF_SETFINAL, ESMF_SINGLEPHASE
+  public ESMF_Method, ESMF_SETINIT, ESMF_SETRUN, ESMF_SETFINAL
+  public ESMF_SINGLEPHASE
       
   ! These have to be public so other component types can use them, but 
   ! are not intended to be used outside the Framework code.
@@ -249,7 +257,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.178 2009/03/03 06:43:46 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.179 2009/03/17 05:21:36 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -871,16 +879,16 @@ contains
 ! !IROUTINE: ESMF_CompExecute -- Call into registered component method
 
 ! !INTERFACE:
-  recursive subroutine ESMF_CompExecute(compp, importState, exportState, &
-    clock, methodtype, phase, blockingFlag, rc)
+  recursive subroutine ESMF_CompExecute(compp, method, &
+    importState, exportState, clock, phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),    pointer                 :: compp
+    type(ESMF_Method),       intent(in)              :: method
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(in),    optional :: clock
-    character(len=*),        intent(in),    optional :: methodtype
     integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
     integer,                 intent(out),   optional :: rc 
@@ -898,17 +906,17 @@ contains
 !
 !   \item[compp]
 !    Component to call Initialization routine for.
+!   \item[method]
+!    One of the ESMF Component methods. See section \ref{opt:methods} 
+!    for a complete list of valid methods.
 !   \item[{[importState]}]  
 !    Import data for component method.
 !   \item[{[exportState]}]  
 !    Export data for component method.
 !   \item[{[clock]}]  
 !    External clock for passing in time information.
-!   \item[{[methodtype]}]
-!    One of the method types: ESMF\_SETINIT, ESMF\_SETRUN, ESMF\_SETFINAL
-!   \item[{[phase]}]  
-!    If multiple-phase methods, which phase number this is.
-!    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!   \item[{[phase]}]
+!    If multiple-phase methods, which phase number this is. Default is 1.
 !   \item[{[blockingFlag]}]
 !    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
 !    for a list of valid blocking options. Default option is
@@ -926,6 +934,7 @@ contains
         integer                 :: callrc       ! return code from user code
         type(ESMF_BlockingFlag) :: blocking     ! local blocking flag
         type(ESMF_VM)           :: vm           ! VM for current context
+        integer                 :: phaseArg
         
         ! dummys that will provide initializer values if args are not present
         type(ESMF_State)        :: dummyis, dummyes
@@ -989,6 +998,10 @@ contains
           compp%argclock = dummyclock
         endif
 
+        ! phase
+        phaseArg = 1 !default
+        if (present(phase)) phaseArg = phase
+
         ! Wrap comp so it's passed to C++ correctly.
         compp%compw%compp => compp
         ESMF_INIT_SET_CREATED(compp%compw)
@@ -996,7 +1009,7 @@ contains
         ! Set up the arguments
         if (compp%iAmParticipant) then
           ! only set arguments on those PETs that are executing the component
-          call c_ESMC_FTableSetStateArgs(compp%this, methodtype, phase, &
+          call c_ESMC_FTableSetStateArgs(compp%this, method, phaseArg, &
             compp%compw, compp%is, compp%es, compp%argclock, status)
 !gjt: ignore return value now that setservices runs in child context
 !          if (ESMF_LogMsgFoundError(status, &
@@ -1006,7 +1019,7 @@ contains
           
         ! callback into user code
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
-          compp%vm_info, compp%vm_cargo, compp%this, methodtype, phase, &
+          compp%vm_info, compp%vm_cargo, compp%this, method, phaseArg, &
           status)
         if (ESMF_LogMsgFoundError(status, &
           ESMF_ERR_PASSTHRU, &
@@ -1383,8 +1396,7 @@ contains
 !   \item[{[clock]}]  
 !    External clock for passing in time information.
 !   \item[{[phase]}]  
-!     If multiple-phase restore, which phase number this is.
-!     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!     If multiple-phase restore, which phase number this is. Default is 1.
 !   \item[{[blockingFlag]}]  
 !    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
@@ -1398,6 +1410,7 @@ contains
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
         type (ESMF_BlockingFlag) :: blocking
+        integer:: phaseArg
 
         ! ReadRestart return code; assume failure until success is certain
         status = ESMF_RC_NOT_IMPL
@@ -1436,18 +1449,22 @@ contains
           blocking = ESMF_VASBLOCKING
         endif
 
+        ! phase
+        phaseArg = 1 !default
+        if (present(phase)) phaseArg = phase
+
         ! TODO: put in rest of default argument handling here
 
         ! Wrap comp so it's passed to C++ correctly.
         compp%compw%compp => compp
 
         ! Set up the arguments before the call     
-        call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETREADRESTART, phase, &
-                                    compp%compw, iospec, clock, status)
+        call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETREADRESTART, phaseArg, &
+          compp%compw, iospec, clock, status)
 
         ! Call user-defined run routine
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETREADRESTART, &
-                                                           phase, status)
+          phaseArg, status)
 
         ! set error code but fall thru and clean up states
         if (ESMF_LogMsgFoundError(status, &
@@ -2051,8 +2068,7 @@ contains
 !   \item[{[clock]}]  
 !     External clock for passing in time information.
 !   \item[{[phase]}]  
-!     If multiple-phase checkpoint, which phase number this is.
-!     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!     If multiple-phase checkpoint, which phase number this is. Default is 1.
 !   \item[{[blockingFlag]}]  
 !    Blocking behavior of this method call. See section \ref{opt:blockingflag} 
 !    for a list of valid blocking options. Default option is
@@ -2069,6 +2085,7 @@ contains
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
         type (ESMF_BlockingFlag) :: blocking
+        integer:: phaseArg
 
         ! WriteRestart return code; assume failure until success is certain
         status = ESMF_RC_NOT_IMPL
@@ -2105,18 +2122,22 @@ contains
           blocking = ESMF_VASBLOCKING
         endif
 
+        ! phase
+        phaseArg = 1 !default
+        if (present(phase)) phaseArg = phase
+
         ! TODO: add rest of default handling here.
 
         ! Wrap comp so it's passed to C++ correctly.
         compp%compw%compp => compp
 
         ! Set up the arguments before the call     
-        call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETWRITERESTART, phase, &
-                                    compp%compw, iospec, clock, status)
+        call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETWRITERESTART, phaseArg,&
+         compp%compw, iospec, clock, status)
 
         ! Call user-defined run routine
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETWRITERESTART, &
-                                                            phase, status)
+          phaseArg, status)
 
         ! set error code but fall thru and clean up states
         if (ESMF_LogMsgFoundError(status, &

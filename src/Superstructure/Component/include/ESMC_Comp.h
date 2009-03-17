@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.45 2009/01/21 21:38:02 cdeluca Exp $
+// $Id: ESMC_Comp.h,v 1.46 2009/03/17 05:21:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,12 +46,8 @@ extern "C" {
 enum ESMC_GridCompType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE, 
   ESMF_RIVER, ESMF_GRIDCOMPTYPE_UNKNOWN };
 
-extern const char *ESMC_SetInit;
-extern const char *ESMC_SetRun;
-extern const char *ESMC_SetFinal;
-extern const char *ESMC_SetWriteRestart;
-extern const char *ESMC_SetReadRestart;
-
+enum ESMC_Method { ESMF_SETINIT=1, ESMF_SETRUN, ESMF_SETFINAL,
+  ESMF_SETWRITERESTART, ESMF_SETREADRESTART };
 
 // Class declaration type
 typedef void* ESMC_GridComp;
@@ -62,7 +58,7 @@ ESMC_GridComp ESMC_GridCompCreate(char *name, enum ESMC_GridCompType mtype,
 int ESMC_GridCompDestroy(ESMC_GridComp *comp);
 int ESMC_GridCompSetServices(ESMC_GridComp comp, 
   void (*func)(ESMC_GridComp, int *));
-int ESMC_GridCompSetEntryPoint(ESMC_GridComp comp, const char *functionType,
+int ESMC_GridCompSetEntryPoint(ESMC_GridComp comp, enum ESMC_Method method,
   void (*func)(ESMC_GridComp, ESMC_State, ESMC_State, ESMC_Clock *, int *),
   int phase);
 int ESMC_GridCompInitialize(ESMC_GridComp comp, ESMC_State importState,
@@ -84,7 +80,7 @@ ESMC_CplComp ESMC_CplCompCreate(char *name, char *configFile, ESMC_Clock clock,
 int ESMC_CplCompDestroy(ESMC_CplComp *comp);
 int ESMC_CplCompSetServices(ESMC_CplComp comp, 
   void (*func)(ESMC_CplComp, int *));
-int ESMC_CplCompSetEntryPoint(ESMC_CplComp comp, const char *functionType,
+int ESMC_CplCompSetEntryPoint(ESMC_CplComp comp, enum ESMC_Method method,
   void (*func)(ESMC_CplComp, ESMC_State, ESMC_State, ESMC_Clock *, int *),
   int phase);
 int ESMC_CplCompInitialize(ESMC_CplComp comp, ESMC_State importState,

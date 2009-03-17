@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.103 2009/03/03 06:43:47 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.104 2009/03/17 05:21:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.103 2009/03/03 06:43:47 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.104 2009/03/17 05:21:36 theurich Exp $'
 
 !==============================================================================
 !
@@ -352,10 +352,10 @@ contains
 !   the work, accomodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For single-phase child components this argument is optional, but   
-!   if specified it must be {\tt ESMF\_SINGLEPHASE}.
 !   For multiple-phase child components, this is the integer phase 
 !   number to be invoked.
+!   For single-phase child components this argument is optional. The default is
+!   1.
 ! \item[{[blockingflag]}]
 !   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
 !   for a list of valid blocking options. Default option is
@@ -379,9 +379,9 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     ! call Comp method
-    call ESMF_CompExecute(cplcomp%compp, importState, exportState, &
-      clock=clock, methodtype=ESMF_SETFINAL, phase=phase, &
-      blockingflag=blockingflag, rc=localrc)
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETFINAL, &
+      importState=importState, exportState=exportState, clock=clock, &
+      phase=phase, blockingflag=blockingflag, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -569,10 +569,10 @@ contains
 !   the work, accomodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For single-phase child components this argument is optional, but   
-!   if specified it must be {\tt ESMF\_SINGLEPHASE}.
 !   For multiple-phase child components, this is the integer phase 
 !   number to be invoked.
+!   For single-phase child components this argument is optional. The default is
+!   1.
 ! \item[{[blockingflag]}]
 !   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
 !   for a list of valid blocking options. Default option is
@@ -596,9 +596,9 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     ! call Comp method
-    call ESMF_CompExecute(cplcomp%compp, importState, exportState, &
-      clock=clock, methodtype=ESMF_SETINIT, phase=phase, &
-      blockingflag=blockingflag, rc=localrc)
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETINIT, &
+      importState=importState, exportState=exportState, clock=clock, &
+      phase=phase, blockingflag=blockingflag, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -766,12 +766,10 @@ contains
 !   the work, accomodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For single-phase child components this argument is optional, but   
-!   if specified it must be {\tt ESMF\_SINGLEPHASE}.
 !   For multiple-phase child components, this is the integer phase 
 !   number to be invoked.
-!   If multiple-phase restore, which phase number this is.
-!   Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!   For single-phase child components this argument is optional. The default is
+!   1.
 ! \item[{[blockingflag]}]
 !   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
 !   for a list of valid blocking options. Default option is
@@ -855,13 +853,10 @@ contains
 !   the work, accomodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For single-phase child components this argument is optional, but   
-!   if specified it must be {\tt ESMF\_SINGLEPHASE}.
 !   For multiple-phase child components, this is the integer phase 
 !   number to be invoked.
-!   If multiple-phase restore, which phase number this is.
-!   Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!   External clock for passing in time information.
+!   For single-phase child components this argument is optional. The default is
+!   1.
 ! \item[{[blockingflag]}]
 !   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
 !   for a list of valid blocking options. Default option is
@@ -885,9 +880,9 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     ! call Comp method
-    call ESMF_CompExecute(cplcomp%compp, importState, exportState, &
-      clock=clock, methodtype=ESMF_SETRUN, phase=phase, &
-      blockingflag=blockingflag, rc=localrc)
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETRUN, &
+      importState=importState, exportState=exportState, clock=clock, &
+      phase=phase, blockingflag=blockingflag, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -976,11 +971,11 @@ contains
 ! !IROUTINE: ESMF_CplCompSetEntryPoint - Set user routine as entry point for standard Component method
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetEntryPoint(cplcomp, stage, routine, phase, rc)
+  subroutine ESMF_CplCompSetEntryPoint(cplcomp, method, routine, phase, rc)
 
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent (in) :: cplcomp
-    character(*),       intent(in)  :: stage
+    type(ESMF_Method),  intent(in)  :: method
     interface
       subroutine routine(cplcomp, importState, exportState, clock, rc)
         use ESMF_CompMod
@@ -999,23 +994,24 @@ contains
 !
 ! !DESCRIPTION:
 ! Registers a user-supplied {\tt routine} as the entry point for one of the
-! predefined Component {\tt stage}s. After this call the {\tt routine} becomes
-! accessible via the standard Component API method for this {\tt stage}.
+! predefined Component {\tt method}s. After this call the {\tt routine} becomes
+! accessible via the standard Component method API.
 !    
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
 !   An {\tt ESMF\_CplComp} object.
-! \item[stage]
-!   One of a set of predefined Component stages - e.g. {\tt ESMF\_SETINIT}, 
-!   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. !!!need to reference here!!!
+! \item[method]
+!   One of a set of predefined Component methods - e.g. {\tt ESMF\_SETINIT}, 
+!   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. See section \ref{opt:method} 
+!   for a complete list of valid method options.
 ! \item[routine]
-!   The user-supplied subroutine to be associated for this {\tt stage}.
+!   The user-supplied subroutine to be associated for this {\tt method}.
 !   This subroutine does not have to be public.
 ! \item[{[phase]}] 
-!   The {\tt phase} number for multi-phase stages. For single phase 
-!   stages the {\tt phase} argument can be omitted. The default setting
-!   is {\tt ESMF\_SINGLEPHASE}.
+!   The {\tt phase} number for multi-phase methods. For single phase 
+!   methods the {\tt phase} argument can be omitted. The default setting
+!   is 1.
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1036,10 +1032,10 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
-    phaseArg = ESMF_SINGLEPHASE   ! default
+    phaseArg = 1   ! default
     if (present(phase)) phaseArg = phase
   
-    call c_ESMC_SetEntryPoint(cplcomp, stage, routine, phaseArg, localrc)
+    call c_ESMC_SetEntryPoint(cplcomp, method, routine, phaseArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1705,10 +1701,10 @@ contains
 !   the work, accomodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For single-phase child components this argument is optional, but   
-!   if specified it must be {\tt ESMF\_SINGLEPHASE}.
 !   For multiple-phase child components, this is the integer phase 
 !   number to be invoked.
+!   For single-phase child components this argument is optional. The default is
+!   1.
 ! \item[{[blockingflag]}]
 !   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
 !   for a list of valid blocking options. Default option is
