@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.32 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_CplEx.F90,v 1.33 2009/03/17 05:47:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -56,9 +56,9 @@
       integer, intent(out)  :: rc     ! must not be optional
 
       ! SetServices the callback routines.
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, CPL_Init, 0, rc)
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, CPL_Run, 0, rc)
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, CPL_Final, 0, rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, routine=CPL_Init, rc=rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, routine=CPL_Run, rc=rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, routine=CPL_Final, rc=rc)
 
       ! If desired, this routine can register a private data block
       ! to be passed in to the routines above:
