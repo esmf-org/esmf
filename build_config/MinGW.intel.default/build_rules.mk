@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.6 2009/01/30 02:00:33 w6ws Exp $
+# $Id: build_rules.mk,v 1.7 2009/03/17 01:45:10 w6ws Exp $
 #
 # MinGW.intel.default
 #
@@ -9,6 +9,10 @@
 ESMF_F90DEFAULT         = ifort
 ESMF_F90COMPILEOPTS    += -unix -Qfpp
 ESMF_CXXDEFAULT         = icl
+
+# Turn off some noise
+ESMF_CXXCOMPILEOPTS    += -nologo
+ESMF_F90COMPILEOPTS    += -nologo
 # Specify that .C files are c++
 ESMF_CXXCOMPILEOPTS    += -TP
 # Specify the c++ exception model
@@ -59,8 +63,8 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -logo
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -logo
 
 ############################################################
 # Force Fortran symbols lower case
