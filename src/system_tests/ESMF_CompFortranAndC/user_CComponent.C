@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.8 2009/03/17 05:21:36 theurich Exp $
+// $Id: user_CComponent.C,v 1.9 2009/03/17 05:34:59 theurich Exp $
 //==============================================================================
 
 
@@ -88,9 +88,9 @@ void FTN(my_registrationinc)(ESMC_GridComp gcomp, int *rc){
   printf("I am in myRegistrationInC()\n");
   ESMC_GridCompPrint(gcomp, "");
 
-  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, myInitInC, 0);
-  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, myRunInC, 0);
-  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, myFinalInC, 0);
+  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, myInitInC, 1);
+  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, myRunInC, 1);
+  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, myFinalInC, 1);
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
