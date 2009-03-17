@@ -259,8 +259,14 @@ static void parallel_union_field_info(std::vector<UInt> &nvalSet, std::vector<UI
 
   std::vector<UInt> allval(rdisp[csize], 0);
 
-  MPI_Allgatherv(&nvs[0], nvs.size(), MPI_UNSIGNED, &allval[0],
-      &num_val[0], &rdisp[0], MPI_UNSIGNED, Par::Comm());
+  if (nvs.size ())
+    MPI_Allgatherv(&nvs[0], nvs.size(), MPI_UNSIGNED, &allval[0],
+        &num_val[0], &rdisp[0], MPI_UNSIGNED, Par::Comm());
+  else {
+    unsigned int zerobuf = 0;
+    MPI_Allgatherv(&zerobuf, 0, MPI_UNSIGNED, &allval[0],
+        &num_val[0], &rdisp[0], MPI_UNSIGNED, Par::Comm());
+  }
 
   // Now send out the valsetobj
   // First copy to a contiguous buffer
@@ -270,8 +276,14 @@ static void parallel_union_field_info(std::vector<UInt> &nvalSet, std::vector<UI
 
   std::vector<UInt> allvalo(rdisp[csize], 0);
 
-  MPI_Allgatherv(&contig_nvso[0], nvs.size(), MPI_UNSIGNED, &allvalo[0],
-      &num_val[0], &rdisp[0], MPI_UNSIGNED, Par::Comm());
+  if (nvs.size ())
+    MPI_Allgatherv(&contig_nvso[0], nvs.size(), MPI_UNSIGNED, &allvalo[0],
+        &num_val[0], &rdisp[0], MPI_UNSIGNED, Par::Comm());
+  else {
+    unsigned int zerobuf = 0;
+    MPI_Allgatherv(&zerobuf, 0, MPI_UNSIGNED, &allvalo[0],
+        &num_val[0], &rdisp[0], MPI_UNSIGNED, Par::Comm());
+  }
 
   // Loop through results
   for (UInt i = 0; i < (UInt) rdisp[csize]; i++) {
