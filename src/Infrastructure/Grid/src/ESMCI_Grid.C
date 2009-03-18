@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.83 2009/02/16 19:14:31 rokuingh Exp $
+// $Id: ESMCI_Grid.C,v 1.84 2009/03/18 23:16:44 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.83 2009/02/16 19:14:31 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.84 2009/03/18 23:16:44 peggyli Exp $";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
@@ -5977,16 +5977,11 @@ int construct(
     */
 
   }  
- 
-
-
-
-
 
   // reconstruct minIndex and maxIndex from distGrid's min and maxIndexPDimPPatch and 
   // undistGridLand UBounds and distgridToGridMap
-  distGridMinIndex = distgridArg->getMinIndexPDimPDe(0, &rc);
-  distGridMaxIndex = distgridArg->getMaxIndexPDimPDe(0, &rc);
+  distGridMinIndex = distgridArg->getMinIndexPDimPPatch();
+  distGridMaxIndex = distgridArg->getMaxIndexPDimPPatch();
 
   // allocate minIndex and maxIndex and fill them
   minIndex = new int[dimCount];
@@ -6852,7 +6847,7 @@ GridIter *GridIter::toBeg(
 
   // Set to beginning (localDE=0)
   this->setDEBnds(0);
-
+  
   // Set to first index
   for (int i=0; i<rank; i++) {
     curInd[i]=lBndInd[i];
@@ -7010,7 +7005,7 @@ int GridIter::getGlobalID(
   // NOTE THAT THIS ONLY WORKS FOR SINGLE PATCH GRIDS WITH GLOBAL INDEXING
   gid=grid->getDistGrid()->getSequenceIndexPatch(1,deBasedInd,0,&localrc);
 
-  if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
+  //  if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
 #endif
 
   return gid;
