@@ -1,14 +1,14 @@
-# $Id: makefile,v 1.7 2008/09/27 04:05:44 cdeluca Exp $
+# $Id: makefile,v 1.8 2009/03/18 23:57:23 w6ws Exp $
 
 ALL: onedoc
 
 LOCDIR = src/Infrastructure/Util/doc
 
-DVIFILES  = 
+DVIFILES  = IOUtil_refdoc.dvi
 
-PDFFILES  = 
+PDFFILES  = $(ESMC_DOCDIR)/IOUtil_refdoc.pdf
 
-HTMLFILES = 
+HTMLFILES = $(ESMC_DOCDIR)/IOUtil_refdoc
 
 
 #
@@ -40,7 +40,7 @@ TEXFILES_TO_MAKE += ESMF_ErrReturnCodes.tex
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpfull.
 #
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) IOUtil_desc.tex
 
 include $(ESMF_DIR)/makefile
 
@@ -52,7 +52,8 @@ ESMF_ErrReturnCodes.tex : ESMF_ErrReturnCodes_chapi.tex
 
 DIRS = 
 
-CLEANDIRS   = 
-CLEANFILES  = $(TEXFILES_TO_MAKE)
+CLEANDIRS   = IOUtil_refdoc $(HTMLFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
+	      IOUtil_refdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
