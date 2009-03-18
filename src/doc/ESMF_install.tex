@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.73 2008/11/26 20:04:38 theurich Exp $
+% $Id: ESMF_install.tex,v 1.74 2009/03/18 05:36:31 eschwab Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -154,6 +154,45 @@ Specifies the path where the PNETCDF library file is located.
 
 Specifies the linker directives needed to link the PNETCDF library to the
 application.
+\end{description}
+
+\subsubsection{XERCES}
+ESMF provides the ability to read Attribute data in XML file format.  The
+following environment variables enable, and specify the name and location
+of the desired XERCES library and associated header files:
+
+\begin{description}
+
+\item[ESMF\_XERCES] Possible value: "not set" (default), standard, <userstring>
+
+\begin{description}
+\item["not set"] (default): XERCES-dependent features will be disabled.
+The {\tt ESMF\_XERCES\_INCLUDE}, {\tt ESMF\_XERCES\_LIBPATH}, and
+{\tt ESMF\_XERCES\_LIBS} environment variables will be ignored.
+
+\item[standard] {\tt ESMF\_XERCES\_LIBS} will be set to "-lxerces-c".  
+The {\tt ESMF\_NETLIB\_INCLUDE} and {\tt ESMF\_XERCES\_LIBPATH}
+environment variables will be also used, if defined.
+
+\item[<userstring>] If set, {\tt ESMF\_XERCES\_INCLUDE}, {\tt ESMF\_XERCES\_LIBPATH},
+and {\tt ESMF\_XERCES\_LIBS} environment variables will be used, if defined.
+\end{description}
+
+\item[ESMF\_XERCES\_INCLUDE] Typical value: /usr/local/include (no default)
+
+Specifies the path where the XERCES header files are located.
+
+\item[ESMF\_XERCES\_LIBPATH] Typical value: /usr/local/lib (no default)
+
+Specifies the path where the XERCES library file is located.
+
+\item[ESMF\_XERCES\_LIBS] Typical value: "-lxerces-c" (no default)
+
+Specifies the linker directives needed to link the XERCES library to
+the application.
+
+The default value depends on the setting of {\tt ESMF\_XERCES}.  For the
+typical case where {\tt ESMF\_XERCES} is set to "standard", {\tt ESMF\_XERCES\_LIBS} is set to "-lxerces-c". 
 \end{description}
 
 \subsection{ESMF Environment Variables}
