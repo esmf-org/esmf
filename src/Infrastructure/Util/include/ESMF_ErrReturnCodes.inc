@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_ErrReturnCodes.inc,v 1.12 2009/01/21 21:38:01 cdeluca Exp $
+$Id: ESMF_ErrReturnCodes.inc,v 1.13 2009/03/18 05:56:19 eschwab Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -95,17 +95,18 @@ Fortran Symmetric Return Codes 1-500
 #define  ESMF_RC_SYS               44
 #define  ESMF_RC_BUSY              45
 #define  ESMF_RC_LIB               46
-#define  ESMF_RC_ATTR_UNUSED       47
-#define  ESMF_RC_OBJ_NOT_CREATED   48
-#define  ESMF_RC_OBJ_DELETED       49
-#define  ESMF_RC_NOT_SET           50
-#define  ESMF_RC_VAL_WRONG         51
-#define  ESMF_RC_VAL_ERRBOUND      52  
-#define  ESMF_RC_VAL_OUTOFRANGE    53
-#define  ESMF_RC_OBJ_UNINIT        54
+#define  ESMF_RC_LIB_NOT_PRESENT   47
+#define  ESMF_RC_ATTR_UNUSED       48
+#define  ESMF_RC_OBJ_NOT_CREATED   49
+#define  ESMF_RC_OBJ_DELETED       50
+#define  ESMF_RC_NOT_SET           51
+#define  ESMF_RC_VAL_WRONG         52
+#define  ESMF_RC_VAL_ERRBOUND      53  
+#define  ESMF_RC_VAL_OUTOFRANGE    54
+#define  ESMF_RC_OBJ_UNINIT        55
 
 #if 0
-54-500 reserved for future Fortran symmetric return code definitions
+56-500 reserved for future Fortran symmetric return code definitions
 #endif
 
 #if 0
@@ -160,17 +161,18 @@ C++ Symmetric Return Codes 501-999
 #define  ESMC_RC_SYS              544
 #define  ESMC_RC_BUSY             545
 #define  ESMC_RC_LIB              546
-#define  ESMC_RC_ATTR_UNUSED      547
-#define  ESMC_RC_OBJ_NOT_CREATED  548
-#define  ESMC_RC_OBJ_DELETED      549
-#define  ESMC_RC_NOT_SET          550
-#define  ESMC_RC_VAL_WRONG        551
-#define  ESMC_RC_VAL_ERRBOUND     552
-#define  ESMC_RC_VAL_OUTOFRANGE   553
-#define  ESMC_RC_OBJ_UNINIT       554
+#define  ESMC_RC_LIB_NOT_PRESENT  547
+#define  ESMC_RC_ATTR_UNUSED      548
+#define  ESMC_RC_OBJ_NOT_CREATED  549
+#define  ESMC_RC_OBJ_DELETED      550
+#define  ESMC_RC_NOT_SET          551
+#define  ESMC_RC_VAL_WRONG        552
+#define  ESMC_RC_VAL_ERRBOUND     553
+#define  ESMC_RC_VAL_OUTOFRANGE   554
+#define  ESMC_RC_OBJ_UNINIT       555
 
 #if 0
-554-999 reserved for future C++ symmetric return code definitions
+556-999 reserved for future C++ symmetric return code definitions
 #endif
 
 #if 0
