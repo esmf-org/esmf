@@ -1,4 +1,4 @@
-//$Id: ESMC_ErrMsgs.C,v 1.13 2009/01/21 21:38:00 cdeluca Exp $
+//$Id: ESMC_ErrMsgs.C,v 1.14 2009/03/18 05:57:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -72,19 +72,20 @@ static const char *errMsg[] = {
   "System call error ",                               //   44 = ESMF_RC_SYS
   "Resource is busy ",                                //   45 = ESMF_RC_BUSY
   "Error in library called by ESMF ",                 //   46 = ESMF_RC_LIB
+  "Library needed by ESMF not present ",              //   47 = ESMF_RC_LIB_NOT_PRESENT
 
-  "Attribute unused ",                                //   47 = ESMF_RC_ATTR_UNUSED
-  "Object being used before creation ",               //   48 = ESMF_RC_OBJ_NOT_CREATED 
-  "Object being used after deletion ",                //   49 = ESMF_RC_OBJ_DELETED     
-  "Return code not set ",                             //   50 = ESMF_RC_NOT_SET
+  "Attribute unused ",                                //   48 = ESMF_RC_ATTR_UNUSED
+  "Object being used before creation ",               //   49 = ESMF_RC_OBJ_NOT_CREATED 
+  "Object being used after deletion ",                //   50 = ESMF_RC_OBJ_DELETED     
+  "Return code not set ",                             //   51 = ESMF_RC_NOT_SET
 
-  "Wrong data value ",                                //   51 = ESMF_RC_VAL_WRONG
-  "Value inconsistent with error bound ",             //   52 = ESMF_RC_VAL_ERRBOUND
-  "Value out of range ",                              //   53 = ESMF_RC_VAL_OUTOFRANGE
+  "Wrong data value ",                                //   52 = ESMF_RC_VAL_WRONG
+  "Value inconsistent with error bound ",             //   53 = ESMF_RC_VAL_ERRBOUND
+  "Value out of range ",                              //   54 = ESMF_RC_VAL_OUTOFRANGE
 
-// 53-500 reserved for future F90 symmetric return code definitions
+// 55-500 reserved for future F90 symmetric return code definitions
                                                                           
-           "","","","","","","","","","","","","","","","","","","","","","",
+              "","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
@@ -159,19 +160,20 @@ static const char *errMsg[] = {
   "System call error ",                               //  544 = ESMC_RC_SYS
   "Resource is busy ",                                //  545 = ESMC_RC_BUSY
   "Error in library called by ESMF ",                 //  546 = ESMC_RC_LIB
+  "Library needed by ESMF not present ",              //  547 = ESMC_RC_LIB_NOT_PRESENT
 
-  "Attribute unused ",                                //  547 = ESMC_RC_ATTR_UNUSED
-  "Object being used before creation ",               //  548 = ESMC_RC_OBJ_NOT_CREATED 
-  "Object being used after deletion ",                //  549 = ESMC_RC_OBJ_DELETED     
-  "Return code not set ",                             //  550 = ESMC_RC_NOT_SET
+  "Attribute unused ",                                //  548 = ESMC_RC_ATTR_UNUSED
+  "Object being used before creation ",               //  549 = ESMC_RC_OBJ_NOT_CREATED 
+  "Object being used after deletion ",                //  550 = ESMC_RC_OBJ_DELETED     
+  "Return code not set ",                             //  551 = ESMC_RC_NOT_SET
 
-  "Wrong data value ",                                //  551 = ESMC_RC_VAL_WRONG  
-  "Value inconsistent with error bound ",             //  552 = ESMC_RC_VAL_ERRBOUND
-  "Value out of range ",                              //  553 = ESMC_RC_VAL_OUTOFRANGE
+  "Wrong data value ",                                //  552 = ESMC_RC_VAL_WRONG  
+  "Value inconsistent with error bound ",             //  553 = ESMC_RC_VAL_ERRBOUND
+  "Value out of range ",                              //  554 = ESMC_RC_VAL_OUTOFRANGE
 
-// 552-999 reserved for future C++ symmetric return code definitions
+// 555-999 reserved for future C++ symmetric return code definitions
                                                                          
-           "","","","","","","","","","","","","","","","","","","","","","",
+              "","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
