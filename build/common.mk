@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.251 2009/02/27 22:42:32 svasquez Exp $
+#  $Id: common.mk,v 1.252 2009/03/18 05:32:42 eschwab Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -351,6 +351,53 @@ endif
 
 ifeq ($(ESMF_ETCDIR),default)
 export ESMF_ETCDIR = $(ESMF_BUILD)/src/etc
+endif
+
+#-------------------------------------------------------------------------------
+# For Xerces C++ XML API, need to set shared library path per OS
+#-------------------------------------------------------------------------------
+
+ifdef ESMF_XERCES
+ifdef ESMF_XERCES_LIBPATH
+
+# ESMF_SHARED_LIBPATH_NAME and ESMF_SHARED_LIBPATH_VALUE, set below, are
+#   used in $(ESMF_DIR)/makefile for os-independent "gmake info" echoing
+
+ifeq ($(ESMF_OS),Linux)
+ifeq (,$(findstring $(ESMF_XERCES_LIBPATH),$(LD_LIBRARY_PATH)))
+export LD_LIBRARY_PATH += $(ESMF_XERCES_LIBPATH)
+endif
+ESMF_SHARED_LIBPATH_NAME = LD_LIBRARY_PATH
+ESMF_SHARED_LIBPATH_VALUE = $(LD_LIBRARY_PATH)
+endif
+
+ifeq ($(ESMF_OS),SunOS)
+ifeq (,$(findstring $(ESMF_XERCES_LIBPATH),$(LD_LIBRARY_PATH)))
+export LD_LIBRARY_PATH += $(ESMF_XERCES_LIBPATH)
+endif
+ESMF_SHARED_LIBPATH_NAME = LD_LIBRARY_PATH
+ESMF_SHARED_LIBPATH_VALUE = $(LD_LIBRARY_PATH)
+endif
+
+ifeq ($(ESMF_OS),AIX)
+ifeq (,$(findstring $(ESMF_XERCES_LIBPATH),$(LIBPATH)))
+export LIBPATH += $(ESMF_XERCES_LIBPATH)
+endif
+ESMF_SHARED_LIBPATH_NAME = LIBPATH
+ESMF_SHARED_LIBPATH_VALUE = $(LIBPATH)
+endif
+
+ifeq ($(ESMF_OS),Darwin)
+ifeq (,$(findstring $(ESMF_XERCES_LIBPATH),$(DYLD_LIBRARY_PATH)))
+export DYLD_LIBRARY_PATH += $(ESMF_XERCES_LIBPATH)
+endif
+ESMF_SHARED_LIBPATH_NAME = DYLD_LIBRARY_PATH
+ESMF_SHARED_LIBPATH_VALUE = $(DYLD_LIBRARY_PATH)
+endif
+
+# TODO: other OSes
+
+endif
 endif
 
 #-------------------------------------------------------------------------------
@@ -885,6 +932,16 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
+# Set XERCES C++ XML API default libs according to ESMF_XERCES
+# (if not set in user environment)
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_XERCES),standard)
+ifneq ($(origin ESMF_XERCES_LIBS), environment)
+ESMF_XERCES_LIBS = -lxerces-c
+endif
+endif
+
+#-------------------------------------------------------------------------------
 # Set the correct MPIRUN command with appropriate options
 #-------------------------------------------------------------------------------
 ESMF_MPIRUNCOMMAND  = $(shell $(ESMF_DIR)/scripts/mpirun.command $(ESMF_DIR)/scripts $(ESMF_MPIRUN))
@@ -928,6 +985,26 @@ endif
 ifdef ESMF_PNETCDF_LIBPATH
 ESMF_CXXLINKPATHS       += -L$(ESMF_PNETCDF_LIBPATH)
 ESMF_F90LINKPATHS       += -L$(ESMF_PNETCDF_LIBPATH)
+endif
+endif
+
+#-------------------------------------------------------------------------------
+# For convenience ESMF_XERCES_INCLUDE and ESMF_XERCES_LIBPATH variables are 
+# appended to the appropriate variables.
+#-------------------------------------------------------------------------------
+ifdef ESMF_XERCES
+CPPFLAGS                += -DESMF_XERCES=1
+ifdef ESMF_XERCES_INCLUDE
+ESMF_CXXCOMPILEPATHS    += -I$(ESMF_XERCES_INCLUDE)
+ESMF_F90COMPILEPATHS    += -I$(ESMF_XERCES_INCLUDE)
+endif
+ifdef ESMF_XERCES_LIBS
+ESMF_CXXLINKLIBS        += $(ESMF_XERCES_LIBS)
+ESMF_F90LINKLIBS        += $(ESMF_XERCES_LIBS)
+endif
+ifdef ESMF_XERCES_LIBPATH
+ESMF_CXXLINKPATHS       += -L$(ESMF_XERCES_LIBPATH)
+ESMF_F90LINKPATHS       += -L$(ESMF_XERCES_LIBPATH)
 endif
 endif
 
