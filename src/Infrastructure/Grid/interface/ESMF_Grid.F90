@@ -221,7 +221,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.109 2009/03/16 18:22:18 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.110 2009/03/18 23:01:59 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1264,7 +1264,7 @@ end interface
 #undef  ESMF_METHOD
 #define ESMF_METHOD "GridConvertIndex"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridConvertIndex - Convert Arbitrary Grid index into DistGrid index
 ! !INTERFACE:
       subroutine ESMF_GridConvertIndex(grid,staggerloc,gridindex, distgridindex, rc)
@@ -1300,7 +1300,7 @@ end interface
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
 !
-!EOP
+!EOPI
 
     integer ::  localrc
     integer ::  DimCount, distDimCount, undistDimCount
@@ -5885,7 +5885,6 @@ end subroutine ESMF_GridGetDefault
 
     call c_ESMC_GridGetPSloc(grid, tmp_staggerLoc, &
       computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
-      ESMF_NULL_POINTER, ESMF_NULL_POINTER, &
      minIndexArg, maxIndexArg,localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
@@ -13916,7 +13915,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetCmmitShapeTileArb"
 !BOP
-! !IROUTINE: ESMF_GridSetCmmitShapeTile - Create a Grid with an arbitrary distribution
+! !IROUTINE: ESMF_GridSetCommitShapeTile - Create a Grid with an arbitrary distribution
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSetCommitShapeTile()
