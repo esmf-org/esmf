@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.3 2009/01/29 18:13:14 peggyli Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.4 2009/03/18 23:18:50 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2008, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.3 2009/01/29 18:13:14 peggyli Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.4 2009/03/18 23:18:50 peggyli Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -69,7 +69,7 @@ program ESMF_GridArbitraryUTest
   integer :: distgridToArrayMap(2)
   integer :: gridEdgeLWidth(3),gridEdgeUWidth(3),gridAlign(3)
   integer :: exlbnd(3),exubnd(3)
-  integer :: clbnd(3),cubnd(3)
+  integer :: clbnd(3),cubnd(3), lwidth(3), uwidth(3)
   integer(ESMF_KIND_I4), pointer :: buf(:)
   real(ESMF_KIND_R8), pointer :: fptr2D(:,:)
   integer :: bufCount, offset, localDECount, rank, i1,i2,lDE
@@ -198,8 +198,10 @@ program ESMF_GridArbitraryUTest
 
   ! get minIndex and maxIndex
   allocate(minIndex1(dimCount), maxIndex1(dimCount))
-  call ESMF_GridGet(grid, minIndex = minIndex1, maxIndex=maxIndex1, rc=localrc)
-   !print *, "minIndex:",  minIndex1, maxIndex1
+
+  ! get bounds for stagger location
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, minIndex=minIndex1, maxIndex=maxIndex1, &
+	computationalEdgeLWidth=lwidth, computationalEdgeUWidth=uwidth, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check that defaults are as expected
@@ -208,6 +210,10 @@ program ESMF_GridArbitraryUTest
   if (dimCount .ne. 2) correct=.false.
   if ((distgridToGridMap(1) .ne. 1) .or. (distgridToGridMap(2) .ne. 2)) correct=.false.
   if (localCount .ne. localCount1) correct = .false.
+  if ((minIndex1(1) .ne. 1) .and. (minIndex1(2) .ne. 1)) correct = .false. 
+  if ((maxIndex1(1) .ne. xdim) .and. (maxIndex1(2) .ne. ydim)) correct = .false. 
+  if ((lwidth(1) .ne. 0) .and. (lwidth(2) .ne. 0)) correct = .false.
+  if ((uwidth(1) .ne. 0) .and. (uwidth(2) .ne. 0)) correct = .false.
   deallocate(minIndex1, maxIndex1)
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -365,7 +371,6 @@ program ESMF_GridArbitraryUTest
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
 
-#if 1
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Test Set 2:  3D Arbitrary Grid with 2 dimensions distributed, 1 dimension undistributed
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -622,7 +627,7 @@ program ESMF_GridArbitraryUTest
   !print *, "PE ", myPet, "distgridcount=", distDimCount, "elements", elementCounts
   ! get minIndex and maxIndex
   allocate(minIndex1(dimCount), maxIndex1(dimCount))
-  call ESMF_GridGet(grid, minIndex = minIndex1, maxIndex=maxIndex1, rc=localrc)
+  call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, minIndex = minIndex1, maxIndex=maxIndex1, rc=localrc)
   ! print *, "minIndex:",  minIndex1, maxIndex1
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -637,6 +642,10 @@ program ESMF_GridArbitraryUTest
 	correct = .false.
 	print *, "PE ", myPet, "elements", elementCounts, localcount
   endif
+  if ((minIndex1(1) .ne. 1) .and. (minIndex1(2) .ne. 1) .and. (minIndex1(3).ne.1)) correct = .false. 
+  if ((maxIndex1(1) .ne. xdim) .and. (maxIndex1(2) .ne. ydim) .and. &
+	(maxIndex1(3) .ne. zdim)) correct = .false. 
+
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
@@ -1200,7 +1209,6 @@ program ESMF_GridArbitraryUTest
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-#endif
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)
