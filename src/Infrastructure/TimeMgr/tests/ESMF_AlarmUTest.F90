@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.41 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.42 2009/03/18 05:27:27 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.41 2009/01/21 21:38:01 cdeluca Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.42 2009/03/18 05:27:27 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,9 +52,9 @@
 
       logical :: bool
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock, clock1, clock2, domainClock
+      type(ESMF_Clock) :: clock, clock1, clock2, domainClock, CLOCK_ATM
       type(ESMF_Alarm) :: alarm, alarm1, alarm2, alarm3, alarm4, alarm6
-      type(ESMF_Alarm) :: beforeAlarm, afterAlarm
+      type(ESMF_Alarm) :: beforeAlarm, afterAlarm, ALARM_HISTORY
       type(ESMF_Alarm) :: alarm5(200)
       type(ESMF_Alarm) :: alarmList(201)
       type(ESMF_Direction) :: forwardDirection, reverseDirection
@@ -71,11 +71,11 @@
 
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep, alarmStep, alarmStep2, ringDuration
-      type(ESMF_TimeInterval) :: runDuration
+      type(ESMF_TimeInterval) :: runDuration, TIMEINTERVAL_HISTORY
       type(ESMF_Time) :: startTime, stopTime, nextTime, prevTime
       type(ESMF_Time) :: alarmTime, alarmStopTime
       type(ESMF_Time) :: beforeAlarmTime, afterAlarmTime
-      type(ESMF_Time) :: currentTime, currentTime2
+      type(ESMF_Time) :: currentTime, currentTime2, currTime
       character(ESMF_MAXSTR) :: aName
 
 
@@ -1907,6 +1907,75 @@
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Alarm ringTime = clock startTime *and* ringInterval specified
+      !  upon alarm creation *and* after clock restored from restart state --
+      !  with 2 calls to ESMF_ClockSet() -- should ring immediately.  
+      !  This approach to restart will become obsolete with the implementation
+      !  of WriteRestart()/ReadStart(), but it should remain technically valid,
+      !  along with this unit test.  From Ratko Vasic in ticket #2685243.
+
+      write(failMsg, *) " Did not return alarm ringing and ESMF_SUCCESS"
+      write(name, *) "Alarm ringTime = Clock startTime with ringInterval, after clock restore"
+
+      call ESMF_TimeIntervalSet(timeStep, m=3, rc=rc)
+      call ESMF_TimeIntervalSet(TIMEINTERVAL_HISTORY, h=3, rc=rc)
+      call ESMF_TimeSet(startTime, mm=9, dd=18, yy=2007, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, mm=9, dd=19, yy=2007, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(currTime, mm=9, dd=18, yy=2007, h=12, &
+                        calendar=gregorianCalendar, rc=rc)
+
+      CLOCK_ATM=ESMF_ClockCreate( &
+        name       ='CLOCK_ATM'   &  !<-- The ATM Clock's name
+       ,timeStep   =timeStep      &  !<-- The fundamental timestep in
+                                     !     this component
+       ,startTime  =startTime     &  !<-- Start time of simulation
+       ,stopTime   =stopTime      &  !<-- Stop time of simulation
+       ,rc         =rc)
+
+      ! 1st ClockSet() to reset currTime and advanceCount for restart
+      call ESMF_ClockSet(             &
+        clock       =CLOCK_ATM        &  !<-- The ATM Component's Clock
+       ,currtime    =currTime         &  !<-- Current time of simulation
+       ,advanceCount=240_ESMF_KIND_I8 &  !<-- Timestep at this current time
+       ,rc          =rc)
+
+      ! 2nd ClockSet() with same values that CLOCK_ATM already has; should
+      ! have no affect
+      call ESMF_ClockSet(clock    =CLOCK_ATM &
+                        ,currtime =currTime  &
+                        ,starttime=startTime &
+                        ,rc       =rc)
+
+      !call ESMF_ClockPrint(CLOCK_ATM, rc=rc)
+
+      ALARM_HISTORY=ESMF_AlarmCreate(          &
+        name             ='ALARM_HISTORY'      &
+       ,clock            =CLOCK_ATM            &  ! <-- ATM Clock
+       ,ringTime         =currTime             &  ! <-- Forecast/Restart start
+                                                  !      time (ESMF)
+       ,ringInterval     =TIMEINTERVAL_HISTORY &  ! <-- Time interval between
+       ,ringTimeStepCount=1                    &  ! <-- The Alarm rings for
+                                                  !      this many timesteps
+       ,sticky           =.false.              &  ! <-- Alarm does not ring
+                                                  !      until turned off
+       ,rc               =rc) 
+
+      !call ESMF_AlarmPrint(ALARM_HISTORY, rc=rc)
+
+      call ESMF_AlarmGet(ALARM_HISTORY, ringTime=alarmTime, rc=rc)
+      bool = ESMF_AlarmIsRinging(ALARM_HISTORY)
+
+      call ESMF_Test(((alarmTime==currTime+TIMEINTERVAL_HISTORY).and.bool &
+                       .and. rc.eq.ESMF_SUCCESS), &
+                       name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy(ALARM_HISTORY, rc=rc)
+      call ESMF_ClockDestroy(CLOCK_ATM, rc=rc)
 
       ! ----------------------------------------------------------------------------
       !EX_UTest

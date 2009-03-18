@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.10 2009/01/21 21:38:01 cdeluca Exp $
+// $Id: ESMCI_Clock.C,v 1.11 2009/03/18 05:27:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.10 2009/01/21 21:38:01 cdeluca Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.11 2009/03/18 05:27:26 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -333,7 +333,11 @@ int Clock::count=0;
     if (refTime   != ESMC_NULL_POINTER) this->refTime   = *refTime;
 
     if (currTime  != ESMC_NULL_POINTER) {
-      this->prevTime = this->currTime;
+      // Don't reset prevTime! Only clockAdvance() should change internal
+      // state properties.  Setting prevTime here caused multiple calls to
+      // set() with the same value, which should be innocuous, to result in
+      // incorrect alarm behavior, as Ratko Vasic discovered in ticket #2685243.
+      // this->prevTime = this->currTime;
       this->currTime = *currTime;
     }
 
