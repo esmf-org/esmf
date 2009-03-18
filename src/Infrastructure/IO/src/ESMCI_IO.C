@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.C,v 1.1 2009/03/09 05:59:17 eschwab Exp $
+// $Id: ESMCI_IO.C,v 1.2 2009/03/18 05:39:43 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -27,11 +27,13 @@
  #include <ctype.h>
  #include <iostream>
 
+#ifdef ESMF_XERCES
  #include <xercesc/sax2/SAX2XMLReader.hpp>
  #include <xercesc/sax2/XMLReaderFactory.hpp>
  #include <xercesc/sax2/DefaultHandler.hpp>
  #include <xercesc/sax2/Attributes.hpp>
  #include <xercesc/util/XMLString.hpp>
+#endif
 
  #include <ESMCI_LogErr.h>
  #include <ESMF_LogMacros.inc>
@@ -44,9 +46,10 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.1 2009/03/09 05:59:17 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO.C,v 1.2 2009/03/18 05:39:43 eschwab Exp $";
 //-------------------------------------------------------------------------
 
+#ifdef ESMF_XERCES
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MySAX2Handler::MySAX2Handler()"
 
@@ -164,6 +167,8 @@ void MySAX2Handler::fatalError(const SAXParseException& exception)
     XMLString::release(&message);
 }
 
+#endif
+
 namespace ESMCI{
 
 // initialize static io instance counter
@@ -245,6 +250,7 @@ int IO::count=0;
 // TODO 
 
     // TODO returnCode = io->validate();
+    returnCode = ESMF_SUCCESS;
     ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
     return(io);
 
@@ -331,6 +337,7 @@ int IO::count=0;
       // TODO use existing IO fileName member
     }
 
+#ifdef ESMF_XERCES
     try {
         XMLPlatformUtils::Initialize();
     }
@@ -340,7 +347,7 @@ int IO::count=0;
         cout << "Exception message is: \n"
              << message << "\n";
         XMLString::release(&message);
-        return 1;
+        return ESMF_FAILURE; // TODO: specific ESMF rc
     }
 
     SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
@@ -362,24 +369,28 @@ int IO::count=0;
         cout << "Exception message is: \n"
              << message << "\n";
         XMLString::release(&message);
-        return -1;
+        return ESMF_FAILURE; // TODO: specific ESMF rc
     }
     catch (const SAXParseException& toCatch) {
         char* message = XMLString::transcode(toCatch.getMessage());
         cout << "Exception message is: \n"
              << message << "\n";
         XMLString::release(&message);
-        return -1;
+        return ESMF_FAILURE; // TODO: specific ESMF rc
     }
     catch (...) {
         cout << "Unexpected Exception \n" ;
-        return -1;
+        return ESMF_FAILURE; // TODO: specific ESMF rc
     }
 
     delete myHandler;
     delete parser;
 
     XMLPlatformUtils::Terminate();
+#else
+    // xerces library not present
+    rc = ESMF_RC_LIB_NOT_PRESENT;
+#endif
 
     return (rc);
 

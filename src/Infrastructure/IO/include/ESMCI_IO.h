@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.h,v 1.1 2009/03/09 05:59:16 eschwab Exp $
+// $Id: ESMCI_IO.h,v 1.2 2009/03/18 05:39:43 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !CLASS: ESMCI::IO - TODO
+// !CLASS: ESMCI::IO - Handles low-level IO for ESMF internals and user API.
 //
 // !DESCRIPTION:
 //  TODO
@@ -38,6 +38,7 @@
 // !USES:
 #include "ESMC_Base.h"           // inherited Base class TODO ?
 
+#ifdef ESMF_XERCES
  #include <xercesc/sax2/DefaultHandler.hpp>
 
  using namespace xercesc;
@@ -58,6 +59,7 @@
      void fatalError(const SAXParseException&);
      MySAX2Handler(ESMC_Base *base);
  };
+#endif
 
  namespace ESMCI{
 
