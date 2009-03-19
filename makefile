@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.99 2009/03/18 05:32:41 eschwab Exp $
+# $Id: makefile,v 1.100 2009/03/19 19:35:43 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -107,7 +107,7 @@ script_info:
 	  echo "ESMF_MPILAUNCHOPTIONS:  $(ESMF_MPILAUNCHOPTIONS)" ; fi
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
-	-@echo " * ESMF and other environment variables pointing to 3rd party software *"
+	-@echo " * ESMF environment variables pointing to 3rd party software *"
 	-@if [ -n "$(ESMF_LAPACK)" ] ; then \
 	  echo "ESMF_LAPACK:            $(ESMF_LAPACK)" ; \
 	  if [ -n "$(ESMF_LAPACK_LIBS)" ] ; then \
@@ -151,9 +151,6 @@ script_info:
           fi; \
 	  if [ -n "$(ESMF_XERCES_LIBPATH)" ] ; then \
 	    echo "ESMF_XERCES_LIBPATH:    $(ESMF_XERCES_LIBPATH)" ; \
-          fi; \
-	  if [ -n "$(ESMF_SHARED_LIBPATH_VALUE)" ] ; then \
-	    echo "$(ESMF_SHARED_LIBPATH_NAME):        $(ESMF_SHARED_LIBPATH_VALUE)" ; \
           fi; \
          fi
 	-@echo " "
@@ -280,7 +277,7 @@ info_mk: chkdir_lib
 	-@echo "# ESMF_TESTMPMD: $(ESMF_TESTMPMD)" >> $(MKINFO)
 	-@echo "# ESMF_TESTHARNESS: $(ESMF_TESTHARNESS)" >> $(MKINFO)
 	-@echo "# " >> $(MKINFO)
-	-@echo "# ESMF and other environment variables pointing to 3rd party software:" >> $(MKINFO)
+	-@echo "# ESMF environment variables pointing to 3rd party software:" >> $(MKINFO)
 	-@if [ -n "$(ESMF_LAPACK)" ] ; then \
 	  echo "# ESMF_LAPACK:            $(ESMF_LAPACK)" >> $(MKINFO) ; \
 	  if [ -n "$(ESMF_LAPACK_LIBS)" ] ; then \
@@ -324,9 +321,6 @@ info_mk: chkdir_lib
           fi; \
 	  if [ -n "$(ESMF_XERCES_LIBPATH)" ] ; then \
 	    echo "# ESMF_XERCES_LIBPATH:    $(ESMF_XERCES_LIBPATH)" >> $(MKINFO) ; \
-          fi; \
-	  if [ -n "$(ESMF_SHARED_LIBPATH_VALUE)" ] ; then \
-	    echo "# $(ESMF_SHARED_LIBPATH_NAME):        $(ESMF_SHARED_LIBPATH_VALUE)" >> $(MKINFO) ; \
           fi; \
          fi
 

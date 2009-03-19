@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.252 2009/03/18 05:32:42 eschwab Exp $
+#  $Id: common.mk,v 1.253 2009/03/19 19:35:44 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -351,53 +351,6 @@ endif
 
 ifeq ($(ESMF_ETCDIR),default)
 export ESMF_ETCDIR = $(ESMF_BUILD)/src/etc
-endif
-
-#-------------------------------------------------------------------------------
-# For Xerces C++ XML API, need to set shared library path per OS
-#-------------------------------------------------------------------------------
-
-ifdef ESMF_XERCES
-ifdef ESMF_XERCES_LIBPATH
-
-# ESMF_SHARED_LIBPATH_NAME and ESMF_SHARED_LIBPATH_VALUE, set below, are
-#   used in $(ESMF_DIR)/makefile for os-independent "gmake info" echoing
-
-ifeq ($(ESMF_OS),Linux)
-ifeq (,$(findstring $(ESMF_XERCES_LIBPATH),$(LD_LIBRARY_PATH)))
-export LD_LIBRARY_PATH += $(ESMF_XERCES_LIBPATH)
-endif
-ESMF_SHARED_LIBPATH_NAME = LD_LIBRARY_PATH
-ESMF_SHARED_LIBPATH_VALUE = $(LD_LIBRARY_PATH)
-endif
-
-ifeq ($(ESMF_OS),SunOS)
-ifeq (,$(findstring $(ESMF_XERCES_LIBPATH),$(LD_LIBRARY_PATH)))
-export LD_LIBRARY_PATH += $(ESMF_XERCES_LIBPATH)
-endif
-ESMF_SHARED_LIBPATH_NAME = LD_LIBRARY_PATH
-ESMF_SHARED_LIBPATH_VALUE = $(LD_LIBRARY_PATH)
-endif
-
-ifeq ($(ESMF_OS),AIX)
-ifeq (,$(findstring $(ESMF_XERCES_LIBPATH),$(LIBPATH)))
-export LIBPATH += $(ESMF_XERCES_LIBPATH)
-endif
-ESMF_SHARED_LIBPATH_NAME = LIBPATH
-ESMF_SHARED_LIBPATH_VALUE = $(LIBPATH)
-endif
-
-ifeq ($(ESMF_OS),Darwin)
-ifeq (,$(findstring $(ESMF_XERCES_LIBPATH),$(DYLD_LIBRARY_PATH)))
-export DYLD_LIBRARY_PATH += $(ESMF_XERCES_LIBPATH)
-endif
-ESMF_SHARED_LIBPATH_NAME = DYLD_LIBRARY_PATH
-ESMF_SHARED_LIBPATH_VALUE = $(DYLD_LIBRARY_PATH)
-endif
-
-# TODO: other OSes
-
-endif
 endif
 
 #-------------------------------------------------------------------------------
@@ -869,8 +822,11 @@ endif
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-# Set LAPACK default libs according to ESMF_LAPACK (if not set in user
-# environment)
+# 3rd Party libraries
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# LAPACK
 #-------------------------------------------------------------------------------
 ifneq ($(origin ESMF_LAPACK), environment)
 ifdef ESMF_LAPACKDEFAULT
@@ -900,10 +856,6 @@ ESMF_LAPACK_LIBS = -lscs
 endif
 endif
 
-#-------------------------------------------------------------------------------
-# LAPACK is used by a few ESMF routines, when available.  The following links
-# them in.
-#-------------------------------------------------------------------------------
 ifdef ESMF_LAPACK
 CPPFLAGS                += -DESMF_LAPACK=1
 ifdef ESMF_LAPACK_LIBS
@@ -913,46 +865,30 @@ endif
 ifdef ESMF_LAPACK_LIBPATH
 ESMF_CXXLINKPATHS       += -L$(ESMF_LAPACK_LIBPATH)
 ESMF_F90LINKPATHS       += -L$(ESMF_LAPACK_LIBPATH)
+ifneq ($(ESMF_CXXLINKRPATHS), "")
+ESMF_CXXLINKRPATHS += $(ESMF_RPATHPREFIX)$(ESMF_LAPACK_LIBPATH)
+endif
+ifneq ($(ESMF_F90LINKRPATHS), "")
+ESMF_F90LINKRPATHS += $(ESMF_RPATHPREFIX)$(ESMF_LAPACK_LIBPATH)
+endif
 endif
 endif
 
 #-------------------------------------------------------------------------------
-# Set NETCDF default libs according to ESMF_NETCDF (if not set in user
-# environment)
+# NETCDF
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_NETCDF),standard)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
 ESMF_NETCDF_LIBS = -lnetcdf
 endif
 endif
+
 ifeq ($(ESMF_NETCDF),split)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
 ESMF_NETCDF_LIBS = -lnetcdff -lnetcdf
 endif
 endif
 
-#-------------------------------------------------------------------------------
-# Set XERCES C++ XML API default libs according to ESMF_XERCES
-# (if not set in user environment)
-#-------------------------------------------------------------------------------
-ifeq ($(ESMF_XERCES),standard)
-ifneq ($(origin ESMF_XERCES_LIBS), environment)
-ESMF_XERCES_LIBS = -lxerces-c
-endif
-endif
-
-#-------------------------------------------------------------------------------
-# Set the correct MPIRUN command with appropriate options
-#-------------------------------------------------------------------------------
-ESMF_MPIRUNCOMMAND  = $(shell $(ESMF_DIR)/scripts/mpirun.command $(ESMF_DIR)/scripts $(ESMF_MPIRUN))
-ifeq ($(ESMF_MPIRUNCOMMAND),esmfscript)
-ESMF_MPIRUN := $(ESMF_DIR)/scripts/$(ESMF_MPIRUN) $(ESMF_MPISCRIPTOPTIONS)
-endif
-
-#-------------------------------------------------------------------------------
-# For convenience ESMF_NETCDF_INCLUDE and ESMF_NETCDF_LIBPATH variables are 
-# appended to the appropriate variables.
-#-------------------------------------------------------------------------------
 ifdef ESMF_NETCDF
 CPPFLAGS                += -DESMF_NETCDF=1
 ifdef ESMF_NETCDF_INCLUDE
@@ -966,12 +902,17 @@ endif
 ifdef ESMF_NETCDF_LIBPATH
 ESMF_CXXLINKPATHS       += -L$(ESMF_NETCDF_LIBPATH)
 ESMF_F90LINKPATHS       += -L$(ESMF_NETCDF_LIBPATH)
+ifneq ($(ESMF_CXXLINKRPATHS), "")
+ESMF_CXXLINKRPATHS += $(ESMF_RPATHPREFIX)$(ESMF_NETCDF_LIBPATH)
+endif
+ifneq ($(ESMF_F90LINKRPATHS), "")
+ESMF_F90LINKRPATHS += $(ESMF_RPATHPREFIX)$(ESMF_NETCDF_LIBPATH)
+endif
 endif
 endif
 
 #-------------------------------------------------------------------------------
-# PNETCDF is used by a few ESMF routines, when available.  The following links
-# them in.
+# PNETCDF
 #-------------------------------------------------------------------------------
 ifdef ESMF_PNETCDF
 CPPFLAGS                += -DESMF_PNETCDF=1
@@ -985,13 +926,24 @@ endif
 ifdef ESMF_PNETCDF_LIBPATH
 ESMF_CXXLINKPATHS       += -L$(ESMF_PNETCDF_LIBPATH)
 ESMF_F90LINKPATHS       += -L$(ESMF_PNETCDF_LIBPATH)
+ifneq ($(ESMF_CXXLINKRPATHS), "")
+ESMF_CXXLINKRPATHS += $(ESMF_RPATHPREFIX)$(ESMF_PNETCDF_LIBPATH)
+endif
+ifneq ($(ESMF_F90LINKRPATHS), "")
+ESMF_F90LINKRPATHS += $(ESMF_RPATHPREFIX)$(ESMF_PNETCDF_LIBPATH)
+endif
 endif
 endif
 
 #-------------------------------------------------------------------------------
-# For convenience ESMF_XERCES_INCLUDE and ESMF_XERCES_LIBPATH variables are 
-# appended to the appropriate variables.
+# XERCES C++ XML API
 #-------------------------------------------------------------------------------
+ifeq ($(ESMF_XERCES),standard)
+ifneq ($(origin ESMF_XERCES_LIBS), environment)
+ESMF_XERCES_LIBS = -lxerces-c
+endif
+endif
+
 ifdef ESMF_XERCES
 CPPFLAGS                += -DESMF_XERCES=1
 ifdef ESMF_XERCES_INCLUDE
@@ -1005,7 +957,21 @@ endif
 ifdef ESMF_XERCES_LIBPATH
 ESMF_CXXLINKPATHS       += -L$(ESMF_XERCES_LIBPATH)
 ESMF_F90LINKPATHS       += -L$(ESMF_XERCES_LIBPATH)
+ifneq ($(ESMF_CXXLINKRPATHS), "")
+ESMF_CXXLINKRPATHS += $(ESMF_RPATHPREFIX)$(ESMF_XERCES_LIBPATH)
 endif
+ifneq ($(ESMF_F90LINKRPATHS), "")
+ESMF_F90LINKRPATHS += $(ESMF_RPATHPREFIX)$(ESMF_XERCES_LIBPATH)
+endif
+endif
+endif
+
+#-------------------------------------------------------------------------------
+# Set the correct MPIRUN command with appropriate options
+#-------------------------------------------------------------------------------
+ESMF_MPIRUNCOMMAND  = $(shell $(ESMF_DIR)/scripts/mpirun.command $(ESMF_DIR)/scripts $(ESMF_MPIRUN))
+ifeq ($(ESMF_MPIRUNCOMMAND),esmfscript)
+ESMF_MPIRUN := $(ESMF_DIR)/scripts/$(ESMF_MPIRUN) $(ESMF_MPISCRIPTOPTIONS)
 endif
 
 #-------------------------------------------------------------------------------
@@ -1020,7 +986,7 @@ endif
 
 #-------------------------------------------------------------------------------
 # ESMF_PTHREADS is passed (by CPP) into the library compilation to control the
-# dependency on of the ESMF library on Pthreads.
+# dependency of the ESMF library on Pthreads.
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_PTHREADS),OFF)
 CPPFLAGS       += -DESMF_NO_PTHREADS
