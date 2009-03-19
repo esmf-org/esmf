@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.253 2009/03/19 19:35:44 theurich Exp $
+#  $Id: common.mk,v 1.254 2009/03/19 20:59:46 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -289,6 +289,7 @@ ifeq ($(ESMF_OS),MinGW)
 # default on MinGW is 32-bit
 export ESMF_ABI = 32
 ifeq ($(ESMF_MACHINE),x86_64)
+# except x86_64
 export ESMF_ABI = 64
 endif
 endif
@@ -526,15 +527,9 @@ endif
 #-------------------------------------------------------------------------------
 ESMF_PTHREADSDEFAULT        = ON
 
-ifeq ($(ESMF_OS),MinGW)
-ESMF_ARDEFAULT              = lib
-ESMF_ARCREATEFLAGSDEFAULT   =
-ESMF_AREXTRACTDEFAULT       = $(ESMF_ARDEFAULT) -extract:
-else
 ESMF_ARDEFAULT              = ar
 ESMF_ARCREATEFLAGSDEFAULT   = cr
 ESMF_AREXTRACTDEFAULT       = $(ESMF_ARDEFAULT) -x
-endif
 ESMF_RANLIBDEFAULT          = ranlib
 ESMF_SEDDEFAULT             = sed
 ESMF_CPPDEFAULT             = gcc
@@ -544,37 +539,16 @@ ESMF_MV                     = mv -f
 ESMF_WC                     = wc 
 ESMF_GREPV                  = grep -v
 
-ifeq ($(ESMF_OS),MinGW)
-ESMF_RPATHPREFIX     =
-else
 ESMF_RPATHPREFIX     = -Wl,-rpath,
-endif
 
 ESMF_F90OPTFLAG_X           =
 ESMF_CXXOPTFLAG_X           =
-ifeq ($(ESMF_OS).$(ESMF_COMPILER),MinGW.intel)
-ESMF_F90OPTFLAG_G           = -Od -debug -traceback
-ESMF_CXXOPTFLAG_G           = -Od -debug -traceback
-else
 ESMF_F90OPTFLAG_G           = -g
 ESMF_CXXOPTFLAG_G           = -g
-endif
 
 # setting default optimization flags is platform dependent
 ifneq ($(origin ESMF_OPTLEVEL), environment)
 ESMF_OPTLEVEL = $(ESMF_OPTLEVELDEFAULT)
-endif
-
-ifeq ($(ESMF_OS),Cygwin)
-ifeq ($(ESMF_COMPILER),intel)
-ESMF_OPTLEVEL               = 2
-endif
-endif
-
-ifeq ($(ESMF_OS),MinGW)
-ifeq ($(ESMF_COMPILER),intel)
-ESMF_OPTLEVEL               = 2
-endif
 endif
 
 ifneq ($(ESMF_OPTLEVEL),default)
@@ -676,20 +650,11 @@ ESMF_F90LINKER = $(ESMF_F90LINKERDEFAULT)
 ESMF_F90LINKERDEFAULT = $(ESMF_F90DEFAULT)
 endif
 endif
-ifneq ($(ESMF_OS),MinGW)
 ESMF_F90LINKOPTS +=
 ESMF_F90LINKPATHS += -L$(ESMF_LDIR)
 ESMF_F90LINKRPATHS += $(ESMF_RPATHPREFIX)$(ESMF_LDIR)
 ESMF_F90LINKLIBS +=
 ESMF_F90ESMFLINKLIBS += -lesmf $(ESMF_F90LINKLIBS)
-else
-ESMF_F90LINKOPTS +=
-ESMF_F90LINKPATHS += -libpath:`$(ESMF_DIR)/scripts/path_mingw2win $(ESMF_LDIR)`
-ESMF_F90LINKRPATHS +=
-ESMF_F90LINKLIBS +=
-ESMF_F90ESMFLINKLIBS += libesmf.a $(ESMF_F90LINKLIBS)
-ESMF_F90ESMFLINKLIBS += -link -debug -libpath:`$(ESMF_DIR)/scripts/path_mingw2win $(ESMF_LDIR)` $(ESMF_MPILIBPATH)
-endif
 
 # - CXXLINKER
 ifneq ($(origin ESMF_CXXLINKER), environment)
@@ -700,20 +665,11 @@ ESMF_CXXLINKER = $(ESMF_CXXLINKERDEFAULT)
 ESMF_CXXLINKERDEFAULT = $(ESMF_CXXDEFAULT)
 endif
 endif
-ifneq ($(ESMF_OS),MinGW)
 ESMF_CXXLINKOPTS +=
 ESMF_CXXLINKPATHS += -L$(ESMF_LDIR)
 ESMF_CXXLINKRPATHS += $(ESMF_RPATHPREFIX)$(ESMF_LDIR)
 ESMF_CXXLINKLIBS +=
 ESMF_CXXESMFLINKLIBS += -lesmf $(ESMF_CXXLINKLIBS)
-else
-ESMF_CXXLINKOPTS +=
-ESMF_CXXLINKPATHS += -libpath:`$(ESMF_DIR)/scripts/path_mingw2win $(ESMF_LDIR)`
-ESMF_CXXLINKRPATHS +=
-ESMF_CXXLINKLIBS +=
-ESMF_CXXESMFLINKLIBS += libesmf.a $(ESMF_CXXLINKLIBS)
-ESMF_CXXESMFLINKLIBS += -link -debug -libpath:`$(ESMF_DIR)/scripts/path_mingw2win $(ESMF_LDIR)` $(ESMF_MPILIBPATH)
-endif
 
 # - tools: AR + RANLIB + ...
 ifneq ($(origin ESMF_AR), environment)

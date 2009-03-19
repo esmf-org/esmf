@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.7 2009/03/17 01:45:10 w6ws Exp $
+# $Id: build_rules.mk,v 1.8 2009/03/19 20:59:46 theurich Exp $
 #
 # MinGW.intel.default
 #
@@ -170,35 +170,51 @@ ESMF_F90COMPILEFREENOCPP = -fpp0 -FR
 ESMF_F90COMPILEFIXCPP    = -fpp
 
 ###########################################################
-# Windows does not have a ranlib command -> "true" is a noop command
+# Special debugging flags
 #
-ESMF_RANLIBDEFAULT       = true
+ESMF_F90OPTFLAG_G           = -Od -debug -traceback
+ESMF_CXXOPTFLAG_G           = -Od -debug -traceback
 
 ###########################################################
-# Determine where gcc's libraries are located
+# Default optlevel
 #
-# ESMF_F90LINKPATHS += \
-#  -L$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
-# ESMF_F90LINKRPATHS += \
-#  -Wl,-rpath,$(dir $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a))
+ESMF_OPTLEVELDEFAULT        = 2
+
+###########################################################
+# Change default tools, "true" is a noop executable
+#
+ESMF_ARDEFAULT              = lib
+ESMF_ARCREATEFLAGSDEFAULT   =
+ESMF_AREXTRACTDEFAULT       = $(ESMF_ARDEFAULT) -extract:
+ESMF_RANLIBDEFAULT          = true
 
 ############################################################
-# Determine where gfortran's libraries are located
+# Blank out variables to prevent rpath encoding
 #
-# ESMF_CXXLINKPATHS += \
-#   -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
-# ESMF_CXXLINKRPATHS += \
-#   -Wl,-rpath,$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F90COMPILER)))
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
+
+###########################################################
+# Determine where libraries are located
+#
+ESMF_F90LINKPATHS = -libpath:`$(ESMF_DIR)/scripts/path_mingw2win $(ESMF_LDIR)`
+
+############################################################
+# Determine where libraries are located
+#
+ESMF_CXXLINKPATHS = -libpath:`$(ESMF_DIR)/scripts/path_mingw2win $(ESMF_LDIR)`
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-# ESMF_F90LINKLIBS += -lstdc++
+ESMF_F90LINKLIBS += -link -debug -libpath:`$(ESMF_DIR)/scripts/path_mingw2win $(ESMF_LDIR)` $(ESMF_MPILIBPATH)
+ESMF_F90ESMFLINKLIBS = libesmf.a $(ESMF_F90LINKLIBS)
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-# ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)")
+ESMF_CXXLINKLIBS += -link -debug -libpath:`$(ESMF_DIR)/scripts/path_mingw2win $(ESMF_LDIR)` $(ESMF_MPILIBPATH)
+ESMF_CXXESMFLINKLIBS = libesmf.a $(ESMF_CXXLINKLIBS)
 
 ############################################################
 # Blank out shared library options
