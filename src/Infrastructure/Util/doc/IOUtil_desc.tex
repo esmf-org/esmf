@@ -1,4 +1,4 @@
-% $Id: IOUtil_desc.tex,v 1.1 2009/03/18 23:57:23 w6ws Exp $
+% $Id: IOUtil_desc.tex,v 1.2 2009/03/19 00:50:30 w6ws Exp $
 
 The ESMF Fortran I/O utilities provide portable methods to access
 capabilities which are often implemented in different
@@ -10,10 +10,9 @@ buffers.
 
 The {\tt ESMF\_IOUnitGet()} method is used to find an unopened
 unit number within the range of unit numbers that ESMF
-is allowed to use.  Internally, ESMF primarily uses unit
-numbers for log files.  By default the unit numbers range
-from {\tt ESMF\_LOG\_FORT\_UNIT\_NUMBER} to {\tt ESMF\_LOG\_UPPER},
-which are normally set to 50 and 99 respectively.
+is allowed to use.  Internally, ESMF uses Fortran unit
+numbers primarily for log files.  By default the unit number range
+is normally set to start at unit 50 and end at unit 99.
 
 
 When integrating ESMF with applications which use conflicting
