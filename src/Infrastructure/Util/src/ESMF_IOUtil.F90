@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUtil.F90,v 1.3 2009/01/21 21:38:01 cdeluca Exp $
+! $Id: ESMF_IOUtil.F90,v 1.4 2009/03/19 00:25:35 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@ module ESMF_IOUtilMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version = &
-      '$Id: ESMF_IOUtil.F90,v 1.3 2009/01/21 21:38:01 cdeluca Exp $'
+      '$Id: ESMF_IOUtil.F90,v 1.4 2009/03/19 00:25:35 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   contains
@@ -116,11 +116,16 @@ module ESMF_IOUtilMod
 
 !
 ! !DESCRIPTION:
-!   Call the system-dependent routine to force output.
-
+!   Call the system-dependent routine to force output on a specific
+!   Fortran unit number.
 !
-! !REQUIREMENTS:
-
+!     The arguments are:
+!     \begin{description}
+!     \item[{[unit]}]
+!       A Fortran I/O unit number.
+!     \item[{[rc]}]
+!       Return code; {\tt ESMF\_SUCCESS} and {\tt ESMF\_FAILURE}
+!     \end{description}
 !EOP
     integer :: status
 
@@ -136,7 +141,6 @@ ESMF_IOFlushMacro(unit,status)
     end if
 
   end subroutine ESMF_IOUnitFlush
-
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IOUnitGet"
@@ -159,14 +163,20 @@ ESMF_IOFlushMacro(unit,status)
 !     \item[{[unit]}]
 !       A Fortran I/O unit number.
 !     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       Return code; {\tt ESMF\_SUCCESS} and {\tt ESMF\_FAILURE}.
 !     \end{description}
 !
 !   The Fortran unit which is returned is not reserved in any way.
-!   So successive calls without intervening OPEN or CLOSE statements (or
+!   Successive calls without intervening {\tt OPEN} or {\tt CLOSE} statements (or
 !   other ways of connecting to units), may not return a unique unit
-!   number.  It is recommended that an OPEN statement immediately follow
-!   the call to ESMF\_IOUnitGet to activate the unit.
+!   number.  It is recommended that an {\tt OPEN} statement immediately follow
+!   the call to {\tt ESMF\_IOUnitGet()} to activate the unit.
+!
+!   By default, the range of unit numbers returned is between 50 and 99.
+!   When integrating ESMF into an application where this causes a conflict,
+!   the range of values may be moved by setting the {\tt IOUnitLower} and
+!   {\tt IOUnitUpper} arguments in the initial {\tt ESMF\_Initialize()} call
+!   with values in a safe, alternate, range.
 !EOP
 
     integer :: i, status
@@ -216,7 +226,6 @@ ESMF_IOFlushMacro(unit,status)
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!
 !
 !EOPI
 
