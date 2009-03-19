@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUtil.F90,v 1.4 2009/03/19 00:25:35 w6ws Exp $
+! $Id: ESMF_IOUtil.F90,v 1.5 2009/03/19 01:14:09 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@ module ESMF_IOUtilMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version = &
-      '$Id: ESMF_IOUtil.F90,v 1.4 2009/03/19 00:25:35 w6ws Exp $'
+      '$Id: ESMF_IOUtil.F90,v 1.5 2009/03/19 01:14:09 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   contains
@@ -124,7 +124,7 @@ module ESMF_IOUtilMod
 !     \item[{[unit]}]
 !       A Fortran I/O unit number.
 !     \item[{[rc]}]
-!       Return code; {\tt ESMF\_SUCCESS} and {\tt ESMF\_FAILURE}
+!       Return code; Returns either {\tt ESMF\_SUCCESS} or {\tt ESMF\_FAILURE}
 !     \end{description}
 !EOP
     integer :: status
@@ -163,20 +163,22 @@ ESMF_IOFlushMacro(unit,status)
 !     \item[{[unit]}]
 !       A Fortran I/O unit number.
 !     \item[{[rc]}]
-!       Return code; {\tt ESMF\_SUCCESS} and {\tt ESMF\_FAILURE}.
+!       Return code; Returns either {\tt ESMF\_SUCCESS} or {\tt ESMF\_FAILURE}.
 !     \end{description}
 !
+!
+!   By default, the range of unit numbers returned is between 50 and 99
+!   (parameters {\tt ESMF\_LOG\_FORTRAN\_UNIT\_NUMBER} and {\tt ESMF\_LOG\_UPPER}
+!   respectively.) When integrating ESMF into an application where these values
+!   conflict with other usages, the range of values may be moved by setting the
+!   optional {\tt IOUnitLower} and {\tt IOUnitUpper} arguments in the initial
+!   {\tt ESMF\_Initialize()} call with values in a safe, alternate, range.
+!
 !   The Fortran unit which is returned is not reserved in any way.
-!   Successive calls without intervening {\tt OPEN} or {\tt CLOSE} statements (or
-!   other ways of connecting to units), may not return a unique unit
+!   Successive calls without intervening {\tt OPEN} or {\tt CLOSE} statements
+!   (or other means of connecting to units), might not return a unique unit
 !   number.  It is recommended that an {\tt OPEN} statement immediately follow
 !   the call to {\tt ESMF\_IOUnitGet()} to activate the unit.
-!
-!   By default, the range of unit numbers returned is between 50 and 99.
-!   When integrating ESMF into an application where this causes a conflict,
-!   the range of values may be moved by setting the {\tt IOUnitLower} and
-!   {\tt IOUnitUpper} arguments in the initial {\tt ESMF\_Initialize()} call
-!   with values in a safe, alternate, range.
 !EOP
 
     integer :: i, status
