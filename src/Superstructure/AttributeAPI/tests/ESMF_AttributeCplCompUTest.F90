@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCplCompUTest.F90,v 1.6 2009/03/13 23:00:13 rokuingh Exp $
+! $Id: ESMF_AttributeCplCompUTest.F90,v 1.7 2009/03/20 15:55:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.6 2009/03/13 23:00:13 rokuingh Exp $'
+      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.7 2009/03/20 15:55:55 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -796,7 +796,7 @@ program ESMF_AttributeCplCompUTest
     !  Get an Attribute which was not set from an Attribute package
     !-------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Get an ESMF_I4 Attribute from a CplComp Test
       call ESMF_AttributeGet(cplcomp, name="NotHere", value=outI4, &
         convention=conv, purpose=purp, rc=rc)
