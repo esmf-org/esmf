@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2009/02/13 00:54:37 theurich Exp $
+! $Id: user_coupler.F90,v 1.3 2009/03/20 19:49:45 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -19,7 +19,7 @@ module user_coupler
     
   implicit none
    
-  public usercpl_register
+  public usercpl_setvm, usercpl_register
         
   ! global data
   type(ESMF_RouteHandle), save :: routehandle1, routehandle2, routehandle3
@@ -30,6 +30,34 @@ module user_coupler
 !   !  The Register routine sets the subroutines to be called
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
+
+  subroutine usercpl_setvm(comp, rc)
+    type(ESMF_CplComp) :: comp
+    integer, intent(out) :: rc
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    logical :: supportPthreads
+#endif
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+#ifdef ESMF_TESTWITHTHREADS
+    ! The following call will turn on ESMF-threading (single threaded)
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
+    ! threading features.
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
+    if (supportPthreads) then
+      call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
+    endif
+#endif
+
+  end subroutine
  
   subroutine usercpl_register(comp, rc)
     type(ESMF_CplComp) :: comp
@@ -56,22 +84,6 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "Registered Initialize, Run, and Finalize routines"
-
-#ifdef ESMF_TESTWITHTHREADS
-    ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for
-    ! your own code development you probably don't want to include the
-    ! following call unless you are interested in exploring ESMF's
-    ! threading features.
-
-    ! First test whether ESMF-threading is supported on this machine
-    call ESMF_VMGetGlobal(vm, rc=rc)
-    call ESMF_VMGet(vm, supportPthreadsFlag=supportPthreads, rc=rc)
-    if (supportPthreads) then
-      call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
-    endif
-#endif
-
     print *, "User Coupler Register returning"
 
   end subroutine
