@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.22 2009/02/18 01:33:34 rokuingh Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.23 2009/03/23 20:40:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -177,12 +177,10 @@ end module ESMF_StateReconcileEx_Mod
     call ESMF_GridCompSetServices(comp2, comp_dummy, rc)
 
     print *, "ready to set entry point 1"
-    call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, &
-                                        comp1_init, ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, comp1_init, rc=rc)
 
     print *, "ready to set entry point 2"
-    call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETINIT, &
-                                        comp2_init, ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETINIT, comp2_init, rc=rc)
 
 
     print *, "ready to call init for comp 1"

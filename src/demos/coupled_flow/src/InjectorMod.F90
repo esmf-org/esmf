@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.7 2008/05/08 02:27:27 theurich Exp $
+! $Id: InjectorMod.F90,v 1.8 2009/03/23 20:40:48 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -94,14 +94,10 @@
         !
         !  This Component has a 2 phase initialization, and a single
         !   phase run and finalize.
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
-                                                        injector_init1, 1, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
-                                                        injector_init2, 2, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
-                                           injector_run, ESMF_SINGLEPHASE, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
-                                         injector_final, ESMF_SINGLEPHASE, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, injector_init1, 1, rc=rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, injector_init2, 2, rc=rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, injector_run, rc=rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, injector_final, rc=rc)
 
         print *, "InjectorMod: Registered Initialize, Run, and Finalize routines"
 

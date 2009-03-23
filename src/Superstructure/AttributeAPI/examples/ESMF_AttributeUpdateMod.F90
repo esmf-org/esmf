@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.6 2009/02/25 05:29:18 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.7 2009/03/23 20:40:48 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -67,14 +67,11 @@ module ESMF_AttributeUpdateMod
 
     ! Register the callback routines.
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userm1_init, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userm1_init, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userm1_run, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userm1_run, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userm1_final, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userm1_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
 #ifdef ESMF_TESTWITHTHREADS
@@ -140,14 +137,11 @@ module ESMF_AttributeUpdateMod
 
     ! Register the callback routines.
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userm2_init, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userm2_init, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userm2_run, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userm2_run, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userm2_final, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userm2_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
 #ifdef ESMF_TESTWITHTHREADS
@@ -212,14 +206,11 @@ module ESMF_AttributeUpdateMod
     rc = ESMF_SUCCESS
     
     ! Register the callback routines.
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, usercpl_init, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, usercpl_init, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, usercpl_run, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, usercpl_run, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, usercpl_final, &
-      ESMF_SINGLEPHASE, rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, usercpl_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
 #ifdef ESMF_TESTWITHTHREADS

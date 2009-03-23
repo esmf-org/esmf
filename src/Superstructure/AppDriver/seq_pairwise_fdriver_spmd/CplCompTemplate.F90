@@ -1,4 +1,4 @@
-! $Id: CplCompTemplate.F90,v 1.5 2008/05/08 02:27:23 theurich Exp $
+! $Id: CplCompTemplate.F90,v 1.6 2009/03/23 20:40:47 theurich Exp $
 !
 ! Test code which supplies a user-written coupler component.
 
@@ -29,12 +29,9 @@
        type(ESMF_CplComp) :: ccomp
        integer :: rc
 
-       call ESMF_CplCompSetEntryPoint(ccomp, ESMF_SETINIT, my_init, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_CplCompSetEntryPoint(ccomp, ESMF_SETRUN, my_run, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_CplCompSetEntryPoint(ccomp, ESMF_SETFINAL, my_final, &
-                                                     ESMF_SINGLEPHASE, rc)
+       call ESMF_CplCompSetEntryPoint(ccomp, ESMF_SETINIT, my_init, rc=rc)
+       call ESMF_CplCompSetEntryPoint(ccomp, ESMF_SETRUN, my_run, rc=rc)
+       call ESMF_CplCompSetEntryPoint(ccomp, ESMF_SETFINAL, my_final, rc=rc)
 
     end subroutine UserCpl_SetServices
 

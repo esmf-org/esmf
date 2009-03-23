@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.34 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.35 2009/03/23 20:40:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -40,12 +40,9 @@
       type(ESMF_GridComp) :: gcomp
       integer, intent(out) :: rc
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, &
-                                                     ESMF_SINGLEPHASE, rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, rc=rc)
       
     end subroutine PHYS_SetServices
       
@@ -106,12 +103,9 @@
       type(ESMF_GridComp) :: gcomp
       integer, intent(out) :: rc
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, &
-                                                     ESMF_SINGLEPHASE, rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, rc=rc)
       
     end subroutine DYNM_SetServices
       
@@ -173,12 +167,9 @@
       type(ESMF_CplComp) :: cpl
       integer, intent(out) :: rc
 
-       call ESMF_CplCompSetEntryPoint(cpl, ESMF_SETINIT, my_init, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_CplCompSetEntryPoint(cpl, ESMF_SETRUN, my_run, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_CplCompSetEntryPoint(cpl, ESMF_SETFINAL, my_final, &
-                                                     ESMF_SINGLEPHASE, rc)
+       call ESMF_CplCompSetEntryPoint(cpl, ESMF_SETINIT, my_init, rc=rc)
+       call ESMF_CplCompSetEntryPoint(cpl, ESMF_SETRUN, my_run, rc=rc)
+       call ESMF_CplCompSetEntryPoint(cpl, ESMF_SETFINAL, my_final, rc=rc)
       
     end subroutine CPLR_SetServices
       

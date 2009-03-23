@@ -1,4 +1,4 @@
-! $Id: ParentGridCompTemplate.F90,v 1.8 2008/05/08 02:27:23 theurich Exp $
+! $Id: ParentGridCompTemplate.F90,v 1.9 2009/03/23 20:40:48 theurich Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -46,12 +46,9 @@
        type(ESMF_GridComp) :: gcomp
        integer :: rc
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, &
-                                                     ESMF_SINGLEPHASE, rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, &
-                                                     ESMF_SINGLEPHASE, rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, rc=rc)
 
     end subroutine UserPComp_SetServices
 

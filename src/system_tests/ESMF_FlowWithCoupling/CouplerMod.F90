@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.20 2009/01/16 05:28:25 theurich Exp $
+! $Id: CouplerMod.F90,v 1.21 2009/03/23 20:40:48 theurich Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -40,12 +40,9 @@
 
       ! Register the callback routines.
 
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, coupler_init, &
-                                                ESMF_SINGLEPHASE, rc)
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, coupler_run, &
-                                                ESMF_SINGLEPHASE, rc)
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, coupler_final, &
-                                                ESMF_SINGLEPHASE, rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, coupler_init, rc=rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, coupler_run, rc=rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, coupler_final, rc=rc)
 
       print *, "Registered Initialize, Run, and Finalize routines"
 

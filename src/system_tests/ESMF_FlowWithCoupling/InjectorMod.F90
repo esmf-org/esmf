@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.33 2009/01/16 05:28:25 theurich Exp $
+! $Id: InjectorMod.F90,v 1.34 2009/03/23 20:40:48 theurich Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -65,12 +65,9 @@
 
         ! Register the callback routines.
 
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
-                                          injector_init, ESMF_SINGLEPHASE, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
-                                          injector_run, ESMF_SINGLEPHASE, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
-                                          injector_final, ESMF_SINGLEPHASE, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, injector_init, rc=rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, injector_run, rc=rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, injector_final, rc=rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
 

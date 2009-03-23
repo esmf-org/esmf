@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.5 2007/07/19 22:15:33 cdeluca Exp $
+! $Id: CoupledFlowDemo.F90,v 1.6 2009/03/23 20:40:48 theurich Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -83,12 +83,9 @@
 !\begin{verbatim}
         ! Register the callback routines.
 
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
-                                        coupledflow_init, ESMF_SINGLEPHASE, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
-                                        coupledflow_run, ESMF_SINGLEPHASE, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
-                                        coupledflow_final, ESMF_SINGLEPHASE, rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, coupledflow_init, rc=rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, coupledflow_run, rc=rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, coupledflow_final, rc=rc)
 
 !\end{verbatim}
 !EOP
