@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.179 2009/03/17 05:21:36 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.180 2009/03/23 22:34:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -257,7 +257,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.179 2009/03/17 05:21:36 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.180 2009/03/23 22:34:26 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -268,6 +268,7 @@ module ESMF_CompMod
 
 !------------------------------------------------------------------------------
   interface operator (.eq.)
+    module procedure ESMF_meeq
     module procedure ESMF_cteq
     module procedure ESMF_mteq
   end interface
@@ -275,6 +276,7 @@ module ESMF_CompMod
 
 !------------------------------------------------------------------------------
   interface operator (.ne.)
+    module procedure ESMF_mene
     module procedure ESMF_ctne
     module procedure ESMF_mtne
   end interface
@@ -414,6 +416,23 @@ contains
 
 
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_Method derived types to see if they're the same 
+
+  function ESMF_meeq(me1, me2)
+    logical ESMF_meeq
+    type(ESMF_Method), intent(in) :: me1, me2
+    ESMF_meeq = (me1%method .eq. me2%method)    
+  end function
+
+  function ESMF_mene(me1, me2)
+    logical ESMF_mene
+    type(ESMF_Method), intent(in) :: me1, me2
+    ESMF_mene = (me1%method .ne. me2%method)
+  end function
 !------------------------------------------------------------------------------
 
 
