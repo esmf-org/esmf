@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.35 2009/02/12 18:53:39 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.36 2009/03/23 20:44:47 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -2522,8 +2522,12 @@ contains
             if (ESMF_LogMsgFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(field, localDe=0, farray=farray1, &
-                exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
+            call ESMF_FieldGet(field, localDe=0, farray=farray1, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
+
+            call ESMF_FieldGetBounds(field, exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
                 totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
                 rc=localrc)
