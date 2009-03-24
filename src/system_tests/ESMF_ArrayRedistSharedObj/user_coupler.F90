@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2009/02/12 05:35:22 theurich Exp $
+! $Id: user_coupler.F90,v 1.4 2009/03/24 19:14:17 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -69,13 +69,13 @@ module user_coupler
     print *, "User Coupler Register starting"
     
     ! Register the callback routines.
-    call ESMF_CplCompSetEntryPoint(comp, stage=ESMF_SETINIT, &
+    call ESMF_CplCompSetEntryPoint(comp, method=ESMF_SETINIT, &
       routine=user_init, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, stage=ESMF_SETRUN, &
+    call ESMF_CplCompSetEntryPoint(comp, method=ESMF_SETRUN, &
       routine=user_run, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, stage=ESMF_SETFINAL, &
+    call ESMF_CplCompSetEntryPoint(comp, method=ESMF_SETFINAL, &
       routine=user_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
