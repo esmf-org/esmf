@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.254 2009/03/19 20:59:46 theurich Exp $
+#  $Id: common.mk,v 1.255 2009/03/24 21:02:38 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2420,89 +2420,6 @@ check_results: check_unit_tests check_examples check_system_tests
 
 results_summary:
 	@$(DO_SUM_RESULTS)
-
-
-#-------------------------------------------------------------------------------
-# Targets for building the release, and the quick_start dirs
-#-------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------
-# TODO: this section is frightfully out of date.   A release could be
-# just the libs and mods, that plus quickstart, that plus the examples,
-# that plus all the unit and system tests, that plus the demos.
-#
-# Rules for putting example files where they need to be for our
-# binary releases (the pre-built libesmf.so and some simple examples).
-# Creates the directory structure for releases, and copies example
-# files and READMEs into it.
-#
-RELEASE_VERSION = 1_0_0rp2
-RELEASE_SUBDIRS = example lib mod CoupledFlowSrc CoupledFlowExe
-RELEASE_DIR     =  $(ESMF_BUILD)/release/esmf_$(RELEASE_VERSION)_$(ESMF_OS)_$(BOPT)_so
-
-chkdir_release:
-	@if [ ! -d $(RELEASE_DIR) ] ; then \
-	   echo Making $(RELEASE_DIR); mkdir -p $(RELEASE_DIR) ; fi
-	@for DIR in $(RELEASE_SUBDIRS) foo ; do \
-	   if [ $$DIR != "foo" ] ; then \
-	      if [ ! -d $(RELEASE_DIR)/$$DIR ] ; then \
-	         echo Making $(RELEASE_DIR)/$$DIR ;\
-	         mkdir $(RELEASE_DIR)/$$DIR ;\
-	      fi ;\
-	   fi ;\
-	done
-
-build_release: chkdir_release build_libs shared
-	$(MAKE) ACTION=tree_build_release tree
-
-tree_build_release:
-	@for FILES in $(RELEASE_COPYFILES) foo ; do \
-	   if [ $$FILES != "foo" ] ; then \
-	      echo "Copying $$FILES to $(RELEASE_DIR)/$(RELEASE_DESTDIR)" ;\
-	      cp $$FILES $(RELEASE_DIR)/$(RELEASE_DESTDIR) ;\
-	   fi ;\
-	done
-	@for FILES in $(RELEASE_ARCHCOPYFILES) foo ; do \
-	   if [ $$FILES != "foo" ] ; then \
-	      echo "Copying $$FILES.$(ESMF_OS) to $(RELEASE_DIR)/$(RELEASE_DESTDIR)/$$FILES" ;\
-	      cp $$FILES.$(ESMF_OS) $(RELEASE_DIR)/$(RELEASE_DESTDIR)/$$FILES ;\
-	   fi ;\
-	done
-
-
-
-# ------------------------------------------------------------------
-# Rules for putting quick_start files where they need to be for our
-# public releases. 
-#
-
-QUICKSTART_DIR     =  $(ESMF_BUILD)/quick_start
-
-chkdir_quick_start:
-	@if [ ! -d $(QUICKSTART_DIR) ] ; then \
-	   echo Making $(QUICKSTART_DIR); mkdir -p $(QUICKSTART_DIR) ; fi
-	@for DIR in $(QUICKSTART_SUBDIRS) foo ; do \
-	   if [ $$DIR != "foo" ] ; then \
-	      if [ ! -d $(QUICKSTART_DIR)/$$DIR ] ; then \
-	         echo Making $(QUICKSTART_DIR)/$$DIR ;\
-	         mkdir $(QUICKSTART_DIR)/$$DIR ;\
-	      fi ;\
-	   fi ;\
-	done
-
-build_quick_start: chkdir_quick_start
-	$(MAKE) ACTION=tree_build_quick_start tree
-
-tree_build_quick_start: chkdir_quick_start
-	@for DIR in $(QUICKSTART_COPYDIRS) foo ; do \
-	   if [ $$DIR != "foo" ] ; then \
-	      echo "Copying $$DIR files to $(QUICKSTART_DIR)" ;\
-	      cp -f $$DIR/* $(QUICKSTART_DIR) ;\
-	   fi ;\
-	done
-
-
-
 
 
 #-------------------------------------------------------------------------------
