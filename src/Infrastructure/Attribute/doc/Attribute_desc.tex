@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.21 2009/03/01 09:02:25 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.22 2009/03/24 18:41:13 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ Attribute hierarchies are linked in a "shallow" manner, meaning that the Attribu
 
 \subsubsection{Attribute Packages}
 
-At this time, all ESMF objects which are enabled to contain Attributes can also contain Attribute packages.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as "CF" (see below) and "general".  These specifiers are used to enforce compliance with several existing metadata standards.  One can use an ESMF supplied standard Attribute package, specify their own Attribute packages, or add customized Attributes to the ESMF supplied Attribute packages.  Working with Attribute packages is quite involved, at present, but significant effort in automation of these metadata capabilities in ESMF is anticipated in future releases. 
+At this time, all ESMF objects which are enabled to contain Attributes can also contain Attribute packages.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as "CF" (see below) and "general".  These specifiers are used to validate ESMF Attribute packages against existing metadata conventions.  One can use an ESMF supplied standard Attribute package, specify their own Attribute packages, or add customized Attributes to the ESMF supplied Attribute packages.  Currently, working with Attribute packages is quite involved, but future development with IO will allow for a more automated approach to populating Attribute packages from a file.
 
 The standard Attribute packages supplied by ESMF exist for the following ESMF objects:
 
@@ -54,9 +54,10 @@ The standard Attribute packages supplied by ESMF exist for the following ESMF ob
 \item CplComp
 \item GridComp
 \item Field
+\item Grid
 \end{itemize}
 
-The ESMF standard Attribute packages are based on the Climate and Forecast (CF) convention.  When additional Attributes beyond the ESMF supplied Attribute packages are desired, these can be generated with the Attribute package nesting capabilities.  User supplied Attribute packages will also be an option in future releases.  An example of some more standardized user supplied Attribute packages are in Tables \ref{ComponentAttributePackages} - \ref{FieldAttributePackages}, which summarize the Attribute packages available at this point in time.
+The ESMF standard Attribute packages are based on the Climate and Forecast (CF) convention.  When additional Attributes beyond the ESMF supplied Attribute packages are desired, these can be generated with the Attribute package nesting capabilities.  User supplied Attribute packages will also be an option in future releases.  An example of some more standardized user supplied Attribute packages are in Tables \ref{ComponentAttributePackages} - \ref{GridAttributePackages}, which summarize the Attribute packages available at this point in time.
 
 \vspace{18pt}
 
