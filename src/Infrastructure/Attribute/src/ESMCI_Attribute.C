@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.16 2009/03/25 05:59:57 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.17 2009/03/25 20:49:53 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.16 2009/03/25 05:59:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.17 2009/03/25 20:49:53 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -123,16 +123,18 @@ namespace ESMCI {
   // make an Attribute in the new attpack
   attr = new Attribute(name, convention, purpose, object);  
   if (!attr) {
+    sprintf(msgbuf, "failed initialized an attpack Attribute");
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed initialized an attpack Attribute", &localrc);
+                               msgbuf, &localrc);
     return ESMF_FAILURE;
   }
   
   // add the new Attribute to the new attpack
   localrc = attpack->AttributeSet(attr);
   if (localrc != ESMF_SUCCESS) {
+    sprintf(msgbuf, "failed adding an attpack Attribute");
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed adding an attpack Attribute", &localrc);
+                               msgbuf, &localrc);
     return ESMF_FAILURE;
   }
   
@@ -162,6 +164,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc;
   Attribute *attpack, *nestedpack;
   bool stop = false;
@@ -175,8 +178,9 @@ namespace ESMCI {
     // name the attribute package using convention, purpose, and object
     attpack = new Attribute(convention, purpose, object);
     if (!attpack) {
+      sprintf(msgbuf, "failed initializing an attpack");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed initializing an attpack", &localrc);
+                               msgbuf, &localrc);
       return ESMF_FAILURE;
     }
     
@@ -194,13 +198,15 @@ namespace ESMCI {
       localrc = AttributeSet(attpack);
     }
     else {
+      sprintf(msgbuf, "failed adding attpack");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed adding attpack", &localrc);
+                               msgbuf, &localrc);
       return ESMF_FAILURE;
     }
     if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "failed adding an attpack to an Attribute");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed adding an attpack to an Attribute", &localrc);
+                               msgbuf, &localrc);
       return ESMF_FAILURE;
     }
   }
@@ -472,7 +478,7 @@ namespace ESMCI {
   if (!(attpack->attrList.empty())) {
     sprintf(msgbuf, "failed removing entire attribute package, attrCount = %d",
       attpack->attrCount);
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   msgbuf, &localrc);
     return ESMF_FAILURE;
   }
@@ -568,8 +574,9 @@ namespace ESMCI {
   }
   
   if (!done) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "could not locate, ", &localrc);
+    sprintf(msgbuf, "could not locate, ");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  msgbuf, &localrc);
     return ESMF_FAILURE;
   }
 
@@ -638,7 +645,6 @@ namespace ESMCI {
   if(!attpack) {
        sprintf(msgbuf, "Cannot find an Attribute package with:\nconvention = '%s'\npurpose = '%s'\nobject = '%s'\n",
                       convention.c_str(), purpose.c_str(), object.c_str());
-       printf(msgbuf);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              msgbuf, &localrc);
        return localrc;
@@ -647,7 +653,6 @@ namespace ESMCI {
   attr = attpack->AttPackGetAttribute(name, convention, purpose, object);
   if (!attr) {
        sprintf(msgbuf, "This Attribute package does have an Attribute named '%s'\n", name.c_str());
-       printf(msgbuf);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
                              msgbuf, &localrc);
        return localrc;
@@ -656,8 +661,9 @@ namespace ESMCI {
   // Set the Attribute
   localrc = attr->AttrModifyValue(tk, count, value);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed modifying an attpack Attribute", &localrc);
+    sprintf(msgbuf, "failed modifying an attpack Attribute");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                               msgbuf, &localrc);
     return ESMF_FAILURE;
   }
   
@@ -783,6 +789,7 @@ namespace ESMCI {
 //   base level, and copy by reference all {\tt Attributes} in lower base levels.
 //
 //EOPI
+  char msgbuf[ESMF_MAXSTR];
   int i, localrc;
   Attribute *attr;
   
@@ -792,10 +799,9 @@ namespace ESMCI {
   // call local copy on this Attribute 
   localrc = AttributeCopy(source);
   if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                          "AttributeCopyHybrid() bailed in AttributeCopy()", 
-                          &localrc);
-      return ESMF_FAILURE;
+    sprintf(msgbuf, "AttributeCopyHybrid() bailed in AttributeCopy()");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+    return ESMF_FAILURE;
   }
 
   // if this base level copy by value, if not copy by value
@@ -806,16 +812,14 @@ namespace ESMCI {
       (attr->attrBase) = (this->attrBase); 
       localrc = attr->AttributeCopyValue(*(source.attrList.at(i)));
       if (localrc != ESMF_SUCCESS) {
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                             "AttributeCopyValue() bailed in recursion", 
-                             &localrc);
+          sprintf(msgbuf, "AttributeCopyValue() bailed in recursion");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
           return ESMF_FAILURE;
       }
       localrc = AttributeSet(attr);
       if (localrc != ESMF_SUCCESS) {
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                             "AttributeCopyHybrid() bailed in AttributeSet()", 
-                             &localrc);
+          sprintf(msgbuf, "AttributeCopyHybrid() bailed in AttributeSet()");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
           return ESMF_FAILURE;
       }
       // update of count and flags is handled in AttributeSet()
@@ -853,6 +857,7 @@ namespace ESMCI {
 //   this base level.
 //
 //EOPI
+  char msgbuf[ESMF_MAXSTR];
   int i, localrc;
   Attribute *attr;
   
@@ -862,9 +867,8 @@ namespace ESMCI {
   // call local copy on source
   localrc = AttributeCopy(source);
   if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                          "AttributeCopyValue() bailed in AttributeCopy()", 
-                          &localrc);
+      sprintf(msgbuf, "AttributeCopyValue() bailed in AttributeCopy()");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       return ESMF_FAILURE;
   }
 
@@ -876,17 +880,15 @@ namespace ESMCI {
       (attr->attrBase) = (this->attrBase); 
       localrc = attr->AttributeCopyValue(*(source.attrList.at(i)));
       if (localrc != ESMF_SUCCESS) {
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                             "AttributeCopyValue() bailed in recursion", 
-                             &localrc);
+      sprintf(msgbuf, "AttributeCopyValue() bailed in recursion");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
           return ESMF_FAILURE;
       }
       // add newly initialized attr to destination
       localrc = AttributeSet(attr);
       if (localrc != ESMF_SUCCESS) {
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                             "AttributeCopyValue() bailed in AttributeSet()", 
-                             &localrc);
+      sprintf(msgbuf, "AttributeCopyValue() bailed in AttributeSet()");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
           return ESMF_FAILURE;
       }
       // update of count and flags is handled in AttributeSet()
@@ -967,6 +969,7 @@ namespace ESMCI {
 
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc, len;
 
   // Initialize local return code
@@ -985,23 +988,21 @@ namespace ESMCI {
       // check name
       else if (attrLens[i] > 0) {
         if (attrNames[i].compare(attrList.at(i)->attrName) != 0) {
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                             "Attribute package name out of order", 
-                             &localrc);
+          sprintf(msgbuf, "Attribute package name out of order");
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
           return ESMF_FAILURE;
         }
       }
       else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                             "length < 0 = not good.", 
-                             &localrc);
+        sprintf(msgbuf, "length < 0 = no good.");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
           return ESMF_FAILURE;
       }
 
       // add length
       if (attrList.at(i)->items > 1) {
-        ESMC_LogDefault.Write("Write items > 1 - Not yet implemented\n",
-          ESMC_LOG_INFO);
+        sprintf(msgbuf, "Write items > 1 - Not yet implemented\n");
+        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
         attrLens[i] = 0;
       }
       else if (attrList.at(i)->items == 1) {
@@ -1013,8 +1014,8 @@ namespace ESMCI {
             attrLens[i] = (attrList.at(i)->vcp.size())+3;
         }
         else {
-          ESMC_LogDefault.Write("working on counting digits",
-            ESMC_LOG_INFO);
+          sprintf(msgbuf, "working on counting digits");
+          ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
           //***FIXME*** here we do log10(number) + 4
           attrLens[i] = 10;
         }
@@ -1053,6 +1054,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc;
   Attribute *attr;
 
@@ -1062,22 +1064,22 @@ namespace ESMCI {
   // Get the attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_I4) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not typekind I4", &localrc);
+      sprintf(msgbuf, "Attribute not typekind I4");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         return ESMF_FAILURE;
     }
   
     // simple sanity checks
     if (attr->items != 1) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not single value", &localrc);
+      sprintf(msgbuf, "Attribute not single value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       return ESMF_FAILURE;
     }
 
@@ -1109,6 +1111,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc, i;
   Attribute *attr;
 
@@ -1118,22 +1121,22 @@ namespace ESMCI {
   // Get the attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_I4) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not typekind I4", &localrc);
+      sprintf(msgbuf, "Attribute not typekind I4");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items <= 1) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not single value", &localrc);
+       sprintf(msgbuf, "Attribute not single value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
@@ -1168,6 +1171,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc;
   Attribute *attr;
 
@@ -1177,22 +1181,22 @@ namespace ESMCI {
   // Get the attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf,ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_I8) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not typekind I8", &localrc);
+      sprintf(msgbuf, "Attribute not typekind I8");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items != 1) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not single value", &localrc);
+      sprintf(msgbuf, "Attribute not single value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
@@ -1224,6 +1228,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc, i;
   Attribute *attr;
 
@@ -1233,22 +1238,22 @@ namespace ESMCI {
   // Get the attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_I8) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not typekind I8", &localrc);
+      sprintf(msgbuf, "Attribute not typekind I8");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items <= 1) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not single value", &localrc);
+      sprintf(msgbuf, "Attribute not single value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
@@ -1283,6 +1288,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc;
   Attribute *attr;
 
@@ -1292,22 +1298,22 @@ namespace ESMCI {
   // Get the attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_R4) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not typekind R4", &localrc);
+      sprintf(msgbuf, "Attribute not typekind R4");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items != 1) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not single value", &localrc);
+      sprintf(msgbuf, "Attribute not single value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return localrc;
     }
 
@@ -1339,6 +1345,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc, i;
   Attribute *attr;
 
@@ -1348,22 +1355,22 @@ namespace ESMCI {
   // Get the attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_R4) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not typekind R4", &localrc);
+      sprintf(msgbuf, "Attribute not typekind R4");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items <= 1) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not single value", &localrc);
+      sprintf(msgbuf, "Attribute not single value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
@@ -1398,6 +1405,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc;
   Attribute *attr;
 
@@ -1407,22 +1415,22 @@ namespace ESMCI {
   // Get the attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_R8) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not typekind R8", &localrc);
+      sprintf(msgbuf, "Attribute not typekind R8");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items != 1) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not single value", &localrc);
+      sprintf(msgbuf, "Attribute not single value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
@@ -1454,6 +1462,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc, i;
   Attribute *attr;
 
@@ -1463,22 +1472,22 @@ namespace ESMCI {
   // Get the attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_R8) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not typekind R8", &localrc);
+      sprintf(msgbuf, "Attribute not typekind R8");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items <= 1) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not single value", &localrc);
+      sprintf(msgbuf, "Attribute not single value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
@@ -1513,6 +1522,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc;
   Attribute *attr;
 
@@ -1522,22 +1532,22 @@ namespace ESMCI {
   // Get the attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_LOGICAL) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not typekind LOGICAL", &localrc);
+      sprintf(msgbuf, "Attribute not typekind LOGICAL");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items != 1) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not single value", &localrc);
+      sprintf(msgbuf, "Attribute not single value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
@@ -1569,6 +1579,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc, i;
   Attribute *attr;
 
@@ -1578,22 +1589,22 @@ namespace ESMCI {
   // Get the attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_LOGICAL) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not typekind LOGICAL", &localrc);
+      sprintf(msgbuf, "Attribute not typekind LOGICAL");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items <= 1) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not single value", &localrc);
+      sprintf(msgbuf, "Attribute not single value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
@@ -1628,6 +1639,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc;
   Attribute *attr;
 
@@ -1637,22 +1649,22 @@ namespace ESMCI {
   // Get the attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not typekind CHARACTER", &localrc);
+      sprintf(msgbuf, "Attribute not typekind CHARACTER");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items != 1) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not single value", &localrc);
+      sprintf(msgbuf, "Attribute not single value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
@@ -1683,6 +1695,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc;
   Attribute *attr;
 
@@ -1692,22 +1705,22 @@ namespace ESMCI {
   // Get the attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not typekind CHARACTER", &localrc);
+      sprintf(msgbuf, "Attribute not typekind CHARACTER");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
     // simple sanity checks
     if (attr->items <= 1) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Attribute not single value", &localrc);
+      sprintf(msgbuf, "Attribute not single value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
     }
 
@@ -1739,6 +1752,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc, i;
   Attribute *attr;
 
@@ -1748,8 +1762,8 @@ namespace ESMCI {
   // Get the attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
@@ -1786,6 +1800,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc, i;
   Attribute *attr;
 
@@ -1794,16 +1809,16 @@ namespace ESMCI {
 
   // simple sanity checks
   if (num < 0) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                             "Attribute number must be > 0", &localrc);
+      sprintf(msgbuf, "Attribute number must be > 0");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
   }
 
   // Get the attribute
   attr = AttributeGet(num);
   if (!attr) {
-    ESMC_LogDefault.Write("Attribute not found, using default value if present",
-      ESMC_LOG_INFO);
+    sprintf(msgbuf, "Attribute not found, using default value if present");
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
     return ESMF_FAILURE;
   }
   else {
@@ -1910,6 +1925,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int size;
   unsigned int i;
   Attribute *attr;
@@ -1925,15 +1941,15 @@ namespace ESMCI {
   
   // check that it is valid
   if (!attr) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                                          "Attribute not found", NULL);
+      sprintf(msgbuf, "Attribute not found");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, NULL);
     return ESMF_FAILURE;
   }
   
   // check that this is a char Attribute
   if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                                          "Attribute is not a char", NULL);
+      sprintf(msgbuf, "Attribute is not a char");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, NULL);
     return ESMF_FAILURE;
   }
   
@@ -1993,12 +2009,13 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   Attribute *attr;
 
   attr = AttributeGet(name);
   if (!attr) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                                            "Attribute not found", NULL);
+      sprintf(msgbuf, "Attribute not found");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, NULL);
       return ESMF_FAILURE;
   }
 
@@ -2056,6 +2073,7 @@ namespace ESMCI {
 
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc;
   unsigned int i, j;
   bool done=false;
@@ -2076,8 +2094,8 @@ namespace ESMCI {
   }
   
   if (!done) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "could not locate, ", &localrc);
+    sprintf(msgbuf, "could not locate, ");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     return ESMF_FAILURE;
   }
   
@@ -2107,6 +2125,7 @@ namespace ESMCI {
 //
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int i, localrc;
 
   // Initialize local return code; assume routine not implemented
@@ -2114,8 +2133,8 @@ namespace ESMCI {
 
   // simple sanity checks
   if (!attr) {
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "bad Attribute object", &localrc);
+      sprintf(msgbuf, "bad Attribute object");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
        return ESMF_FAILURE;
   }
 
@@ -2702,6 +2721,7 @@ namespace ESMCI {
 
 //EOPI
 
+  char msgbuf[ESMF_MAXSTR];
   int localrc;
 
   // Initialize local return code
@@ -2712,8 +2732,8 @@ namespace ESMCI {
       name.compare(attrName) == 0) {
     localrc = AttrModifyValue(tk, count, value);
     if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "AttributeSetObjsInTree failed to set an Attribute", &localrc);
+      sprintf(msgbuf, "AttributeSetObjsInTree failed to set an Attribute");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       return ESMF_FAILURE;
     }
   }
@@ -2830,9 +2850,8 @@ namespace ESMCI {
   // determine the number of fields to write
   localrc = AttributeCountTree(convention, purpose, varobj, na, maxobjs);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "AttributeWriteTab failed counting max objs",
-                                &localrc);
+    sprintf(msgbuf, "AttributeWriteTab failed counting max objs");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     fclose(tab);
     return ESMF_FAILURE;
   }
@@ -2840,9 +2859,8 @@ namespace ESMCI {
   // allocate the integer array of length maxobjs
   attrLens = new int[maxobjs];
   if (!attrLens) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "AttributeWriteTab failed allocating attrLens",
-                                &localrc);
+    sprintf(msgbuf, "AttributeWriteTab failed allocating attrLens");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf,  &localrc);
     fclose(tab);
     return ESMF_FAILURE;
   }
@@ -2853,9 +2871,8 @@ namespace ESMCI {
   localrc = AttributeCountTreeLens(convention, purpose, varobj, attrLens,
     attrNames);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "AttributeWriteTab failed CountTreeLens",
-                                &localrc);
+    sprintf(msgbuf, "AttributeWriteTab failed CountTreeLens");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     delete [] attrLens;
     attrNames.clear();
     fclose(tab);
@@ -2877,8 +2894,8 @@ namespace ESMCI {
   localrc = AttributeWriteTabrecurse(tab,convention,purpose,varobj,attrLens,
     attrNames,maxobjs,count);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "Attribute failed recursing in WriteTab", &localrc);
+    sprintf(msgbuf, "Attribute failed recursing in WriteTab");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     delete [] attrLens;
     attrNames.clear();
     fclose(tab);
@@ -3029,16 +3046,16 @@ namespace ESMCI {
   if (object.compare("comp")==0) {
   attpack = AttPackGet(convention, purpose, object);
   if (!attpack) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed getting attpack in WriteXML", &localrc);
+    sprintf(msgbuf, "failed getting attpack in WriteXML");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     return ESMF_FAILURE;
   }
 
   // get value of attribute 0 or set to N/A if not present
   localrc = attpack->AttributeIsPresent("name", &presentflag);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed finding an attribute", &localrc);
+    sprintf(msgbuf, "failed finding an attribute");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     fclose(xml);
     return ESMF_FAILURE;
   }
@@ -3046,8 +3063,8 @@ namespace ESMCI {
     attr = attpack->AttributeGet(0);
     modelcompname = attr->vcp;
     if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed getting attribute value", &localrc);
+      sprintf(msgbuf, "failed getting attribute value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       fclose(xml);
       return ESMF_FAILURE;
     }
@@ -3059,8 +3076,8 @@ namespace ESMCI {
   // get value of attribute 1 or set to N/A if not present
   localrc = attpack->AttributeIsPresent("full_name", &presentflag);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed finding an attribute", &localrc);
+    sprintf(msgbuf, "failed finding an attribute");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     fclose(xml);
     return ESMF_FAILURE;
   }
@@ -3068,8 +3085,8 @@ namespace ESMCI {
     attr = attpack->AttributeGet(1);
     fullname = attr->vcp;
     if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed getting attribute value", &localrc);
+      sprintf(msgbuf, "failed getting attribute value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       fclose(xml);
       return ESMF_FAILURE;
     }
@@ -3081,8 +3098,8 @@ namespace ESMCI {
   // get value of attribute 2 or set to N/A if not present
   localrc = attpack->AttributeIsPresent("version", &presentflag);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed finding an attribute", &localrc);
+    sprintf(msgbuf, "failed finding an attribute");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     fclose(xml);
     return ESMF_FAILURE;
   }
@@ -3090,8 +3107,8 @@ namespace ESMCI {
     attr = attpack->AttributeGet(2);
     version = attr->vcp;
     if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "failed getting attribute value", &localrc);
+      sprintf(msgbuf, "failed getting attribute value");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       fclose(xml);
       return ESMF_FAILURE;
     }
@@ -3100,9 +3117,22 @@ namespace ESMCI {
     version="N/A";
   }
   
+  } else if (object.compare("state")==0 ||
+             object.compare("fieldbundle")==0 ||
+             object.compare("field")==0) { 
+    modelcompname="N/A";
+    fullname="N/A";
+    version="N/A";
+  }
+  else {
+    sprintf(msgbuf, "AttributeWrite called from an invalid ESMF object");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+    return ESMF_FAILURE;
+  }
+  
   // Write the XML file header
   sprintf(msgbuf,"<model_component name=\"%s\" full_name=\"%s\" version=\"%s\"\n",
-    modelcompname.c_str(),fullname.c_str(),version.c_str());
+  modelcompname.c_str(),fullname.c_str(),version.c_str());
   //printf(msgbuf);
   fprintf(xml,msgbuf);
   sprintf(msgbuf,"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
@@ -3114,14 +3144,14 @@ namespace ESMCI {
   sprintf(msgbuf,"xmlns=\"http://www.esmf.ucar.edu\">\n\n");
   //printf(msgbuf);
   fprintf(xml,msgbuf);
-  }
+
 // *** HACK ***
    
   // determine the number of fields to write
   localrc = AttributeCountTree(convention, purpose, varobj, stop, na);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "Attribute failed counting fields", &localrc);
+    sprintf(msgbuf, "Attribute failed counting fields");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     fclose(xml);
     return ESMF_FAILURE;
   }
@@ -3129,8 +3159,8 @@ namespace ESMCI {
   // recurse the Attribute hierarchy
   localrc = AttributeWriteXMLrecurse(xml,convention,purpose,object,varobj,stop,fldcount);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                               "Attribute failed recursing in WriteTab", &localrc);
+    sprintf(msgbuf, "Attribute failed recursing in WriteTab");
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     fclose(xml);
     return ESMF_FAILURE;
   }
@@ -3352,8 +3382,8 @@ namespace ESMCI {
              else if (tk == ESMC_TYPEKIND_CHARACTER)
                  sprintf(msgbuf, "%s\n", vcp.c_str());
              else{ 
-                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                             "unknown value", &localrc);
+                 sprintf(msgbuf, "unknown value");
+                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
                  return localrc;
              }
       printf(msgbuf);
@@ -3379,8 +3409,8 @@ namespace ESMCI {
                 } else if (tk == ESMC_TYPEKIND_CHARACTER) {
                     sprintf(msgbuf, "          \t item %d: %s\n", i, vcpp[i].c_str());
                 } else{
-                    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                             "          \t unknown value", &localrc);
+                    sprintf(msgbuf, "          \t unknown value");
+                    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
                     return localrc;
                 }
       printf(msgbuf);
@@ -3870,15 +3900,15 @@ namespace ESMCI {
 //EOPI
 
   int localrc;
+  char msgbuf[ESMF_MAXSTR];
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
   localrc = AttributeCopyValue(source);
   if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                          "AttributeOperator= bailed in AttributeCopyValue()", 
-                          &localrc);
+      sprintf(msgbuf, "AttributeOperator= bailed in AttributeCopyValue()");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
   }
   
   return (*this);
@@ -3943,6 +3973,7 @@ namespace ESMCI {
 //EOPI
     int loffset, nbytes, chars;
     int localrc;
+    char msgbuf[ESMF_MAXSTR];
     unsigned int i;
     Attribute *attr;
     
@@ -4067,14 +4098,14 @@ namespace ESMCI {
       attr->setBase(attrBase);
       localrc = attr->ESMC_Deserialize(buffer,&loffset);
       if (localrc != ESMF_SUCCESS) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "AttributeDeserialize failed deserializing next attr", &localrc);
+        sprintf(msgbuf, "AttributeDeserialize failed deserializing next attr");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         return ESMF_FAILURE;
       }
       localrc = AttributeSet(attr);
       if (localrc != ESMF_SUCCESS) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "AttributeDeserialize failed adding attribute", &localrc);
+        sprintf(msgbuf, "AttributeDeserialize failed adding attribute");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         return ESMF_FAILURE;
       }
     }
@@ -4154,6 +4185,7 @@ namespace ESMCI {
 //EOPI
     int nbytes;
     int localrc;
+    char msgbuf[ESMF_MAXSTR];
     unsigned int i;
 
     // Define serialization macros
@@ -4256,8 +4288,8 @@ namespace ESMCI {
       
       // check if buffer has enough free memory, expand?
       if (*length < offset){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                      "Buffer too short to add an Attribute hierarchy", &localrc);
+        sprintf(msgbuf, "Buffer too short to add an Attribute hierarchy");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, msgbuf, &localrc);
         return localrc;
       }
       
@@ -4270,64 +4302,4 @@ namespace ESMCI {
 
  } // end ESMC_SerializeCC
 //-----------------------------------------------------------------------------
-/*#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeGetObjectList"
-//BOPI
-// !IROUTINE:  AttributeGetObjectList - get an {\tt Attribute} from multiple ESMF objects 
-//
-// !INTERFACE:
-      int AttributeGetObjectList(
-// 
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-      ESMC_Base *anytypelist,            // in - list of ESMC objects
-      string name,                        // in - Attribute name
-      Attribute *valuelist) {       // out - list of Attribute values
-// 
-// !DESCRIPTION:
-//     Get the same {\tt Attribute} name from multiple objects in one call.
-//
-//EOPI
-    int localrc;
-
-    // Initialize local return code ; assume routine not implemented
-    localrc = ESMC_RC_NOT_IMPL;
-
-    return localrc;
-
-}  // end AttributeGetObjectList
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeSetObjectList"
-//BOPI
-// !IROUTINE:  AttributeSetObjectList - set an {\tt Attribute} on multiple ESMF objects
-//
-// !INTERFACE:
-      int AttributeSetObjectList(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-      ESMC_Base *anytypelist,    // in - list of ESMC objects
-      Attribute *value) {   // in - Attribute value
-// 
-// !DESCRIPTION:
-//     Set the same {\tt Attribute} on multiple objects in one call.
-//
-//EOPI
-
-    int localrc;
-
-    // Initialize local return code; assume routine not implemented
-    localrc = ESMC_RC_NOT_IMPL;
-
-    return localrc;
-
-}  // end AttributeSetObjectList
-//-----------------------------------------------------------------------------
-*/
-
 } // namespace ESMCI
