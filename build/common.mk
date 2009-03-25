@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.255 2009/03/24 21:02:38 theurich Exp $
+#  $Id: common.mk,v 1.256 2009/03/25 00:07:41 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1240,9 +1240,6 @@ esmflib:: chkdir_lib $(SOURCE)
 		$(MAKE) -f $(MAKEFILE) libc ; fi
 	@if [ "$(SOURCEF)" != "" ] ; then \
 		$(MAKE) -f $(MAKEFILE) libf ; fi
-	@if [ "$(QUICKSTART)" != "" ] ; then \
-		$(MAKE) -f $(MAKEFILE) tree_build_quick_start; fi
-
 
 # copy private include files into src/include directory.
 include: chkdir_include $(if $(findstring ON,$(ESMF_DEFER_LIB_BUILD)),chkdir_lib)
