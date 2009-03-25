@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2009/03/25 05:53:54 eschwab Exp $ 
+# $Id: makefile,v 1.4 2009/03/25 17:01:04 theurich Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -110,11 +110,11 @@ RUN_ESMF_AttributeGridCompUTestUNI:
 	$(MAKE) TNAME=AttributeGridComp NP=1 ftest
 
 RUN_ESMF_AttReadGridCompUTest:
-	cp -f $(ESMF_DIR)/src/SuperStructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadGridComp NP=4 ftest
 
 RUN_ESMF_AttReadGridCompUTestUNI:
-	cp -f $(ESMF_DIR)/src/SuperStructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadGridComp NP=1 ftest
 
 # --- Grid
