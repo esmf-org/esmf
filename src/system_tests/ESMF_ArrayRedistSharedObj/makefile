@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2009/03/25 00:09:57 theurich Exp $ 
+# $Id: makefile,v 1.4 2009/03/25 00:24:53 theurich Exp $ 
 
 # share the symbol table of the main executable to allow dynamic
 # linking against its symbols
@@ -11,7 +11,15 @@ run: tree_run_system_tests
 LOCDIR	  = src/system_tests/ESMF_ArrayRedistSharedObj
 
 
+ifeq ($(ESMF_TESTSHAREDOBJ),ON)
 SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_ArrayRedistSharedObjSTest
+SYSTEM_TESTS_RUN      = RUN_ArrayRedistSharedObj
+else
+SYSTEM_TESTS_BUILD    =
+SYSTEM_TESTS_RUN      =
+endif
+
+SYSTEM_TESTS_RUN_UNI  =
 
 # Object files other than STest%.o that the
 # system tests executable will depend on.
@@ -20,9 +28,6 @@ SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_ArrayRedistSharedObjSTest
 SYSTEM_TESTS_OBJ      = user_model2.o
 SYSTEM_TESTS_SHOBJ    = user_model1 user_coupler
 
-SYSTEM_TESTS_RUN      = RUN_ArrayRedistSharedObj
-
-SYSTEM_TESTS_RUN_UNI  =
 
 ESMF_ArrayRedistSharedObjSTest.o : $(SYSTEM_TESTS_OBJ)
 

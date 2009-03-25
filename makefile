@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.102 2009/03/25 00:09:55 theurich Exp $
+# $Id: makefile,v 1.103 2009/03/25 00:24:53 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -97,6 +97,7 @@ script_info:
 	-@echo "ESMF_TESTEXHAUSTIVE:    $(ESMF_TESTEXHAUSTIVE)"
 	-@echo "ESMF_TESTWITHTHREADS:   $(ESMF_TESTWITHTHREADS)"
 	-@echo "ESMF_TESTMPMD:          $(ESMF_TESTMPMD)"
+	-@echo "ESMF_TESTSHAREDOBJ:     $(ESMF_TESTSHAREDOBJ)"
 	-@echo "ESMF_TESTHARNESS:    	$(ESMF_TESTHARNESS)"
 	-@echo "ESMF_MPIRUN:            $(ESMF_MPIRUN)"
 	-@if [ -n "$(ESMF_MPISCRIPTOPTIONS)" ] ; then \
@@ -290,6 +291,7 @@ info_mk: chkdir_lib
 	-@echo "# ESMF_TESTEXHAUSTIVE: $(ESMF_TESTEXHAUSTIVE)" >> $(MKINFO)
 	-@echo "# ESMF_TESTWITHTHREADS: $(ESMF_TESTWITHTHREADS)" >> $(MKINFO)
 	-@echo "# ESMF_TESTMPMD: $(ESMF_TESTMPMD)" >> $(MKINFO)
+	-@echo "# ESMF_TESTSHAREDOBJ: $(ESMF_TESTSHAREDOBJ)" >> $(MKINFO)
 	-@echo "# ESMF_TESTHARNESS: $(ESMF_TESTHARNESS)" >> $(MKINFO)
 	-@echo "# " >> $(MKINFO)
 	-@echo "# ESMF environment variables pointing to 3rd party software:" >> $(MKINFO)
