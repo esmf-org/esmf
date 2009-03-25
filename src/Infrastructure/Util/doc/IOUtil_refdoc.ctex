@@ -1,4 +1,4 @@
-% $Id: IOUtil_refdoc.ctex,v 1.1 2009/03/18 23:57:23 w6ws Exp $
+% $Id: IOUtil_refdoc.ctex,v 1.2 2009/03/25 19:57:49 w6ws Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -78,11 +78,11 @@
 %\input{../Infrastructure/Util/doc/IOUtil_rest}
 #endif
 
-%\subsection{Design and Implementation Notes}
+\subsection{Design and Implementation Notes}
 #ifdef STANDALONE
-%\input{IOUtil_implnotes}
+\input{IOUtil_implnotes}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/Util/doc/IOUtil_implnotes}
+\input{../Infrastructure/Util/doc/IOUtil_implnotes}
 #endif
 
 \subsection{Utility API}
