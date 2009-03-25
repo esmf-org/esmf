@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.11 2009/03/13 23:01:07 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.12 2009/03/25 05:59:52 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -23,6 +23,7 @@
  // associated class definition file and others
 #include <string.h>
 #include <stdlib.h>
+#include "ESMCI_F90Interface.h"
 #include "ESMC_Start.h"
 #include "ESMCI_Attribute.h"
 #include "ESMC_Base.h"
@@ -31,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.11 2009/03/13 23:01:07 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.12 2009/03/25 05:59:52 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1708,6 +1709,29 @@ extern "C" {
   return;
 
 }  // end c_esmc_attpacksetvalue
+
+//-----------------------------------------------------------------------------
+
+
+      void FTN(c_esmc_attributeread)(ESMC_Base **base,
+                                     int *fileNameLen,
+                                     const char *fileName,
+                                     int *status) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributeread()"
+
+// TODO convention, purpose, basename?
+// TODO match formatting of rest of this file
+
+         ESMF_CHECK_POINTER(*base, status)
+
+         // Read the attributes into the object.
+         int rc = (*base)->root.AttributeRead(
+                          *fileNameLen, // always present internal argument.
+                          ESMC_NOT_PRESENT_FILTER(fileName));
+                          
+         if (ESMC_PRESENT(status)) *status = rc;
+      }
 
 //-----------------------------------------------------------------------------
 //BOP

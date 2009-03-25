@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.15 2009/02/25 05:28:16 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.16 2009/03/25 05:59:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -30,12 +30,13 @@
 #include "ESMCI_Attribute.h"
 #include "ESMC_Base.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_IO.h"
 //#include "ESMCI_VM.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.15 2009/02/25 05:28:16 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.16 2009/03/25 05:59:57 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2725,6 +2726,51 @@ namespace ESMCI {
   return ESMF_SUCCESS;
 
 }  // end AttributeSetObjsInTree
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//
+// READ ROUTINES:
+//
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeRead"
+//BOPI
+// !IROUTINE:  AttributeRead - read Attributes from XML file
+//
+// !INTERFACE:
+      int Attribute::AttributeRead(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      int fileNameLen,             //  in - file name length
+      const char* fileName) {      //  in - file name
+
+//
+// !DESCRIPTION:
+//    Read the contents of an XML file into an {\tt Attribute} hierarchy.
+//    Expected to be called internally.
+//
+//EOPI
+
+  int rc;
+
+  // instantiate IO object; initialize with pointer to this Attribute node, to
+  // place file-read attributes into.
+  IO io(this);
+
+  // read the XML file, placing contents into this Attribute node
+  rc = io.read(fileNameLen, fileName);
+  ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+
+  return rc;
+
+ } // end AttributeRead
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //

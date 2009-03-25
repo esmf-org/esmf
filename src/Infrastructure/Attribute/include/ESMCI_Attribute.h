@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.11 2009/02/25 05:28:16 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.12 2009/03/25 05:59:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -204,6 +204,9 @@ class Attribute
       const vector<ESMC_I4> &roots, const vector<ESMC_I4> &nonroots) const;
     int AttributeUpdateRemove(int attrNum);
     int AttributeUpdateReset();
+
+    // attribute read methods
+    int AttributeRead(int fileNameLen, const char* fileName);
 
     // attribute write methods
     int AttributeWriteTab(const string &convention, const string &purpose, 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.19 2009/03/10 15:30:12 theurich Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.20 2009/03/25 06:00:25 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -104,6 +104,7 @@ module ESMF_AttributeMod
       public ESMF_AttributeGet
       public ESMF_AttributeSet
       public ESMF_AttributeUpdate
+      public ESMF_AttributeRead
       public ESMF_AttributeWrite
 
 !EOPI 
@@ -111,7 +112,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.19 2009/03/10 15:30:12 theurich Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.20 2009/03/25 06:00:25 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -386,6 +387,32 @@ module ESMF_AttributeMod
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that attach
 !     Attributes and Attribute packages, and link Attribute hierarchies.
+ 
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeRead  - Read an Attribute or Attribute Package
+!
+! !INTERFACE:
+      interface ESMF_AttributeRead
+   
+! !PRIVATE MEMBER FUNCTIONS:
+! TODO
+!        module procedure ESMF_ArrayAttRead
+!        module procedure ESMF_ArrayBundleAttRead
+!        module procedure ESMF_CplCompAttRead
+        module procedure ESMF_GridCompAttRead
+!        module procedure ESMF_DistGridAttRead
+!        module procedure ESMF_FieldAttRead
+!        module procedure ESMF_FieldBundleAttRead
+!        module procedure ESMF_GridAttRead
+!        module procedure ESMF_StateAttRead
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that read
+!     an Attribute or Attribute package.
  
 !EOPI
       end interface
@@ -827,6 +854,52 @@ contains
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeRead  - Read an Attribute package
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeRead(<object>, fileName, convention, purpose, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character (len=*),   intent(in), optional :: fileName
+!     character (len = *), intent(in), optional :: convention
+!     character (len = *), intent(in), optional :: purpose
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Read the Attribute package for <object>.  The Attribute package defines 
+!     the convention, purpose, and object type of the associated Attributes.  
+!     The fileName format is XML. 
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array), intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp), intent(inout) :: comp  
+!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_DistGrid), intent(inout) :: grid
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item[{[fileName]}]
+!          The file name to be read from.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -4832,6 +4905,79 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridCompAttUpdate
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_GridCompAttRead"
+!BOPI
+! !IROUTINE: ESMF_GridCompAttRead - Read an Attribute package
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeRead()
+      subroutine ESMF_GridCompAttRead(comp, fileName, convention, purpose, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(inout) :: comp  
+      character (len=*),   intent(in), optional :: fileName
+      character (len = *), intent(in), optional :: convention
+      character (len = *), intent(in), optional :: purpose
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!     Read the Attribute package for the {\tt comp}.
+!     The Attribute package defines the convention, purpose, and object type
+!     of the associated Attributes.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [comp]
+!      An {\tt ESMF\_GridComp} object.
+!     \item[{[fileName]}]
+!      The file name to be read from.
+!     \item [convention]
+!      The convention of the Attribute package.
+!     \item [purpose]
+!      The purpose of the Attribute package.
+!     \item [{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      ! initialize fileName length to zero for non-existent name
+      integer :: fileNameLen, localrc
+
+      fileNameLen = 0
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      ! check input variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
+
+      call ESMF_GridCompValidate(comp, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+ 
+      ! get length of given fileName for C++ validation
+      if (present(fileName)) then
+        fileNameLen = len_trim(fileName)
+      end if
+
+      ! invoke C to C++ entry point
+      ! TODO: convention, purpose
+      call c_ESMC_AttributeRead(comp%compp%base, fileNameLen, fileName, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                              ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridCompAttRead
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
