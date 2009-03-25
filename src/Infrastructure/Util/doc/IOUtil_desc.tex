@@ -1,33 +1,9 @@
-% $Id: IOUtil_desc.tex,v 1.2 2009/03/19 00:50:30 w6ws Exp $
+% $Id: IOUtil_desc.tex,v 1.3 2009/03/25 19:57:18 w6ws Exp $
 
 The ESMF Fortran I/O utilities provide portable methods to access
 capabilities which are often implemented in different
 ways in different environments.  Currently, two utility
-methods are implemented: {\tt ESMF\_IOUnitGet()}, for unit
-number inquiry, and {\tt ESMF\_IOUnitFlush()}, for flushing I/O
-buffers.
-
-
-The {\tt ESMF\_IOUnitGet()} method is used to find an unopened
+methods are implemented: {\tt ESMF\_IOUnitGet()}, to find an unopened
 unit number within the range of unit numbers that ESMF
-is allowed to use.  Internally, ESMF uses Fortran unit
-numbers primarily for log files.  By default the unit number range
-is normally set to start at unit 50 and end at unit 99.
-
-
-When integrating ESMF with applications which use conflicting
-unit number ranges, the optional {\tt IOUnitLower}, and
-{\tt IOUnitUpper} arguments in the initial {\tt ESMF\_Initialize()} call
-may be used to move the ESMF unit numbers to an alternate range.
-The return values from {\tt ESMF\_IOUnitGet()} will reflect the
-alternate range.
-
-
-The {\tt ESMF\_IOUnitFlush()} procedure is used to flush the
-I/O buffer associated with a specific Fortran unit.  Normally,
-buffers are filled and flushed automatically by the Fortran
-runtime library.  However in some situations, in particular
-in parallel applications, it is useful to force an output
-buffer to be explicitly flushed at specific points.  For example,
-it may be useful to flush a buffer used for debug output
-in conjunction with {\tt ESMF\_VMBarrier()} calls.
+is allowed to use, and {\tt ESMF\_IOUnitFlush()} to flush the
+I/O buffer associated with a specific Fortran unit.
