@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2009/03/01 09:01:40 rokuingh Exp $ 
+# $Id: makefile,v 1.3 2009/03/25 05:53:54 eschwab Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -14,7 +14,8 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeFBundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeGridCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeGridUTest \
-		$(ESMF_TESTDIR)/ESMF_AttributeStateUTest
+		$(ESMF_TESTDIR)/ESMF_AttributeStateUTest \
+		$(ESMF_TESTDIR)/ESMF_AttReadGridCompUTest
 
 TESTS_RUN     = RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttributeABundleUTest \
@@ -24,7 +25,8 @@ TESTS_RUN     = RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttributeFBundleUTest \
 		RUN_ESMF_AttributeGridCompUTest \
 		RUN_ESMF_AttributeGridUTest \
-		RUN_ESMF_AttributeStateUTest
+		RUN_ESMF_AttributeStateUTest \
+		RUN_ESMF_AttReadGridCompUTest
 
 TESTS_RUN_UNI = RUN_ESMF_AttributeArrayUTestUNI \
 		RUN_ESMF_AttributeABundleUTestUNI \
@@ -34,7 +36,8 @@ TESTS_RUN_UNI = RUN_ESMF_AttributeArrayUTestUNI \
 		RUN_ESMF_AttributeFBundleUTestUNI \
 		RUN_ESMF_AttributeGridCompUTestUNI \
 		RUN_ESMF_AttributeGridUTestUNI \
-		RUN_ESMF_AttributeStateUTestUNI
+		RUN_ESMF_AttributeStateUTestUNI \
+		RUN_ESMF_AttReadGridCompUTestUNI
 
 
 include ${ESMF_DIR}/makefile
@@ -105,6 +108,14 @@ RUN_ESMF_AttributeGridCompUTest:
 
 RUN_ESMF_AttributeGridCompUTestUNI:
 	$(MAKE) TNAME=AttributeGridComp NP=1 ftest
+
+RUN_ESMF_AttReadGridCompUTest:
+	cp -f $(ESMF_DIR)/src/SuperStructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
+	$(MAKE) TNAME=AttReadGridComp NP=4 ftest
+
+RUN_ESMF_AttReadGridCompUTestUNI:
+	cp -f $(ESMF_DIR)/src/SuperStructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
+	$(MAKE) TNAME=AttReadGridComp NP=1 ftest
 
 # --- Grid
 
