@@ -33,10 +33,7 @@ program ESMF_AttributeSTest
   type(ESMF_GridComp) :: comp1
   type(ESMF_GridComp) :: comp2
   type(ESMF_CplComp) :: cplcomp
-  character(ESMF_MAXSTR) :: name1,name2,name3,name4,name5,name6,name7, &
-                            name8, name9, name10, value1,value2,value3, &
-                            value4,value5,value6,value7,value8,value9, &
-                            value10,conv,purp
+  character(ESMF_MAXSTR) :: conv,purp
     
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: testresult = 0
@@ -198,50 +195,22 @@ program ESMF_AttributeSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     
-  ! add Attribute packages to the Gridded Components and link the States
-  
-  ! initialize variables
-  conv = 'CF'
-  purp = 'basic'
-  name1 = 'discipline'
-  name2 = 'physical_domain'
-  name3 = 'agency'
-  name4 = 'institution'
-  name5 = 'author'
-  name6 = 'coding_language'
-  name7 = 'model_component_framework'
-  name8 = 'name'
-  name9 = 'full_name'
-  name10 = 'version'
-  value1 = 'Atmosphere'
-  value2 = 'Earth system'
-  value3 = 'NASA'
-  value4 = 'Global Modeling and Assimilation Office (GMAO)'
-  value5 = 'Max Suarez'
-  value6 = 'Fortran 90'
-  value7 = 'ESMF (Earth System Modeling Framework)'
-  value8 = 'GEOS-5 FV dynamical core'
-  value9 = 'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core'
-  value10 = 'GEOSagcm-EROS-beta7p12'
-  
-  ! Add the Attribute package to comp2
-  call ESMF_AttributeAdd(comp2, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp2, name1, value1, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp2, name2, value2, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp2, name3, value3, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp2, name4, value4, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp2, name5, value5, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp2, name6, value6, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp2, name7, value7, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp2, name8, value8, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp2, name9, value9, convention=conv, purpose=purp, rc=rc)
-  call ESMF_AttributeSet(comp2, name10, value10, convention=conv, purpose=purp, rc=rc)
+  ! link the Component Attribute hierarchy to State
+  call ESMF_AttributeSet(comp2, c2imp, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   
-    ! link the Component Attribute hierarchy to State
-  call ESMF_AttributeSet(comp2, c2imp, rc=rc)
+  ! now call AttributeUpdate to get a VM wide view of the
+  ! metadata set on comp1 in comp1initialize
+  call ESMF_AttributeUpdate(comp1, vm, rootList=(/0,1,2/), rc=rc)
+  if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    
+  ! now call AttributeCopy to get info from comp1 to comp2
+  call ESMF_AttributeCopy(comp1, comp2, &
+      ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -270,9 +239,14 @@ program ESMF_AttributeSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  ! Write the Attribute info to esmf/test/testg/<platform>/ESMF_AttributeSTest.stdout
+  ! Write the Attribute info in tab-delimited and .xml format for both Components
   ! The XML format will also send the output to an .xml in this directory
+  conv = 'CF'
+  purp = 'general'
   if (localPet .eq. 0) then
+    call ESMF_AttributeWrite(comp1,conv,purp,rc=rc)
+    call ESMF_AttributeWrite(comp2,conv,purp,rc=rc)
+    call ESMF_AttributeWrite(comp1,conv,purp,attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     call ESMF_AttributeWrite(comp2,conv,purp,attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &

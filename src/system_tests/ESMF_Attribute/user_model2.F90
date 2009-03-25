@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.20 2009/02/24 00:01:59 rokuingh Exp $
+! $Id: user_model2.F90,v 1.21 2009/03/25 20:54:24 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -109,7 +109,10 @@ module user_model2
 
     ! Local variables
     type(ESMF_VM)               :: vm
-    integer                     :: petCount, status, myPet
+    type(ESMF_Field)            :: field
+    type(ESMF_FieldBundle)      :: fieldbundle
+    type(ESMF_Grid)             :: grid
+    integer                     :: petCount, status, myPet, k
     character(ESMF_MAXSTR)      :: conv,purp
     
     ! Initialize return code
@@ -123,15 +126,18 @@ module user_model2
 
     ! Initialize variables
     conv = 'CF'
-    purp = 'basic'
+    purp = 'general'
 
     ! Write the Attribute info to esmf/test/testg/<platform>/ESMF_AttributeSTest.stdout
     if (myPet .eq. 0) then
       call ESMF_AttributeWrite(importState,conv,purp,rc=rc)
+      call ESMF_AttributeWrite(importState,conv,purp, &
+                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
       !call ESMF_StatePrint(importState, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
     endif
-                                                             
+    
+
   end subroutine user_run
 
 !-------------------------------------------------------------------------
