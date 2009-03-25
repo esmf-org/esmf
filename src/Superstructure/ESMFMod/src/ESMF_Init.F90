@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.53 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_Init.F90,v 1.54 2009/03/25 19:59:12 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -143,6 +143,11 @@
 !     to turn the Error Log feature off in these situations by setting
 !     {\tt defaultLogType} to ESMF\_LOG\_NONE.
 !
+!     When integrating ESMF with applications where Fortran unit number conflicts
+!     exist, the optional {\tt IOUnitLower} and {\tt IOUnitUpper} arguments may be
+!     used to specify an alternate unit number range.  See section \ref{fio:unitnumbers}
+!     for more information on how ESMF uses Fortran unit numbers.
+!
 !     Before exiting the application the user must call {\tt ESMF\_Finalize()}
 !     to release resources and clean up the ESMF gracefully.
 !
@@ -167,11 +172,17 @@
 !           If not specified, defaults to {\tt MPI\_COMM\_WORLD}
 !     \item [{[IOUnitLower]}]
 !           Lower bound for Fortran unit numbers used within the ESMF library.
-!           Fortran units are primarily used for log files.
-!           If not specified, defaults to {\tt ESMF\_LOG\_FORT\_UNIT\_NUMBER}
+!           Fortran units are primarily used for log files.  Legal unit numbers
+!           are positive integers.  A value higher than 10 is recommended
+!           in order to avoid the compiler-specific
+!           reservations which are typically found on the first few units.
+!           If not specified, defaults to {\tt ESMF\_LOG\_FORT\_UNIT\_NUMBER},
+!           which is distributed with a value of 50
 !     \item [{[IOUnitUpper]}]
 !           Upper bound for Fortran unit numbers used within the ESMF library.
-!           If not specified, defaults to {\tt ESMF\_LOG\_UPPER}
+!           Must be set to a value higher than {\tt IOUnitLower}.
+!           If not specified, defaults to {\tt ESMF\_LOG\_UPPER}, which is
+!           distributed with a value of 99
 !     \item [{[vm]}]
 !           Returns the global {\tt ESMF\_VM} that was created 
 !           during initialization.
@@ -179,7 +190,6 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
-!
 !EOP
       integer       :: localrc                        ! local return code
       type(ESMF_VM) :: localvm
