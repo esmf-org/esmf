@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.79 2009/01/12 18:23:05 theurich Exp $
+# $Id: build_rules.mk,v 1.80 2009/03/25 00:09:55 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -180,3 +180,13 @@ ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) 
 # Shared library options
 #
 ESMF_SL_LIBOPTS  += -shared
+
+############################################################
+# Shared object options
+#
+ESMF_SO_F90COMPILEOPTS  = -fPIC
+ESMF_SO_F90LINKOPTS     = -shared
+ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
+ESMF_SO_CXXCOMPILEOPTS  = -fPIC
+ESMF_SO_CXXLINKOPTS     = -shared
+ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic

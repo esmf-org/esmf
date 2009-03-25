@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.256 2009/03/25 00:07:41 theurich Exp $
+#  $Id: common.mk,v 1.257 2009/03/25 00:09:55 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -697,6 +697,14 @@ ESMF_SL_LIBS_TO_MAKE  = libesmf
 ESMF_SL_LIBLINKER     = $(ESMF_CXXCOMPILER)
 ESMF_SL_LIBOPTS      +=
 ESMF_SL_LIBLIBS      +=
+
+# - Shared objects
+ESMF_SO_F90COMPILEOPTS  +=
+ESMF_SO_F90LINKOPTS     +=
+ESMF_SO_F90LINKOPTSEXE  +=
+ESMF_SO_CXXCOMPILEOPTS  +=
+ESMF_SO_CXXLINKOPTS     +=
+ESMF_SO_CXXLINKOPTSEXE  +=
 
 # - MPIRUN
 ifneq ($(origin ESMF_MPIRUN), environment)
@@ -1567,10 +1575,10 @@ tree_build_system_tests: $(SYSTEM_TESTS_BUILD)
 #
 #  Link rule for Fortran system tests.
 #
-$(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
+$(ESMF_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(addsuffix .$(ESMF_SL_SUFFIX), $(SYSTEM_TESTS_SHOBJ)) $(ESMFLIB)
 	$(MAKE) chkdir_tests
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(SYSTEM_TESTS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.so *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 
 # debugging aid:  link the executable, standard output, and log file to
@@ -1598,7 +1606,7 @@ $(ESMF_TESTDIR)/ESMF_%STestD : $(SYSTEM_TESTS_OBJ_D) $(ESMFLIB) ESMF_%STestD.o
 $(ESMF_TESTDIR)/ESMF_%STestE : $(SYSTEM_TESTS_OBJ_E) $(ESMFLIB) ESMF_%STestE.o 
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(SYSTEM_TESTS_OBJ_E) ESMF_$*STestE.o $(ESMF_F90ESMFLINKLIBS)
 MPMDCLEANUP:
-	$(ESMF_RM) -f *.o *.so *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 #
 # run_system_tests
@@ -1811,7 +1819,7 @@ tree_build_use_test_cases: chkdir_tests $(USE_TEST_CASES_BUILD)
 #
 $(ESMF_TESTDIR)/ESMF_%UseTestCase : ESMF_%UseTestCase.o $(USE_TEST_CASES_OBJ) $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(USE_TEST_CASES_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.so *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 
 # debugging aid:  link the executable, standard output, and log file to
@@ -1959,16 +1967,16 @@ tree_build_unit_tests: $(TESTS_BUILD)
 
 $(ESMF_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(ESMF_UTEST_$(*)_OBJS) $(TESTS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.so *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 
 $(ESMF_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
 	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(ESMC_UTEST_$(*)_OBJS) $< $(ESMF_CXXESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.so *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 $(ESMF_TESTDIR)/ESMCI_%UTest : ESMCI_%UTest.o $(ESMFLIB)
 	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(ESMCI_UTEST_$(*)_OBJS) $< $(ESMF_CXXESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.so *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 # debugging aid:  link the executable, standard output, and log file to
 # temporary names in the current directory (they are built in the test
@@ -2249,7 +2257,7 @@ tree_build_examples: $(EXAMPLES_BUILD)
 #
 $(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(ESMF_EXAMPLE_$(*)_OBJS) $< $(ESMF_F90ESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.so *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 
 $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
@@ -2375,7 +2383,7 @@ tree_build_demos: $(DEMOS_BUILD)
 
 $(ESMF_TESTDIR)/%App : %Demo.o $(DEMOS_OBJ) $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(DEMOS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.so *.mod
+	$(ESMF_RM) -f *.o *.mod
 
 
 #
@@ -2608,6 +2616,10 @@ $(ESMF_OBJDIR)/%.o : %.C
 
 .C.o:
 	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
+        
+.F90.$(ESMF_SL_SUFFIX):
+	$(ESMF_F90COMPILEFREECPP_CMD) $(ESMF_SO_F90COMPILEOPTS) $<
+	$(ESMF_F90LINKER) $(ESMF_SO_F90LINKOPTS) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $*.o $(ESMF_F90ESMFLINKLIBS)
 
 .F90.a:
 	$(ESMF_F90COMPILEFREECPP_CMD) $<
@@ -2874,9 +2886,9 @@ $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 
 
 #-------------------------------------------------------------------------------
-# Keep .o files
+# Keep .o and .$(ESMF_SL_SUFFIX) files
 #-------------------------------------------------------------------------------
-.PRECIOUS: %.o
+.PRECIOUS: %.o %.$(ESMF_SL_SUFFIX)
 
 
 #-------------------------------------------------------------------------------
