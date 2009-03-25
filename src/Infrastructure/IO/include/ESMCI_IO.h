@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.h,v 1.2 2009/03/18 05:39:43 eschwab Exp $
+// $Id: ESMCI_IO.h,v 1.3 2009/03/25 05:57:28 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
 
  class MySAX2Handler : public DefaultHandler {
  private:
-    ESMC_Base* base;
+    ESMCI::Attribute* attr;
     char qname[ESMF_MAXSTR];
 
  public:
@@ -57,7 +57,7 @@
      );
      void characters(const XMLCh *const chars, const XMLSize_t length);
      void fatalError(const SAXParseException&);
-     MySAX2Handler(ESMC_Base *base);
+     MySAX2Handler(ESMCI::Attribute *attr);
  };
 #endif
 
@@ -74,7 +74,8 @@
             // fully aligned with F90 equiv 
   private:   // corresponds to F90 module 'type ESMF_IO' members
     char         name[ESMF_MAXSTR];  // name of io object
-    ESMC_Base   *base;    // associated object's base
+    Attribute   *attr;    // associated object's attributes
+// TODO: need both base and attr?
     char         fileName[ESMF_MAXSTR];
     int          id;          // unique identifier. used for equality
                               //    checks and to generate unique default
@@ -103,11 +104,12 @@
 
     // native C++ constructors/destructors
     IO(void);
+    IO(Attribute*);
     // IO(const IO &io);  TODO
     ~IO(void);
 
     // friend function to allocate and initialize IO object from heap
-    friend IO *ESMCI_IOCreate(int, const char*, ESMC_Base*, int*);
+    friend IO *ESMCI_IOCreate(int, const char*, Attribute*, int*);
 
     // friend function to copy an io  TODO ?
     //friend IO *ESMCI_IO(IO*, int*);
@@ -134,7 +136,7 @@
 
     // friend function to allocate and initialize io from heap
     IO *ESMCI_IOCreate(int nameLen, const char* name=0,
-                       ESMC_Base* base=0, int* rc=0);
+                       Attribute* attr=0, int* rc=0);
 
     // friend function to copy an io  TODO ?
     //IO *ESMCI_IOCreate(IO *io, int *rc=0);

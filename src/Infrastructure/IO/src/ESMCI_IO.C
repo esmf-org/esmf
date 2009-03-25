@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.C,v 1.2 2009/03/18 05:39:43 eschwab Exp $
+// $Id: ESMCI_IO.C,v 1.3 2009/03/25 05:57:29 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -46,16 +46,17 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.2 2009/03/18 05:39:43 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO.C,v 1.3 2009/03/25 05:57:29 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 #ifdef ESMF_XERCES
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MySAX2Handler::MySAX2Handler()"
 
-MySAX2Handler::MySAX2Handler(ESMC_Base *base) : DefaultHandler()
+MySAX2Handler::MySAX2Handler(ESMCI::Attribute *attr) : DefaultHandler()
 {
-  this->base = base;
+  this->attr = attr;
 }
 
 #undef  ESMC_METHOD
@@ -137,13 +138,13 @@ void MySAX2Handler::characters(const XMLCh *const chars,
     }
 
       // Set the attribute on the object.
-      status = this->base->root.AttributeSet(cname, &cvalue);
+      status = this->attr->AttributeSet(cname, &cvalue);
 
       // TODO: the following is based on F90->C->C++ glue code call for F90
       //    ESMF_AttributeSet(gridcomp, ...), which appears not to work;
       //    produces garbage chars appended after good chars when retrieved
       //    from F90 via ESMF_AttributeGet().
-     // status = this->base->root.AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1, 
+     // status = this->attr->AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1, 
      //                                      &cvalue, "ESG", "general", "comp");
 
       if (status != ESMF_SUCCESS) {
@@ -196,7 +197,7 @@ int IO::count=0;
 // !ARGUMENTS:
       int                nameLen,          // in
       const char        *name,             // in
-      ESMC_Base         *base,             // in
+      Attribute         *attr,             // in
       int               *rc) {             // out - return code
 
 // !DESCRIPTION:
@@ -245,7 +246,7 @@ int IO::count=0;
       sprintf(io->name, "IO%3.3d\0", io->id);
     }
 
-    if (base != ESMC_NULL_POINTER) io->base = base;
+    if (attr != ESMC_NULL_POINTER) io->attr = attr;
 
 // TODO 
 
@@ -354,7 +355,8 @@ int IO::count=0;
     parser->setFeature(XMLUni::fgSAX2CoreValidation, true);
     parser->setFeature(XMLUni::fgSAX2CoreNameSpaces, true);   // optional
 
-    MySAX2Handler* myHandler = new MySAX2Handler(base);
+    MySAX2Handler* myHandler;
+    myHandler = new MySAX2Handler(attr);
     parser->setContentHandler(myHandler);
     parser->setErrorHandler(myHandler);
 
@@ -419,8 +421,40 @@ int IO::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::IO() native constructor"
 
+    attr = ESMC_NULL_POINTER;
     name[0] = '\0';
     id = ++count;  // TODO: inherit from ESMC_Base class
+    // copy = false;  // TODO: see notes in constructors and destructor below
+
+ } // end IO
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  IO - native C++ constructor
+//
+// !INTERFACE:
+      IO::IO(Attribute* attribute) {
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      Initializes for either C++ or F90, since {\tt ESMC\_IO} is a deep,
+//      dynamically allocated class.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::IO() native constructor"
+
+    attr = attribute;
+    // create default name "IONNN"
+    id = ++count;  // TODO: inherit from ESMC_Base class
+    sprintf(name, "IO%3.3d\0", id);
     // copy = false;  // TODO: see notes in constructors and destructor below
 
  } // end IO

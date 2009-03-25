@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_F.C,v 1.1 2009/03/09 05:59:17 eschwab Exp $
+// $Id: ESMCI_IO_F.C,v 1.2 2009/03/25 05:57:30 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -42,11 +42,12 @@ extern "C" {
                                  const char *name,
                                  ESMC_Base **base,
                                  int *status) {
+          ESMF_CHECK_POINTER(*base, status)
           *ptr = ESMCI_IOCreate(
                                            *nameLen,   // always present 
                                                        //   internal argument.
                     ESMC_NOT_PRESENT_FILTER(name),
-                                            *base,     // TODO: check pointer?
+                                         &((*base)->root),  // attributes
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
