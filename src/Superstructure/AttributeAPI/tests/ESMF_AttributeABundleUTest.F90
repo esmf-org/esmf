@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.2 2009/03/13 23:00:13 rokuingh Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.3 2009/03/25 20:51:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.2 2009/03/13 23:00:13 rokuingh Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.3 2009/03/25 20:51:38 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -771,15 +771,6 @@ program ESMF_AttributeArrayBundleUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Write the Attribute package from an ArrayBundle Test
-      call ESMF_AttributeWrite(arraybundle, convention=conv, purpose=purp, &
-        attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Writing an Attribute package from an ArrayBundle Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
       ! Remove the entire Attribute package from an ArrayBundle Test
       call ESMF_AttributeRemove(arraybundle, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -957,15 +948,6 @@ program ESMF_AttributeArrayBundleUTest
       write(name, *) "Getting a default Attribute character list in an Attribute package on an ArrayBundle test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackListOut2 == attpackDfltList), &
         name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Write the Attribute package from a ArrayBundle Test
-      call ESMF_AttributeWrite(arraybundle, convention=conv, purpose=purp, &
-        attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Writing an Attribute package from an ArrayBundle Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif

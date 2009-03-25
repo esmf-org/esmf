@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFBundleUTest.F90,v 1.6 2009/03/13 23:00:13 rokuingh Exp $
+! $Id: ESMF_AttributeFBundleUTest.F90,v 1.7 2009/03/25 20:51:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.6 2009/03/13 23:00:13 rokuingh Exp $'
+      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.7 2009/03/25 20:51:38 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -789,15 +789,12 @@ program ESMF_AttributeFBundleUTest
     !-------------------------------------------------------------------------
     !  Attribute package - standard
     !-------------------------------------------------------------------------
-      conv = 'CF'
-      purp = 'general'
-      
       !NEX_UTest
       ! Create an Attribute package on a FieldBundle Test
-      call ESMF_AttributeAdd(fieldbundle, convention=conv, purpose=purp, &
-        attpacknestflag=ESMF_ATTPACKNEST_OFF, rc=rc)
+      call ESMF_AttributeAdd(fieldbundle, convention=conv, &
+        purpose=purp, attrList=attpackList, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a standard Attribute package on a FieldBundle Test"
+      write(name, *) "Creating a custom Attribute package on a FieldBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 

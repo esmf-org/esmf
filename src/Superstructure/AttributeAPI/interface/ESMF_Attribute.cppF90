@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.20 2009/03/25 06:00:25 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.21 2009/03/25 20:51:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.20 2009/03/25 06:00:25 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.21 2009/03/25 20:51:38 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -137,7 +137,6 @@ module ESMF_AttributeMod
         module procedure ESMF_DistGridAttAddPackCstm
         module procedure ESMF_FieldAttAddPack
         module procedure ESMF_FieldAttAddPackCstm
-        module procedure ESMF_FieldBundleAttAddPack
         module procedure ESMF_FieldBundleAttAddPackCstm
         module procedure ESMF_GridAttAddPack
         module procedure ESMF_GridAttAddPackCstm
@@ -160,7 +159,9 @@ module ESMF_AttributeMod
       interface ESMF_AttributeCopy
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_StateAttributeCopy
+        module procedure ESMF_CplCompAttCopy
+        module procedure ESMF_GridCompAttCopy
+        module procedure ESMF_StateAttCopy
         
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that copy
@@ -380,9 +381,9 @@ module ESMF_AttributeMod
         module procedure ESMF_StateAttSetLgclList
         module procedure ESMF_StateAttSetChar
         module procedure ESMF_StateAttSetCharList
-        module procedure ESMF_StateAttSetLinkFB
-        module procedure ESMF_StateAttSetLinkField
-        module procedure ESMF_StateAttSetLinkState
+        module procedure ESMF_StateAttSetLinkfieldbundle
+        module procedure ESMF_StateAttSetLinkfield
+        module procedure ESMF_StateAttSetLinkstate
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that attach
@@ -425,14 +426,14 @@ module ESMF_AttributeMod
       interface ESMF_AttributeWrite
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_ArrayAttWrite
-        module procedure ESMF_ArrayBundleAttWrite
+        !module procedure ESMF_ArrayAttWrite
+        !module procedure ESMF_ArrayBundleAttWrite
         module procedure ESMF_CplCompAttWrite
         module procedure ESMF_GridCompAttWrite
-        module procedure ESMF_DistGridAttWrite
+        !module procedure ESMF_DistGridAttWrite
         module procedure ESMF_FieldAttWrite
         module procedure ESMF_FieldBundleAttWrite
-        module procedure ESMF_GridAttWrite
+        !module procedure ESMF_GridAttWrite
         module procedure ESMF_StateAttWrite
 
 ! !DESCRIPTION:
@@ -493,10 +494,9 @@ contains
 !     to the ESG convention.
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: comp  
-!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
 !     \item type(ESMF\_Field), intent(inout) :: field  
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
@@ -542,11 +542,11 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: comp  
-!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
 !     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
@@ -578,7 +578,7 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeCopy() 
-!     subroutine ESMF_AttributeCopyAll(<object1>, <object2>, attcopyflag, atttreeflag, rc)
+!     subroutine ESMF_AttributeCopy(<object1>, <object2>, attcopyflag, atttreeflag, rc)
 !
 ! !ARGUMENTS:
 !     <object1>, see below for supported values  
@@ -591,12 +591,18 @@ contains
 !     Copies an Attribute hierarchy from <object1> to <object2>.
 !     Supported values for <object1> are:
 !     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp 
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
 !     Supported values for <object2> are:
 !     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp 
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
+!
+!     NOTE: Copies between like ESMF objects are recommended
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -657,11 +663,11 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: comp  
-!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
 !     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
@@ -737,11 +743,11 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: comp  
-!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
 !     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
@@ -780,11 +786,11 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: comp  
-!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
 !     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
@@ -829,11 +835,11 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: comp  
-!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
 !     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
@@ -876,15 +882,7 @@ contains
 !     The fileName format is XML. 
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF\_Array), intent(inout) :: array
-!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: comp  
-!     \item type(ESMF\_GridComp), intent(inout) :: comp  
-!     \item type(ESMF\_DistGrid), intent(inout) :: grid
-!     \item type(ESMF\_Field), intent(inout) :: field  
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
-!     \item type(ESMF\_Grid), intent(inout) :: grid
-!     \item type(ESMF\_State), intent(inout) :: state
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
 !     \end{description}
 !
 !     The arguments are:
@@ -922,11 +920,11 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: comp  
-!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
 !     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
@@ -980,11 +978,11 @@ contains
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
 !     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: comp  
-!     \item type(ESMF\_GridComp), intent(inout) :: comp  
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
 !     \item type(ESMF\_DistGrid), intent(inout) :: grid
 !     \item type(ESMF\_Field), intent(inout) :: field  
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
@@ -1024,6 +1022,176 @@ contains
 !
 !
 !EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Link a Component Attribute hierarchy to that of
+!                                {\bf a Component or State}
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeSet()
+!      subroutine ESMF_CplCompAttSetLink(<object1>, <object2>, rc)
+!
+! !ARGUMENTS:
+!      <object1>, see below for supported values  
+!      <object2>, see below for supported values
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Attaches a {\tt CplComp} or {\tt GridComp} Attribute hierarchy to the 
+!     hierarchy of a {\tt CplComp}, {\tt GridComp}, or {\tt State}.
+!      
+!     Supported values for the <object1> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp1
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp1
+!     \end{description}
+!     Supported values for the <object2> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp2
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp2
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [<object1>]
+!       The ``parent'' object in the Attribute hierarchy link.
+!     \item [<object2>]
+!       The ``child'' object in the Attribute hierarchy link.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Link a State Attribute hierarchy with the
+!                               {\bf hierarchy of a FieldBundle, Field, or State}
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeSet()
+!      subroutine ESMF_StateAttributeSetLink(state, <object>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF\_State), intent(inout) :: state  
+!      <object>, see below for supported values
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Attaches a {\tt State} Attribute hierarchy to the hierarchy of
+!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}. 
+!     Supported values for the <object> are:
+!     \begin{description}
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Field), intent(inout) :: field
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [<object>]
+!       The object with which to link hierarchies.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeUpdate  - Update an Attribute hierarchy
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeUpdate(<object>, vm, rootList, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     type(ESMF_VM), intent(in) :: vm
+!     integer, dimension(:), intent(in) :: rootList
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Update an Attribute hierarchy during runtime.
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [vm]
+!           The virtural machine over which this Attribute hierarchy 
+!           should be updated.
+!     \item [rootList]
+!           The list of "root" PETs that are to be used to update.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeWrite  - Write an Attribute package
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeWrite(<object>, convention, purpose, attwriteflag, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character (len = *), intent(in), optional :: convention
+!     character (len = *), intent(in), optional :: purpose
+!     type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Write the Attribute package for <object>.  The Attribute package defines 
+!     the convention, purpose, and object type of the associated Attributes.  Either
+!     tab-delimited or xml format is acheived by using {\tt attwriteflag}.
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp  
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp  
+!     \item type(ESMF\_Field), intent(inout) :: field  
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle 
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [attwriteflag]
+!           The flag to specify which format is desired for the write, the 
+!           default is tab-delimited.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!     NOTE:  The options for {\tt attwriteflag} include:
+!            \begin{enumerate}
+!              \item ESMF\_ATTWRITE\_XML will write in xml format
+!              \item ESMF\_ATTWRITE\_TAB will write in tab-delimited format
+!            \end{enumerate}
+!
+!EOP
+!------------------------------------------------------------------------------
+
 
 !-------------------------------------------------------------------------
 !  Macro versions of the routines
@@ -1179,6 +1347,70 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
       end subroutine mclass##AttAddPackCstm @\
+
+!------------------------------------------------------------------------------ 
+
+#define AttCopyMacro(mclass1, mclass2, mthis1, mthis2, mthisfield1, mthisfield2) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttributeCopy" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeCopy - Copy an Attribute hierarchy between objects @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeCopy() @\
+      subroutine mclass1##AttCopy(mthis1, mthis2, attcopyflag, atttreeflag, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass1), intent(inout) :: mthis1   @\
+      type(mclass2), intent(inout) :: mthis2 @\
+      type(ESMF_AttCopyFlag), intent(in) :: attcopyflag @\
+      type(ESMF_AttTreeFlag), intent(in) :: atttreeflag @\
+      integer, intent(out), optional :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Copy all Attributes in one hierarchy to another. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis1] @\
+!      An {\tt mclass1} object. @\
+!     \item [mthis2] @\
+!      An {\tt mclass2} object. @\
+!     \item [attcopyflag] @\
+!      A flag to determine if the copy is to be by reference, value, or both @\
+!     \item [atttreeflag] @\
+!      A flag to determine if the copy is supposed to descend the Attribute @\
+!      hierarchy @\
+!     \item [{[rc]}] @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc @\
+ @\
+      ! Initialize @\
+      localrc = ESMF_RC_NOT_IMPL @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check variables @\
+      ESMF_INIT_CHECK_DEEP(mclass1##GetInit,mthis1,rc) @\
+ @\
+      ! check variables @\
+      ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
+ @\
+      call c_ESMC_AttributeCopy(mthisfield1, mthisfield2, & @\
+                                attcopyflag, atttreeflag, localrc) @\
+      if(ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass1##AttCopy @\
 
 !------------------------------------------------------------------------------
 
@@ -2616,6 +2848,82 @@ contains
       end subroutine mclass##AttGetInfoByNum @\
  @\
       
+!-----------------------------------------------------------------------------
+
+#define AttReadMacro(mclass, mthis, mthisfield) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttRead" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeRead - Read an Attribute package @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeRead() @\
+      subroutine mclass##AttRead(mthis, fileName, convention, purpose, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass), intent(inout) :: mthis @\
+      character (len=*),   intent(in), optional :: fileName @\
+      character (len = *), intent(in), optional :: convention @\
+      character (len = *), intent(in), optional :: purpose @\
+      integer, intent(out), optional :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Read the Attribute package for the {\tt mthis}. @\
+!     The Attribute package defines the convention, purpose, and object type @\
+!     of the associated Attributes. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis] @\
+!      An {\tt mclass} object. @\
+!     \item[{[fileName]}] @\
+!      The file name to be read from. @\
+!     \item [convention] @\
+!      The convention of the Attribute package. @\
+!     \item [purpose] @\
+!      The purpose of the Attribute package. @\
+!     \item [{[rc]}]  @\
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      ! initialize fileName length to zero for non-existent name @\
+      integer :: fileNameLen, localrc @\
+ @\
+      fileNameLen = 0 @\
+ @\
+      ! Initialize return code; assume failure until success is certain @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+      localrc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      call mclass##Validate(mthis, rc=localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
+  @\
+      ! get length of given fileName for C++ validation @\
+      if (present(fileName)) then @\
+        fileNameLen = len_trim(fileName) @\
+      end if @\
+ @\
+      ! invoke C to C++ entry point @\
+      ! TODO: convention, purpose @\
+      call c_ESMC_AttributeRead(mthisfield, fileNameLen, fileName, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                              ESMF_ERR_PASSTHRU, & @\
+                              ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass##AttRead @\
+
 !------------------------------------------------------------------------------
 
 #define AttSetDoc() \
@@ -3386,6 +3694,330 @@ contains
  @\
       end subroutine mclass##AttSetCharList @\
 
+!-----------------------------------------------------------------------------
+
+#define AttSetLinkMacro(mclass1, mclass2, mthis1, mthis2, mthisfield1, mthisfield2) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttSetLink" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeSet - Link one Attribute hierarchy to another @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeSet() @\
+      subroutine mclass1##AttSetLink##mthis2(mthis1, mthis2, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass1), intent(inout) :: mthis1 @\
+      type(mclass2), intent(inout)  :: mthis2 @\
+      integer, intent(out), optional  :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Attaches two Attribute hierarchies @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis1] @\
+!      An {\tt mclass1} object. @\
+!     \item [mthis2] @\
+!      An {\tt mclass2} object. @\
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc                           ! Error status @\
+ @\
+      ! Initialize return code; assume failure until success is certain @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass1##GetInit,mthis1,rc) @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
+ @\
+      call c_ESMC_AttributeSetLink(mthisfield1, mthisfield2, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass1##AttSetLink##mthis2 @\
+
+!-----------------------------------------------------------------------------
+
+#define ESMF_StateAttSetLinkMacro(mclass, mthis1, mthis2, mthisfield1, mthisfield2, mthisfield3, mobj) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_StateAttSetLink" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeSet - Link one Attribute hierarchy to another @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeSet() @\
+      subroutine ESMF_StateAttSetLink##mthis2(mthis1, mthis2, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(ESMF_State), intent(inout) :: mthis1 @\
+      type(mclass), intent(inout)  :: mthis2 @\
+      integer, intent(out), optional  :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Attaches two Attribute hierarchies @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis1] @\
+!      An {\tt ESMF\_State} object. @\
+!     \item [mthis2] @\
+!      An {\tt mclass} object. @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc                           ! Error status @\
+      type(ESMF_Logical) :: lvalue1, lvalue2 @\
+      character (len=*), parameter :: lobject = 'mobj' @\
+      character (len=*), parameter :: lname1 = 'import' @\
+      character (len=*), parameter :: lname2 = 'export' @\
+ @\
+      ! Initialize return code; assume failure until success is certain @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,mthis1,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis2,rc) @\
+ @\
+      call c_ESMC_AttributeSetLink(mthisfield1, mthisfield2, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+ @\
+      ! set the import and export Attributes on any Field connected to this State @\
+      lvalue1 = .true. @\
+      lvalue2 = .false. @\
+      if (mthis1%mthisfield3 == ESMF_STATE_IMPORT) then @\
+        call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname1, & @\
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc) @\
+        call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname2, & @\
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (mthis1%mthisfield3 == ESMF_STATE_EXPORT) then @\
+        call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname1, & @\
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc) @\
+        call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname2, & @\
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      endif @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine ESMF_StateAttSetLink##mthis2 @\
+
+!-----------------------------------------------------------------------------
+
+#define AttUpdateMacro(mclass, mthis, mthisfield) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttUpdate" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeUpdate() @\
+      subroutine mclass##AttUpdate(mthis, vm, rootList, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass), intent(inout) :: mthis @\
+      type(ESMF_VM), intent(in) :: vm @\
+      integer, dimension(:), intent(in) :: rootList @\
+      integer, intent(out), optional :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Update an Attribute hierarchy. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis] @\
+!      An {\tt mclass} object. @\
+!     \item [vm] @\
+!      The virtural machine over which this Attribute hierarchy  @\
+!      should be updated. @\
+!     \item [rootList] @\
+!      The list of "root" PETs that are to be used to update. @\
+!     \item [{[rc]}]  @\
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc, count                           ! Error status @\
+ @\
+      ! Initialize return code; assume failure until success is certain @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      count = size(rootList) @\
+      call c_ESMC_AttributeUpdate(mthisfield, vm, rootList, count, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass##AttUpdate @\
+
+!-----------------------------------------------------------------------------
+
+#define AttWriteMacro(mclass, mthis, mthisfield, mthisobj, mthistar) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttWrite" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeWrite - Write an Attribute package to file @\
+ @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeWrite() @\
+      subroutine mclass##AttWrite(mthis, convention, purpose, attwriteflag, rc) @\
+ @\
+! !ARGUMENTS: @\
+      type(mclass), intent(inout) :: mthis   @\
+      character (len = *), intent(in), optional :: convention @\
+      character (len = *), intent(in), optional :: purpose @\
+      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag @\
+      integer, intent(out), optional :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Write the Attribute package for the {\tt state}. @\
+!     The Attribute package defines the convention, purpose, and object type  @\
+!     of the associated Attributes. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [state] @\
+!      An {\tt ESMF\_State} object. @\
+!     \item [convention] @\
+!      The convention of the Attribute package. @\
+!     \item [purpose] @\
+!      The purpose of the Attribute package. @\
+!     \item [attwriteflag] @\
+!      Flag to determine the format for writing the Attributes. @\
+!     \item [{[rc]}]  @\
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc, directional @\
+      character(len=*), parameter :: fconvention='N/A' @\
+      character(len=*), parameter :: fpurpose='N/A' @\
+      character(len=*), parameter :: fobject=#mthisobj @\
+      character(len=*), parameter :: ftarobj=#mthistar @\
+      type(ESMF_AttWriteFlag) :: writeflag @\
+ @\
+      ! Initialize return code; assume failure until success is certain @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      directional = 0 @\
+      if (present(convention)) then @\
+        directional = 1 ! convention only @\
+      endif @\
+ @\
+      if (present(purpose)) then @\
+        directional = 2 ! purpose only @\
+      endif @\
+ @\
+      if (present(convention) .AND. present(purpose)) then @\
+        directional = 3 ! convention and purpose @\
+      endif @\
+ @\
+      if (present(attwriteflag)) then @\
+        writeflag = attwriteflag @\
+      else @\
+        writeflag = ESMF_ATTWRITE_TAB @\
+      endif @\
+ @\
+      if (directional == 0) then @\
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
+        call c_ESMC_AttributeWriteTab(mthisfield, fconvention, & @\
+          fpurpose, fobject, ftarobj, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
+        call c_ESMC_AttributeWriteXML(mthisfield, fconvention, & @\
+          fpurpose, fobject, ftarobj, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      endif @\
+      else if (directional == 1) then @\
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
+        call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
+          fpurpose, fobject, ftarobj, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
+        call c_ESMC_AttributeWriteXML(mthisfield, convention, & @\
+          fpurpose, fobject, ftarobj, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      endif @\
+      else if (directional == 2) then @\
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
+        call c_ESMC_AttributeWriteTab(mthisfield, fconvention, & @\
+          purpose, fobject, ftarobj, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
+        call c_ESMC_AttributeWriteXML(mthisfield, fconvention, & @\
+          purpose, fobject, ftarobj, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      endif @\
+      else if (directional == 3) then @\
+      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
+        call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
+          purpose, fobject, ftarobj, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then @\
+        call c_ESMC_AttributeWriteXML(mthisfield, convention, & @\
+          purpose, fobject, ftarobj, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      endif @\
+      end if @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass##AttWrite @\
 
 !-------------------------------------------------------------------------
 !  ARRAY
@@ -3499,204 +4131,9 @@ AttSetLogicalMacro(ESMF_Array, array, array)
 AttSetCharacterMacro(ESMF_Array, array, array)
 
 #if 0
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayAttUpdate"
-!BOPI
-! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeUpdate()
-      subroutine ESMF_ArrayAttUpdate(array, vm, rootList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array
-      type(ESMF_VM), intent(in) :: vm
-      integer, dimension(:), intent(in) :: rootList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Update an Attribute hierarchy.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!      An {\tt ESMF\_Array} object.
-!     \item [vm]
-!      The virtural machine over which this Attribute hierarchy 
-!      should be updated.
-!     \item [rootList]
-!      The list of "root" PETs that are to be used to update.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, count                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
-
-      call ESMF_ArrayValidate(array, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      count = size(rootList)
-      call c_ESMC_AttributeUpdate(array, vm, rootList, count, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_ArrayAttUpdate
+AttUpdateMacro(ESMF_Array, array, array)
+AttWriteMacro(ESMF_Array, array, array, array, array)
 #endif
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayAttWrite"
-!BOPI
-! !IROUTINE: ESMF_AttributeWrite - Print the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_ArrayAttWrite(array, convention, purpose, &
-        attwriteflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array  
-      character (len = *), intent(in), optional :: convention
-      character (len = *), intent(in), optional :: purpose
-      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Print the Attribute package for the {\tt array}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!      An {\tt ESMF\_Array} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attwriteflag]
-!      Flag to determine the format for writing the Attributes.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, directional                           ! Error status
-      character(len=*), parameter :: fconvention='N/A'
-      character(len=*), parameter :: fpurpose='N/A'
-      character(len=*), parameter :: fobject='array'
-      character(len=*), parameter :: ftarobj='array'
-      type(ESMF_AttWriteFlag) :: writeflag
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
-
-      call ESMF_ArrayValidate(array, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      directional = 0
-      if (present(convention)) then
-        directional = 1 ! convention only
-      endif
-      
-      if (present(purpose)) then
-        directional = 2 ! purpose only
-      endif
-      
-      if (present(convention) .AND. present(purpose)) then
-        directional = 3 ! convention and purpose
-      endif
-      
-      if (present(attwriteflag)) then
-        writeflag = attwriteflag
-      else
-        writeflag = ESMF_ATTWRITE_TAB
-      endif
-      
-      if (directional == 0) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(array, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(array, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 1) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(array, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(array, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 2) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(array, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(array, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 3) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(array, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(array, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      end if
-      
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_ArrayAttWrite
 
 !-------------------------------------------------------------------------
 !  ARRAYBUNDLE
@@ -3808,205 +4245,11 @@ GetCountNameNumberMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 TypeKind3DeclarationMacro(AttSet, ESMF_ArrayBundle, arraybundle, arraybundle)
 AttSetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttSetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+
 #if 0
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayBundleAttUpdate"
-!BOPI
-! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeUpdate()
-      subroutine ESMF_ArrayBundleAttUpdate(arraybundle, vm, rootList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_ArrayBundle), intent(inout) :: arraybundle
-      type(ESMF_VM), intent(in) :: vm
-      integer, dimension(:), intent(in) :: rootList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Update an Attribute hierarchy.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [arraybundle]
-!      An {\tt ESMF\_ArrayBundle} object.
-!     \item [vm]
-!      The virtural machine over which this Attribute hierarchy 
-!      should be updated.
-!     \item [rootList]
-!      The list of "root" PETs that are to be used to update.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, count                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundle,rc)
-
-      call ESMF_ArrayBundleValidate(arraybundle, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      count = size(rootList)
-      call c_ESMC_AttributeUpdate(arraybundle, vm, rootList, count, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_ArrayBundleAttUpdate
+AttUpdateMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttWriteMacro(ESMF_ArrayBundle, arraybundle, arraybundle, arraybundle, arraybundle)
 #endif
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayBundleAttWrite"
-!BOPI
-! !IROUTINE: ESMF_AttributeWrite - Print the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_ArrayBundleAttWrite(arraybundle, convention, purpose, &
-        attwriteflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_ArrayBundle), intent(inout) :: arraybundle  
-      character (len = *), intent(in), optional :: convention
-      character (len = *), intent(in), optional :: purpose
-      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Print the Attribute package for the {\tt arraybundle}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [arraybundle]
-!      An {\tt ESMF\_ArrayBundle} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attwriteflag]
-!      Flag to determine the format for writing the Attributes.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, directional                           ! Error status
-      character(len=*), parameter :: fconvention='N/A'
-      character(len=*), parameter :: fpurpose='N/A'
-      character(len=*), parameter :: fobject='arraybundle'
-      character(len=*), parameter :: ftarobj='arraybundle'
-      type(ESMF_AttWriteFlag) :: writeflag
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundle,rc)
-
-      call ESMF_ArrayBundleValidate(arraybundle, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      directional = 0
-      if (present(convention)) then
-        directional = 1 ! convention only
-      endif
-      
-      if (present(purpose)) then
-        directional = 2 ! purpose only
-      endif
-      
-      if (present(convention) .AND. present(purpose)) then
-        directional = 3 ! convention and purpose
-      endif
-      
-      if (present(attwriteflag)) then
-        writeflag = attwriteflag
-      else
-        writeflag = ESMF_ATTWRITE_TAB
-      endif
-      
-      if (directional == 0) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(arraybundle, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(arraybundle, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 1) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(arraybundle, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(arraybundle, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 2) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(arraybundle, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(arraybundle, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 3) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(arraybundle, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(arraybundle, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      end if
-      
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_ArrayBundleAttWrite
 
 !-------------------------------------------------------------------------
 !  CplComp
@@ -4119,6 +4362,7 @@ AttSetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 !------------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_CplComp, comp, comp%compp%base)
+AttCopyMacro(ESMF_CplComp, ESMF_CplComp, comp1, comp2, comp1%compp%base, comp2%compp%base)
 AttRemoveMacro(ESMF_CplComp, comp, comp%compp%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_CplComp, comp, comp%compp%base)
@@ -4131,423 +4375,15 @@ TypeKind3DeclarationMacro(AttSet, ESMF_CplComp, comp, comp%compp%base)
 AttSetLogicalMacro(ESMF_CplComp, comp, comp%compp%base)
 AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AttributeSet - Link a Component Attribute hierarchy to that of
-!                                {\bf a Component or State}
-!
-! !INTERFACE:
-!      ! Private name; call using ESMF_AttributeSet()
-!      subroutine ESMF_CplCompAttSetLink(<object1>, <object2>, rc)
-!
-! !ARGUMENTS:
-!      <object1>, see below for supported values  
-!      <object2>, see below for supported values
-!      integer, intent(out), optional :: rc   
-!
-!
-! !DESCRIPTION:
-!     Attaches a {\tt CplComp} or {\tt GridComp} Attribute hierarchy to the 
-!     hierarchy of a {\tt CplComp}, {\tt GridComp}, or {\tt State}.
-!      
-!     Supported values for the <object1> are:
-!     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: comp1
-!     \item type(ESMF\_GridComp), intent(inout) :: comp1
-!     \end{description}
-!     Supported values for the <object2> are:
-!     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: comp2
-!     \item type(ESMF\_GridComp), intent(inout) :: comp2
-!     \item type(ESMF\_State), intent(inout) :: state
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [<object1>]
-!       The ``parent'' object in the Attribute hierarchy link.
-!     \item [<object2>]
-!       The ``child'' object in the Attribute hierarchy link.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_CplCompAttSetLinkCplComp"
-!BOPI
-! !IROUTINE: ESMF_AttributeSet - Link an CplComp Attribute hierarchy to a CplComp
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_CplCompAttSetLinkCplComp(comp1, comp2, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp), intent(inout) :: comp1
-      type(ESMF_CplComp), intent(inout)  :: comp2
-      integer, intent(out), optional  :: rc   
+AttSetLinkMacro(ESMF_CplComp, ESMF_CplComp, cplcomp1, cplcomp, & @\
+                cplcomp1%compp%base, cplcomp%compp%base)
+AttSetLinkMacro(ESMF_CplComp, ESMF_GridComp, cplcomp, gridcomp,  & @\
+                cplcomp%compp%base, gridcomp%compp%base)
+AttSetLinkMacro(ESMF_CplComp, ESMF_State, cplcomp, state,  & @\
+                cplcomp%compp%base, state%statep%base)
 
-!
-! !DESCRIPTION:
-!     Attaches a CplComp to a CplComp in an Attribute hierarchy
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [comp1]
-!      An {\tt ESMF\_CplComp} object.
-!     \item [comp2]
-!      An {\tt ESMF\_CplComp} object.
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp1,rc)
-
-      call ESMF_CplCompValidate(comp1, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp2,rc)
-
-      call ESMF_CplCompValidate(comp2, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
-        localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_CplCompAttSetLinkCplComp
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_CplCompAttSetLinkGridComp"
-!BOPI
-! !IROUTINE: ESMF_AttributeSet - Link an CplComp Attribute hierarchy to a GridComp
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_CplCompAttSetLinkGridComp(comp1, comp2, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp), intent(inout) :: comp1
-      type(ESMF_GridComp), intent(inout)  :: comp2
-      integer, intent(out), optional  :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a CplComp to a GridComp in an Attribute hierarchy
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [comp1]
-!      An {\tt ESMF\_CplComp} object.
-!     \item [comp2]
-!      An {\tt ESMF\_GridComp} object.
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp1,rc)
-
-      call ESMF_CplCompValidate(comp1, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp2,rc)
-
-      call ESMF_GridCompValidate(comp2, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
-        localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_CplCompAttSetLinkGridComp
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_CplCompAttSetLinkState"
-!BOPI
-! !IROUTINE: ESMF_AttributeSet - Link an CplComp Attribute hierarchy to a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_CplCompAttSetLinkState(comp1, state, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp), intent(inout) :: comp1
-      type(ESMF_State), intent(inout)  :: state
-      integer, intent(out), optional  :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a CplComp to a Field in an Attribute hierarchy
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [comp1]
-!      An {\tt ESMF\_CplComp} object.
-!     \item [state]
-!      An {\tt ESMF\_State} object.
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp1,rc)
-
-      call ESMF_CplCompValidate(comp1, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetLink(comp1%compp%base, state%statep%base, &
-        localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_CplCompAttSetLinkState
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_CplCompAttUpdate"
-!BOPI
-! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeUpdate()
-      subroutine ESMF_CplCompAttUpdate(comp, vm, rootList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp), intent(inout) :: comp
-      type(ESMF_VM), intent(in) :: vm
-      integer, dimension(:), intent(in) :: rootList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Update an Attribute hierarchy.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [comp]
-!      An {\tt ESMF\_CplComp} object.
-!     \item [vm]
-!      The virtural machine over which this Attribute hierarchy 
-!      should be updated.
-!     \item [rootList]
-!      The list of "root" PETs that are to be used to update.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, count                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
-
-      call ESMF_CplCompValidate(comp, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      count = size(rootList)
-      call c_ESMC_AttributeUpdate(comp%compp%base, vm, rootList, count, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_CplCompAttUpdate
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_CplCompAttWrite"
-!BOPI
-! !IROUTINE: ESMF_CplCompAttWrite - Print the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_CplCompAttWrite(comp, convention, purpose, &
-        attwriteflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp), intent(inout) :: comp  
-      character (len = *), intent(in), optional :: convention
-      character (len = *), intent(in), optional :: purpose
-      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Write the Attribute package for the {\tt comp}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [comp]
-!      An {\tt ESMF\_CplComp} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attwriteflag]
-!      Flag to determine the format for writing the Attributes.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, directional                           ! Error status
-      character(len=*), parameter :: fconvention='N/A'
-      character(len=*), parameter :: fpurpose='N/A'
-      character(len=*), parameter :: fobject='comp'
-      character(len=*), parameter :: ftarobj='field'
-      type(ESMF_AttWriteFlag) :: writeflag
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp,rc)
-
-      call ESMF_CplCompValidate(comp, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      directional = 0
-      if (present(convention)) then
-        directional = 1 ! convention only
-      endif
-      
-      if (present(purpose)) then
-        directional = 2 ! purpose only
-      endif
-      
-      if (present(convention) .AND. present(purpose)) then
-        directional = 3 ! convention and purpose
-      endif
-      
-      if (present(attwriteflag)) then
-        writeflag = attwriteflag
-      else
-        writeflag = ESMF_ATTWRITE_TAB
-      endif
-      
-      if (directional == 0) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 1) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 2) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 3) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      end if
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_CplCompAttWrite
+AttUpdateMacro(ESMF_CplComp, comp, comp%compp%base)
+AttWriteMacro(ESMF_CplComp, comp, comp%compp%base, comp, field)
 
 !-------------------------------------------------------------------------
 !  GridComp
@@ -4659,6 +4495,7 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 !------------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_GridComp, comp, comp%compp%base)
+AttCopyMacro(ESMF_GridComp, ESMF_GridComp, comp1, comp2, comp1%compp%base, comp2%compp%base)
 AttRemoveMacro(ESMF_GridComp, comp, comp%compp%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_GridComp, comp, comp%compp%base)
@@ -4667,457 +4504,21 @@ AttGetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 
 GetCountNameNumberMacro(ESMF_GridComp, comp, comp%compp%base)
 
+AttReadMacro(ESMF_GridComp, comp, comp%compp%base)
+
 TypeKind3DeclarationMacro(AttSet, ESMF_GridComp, comp, comp%compp%base)
 AttSetLogicalMacro(ESMF_GridComp, comp, comp%compp%base)
 AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_GridCompAttSetLinkCplComp"
-!BOPI
-! !IROUTINE: ESMF_AttributeSet - Link an GridComp Attribute hierarchy to a CplComp
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_GridCompAttSetLinkCplComp(comp1, comp2, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridComp), intent(inout) :: comp1
-      type(ESMF_CplComp), intent(inout)  :: comp2
-      integer, intent(out), optional  :: rc   
+AttSetLinkMacro(ESMF_GridComp, ESMF_CplComp, gridcomp, cplcomp, & @\
+                gridcomp%compp%base, cplcomp%compp%base)
+AttSetLinkMacro(ESMF_GridComp, ESMF_GridComp, gridcomp1, gridcomp, & @\
+                gridcomp1%compp%base, gridcomp%compp%base)
+AttSetLinkMacro(ESMF_GridComp, ESMF_State, gridcomp, state, & @\
+                gridcomp%compp%base, state%statep%base)
 
-!
-! !DESCRIPTION:
-!     Attaches a GridComp to a CplComp in an Attribute hierarchy
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [comp1]
-!      An {\tt ESMF\_GridComp} object.
-!     \item [comp2]
-!      An {\tt ESMF\_CplComp} object.
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp1,rc)
-
-      call ESMF_GridCompValidate(comp1, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,comp2,rc)
-
-      call ESMF_CplCompValidate(comp2, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
-        localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridCompAttSetLinkCplComp
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_GridCompAttSetLinkGridComp"
-!BOPI
-! !IROUTINE: ESMF_AttributeSet - Link an GridComp Attribute hierarchy to a GridComp
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_GridCompAttSetLinkGridComp(comp1, comp2, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridComp), intent(inout) :: comp1
-      type(ESMF_GridComp), intent(inout)  :: comp2
-      integer, intent(out), optional  :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a GridComp to a GridComp in an Attribute hierarchy
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [comp1]
-!      An {\tt ESMF\_GridComp} object.
-!     \item [comp2]
-!      An {\tt ESMF\_GridComp} object.
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp1,rc)
-
-      call ESMF_GridCompValidate(comp1, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp2,rc)
-
-      call ESMF_GridCompValidate(comp2, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetLink(comp1%compp%base, comp2%compp%base, &
-        localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridCompAttSetLinkGridComp
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_GridCompAttSetLinkState"
-!BOPI
-! !IROUTINE: ESMF_AttributeSet - Link a GridComp Attribute hierarchy to a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_GridCompAttSetLinkState(comp1, state, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridComp), intent(inout) :: comp1
-      type(ESMF_State), intent(inout)  :: state
-      integer, intent(out), optional  :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a GridComp to a Field in an Attribute hierarchy
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [comp1]
-!      An {\tt ESMF\_GridComp} object.
-!     \item [state]
-!      An {\tt ESMF\_State} object.
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp1,rc)
-
-      call ESMF_GridCompValidate(comp1, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetLink(comp1%compp%base, state%statep%base, &
-        localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridCompAttSetLinkState
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_GridCompAttUpdate"
-!BOPI
-! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeUpdate()
-      subroutine ESMF_GridCompAttUpdate(comp, vm, rootList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridComp), intent(inout) :: comp
-      type(ESMF_VM), intent(in) :: vm
-      integer, dimension(:), intent(in) :: rootList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Update an Attribute hierarchy.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [comp]
-!      An {\tt ESMF\_GridComp} object.
-!     \item [vm]
-!      The virtural machine over which this Attribute hierarchy 
-!      should be updated.
-!     \item [rootList]
-!      The list of "root" PETs that are to be used to update.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, count                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
-
-      call ESMF_GridCompValidate(comp, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      count = size(rootList)
-      call c_ESMC_AttributeUpdate(comp%compp%base, vm, rootList, count, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridCompAttUpdate
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_GridCompAttRead"
-!BOPI
-! !IROUTINE: ESMF_GridCompAttRead - Read an Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeRead()
-      subroutine ESMF_GridCompAttRead(comp, fileName, convention, purpose, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridComp), intent(inout) :: comp  
-      character (len=*),   intent(in), optional :: fileName
-      character (len = *), intent(in), optional :: convention
-      character (len = *), intent(in), optional :: purpose
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Read the Attribute package for the {\tt comp}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [comp]
-!      An {\tt ESMF\_GridComp} object.
-!     \item[{[fileName]}]
-!      The file name to be read from.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      ! initialize fileName length to zero for non-existent name
-      integer :: fileNameLen, localrc
-
-      fileNameLen = 0
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
-
-      call ESMF_GridCompValidate(comp, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
- 
-      ! get length of given fileName for C++ validation
-      if (present(fileName)) then
-        fileNameLen = len_trim(fileName)
-      end if
-
-      ! invoke C to C++ entry point
-      ! TODO: convention, purpose
-      call c_ESMC_AttributeRead(comp%compp%base, fileNameLen, fileName, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                              ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridCompAttRead
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_GridCompAttWrite"
-!BOPI
-! !IROUTINE: ESMF_GridCompAttWrite - Print the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_GridCompAttWrite(comp, convention, purpose, &
-        attwriteflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridComp), intent(inout) :: comp  
-      character (len = *), intent(in), optional :: convention
-      character (len = *), intent(in), optional :: purpose
-      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Write the Attribute package for the {\tt comp}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [comp]
-!      An {\tt ESMF\_GridComp} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attwriteflag]
-!      Flag to determine the format for writing the Attributes.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, directional                           ! Error status
-      character(len=*), parameter :: fconvention='N/A'
-      character(len=*), parameter :: fpurpose='N/A'
-      character(len=*), parameter :: fobject='comp'
-      character(len=*), parameter :: ftarobj='field'
-      type(ESMF_AttWriteFlag) :: writeflag
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,comp,rc)
-
-      call ESMF_GridCompValidate(comp, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      directional = 0
-      if (present(convention)) then
-        directional = 1 ! convention only
-      endif
-      
-      if (present(purpose)) then
-        directional = 2 ! purpose only
-      endif
-      
-      if (present(convention) .AND. present(purpose)) then
-        directional = 3 ! convention and purpose
-      endif
-
-      if (present(attwriteflag)) then
-        writeflag = attwriteflag
-      else
-        writeflag = ESMF_ATTWRITE_TAB
-      endif
-      
-      if (directional == 0) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 1) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 2) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 3) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(comp%compp%base, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(comp%compp%base, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      end if
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridCompAttWrite
+AttUpdateMacro(ESMF_GridComp, comp, comp%compp%base)
+AttWriteMacro(ESMF_GridComp, comp, comp%compp%base, comp, field)
 
 !-------------------------------------------------------------------------
 !  DISTGRID
@@ -5225,145 +4626,9 @@ TypeKind3DeclarationMacro(AttSet, ESMF_DistGrid, distgrid, distgrid)
 AttSetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
 AttSetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
 
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_DistGridAttWrite"
-!BOPI
-! !IROUTINE: ESMF_AttributeWrite - Print the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_DistGridAttWrite(distgrid, convention, purpose, &
-        attwriteflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_DistGrid), intent(inout) :: distgrid  
-      character (len = *), intent(in), optional :: convention
-      character (len = *), intent(in), optional :: purpose
-      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Print the Attribute package for the {\tt distgrid}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [distgrid]
-!      An {\tt ESMF\_DistGrid} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attwriteflag]
-!      Flag to determine the format for writing the Attributes.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, directional                           ! Error status
-      character(len=*), parameter :: fconvention='N/A'
-      character(len=*), parameter :: fpurpose='N/A'
-      character(len=*), parameter :: fobject='distgrid'
-      character(len=*), parameter :: ftarobj='distgrid'
-      type(ESMF_AttWriteFlag) :: writeflag
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit,distgrid,rc)
-
-      call ESMF_DistGridValidate(distgrid, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      directional = 0
-      if (present(convention)) then
-        directional = 1 ! convention only
-      endif
-      
-      if (present(purpose)) then
-        directional = 2 ! purpose only
-      endif
-      
-      if (present(convention) .AND. present(purpose)) then
-        directional = 3 ! convention and purpose
-      endif
-      
-      if (present(attwriteflag)) then
-        writeflag = attwriteflag
-      else
-        writeflag = ESMF_ATTWRITE_TAB
-      endif
-      
-      if (directional == 0) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(distgrid, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(distgrid, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 1) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(distgrid, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(distgrid, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 2) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(distgrid, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(distgrid, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 3) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(distgrid, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(distgrid, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      end if
-      
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_DistGridAttWrite
+#if 0
+AttWriteMacro(ESMF_DistGrid, distgrid, distgrid, distgrid, distgrid)
+#endif
 
 !-------------------------------------------------------------------------
 !  FIELD
@@ -5476,210 +4741,14 @@ TypeKind3DeclarationMacro(AttSet, ESMF_Field, field, field%ftypep%base)
 AttSetLogicalMacro(ESMF_Field, field, field%ftypep%base)
 AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldAttUpdate"
-!BOPI
-! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeUpdate()
-      subroutine ESMF_FieldAttUpdate(field, vm, rootList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field
-      type(ESMF_VM), intent(in) :: vm
-      integer, dimension(:), intent(in) :: rootList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Update an Attribute hierarchy.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!      An {\tt ESMF\_Field} object.
-!     \item [vm]
-!      The virtural machine over which this Attribute hierarchy 
-!      should be updated.
-!     \item [rootList]
-!      The list of "root" PETs that are to be used to update.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, count                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
-      ! this is commented out because empty objects can hold Attributes
-      !call ESMF_FieldValidate(field, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      count = size(rootList)
-      call c_ESMC_AttributeUpdate(field%ftypep%base, vm, rootList, count, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldAttUpdate
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldAttWrite"
-!BOPI
-! !IROUTINE: ESMF_AttributeWrite - Print the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_FieldAttWrite(field, convention, purpose, &
-        attwriteflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field  
-      character (len = *), intent(in), optional :: convention
-      character (len = *), intent(in), optional :: purpose
-      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Write the Attribute package for the {\tt field}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!      An {\tt ESMF\_Field} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attwriteflag]
-!      Flag to determine the format for writing the Attributes.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, directional                           ! Error status
-      character(len=*), parameter :: fconvention='N/A'
-      character(len=*), parameter :: fpurpose='N/A'
-      character(len=*), parameter :: fobject='field'
-      character(len=*), parameter :: ftarobj='field'
-      type(ESMF_AttWriteFlag) :: writeflag
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
-      call ESMF_FieldValidate(field, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      directional = 0
-      if (present(convention)) then
-        directional = 1 ! convention only
-      endif
-      
-      if (present(purpose)) then
-        directional = 2 ! purpose only
-      endif
-      
-      if (present(convention) .AND. present(purpose)) then
-        directional = 3 ! convention and purpose
-      endif
-      
-      if (present(attwriteflag)) then
-        writeflag = attwriteflag
-      else
-        writeflag = ESMF_ATTWRITE_TAB
-      endif
-      
-      if (directional == 0) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(field%ftypep%base, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(field%ftypep%base, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 1) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(field%ftypep%base, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(field%ftypep%base, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 2) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(field%ftypep%base, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(field%ftypep%base, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 3) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(field%ftypep%base, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(field%ftypep%base, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      end if
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldAttWrite
+AttUpdateMacro(ESMF_Field, field, field%ftypep%base)
+AttWriteMacro(ESMF_Field, field, field%ftypep%base, field, field)
 
 !-------------------------------------------------------------------------
 !  FIELDBUNDLE
 !-------------------------------------------------------------------------
 
+#if 0
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldBundleAttAddPack"
@@ -5751,6 +4820,7 @@ AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
       end subroutine ESMF_FieldBundleAttAddPack
 
 !------------------------------------------------------------------------------
+#endif 
 
 AttAddPackCustomMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 AttRemoveMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
@@ -5765,260 +4835,11 @@ TypeKind3DeclarationMacro(AttSet, ESMF_FieldBundle, fieldbundle, fieldbundle%bty
 AttSetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldBundleAttSetLinkField"
-!BOP
-! !IROUTINE: ESMF_AttributeSet - Link a FieldBundle Attribute hierarchy to that 
-!                                {\bf of a Field}
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_FieldBundleAttSetLinkField(fieldbundle, field, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
-      type(ESMF_Field), intent(inout)  :: field
-      integer, intent(out), optional  :: rc   
+AttSetLinkMacro(ESMF_FieldBundle, ESMF_Field, fieldbundle, field, & @\
+                fieldbundle%btypep%base, field%ftypep%base)
 
-!
-! !DESCRIPTION:
-!     Attaches a FieldBundle to a Field in an Attribute hierarchy
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [fieldbundle]
-!      An {\tt ESMF\_FieldBundle} object.
-!     \item [field]
-!      An {\tt ESMF\_Field} object.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-
-      integer :: localrc                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit,fieldbundle,rc)
-
-      call ESMF_FieldBundleValidate(fieldbundle, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetLink(fieldbundle%btypep%base, field%ftypep%base, &
-        localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldBundleAttSetLinkField
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldBundleAttUpdate"
-!BOPI
-! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeUpdate()
-      subroutine ESMF_FieldBundleAttUpdate(fieldbundle, vm, rootList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
-      type(ESMF_VM), intent(in) :: vm
-      integer, dimension(:), intent(in) :: rootList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Update an Attribute hierarchy.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [fieldbundle]
-!      An {\tt ESMF\_FieldBundle} object.
-!     \item [vm]
-!      The virtural machine over which this Attribute hierarchy 
-!      should be updated.
-!     \item [rootList]
-!      The list of "root" PETs that are to be used to update.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, count                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
-
-      call ESMF_FieldBundleValidate(fieldbundle, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      count = size(rootList)
-      call c_ESMC_AttributeUpdate(fieldbundle%btypep%base, vm, rootList, count, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldBundleAttUpdate
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldBundleAttWrite"
-!BOPI
-! !IROUTINE: ESMF_FieldBundleAttWrite - Print the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_FieldBundleAttWrite(fieldbundle, convention, purpose, &
-        attwriteflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: fieldbundle  
-      character (len = *), intent(in), optional :: convention
-      character (len = *), intent(in), optional :: purpose
-      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Write the Attribute package for the {\tt fieldbundle}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [fieldbundle]
-!      An {\tt ESMF\_FieldBundle} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attwriteflag]
-!      Flag to determine the format for writing the Attributes.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, directional                           ! Error status
-      character(len=*), parameter :: fconvention='N/A'
-      character(len=*), parameter :: fpurpose='N/A'
-      character(len=*), parameter :: fobject='fieldbundle'
-      character(len=*), parameter :: ftarobj='field'
-      type(ESMF_AttWriteFlag) :: writeflag
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
-
-      call ESMF_FieldBundleValidate(fieldbundle, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      directional = 0
-      if (present(convention)) then
-        directional = 1 ! convention only
-      endif
-      
-      if (present(purpose)) then
-        directional = 2 ! purpose only
-      endif
-      
-      if (present(convention) .AND. present(purpose)) then
-        directional = 3 ! convention and purpose
-      endif
-
-      if (present(attwriteflag)) then
-        writeflag = attwriteflag
-      else
-        writeflag = ESMF_ATTWRITE_TAB
-      endif
-      
-      if (directional == 0) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(fieldbundle%btypep%base, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(fieldbundle%btypep%base, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 1) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(fieldbundle%btypep%base, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(fieldbundle%btypep%base, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 2) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(fieldbundle%btypep%base, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(fieldbundle%btypep%base, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 3) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(fieldbundle%btypep%base, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(fieldbundle%btypep%base, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      end if
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldBundleAttWrite
+AttUpdateMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base, fieldbundle, field)
 
 !-------------------------------------------------------------------------
 !  GRID
@@ -6154,201 +4975,11 @@ GetCountNameNumberMacro(ESMF_Grid, grid, grid)
 TypeKind3DeclarationMacro(AttSet, ESMF_Grid, grid, grid)
 AttSetLogicalMacro(ESMF_Grid, grid, grid)
 AttSetCharacterMacro(ESMF_Grid, grid, grid)
+
 #if 0
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_GridAttUpdate"
-!BOPI
-! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeUpdate()
-      subroutine ESMF_GridAttUpdate(grid, vm, rootList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(inout) :: grid
-      type(ESMF_VM), intent(in) :: vm
-      integer, dimension(:), intent(in) :: rootList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Update an Attribute hierarchy.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [grid]
-!      An {\tt ESMF\_Grid} object.
-!     \item [vm]
-!      The virtural machine over which this Attribute hierarchy 
-!      should be updated.
-!     \item [rootList]
-!      The list of "root" PETs that are to be used to update.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, count                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-      ! this is commented out because empty objects can hold Attributes
-      !call ESMF_GridValidate(grid, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      count = size(rootList)
-      call c_ESMC_AttributeUpdate(grid, vm, rootList, count, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridAttUpdate
+AttUpdateMacro(ESMF_Grid, grid, grid)
+AttWriteMacro(ESMF_Grid, grid, grid, grid, grid)
 #endif
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_GridAttWrite"
-!BOPI
-! !IROUTINE: ESMF_GridAttWrite - Print the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_GridAttWrite(grid, convention, purpose, &
-        attwriteflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(inout) :: grid  
-      character (len = *), intent(in), optional :: convention
-      character (len = *), intent(in), optional :: purpose
-      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Write the Attribute package for the {\tt grid}.
-!     The Attribute package defines the convention, purpose, and object type
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [grid]
-!      An {\tt ESMF\_Grid} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attwriteflag]
-!      Flag to determine the format for writing the Attributes.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, directional                           ! Error status
-      character(len=*), parameter :: fconvention='N/A'
-      character(len=*), parameter :: fpurpose='N/A'
-      character(len=*), parameter :: fobject='grid'
-      character(len=*), parameter :: ftarobj='grid'
-      type(ESMF_AttWriteFlag) :: writeflag
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-      directional = 0
-      if (present(convention)) then
-        directional = 1 ! convention only
-      endif
-      
-      if (present(purpose)) then
-        directional = 2 ! purpose only
-      endif
-      
-      if (present(convention) .AND. present(purpose)) then
-        directional = 3 ! convention and purpose
-      endif
-
-      if (present(attwriteflag)) then
-        writeflag = attwriteflag
-      else
-        writeflag = ESMF_ATTWRITE_TAB
-      endif
-      
-      if (directional == 0) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(grid, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(grid, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 1) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(grid, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(grid, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 2) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(grid, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(grid, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 3) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(grid, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(grid, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      end if
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridAttWrite
 
 !-------------------------------------------------------------------------
 !  STATE
@@ -6448,80 +5079,11 @@ AttSetCharacterMacro(ESMF_Grid, grid, grid)
 
       end subroutine ESMF_StateAttAddPack
 
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateAttributeCopy"
-!BOPI
-! !IROUTINE: ESMF_StateAttributeCopy - Copy an Attribute hierarchy between states
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeCopy()
-      subroutine ESMF_StateAttributeCopy(state1, state2, attcopyflag, atttreeflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state1  
-      type(ESMF_State), intent(inout) :: state2
-      type(ESMF_AttCopyFlag), intent(in) :: attcopyflag
-      type(ESMF_AttTreeFlag), intent(in) :: atttreeflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Copy all Attributes in one {\tt state} hierarchy to another.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [state1]
-!      An {\tt ESMF\_State} object.
-!     \item [state2]
-!      An {\tt ESMF\_State} object.
-!     \item [attcopyflag]
-!      A flag to determine if the copy is to be by reference, value, or both
-!     \item [atttreeflag]
-!      A flag to determine if the copy is supposed to descend the Attribute 
-!      hierarchy
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-      
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state1,rc)
-      
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state2,rc)
-
-      call ESMF_StateValidate(state1, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      
-      call ESMF_StateValidate(state2, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeCopy(state1%statep%base, state2%statep%base, &
-                                attcopyflag, atttreeflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAttributeCopy
-
 
 !------------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_State, state, state%statep%base)
+AttCopyMacro(ESMF_State, ESMF_State, state1, state2, state1%statep%base, state2%statep%base)
 AttRemoveMacro(ESMF_State, state, state%statep%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_State, state, state%statep%base)
@@ -6534,573 +5096,16 @@ TypeKind3DeclarationMacro(AttSet, ESMF_State, state, state%statep%base)
 AttSetLogicalMacro(ESMF_State, state, state%statep%base)
 AttSetCharacterMacro(ESMF_State, state, state%statep%base)
 
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AttributeSet - Link a State Attribute hierarchy with the
-!                               {\bf hierarchy of a FieldBundle, Field, or State}
-!
-! !INTERFACE:
-!      ! Private name; call using ESMF_AttributeSet()
-!      subroutine ESMF_StateAttributeSetLink(state, <object>, rc)
-!
-! !ARGUMENTS:
-!      type(ESMF\_State), intent(inout) :: state  
-!      <object>, see below for supported values
-!      integer, intent(out), optional :: rc   
-!
-!
-! !DESCRIPTION:
-!     Attaches a {\tt State} Attribute hierarchy to the hierarchy of
-!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}. 
-!     Supported values for the <object> are:
-!     \begin{description}
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle
-!     \item type(ESMF\_Field), intent(inout) :: field
-!     \item type(ESMF\_State), intent(inout) :: state
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!       An {\tt ESMF\_State} object.
-!     \item [<object>]
-!       The object with which to link hierarchies.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateAttSetLinkFB"
-!BOPI
-! !IROUTINE: ESMF_AttributeSet - Link a State to a FieldBundle in an Attribute hierarchy
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_StateAttSetLinkFB(state, bundle, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      type(ESMF_FieldBundle), intent(inout)  :: bundle
-      integer, intent(out), optional  :: rc   
+ESMF_StateAttSetLinkMacro(ESMF_Field, state1, field, state1%statep%base, & @\
+                          field%ftypep%base, statep%st, field)
+ESMF_StateAttSetLinkMacro(ESMF_FieldBundle, state1, fieldbundle, state1%statep%base, & @\
+                          fieldbundle%btypep%base, statep%st, field)
+ESMF_StateAttSetLinkMacro(ESMF_State, state1, state, state1%statep%base, & @\
+                          state%statep%base, statep%st, field)
 
-!
-! !DESCRIPTION:
-!     Attaches a State to a FieldBundle in an Attribute hierarchy
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!      An {\tt ESMF\_State} object.
-!     \item [bundle]
-!      An {\tt ESMF\_FieldBundle} object.
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
+AttUpdateMacro(ESMF_State, state, state%statep%base)
+AttWriteMacro(ESMF_State, state, state%statep%base, state, field)
 
-      integer :: localrc                           ! Error status
-      type(ESMF_Logical) :: lvalue1, lvalue2
-      character (len=*), parameter :: lobject = 'field'
-      character (len=*), parameter :: lname1 = 'import'
-      character (len=*), parameter :: lname2 = 'export'
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetLink(state%statep%base, bundle%btypep%base, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      ! set the import and export Attributes on any Field connected to this State
-      lvalue1 = .true.
-      lvalue2 = .false.
-      if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAttSetLinkFB
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateAttSetLinkField"
-!BOPI
-! !IROUTINE: ESMF_AttributeSet - Link a State to a Field in an Attribute hierarchy
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_StateAttSetLinkField(state, field, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      type(ESMF_Field), intent(inout)  :: field
-      integer, intent(out), optional  :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a State to a Field in an Attribute hierarchy
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!      An {\tt ESMF\_State} object.
-!     \item [field]
-!      An {\tt ESMF\_Field} object.
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-      type(ESMF_Logical) :: lvalue1, lvalue2
-      character (len=*), parameter :: lobject = 'field'
-      character (len=*), parameter :: lname1 = 'import'
-      character (len=*), parameter :: lname2 = 'export'
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetLink(state%statep%base, field%ftypep%base, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      ! set the import and export Attributes on any Field connected to this State
-      lvalue1 = .true.
-      lvalue2 = .false.
-      if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAttSetLinkField
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateAttSetLinkState"
-!BOPI
-! !IROUTINE: ESMF_AttributeSet - Link a State to a State in an Attribute hierarchy
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeSet()
-      subroutine ESMF_StateAttSetLinkState(state1, state2, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state1
-      type(ESMF_State), intent(inout)  :: state2
-      integer, intent(out), optional  :: rc   
-
-!
-! !DESCRIPTION:
-!     Attaches a State to a State in an Attribute hierarchy
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [state1]
-!      An {\tt ESMF\_State} object.
-!     \item [state2]
-!      An {\tt ESMF\_State} object.
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc                           ! Error status
-      type(ESMF_Logical) :: lvalue1, lvalue2
-      character (len=*), parameter :: lobject = 'field'
-      character (len=*), parameter :: lname1 = 'import'
-      character (len=*), parameter :: lname2 = 'export'
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state1,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state2,rc)
-
-      call ESMF_StateValidate(state1, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-                                  
-      call ESMF_StateValidate(state2, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      call c_ESMC_AttributeSetLink(state1%statep%base, state2%statep%base, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      ! set the import and export Attributes on any Field connected to this State
-      lvalue1 = .true.
-      lvalue2 = .false.
-      if (state1%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state1%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state1%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (state1%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjsInTree(state1%statep%base, lobject, lname1, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc)
-        call c_ESMC_AttributeSetObjsInTree(state1%statep%base, lobject, lname2, &
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAttSetLinkState
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateAttUpdate"
-!BOPI
-! !IROUTINE: ESMF_AttributeUpdate - Update an Attribute hierarchy
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeUpdate()
-      subroutine ESMF_StateAttUpdate(state, vm, rootList, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      type(ESMF_VM), intent(in) :: vm
-      integer, dimension(:), intent(in) :: rootList
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Update an Attribute hierarchy.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!      An {\tt ESMF\_State} object.
-!     \item [vm]
-!      The virtural machine over which this Attribute hierarchy 
-!      should be updated.
-!     \item [rootList]
-!      The list of "root" PETs that are to be used to update.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, count                           ! Error status
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      count = size(rootList)
-      call c_ESMC_AttributeUpdate(state%statep%base, vm, rootList, count, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAttUpdate
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateAttWrite"
-!BOPI
-! !IROUTINE: ESMF_StateAttWrite - Print the Attribute package
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeWrite()
-      subroutine ESMF_StateAttWrite(state, convention, purpose, &
-        attwriteflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state  
-      character (len = *), intent(in), optional :: convention
-      character (len = *), intent(in), optional :: purpose
-      type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!     Write the Attribute package for the {\tt state}.
-!     The Attribute package defines the convention, purpose, and object type 
-!     of the associated Attributes.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!      An {\tt ESMF\_State} object.
-!     \item [convention]
-!      The convention of the Attribute package.
-!     \item [purpose]
-!      The purpose of the Attribute package.
-!     \item [attwriteflag]
-!      Flag to determine the format for writing the Attributes.
-!     \item [{[rc]}] 
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: localrc, directional                           ! Error status
-      character(len=*), parameter :: fconvention='N/A'
-      character(len=*), parameter :: fpurpose='N/A'
-      character(len=*), parameter :: fobject='state'
-      character(len=*), parameter :: ftarobj='field'
-      type(ESMF_AttWriteFlag) :: writeflag
-
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      directional = 0
-      if (present(convention)) then
-        directional = 1 ! convention only
-      endif
-      
-      if (present(purpose)) then
-        directional = 2 ! purpose only
-      endif
-      
-      if (present(convention) .AND. present(purpose)) then
-        directional = 3 ! convention and purpose
-      endif
-
-      if (present(attwriteflag)) then
-        writeflag = attwriteflag
-      else
-        writeflag = ESMF_ATTWRITE_TAB
-      endif
-      
-      if (directional == 0) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(state%statep%base, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(state%statep%base, fconvention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 1) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(state%statep%base, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(state%statep%base, convention, &
-          fpurpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 2) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(state%statep%base, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(state%statep%base, fconvention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      else if (directional == 3) then
-      if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then
-        call c_ESMC_AttributeWriteTab(state%statep%base, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (writeflag%value .eq. ESMF_ATTWRITE_XML%value) then
-        call c_ESMC_AttributeWriteXML(state%statep%base, convention, &
-          purpose, fobject, ftarobj, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      end if
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateAttWrite
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AttributeUpdate  - Update an Attribute hierarchy
-!
-! !INTERFACE:
-!     subroutine ESMF_AttributeUpdate(<object>, vm, rootList, rc)
-!
-! !ARGUMENTS:
-!     <object>, see below for supported values  
-!     type(ESMF_VM), intent(in) :: vm
-!     integer, dimension(:), intent(in) :: rootList
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Update an Attribute hierarchy during runtime.
-!     Supported values for <object> are:
-!     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: comp  
-!     \item type(ESMF\_GridComp), intent(inout) :: comp  
-!     \item type(ESMF\_Field), intent(inout) :: field  
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
-!     \item type(ESMF\_State), intent(inout) :: state
-!     \end{description}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [<object>]
-!           An {\tt ESMF} object.
-!     \item [vm]
-!           The virtural machine over which this Attribute hierarchy 
-!           should be updated.
-!     \item [rootList]
-!           The list of "root" PETs that are to be used to update.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AttributeWrite  - Write an Attribute package
-!
-! !INTERFACE:
-!     subroutine ESMF_AttributeWrite(<object>, convention, purpose, attwriteflag, rc)
-!
-! !ARGUMENTS:
-!     <object>, see below for supported values  
-!     character (len = *), intent(in), optional :: convention
-!     character (len = *), intent(in), optional :: purpose
-!     type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-!     integer, intent(out), optional :: rc   
-!
-! !DESCRIPTION:
-!     Write the Attribute package for <object>.  The Attribute package defines 
-!     the convention, purpose, and object type of the associated Attributes.  Either
-!     tab-delimited or xml format is acheived by using {\tt attwriteflag}.
-!     Supported values for <object> are:
-!     \begin{description}
-!     \item type(ESMF\_Array), intent(inout) :: array
-!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp), intent(inout) :: comp  
-!     \item type(ESMF\_GridComp), intent(inout) :: comp  
-!     \item type(ESMF\_DistGrid), intent(inout) :: grid
-!     \item type(ESMF\_Field), intent(inout) :: field  
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fbundle 
-!     \item type(ESMF\_Grid), intent(inout) :: grid
-!     \item type(ESMF\_State), intent(inout) :: state
-!     \end{description}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [<object>]
-!           An {\tt ESMF} object.
-!     \item [convention]
-!           The convention of the Attribute package.
-!     \item [purpose]
-!           The purpose of the Attribute package.
-!     \item [attwriteflag]
-!           The flag to specify which format is desired for the write, the 
-!           default is tab-delimited.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!     NOTE:  The options for {\tt attwriteflag} include:
-!            \begin{enumerate}
-!              \item ESMF\_ATTWRITE\_XML will write in xml format
-!              \item ESMF\_ATTWRITE\_TAB will write in tab-delimited format
-!            \end{enumerate}
-!
-!EOP
 !------------------------------------------------------------------------------
 
 end module ESMF_AttributeMod
