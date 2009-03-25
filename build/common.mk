@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.258 2009/03/25 00:24:53 theurich Exp $
+#  $Id: common.mk,v 1.259 2009/03/25 19:55:54 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1256,6 +1256,8 @@ esmflib:: chkdir_lib $(SOURCE)
 		$(MAKE) -f $(MAKEFILE) libc ; fi
 	@if [ "$(SOURCEF)" != "" ] ; then \
 		$(MAKE) -f $(MAKEFILE) libf ; fi
+	@if [ "$(QUICKSTART)" != "" ] ; then \
+		$(MAKE) -f $(MAKEFILE) tree_build_quick_start; fi
 
 # copy private include files into src/include directory.
 include: chkdir_include $(if $(findstring ON,$(ESMF_DEFER_LIB_BUILD)),chkdir_lib)
@@ -2434,6 +2436,35 @@ check_results: check_unit_tests check_examples check_system_tests
 results_summary:
 	@$(DO_SUM_RESULTS)
 
+
+#-------------------------------------------------------------------------------
+# Quickstart targets
+#-------------------------------------------------------------------------------
+
+QUICKSTART_DIR     =  $(ESMF_BUILD)/quick_start
+
+chkdir_quick_start:
+	@if [ ! -d $(QUICKSTART_DIR) ] ; then \
+	   echo Making $(QUICKSTART_DIR); mkdir -p $(QUICKSTART_DIR) ; fi
+	@for DIR in $(QUICKSTART_SUBDIRS) foo ; do \
+	   if [ $$DIR != "foo" ] ; then \
+	      if [ ! -d $(QUICKSTART_DIR)/$$DIR ] ; then \
+	         echo Making $(QUICKSTART_DIR)/$$DIR ;\
+	         mkdir $(QUICKSTART_DIR)/$$DIR ;\
+	      fi ;\
+	   fi ;\
+	done
+
+build_quick_start: chkdir_quick_start
+	$(MAKE) ACTION=tree_build_quick_start tree
+
+tree_build_quick_start: chkdir_quick_start
+	@for DIR in $(QUICKSTART_COPYDIRS) foo ; do \
+	   if [ $$DIR != "foo" ] ; then \
+	      echo "Copying $$DIR files to $(QUICKSTART_DIR)" ;\
+	      cp -f $$DIR/* $(QUICKSTART_DIR) ;\
+	   fi ;\
+	done
 
 #-------------------------------------------------------------------------------
 #  Doc targets
