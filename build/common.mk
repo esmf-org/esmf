@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.259 2009/03/25 19:55:54 theurich Exp $
+#  $Id: common.mk,v 1.260 2009/03/25 21:34:02 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -607,7 +607,7 @@ ifeq ($(ESMF_BOPT),O)
 ESMF_F90OPTFLAG = $(ESMF_F90OPTFLAG_O)
 endif
 endif
-ESMF_F90COMPILEOPTS += $(ESMF_F90OPTFLAG)
+ESMF_F90COMPILEOPTS += $(ESMF_F90OPTFLAG) $(ESMF_SO_F90COMPILEOPTS)
 ESMF_F90COMPILEPATHS += $(ESMF_F90IMOD)$(ESMF_F90MODDIR)
 ESMF_F90COMPILEPATHSLOCAL =
 ifneq ($(ESMF_SITE),default)
@@ -639,7 +639,7 @@ ifeq ($(ESMF_BOPT),O)
 ESMF_CXXOPTFLAG = $(ESMF_CXXOPTFLAG_O)
 endif
 endif
-ESMF_CXXCOMPILEOPTS += $(ESMF_CXXOPTFLAG)
+ESMF_CXXCOMPILEOPTS += $(ESMF_CXXOPTFLAG) $(ESMF_SO_CXXCOMPILEOPTS)
 ESMF_CXXCOMPILEPATHSLOCAL = -I$(ESMF_DIR)/$(LOCDIR)
 ESMF_CXXCOMPILEPATHSLOCAL += -I$(ESMF_DIR)/$(LOCDIR)/../include 
 ifneq ($(ESMF_SITE),default)
@@ -1311,7 +1311,7 @@ tree_etc:
 # prevent the wildcards from being expanded.)
 
 CLEAN_DEFDIRS = coredir.*
-CLEAN_DEFAULTS = *.o *.so *.mod *.txt core ESM*.stdout ESM*.Log PET*.Log *ESMF_LogFile
+CLEAN_DEFAULTS = *.o *.$(ESMF_SL_SUFFIX) *.mod *.txt core ESM*.stdout ESM*.Log PET*.Log *ESMF_LogFile
 CLEAN_TEXFILES = *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG
 
 clean:
@@ -2921,7 +2921,7 @@ $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 #  These rules are for compiling the test examples.
 #-------------------------------------------------------------------------------
 .cpp.rm .cc.rm .C.rm .F.rm .f.rm .c.rm:
-	-@$(ESMF_RM) $* *.o *.so $*.mon.* gmon.out mon.out
+	-@$(ESMF_RM) $* *.o *.$(ESMF_SL_SUFFIX) $*.mon.* gmon.out mon.out
 
 
 #-------------------------------------------------------------------------------
