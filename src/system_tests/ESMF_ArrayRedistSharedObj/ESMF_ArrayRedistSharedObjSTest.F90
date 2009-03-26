@@ -1,7 +1,7 @@
-! $Id: ESMF_ArrayRedistSharedObjSTest.F90,v 1.6 2009/03/26 16:40:14 theurich Exp $
+! $Id: ESMF_ArrayRedistSharedObjSTest.F90,v 1.7 2009/03/26 19:41:02 svasquez Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_disable_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_SHAREDOBJ_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
