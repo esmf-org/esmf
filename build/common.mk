@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.260 2009/03/25 21:34:02 theurich Exp $
+#  $Id: common.mk,v 1.261 2009/03/26 19:42:10 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1516,7 +1516,7 @@ system_tests: chkdir_tests
 	  $(MAKE) err ; \
           exit ; \
 	fi ; \
-	$(MAKE) MULTI="Multiprocessor" config_sys_tests ; \
+	$(MAKE) MULTI="Multiprocessor" config_sys_tests update_sys_test_flags; \
 	$(MAKE) ACTION=tree_system_tests tree ; \
 	$(MAKE) check_system_tests
 
@@ -1536,7 +1536,7 @@ system_tests_uni: chkdir_tests
 	   fi; \
 	   echo current working directory is now `pwd` ; \
 	fi ; \
-	$(MAKE) MULTI="Uniprocessor" config_sys_tests
+	$(MAKE) MULTI="Uniprocessor" config_sys_tests update_sys_tests_flags
 	$(MAKE) ACTION=tree_system_tests_uni tree ; \
 	$(MAKE) check_system_tests
 
@@ -1556,7 +1556,7 @@ build_system_tests: reqfile_libesmf reqdir_lib chkdir_tests
 	   fi; \
 	   echo current working directory is now `pwd` ; \
         fi ; \
-	$(MAKE) config_sys_tests
+	$(MAKE) config_sys_tests update_sys_tests_flags
 	$(MAKE) ACTION=tree_build_system_tests tree ; \
 	echo "ESMF system tests built successfully."
 
@@ -1621,7 +1621,7 @@ MPMDCLEANUP:
 #
 # run_system_tests
 #
-run_system_tests:  reqdir_tests update_mpmd_flag
+run_system_tests:  reqdir_tests update_sys_tests_flags
 	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
@@ -1651,7 +1651,7 @@ tree_run_system_tests: $(SYSTEM_TESTS_RUN)
 #
 # run_system_tests_uni
 #
-run_system_tests_uni:  reqdir_tests update_mpmd_flag
+run_system_tests_uni:  reqdir_tests update_sys_tests_flags
 	@if [ -f $(SYS_TESTS_CONFIG) ] ; then \
            $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
            $(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG); \
@@ -1672,36 +1672,27 @@ run_system_tests_uni:  reqdir_tests update_mpmd_flag
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 
 #
-# echo into a file how the tests were last built and run, so when the perl
-# scripts run to check the results it can compute the number of messages that
-# should be found.  it needs to know mpmd vs non-mpmd to know how many total
-# tests we expected to execute; it needs to know multi vs uni so it knows
-# how many messages per test are generated.
+# echo into a file how the tests were last run, multi or uni, so when the perl
+# scripts run to check the results it can find the correct system tests.
+# Assume Nontestmpmd and Nonsharedobj, they will be updated subsequently.
 #
 config_sys_tests:
 	@echo "# This file used by test scripts, please do not delete." > $(SYS_TESTS_CONFIG)
-ifeq ($(ESMF_TESTMPMD),ON)
 ifeq ($(MULTI),)
-	@echo "Last run Testmpmd ;  Noprocessor" >> $(SYS_TESTS_CONFIG)
+	@echo "Last run Nontestmpmd Nontestsharedobj ;  Noprocessor" >> $(SYS_TESTS_CONFIG)
 else
-	@echo "Last run Testmpmd ;" $(MULTI) >> $(SYS_TESTS_CONFIG)
-endif
-else
-ifeq ($(MULTI),)
-	@echo "Last run Nontestmpmd ; Noprocessor" >> $(SYS_TESTS_CONFIG)
-else
-	@echo "Last run Nontestmpmd ; " $(MULTI) >> $(SYS_TESTS_CONFIG)
-endif
+	@echo "Last run Nontestmpmd Nontestsharedobj ;" $(MULTI) >> $(SYS_TESTS_CONFIG)
 endif
 
 
 
 #
 # verify that either there is no SYS_TESTS_CONFIG file, or if one exists that
-# the string testmpmd or Non-testmpmd matches the current setting of the
-# ESMF_TESTMPMD environment variable.  
+# the string Testmpmd or Nontestmpmd matches the current setting of the
+# ESMF_TESTMPMD environment variable and that the string Testsharedobj or Nontestsharedobj 
+# matches the current setting of the  ESMF_TESTSHAREDOBJ environment variable.  
 #
-update_mpmd_flag:
+update_sys_tests_flags:
 ifeq ($(ESMF_TESTMPMD),ON)
 	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estmpmd/ Testmpmd/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
 	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
@@ -1709,6 +1700,14 @@ else
 	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estmpmd/ Nontestmpmd/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
 	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
 endif
+ifeq ($(ESMF_TESTSHAREDOBJ),ON)
+	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estsharedobj/ Testsharedobj/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
+	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
+else
+	$(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*estsharedobj/ Nontestsharedobj/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
+	$(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG);
+endif
+
 
 #
 # run the systests, either redirecting the stdout from the command line, or

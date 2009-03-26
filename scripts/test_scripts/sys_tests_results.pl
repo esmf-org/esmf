@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.11 2008/04/25 21:23:29 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.12 2009/03/26 19:43:08 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -44,17 +44,27 @@ use File::Find
         # Get flags from sys_tests_config file.
         # testmpmd = 0 for ESMF_TESTMPMD=OFF
         # testmpmd = 1 for ESMF_TESTMPMD=ON
+        # testsharedobj = 0 for ESMF_TESTSHAREDOBJ=OFF
+        # testsharedobj = 1 for ESMF_TESTSHAREDOBJ=ON
         # processor = 0 for uni_processor
         # processor = 1 for multi_processor
         foreach $line (<F>){
                         push(file_lines, $line);
-                        $count=grep(/Non-testmpmd/, @file_lines);
+                        $count=grep(/Nontestmpmd/, @file_lines);
                         if ($count == 1) {
                                 $testmpmd=0;
                         }
                         $count=grep(/Testmpmd/, @file_lines);
                         if ($count == 1) {
                                 $testmpmd=1;
+                        }
+                        $count=grep(/Nontestsharedobj/, @file_lines);
+                        if ($count == 1) {
+                                $testsharedobj=0;
+                        }
+                        $count=grep(/Testsharedobj/, @file_lines);
+                        if ($count == 1) {
+                                $testsharedobj=1;
                         }
                         $count=grep(/Uniprocessor/, @file_lines);
                         if ($count == 1) {
@@ -109,6 +119,14 @@ use File::Find
                         if ( ($testmpmd == 1) &  ( $processor == 1)) {
 			  # Include MPMD system tests only if running multi processor
                           $count=grep ( /ESMF_MPMD_SYSTEM_TEST/, @file_lines);
+                          if ($count != 0) {
+                                push (act_st_files, $file);
+                                        $st_count=$st_count + 1;
+                                }
+                        }
+                        if ( ($testsharedobj == 1) &  ( $processor == 1)) {
+			  # Include Sharedobj system tests only if running multi processor
+                          $count=grep ( /ESMF_SHAREDOBJ_SYSTEM_TEST/, @file_lines);
                           if ($count != 0) {
                                 push (act_st_files, $file);
                                         $st_count=$st_count + 1;
