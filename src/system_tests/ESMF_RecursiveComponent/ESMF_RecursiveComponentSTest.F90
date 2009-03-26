@@ -1,4 +1,4 @@
-! $Id: ESMF_RecursiveComponentSTest.F90,v 1.5 2009/02/12 21:05:22 theurich Exp $
+! $Id: ESMF_RecursiveComponentSTest.F90,v 1.6 2009/03/26 03:28:21 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -111,11 +111,11 @@ program ESMF_RecursiveComponentSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_GridCompSetVM(component, routine=componentSetVM, rc=localrc)
+  call ESMF_GridCompSetVM(component, userRoutine=componentSetVM, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_GridCompSetServices(component, routine=componentReg, rc=localrc)
+  call ESMF_GridCompSetServices(component, userRoutine=componentReg, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)

@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.9 2009/02/12 05:35:22 theurich Exp $
+! $Id: modelComp.F90,v 1.10 2009/03/26 03:28:20 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -62,13 +62,13 @@ module modelCompMod
     rc = ESMF_SUCCESS
 
     ! Register Init, Run, Finalize
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, routine=compInit, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=compInit, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, routine=compRun, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=compRun, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, routine=compFinal, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=compFinal, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -113,15 +113,15 @@ module modelCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! SetServices for modelAComp
-    call ESMF_GridCompSetVM(modelAComp, routine=modelACompSetVM, rc=rc)
+    call ESMF_GridCompSetVM(modelAComp, userRoutine=modelACompSetVM, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetServices(modelAComp, routine=modelACompReg, rc=rc)
+    call ESMF_GridCompSetServices(modelAComp, userRoutine=modelACompReg, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! SetServices for modelBComp
-    call ESMF_GridCompSetVM(modelBComp, routine=modelBCompSetVM, rc=rc)
+    call ESMF_GridCompSetVM(modelBComp, userRoutine=modelBCompSetVM, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetServices(modelBComp, routine=modelBCompReg, rc=rc)
+    call ESMF_GridCompSetServices(modelBComp, userRoutine=modelBCompReg, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Create State and initialize modelAComp

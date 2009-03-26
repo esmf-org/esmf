@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.104 2009/03/17 05:21:36 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.105 2009/03/26 03:28:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.104 2009/03/17 05:21:36 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.105 2009/03/26 03:28:20 theurich Exp $'
 
 !==============================================================================
 !
@@ -971,13 +971,13 @@ contains
 ! !IROUTINE: ESMF_CplCompSetEntryPoint - Set user routine as entry point for standard Component method
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetEntryPoint(cplcomp, method, routine, phase, rc)
+  subroutine ESMF_CplCompSetEntryPoint(cplcomp, method, userRoutine, phase, rc)
 
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent (in) :: cplcomp
     type(ESMF_Method),  intent(in)  :: method
     interface
-      subroutine routine(cplcomp, importState, exportState, clock, rc)
+      subroutine userRoutine(cplcomp, importState, exportState, clock, rc)
         use ESMF_CompMod
         use ESMF_StateMod
         use ESMF_ClockMod
@@ -993,9 +993,9 @@ contains
     integer, intent(out), optional  :: rc 
 !
 ! !DESCRIPTION:
-! Registers a user-supplied {\tt routine} as the entry point for one of the
-! predefined Component {\tt method}s. After this call the {\tt routine} becomes
-! accessible via the standard Component method API.
+! Registers a user-supplied {\tt userRoutine} as the entry point for one of the
+! predefined Component {\tt method}s. After this call the {\tt userRoutine}
+! becomes accessible via the standard Component method API.
 !    
 ! The arguments are:
 ! \begin{description}
@@ -1005,7 +1005,7 @@ contains
 !   One of a set of predefined Component methods - e.g. {\tt ESMF\_SETINIT}, 
 !   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. See section \ref{opt:method} 
 !   for a complete list of valid method options.
-! \item[routine]
+! \item[userRoutine]
 !   The user-supplied subroutine to be associated for this {\tt method}.
 !   This subroutine does not have to be public.
 ! \item[{[phase]}] 
@@ -1017,8 +1017,8 @@ contains
 ! \end{description}
 !
 ! The Component writer must supply a subroutine with the exact interface 
-! shown above for the {\tt routine} argument. Arguments in {\tt routine} must
-! not be declared as optional, and the types, intent and order must match.
+! shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
+! must not be declared as optional, and the types, intent and order must match.
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1035,7 +1035,7 @@ contains
     phaseArg = 1   ! default
     if (present(phase)) phaseArg = phase
   
-    call c_ESMC_SetEntryPoint(cplcomp, method, routine, phaseArg, localrc)
+    call c_ESMC_SetEntryPoint(cplcomp, method, userRoutine, phaseArg, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1096,12 +1096,12 @@ contains
 ! !IROUTINE: ESMF_CplCompSetServices - Call user routine to register CplComp methods
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_CplCompSetServices(cplcomp, routine, rc)
+  recursive subroutine ESMF_CplCompSetServices(cplcomp, userRoutine, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)              :: cplcomp
     interface
-      subroutine routine(cplcomp, rc)
+      subroutine userRoutine(cplcomp, rc)
         use ESMF_CompMod
         implicit none
         type(ESMF_CplComp)          :: cplcomp  ! must not be optional
@@ -1111,24 +1111,24 @@ contains
     integer, intent(out), optional  :: rc 
 !
 ! !DESCRIPTION:
-! Call into user provided {\tt routine} which is responsible for
+! Call into user provided {\tt userRoutine} which is responsible for
 ! for setting Component's Initialize(), Run() and Finalize() services.
 !    
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
 !   Coupler Component.
-! \item[routine]
+! \item[userRoutine]
 !   Routine to be called.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 ! The Component writer must supply a subroutine with the exact interface 
-! shown above for the {\tt routine} argument. Arguments in {\tt routine} must
-! not be declared as optional, and the types, intent and order must match.
+! shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
+! must not be declared as optional, and the types, intent and order must match.
 !
-! The {\tt routine}, when called by the framework, must make successive calls to
+! The {\tt userRoutine}, when called by the framework, must make successive calls to
 ! {\tt ESMF\_CplCompSetEntryPoint()} to preset callback routines for standard
 ! Component Initialize(), Run() and Finalize() methods.
 !
@@ -1143,7 +1143,7 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
-    call c_ESMC_SetServices(cplcomp, routine, localrc)
+    call c_ESMC_SetServices(cplcomp, userRoutine, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1162,19 +1162,19 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_CplCompSetServices()
-  recursive subroutine ESMF_CplCompSetServicesShObj(cplcomp, routine, &
+  recursive subroutine ESMF_CplCompSetServicesShObj(cplcomp, userRoutine, &
     sharedObj, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),      intent(inout)         :: cplcomp
-    character(len=*),        intent(in)            :: routine
+    character(len=*),        intent(in)            :: userRoutine
     character(len=*),        intent(in),  optional :: sharedObj
     integer,                 intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 ! Call into user provided routine which is responsible for setting
 ! Component's Initialize(), Run() and Finalize() services. The named
-! {\tt routine} must exist in the shared object file specified in the
+! {\tt userRoutine} must exist in the shared object file specified in the
 ! {\tt sharedObj} argument. All of the platform specific details about 
 ! dynamic linking and loading apply.
 !    
@@ -1182,32 +1182,32 @@ contains
 ! \begin{description}
 ! \item[cplcomp]
 !   Coupler Component.
-! \item[routine]
+! \item[userRoutine]
 !   Name of routine to be called.
 ! \item[{[sharedObj]}]
-!   Name of shared object that contains {\tt routine}. If the {\tt sharedObj}
-!   argument is not provided the executable itself will be searched for
-!   {\tt routine}.
+!   Name of shared object that contains {\tt userRoutine}. If the
+!   {\tt sharedObj} argument is not provided the executable itself will be
+!   searched for {\tt userRoutine}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 ! The Component writer must supply a subroutine with the exact interface 
-! shown for {\tt routine} below. Arguments must not be declared
+! shown for {\tt userRoutine} below. Arguments must not be declared
 ! as optional, and the types, intent and order must match.
 !
 ! !INTERFACE:
 !   interface
-!     subroutine routine(cplcomp, rc)
+!     subroutine userRoutine(cplcomp, rc)
 !       type(ESMF_CplComp)   :: cplcomp    ! must not be optional
 !       integer, intent(out) :: rc         ! must not be optional
 !     end subroutine
 !   end interface
 !
 ! !DESCRIPTION:
-! The {\tt routine}, when called by the framework, must make successive calls to
-! {\tt ESMF\_CplCompSetEntryPoint()} to preset callback routines for standard
-! Component Initialize(), Run() and Finalize() methods.
+! The {\tt userRoutine}, when called by the framework, must make successive
+! calls to {\tt ESMF\_CplCompSetEntryPoint()} to preset callback routines for
+! standard Component Initialize(), Run() and Finalize() methods.
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1222,9 +1222,9 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
     if (present(sharedObj)) then
-      call c_ESMC_SetServicesShObj(cplcomp, routine, sharedObj, localrc)
+      call c_ESMC_SetServicesShObj(cplcomp, userRoutine, sharedObj, localrc)
     else
-      call c_ESMC_SetServicesShObj(cplcomp, routine, emptyString, localrc)
+      call c_ESMC_SetServicesShObj(cplcomp, userRoutine, emptyString, localrc)
     endif
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -1243,11 +1243,11 @@ contains
 ! !IROUTINE: ESMF_CplCompSetVM - Call user routine to set CplComp VM properies
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_CplCompSetVM(cplcomp, routine, rc)
+  recursive subroutine ESMF_CplCompSetVM(cplcomp, userRoutine, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp)              :: cplcomp
     interface
-      subroutine routine(cplcomp, rc)
+      subroutine userRoutine(cplcomp, rc)
         use ESMF_CompMod
         implicit none
         type(ESMF_CplComp)          :: cplcomp  ! must not be optional
@@ -1257,22 +1257,22 @@ contains
     integer, intent(out), optional  :: rc 
 !
 ! !DESCRIPTION:
-! Optionally call into user provided {\tt routine} which is responsible for
+! Optionally call into user provided {\tt userRoutine} which is responsible for
 ! for setting Component's VM properties. 
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
 !   Coupler Component.
-! \item[routine]
+! \item[userRoutine]
 !   Routine to be called.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 ! The Component writer must supply a subroutine with the exact interface 
-! shown above for the {\tt routine} argument. Arguments in {\tt routine} must
-! not be declared as optional, and the types, intent and order must match.
+! shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
+! must not be declared as optional, and the types, intent and order must match.
 !
 ! The subroutine, when called by the framework, is expected to use any of the
 ! {\tt ESMF\_CplCompSetVMxxx()} methods to set the properties of the VM
@@ -1289,7 +1289,7 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
-    call c_ESMC_SetVM(cplcomp, routine, localrc)
+    call c_ESMC_SetVM(cplcomp, userRoutine, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1307,17 +1307,17 @@ contains
 ! !IROUTINE: ESMF_CplCompSetVM - Set CplComp VM properties in routine located in shared object
 ! !INTERFACE:
   ! Private name; call using ESMF_CplCompSetVM()
-  recursive subroutine ESMF_CplCompSetVMShObj(cplcomp, routine, sharedObj, rc)
+  recursive subroutine ESMF_CplCompSetVMShObj(cplcomp, userRoutine, sharedObj, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),      intent(inout)         :: cplcomp
-    character(len=*),        intent(in)            :: routine
+    character(len=*),        intent(in)            :: userRoutine
     character(len=*),        intent(in),  optional :: sharedObj
     integer,                 intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Optionally call into user provided {\tt routine} which is responsible for
-! for setting Component's VM properties. The named {\tt routine} must exist
+! Optionally call into user provided {\tt userRoutine} which is responsible for
+! for setting Component's VM properties. The named {\tt userRoutine} must exist
 ! in the shared object file specified in the {\tt sharedObj} argument. All of
 ! the platform specific details about dynamic linking and loading apply.
 !    
@@ -1325,23 +1325,23 @@ contains
 ! \begin{description}
 ! \item[cplcomp]
 !   Coupler Component.
-! \item[routine]
+! \item[userRoutine]
 !   Routine to be called.
 ! \item[{[sharedObj]}]
-!   Name of shared object that contains {\tt routine}. If the {\tt sharedObj}
-!   argument is not provided the executable itself will be searched for
-!   {\tt routine}.
+!   Name of shared object that contains {\tt userRoutine}. If the 
+!   {\tt sharedObj} argument is not provided the executable itself will be
+!   searched for {\tt userRoutine}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 ! The Component writer must supply a subroutine with the exact interface 
-! shown for {\tt routine} below. Arguments must not be declared
+! shown for {\tt userRoutine} below. Arguments must not be declared
 ! as optional, and the types, intent and order must match.
 !
 ! !INTERFACE:
 !   interface
-!     subroutine routine(cplcomp, rc)
+!     subroutine userRoutine(cplcomp, rc)
 !       type(ESMF_CplComp)   :: cplcomp     ! must not be optional
 !       integer, intent(out) :: rc          ! must not be optional
 !     end subroutine
@@ -1365,9 +1365,9 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
     if (present(sharedObj)) then
-      call c_ESMC_SetVMShObj(cplcomp, routine, sharedObj, localrc)
+      call c_ESMC_SetVMShObj(cplcomp, userRoutine, sharedObj, localrc)
     else
-      call c_ESMC_SetVMShObj(cplcomp, routine, emptyString, localrc)
+      call c_ESMC_SetVMShObj(cplcomp, userRoutine, emptyString, localrc)
     endif
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &

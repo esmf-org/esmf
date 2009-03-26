@@ -1,4 +1,4 @@
-! $Id: ESMF_MyRegistrationInFortran.F90,v 1.7 2009/02/13 01:36:09 theurich Exp $
+! $Id: ESMF_MyRegistrationInFortran.F90,v 1.8 2009/03/26 03:28:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -108,11 +108,11 @@ subroutine my_RegistrationInFortran(gcomp, rc)
   print *, "I am in myRegistrationInFortran()"
   call ESMF_GridCompPrint(gcomp)
   
-  call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, routine=myInitInFortran, &
+  call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, userRoutine=myInitInFortran, &
     rc=rc)
-  call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, routine=myRunInFortran, &
+  call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, userRoutine=myRunInFortran, &
     rc=rc)
-  call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, routine=myFinalInFortran, &
+  call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, userRoutine=myFinalInFortran, &
     rc=rc)
   
   ! return successfully
@@ -130,11 +130,11 @@ subroutine my_CplRegistrationInFortran(cplcomp, rc)
   print *, "I am in myRegistrationInFortran()"
   call ESMF_CplCompPrint(cplcomp)
   
-  call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETINIT, routine=myCplInitInFortran, &
+  call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETINIT, userRoutine=myCplInitInFortran, &
     rc=rc)
-  call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETRUN, routine=myCplRunInFortran, &
+  call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETRUN, userRoutine=myCplRunInFortran, &
     rc=rc)
-  call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETFINAL, routine=myCplFinalInFortran, &
+  call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETFINAL, userRoutine=myCplFinalInFortran, &
     rc=rc)
   
   ! return successfully

@@ -1,4 +1,4 @@
-! $Id: cplComp.F90,v 1.8 2009/02/12 05:35:22 theurich Exp $
+! $Id: cplComp.F90,v 1.9 2009/03/26 03:28:20 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -54,16 +54,16 @@ module cplCompMod
     rc = ESMF_SUCCESS
 
     ! Register Init, Finalize (this component does not provide Run)
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, routine=compInit1, &
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=compInit1, &
       phase=1, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, routine=compInit2, &
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=compInit2, &
       phase=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, routine=compFinal1, &
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=compFinal1, &
       phase=1, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, routine=compFinal2, &
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=compFinal2, &
       phase=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 

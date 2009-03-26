@@ -1,4 +1,4 @@
-! $Id: ESMF_SetServCode.F90,v 1.13 2009/02/13 01:36:09 theurich Exp $
+! $Id: ESMF_SetServCode.F90,v 1.14 2009/03/26 03:28:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -69,11 +69,11 @@ contains
        ! Initialize return code
        rc = ESMF_SUCCESS
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, routine=my_init1, &
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, userRoutine=my_init1, &
          rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, routine=my_run1, &
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, userRoutine=my_run1, &
          rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, routine=my_final1, &
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, userRoutine=my_final1, &
          rc=rc)
                                                      
     end subroutine SetServ1
@@ -86,11 +86,11 @@ contains
        ! Initialize return code
        rc = ESMF_SUCCESS
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, routine=my_init2, &
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, userRoutine=my_init2, &
          rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, routine=my_run2, &
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, userRoutine=my_run2, &
          rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, routine=my_final2, &
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, userRoutine=my_final2, &
          rc=rc)
 
     end subroutine SetServ2

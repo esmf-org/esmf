@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.39 2009/03/17 05:47:15 theurich Exp $
+! $Id: ESMF_GCompEx.F90,v 1.40 2009/03/26 03:28:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -56,9 +56,9 @@
       integer, intent(out)  :: rc     ! must not be optional
 
       ! SetServices the callback routines.
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, routine=GComp_Init, rc=rc)
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, routine=GComp_Run, rc=rc)
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, routine=GComp_Final, rc=rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=GComp_Init, rc=rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=GComp_Run, rc=rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=GComp_Final, rc=rc)
 
       ! If desired, this routine can register a private data block
       ! to be passed in to the routines above:
