@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.21 2009/03/25 20:51:38 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.22 2009/03/26 04:48:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.21 2009/03/25 20:51:38 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.22 2009/03/26 04:48:28 theurich Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -3696,7 +3696,7 @@ contains
 
 !-----------------------------------------------------------------------------
 
-#define AttSetLinkMacro(mclass1, mclass2, mthis1, mthis2, mthisfield1, mthisfield2) \
+#define AttSetLinkMacro(mclass1, mclass2, mclass2short, mthis1, mthis2, mthisfield1, mthisfield2) \
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttSetLink" @\
  @\
@@ -3705,7 +3705,7 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
-      subroutine mclass1##AttSetLink##mthis2(mthis1, mthis2, rc) @\
+      subroutine mclass1##AttSetLink##mclass2short(mthis1, mthis2, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass1), intent(inout) :: mthis1 @\
@@ -3746,7 +3746,7 @@ contains
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
-      end subroutine mclass1##AttSetLink##mthis2 @\
+      end subroutine mclass1##AttSetLink##mclass2short @\
 
 !-----------------------------------------------------------------------------
 
@@ -4375,12 +4375,12 @@ TypeKind3DeclarationMacro(AttSet, ESMF_CplComp, comp, comp%compp%base)
 AttSetLogicalMacro(ESMF_CplComp, comp, comp%compp%base)
 AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 
-AttSetLinkMacro(ESMF_CplComp, ESMF_CplComp, cplcomp1, cplcomp, & @\
-                cplcomp1%compp%base, cplcomp%compp%base)
-AttSetLinkMacro(ESMF_CplComp, ESMF_GridComp, cplcomp, gridcomp,  & @\
-                cplcomp%compp%base, gridcomp%compp%base)
-AttSetLinkMacro(ESMF_CplComp, ESMF_State, cplcomp, state,  & @\
-                cplcomp%compp%base, state%statep%base)
+AttSetLinkMacro(ESMF_CplComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttSetLinkMacro(ESMF_CplComp, ESMF_GridComp, GridComp, comp1, comp2,  & @\
+                comp1%compp%base, comp2%compp%base)
+AttSetLinkMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
+                comp%compp%base, state%statep%base)
 
 AttUpdateMacro(ESMF_CplComp, comp, comp%compp%base)
 AttWriteMacro(ESMF_CplComp, comp, comp%compp%base, comp, field)
@@ -4510,12 +4510,12 @@ TypeKind3DeclarationMacro(AttSet, ESMF_GridComp, comp, comp%compp%base)
 AttSetLogicalMacro(ESMF_GridComp, comp, comp%compp%base)
 AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 
-AttSetLinkMacro(ESMF_GridComp, ESMF_CplComp, gridcomp, cplcomp, & @\
-                gridcomp%compp%base, cplcomp%compp%base)
-AttSetLinkMacro(ESMF_GridComp, ESMF_GridComp, gridcomp1, gridcomp, & @\
-                gridcomp1%compp%base, gridcomp%compp%base)
-AttSetLinkMacro(ESMF_GridComp, ESMF_State, gridcomp, state, & @\
-                gridcomp%compp%base, state%statep%base)
+AttSetLinkMacro(ESMF_GridComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttSetLinkMacro(ESMF_GridComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttSetLinkMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
+                comp%compp%base, state%statep%base)
 
 AttUpdateMacro(ESMF_GridComp, comp, comp%compp%base)
 AttWriteMacro(ESMF_GridComp, comp, comp%compp%base, comp, field)
@@ -4835,7 +4835,7 @@ TypeKind3DeclarationMacro(AttSet, ESMF_FieldBundle, fieldbundle, fieldbundle%bty
 AttSetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
-AttSetLinkMacro(ESMF_FieldBundle, ESMF_Field, fieldbundle, field, & @\
+AttSetLinkMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
                 fieldbundle%btypep%base, field%ftypep%base)
 
 AttUpdateMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
