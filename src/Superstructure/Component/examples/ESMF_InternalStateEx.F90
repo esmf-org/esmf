@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.15 2009/01/21 21:38:02 cdeluca Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.16 2009/03/27 05:33:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -34,92 +34,88 @@
 !EOP
 !-------------------------------------------------------------------------
 
-     program ESMF_InternalStateEx
+program ESMF_InternalStateEx
 
 !-------------------------------------------------------------------------
 ! !USES:
 !BOC
-    ! ESMF Framework module
-    use ESMF_Mod
-    implicit none
-    
-    type(ESMF_GridComp) :: comp1
-    integer :: rc, finalrc
+  ! ESMF Framework module
+  use ESMF_Mod
+  implicit none
+  
+  type(ESMF_GridComp) :: comp
+  integer :: rc, finalrc
 
-    ! Internal State Variables
-    type testData
-    sequence
-        integer :: testValue
-        real    :: testScaling
-    end type
+  ! Internal State Variables
+  type testData
+  sequence
+    integer :: testValue
+    real    :: testScaling
+  end type
 
-    type dataWrapper
-    sequence
-        type(testData), pointer :: p
-    end type
+  type dataWrapper
+  sequence
+    type(testData), pointer :: p
+  end type
 
-    type (dataWrapper) :: wrap1, wrap2
-    type(testData), target :: data1, data2
+  type(dataWrapper) :: wrap1, wrap2
+  type(testData), target :: data
+  type(testData), pointer :: datap
 
-
-    finalrc = ESMF_SUCCESS
+  finalrc = ESMF_SUCCESS
 !-------------------------------------------------------------------------
         
-    call ESMF_Initialize(rc=rc)
-    if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
-
-
-!-------------------------------------------------------------------------
-
-!   !  Creation of a Component
-    comp1 = ESMF_GridCompCreate(name="test", rc=rc)  
-    if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+  call ESMF_Initialize(rc=rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
 
 !-------------------------------------------------------------------------
-!   This could be called, for example, during a routine's initialize phase.
 
-!   !  Set Internal State
-    data1%testValue = 4567
-    data1%testScaling = 0.5
-    wrap1%p => data1
-
-    call ESMF_GridCompSetInternalState(comp1, wrap1, rc)
-    if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+  !  Creation of a Component
+  comp = ESMF_GridCompCreate(name="test", rc=rc)  
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
 
 !-------------------------------------------------------------------------
-!   And this could be called, for example, during a routine's run phase.
+! This could be called, for example, during a Component's initialize phase.
 
-!   ! Get Internal State
-!   !   note that we do not assign the pointer inside wrap2 - this call
-!   !   does that.
-    call ESMF_GridCompGetInternalState(comp1, wrap2, rc)
-    if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+    ! Initialize private data block
+  data%testValue = 4567
+  data%testScaling = 0.5
 
-    data2 = wrap2%p 
-    if ((data2%testValue .ne. 4567) .or. (data2%testScaling .ne. 0.5)) then
-       print *, "did not get same values back"
-       finalrc = ESMF_FAILURE
-    else
-       print *, "got same values back from GetInternalState as original"
-    endif
+  ! Set Internal State
+  wrap1%p => data
+  call ESMF_GridCompSetInternalState(comp, wrap1, rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
 
+!-------------------------------------------------------------------------
+! This could be called, for example, during a Component's run phase.
+
+  ! Get Internal State
+  call ESMF_GridCompGetInternalState(comp, wrap2, rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+
+  ! Access private data block and verify data
+  datap => wrap2%p 
+  if ((datap%testValue .ne. 4567) .or. (datap%testScaling .ne. 0.5)) then
+    print *, "did not get same values back"
+    finalrc = ESMF_FAILURE
+  else
+    print *, "got same values back from GetInternalState as original"
+  endif
 
 !EOC
 !-------------------------------------------------------------------------
-!   !  Destroying a component
 
-    call ESMF_GridCompDestroy(comp1, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+  call ESMF_GridCompDestroy(comp, rc=rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
 
-    call ESMF_Finalize(rc=rc)
-    if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+  call ESMF_Finalize(rc=rc)
+  if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
 
-    if (finalrc .eq. ESMF_SUCCESS) then
-        print *, "PASS: ESMF_InternalStateEx.F90"
-    else 
-        print *, "FAIL: ESMF_InternalStateEx.F90"
-    end if
+  if (finalrc .eq. ESMF_SUCCESS) then
+    print *, "PASS: ESMF_InternalStateEx.F90"
+  else 
+    print *, "FAIL: ESMF_InternalStateEx.F90"
+  end if
 
-
-    end program ESMF_InternalStateEx
+end program ESMF_InternalStateEx
     

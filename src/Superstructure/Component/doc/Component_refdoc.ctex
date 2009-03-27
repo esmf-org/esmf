@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.41 2009/02/25 23:01:21 theurich Exp $
+% $Id: Component_refdoc.ctex,v 1.42 2009/03/27 05:33:31 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -67,10 +67,12 @@
 \input{GridComp_usage}
 \input{ESMF_GCompEx_fapi}
 \input{ESMF_InternalStateEx_fapi}
+\input{ESMF_InternalStateModEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/GridComp_usage}
 \input{../Superstructure/Component/doc/ESMF_GCompEx_fapi}
 \input{../Superstructure/Component/doc/ESMF_InternalStateEx_fapi}
+\input{../Superstructure/Component/doc/ESMF_InternalStateModEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
