@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.261 2009/03/26 19:42:10 svasquez Exp $
+#  $Id: common.mk,v 1.262 2009/03/27 18:29:40 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1516,7 +1516,7 @@ system_tests: chkdir_tests
 	  $(MAKE) err ; \
           exit ; \
 	fi ; \
-	$(MAKE) MULTI="Multiprocessor" config_sys_tests update_sys_test_flags; \
+	$(MAKE) MULTI="Multiprocessor" config_sys_tests update_sys_tests_flags; \
 	$(MAKE) ACTION=tree_system_tests tree ; \
 	$(MAKE) check_system_tests
 
