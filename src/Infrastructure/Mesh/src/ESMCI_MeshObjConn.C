@@ -671,6 +671,9 @@ std::cout << "(rot,pol):" << rotation[el] << ", " << polarity[el] << std::endl;
   } // elems
 }
 
+// ----------------------------------------------------------------------------
+// explicit instantiation of templates to help with share library linking
+
 template void face_info<>(MeshObj** node_begin,
                MeshObj** node_end,
                MeshObj** elem_begin,
@@ -681,12 +684,17 @@ template void face_info<>(MeshObj** node_begin,
                bool
                );
 
-template
-void common_objs<>(MeshObj** in_obj_begin, MeshObj** in_obj_end, 
+template void common_objs<>(MeshObj** in_obj_begin, MeshObj** in_obj_end, 
                  UInt rel_type, 
                  UInt out_obj_type, 
                  std::vector<MeshObj*> &out_obj);
 
+template void common_objs<>(std::vector<MeshObj*>::iterator, 
+                 std::vector<MeshObj*>::iterator, 
+                 UInt rel_type, 
+                 UInt out_obj_type, 
+                 std::vector<MeshObj*> &out_obj);
+// ----------------------------------------------------------------------------
 
 void remove_back_relations(MeshObj &obj) {
   MeshObjRelationList::iterator ri = obj.Relations.begin(), re = obj.Relations.end();
