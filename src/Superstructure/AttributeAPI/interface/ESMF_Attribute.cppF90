@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.25 2009/03/28 21:23:57 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.26 2009/03/28 22:10:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.25 2009/03/28 21:23:57 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.26 2009/03/28 22:10:15 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -910,6 +910,226 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_AttributeLink - Link a Component Attribute hierarchy to that of
+!                                {\bf a Component or State}
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLink()
+!      subroutine ESMF_CompAttLink(<object1>, <object2>, rc)
+!
+! !ARGUMENTS:
+!      <object1>, see below for supported values  
+!      <object2>, see below for supported values
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Attaches a {\tt CplComp} or {\tt GridComp} Attribute hierarchy to the 
+!     hierarchy of a {\tt CplComp}, {\tt GridComp}, or {\tt State}.
+!      
+!     Supported values for the <object1> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp1
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp1
+!     \end{description}
+!     Supported values for the <object2> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp2
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp2
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [<object1>]
+!       The ``parent'' object in the Attribute hierarchy link.
+!     \item [<object2>]
+!       The ``child'' object in the Attribute hierarchy link.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLink - Link a State Attribute hierarchy with the
+!                               {\bf hierarchy of a FieldBundle, Field, or State}
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLink()
+!      subroutine ESMF_StateAttLink(state, <object>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF\_State), intent(inout) :: state  
+!      <object>, see below for supported values
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Attaches a {\tt State} Attribute hierarchy to the hierarchy of
+!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}. 
+!     Supported values for the <object> are:
+!     \begin{description}
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Field), intent(inout) :: field
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [<object>]
+!       The object with which to link hierarchies.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLink - Link a FieldBundle and Field Attribute hierarchy
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLink()
+!      subroutine ESMF_FieldBundleAttLink(state, <object>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!      type(ESMF\_Field), intent(inout) :: field
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Attaches a {\tt FieldBundle} Attribute hierarchy to the hierarchy of
+!     a {\tt Field}. 
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [fieldbundle]
+!       An {\tt ESMF\_FieldBundle} object.
+!     \item [field]
+!       An {\tt ESMF\_Field} object.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a Component Attribute hierarchy
+!                                {\bf from that of a Component or State}
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLinkRemove()
+!      subroutine ESMF_CompAttLinkRemove(<object1>, <object2>, rc)
+!
+! !ARGUMENTS:
+!      <object1>, see below for supported values  
+!      <object2>, see below for supported values
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Unattaches a {\tt CplComp} or {\tt GridComp} Attribute hierarchy from the 
+!     hierarchy of a {\tt CplComp}, {\tt GridComp}, or {\tt State}.
+!      
+!     Supported values for the <object1> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp1
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp1
+!     \end{description}
+!     Supported values for the <object2> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp2
+!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp2
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [<object1>]
+!       The ``parent'' object in the Attribute hierarchy link.
+!     \item [<object2>]
+!       The ``child'' object in the Attribute hierarchy link.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a State Attribute hierarchy with the
+!                               {\bf hierarchy of a FieldBundle, Field, or State}
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLinkRemove()
+!      subroutine ESMF_StateAttLinkRemove(state, <object>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF\_State), intent(inout) :: state  
+!      <object>, see below for supported values
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Unattaches a {\tt State} Attribute hierarchy from the hierarchy of
+!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}. 
+!     Supported values for the <object> are:
+!     \begin{description}
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Field), intent(inout) :: field
+!     \item type(ESMF\_State), intent(inout) :: state
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [<object>]
+!       The object with which to unlink hierarchies.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a FieldBundle and Field Attribute hierarchy
+!
+! !INTERFACE:
+!      ! Private name; call using ESMF_AttributeLinkRemove()
+!      subroutine ESMF_FieldBundleAttLinkRemove(state, <object>, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!      type(ESMF\_Field), intent(inout) :: field
+!      integer, intent(out), optional :: rc   
+!
+!
+! !DESCRIPTION:
+!     Unattaches a {\tt FieldBundle} Attribute hierarchy from the hierarchy of
+!     a {\tt Field}. 
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [fieldbundle]
+!       An {\tt ESMF\_FieldBundle} object.
+!     \item [field]
+!       An {\tt ESMF\_Field} object.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_AttributeRead  - Read an Attribute package
 !
 ! !INTERFACE:
@@ -1064,86 +1284,6 @@ contains
 !           The number of items in a multi-valued Attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AttributeSet - Link a Component Attribute hierarchy to that of
-!                                {\bf a Component or State}
-!
-! !INTERFACE:
-!      ! Private name; call using ESMF_AttributeSet()
-!      subroutine ESMF_CplCompAttSetLink(<object1>, <object2>, rc)
-!
-! !ARGUMENTS:
-!      <object1>, see below for supported values  
-!      <object2>, see below for supported values
-!      integer, intent(out), optional :: rc   
-!
-!
-! !DESCRIPTION:
-!     Attaches a {\tt CplComp} or {\tt GridComp} Attribute hierarchy to the 
-!     hierarchy of a {\tt CplComp}, {\tt GridComp}, or {\tt State}.
-!      
-!     Supported values for the <object1> are:
-!     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp1
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp1
-!     \end{description}
-!     Supported values for the <object2> are:
-!     \begin{description}
-!     \item type(ESMF\_CplComp), intent(inout) :: cplcomp2
-!     \item type(ESMF\_GridComp), intent(inout) :: gridcomp2
-!     \item type(ESMF\_State), intent(inout) :: state
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [<object1>]
-!       The ``parent'' object in the Attribute hierarchy link.
-!     \item [<object2>]
-!       The ``child'' object in the Attribute hierarchy link.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AttributeSet - Link a State Attribute hierarchy with the
-!                               {\bf hierarchy of a FieldBundle, Field, or State}
-!
-! !INTERFACE:
-!      ! Private name; call using ESMF_AttributeSet()
-!      subroutine ESMF_StateAttributeSetLink(state, <object>, rc)
-!
-! !ARGUMENTS:
-!      type(ESMF\_State), intent(inout) :: state  
-!      <object>, see below for supported values
-!      integer, intent(out), optional :: rc   
-!
-!
-! !DESCRIPTION:
-!     Attaches a {\tt State} Attribute hierarchy to the hierarchy of
-!     a {\tt Fieldbundle}, {\tt Field}, or another {\tt State}. 
-!     Supported values for the <object> are:
-!     \begin{description}
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
-!     \item type(ESMF\_Field), intent(inout) :: field
-!     \item type(ESMF\_State), intent(inout) :: state
-!     \end{description}
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!       An {\tt ESMF\_State} object.
-!     \item [<object>]
-!       The object with which to link hierarchies.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
