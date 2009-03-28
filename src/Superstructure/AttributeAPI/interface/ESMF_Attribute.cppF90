@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.24 2009/03/28 20:45:48 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.25 2009/03/28 21:23:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.24 2009/03/28 20:45:48 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.25 2009/03/28 21:23:57 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -342,16 +342,16 @@ module ESMF_AttributeMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
 ! TODO
-        module procedure ESMF_CplCompAttLinkRemoveCplComp
-        module procedure ESMF_CplCompAttLinkRemoveGridComp
-        module procedure ESMF_CplCompAttLinkRemoveState
-        module procedure ESMF_GridCompAttLinkRemoveCplComp
-        module procedure ESMF_GridCompAttLinkRemoveGridComp
-        module procedure ESMF_GridCompAttLinkRemoveState
-        module procedure ESMF_FieldBundleAttLinkRemoveField
-        module procedure ESMF_StateAttLinkRemoveFieldBundle
-        module procedure ESMF_StateAttLinkRemoveField
-        module procedure ESMF_StateAttLinkRemoveState
+        module procedure ESMF_CplCompAttLinkRmCplComp
+        module procedure ESMF_CplCompAttLinkRmGridComp
+        module procedure ESMF_CplCompAttLinkRmState
+        module procedure ESMF_GridCompAttLinkRmCplComp
+        module procedure ESMF_GridCompAttLinkRmGridComp
+        module procedure ESMF_GridCompAttLinkRmState
+        module procedure ESMF_FieldBundleAttLinkRmField
+        module procedure ESMF_StateAttLinkRmFieldBundle
+        module procedure ESMF_StateAttLinkRmField
+        module procedure ESMF_StateAttLinkRmState
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that unlink
@@ -3062,7 +3062,7 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeLinkRemove() @\
-      subroutine mclass1##AttLinkRemove##mclass2short(mthis1, mthis2, rc) @\
+      subroutine mclass1##AttLinkRm##mclass2short(mthis1, mthis2, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass1), intent(inout) :: mthis1 @\
@@ -3103,7 +3103,7 @@ contains
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
-      end subroutine mclass1##AttLinkRemove##mclass2short @\
+      end subroutine mclass1##AttLinkRm##mclass2short @\
 
 !-----------------------------------------------------------------------------
 
