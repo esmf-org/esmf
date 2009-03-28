@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.12 2009/03/25 05:59:55 eschwab Exp $
+// $Id: ESMCI_Attribute.h,v 1.13 2009/03/28 01:36:36 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -160,6 +160,10 @@ class Attribute
     // query for existence of an attribute
     int AttributeIsPresent(const string &name, ESMC_Logical *present) const;
 
+    // link/unlink an attribute hierarchy
+    int AttributeLink(ESMC_Base *destination);
+    int AttributeLinkRemove(ESMC_Base *destination);
+
     // destroy an attribute or attpack
     int AttributeRemove(const string &name);
     
@@ -182,9 +186,6 @@ class Attribute
 //    int AttributeSet(const string &name, const ESMC_TypeKind &tk, 
 //      int count, void *value);
     
-    // attribute set a link in hierarchy
-    int AttributeSetLink(ESMC_Base *destination);
-
     // recursive call to set all attributes with attrObject = object
     int AttributeSetObjsInTree(const string &name, const string &object, 
       const ESMC_TypeKind &tk, int count, void *value);
@@ -297,13 +298,14 @@ extern "C" {
                                     int *count, void *value, int *rc, int nlen);
   void FTN(c_esmc_attributeispresent)(ESMC_Base **base, char *name, ESMC_Logical *present, 
                                     int *rc, int nlen);
+  void FTN(c_esmc_attributelink)(ESMC_Base **source, ESMC_Base **destination, int *rc);
+  void FTN(c_esmc_attributelinkremove)(ESMC_Base **source, ESMC_Base **destination, int *rc);
   void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, 
                                     int *rc, int nlen, int vlen);
   void FTN(c_esmc_attributesetcharlist)(ESMC_Base **base, char *name, ESMC_TypeKind *tk,
                                         int *count, char *valueList, int *lens, int *rc, int nlen);
   void FTN(c_esmc_attributesetvalue)(ESMC_Base **base, char *name, ESMC_TypeKind *tk,
                                     int *count, void *value, int *rc, int nlen);
-  void FTN(c_esmc_attributesetlink)(ESMC_Base **source, ESMC_Base **destination, int *rc);
   void FTN(c_esmc_attributesetobjsintree)(ESMC_Base **base, char *object, char *name, 
                                           ESMC_TypeKind *tk, int *count, void *value, 
                                           int *rc, int olen, int nlen);

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.17 2009/03/25 20:49:53 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.18 2009/03/28 01:36:36 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.17 2009/03/25 20:49:53 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.18 2009/03/28 01:36:36 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2055,6 +2055,104 @@ namespace ESMCI {
 }  // end AttributeIsPresent
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeLink"
+//BOPI
+// !IROUTINE:  AttributeLink - Link an {\tt Attribute} hierarchy
+//
+// !INTERFACE:
+      int Attribute::AttributeLink(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      ESMC_Base *destination) {  // in/out destination Attribute to be linked
+// !DESCRIPTION:
+//     Link an {\tt Attribute} hierarchy.
+//
+//EOPI
+
+  int localrc;
+  Attribute *attr;
+  char msgbuf[ESMF_MAXSTR];
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+    
+  for (unsigned int i=0; i<attrCount; i++) {
+    if (attrList.at(i)->attrRoot == ESMF_TRUE) {
+      if (destination->ESMC_BaseGetID() == attrList.at(i)->attrBase->ESMC_BaseGetID()) {
+        sprintf(msgbuf, "AttributeLink tried to double set a link SrcBase = %d, DestBase = %d",
+                   attrList.at(i)->attrBase->ESMC_BaseGetID(), destination->ESMC_BaseGetID());
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        return ESMF_FAILURE;
+      }
+    }
+  }
+  
+  attr = &(destination->root);
+    
+  attrList.push_back(attr);
+  attrCount++;
+  
+  // now set linkChange
+  linkChange = ESMF_TRUE;
+
+  return ESMF_SUCCESS;
+
+}  // end AttributeLink
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeLinkRemove"
+//BOPI
+// !IROUTINE:  AttributeLinkRemove - Remove a link in an {\tt Attribute} hierarchy
+//
+// !INTERFACE:
+      int Attribute::AttributeLinkRemove(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      ESMC_Base *destination) {  // in/out destination Attribute to be linked
+// !DESCRIPTION:
+//     Set a link in an {\tt Attribute} hierarchy.
+//
+//EOPI
+
+  int localrc;
+  char msgbuf[ESMF_MAXSTR];
+  unsigned int i;
+  bool done=false;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+    
+  for (i=0; i<attrCount; i++) {
+    if (attrList.at(i)->attrRoot == ESMF_TRUE) {
+      if (destination->ESMC_BaseGetID() == attrList.at(i)->attrBase->ESMC_BaseGetID()) {
+        // don't delete the root, but erase the Attribute pointer
+        attrList.erase(attrList.begin() + i);
+        attrCount--;
+        structChange = ESMF_TRUE;
+        done = true;
+        break;
+      }
+    }
+  }
+  
+  // link wasn't found
+  if (!done) {
+    sprintf(msgbuf, "AttributeUnlink could not find the link to remove");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+    return ESMF_FAILURE;
+  }
+  
+  return ESMF_SUCCESS;
+    
+}  // end AttributeLinkRemove
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeRemove"
 //BOPI
 // !IROUTINE:  AttributeRemove - Remove the {\tt Attribute}
@@ -2649,54 +2747,6 @@ namespace ESMCI {
   return localrc;
 
 }  // end AttributeSet*/
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeSetLink"
-//BOPI
-// !IROUTINE:  AttributeSetLink - set a link in an {\tt Attribute} hierarchy
-//
-// !INTERFACE:
-      int Attribute::AttributeSetLink(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-// 
-// !ARGUMENTS:
-      ESMC_Base *destination) {  // in/out destination Attribute to be linked
-// !DESCRIPTION:
-//     Set a link in an {\tt Attribute} hierarchy.
-//
-//EOPI
-
-  int localrc;
-  Attribute *attr;
-  char msgbuf[ESMF_MAXSTR];
-
-  // Initialize local return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-    
-  for (unsigned int i=0; i<attrCount; i++) {
-    if (attrList.at(i)->attrRoot == ESMF_TRUE) {
-      if (destination->ESMC_BaseGetID() == attrList.at(i)->attrBase->ESMC_BaseGetID()) {
-        sprintf(msgbuf, "AttributeSetLink tried to double set a link SrcBase = %d, DestBase = %d",
-                   attrList.at(i)->attrBase->ESMC_BaseGetID(), destination->ESMC_BaseGetID());
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-        return ESMF_FAILURE;
-      }
-    }
-  }
-  
-  attr = &(destination->root);
-    
-  attrList.push_back(attr);
-  attrCount++;
-  
-  // now set linkChange
-  linkChange = ESMF_TRUE;
-
-  return ESMF_SUCCESS;
-
-}  // end AttributeSetLink
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeSetObjsInTree"

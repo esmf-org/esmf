@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.12 2009/03/25 05:59:52 eschwab Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.13 2009/03/28 01:36:36 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.12 2009/03/25 05:59:52 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.13 2009/03/28 01:36:36 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1288,7 +1288,7 @@ extern "C" {
   }
 
   // simple sanity check before doing any more work
-  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+  if (!convention) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
@@ -1296,7 +1296,7 @@ extern "C" {
   }
   
   // simple sanity check before doing any more work
-  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+  if (!purpose) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
@@ -1304,7 +1304,7 @@ extern "C" {
   }
   
   // simple sanity check before doing any more work
-  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+  if (!object) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
@@ -1324,37 +1324,11 @@ extern "C" {
 
   if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", &status);
+                         "bad attribute name conversion, name must not be empty", &status);
       if (rc) *rc = status;
       return;
   }
   
-  if (cvalue.empty()) {
-      ESMC_LogDefault.Write("Attribute has an empty value argument",
-                              ESMC_LOG_INFO);
-      cvalue = '\0';
-  }
-
-  if (cconv.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cpurp.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cobj.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
 
   // Set the attribute on the object.
   status = (**base).root.AttPackSet(cname, *tk, 1, &cvalue, cconv, cpurp, cobj);
@@ -1424,7 +1398,7 @@ extern "C" {
   }
 
   // simple sanity check before doing any more work
-  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+  if (!convention) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
@@ -1432,7 +1406,7 @@ extern "C" {
   }
   
   // simple sanity check before doing any more work
-  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+  if (!purpose) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
@@ -1440,7 +1414,7 @@ extern "C" {
   }
   
   // simple sanity check before doing any more work
-  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+  if (!object) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
@@ -1458,32 +1432,11 @@ extern "C" {
 
   if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", &status);
+                         "bad attribute name conversion, name must not be empty", &status);
       if (rc) *rc = status;
       return;
   }
   
-  if (cconv.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cpurp.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cobj.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
   // allocate space for the array of char*'s and vector of strings
   vector<string> cvalue;
   cvalue.reserve(*count);
@@ -1501,11 +1454,6 @@ extern "C" {
     // copy and convert F90 string to null terminated one
     string temp((&valueList[j]), lens[i]);
     temp.resize(temp.find_last_not_of(" ")+1);
-    if (temp.empty()) {
-      ESMC_LogDefault.Write("Attribute has an empty value argument",
-                              ESMC_LOG_INFO);
-      temp = '\0';
-    }
     cvalue.push_back(temp);
     j = j + lens[i];
   }
@@ -1576,7 +1524,7 @@ extern "C" {
   }
 
   // simple sanity check before doing any more work
-  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+  if (!convention) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute convention", &status);
       if (rc) *rc = status;
@@ -1584,7 +1532,7 @@ extern "C" {
   }
   
   // simple sanity check before doing any more work
-  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+  if (!purpose) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute purpose", &status);
       if (rc) *rc = status;
@@ -1592,7 +1540,7 @@ extern "C" {
   }
   
   // simple sanity check before doing any more work
-  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+  if (!object) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute object", &status);
       if (rc) *rc = status;
@@ -1610,32 +1558,11 @@ extern "C" {
 
   if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", &status);
+                         "bad attribute name conversion, name must not be empty", &status);
       if (rc) *rc = status;
       return;
   }
   
-  if (cconv.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cpurp.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cobj.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
   if (value) {
     if (*count == 1) {
       if (*tk == ESMC_TYPEKIND_I4)
@@ -2062,74 +1989,6 @@ extern "C" {
   return;
 
 }  // end c_ESMC_AttributeCopy
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_esmc_attributeremove - Remove the attribute
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributeremove)(
-//
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributeremove()"
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,          // in/out - base object
-      char *name,                // in - F90, non-null terminated string
-      int *rc,                   // in - return code     
-      int nlen) {                // hidden/in - strlen count for name
-// 
-// !DESCRIPTION:
-//    Remove an attribute package
-//
-//EOP
-
-  int status;
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!base) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", &status);
-    if (rc) *rc = status;    
-    return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name", &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  string cname(name, nlen);
-  cname.resize(cname.find_last_not_of(" ")+1);
-
-  if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // Set the attribute on the object.
-  status = (**base).root.AttributeRemove(cname);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed removing the attribute", &status);
-    if (rc) *rc = status;
-    return;
-  }
-    
-  if (rc) *rc = status;
-  return;
-
-}  // end c_esmc_attributeremove
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -2841,6 +2700,182 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  c_ESMC_AttributeLink - Link an Attribute hierarchy
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributelink)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributelink()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **source,       // in/out - base object
+      ESMC_Base **destination,  // in/out - base destination object
+      int *rc) {                // in/out - return value 
+// 
+// !DESCRIPTION:
+//     Set a link in an attribute hierarchy.
+//
+//EOP
+
+  int i, status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!source) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad source base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+  
+  if (!destination) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad destination base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // Set the attribute link on the object.
+  status = (**source).root.AttributeLink(*destination);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed setting attribute link", &status);
+  }
+  
+  if (rc) *rc = status;
+  return;
+
+}  // end c_ESMC_AttributeLink
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeLinkRemove - Remove a link an Attribute hierarchy
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributelinkremove)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributelinkremove()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **source,       // in/out - base object
+      ESMC_Base **destination,  // in/out - base destination object
+      int *rc) {                // in/out - return value 
+// 
+// !DESCRIPTION:
+//     Remove a link in an attribute hierarchy.
+//
+//EOP
+
+  int i, status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!source) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad source base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+  
+  if (!destination) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad destination base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // Set the attribute link on the object.
+  status = (**source).root.AttributeLinkRemove(*destination);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed removing an attribute link", &status);
+  }
+  
+  if (rc) *rc = status;
+  return;
+
+}  // end c_ESMC_AttributeLinkRemove
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_esmc_attributeremove - Remove the attribute
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributeremove)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributeremove()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,          // in/out - base object
+      char *name,                // in - F90, non-null terminated string
+      int *rc,                   // in - return code     
+      int nlen) {                // hidden/in - strlen count for name
+// 
+// !DESCRIPTION:
+//    Remove an attribute package
+//
+//EOP
+
+  int status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  string cname(name, nlen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // Set the attribute on the object.
+  status = (**base).root.AttributeRemove(cname);
+  if (status != ESMF_SUCCESS) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed removing the attribute", &status);
+    if (rc) *rc = status;
+    return;
+  }
+    
+  if (rc) *rc = status;
+  return;
+
+}  // end c_esmc_attributeremove
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  c_ESMC_AttributeSetChar - Set String Attribute on an ESMF type
 //
 // !INTERFACE:
@@ -2901,17 +2936,11 @@ extern "C" {
 
   if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", &status);
+                         "bad attribute name conversion, name must not be empty", &status);
       if (rc) *rc = status;
       return;
   }
   
-  if (cvalue.empty()) {
-      ESMC_LogDefault.Write("Attribute has an empty value argument",
-                              ESMC_LOG_INFO);
-      cvalue = '\0';
-  }
-
   // Set the attribute on the object
   status = (**base).root.AttributeSet(cname, &cvalue);
   if (status != ESMF_SUCCESS) {
@@ -2978,7 +3007,7 @@ extern "C" {
   cname.resize(cname.find_last_not_of(" ")+1);
   if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", &status);
+                         "bad attribute name conversion, name must not be empty", &status);
       if (rc) *rc = status;
       return;
   }
@@ -3000,11 +3029,6 @@ extern "C" {
     // copy and convert F90 string to null terminated one
     string temp((&valueList[j]), lens[i]);
     temp.resize(temp.find_last_not_of(" ")+1);
-    if (temp.empty()) {
-      ESMC_LogDefault.Write("Attribute has an empty value argument",
-                              ESMC_LOG_INFO);
-      temp = '\0';
-    }
     cvalue.push_back(temp);
     j = j + lens[i];
   }
@@ -3074,7 +3098,7 @@ extern "C" {
   cname.resize(cname.find_last_not_of(" ")+1);
   if (cname.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", &status);
+                         "bad attribute name conversion, name must not be empty", &status);
     if (rc) *rc = status;
     return;
   }
@@ -3147,60 +3171,6 @@ extern "C" {
   return;
 
 }  // end c_ESMC_AttributeSetValue
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeSetLink - Set a link in an Attribute hierarchy
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributesetlink)(
-//
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributesetlink()"
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **source,       // in/out - base object
-      ESMC_Base **destination,  // in/out - base destination object
-      int *rc) {                // in/out - return value 
-// 
-// !DESCRIPTION:
-//     Set a link in an attribute hierarchy.
-//
-//EOP
-
-  int i, status;
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!source) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad source base", &status);
-    if (rc) *rc = status;    
-    return;
-  }
-  
-  if (!destination) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad destination base", &status);
-    if (rc) *rc = status;    
-    return;
-  }
-
-  // Set the attribute link on the object.
-  status = (**source).root.AttributeSetLink(*destination);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed setting attribute link", &status);
-  }
-  
-  if (rc) *rc = status;
-  return;
-
-}  // end c_ESMC_AttributeSetLink
 
 //-----------------------------------------------------------------------------
 //BOP
