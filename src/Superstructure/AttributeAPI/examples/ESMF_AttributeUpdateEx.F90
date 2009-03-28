@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.9 2009/02/27 22:56:21 svasquez Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.10 2009/03/28 01:35:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -191,7 +191,7 @@ implicit none
       call ESMF_AttributeSet(gridcomp1, name10, value10, &
         convention=convESG, purpose=purpGen, rc=rc)
       
-      call ESMF_AttributeSet(gridcomp1, c1exp, rc=rc) 
+      call ESMF_AttributeLink(gridcomp1, c1exp, rc=rc) 
 !EOC
 
 !BOE

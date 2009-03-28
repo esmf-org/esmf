@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.4 2009/02/20 05:42:13 rokuingh Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.5 2009/03/28 01:35:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -486,7 +486,7 @@ program ESMF_AttributePackageEx
 !EOE
 
 !BOC
-      call ESMF_AttributeSet(gridcomp, exportState, rc=rc)
+      call ESMF_AttributeLink(gridcomp, exportState, rc=rc)
 !EOC
 
 !BOE

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridCompUTest.F90,v 1.6 2009/03/13 23:00:13 rokuingh Exp $
+! $Id: ESMF_AttributeGridCompUTest.F90,v 1.7 2009/03/28 01:35:12 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.6 2009/03/13 23:00:13 rokuingh Exp $'
+      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.7 2009/03/28 01:35:12 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -60,15 +60,15 @@ program ESMF_AttributeGridCompUTest
       real(kind=4)                     :: inR4, outR4, defaultR4, dfltoutR4
       real(kind=4), dimension(3)       :: inR4l, outR4l, defaultR4l, dfltoutR4l
       real(kind=8)                     :: inR8, outR8, defaultR8, dfltoutR8
-      real(kind=8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l
-      real(kind=8), dimension(5)       :: outR8l
+      real(kind=8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l, outR8l
+      real(kind=8), dimension(10)       :: outR8lLong
       character(ESMF_MAXSTR)                     :: inChar, outChar, defaultChar, dfltoutChar, &
                                                     inEmpty, outEmpty
-      character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl
-      character(ESMF_MAXSTR), dimension(5)       :: outCharl
+      character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl, outCharl
+      character(ESMF_MAXSTR), dimension(10)       :: outCharlLong
       logical                          :: inLog, outLog, defaultLog, dfltoutLog
-      logical, dimension(3)            :: inLogl, defaultLogl, dfltoutLogl
-      logical, dimension(5)            :: outLogl
+      logical, dimension(3)            :: inLogl, defaultLogl, dfltoutLogl, outLogl
+      logical, dimension(10)            :: outLoglLong
   
       character(ESMF_MAXSTR), dimension(3)  :: attpackList, attpackListOut, &
                                                attpackListOut2, attpackDfltList, &
@@ -107,6 +107,9 @@ program ESMF_AttributeGridCompUTest
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+      conv = "customconvention"
+      purp = "custompurpose"
+
 !-------------------------------------------------------------------------
 !  GRIDCOMP
 !-------------------------------------------------------------------------
@@ -125,7 +128,7 @@ program ESMF_AttributeGridCompUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Get an empty valGridCompue character from a GridComp Test
+      ! Get an empty value character from a GridComp Test
       call ESMF_AttributeGet(gridcomp, name="EmptyValue", value=outEmpty, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an empty value character Attribute from a GridComp Test"
@@ -136,11 +139,12 @@ program ESMF_AttributeGridCompUTest
     !-------------------------------------------------------------------------
     !  Empty value from variable
     !-------------------------------------------------------------------------
+      inEmpty = ""
       !EX_UTest
       ! Add an empty value character to a GridComp Test
       call ESMF_AttributeSet(gridcomp, name="EmptyValue", value=inEmpty, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding an empty value character Attribute to a GridComp Test"
+      write(name, *) "Adding an empty value character Attribute to a GridComp Test 2"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -148,8 +152,8 @@ program ESMF_AttributeGridCompUTest
       ! Get an empty value character from a GridComp Test
       call ESMF_AttributeGet(gridcomp, name="EmptyValue", value=outEmpty, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an empty value character Attribute from a GridComp Test"
-      call ESMF_Test((rc==ESMF_SUCCESS).and.(""==outEmpty), &
+      write(name, *) "Getting an empty value character Attribute from a GridComp Test 2"
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(inEmpty==outEmpty), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -412,11 +416,13 @@ program ESMF_AttributeGridCompUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+#endif
+      
     !-------------------------------------------------------------------------
     !  ESMF_R8
     !-------------------------------------------------------------------------
       inR8 = 4
-      !EX_UTest
+      !NEX_UTest
       ! Add an ESMF_R8 Attribute to a GridComp Test
       call ESMF_AttributeSet(gridcomp, name="AttrR8", value=inR8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -424,7 +430,7 @@ program ESMF_AttributeGridCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Get an ESMF_R8 Attribute from a GridComp Test
       call ESMF_AttributeGet(gridcomp, name="AttrR8", value=outR8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -433,7 +439,7 @@ program ESMF_AttributeGridCompUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Remove an Attribute on a GridComp Test
       call ESMF_AttributeRemove(gridcomp, name="AttrR8", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -442,7 +448,7 @@ program ESMF_AttributeGridCompUTest
       !------------------------------------------------------------------------
       
       defaultR8 = 7
-      !EX_UTest
+      !NEX_UTest
       ! Get an ESMF_R8 Attribute from a GridComp Test
       call ESMF_AttributeGet(gridcomp, name="AttrR8", value=dfltoutR8, &
         defaultvalue=defaultR8, rc=rc)
@@ -456,7 +462,7 @@ program ESMF_AttributeGridCompUTest
     !  ESMF_R8 list
     !-------------------------------------------------------------------------
       inR8l = (/1,2,3/)
-      !EX_UTest
+      !NEX_UTest
       ! Add an ESMF_R8 list Attribute to a GridComp Test
       call ESMF_AttributeSet(gridcomp, name="AttrR8l", &
         valueList=inR8l, rc=rc)
@@ -465,17 +471,18 @@ program ESMF_AttributeGridCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      itemCount = 3
+      !NEX_UTest
       ! Get an ESMF_R8 list Attribute from a GridComp Test
       call ESMF_AttributeGet(gridcomp, name="AttrR8l", &
-        valueList=outR8l(2:5), itemCount=itemCount, rc=rc)
+        valueList=outR8l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an ESMF_R8l Attribute from a GridComp Test"
-      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8l(2:4) .and. &
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8l), name, &
+                      failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Remove an Attribute on a GridComp Test
       call ESMF_AttributeRemove(gridcomp, name="AttrR8l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -484,7 +491,7 @@ program ESMF_AttributeGridCompUTest
       !------------------------------------------------------------------------
       
       defaultR8l = (/7,8,9/)
-      !EX_UTest
+      !NEX_UTest
       ! Get an ESMF_R8 list Attribute from a GridComp Test
       call ESMF_AttributeGet(gridcomp, name="AttrR8l", &
         valueList=dfltoutR8l, defaultvalueList=defaultR8l, rc=rc)
@@ -494,8 +501,6 @@ program ESMF_AttributeGridCompUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-#endif
-      
     !-------------------------------------------------------------------------
     !  Character
     !-------------------------------------------------------------------------
@@ -558,13 +563,14 @@ program ESMF_AttributeGridCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
   
+      itemCount = 3
       !EX_UTest
       ! Get a char list Attribute on a GridComp Test
       call ESMF_AttributeGet(gridcomp, name="Charl", &
-        valueList=OutCharl(2:5),itemCount=itemCount, rc=rc)
+        valueList=OutCharl,itemCount=itemCount, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an Attribute char list from a GridComp test"
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl==OutCharl(2:4) .and. &
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl==OutCharl .and. &
                     itemCount==3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -654,13 +660,14 @@ program ESMF_AttributeGridCompUTest
       !------------------------------------------------------------------------
 
       outLogl = .false.
+      itemCount = 3
       !EX_UTest
       ! Get a logical attribute - gridcomp version
       call ESMF_AttributeGet(gridcomp, name=attrname,  &
-        valueList=outLogl(2:5), itemCount=itemCount, rc=rc)
+        valueList=outLogl, itemCount=itemCount, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting GridComp Attribute (type Fortran logical gridcomp)"
-      call ESMF_Test((rc == ESMF_SUCCESS) .and. all (inLogl .eqv. outLogl(2:4) &
+      call ESMF_Test((rc == ESMF_SUCCESS) .and. all (inLogl .eqv. outLogl &
                     .and. itemCount==3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -685,13 +692,116 @@ program ESMF_AttributeGridCompUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
+    !  WRONG SIZE ARRAY TESTS
+    !-------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  ESMF_R8 list  -   wrong size array
+    !-------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Add an ESMF_R8 list Attribute to a GridComp Test
+      call ESMF_AttributeSet(gridcomp, name="AttrR8l", &
+        valueList=inR8l, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding an ESMF_R8l Attribute to a GridComp Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      itemCount = 4
+      !EX_UTest
+      ! Too Short Get an ESMF_R8 list Attribute from a GridComp Test
+      call ESMF_AttributeGet(gridcomp, name="AttrR8l", &
+        valueList=outR8lLong(1:2), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an ESMF_R8l Attribute from a GridComp Test with short valueList"
+      call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      itemCount = 3
+      !EX_UTest
+      ! Too Long Get an ESMF_R8 list Attribute from a GridComp Test
+      call ESMF_AttributeGet(gridcomp, name="AttrR8l", &
+        valueList=outR8lLong(4:8), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an ESMF_R8l Attribute from a GridComp Test with long valueList"
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8lLong(4:6) .and. &
+                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Character list  -   wrong size array
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Set a char list Attribute on a GridComp Test
+      call ESMF_AttributeSet(gridcomp, name="Charl", &
+        valueList=InCharl, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting an Attribute char list on a GridComp test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+  
+      itemCount = 4
+      !EX_UTest
+      ! Too Short Get a char list Attribute from a GridComp Test
+      call ESMF_AttributeGet(gridcomp, name="Charl", &
+        valueList=outCharlLong(1:2),itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting an Attribute char list from a GridComp test with short valueList"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      itemCount = 3
+      !EX_UTest
+      ! Too Long Get a char list Attribute from a GridComp Test
+      call ESMF_AttributeGet(gridcomp, name="Charl", &
+        valueList=outCharlLong(4:8), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting a default Attribute char list from a GridComp test with long valueList"
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inCharl==outCharlLong(4:6) .and. &
+                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Logical list  -  wrong size array
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Set a logical attribute - gridcomp version
+      call ESMF_AttributeSet(gridcomp, name=attrname, &
+        valueList=inLogl, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting an Attribute logical list on a GridComp test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      outLogl = .false.
+      itemCount = 4
+      !EX_UTest
+      ! Too Short Get an ESMF_R8 list Attribute from a GridComp Test
+      call ESMF_AttributeGet(gridcomp, name=attrname,  &
+        valueList=outLoglLong(1:2), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting an logical list Attribute from a GridComp Test with short valueList"
+      call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      itemCount = 3
+      !EX_UTest
+      ! Too Long Get an ESMF_R8 list Attribute from a GridComp Test
+      call ESMF_AttributeGet(gridcomp, name=attrname, &
+        valueList=outLoglLong(4:8), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting an logical list Attribute from a GridComp Test with long valueList"
+      call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl==outLoglLong(4:6) .and. &
+                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
     !  Attribute package - custom
     !-------------------------------------------------------------------------
       attpackList(1) = "Custom1"
       attpackList(2) = "Custom2"
       attpackList(3) = "Custom3"
-      conv = "customconvention"
-      purp = "custompurpose"
       
       !EX_UTest
       ! Create a custom Attribute package on a GridComp Test
@@ -1009,7 +1119,7 @@ program ESMF_AttributeGridCompUTest
 
       !NEX_UTest
       ! Link a GridComp Attribute hierarchy to a State Attribute hierarchy GridComp Test
-      call ESMF_AttributeSet(gridcomp, sfg, rc=rc)
+      call ESMF_AttributeLink(gridcomp, sfg, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a GridComp hierarchy to a State hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1017,7 +1127,7 @@ program ESMF_AttributeGridCompUTest
 
       !NEX_UTest
       ! Link a GridComp Attribute hierarchy to a CplComp Attribute hierarchy GridComp Test
-      call ESMF_AttributeSet(gridcomp, cfg, rc=rc)
+      call ESMF_AttributeLink(gridcomp, cfg, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a GridComp hierarchy to a CplComp hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1025,7 +1135,7 @@ program ESMF_AttributeGridCompUTest
 
       !NEX_UTest
       ! Link a GridComp Attribute hierarchy to a GridComp Attribute hierarchy GridComp Test
-      call ESMF_AttributeSet(gridcomp, gfg, rc=rc)
+      call ESMF_AttributeLink(gridcomp, gfg, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a GridComp hierarchy to a GridComp hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1035,7 +1145,7 @@ program ESMF_AttributeGridCompUTest
 
       !EX_UTest
       ! Link a GridComp Attribute hierarchy to a State Attribute hierarchy GridComp Test, again
-      call ESMF_AttributeSet(gridcomp, sfg, rc=rc)
+      call ESMF_AttributeLink(gridcomp, sfg, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a GridComp hierarchy to a State hierarchy Test, again"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1043,7 +1153,7 @@ program ESMF_AttributeGridCompUTest
 
       !EX_UTest
       ! Link a GridComp Attribute hierarchy to a CplComp Attribute hierarchy GridComp Test, again
-      call ESMF_AttributeSet(gridcomp, cfg, rc=rc)
+      call ESMF_AttributeLink(gridcomp, cfg, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a GridComp hierarchy to a CplComp hierarchy Test, again"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1051,13 +1161,37 @@ program ESMF_AttributeGridCompUTest
 
       !EX_UTest
       ! Link a GridComp Attribute hierarchy to a GridComp Attribute hierarchy GridComp Test, again
-      call ESMF_AttributeSet(gridcomp, gfg, rc=rc)
+      call ESMF_AttributeLink(gridcomp, gfg, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a GridComp hierarchy to a GridComp hierarchy Test, again"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif
+
+      !NEX_UTest
+      ! Unlink a GridComp Attribute hierarchy from a State Attribute hierarchy GridComp Test
+      call ESMF_AttributeLinkRemove(gridcomp, sfg, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a GridComp hierarchy from a State hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Unlink a GridComp Attribute hierarchy from a CplComp Attribute hierarchy GridComp Test
+      call ESMF_AttributeLinkRemove(gridcomp, cfg, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a GridComp hierarchy from a CplComp hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Unlink a GridComp Attribute hierarchy from a GridComp Attribute hierarchy GridComp Test
+      call ESMF_AttributeLinkRemove(gridcomp, gfg, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a GridComp hierarchy from a GridComp hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
     !  Attribute Info

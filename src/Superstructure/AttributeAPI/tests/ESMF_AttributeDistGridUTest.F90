@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeDistGridUTest.F90,v 1.3 2009/03/25 20:51:38 rokuingh Exp $
+! $Id: ESMF_AttributeDistGridUTest.F90,v 1.4 2009/03/28 01:35:12 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeDistGridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.3 2009/03/25 20:51:38 rokuingh Exp $'
+      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.4 2009/03/28 01:35:12 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -58,15 +58,15 @@ program ESMF_AttributeDistGridUTest
       real(kind=4)                     :: inR4, outR4, defaultR4, dfltoutR4
       real(kind=4), dimension(3)       :: inR4l, outR4l, defaultR4l, dfltoutR4l
       real(kind=8)                     :: inR8, outR8, defaultR8, dfltoutR8
-      real(kind=8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l
-      real(kind=8), dimension(5)       :: outR8l
+      real(kind=8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l, outR8l
+      real(kind=8), dimension(10)       :: outR8lLong
       character(ESMF_MAXSTR)                     :: inChar, outChar, defaultChar, dfltoutChar, &
                                                     inEmpty, outEmpty
-      character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl
-      character(ESMF_MAXSTR), dimension(5)       :: outCharl
+      character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl, outCharl
+      character(ESMF_MAXSTR), dimension(10)       :: outCharlLong
       logical                          :: inLog, outLog, defaultLog, dfltoutLog
-      logical, dimension(3)            :: inLogl, defaultLogl, dfltoutLogl
-      logical, dimension(5)            :: outLogl
+      logical, dimension(3)            :: inLogl, defaultLogl, dfltoutLogl, outLogl
+      logical, dimension(10)            :: outLoglLong
   
       character(ESMF_MAXSTR), dimension(3)  :: attpackList, attpackListOut, &
                                                attpackListOut2, attpackDfltList, &
@@ -96,6 +96,8 @@ program ESMF_AttributeDistGridUTest
       ! distgrid and grid
       distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
         regDecomp=(/2,3/), rc=rc)
+      conv = "customconvention"
+      purp = "custompurpose"
 
 !-------------------------------------------------------------------------
 !  ARRAY
@@ -126,11 +128,12 @@ program ESMF_AttributeDistGridUTest
     !-------------------------------------------------------------------------
     !  Empty value from variable
     !-------------------------------------------------------------------------
+      inEmpty = ""
       !EX_UTest
       ! Add an empty value character to a DistGrid Test
       call ESMF_AttributeSet(distgrid, name="EmptyValue", value=inEmpty, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding an empty value character Attribute to a DistGrid Test"
+      write(name, *) "Adding an empty value character Attribute to a DistGrid Test 2"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -138,8 +141,8 @@ program ESMF_AttributeDistGridUTest
       ! Get an empty value character from a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="EmptyValue", value=outEmpty, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an empty value character Attribute from a DistGrid Test"
-      call ESMF_Test((rc==ESMF_SUCCESS).and.(""==outEmpty), &
+      write(name, *) "Getting an empty value character Attribute from a DistGrid Test 2"
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(inEmpty==outEmpty), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -402,11 +405,13 @@ program ESMF_AttributeDistGridUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+#endif
+      
     !-------------------------------------------------------------------------
     !  ESMF_R8
     !-------------------------------------------------------------------------
       inR8 = 4
-      !EX_UTest
+      !NEX_UTest
       ! Add an ESMF_R8 Attribute to an DistGrid Test
       call ESMF_AttributeSet(distgrid, name="AttrR8", value=inR8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -414,7 +419,7 @@ program ESMF_AttributeDistGridUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Get an ESMF_R8 Attribute from an DistGrid Test
       call ESMF_AttributeGet(distgrid, name="AttrR8", value=outR8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -423,7 +428,7 @@ program ESMF_AttributeDistGridUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Remove an Attribute on an DistGrid Test
       call ESMF_AttributeRemove(distgrid, name="AttrR8", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -432,7 +437,7 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
       
       defaultR8 = 7
-      !EX_UTest
+      !NEX_UTest
       ! Get an ESMF_R8 Attribute from a Field Test
       call ESMF_AttributeGet(distgrid, name="AttrR8", value=dfltoutR8, &
         defaultvalue=defaultR8, rc=rc)
@@ -446,7 +451,7 @@ program ESMF_AttributeDistGridUTest
     !  ESMF_R8 list
     !-------------------------------------------------------------------------
       inR8l = (/1,2,3/)
-      !EX_UTest
+      !NEX_UTest
       ! Add an ESMF_R8 list Attribute to an DistGrid Test
       call ESMF_AttributeSet(distgrid, name="AttrR8l", &
         valueList=inR8l, rc=rc)
@@ -455,7 +460,8 @@ program ESMF_AttributeDistGridUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      itemCount = 4
+      !NEX_UTest
       ! Get an ESMF_R8 list Attribute from an DistGrid Test
       call ESMF_AttributeGet(distgrid, name="AttrR8l", &
         valueList=outR8l(2:5), itemCount=itemCount, rc=rc)
@@ -465,7 +471,7 @@ program ESMF_AttributeDistGridUTest
                     itemCount==3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Remove an Attribute on an DistGrid Test
       call ESMF_AttributeRemove(distgrid, name="AttrR8l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -474,7 +480,7 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
       
       defaultR8l = (/7,8,9/)
-      !EX_UTest
+      !NEX_UTest
       ! Get an ESMF_R8 list Attribute from a Field Test
       call ESMF_AttributeGet(distgrid, name="AttrR8l", &
         valueList=dfltoutR8l, defaultvalueList=defaultR8l, rc=rc)
@@ -484,8 +490,6 @@ program ESMF_AttributeDistGridUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-#endif
-      
     !-------------------------------------------------------------------------
     !  Character
     !-------------------------------------------------------------------------
@@ -548,6 +552,7 @@ program ESMF_AttributeDistGridUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
   
+      itemCount = 4
       !EX_UTest
       ! Get a char list Attribute on a DistGrid Test
       call ESMF_AttributeGet(distgrid, name="Charl", &
@@ -644,6 +649,7 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
 
       outLogl = .false.
+      itemCount = 4
       !EX_UTest
       ! Get a logical attribute - distgrid version
       call ESMF_AttributeGet(distgrid, name=attrname,  &
@@ -675,13 +681,116 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
+    !  WRONG SIZE ARRAY TESTS
+    !-------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  ESMF_R8 list  -  wrong size array
+    !-------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Add an ESMF_R8 list Attribute to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="AttrR8l", &
+        valueList=inR8l, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding an ESMF_R8l Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      itemCount = 4
+      !EX_UTest
+      ! Too Short Get an ESMF_R8 list Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="AttrR8l", &
+        valueList=outR8lLong(1:2), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an ESMF_R8l Attribute from a DistGrid Test with short valueList"
+      call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      itemCount = 3
+      !EX_UTest
+      ! Too Long Get an ESMF_R8 list Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="AttrR8l", &
+        valueList=outR8lLong(4:8), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an ESMF_R8l Attribute from a DistGrid Test with long valueList"
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8lLong(4:6) .and. &
+                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !-------------------------------------------------------------------------
+      !  Character list wrong size array
+      !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Set a char list Attribute on a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="Charl", &
+        valueList=InCharl, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting an Attribute char list on a DistGrid test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+  
+      itemCount = 4
+      !EX_UTest
+      ! Too Short Get a char list Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="Charl", &
+        valueList=outCharlLong(1:2),itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting an Attribute char list from a DistGrid test with short valueList"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      itemCount = 3
+      !EX_UTest
+      ! Too Long Get a char list Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="Charl", &
+        valueList=outCharlLong(4:8), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting a default Attribute char list from a DistGrid test with long valueList"
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inCharl==outCharlLong(4:6) .and. &
+                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Logical wrong size array
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Set a logical attribute - distgrid version
+      call ESMF_AttributeSet(distgrid, name=attrname, &
+        valueList=inLogl, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting an Attribute logical list on a DistGrid test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      outLogl = .false.
+      itemCount = 4
+      !EX_UTest
+      ! Too Short Get an ESMF_R8 list Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name=attrname,  &
+        valueList=outLoglLong(1:2), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting an logical list Attribute from a DistGrid Test with short valueList"
+      call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      itemCount = 3
+      !EX_UTest
+      ! Too Long Get an ESMF_R8 list Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name=attrname, &
+        valueList=outLoglLong(4:8), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting an logical list Attribute from a DistGrid Test with long valueList"
+      call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl==outLoglLong(4:6) .and. &
+                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
     !  Attribute package - custom
     !-------------------------------------------------------------------------
       attpackList(1) = "Custom1"
       attpackList(2) = "Custom2"
       attpackList(3) = "Custom3"
-      conv = "customconvention"
-      purp = "custompurpose"
       
       !EX_UTest
       ! Create a custom Attribute package on an DistGrid Test

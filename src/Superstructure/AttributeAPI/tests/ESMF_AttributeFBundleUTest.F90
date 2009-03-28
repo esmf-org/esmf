@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFBundleUTest.F90,v 1.7 2009/03/25 20:51:38 rokuingh Exp $
+! $Id: ESMF_AttributeFBundleUTest.F90,v 1.8 2009/03/28 01:35:12 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.7 2009/03/25 20:51:38 rokuingh Exp $'
+      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.8 2009/03/28 01:35:12 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -59,15 +59,15 @@ program ESMF_AttributeFBundleUTest
       real(kind=4)                     :: inR4, outR4, defaultR4, dfltoutR4
       real(kind=4), dimension(3)       :: inR4l, outR4l, defaultR4l, dfltoutR4l
       real(kind=8)                     :: inR8, outR8, defaultR8, dfltoutR8
-      real(kind=8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l
-      real(kind=8), dimension(5)       :: outR8l
+      real(kind=8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l, outR8l
+      real(kind=8), dimension(10)       :: outR8lLong
       character(ESMF_MAXSTR)                     :: inChar, outChar, defaultChar, dfltoutChar, &
                                                     inEmpty, outEmpty
-      character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl
-      character(ESMF_MAXSTR), dimension(5)       :: outCharl
+      character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl, outCharl
+      character(ESMF_MAXSTR), dimension(10)       :: outCharlLong
       logical                          :: inLog, outLog, defaultLog, dfltoutLog
-      logical, dimension(3)            :: inLogl, defaultLogl, dfltoutLogl
-      logical, dimension(5)            :: outLogl
+      logical, dimension(3)            :: inLogl, defaultLogl, dfltoutLogl, outLogl
+      logical, dimension(10)            :: outLoglLong
   
       character(ESMF_MAXSTR), dimension(3)  :: attpackList, attpackListOut, &
                                                attpackListOut2, attpackDfltList, &
@@ -100,6 +100,9 @@ program ESMF_AttributeFBundleUTest
       ! field bundles
       fieldbundle = ESMF_FieldBundleCreate(name="original field bundle", rc=rc)
       
+      conv = "customconvention"
+      purp = "custompurpose"
+      
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !-------------------------------------------------------------------------
@@ -131,11 +134,12 @@ program ESMF_AttributeFBundleUTest
     !-------------------------------------------------------------------------
     !  Empty value from variable
     !-------------------------------------------------------------------------
+      inEmpty = ""
       !EX_UTest
       ! Add an empty value character to a FieldBundle Test
       call ESMF_AttributeSet(fieldbundle, name="EmptyValue", value=inEmpty, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Adding an empty value character Attribute to a FieldBundle Test"
+      write(name, *) "Adding an empty value character Attribute to a FieldBundle Test 2"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -143,8 +147,8 @@ program ESMF_AttributeFBundleUTest
       ! Get an empty value character from a FieldBundle Test
       call ESMF_AttributeGet(fieldbundle, name="EmptyValue", value=outEmpty, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting an empty value character Attribute from a FieldBundle Test"
-      call ESMF_Test((rc==ESMF_SUCCESS).and.(""==outEmpty), &
+      write(name, *) "Getting an empty value character Attribute from a FieldBundle Test 2"
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(inEmpty==outEmpty), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -407,11 +411,13 @@ program ESMF_AttributeFBundleUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+#endif
+      
     !-------------------------------------------------------------------------
     !  ESMF_R8
     !-------------------------------------------------------------------------
       inR8 = 4
-      !EX_UTest
+      !NEX_UTest
       ! Add an ESMF_R8 Attribute to a FieldBundle Test
       call ESMF_AttributeSet(fieldbundle, name="AttrR8", value=inR8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -419,7 +425,7 @@ program ESMF_AttributeFBundleUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Get an ESMF_R8 Attribute from a FieldBundle Test
       call ESMF_AttributeGet(fieldbundle, name="AttrR8", value=outR8, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -428,7 +434,7 @@ program ESMF_AttributeFBundleUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Remove an Attribute on a FieldBundle Test
       call ESMF_AttributeRemove(fieldbundle, name="AttrR8", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -437,7 +443,7 @@ program ESMF_AttributeFBundleUTest
       !------------------------------------------------------------------------
       
       defaultR8 = 7
-      !EX_UTest
+      !NEX_UTest
       ! Get an ESMF_R8 Attribute from a FieldBundle Test
       call ESMF_AttributeGet(fieldbundle, name="AttrR8", value=dfltoutR8, &
         defaultvalue=defaultR8, rc=rc)
@@ -451,7 +457,7 @@ program ESMF_AttributeFBundleUTest
     !  ESMF_R8 list
     !-------------------------------------------------------------------------
       inR8l = (/1,2,3/)
-      !EX_UTest
+      !NEX_UTest
       ! Add an ESMF_R8 list Attribute to a FieldBundle Test
       call ESMF_AttributeSet(fieldbundle, name="AttrR8l", &
         valueList=inR8l, rc=rc)
@@ -460,7 +466,8 @@ program ESMF_AttributeFBundleUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      itemCount = 4
+      !NEX_UTest
       ! Get an ESMF_R8 list Attribute from a FieldBundle Test
       call ESMF_AttributeGet(fieldbundle, name="AttrR8l", &
         valueList=outR8l(2:5), itemCount=itemCount, rc=rc)
@@ -470,7 +477,7 @@ program ESMF_AttributeFBundleUTest
                     itemCount==3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Remove an Attribute on a FieldBundle Test
       call ESMF_AttributeRemove(fieldbundle, name="AttrR8l", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -479,7 +486,7 @@ program ESMF_AttributeFBundleUTest
       !------------------------------------------------------------------------
       
       defaultR8l = (/7,8,9/)
-      !EX_UTest
+      !NEX_UTest
       ! Get an ESMF_R8 list Attribute from a FieldBundle Test
       call ESMF_AttributeGet(fieldbundle, name="AttrR8l", &
         valueList=dfltoutR8l, defaultvalueList=defaultR8l, rc=rc)
@@ -489,8 +496,6 @@ program ESMF_AttributeFBundleUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-#endif
-      
     !-------------------------------------------------------------------------
     !  Character
     !-------------------------------------------------------------------------
@@ -553,6 +558,7 @@ program ESMF_AttributeFBundleUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
   
+      itemCount = 4
       !EX_UTest
       ! Get a char list Attribute on a FieldBundle Test
       call ESMF_AttributeGet(fieldbundle, name="Charl", &
@@ -649,6 +655,7 @@ program ESMF_AttributeFBundleUTest
       !------------------------------------------------------------------------
 
       outLogl = .false.
+      itemCount = 4
       !EX_UTest
       ! Get a logical attribute - fieldbundle version
       call ESMF_AttributeGet(fieldbundle, name=attrname,  &
@@ -680,13 +687,116 @@ program ESMF_AttributeFBundleUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
+    !  WRONG SIZE ARRAY TESTS
+    !-------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  ESMF_R8 list  -  wrong size array
+    !-------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Add an ESMF_R8 list Attribute to a FieldBundle Test
+      call ESMF_AttributeSet(fieldbundle, name="AttrR8l", &
+        valueList=inR8l, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding an ESMF_R8l Attribute to a FieldBundle Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      itemCount = 4
+      !EX_UTest
+      ! Too Short Get an ESMF_R8 list Attribute from a FieldBundle Test
+      call ESMF_AttributeGet(fieldbundle, name="AttrR8l", &
+        valueList=outR8lLong(1:2), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an ESMF_R8l Attribute from a FieldBundle Test with short valueList"
+      call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      itemCount = 3
+      !EX_UTest
+      ! Too Long Get an ESMF_R8 list Attribute from a FieldBundle Test
+      call ESMF_AttributeGet(fieldbundle, name="AttrR8l", &
+        valueList=outR8lLong(4:8), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an ESMF_R8l Attribute from a FieldBundle Test with long valueList"
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8lLong(4:6) .and. &
+                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !-------------------------------------------------------------------------
+      !  Character list wrong size array
+      !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Set a char list Attribute on a FieldBundle Test
+      call ESMF_AttributeSet(fieldbundle, name="Charl", &
+        valueList=InCharl, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting an Attribute char list on a FieldBundle test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+  
+      itemCount = 4
+      !EX_UTest
+      ! Too Short Get a char list Attribute from a FieldBundle Test
+      call ESMF_AttributeGet(fieldbundle, name="Charl", &
+        valueList=outCharlLong(1:2),itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting an Attribute char list from a FieldBundle test with short valueList"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      itemCount = 3
+      !EX_UTest
+      ! Too Long Get a char list Attribute from a FieldBundle Test
+      call ESMF_AttributeGet(fieldbundle, name="Charl", &
+        valueList=outCharlLong(4:8), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting a default Attribute char list from a FieldBundle test with long valueList"
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inCharl==outCharlLong(4:6) .and. &
+                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Logical wrong size array
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Set a logical attribute - fieldbundle version
+      call ESMF_AttributeSet(fieldbundle, name=attrname, &
+        valueList=inLogl, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(name, *) "Setting an Attribute logical list on a FieldBundle test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      outLogl = .false.
+      itemCount = 4
+      !EX_UTest
+      ! Too Short Get an ESMF_R8 list Attribute from a FieldBundle Test
+      call ESMF_AttributeGet(fieldbundle, name=attrname,  &
+        valueList=outLoglLong(1:2), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting an logical list Attribute from a FieldBundle Test with short valueList"
+      call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      itemCount = 3
+      !EX_UTest
+      ! Too Long Get an ESMF_R8 list Attribute from a FieldBundle Test
+      call ESMF_AttributeGet(fieldbundle, name=attrname, &
+        valueList=outLoglLong(4:8), itemCount=itemCount, rc=rc)
+      write(failMsg, *) "Did not return logical .TRUE."
+      write(name, *) "Getting an logical list Attribute from a FieldBundle Test with long valueList"
+      call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl==outLoglLong(4:6) .and. &
+                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
     !  Attribute package - custom
     !-------------------------------------------------------------------------
       attpackList(1) = "Custom1"
       attpackList(2) = "Custom2"
       attpackList(3) = "Custom3"
-      conv = "customconvention"
-      purp = "custompurpose"
       
       !EX_UTest
       ! Create a custom Attribute package on a FieldBundle Test
@@ -783,22 +893,6 @@ program ESMF_AttributeFBundleUTest
       write(name, *) "Removing the entire Attribute package from a FieldBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-
-#endif
-
-    !-------------------------------------------------------------------------
-    !  Attribute package - standard
-    !-------------------------------------------------------------------------
-      !NEX_UTest
-      ! Create an Attribute package on a FieldBundle Test
-      call ESMF_AttributeAdd(fieldbundle, convention=conv, &
-        purpose=purp, attrList=attpackList, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a custom Attribute package on a FieldBundle Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-#ifdef ESMF_TESTEXHAUSTIVE
 
       attpackListTNames(1) = "ESMF_I4name"
       attpackListTNames(2) = "ESMF_I4namelist"
@@ -989,7 +1083,7 @@ program ESMF_AttributeFBundleUTest
 
       !NEX_UTest
       ! Link a FieldBundle Attribute hierarchy to a Field Attribute hierarchy FieldBundle Test, again
-      call ESMF_AttributeSet(fieldbundle, ffb, rc=rc)
+      call ESMF_AttributeLink(fieldbundle, ffb, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a FieldBundle hierarchy to a Field hierarchy Test, again"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -999,10 +1093,18 @@ program ESMF_AttributeFBundleUTest
 
       !EX_UTest
       ! Link a FieldBundle Attribute hierarchy to a Field Attribute hierarchy FieldBundle Test, again
-      call ESMF_AttributeSet(fieldbundle, ffb, rc=rc)
+      call ESMF_AttributeLink(fieldbundle, ffb, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Linking a FieldBundle hierarchy to a Field hierarchy Test, again"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a FieldBundle Attribute hierarchy from a Field Attribute hierarchy FieldBundle Test
+      call ESMF_AttributeLinkRemove(fieldbundle, ffb, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a FieldBundle hierarchy from a Field hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif

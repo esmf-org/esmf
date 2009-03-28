@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.22 2009/03/26 04:48:28 theurich Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.23 2009/03/28 01:35:12 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -102,6 +102,8 @@ module ESMF_AttributeMod
       public ESMF_AttributeCopy
       public ESMF_AttributeRemove
       public ESMF_AttributeGet
+      public ESMF_AttributeLink
+      public ESMF_AttributeLinkRemove
       public ESMF_AttributeSet
       public ESMF_AttributeUpdate
       public ESMF_AttributeRead
@@ -112,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.22 2009/03/26 04:48:28 theurich Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.23 2009/03/28 01:35:12 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -306,88 +308,54 @@ module ESMF_AttributeMod
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_AttributeSet  - Set Attributes and Attribute packages
+! !IROUTINE: ESMF_AttributeLink  - Link Attribute hierarchies
 !
 ! !INTERFACE:
-      interface ESMF_AttributeSet 
+      interface ESMF_AttributeLink
    
 ! !PRIVATE MEMBER FUNCTIONS:
-	TypeKindInterfaceMacro(ESMF_ArrayAttSet)
-	TypeKindInterfaceMacro(ESMF_ArrayAttSet1D)
-        module procedure ESMF_ArrayAttSetLgcl
-        module procedure ESMF_ArrayAttSetLgclList
-        module procedure ESMF_ArrayAttSetChar
-        module procedure ESMF_ArrayAttSetCharList
-
-	TypeKindInterfaceMacro(ESMF_ArrayBundleAttSet)
-	TypeKindInterfaceMacro(ESMF_ArrayBundleAttSet1D)
-        module procedure ESMF_ArrayBundleAttSetLgcl
-        module procedure ESMF_ArrayBundleAttSetLgclList
-        module procedure ESMF_ArrayBundleAttSetChar
-        module procedure ESMF_ArrayBundleAttSetCharList
-
-	TypeKindInterfaceMacro(ESMF_CplCompAttSet)
-	TypeKindInterfaceMacro(ESMF_CplCompAttSet1D)
-        module procedure ESMF_CplCompAttSetLgcl
-        module procedure ESMF_CplCompAttSetLgclList
-        module procedure ESMF_CplCompAttSetChar
-        module procedure ESMF_CplCompAttSetCharList
-        module procedure ESMF_CplCompAttSetLinkCplComp
-        module procedure ESMF_CplCompAttSetLinkGridComp
-        module procedure ESMF_CplCompAttSetLinkState
-
-	TypeKindInterfaceMacro(ESMF_GridCompAttSet)
-	TypeKindInterfaceMacro(ESMF_GridCompAttSet1D)
-        module procedure ESMF_GridCompAttSetLgcl
-        module procedure ESMF_GridCompAttSetLgclList
-        module procedure ESMF_GridCompAttSetChar
-        module procedure ESMF_GridCompAttSetCharList
-        module procedure ESMF_GridCompAttSetLinkCplComp
-        module procedure ESMF_GridCompAttSetLinkGridComp
-        module procedure ESMF_GridCompAttSetLinkState
-
-	TypeKindInterfaceMacro(ESMF_DistGridAttSet)
-	TypeKindInterfaceMacro(ESMF_DistGridAttSet1D)
-        module procedure ESMF_DistGridAttSetLgcl
-        module procedure ESMF_DistGridAttSetLgclList
-        module procedure ESMF_DistGridAttSetChar
-        module procedure ESMF_DistGridAttSetCharList
-
-	TypeKindInterfaceMacro(ESMF_FieldAttSet)
-	TypeKindInterfaceMacro(ESMF_FieldAttSet1D)
-        module procedure ESMF_FieldAttSetLgcl
-        module procedure ESMF_FieldAttSetLgclList
-        module procedure ESMF_FieldAttSetChar
-        module procedure ESMF_FieldAttSetCharList
-
-	TypeKindInterfaceMacro(ESMF_FieldBundleAttSet)
-	TypeKindInterfaceMacro(ESMF_FieldBundleAttSet1D)
-        module procedure ESMF_FieldBundleAttSetLgcl
-        module procedure ESMF_FieldBundleAttSetLgclList
-        module procedure ESMF_FieldBundleAttSetChar
-        module procedure ESMF_FieldBundleAttSetCharList
-        module procedure ESMF_FieldBundleAttSetLinkField
-
-	TypeKindInterfaceMacro(ESMF_GridAttSet)
-	TypeKindInterfaceMacro(ESMF_GridAttSet1D)
-        module procedure ESMF_GridAttSetLgcl
-        module procedure ESMF_GridAttSetLgclList
-        module procedure ESMF_GridAttSetChar
-        module procedure ESMF_GridAttSetCharList
-
-	TypeKindInterfaceMacro(ESMF_StateAttSet)
-	TypeKindInterfaceMacro(ESMF_StateAttSet1D)
-        module procedure ESMF_StateAttSetLgcl
-        module procedure ESMF_StateAttSetLgclList
-        module procedure ESMF_StateAttSetChar
-        module procedure ESMF_StateAttSetCharList
-        module procedure ESMF_StateAttSetLinkfieldbundle
-        module procedure ESMF_StateAttSetLinkfield
-        module procedure ESMF_StateAttSetLinkstate
+! TODO
+        module procedure ESMF_CplCompAttLinkCplComp
+        module procedure ESMF_CplCompAttLinkGridComp
+        module procedure ESMF_CplCompAttLinkState
+        module procedure ESMF_GridCompAttLinkCplComp
+        module procedure ESMF_GridCompAttLinkGridComp
+        module procedure ESMF_GridCompAttLinkState
+        module procedure ESMF_FieldBundleAttLinkField
+        module procedure ESMF_StateAttLinkFieldBundle
+        module procedure ESMF_StateAttLinkField
+        module procedure ESMF_StateAttLinkState
 
 ! !DESCRIPTION:
-!     This interface provides a single entry point for methods that attach
-!     Attributes and Attribute packages, and link Attribute hierarchies.
+!     This interface provides a single entry point for methods that link
+!     Attribute hierarchies.
+ 
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeLinkRemove  - Unlink Attribute hierarchies
+!
+! !INTERFACE:
+      interface ESMF_AttributeLinkRemove
+   
+! !PRIVATE MEMBER FUNCTIONS:
+! TODO
+        module procedure ESMF_CplCompAttLinkRemoveCplComp
+        module procedure ESMF_CplCompAttLinkRemoveGridComp
+        module procedure ESMF_CplCompAttLinkRemoveState
+        module procedure ESMF_GridCompAttLinkRemoveCplComp
+        module procedure ESMF_GridCompAttLinkRemoveGridComp
+        module procedure ESMF_GridCompAttLinkRemoveState
+        module procedure ESMF_FieldBundleAttLinkRemoveField
+        module procedure ESMF_StateAttLinkRemoveFieldBundle
+        module procedure ESMF_StateAttLinkRemoveField
+        module procedure ESMF_StateAttLinkRemoveState
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that unlink
+!     Attribute hierarchies.
  
 !EOPI
       end interface
@@ -414,6 +382,84 @@ module ESMF_AttributeMod
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that read
 !     an Attribute or Attribute package.
+ 
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeSet  - Set Attributes and Attribute packages
+!
+! !INTERFACE:
+      interface ESMF_AttributeSet 
+   
+! !PRIVATE MEMBER FUNCTIONS:
+	TypeKindInterfaceMacro(ESMF_ArrayAttSet)
+	TypeKindInterfaceMacro(ESMF_ArrayAttSet1D)
+        module procedure ESMF_ArrayAttSetLgcl
+        module procedure ESMF_ArrayAttSetLgclList
+        module procedure ESMF_ArrayAttSetChar
+        module procedure ESMF_ArrayAttSetCharList
+
+	TypeKindInterfaceMacro(ESMF_ArrayBundleAttSet)
+	TypeKindInterfaceMacro(ESMF_ArrayBundleAttSet1D)
+        module procedure ESMF_ArrayBundleAttSetLgcl
+        module procedure ESMF_ArrayBundleAttSetLgclList
+        module procedure ESMF_ArrayBundleAttSetChar
+        module procedure ESMF_ArrayBundleAttSetCharList
+
+	TypeKindInterfaceMacro(ESMF_CplCompAttSet)
+	TypeKindInterfaceMacro(ESMF_CplCompAttSet1D)
+        module procedure ESMF_CplCompAttSetLgcl
+        module procedure ESMF_CplCompAttSetLgclList
+        module procedure ESMF_CplCompAttSetChar
+        module procedure ESMF_CplCompAttSetCharList
+
+	TypeKindInterfaceMacro(ESMF_GridCompAttSet)
+	TypeKindInterfaceMacro(ESMF_GridCompAttSet1D)
+        module procedure ESMF_GridCompAttSetLgcl
+        module procedure ESMF_GridCompAttSetLgclList
+        module procedure ESMF_GridCompAttSetChar
+        module procedure ESMF_GridCompAttSetCharList
+
+	TypeKindInterfaceMacro(ESMF_DistGridAttSet)
+	TypeKindInterfaceMacro(ESMF_DistGridAttSet1D)
+        module procedure ESMF_DistGridAttSetLgcl
+        module procedure ESMF_DistGridAttSetLgclList
+        module procedure ESMF_DistGridAttSetChar
+        module procedure ESMF_DistGridAttSetCharList
+
+	TypeKindInterfaceMacro(ESMF_FieldAttSet)
+	TypeKindInterfaceMacro(ESMF_FieldAttSet1D)
+        module procedure ESMF_FieldAttSetLgcl
+        module procedure ESMF_FieldAttSetLgclList
+        module procedure ESMF_FieldAttSetChar
+        module procedure ESMF_FieldAttSetCharList
+
+	TypeKindInterfaceMacro(ESMF_FieldBundleAttSet)
+	TypeKindInterfaceMacro(ESMF_FieldBundleAttSet1D)
+        module procedure ESMF_FieldBundleAttSetLgcl
+        module procedure ESMF_FieldBundleAttSetLgclList
+        module procedure ESMF_FieldBundleAttSetChar
+        module procedure ESMF_FieldBundleAttSetCharList
+
+	TypeKindInterfaceMacro(ESMF_GridAttSet)
+	TypeKindInterfaceMacro(ESMF_GridAttSet1D)
+        module procedure ESMF_GridAttSetLgcl
+        module procedure ESMF_GridAttSetLgclList
+        module procedure ESMF_GridAttSetChar
+        module procedure ESMF_GridAttSetCharList
+
+	TypeKindInterfaceMacro(ESMF_StateAttSet)
+	TypeKindInterfaceMacro(ESMF_StateAttSet1D)
+        module procedure ESMF_StateAttSetLgcl
+        module procedure ESMF_StateAttSetLgclList
+        module procedure ESMF_StateAttSetChar
+        module procedure ESMF_StateAttSetCharList
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that attach
+!     Attributes and Attribute packages, and link Attribute hierarchies.
  
 !EOPI
       end interface
@@ -1201,7 +1247,7 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttAddPackCstm" @\
 !BOPI @\
-! !IROUTINE: mclass##AttAddPackCstm - Create the Attribute package @\
+! !IROUTINE: AttAddPackCstm - Create the Attribute package @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
@@ -1244,7 +1290,7 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, i, directional, localCount, limit                           ! Error status @\
+      integer :: localrc, i, directional, localCount                          ! Error status @\
       character(len=*), parameter :: fconvention='N/A' @\
       character(len=*), parameter :: fpurpose='N/A' @\
       character(len=*), parameter :: fobject=#mthis @\
@@ -1257,22 +1303,28 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       if (present(count)) then @\
+        if (localCount > size(attrList)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "count cannot be larger than size(attrList)", & @\
+                              ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
 	localCount = count @\
       else @\
 	localCount = size(attrList) @\
       end if @\
  @\
+      if (localCount .le. 0) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "attrList is too small", & @\
+                              ESMF_CONTEXT, rc) @\
+        return @\
+      endif @\
+ @\
       if (present(attpacknestflag)) then @\
         attpacknest = attpacknestflag @\
       else @\
         attpacknest = ESMF_ATTPACKNEST_OFF @\
-      endif @\
- @\
-      limit = size(attrList) @\
-      if (localCount > limit .OR. localCount .le. 0) then @\
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
-                                    "invalid Count parameter", & @\
-                                     ESMF_CONTEXT, rc)) return @\
       endif @\
  @\
       directional = 0 ! neither convention nor purpose @\
@@ -1289,59 +1341,61 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
-      if (directional == 0) then @\
+      select case (directional) @\
+      case (0) @\
       call c_ESMC_AttPackCreate(mthisfield, fconvention, & @\
         fpurpose, fobject, attpacknest, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 1) then @\
+      case (1) @\
       call c_ESMC_AttPackCreate(mthisfield, convention, & @\
         fpurpose, fobject, attpacknest, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 2) then @\
+      case (2) @\
       call c_ESMC_AttPackCreate(mthisfield, fconvention, & @\
         purpose, fobject, attpacknest, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 3) then @\
+      case (3) @\
       call c_ESMC_AttPackCreate(mthisfield, convention, & @\
         purpose, fobject, attpacknest, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      end if @\
+      end select @\
  @\
       do i = 1, localCount @\
        @\
-        if (directional == 0) then @\
+        select case (directional) @\
+        case (0) @\
         call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), fconvention, & @\
           fpurpose, fobject, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-        else if (directional == 1) then @\
+        case (1) @\
         call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), convention, & @\
           fpurpose, fobject, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-        else if (directional == 2) then @\
+        case (2) @\
         call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), fconvention, & @\
           purpose, fobject, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-        else if (directional == 3) then @\
+        case (3) @\
         call c_ESMC_AttPackAddAttribute(mthisfield, attrList(i), convention, & @\
           purpose, fobject, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-        end if @\
+        end select @\
       end do @\
        @\
       if (present(rc)) rc = ESMF_SUCCESS @\
@@ -1604,7 +1658,8 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
-      if (directional == 0) then @\
+      select case (directional) @\
+      case (0) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1618,7 +1673,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 1) then @\
+      case (1) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1632,7 +1687,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 2) then @\
+      case (2) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1646,7 +1701,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 3) then @\
+      case (3) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1660,7 +1715,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      end if @\
+      end select @\
       if (present_flag == ESMF_FALSE) then @\
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
@@ -1752,7 +1807,6 @@ contains
 !EOPI @\
  @\
       integer :: localrc, directional, litemCount @\
-      integer :: limit @\
       character(len=*), parameter :: fconvention='N/A' @\
       character(len=*), parameter :: fpurpose='N/A' @\
       character(len=*), parameter :: fobject=#mthis @\
@@ -1767,13 +1821,23 @@ contains
  @\
       directional = 0 ! neither convention nor purpose @\
  @\
-      litemCount = size(valueList) @\
+      if (present(itemCount)) then @\
+        if (itemCount > size(valueList)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "itemCount cannot be larger than size(valueList)", & @\
+                              ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+	litemCount = itemCount @\
+      else @\
+	litemCount = size(valueList) @\
+      end if @\
  @\
-      limit = size(valueList) @\
-      if (litemCount > limit .OR. litemCount .le. 0) then @\
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
-                                    "invalid itemCount argument", & @\
-                                     ESMF_CONTEXT, rc)) return @\
+      if (litemCount .le. 0) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "valueList is too small", & @\
+                              ESMF_CONTEXT, rc) @\
+        return @\
       endif @\
  @\
     if (present(convention) .OR. present(purpose)) then @\
@@ -1790,7 +1854,8 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
-      if (directional == 0) then @\
+      select case (directional) @\
+      case (0) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1804,7 +1869,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 1) then @\
+      case (1) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1818,7 +1883,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 2) then @\
+      case (2) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1832,7 +1897,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 3) then @\
+      case (3) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1846,7 +1911,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      end if @\
+      end select @\
       if (present_flag == ESMF_FALSE) then @\
         if(present(defaultvalueList)) then @\
           valueList = defaultvalueList @\
@@ -1971,7 +2036,8 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
-      if (directional == 0) then @\
+      select case (directional) @\
+      case (0) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -1986,7 +2052,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 1) then @\
+      case (1) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -2001,7 +2067,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 2) then @\
+      case (2) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -2016,7 +2082,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 3) then @\
+      case (3) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -2031,7 +2097,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      end if @\
+      end select @\
       if (present_flag == ESMF_FALSE) then @\
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
@@ -2125,12 +2191,10 @@ contains
 !EOPI @\
  @\
       integer :: localrc, directional, litemCount @\
-      integer :: limit @\
       character(len=*), parameter :: fconvention='N/A' @\
       character(len=*), parameter :: fpurpose='N/A' @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: present_flag @\
-      type(ESMF_Logical), allocatable :: localvalueList(:) @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -2141,13 +2205,23 @@ contains
  @\
       directional = 0 ! neither convention nor purpose @\
  @\
-      litemCount = size(valueList) @\
+      if (present(itemCount)) then @\
+        if (itemCount > size(valueList)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "itemCount cannot be larger than size(valueList)", & @\
+                              ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+	litemCount = itemCount @\
+      else @\
+	litemCount = size(valueList) @\
+      end if @\
  @\
-      limit = size(valueList) @\
-      if (litemCount > limit .OR. litemCount .le. 0) then @\
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
-                                    "invalid itemCount argument", & @\
-                                     ESMF_CONTEXT, rc)) return @\
+      if (litemCount .le. 0) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "valueList is too small", & @\
+                              ESMF_CONTEXT, rc) @\
+        return @\
       endif @\
  @\
     if (present(convention) .OR. present(purpose)) then @\
@@ -2164,75 +2238,64 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
-      if (directional == 0) then @\
+      select case (directional) @\
+      case (0) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      allocate (localvalueList(limit)) @\
       call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
+        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
         fconvention, fpurpose, fobject, localrc) @\
-      valueList = localvalueList @\
-      deallocate (localvalueList) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 1) then @\
+      case (1) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      allocate (localvalueList(limit)) @\
       call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
+        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
         convention, fpurpose, fobject, localrc) @\
-      valueList = localvalueList @\
-      deallocate (localvalueList) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 2) then @\
+      case (2) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      allocate (localvalueList(limit)) @\
       call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
+        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
         fconvention, purpose, fobject, localrc) @\
-      valueList = localvalueList @\
-      deallocate (localvalueList) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 3) then @\
+      case (3) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       if (present_flag == ESMF_TRUE) then @\
-      allocate (localvalueList(limit)) @\
       call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
+        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
         convention, purpose, fobject, localrc) @\
-      valueList = localvalueList @\
-      deallocate (localvalueList) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      end if @\
+      end select @\
       if (present_flag == ESMF_FALSE) then @\
         if(present(defaultvalueList)) then @\
           valueList = defaultvalueList @\
@@ -2253,11 +2316,8 @@ contains
  @\
       if (present_flag == ESMF_TRUE) then @\
  @\
-      allocate (localvalueList(limit)) @\
       call c_ESMC_AttributeGetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, localrc) @\
-      valueList = localvalueList @\
-      deallocate (localvalueList) @\
+        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
@@ -2358,7 +2418,8 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
-      if (directional == 0) then @\
+      select case (directional) @\
+      case (0) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -2371,7 +2432,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 1) then @\
+      case (1) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -2384,7 +2445,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 2) then @\
+      case (2) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -2397,7 +2458,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 3) then @\
+      case (3) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -2410,7 +2471,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      end if @\
+      end select @\
       if (present_flag == ESMF_FALSE) then @\
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
@@ -2500,7 +2561,7 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, i, j, directional, litemCount, limit @\
+      integer :: localrc, i, j, directional, litemCount @\
       character(len=*), parameter :: fconvention='N/A' @\
       character(len=*), parameter :: fpurpose='N/A' @\
       character(len=*), parameter :: fobject=#mthis @\
@@ -2517,13 +2578,23 @@ contains
  @\
       directional = 0 ! neither convention nor purpose @\
  @\
-      litemCount = size(valueList) @\
+      if (present(itemCount)) then @\
+        if (itemCount > size(valueList)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "itemCount cannot be larger than size(valueList)", & @\
+                              ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
+	litemCount = itemCount @\
+      else @\
+	litemCount = size(valueList) @\
+      end if @\
  @\
-      limit = size(valueList) @\
-      if (litemCount > limit .OR. litemCount .le. 0) then @\
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
-                                    "invalid itemCount argument", & @\
-                                     ESMF_CONTEXT, rc)) return @\
+      if (litemCount .le. 0) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "valueList is too small", & @\
+                              ESMF_CONTEXT, rc) @\
+        return @\
       endif @\
  @\
       do  i=1,litemCount @\
@@ -2544,7 +2615,8 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
-      if (directional == 0) then @\
+      select case (directional) @\
+      case (0) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -2557,7 +2629,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 1) then @\
+      case (1) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, convention, fpurpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -2570,7 +2642,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 2) then @\
+      case (2) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, fconvention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -2583,7 +2655,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      else if (directional == 3) then @\
+      case (3) @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
         fobject, present_flag, localrc) @\
       if(ESMF_LogMsgFoundError(localrc, & @\
@@ -2596,7 +2668,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       end if @\
-      end if @\
+      end select @\
       if (present_flag == ESMF_FALSE) then @\
         if(present(defaultvalueList)) then @\
           do i=1,litemCount @\
@@ -2850,6 +2922,191 @@ contains
       
 !-----------------------------------------------------------------------------
 
+#define AttLinkMacro(mclass1, mclass2, mclass2short, mthis1, mthis2, mthisfield1, mthisfield2) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttLink" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeLink - Link one Attribute hierarchy to another @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeLink() @\
+      subroutine mclass1##AttLink##mclass2short(mthis1, mthis2, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass1), intent(inout) :: mthis1 @\
+      type(mclass2), intent(inout)  :: mthis2 @\
+      integer, intent(out), optional  :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Attaches two Attribute hierarchies @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis1] @\
+!      An {\tt mclass1} object. @\
+!     \item [mthis2] @\
+!      An {\tt mclass2} object. @\
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc                           ! Error status @\
+ @\
+      ! Initialize return code; assume failure until success is certain @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass1##GetInit,mthis1,rc) @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
+ @\
+      call c_ESMC_AttributeLink(mthisfield1, mthisfield2, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass1##AttLink##mclass2short @\
+
+!-----------------------------------------------------------------------------
+
+#define ESMF_StateAttLinkMacro(mclass, mclassshort, mthis1, mthis2, mthisfield1, mthisfield2, mthisfield3, mobj) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_StateAttLink" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeLink - Link one Attribute hierarchy to another @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeLink() @\
+      subroutine ESMF_StateAttLink##mclassshort(mthis1, mthis2, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(ESMF_State), intent(inout) :: mthis1 @\
+      type(mclass), intent(inout)  :: mthis2 @\
+      integer, intent(out), optional  :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Attaches two Attribute hierarchies @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis1] @\
+!      An {\tt ESMF\_State} object. @\
+!     \item [mthis2] @\
+!      An {\tt mclass} object. @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc                           ! Error status @\
+      type(ESMF_Logical) :: lvalue1, lvalue2 @\
+      character (len=*), parameter :: lobject = #mobj @\
+      character (len=*), parameter :: lname1 = 'import' @\
+      character (len=*), parameter :: lname2 = 'export' @\
+ @\
+      ! Initialize return code; assume failure until success is certain @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,mthis1,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis2,rc) @\
+ @\
+      call c_ESMC_AttributeLink(mthisfield1, mthisfield2, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+ @\
+      ! set the import and export Attributes on any Field connected to this State @\
+      lvalue1 = .true. @\
+      lvalue2 = .false. @\
+      if (mthis1%mthisfield3 == ESMF_STATE_IMPORT) then @\
+        call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname1, & @\
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc) @\
+        call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname2, & @\
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      else if (mthis1%mthisfield3 == ESMF_STATE_EXPORT) then @\
+        call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname1, & @\
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc) @\
+        call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname2, & @\
+          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc) @\
+        if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+      endif @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine ESMF_StateAttLink##mclassshort @\
+
+!-----------------------------------------------------------------------------
+
+#define AttLinkRemoveMacro(mclass1, mclass2, mclass2short, mthis1, mthis2, mthisfield1, mthisfield2) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttLinkRemove" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink one Attribute hierarchy from another @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeLinkRemove() @\
+      subroutine mclass1##AttLinkRemove##mclass2short(mthis1, mthis2, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass1), intent(inout) :: mthis1 @\
+      type(mclass2), intent(inout)  :: mthis2 @\
+      integer, intent(out), optional  :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Unattaches two Attribute hierarchies @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis1] @\
+!      An {\tt mclass1} object. @\
+!     \item [mthis2] @\
+!      An {\tt mclass2} object. @\
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc                           ! Error status @\
+ @\
+      ! Initialize return code; assume failure until success is certain @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass1##GetInit,mthis1,rc) @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
+ @\
+      call c_ESMC_AttributeLinkRemove(mthisfield1, mthisfield2, localrc) @\
+      if (ESMF_LogMsgFoundError(localrc, & @\
+                                ESMF_ERR_PASSTHRU, & @\
+                                ESMF_CONTEXT, rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass1##AttLinkRemove##mclass2short @\
+
+!-----------------------------------------------------------------------------
+
 #define AttReadMacro(mclass, mthis, mthisfield) \
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttRead" @\
@@ -3003,35 +3260,36 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
-      if (directional == 0) then @\
+      select case (directional) @\
+      case (0) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, & @\
         fconvention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 1) then @\
+      case (1) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, & @\
         convention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 2) then @\
+      case (2) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, & @\
         fconvention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 3) then @\
+      case (3) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, & @\
         convention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      end if @\
+      end select @\
     else @\
       call c_ESMC_AttributeSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, 1, value, localrc) @\
@@ -3095,7 +3353,6 @@ contains
 !EOPI @\
 @\
       integer :: localrc, directional, litemCount @\
-      integer :: limit @\
       character(len=*), parameter :: fconvention='N/A' @\
       character(len=*), parameter :: fpurpose='N/A' @\
       character(len=*), parameter :: fobject=#mthis @\
@@ -3108,16 +3365,22 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       if (present(itemCount)) then @\
+        if (itemCount > size(valueList)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "itemCount cannot be larger than size(valueList)", & @\
+                              ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
 	litemCount = itemCount @\
       else @\
 	litemCount = size(valueList) @\
       end if @\
  @\
-      limit = size(valueList) @\
-      if (litemCount > limit .OR. litemCount .le. 0) then @\
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
-                                    "invalid itemCount argument", & @\
-                                     ESMF_CONTEXT, rc)) return @\
+      if (litemCount .le. 0) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "valueList is too small", & @\
+                              ESMF_CONTEXT, rc) @\
+        return @\
       endif @\
  @\
       directional = 0 ! neither convention nor purpose @\
@@ -3136,35 +3399,36 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
-      if (directional == 0) then @\
+      select case (directional) @\
+      case (0) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
         fconvention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 1) then @\
+      case (1) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
         convention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 2) then @\
+      case (2) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
         fconvention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 3) then @\
+      case (3) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
         convention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      end if @\
+      end select @\
     else @\
        @\
       call c_ESMC_AttributeSetValue(mthisfield, name, & @\
@@ -3255,35 +3519,36 @@ contains
       endif @\
  @\
       localvalue = value @\
-      if (directional == 0) then @\
+      select case (directional) @\
+      case (0) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
         fconvention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 1) then @\
+      case (1) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
         convention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 2) then @\
+      case (2) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
         fconvention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 3) then @\
+      case (3) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
         ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
         convention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      end if @\
+      end select @\
     else @\
  @\
       localvalue = value @\
@@ -3349,11 +3614,9 @@ contains
 !EOPI @\
  @\
       integer :: localrc, directional, litemCount @\
-      integer :: limit @\
       character(len=*), parameter :: fconvention='N/A' @\
       character(len=*), parameter :: fpurpose='N/A' @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical), allocatable :: localvalueList(:) @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -3363,16 +3626,22 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       if (present(itemCount)) then @\
+        if (itemCount > size(valueList)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "itemCount cannot be larger than size(valueList)", & @\
+                              ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
 	litemCount = itemCount @\
       else @\
 	litemCount = size(valueList) @\
       end if @\
  @\
-      limit = size(valueList) @\
-      if (litemCount > limit .OR. litemCount .le. 0) then @\
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
-                                    "invalid itemCount argument", & @\
-                                     ESMF_CONTEXT, rc)) return @\
+      if (litemCount .le. 0) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "valueList is too small", & @\
+                              ESMF_CONTEXT, rc) @\
+        return @\
       endif @\
  @\
       directional = 0 ! neither convention nor purpose @\
@@ -3391,54 +3660,40 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
-      if (directional == 0) then @\
-      allocate (localvalueList(litemCount)) @\
-      localvalueList = valueList @\
+      select case (directional) @\
+      case (0) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
+        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
         fconvention, fpurpose, fobject, localrc) @\
-      deallocate (localvalueList) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 1) then @\
-      allocate (localvalueList(litemCount)) @\
-      localvalueList = valueList @\
+      case (1) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
+        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
         convention, fpurpose, fobject, localrc) @\
-      deallocate (localvalueList) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 2) then @\
-      allocate (localvalueList(litemCount)) @\
-      localvalueList = valueList @\
+      case (2) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
+        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
         fconvention, purpose, fobject, localrc) @\
-      deallocate (localvalueList) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 3) then @\
-      allocate (localvalueList(litemCount)) @\
-      localvalueList = valueList @\
+      case (3) @\
       call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, & @\
+        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
         convention, purpose, fobject, localrc) @\
-      deallocate (localvalueList) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      end if @\
+      end select @\
     else @\
  @\
-      allocate (localvalueList(litemCount)) @\
-      localvalueList = valueList @\
       call c_ESMC_AttributeSetValue(mthisfield, name, & @\
-        ESMF_TYPEKIND_LOGICAL, litemCount, localvalueList, localrc) @\
-      deallocate (localvalueList) @\
+        ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
  @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                   ESMF_ERR_PASSTHRU, & @\
@@ -3524,31 +3779,32 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
-      if (directional == 0) then @\
+      select case (directional) @\
+      case (0) @\
       call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
         ESMF_TYPEKIND_CHARACTER, fconvention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 1) then @\
+      case (1) @\
       call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
         ESMF_TYPEKIND_CHARACTER, convention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 2) then @\
+      case (2) @\
       call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
         ESMF_TYPEKIND_CHARACTER, fconvention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 3) then @\
+      case (3) @\
       call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
         ESMF_TYPEKIND_CHARACTER, convention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      end if @\
+      end select @\
     else @\
  @\
       call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
@@ -3606,7 +3862,7 @@ contains
 ! @\
 !EOPI @\
  @\
-      integer :: localrc, i, j, directional, litemCount, limit @\
+      integer :: localrc, i, j, directional, litemCount @\
       character(len=*), parameter :: fconvention='N/A' @\
       character(len=*), parameter :: fpurpose='N/A' @\
       character(len=*), parameter :: fobject=#mthis @\
@@ -3621,16 +3877,22 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       if (present(itemCount)) then @\
+        if (itemCount > size(valueList)) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "itemCount cannot be larger than size(valueList)", & @\
+                              ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\
 	litemCount = itemCount @\
       else @\
 	litemCount = size(valueList) @\
       end if @\
  @\
-      limit = size(valueList) @\
-      if (litemCount > limit .OR. litemCount .le. 0) then @\
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
-                                    "invalid itemCount argument", & @\
-                                     ESMF_CONTEXT, rc)) return @\
+      if (litemCount .le. 0) then @\
+        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
+                              "valueList is too small", & @\
+                              ESMF_CONTEXT, rc) @\
+        return @\
       endif @\
  @\
       directional = 0 ! neither convention nor purpose @\
@@ -3656,31 +3918,32 @@ contains
         directional = 3 ! convention and purpose @\
       endif @\
  @\
-      if (directional == 0) then @\
+      select case (directional) @\
+      case (0) @\
       call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, valueString, lens, fconvention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 1) then @\
+      case (1) @\
       call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, valueString, lens, convention, fpurpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 2) then @\
+      case (2) @\
       call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, valueString, lens, fconvention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      else if (directional == 3) then @\
+      case (3) @\
       call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
         litemCount, valueString, lens, convention, purpose, fobject, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      end if @\
+      end select @\
     else @\
  @\
       call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
@@ -3693,137 +3956,6 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
       end subroutine mclass##AttSetCharList @\
-
-!-----------------------------------------------------------------------------
-
-#define AttSetLinkMacro(mclass1, mclass2, mclass2short, mthis1, mthis2, mthisfield1, mthisfield2) \
-^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_AttSetLink" @\
- @\
-!BOPI @\
-! !IROUTINE: ESMF_AttributeSet - Link one Attribute hierarchy to another @\
-! @\
-! !INTERFACE: @\
-      ! Private name; call using ESMF_AttributeSet() @\
-      subroutine mclass1##AttSetLink##mclass2short(mthis1, mthis2, rc) @\
-! @\
-! !ARGUMENTS: @\
-      type(mclass1), intent(inout) :: mthis1 @\
-      type(mclass2), intent(inout)  :: mthis2 @\
-      integer, intent(out), optional  :: rc    @\
- @\
-! @\
-! !DESCRIPTION: @\
-!     Attaches two Attribute hierarchies @\
-! @\
-!     The arguments are: @\
-!     \begin{description} @\
-!     \item [mthis1] @\
-!      An {\tt mclass1} object. @\
-!     \item [mthis2] @\
-!      An {\tt mclass2} object. @\
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
-!     \end{description} @\
-! @\
-! @\
-!EOPI @\
- @\
-      integer :: localrc                           ! Error status @\
- @\
-      ! Initialize return code; assume failure until success is certain @\
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
- @\
-      ! check input variables @\
-      ESMF_INIT_CHECK_DEEP(mclass1##GetInit,mthis1,rc) @\
- @\
-      ! check input variables @\
-      ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
- @\
-      call c_ESMC_AttributeSetLink(mthisfield1, mthisfield2, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
- @\
-      if (present(rc)) rc = ESMF_SUCCESS @\
- @\
-      end subroutine mclass1##AttSetLink##mclass2short @\
-
-!-----------------------------------------------------------------------------
-
-#define ESMF_StateAttSetLinkMacro(mclass, mthis1, mthis2, mthisfield1, mthisfield2, mthisfield3, mobj) \
-^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_StateAttSetLink" @\
- @\
-!BOPI @\
-! !IROUTINE: ESMF_AttributeSet - Link one Attribute hierarchy to another @\
-! @\
-! !INTERFACE: @\
-      ! Private name; call using ESMF_AttributeSet() @\
-      subroutine ESMF_StateAttSetLink##mthis2(mthis1, mthis2, rc) @\
-! @\
-! !ARGUMENTS: @\
-      type(ESMF_State), intent(inout) :: mthis1 @\
-      type(mclass), intent(inout)  :: mthis2 @\
-      integer, intent(out), optional  :: rc    @\
- @\
-! @\
-! !DESCRIPTION: @\
-!     Attaches two Attribute hierarchies @\
-! @\
-!     The arguments are: @\
-!     \begin{description} @\
-!     \item [mthis1] @\
-!      An {\tt ESMF\_State} object. @\
-!     \item [mthis2] @\
-!      An {\tt mclass} object. @\
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
-!     \end{description} @\
-! @\
-! @\
-!EOPI @\
- @\
-      integer :: localrc                           ! Error status @\
-      type(ESMF_Logical) :: lvalue1, lvalue2 @\
-      character (len=*), parameter :: lobject = 'mobj' @\
-      character (len=*), parameter :: lname1 = 'import' @\
-      character (len=*), parameter :: lname2 = 'export' @\
- @\
-      ! Initialize return code; assume failure until success is certain @\
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
- @\
-      ! check input variables @\
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,mthis1,rc) @\
-      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis2,rc) @\
- @\
-      call c_ESMC_AttributeSetLink(mthisfield1, mthisfield2, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
- @\
-      ! set the import and export Attributes on any Field connected to this State @\
-      lvalue1 = .true. @\
-      lvalue2 = .false. @\
-      if (mthis1%mthisfield3 == ESMF_STATE_IMPORT) then @\
-        call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname1, & @\
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc) @\
-        call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname2, & @\
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      else if (mthis1%mthisfield3 == ESMF_STATE_EXPORT) then @\
-        call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname1, & @\
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc) @\
-        call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname2, & @\
-          ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
-                                ESMF_ERR_PASSTHRU, & @\
-                                ESMF_CONTEXT, rc)) return @\
-      endif @\
- @\
-      if (present(rc)) rc = ESMF_SUCCESS @\
- @\
-      end subroutine ESMF_StateAttSetLink##mthis2 @\
 
 !-----------------------------------------------------------------------------
 
@@ -3957,7 +4089,8 @@ contains
         writeflag = ESMF_ATTWRITE_TAB @\
       endif @\
  @\
-      if (directional == 0) then @\
+      select case (directional) @\
+      case (0) @\
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
         call c_ESMC_AttributeWriteTab(mthisfield, fconvention, & @\
           fpurpose, fobject, ftarobj, localrc) @\
@@ -3971,7 +4104,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       endif @\
-      else if (directional == 1) then @\
+      case (1) @\
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
         call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
           fpurpose, fobject, ftarobj, localrc) @\
@@ -3985,7 +4118,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       endif @\
-      else if (directional == 2) then @\
+      case (2) @\
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
         call c_ESMC_AttributeWriteTab(mthisfield, fconvention, & @\
           purpose, fobject, ftarobj, localrc) @\
@@ -3999,7 +4132,7 @@ contains
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
       endif @\
-      else if (directional == 3) then @\
+      case (3) @\
       if (writeflag%value .eq. ESMF_ATTWRITE_TAB%value) then @\
         call c_ESMC_AttributeWriteTab(mthisfield, convention, & @\
           purpose, fobject, ftarobj, localrc) @\
@@ -4012,8 +4145,8 @@ contains
         if (ESMF_LogMsgFoundError(localrc, & @\
                                 ESMF_ERR_PASSTHRU, & @\
                                 ESMF_CONTEXT, rc)) return @\
-      endif @\
       end if @\
+      end select @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -4363,7 +4496,6 @@ AttWriteMacro(ESMF_ArrayBundle, arraybundle, arraybundle, arraybundle, arraybund
 
 AttAddPackCustomMacro(ESMF_CplComp, comp, comp%compp%base)
 AttCopyMacro(ESMF_CplComp, ESMF_CplComp, comp1, comp2, comp1%compp%base, comp2%compp%base)
-AttRemoveMacro(ESMF_CplComp, comp, comp%compp%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_CplComp, comp, comp%compp%base)
 AttGetLogicalMacro(ESMF_CplComp, comp, comp%compp%base)
@@ -4371,16 +4503,24 @@ AttGetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 
 GetCountNameNumberMacro(ESMF_CplComp, comp, comp%compp%base)
 
+AttLinkMacro(ESMF_CplComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkMacro(ESMF_CplComp, ESMF_GridComp, GridComp, comp1, comp2,  & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
+                comp%compp%base, state%statep%base)
+AttLinkRemoveMacro(ESMF_CplComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkRemoveMacro(ESMF_CplComp, ESMF_GridComp, GridComp, comp1, comp2,  & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkRemoveMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
+                comp%compp%base, state%statep%base)
+
+AttRemoveMacro(ESMF_CplComp, comp, comp%compp%base)
+
 TypeKind3DeclarationMacro(AttSet, ESMF_CplComp, comp, comp%compp%base)
 AttSetLogicalMacro(ESMF_CplComp, comp, comp%compp%base)
 AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
-
-AttSetLinkMacro(ESMF_CplComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
-                comp1%compp%base, comp2%compp%base)
-AttSetLinkMacro(ESMF_CplComp, ESMF_GridComp, GridComp, comp1, comp2,  & @\
-                comp1%compp%base, comp2%compp%base)
-AttSetLinkMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
-                comp%compp%base, state%statep%base)
 
 AttUpdateMacro(ESMF_CplComp, comp, comp%compp%base)
 AttWriteMacro(ESMF_CplComp, comp, comp%compp%base, comp, field)
@@ -4504,18 +4644,24 @@ AttGetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 
 GetCountNameNumberMacro(ESMF_GridComp, comp, comp%compp%base)
 
+AttLinkMacro(ESMF_GridComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkMacro(ESMF_GridComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
+                comp%compp%base, state%statep%base)
+AttLinkRemoveMacro(ESMF_GridComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkRemoveMacro(ESMF_GridComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkRemoveMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
+                comp%compp%base, state%statep%base)
+
 AttReadMacro(ESMF_GridComp, comp, comp%compp%base)
 
 TypeKind3DeclarationMacro(AttSet, ESMF_GridComp, comp, comp%compp%base)
 AttSetLogicalMacro(ESMF_GridComp, comp, comp%compp%base)
 AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
-
-AttSetLinkMacro(ESMF_GridComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
-                comp1%compp%base, comp2%compp%base)
-AttSetLinkMacro(ESMF_GridComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
-                comp1%compp%base, comp2%compp%base)
-AttSetLinkMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
-                comp%compp%base, state%statep%base)
 
 AttUpdateMacro(ESMF_GridComp, comp, comp%compp%base)
 AttWriteMacro(ESMF_GridComp, comp, comp%compp%base, comp, field)
@@ -4614,13 +4760,14 @@ AttWriteMacro(ESMF_GridComp, comp, comp%compp%base, comp, field)
 !------------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_DistGrid, distgrid, distgrid)
-AttRemoveMacro(ESMF_DistGrid, distgrid, distgrid)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_DistGrid, distgrid, distgrid)
 AttGetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
 AttGetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
 
 GetCountNameNumberMacro(ESMF_DistGrid, distgrid, distgrid)      
+
+AttRemoveMacro(ESMF_DistGrid, distgrid, distgrid)
 
 TypeKind3DeclarationMacro(AttSet, ESMF_DistGrid, distgrid, distgrid)
 AttSetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
@@ -4729,13 +4876,14 @@ AttWriteMacro(ESMF_DistGrid, distgrid, distgrid, distgrid, distgrid)
 !------------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_Field, field, field%ftypep%base)
-AttRemoveMacro(ESMF_Field, field, field%ftypep%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_Field, field, field%ftypep%base)
 AttGetLogicalMacro(ESMF_Field, field, field%ftypep%base)
 AttGetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 
 GetCountNameNumberMacro(ESMF_Field, field, field%ftypep%base)
+
+AttRemoveMacro(ESMF_Field, field, field%ftypep%base)
 
 TypeKind3DeclarationMacro(AttSet, ESMF_Field, field, field%ftypep%base)
 AttSetLogicalMacro(ESMF_Field, field, field%ftypep%base)
@@ -4823,7 +4971,6 @@ AttWriteMacro(ESMF_Field, field, field%ftypep%base, field, field)
 #endif 
 
 AttAddPackCustomMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttRemoveMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 AttGetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
@@ -4831,12 +4978,16 @@ AttGetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
 GetCountNameNumberMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 
+AttLinkMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
+                fieldbundle%btypep%base, field%ftypep%base)
+AttLinkRemoveMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
+                fieldbundle%btypep%base, field%ftypep%base)
+
+AttRemoveMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+
 TypeKind3DeclarationMacro(AttSet, ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 AttSetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-
-AttSetLinkMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
-                fieldbundle%btypep%base, field%ftypep%base)
 
 AttUpdateMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
 AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base, fieldbundle, field)
@@ -4964,13 +5115,14 @@ AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base, fieldbundl
 !------------------------------------------------------------------------------
 
 AttAddPackCustomMacro(ESMF_Grid, grid, grid)
-AttRemoveMacro(ESMF_Grid, grid, grid)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_Grid, grid, grid)
 AttGetLogicalMacro(ESMF_Grid, grid, grid)
 AttGetCharacterMacro(ESMF_Grid, grid, grid)
 
 GetCountNameNumberMacro(ESMF_Grid, grid, grid)
+
+AttRemoveMacro(ESMF_Grid, grid, grid)
 
 TypeKind3DeclarationMacro(AttSet, ESMF_Grid, grid, grid)
 AttSetLogicalMacro(ESMF_Grid, grid, grid)
@@ -5084,7 +5236,6 @@ AttWriteMacro(ESMF_Grid, grid, grid, grid, grid)
 
 AttAddPackCustomMacro(ESMF_State, state, state%statep%base)
 AttCopyMacro(ESMF_State, ESMF_State, state1, state2, state1%statep%base, state2%statep%base)
-AttRemoveMacro(ESMF_State, state, state%statep%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_State, state, state%statep%base)
 AttGetLogicalMacro(ESMF_State, state, state%statep%base)
@@ -5092,16 +5243,24 @@ AttGetCharacterMacro(ESMF_State, state, state%statep%base)
 
 GetCountNameNumberMacro(ESMF_State, state, state%statep%base)
 
+ESMF_StateAttLinkMacro(ESMF_Field, Field, state, field, state%statep%base, & @\
+                          field%ftypep%base, statep%st, field)
+ESMF_StateAttLinkMacro(ESMF_FieldBundle, FieldBundle, state, fieldbundle, state%statep%base, & @\
+                          fieldbundle%btypep%base, statep%st, field)
+ESMF_StateAttLinkMacro(ESMF_State, State, state1, state2, state1%statep%base, & @\
+                          state2%statep%base, statep%st, field)
+AttLinkRemoveMacro(ESMF_State, ESMF_Field, Field, state, field, & @\
+                state%statep%base, field%ftypep%base)
+AttLinkRemoveMacro(ESMF_State, ESMF_FieldBundle, FieldBundle, state, fieldbundle, & @\
+                state%statep%base, fieldbundle%btypep%base)
+AttLinkRemoveMacro(ESMF_State, ESMF_State, State, state1, state2, & @\
+                state1%statep%base, state2%statep%base)
+
+AttRemoveMacro(ESMF_State, state, state%statep%base)
+
 TypeKind3DeclarationMacro(AttSet, ESMF_State, state, state%statep%base)
 AttSetLogicalMacro(ESMF_State, state, state%statep%base)
 AttSetCharacterMacro(ESMF_State, state, state%statep%base)
-
-ESMF_StateAttSetLinkMacro(ESMF_Field, state1, field, state1%statep%base, & @\
-                          field%ftypep%base, statep%st, field)
-ESMF_StateAttSetLinkMacro(ESMF_FieldBundle, state1, fieldbundle, state1%statep%base, & @\
-                          fieldbundle%btypep%base, statep%st, field)
-ESMF_StateAttSetLinkMacro(ESMF_State, state1, state, state1%statep%base, & @\
-                          state%statep%base, statep%st, field)
 
 AttUpdateMacro(ESMF_State, state, state%statep%base)
 AttWriteMacro(ESMF_State, state, state%statep%base, state, field)
