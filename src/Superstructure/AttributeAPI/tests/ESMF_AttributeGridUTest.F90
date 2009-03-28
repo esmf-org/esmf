@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridUTest.F90,v 1.8 2009/03/28 01:35:12 rokuingh Exp $
+! $Id: ESMF_AttributeGridUTest.F90,v 1.9 2009/03/28 02:33:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridUTest.F90,v 1.8 2009/03/28 01:35:12 rokuingh Exp $'
+      '$Id: ESMF_AttributeGridUTest.F90,v 1.9 2009/03/28 02:33:56 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -460,15 +460,14 @@ program ESMF_AttributeGridUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      itemCount = 4
       !NEX_UTest
       ! Get an ESMF_R8 list Attribute from a Grid Test
       call ESMF_AttributeGet(grid, name="AttrR8l", &
-        valueList=outR8l(2:5), itemCount=itemCount, rc=rc)
+        valueList=outR8l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an ESMF_R8l Attribute from a Grid Test"
-      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8l(2:4) .and. &
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8l), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
@@ -552,15 +551,14 @@ program ESMF_AttributeGridUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
   
-      itemCount = 4
       !EX_UTest
       ! Get a char list Attribute on a Grid Test
       call ESMF_AttributeGet(grid, name="Charl", &
-        valueList=OutCharl(2:5),itemCount=itemCount, rc=rc)
+        valueList=OutCharl, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an Attribute char list from a Grid test"
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl==OutCharl(2:4) .and. &
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl==OutCharl), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -653,11 +651,11 @@ program ESMF_AttributeGridUTest
       !EX_UTest
       ! Get a logical attribute - grid version
       call ESMF_AttributeGet(grid, name=attrname,  &
-        valueList=outLogl(2:5), itemCount=itemCount, rc=rc)
+        valueList=outLogl, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting Grid Attribute (type Fortran logical grid)"
-      call ESMF_Test((rc == ESMF_SUCCESS) .and. all (inLogl .eqv. outLogl(2:4) &
-                    .and. itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc == ESMF_SUCCESS) .and. all (inLogl .eqv. outLogl), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -764,11 +762,10 @@ program ESMF_AttributeGridUTest
       !------------------------------------------------------------------------
 
       outLogl = .false.
-      itemCount = 4
       !EX_UTest
       ! Too Short Get an ESMF_R8 list Attribute from a Grid Test
       call ESMF_AttributeGet(grid, name=attrname,  &
-        valueList=outLoglLong(1:2), itemCount=itemCount, rc=rc)
+        valueList=outLoglLong(1:2), rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting an logical list Attribute from a Grid Test with short valueList"
       call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -781,8 +778,8 @@ program ESMF_AttributeGridUTest
         valueList=outLoglLong(4:8), itemCount=itemCount, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting an logical list Attribute from a Grid Test with long valueList"
-      call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl==outLoglLong(4:6) .and. &
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl==outLoglLong(4:6)) .and. &
+                    itemCount==3, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------

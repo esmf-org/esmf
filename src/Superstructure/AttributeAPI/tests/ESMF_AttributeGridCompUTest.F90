@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridCompUTest.F90,v 1.7 2009/03/28 01:35:12 rokuingh Exp $
+! $Id: ESMF_AttributeGridCompUTest.F90,v 1.8 2009/03/28 02:33:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.7 2009/03/28 01:35:12 rokuingh Exp $'
+      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.8 2009/03/28 02:33:56 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -471,7 +471,6 @@ program ESMF_AttributeGridCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      itemCount = 3
       !NEX_UTest
       ! Get an ESMF_R8 list Attribute from a GridComp Test
       call ESMF_AttributeGet(gridcomp, name="AttrR8l", &
@@ -563,15 +562,14 @@ program ESMF_AttributeGridCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
   
-      itemCount = 3
       !EX_UTest
       ! Get a char list Attribute on a GridComp Test
       call ESMF_AttributeGet(gridcomp, name="Charl", &
-        valueList=OutCharl,itemCount=itemCount, rc=rc)
+        valueList=OutCharl, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an Attribute char list from a GridComp test"
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl==OutCharl .and. &
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl==OutCharl), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -660,15 +658,14 @@ program ESMF_AttributeGridCompUTest
       !------------------------------------------------------------------------
 
       outLogl = .false.
-      itemCount = 3
       !EX_UTest
       ! Get a logical attribute - gridcomp version
       call ESMF_AttributeGet(gridcomp, name=attrname,  &
-        valueList=outLogl, itemCount=itemCount, rc=rc)
+        valueList=outLogl, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting GridComp Attribute (type Fortran logical gridcomp)"
-      call ESMF_Test((rc == ESMF_SUCCESS) .and. all (inLogl .eqv. outLogl &
-                    .and. itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc == ESMF_SUCCESS) .and. all (inLogl .eqv. outLogl), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -775,11 +772,10 @@ program ESMF_AttributeGridCompUTest
       !------------------------------------------------------------------------
 
       outLogl = .false.
-      itemCount = 4
       !EX_UTest
       ! Too Short Get an ESMF_R8 list Attribute from a GridComp Test
       call ESMF_AttributeGet(gridcomp, name=attrname,  &
-        valueList=outLoglLong(1:2), itemCount=itemCount, rc=rc)
+        valueList=outLoglLong(1:2), rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting an logical list Attribute from a GridComp Test with short valueList"
       call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -792,8 +788,8 @@ program ESMF_AttributeGridCompUTest
         valueList=outLoglLong(4:8), itemCount=itemCount, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting an logical list Attribute from a GridComp Test with long valueList"
-      call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl==outLoglLong(4:6) .and. &
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl==outLoglLong(4:6)) .and. &
+                    itemCount==3, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------

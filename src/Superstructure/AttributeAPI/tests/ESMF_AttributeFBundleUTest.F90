@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFBundleUTest.F90,v 1.8 2009/03/28 01:35:12 rokuingh Exp $
+! $Id: ESMF_AttributeFBundleUTest.F90,v 1.9 2009/03/28 02:33:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.8 2009/03/28 01:35:12 rokuingh Exp $'
+      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.9 2009/03/28 02:33:56 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -466,15 +466,14 @@ program ESMF_AttributeFBundleUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      itemCount = 4
       !NEX_UTest
       ! Get an ESMF_R8 list Attribute from a FieldBundle Test
       call ESMF_AttributeGet(fieldbundle, name="AttrR8l", &
-        valueList=outR8l(2:5), itemCount=itemCount, rc=rc)
+        valueList=outR8l, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an ESMF_R8l Attribute from a FieldBundle Test"
-      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8l(2:4) .and. &
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8l), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
@@ -558,15 +557,14 @@ program ESMF_AttributeFBundleUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
   
-      itemCount = 4
       !EX_UTest
       ! Get a char list Attribute on a FieldBundle Test
       call ESMF_AttributeGet(fieldbundle, name="Charl", &
-        valueList=OutCharl(2:5),itemCount=itemCount, rc=rc)
+        valueList=OutCharl, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an Attribute char list from a FieldBundle test"
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl==OutCharl(2:4) .and. &
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl==OutCharl), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -655,15 +653,14 @@ program ESMF_AttributeFBundleUTest
       !------------------------------------------------------------------------
 
       outLogl = .false.
-      itemCount = 4
       !EX_UTest
       ! Get a logical attribute - fieldbundle version
       call ESMF_AttributeGet(fieldbundle, name=attrname,  &
-        valueList=outLogl(2:5), itemCount=itemCount, rc=rc)
+        valueList=outLogl, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting FieldBundle Attribute (type Fortran logical fieldbundle)"
-      call ESMF_Test((rc == ESMF_SUCCESS) .and. all (inLogl .eqv. outLogl(2:4) &
-                    .and. itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc == ESMF_SUCCESS) .and. all (inLogl .eqv. outLogl), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -736,11 +733,10 @@ program ESMF_AttributeFBundleUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
   
-      itemCount = 4
       !EX_UTest
       ! Too Short Get a char list Attribute from a FieldBundle Test
       call ESMF_AttributeGet(fieldbundle, name="Charl", &
-        valueList=outCharlLong(1:2),itemCount=itemCount, rc=rc)
+        valueList=outCharlLong(1:2), rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an Attribute char list from a FieldBundle test with short valueList"
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -753,8 +749,8 @@ program ESMF_AttributeFBundleUTest
         valueList=outCharlLong(4:8), itemCount=itemCount, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a default Attribute char list from a FieldBundle test with long valueList"
-      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inCharl==outCharlLong(4:6) .and. &
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all (inCharl==outCharlLong(4:6)) .and. &
+                    itemCount==3, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
@@ -787,8 +783,8 @@ program ESMF_AttributeFBundleUTest
         valueList=outLoglLong(4:8), itemCount=itemCount, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting an logical list Attribute from a FieldBundle Test with long valueList"
-      call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl==outLoglLong(4:6) .and. &
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl==outLoglLong(4:6)) .and. &
+                      itemCount==3, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
