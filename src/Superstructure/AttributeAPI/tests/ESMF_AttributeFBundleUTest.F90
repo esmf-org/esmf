@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFBundleUTest.F90,v 1.10 2009/03/28 02:42:14 rokuingh Exp $
+! $Id: ESMF_AttributeFBundleUTest.F90,v 1.11 2009/03/28 23:48:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.10 2009/03/28 02:42:14 rokuingh Exp $'
+      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.11 2009/03/28 23:48:58 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,7 +46,7 @@ program ESMF_AttributeFBundleUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_FieldBundle)       :: fieldbundle
+      type(ESMF_FieldBundle)       :: fieldbundle, fieldbundleSwap
       type(ESMF_Field)       :: ffb
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrnameOut, attrvalue
       integer                :: rc, count, items, itemCount
@@ -99,6 +99,7 @@ program ESMF_AttributeFBundleUTest
       
       ! field bundles
       fieldbundle = ESMF_FieldBundleCreate(name="original field bundle", rc=rc)
+      fieldbundleSwap = ESMF_FieldBundleCreate(name="field bundle for swap", rc=rc)
       
       conv = "customconvention"
       purp = "custompurpose"
@@ -874,15 +875,6 @@ program ESMF_AttributeFBundleUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Write the Attribute package from a FieldBundle Test
-      call ESMF_AttributeWrite(fieldbundle, convention=conv, purpose=purp, &
-        attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Writing an Attribute package from a FieldBundle Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
       ! Remove the entire Attribute package from a FieldBundle Test
       call ESMF_AttributeRemove(fieldbundle, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1062,13 +1054,38 @@ program ESMF_AttributeFBundleUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+    !-------------------------------------------------------------------------
+    !  AttributeWrite
+    !-------------------------------------------------------------------------
+
       !EX_UTest
-      ! Write the Attribute package from a FieldBundle Test
+      ! Write the Attribute package to .xml from a FieldBundle Test
       call ESMF_AttributeWrite(fieldbundle, convention=conv, purpose=purp, &
         attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Writing an Attribute package from a FieldBundle Test"
+      write(name, *) "Writing an Attribute package to .xml from a FieldBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Write the Attribute package to .stdout from a FieldBundle Test
+      call ESMF_AttributeWrite(fieldbundle, convention=conv, purpose=purp, &
+        attwriteflag=ESMF_ATTWRITE_TAB, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing an Attribute package to .stdout from a FieldBundle Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Attribute swap
+    !-------------------------------------------------------------------------
+
+      !EXdisable_UTest
+      ! Swap a FieldBundle Attribute hierarchy Test
+      !call c_ESMC_AttributeSwap(fieldbundle%btypep%base, fieldbundleSwap%btypep%base, rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Swapping a FieldBundle Attribute hierarchy Test"
+      !call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif
@@ -1150,6 +1167,7 @@ program ESMF_AttributeFBundleUTest
       !------------------------------------------------------------------------
       ! clean up
       call ESMF_FieldBundleDestroy(fieldbundle, rc=rc)
+      call ESMF_FieldBundleDestroy(fieldbundleSwap, rc=rc)
       
       call ESMF_FieldDestroy(ffb, rc=rc)
 

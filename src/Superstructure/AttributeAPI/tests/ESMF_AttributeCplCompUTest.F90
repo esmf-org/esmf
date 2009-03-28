@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCplCompUTest.F90,v 1.10 2009/03/28 02:42:14 rokuingh Exp $
+! $Id: ESMF_AttributeCplCompUTest.F90,v 1.11 2009/03/28 23:48:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.10 2009/03/28 02:42:14 rokuingh Exp $'
+      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.11 2009/03/28 23:48:58 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,7 +46,7 @@ program ESMF_AttributeCplCompUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_CplComp)     :: cplcomp, cfc
+      type(ESMF_CplComp)     :: cplcomp, cfc, cplcompValue, cplcompHybrid, cplcompSwap
       type(ESMF_GridComp)    :: gfc
       type(ESMF_State)       :: sfc
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrnameOut, attrvalue
@@ -101,6 +101,9 @@ program ESMF_AttributeCplCompUTest
       ! coupler components
       cplcomp = ESMF_CplCompCreate(name="cplcomp", petList=(/0/), rc=rc)
       cfc = ESMF_CplCompCreate(name="cplcompforcplcomp", petList=(/0/), rc=rc)
+      cplcompValue = ESMF_CplCompCreate(name="cplcompforvaluecopy", petList=(/0/), rc=rc)
+      cplcompHybrid = ESMF_CplCompCreate(name="cplcompforhybridcopy", petList=(/0/), rc=rc)
+      cplcompSwap = ESMF_CplCompCreate(name="cplcompforswap", petList=(/0/), rc=rc)
       
       ! gridded components
       gfc = ESMF_GridCompCreate(name="gridcompforcplcomp", petList=(/0/), rc=rc)
@@ -865,15 +868,6 @@ program ESMF_AttributeCplCompUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Write the Attribute package from a CplComp Test
-      call ESMF_AttributeWrite(cplcomp, convention=conv, purpose=purp, &
-        attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Writing an Attribute package from a CplComp Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
       ! Remove the entire Attribute package from an CplComp Test
       call ESMF_AttributeRemove(cplcomp, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1098,13 +1092,56 @@ program ESMF_AttributeCplCompUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+    !-------------------------------------------------------------------------
+    !  AttributeWrite
+    !-------------------------------------------------------------------------
+
       !EX_UTest
-      ! Write the Attribute package from a CplComp Test
+      ! Write the Attribute package to .xml from a CplComp Test
       call ESMF_AttributeWrite(cplcomp, convention=conv, purpose=purp, &
         attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Writing an Attribute package from a CplComp Test"
+      write(name, *) "Writing an Attribute package to .xml from a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Write the Attribute package to .stdout from a CplComp Test
+      call ESMF_AttributeWrite(cplcomp, convention=conv, purpose=purp, &
+        attwriteflag=ESMF_ATTWRITE_TAB, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing an Attribute package to .stdout from a CplComp Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  AttributeCopy and swap
+    !-------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Copy a CplComp Attribute hierarchy VALUE ONE LEVEL Test
+      call ESMF_AttributeCopy(cplcomp, cplcompValue, &
+        attcopyflag=ESMF_ATTCOPY_VALUE, atttreeflag=ESMF_ATTTREE_OFF, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Copying a CplComp Attribute hierarchy VALUE ONE LEVEL Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Copy a CplComp Attribute hierarchy HYBRID Test
+      call ESMF_AttributeCopy(cplcomp, cplcompHybrid, &
+        attcopyflag=ESMF_ATTCOPY_HYBRID, atttreeflag=ESMF_ATTTREE_ON, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Copying a CplComp Attribute hierarchy HYBRID Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EXdisable_UTest
+      ! Swap a CplComp Attribute hierarchy Test
+      !call c_ESMC_AttributeSwap(cplcomp%compp%base, cplcompSwap%compp%base, rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Swapping a CplComp Attribute hierarchy Test"
+      !call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif
@@ -1235,6 +1272,9 @@ program ESMF_AttributeCplCompUTest
       ! clean up
       call ESMF_CplCompDestroy(cplcomp, rc=rc)
       call ESMF_CplCompDestroy(cfc, rc=rc)
+      call ESMF_CplCompDestroy(cplcompValue, rc=rc)
+      call ESMF_CplCompDestroy(cplcompHybrid, rc=rc)
+      call ESMF_CplCompDestroy(cplcompSwap, rc=rc)
       
       call ESMF_GridCompDestroy(gfc, rc=rc)
 

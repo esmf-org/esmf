@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridUTest.F90,v 1.10 2009/03/28 02:42:14 rokuingh Exp $
+! $Id: ESMF_AttributeGridUTest.F90,v 1.11 2009/03/28 23:48:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridUTest.F90,v 1.10 2009/03/28 02:42:14 rokuingh Exp $'
+      '$Id: ESMF_AttributeGridUTest.F90,v 1.11 2009/03/28 23:48:58 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,7 +46,7 @@ program ESMF_AttributeGridUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_Grid)       :: grid
+      type(ESMF_Grid)       :: grid, gridSwap
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrnameOut, attrvalue
       integer                :: rc, count, items, itemCount
       type(ESMF_TypeKind)    :: attrTK
@@ -95,6 +95,7 @@ program ESMF_AttributeGridUTest
       ! preparations
       ! grids
       grid = ESMF_GridCreateEmpty(rc=rc)
+      gridSwap = ESMF_GridCreateEmpty(rc=rc)
 
       conv = "customconvention"
       purp = "custompurpose"
@@ -1067,6 +1068,18 @@ program ESMF_AttributeGridUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+    !-------------------------------------------------------------------------
+    !  Attribute swap
+    !-------------------------------------------------------------------------
+
+      !EXdisable_UTest
+      ! Swap a Grid Attribute hierarchy Test
+      !call c_ESMC_AttributeSwap(grid, gridSwap, rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Swapping a Grid Attribute hierarchy Test"
+      !call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
 #endif
 
     !-------------------------------------------------------------------------
@@ -1114,6 +1127,7 @@ program ESMF_AttributeGridUTest
       !------------------------------------------------------------------------
       ! clean up
       call ESMF_GridDestroy(grid, rc=rc)
+      call ESMF_GridDestroy(gridSwap, rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 

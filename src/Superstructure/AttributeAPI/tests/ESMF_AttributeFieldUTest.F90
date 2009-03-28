@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.9 2009/03/28 02:42:14 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.10 2009/03/28 23:48:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.9 2009/03/28 02:42:14 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.10 2009/03/28 23:48:58 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,7 +46,7 @@ program ESMF_AttributeFieldUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_Field)       :: field
+      type(ESMF_Field)       :: field, fieldSwap
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrnameOut, attrvalue
       integer                :: rc, count, items, itemCount
       type(ESMF_TypeKind)    :: attrTK
@@ -95,6 +95,7 @@ program ESMF_AttributeFieldUTest
       ! preparations
       ! fields
       field = ESMF_FieldCreateEmpty(name="original field", rc=rc)
+      fieldSwap = ESMF_FieldCreateEmpty(name="fieldSwap", rc=rc)
 
       conv = "customconvention"
       purp = "custompurpose"
@@ -868,15 +869,6 @@ program ESMF_AttributeFieldUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Write the Attribute package from a Field Test
-      call ESMF_AttributeWrite(field, convention=conv, purpose=purp, &
-        attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Writing an Attribute package from a Field Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
       ! Remove the entire Attribute package from a Field Test
       call ESMF_AttributeRemove(field, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1087,13 +1079,38 @@ program ESMF_AttributeFieldUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+    !-------------------------------------------------------------------------
+    !  AttributeWrite
+    !-------------------------------------------------------------------------
+
       !EX_UTest
-      ! Write the Attribute package from a Field Test
+      ! Write the Attribute package to .xml from a Field Test
       call ESMF_AttributeWrite(field, convention=conv, purpose=purp, &
         attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Writing an Attribute package from a Field Test"
+      write(name, *) "Writing an Attribute package to .xml from a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Write the Attribute package to .stdout from a Field Test
+      call ESMF_AttributeWrite(field, convention=conv, purpose=purp, &
+        attwriteflag=ESMF_ATTWRITE_TAB, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Writing an Attribute package to .stdout from a Field Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Attribute swap
+    !-------------------------------------------------------------------------
+
+      !EXdisable_UTest
+      ! Swap a Field Attribute hierarchy Test
+      !call c_ESMC_AttributeSwap(field%ftypep%base, fieldSwap%ftypep%base, rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Swapping a Field Attribute hierarchy Test"
+      !call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif
@@ -1143,6 +1160,7 @@ program ESMF_AttributeFieldUTest
       !------------------------------------------------------------------------
       ! clean up
       call ESMF_FieldDestroy(field, rc=rc)
+      call ESMF_FieldDestroy(fieldSwap, rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 

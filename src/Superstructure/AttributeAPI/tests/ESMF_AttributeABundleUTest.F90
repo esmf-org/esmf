@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.6 2009/03/28 02:42:14 rokuingh Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.7 2009/03/28 23:48:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.6 2009/03/28 02:42:14 rokuingh Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.7 2009/03/28 23:48:58 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,7 +46,7 @@ program ESMF_AttributeArrayBundleUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_ArrayBundle)    :: arraybundle
+      type(ESMF_ArrayBundle)    :: arraybundle, arraybundleSwap
       type(ESMF_Array), dimension(2) :: array
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_DistGrid) :: distgrid
@@ -103,6 +103,8 @@ program ESMF_AttributeArrayBundleUTest
       array(2) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
       arraybundle = ESMF_ArrayBundleCreate(arrayList=array, &
         name="MyArrayBundle", rc=rc)
+      arraybundleSwap = ESMF_ArrayBundleCreate(arrayList=array, &
+        name="MyArrayBundleForSwapping", rc=rc)
       conv = "customconvention"
       purp = "custompurpose"
 
@@ -1054,6 +1056,34 @@ program ESMF_AttributeArrayBundleUTest
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+    !-------------------------------------------------------------------------
+    !  Attribute swap
+    !-------------------------------------------------------------------------
+
+      !EXdisable_UTest
+      ! Swap an ArrayBundle Attribute hierarchy Test
+      !call c_ESMC_AttributeSwap(arraybundle, arraybundleSwap, rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Swapping an ArrayBundle Attribute hierarchy Test"
+      !call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EXdisable_UTest
+      ! Swap an ArrayBundle and a DistGrid Attribute hierarchy Test
+      !call c_ESMC_AttributeSwap(arraybundle, distgrid, rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Swapping an ArrayBundle and a DistGrid Attribute hierarchy Test"
+      !call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EXdisable_UTest
+      ! Swap an ArrayBundle and an Array Attribute hierarchy Test
+      !call c_ESMC_AttributeSwap(arraybundle, array(1), rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Swapping an ArrayBundle and an Array Attribute hierarchy Test"
+      !call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
 #endif
 
     !-------------------------------------------------------------------------
@@ -1101,6 +1131,7 @@ program ESMF_AttributeArrayBundleUTest
      !------------------------------------------------------------------------
       ! clean up
       call ESMF_ArrayBundleDestroy(arraybundle, rc=rc)
+      call ESMF_ArrayBundleDestroy(arraybundleSwap, rc=rc)
       call ESMF_ArrayDestroy(array(1), rc=rc)
       call ESMF_ArrayDestroy(array(2), rc=rc)
       call ESMF_DistGridDestroy(distgrid, rc=rc)
