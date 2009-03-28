@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.16 2009/02/25 00:11:49 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.17 2009/03/28 01:37:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -388,7 +388,7 @@ end function
                                 ESMF_CONTEXT, rc)) return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeSetLink(btype%base, field%ftypep%base, status)
+      call c_ESMC_AttributeLink(btype%base, field%ftypep%base, status)
       if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -473,7 +473,7 @@ end function
       
       ! link the Attribute hierarchies
       do i=1,fieldCount
-         call c_ESMC_AttributeSetLink(btype%base, &
+         call c_ESMC_AttributeLink(btype%base, &
           fieldList(i)%ftypep%base, status)
          if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -2545,7 +2545,7 @@ end function
           !  here we relink the Field Attribute hierarchies to the FieldBundle
           !  Attribute hierarchies, as they were before
           if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
-            call c_ESMC_AttributeSetLink(bp%base, bp%flist(i)%ftypep%base, localrc)
+            call c_ESMC_AttributeLink(bp%base, bp%flist(i)%ftypep%base, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then

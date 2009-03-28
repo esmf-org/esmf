@@ -196,7 +196,7 @@ program ESMF_AttributeSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     
   ! link the Component Attribute hierarchy to State
-  call ESMF_AttributeSet(comp2, c2imp, rc=rc)
+  call ESMF_AttributeLink(comp2, c2imp, rc=rc)
   if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)

@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.158 2009/02/16 19:14:32 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.159 2009/03/28 01:38:42 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.158 2009/02/16 19:14:32 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.159 2009/03/28 01:38:42 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -554,7 +554,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeSetLink(state%statep%base, field%ftypep%base, localrc)
+      call c_ESMC_AttributeLink(state%statep%base, field%ftypep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -653,7 +653,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeSetLink(state%statep%base, field%ftypep%base, localrc)
+      call c_ESMC_AttributeLink(state%statep%base, field%ftypep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -750,7 +750,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeSetLink(state%statep%base, &
+      call c_ESMC_AttributeLink(state%statep%base, &
         fieldbundle%btypep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -851,7 +851,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeSetLink(state%statep%base, &
+      call c_ESMC_AttributeLink(state%statep%base, &
         fieldbundle%btypep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -1075,7 +1075,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeSetLink(state%statep%base, nestedstate%statep%base, localrc)
+      call c_ESMC_AttributeLink(state%statep%base, nestedstate%statep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -1176,7 +1176,7 @@
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       !  link the Attribute hierarchies
-      call c_ESMC_AttributeSetLink(state%statep%base, nestedstate%statep%base, localrc)
+      call c_ESMC_AttributeLink(state%statep%base, nestedstate%statep%base, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -1490,7 +1490,7 @@
 
       ! link the Attribute hierarchies
       do i=1,count
-         call c_ESMC_AttributeSetLink(state%statep%base, &
+         call c_ESMC_AttributeLink(state%statep%base, &
           fieldList(i)%ftypep%base, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -1589,7 +1589,7 @@
 
       ! link the Attribute hierarchies
       do i=1,count
-         call c_ESMC_AttributeSetLink(state%statep%base, &
+         call c_ESMC_AttributeLink(state%statep%base, &
           fieldbundleList(i)%btypep%base, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -1824,7 +1824,7 @@
 
       ! link the Attribute hierarchies
       do i=1,count
-         call c_ESMC_AttributeSetLink(state%statep%base, &
+         call c_ESMC_AttributeLink(state%statep%base, &
           nestedStateList(i)%statep%base, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -5768,7 +5768,7 @@
               !  here we relink the State Attribute hierarchy to the FieldBundle
               !  Attribute hierarchy, as they were linked before
               if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
-                call c_ESMC_AttributeSetLink(sp%base, sip%datap%fbp%btypep%base, localrc)
+                call c_ESMC_AttributeLink(sp%base, sip%datap%fbp%btypep%base, localrc)
                 if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
@@ -5783,7 +5783,7 @@
               !  here we relink the State Attribute hierarchy to the Field
               !  Attribute hierarchy, as they were linked before
               if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
-                call c_ESMC_AttributeSetLink(sp%base, sip%datap%fp%ftypep%base, localrc)
+                call c_ESMC_AttributeLink(sp%base, sip%datap%fp%ftypep%base, localrc)
                 if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
@@ -5807,7 +5807,7 @@
               !  here we relink the State Attribute hierarchy to the subState
               !  Attribute hierarchy, as they were linked before
               if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
-                call c_ESMC_AttributeSetLink(sp%base, sip%datap%spp%base, localrc)
+                call c_ESMC_AttributeLink(sp%base, sip%datap%spp%base, localrc)
                 if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
