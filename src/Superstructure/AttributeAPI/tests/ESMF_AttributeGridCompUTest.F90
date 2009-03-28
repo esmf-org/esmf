@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridCompUTest.F90,v 1.8 2009/03/28 02:33:56 rokuingh Exp $
+! $Id: ESMF_AttributeGridCompUTest.F90,v 1.9 2009/03/28 02:42:14 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.8 2009/03/28 02:33:56 rokuingh Exp $'
+      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.9 2009/03/28 02:42:14 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -788,7 +788,7 @@ program ESMF_AttributeGridCompUTest
         valueList=outLoglLong(4:8), itemCount=itemCount, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting an logical list Attribute from a GridComp Test with long valueList"
-      call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl==outLoglLong(4:6)) .and. &
+      call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl .eqv. outLoglLong(4:6)) .and. &
                     itemCount==3, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
