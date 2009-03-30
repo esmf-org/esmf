@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.13 2009/03/28 01:36:36 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.14 2009/03/30 20:32:36 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.13 2009/03/28 01:36:36 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.14 2009/03/30 20:32:36 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1226,6 +1226,59 @@ extern "C" {
   return;
 
 }  // end c_esmc_attpackispresent
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeMove - Move an attribute between objects
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributemove)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributemove()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **source,              // in/out - base object
+      ESMC_Base **destination,         // in/out - base object
+      int *rc) {                       // in/out - return code
+// 
+// !DESCRIPTION:
+//     Swap the Attribute hierarchy from Base1 to Base2
+//
+//EOP
+
+  int status;
+  
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!source) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad source base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+  
+  if (!destination) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad destination base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+  
+  status = (**destination).root.AttributeMove(&((**source).root));
+    if (status != ESMF_SUCCESS) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "failed AttributeMove", &status);
+    }
+  
+  if (rc) *rc = status;
+  return;
+
+}  // end c_ESMC_AttributeMove
 
 //-----------------------------------------------------------------------------
 //BOP

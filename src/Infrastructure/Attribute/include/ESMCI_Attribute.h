@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.13 2009/03/28 01:36:36 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.14 2009/03/30 20:32:36 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -118,13 +118,14 @@ class Attribute
       int count, void *value, const string &convention, 
       const string &purpose, const string &object);
     
-    // copy an attribute hierarchy
+    // copy and swap an attribute hierarchy
     int  AttributeCopy(const Attribute &source);
     int  AttributeCopyHybrid(const Attribute &source);
 //    int  AttributeCopyReference(const Attribute &source);
 //    int  AttributeCopyReferenceTree(const Attribute &source);
     int  AttributeCopyValue(const Attribute &source);
 //    int  AttributeCopyValueTree(const Attribute &source);
+    int  AttributeMove(Attribute *source);
     
     // count the number of objects in an attribute hierarchy
     int AttributeCountTree(const string &convention, const string &purpose,  
@@ -300,6 +301,7 @@ extern "C" {
                                     int *rc, int nlen);
   void FTN(c_esmc_attributelink)(ESMC_Base **source, ESMC_Base **destination, int *rc);
   void FTN(c_esmc_attributelinkremove)(ESMC_Base **source, ESMC_Base **destination, int *rc);
+  void FTN(c_esmc_attributemove)(ESMC_Base **source, ESMC_Base **destination, int *rc);
   void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, 
                                     int *rc, int nlen, int vlen);
   void FTN(c_esmc_attributesetcharlist)(ESMC_Base **base, char *name, ESMC_TypeKind *tk,

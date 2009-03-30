@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.18 2009/03/28 01:36:36 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.19 2009/03/30 20:32:36 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.18 2009/03/28 01:36:36 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.19 2009/03/30 20:32:36 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -898,6 +898,78 @@ namespace ESMCI {
   return ESMF_SUCCESS;
 
  } // end AttributeCopyValue
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeMove"
+//BOPI
+// !IROUTINE:  AttributeSwap - Move {\tt Attributes} between ESMF objects
+//
+// !INTERFACE:
+      int Attribute::AttributeMove(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+        Attribute *source) {   // in - source
+//
+// !DESCRIPTION:
+//   Copy all {\tt Attribute} data and copy by reference all {\tt Attributes} in 
+//   this base level and remove everything copied from source.
+//
+//EOPI
+  char msgbuf[ESMF_MAXSTR];
+  int i, localrc;
+  Attribute *attr;
+  
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // call local copy on source
+  localrc = AttributeCopy(*source);
+  if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "AttributeMove() bailed in AttributeCopy()");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      return ESMF_FAILURE;
+  }
+
+  // copy base level Attributes by value
+  for (i=0; i<source->attrCount; i++) {
+    if(source->attrList.at(i)->attrRoot != ESMF_TRUE) {
+      // add each attr to destination
+      localrc = AttributeSet(source->attrList.at(i));
+      if (localrc != ESMF_SUCCESS) {
+        sprintf(msgbuf, "AttributeMove() bailed in AttributeSet()");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        return ESMF_FAILURE;
+      }
+      // update of count and flags is handled in AttributeSet()
+      // now remove this Attribute from source, this is a swap
+      source->attrList.erase(source->attrList.begin() + i);
+      (source->attrCount)--;
+      source->structChange = ESMF_TRUE;
+    }
+    else {
+      // set the links
+      localrc = AttributeLink(source->attrList.at(i)->attrBase);
+      if (localrc != ESMF_SUCCESS) {
+        sprintf(msgbuf, "AttributeMove() bailed in AttributeLink()");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        return ESMF_FAILURE;
+      }
+      // now remove the link from source, this is a swap
+      localrc = source->AttributeLinkRemove(attrList.at(i)->attrBase);
+      if (localrc != ESMF_SUCCESS) {
+        sprintf(msgbuf, "AttributeMove() bailed in AttributeLinkRemove()");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        return ESMF_FAILURE;
+      }
+    }
+  }
+
+  return ESMF_SUCCESS;
+
+ } // end AttributeMove
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeCountTree"
