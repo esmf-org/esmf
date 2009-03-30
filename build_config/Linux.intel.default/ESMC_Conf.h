@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.19 2009/01/21 21:37:57 cdeluca Exp $"
+"$Id: ESMC_Conf.h,v 1.20 2009/03/30 20:24:38 w6ws Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -78,6 +78,18 @@ typedef long ESMCI_FortranStrLenArg;
 #define ESMF_F90_PTR_PLUS_RANK 48
 #endif
 #define ESMC_POINTER_SIZE 8
+#endif
+
+#if 0
+Intel's icpc version < 11.0 have a problem with implicit template
+instantiation if compiled and linked into a shared library.
+The case happens when the template is declared before
+its point of use, but the actual template definition appears
+later.  Use explicit instantiation to help these compilers.
+#endif
+
+#if (__INTEL_COMPILER < 1100)
+#define ESMF_EXTRAEXPLICITTEMPLATEINSTANTIATION
 #endif
 
 #endif
