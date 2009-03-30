@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.15 2009/03/17 05:21:36 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.16 2009/03/30 23:31:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.15 2009/03/17 05:21:36 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.16 2009/03/30 23:31:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -165,21 +165,18 @@ static void newtrim(char *c, int clen, int *phase, int *nstate, char **newc) {
 //==============================================================================
 // FTable interfaces to be called from Fortran side (ESMF_Comp.F90)
 //
-// NOTICE: some of these interfaces are _not_ used by the Fortran side, instead
-// direct calls from the user Fortran code are made into ESMF_xxx routines
-// contained in this ESMCI file in the next section!!!!
-//
 // these interface subroutine names MUST be in lower case
+//
 extern "C" {
 
-  // no need for explicit create methods - call the native class 
-  // constructor and destructor methods directly.
+  // call to native class constructor
   void FTN(c_esmc_ftablecreate)(ESMCI::FTable **ptr, int *status) {
     *status = ESMC_RC_NOT_IMPL;
     (*ptr) = new ESMCI::FTable;
     (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
   }
 
+  // call to native class destructor
   void FTN(c_esmc_ftabledestroy)(ESMCI::FTable **ptr, int *status) {
     *status = ESMC_RC_NOT_IMPL;
     delete (*ptr);
@@ -187,7 +184,7 @@ extern "C" {
     *status = ESMF_SUCCESS;
   }
   
-  // call a function 
+  // call a function through the ftable
   void FTN(c_esmc_ftablecallentrypoint)(ESMCI::FTable **ptr, 
     enum ESMCI::method *method, int *phase, int *status){
     int funcrc;
@@ -240,44 +237,7 @@ extern "C" {
     delete[] name;
   }
 
-  // get and set routines for both function and data pointers.
-  // index them by name.
-  void FTN(c_esmc_ftablegetentrypoint)(ESMCI::FTable **ptr, char *type, 
-    void **func, enum ESMCI::ftype *ftype, int *status, int slen) {
-    char *name;
-    *status = ESMC_RC_NOT_IMPL;
-
-    newtrim(type, slen, NULL, NULL, &name);
-    //printf("after newtrim, name = '%s'\n", name);
-
-    *status = (*ptr)->getFuncPtr(name, func, ftype);
-    delete[] name;
-  }
-
-  void FTN(c_esmc_ftablesetentrypoint)(ESMCI::FTable **ptr, char *type,
-    void *func, int *status, int slen) {
-    char *name;
-    *status = ESMC_RC_NOT_IMPL;
-
-    newtrim(type, slen, NULL, NULL, &name);
-    //printf("after newtrim, name = '%s'\n", name);
-
-    *status = (*ptr)->setFuncPtr(name, func);
-    delete[] name;
-  }
-
-  void FTN(c_esmc_ftablesetargs)(ESMCI::FTable **ptr, char *type, int *acount,
-    void **alist, int *status, int slen) {
-    char *name;
-    *status = ESMC_RC_NOT_IMPL;
-
-    newtrim(type, slen, NULL, NULL, &name);
-    //printf("after newtrim, name = '%s'\n", name);
-
-    *status = (*ptr)->setFuncArgs(name, *acount, alist);
-    delete[] name;
-  }
-
+  // set arguments for standard Component methods
   void FTN(c_esmc_ftablesetstateargs)(ESMCI::FTable **ptr, 
     enum ESMCI::method *method, int *phase, void *comp, void *importState,
     void *exportState, void *clock, int *status){
@@ -325,13 +285,43 @@ extern "C" {
     delete[] fname;
   }
 
-  void FTN(c_esmc_ftablesetioargs)(ESMCI::FTable **ptr, char *type, int *phase,
-    void *comp, void *iospec, void *clock, int *status, int slen) {
+  // set arguments for RESTART Component methods
+  // TODO: treat this as standard Component method
+  void FTN(c_esmc_ftablesetioargs)(ESMCI::FTable **ptr,
+    enum ESMCI::method *method, int *phase,
+    void *comp, void *iospec, void *clock, int *status) {
     char *fname;
     int acount = 4;
     void *alist[4];
 
-    newtrim(type, slen, phase, NULL, &fname);
+    *status = ESMC_RC_NOT_IMPL;
+
+    char *methodString;
+    switch(*method){
+    case ESMCI::SETINIT:
+      methodString = "Initialize";
+      break;
+    case ESMCI::SETRUN:
+      methodString = "Run";
+      break;
+    case ESMCI::SETFINAL:
+      methodString = "Finalize";
+      break;
+    case ESMCI::SETWRITERESTART:
+      methodString = "WriteRestart";
+      break;
+    case ESMCI::SETREADRESTART:
+      methodString = "ReadRestart";
+      break;
+    case ESMCI::SETREGISTER:
+      methodString = "Register";
+      break;
+    default:
+      break;
+    }
+    
+    int slen = strlen(methodString);
+    newtrim(methodString, slen, phase, NULL, &fname);
     //printf("after newtrim, name = '%s'\n", fname);
 
     alist[0] = (void *)comp;
