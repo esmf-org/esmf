@@ -689,11 +689,14 @@ template void common_objs<>(MeshObj** in_obj_begin, MeshObj** in_obj_end,
                  UInt out_obj_type, 
                  std::vector<MeshObj*> &out_obj);
 
+#ifdef ESMF_EXTRAEXPLICITTEMPLATEINSTANTIATION
 template void common_objs<>(std::vector<MeshObj*>::iterator, 
                  std::vector<MeshObj*>::iterator, 
                  UInt rel_type, 
                  UInt out_obj_type, 
                  std::vector<MeshObj*> &out_obj);
+#endif
+
 // ----------------------------------------------------------------------------
 
 void remove_back_relations(MeshObj &obj) {

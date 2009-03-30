@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.80 2009/03/25 00:09:55 theurich Exp $
+# $Id: build_rules.mk,v 1.81 2009/03/30 16:46:27 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -190,3 +190,10 @@ ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
 ESMF_SO_CXXCOMPILEOPTS  = -fPIC
 ESMF_SO_CXXLINKOPTS     = -shared
 ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
+
+############################################################
+# Intel's icpc version < 11.0 have a problem with implicit template
+# instantiation if compiled and linked into a shared library. Use explicit
+# instantiation to help these compilers.
+#
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_EXTRAEXPLICITTEMPLATEINSTANTIATION
