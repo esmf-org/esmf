@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.180 2009/03/23 22:34:26 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.181 2009/03/30 17:15:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -215,6 +215,7 @@ module ESMF_CompMod
   public ESMF_GridCompType, ESMF_ATM, ESMF_LAND, ESMF_OCEAN, &
     ESMF_SEAICE, ESMF_RIVER, ESMF_OTHER
   public ESMF_Method, ESMF_SETINIT, ESMF_SETRUN, ESMF_SETFINAL
+  public ESMF_SETWRITERESTART, ESMF_SETREADRESTART
   public ESMF_SINGLEPHASE
       
   ! These have to be public so other component types can use them, but 
@@ -257,7 +258,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.180 2009/03/23 22:34:26 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.181 2009/03/30 17:15:22 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
