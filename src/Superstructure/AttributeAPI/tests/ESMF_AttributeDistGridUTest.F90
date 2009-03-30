@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeDistGridUTest.F90,v 1.7 2009/03/28 23:48:58 rokuingh Exp $
+! $Id: ESMF_AttributeDistGridUTest.F90,v 1.8 2009/03/30 20:33:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeDistGridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.7 2009/03/28 23:48:58 rokuingh Exp $'
+      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.8 2009/03/30 20:33:26 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,7 +46,7 @@ program ESMF_AttributeDistGridUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_DistGrid)    :: distgrid, distgridSwap
+      type(ESMF_DistGrid)    :: distgrid, distgridMove
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrnameOut, attrvalue
       integer                :: rc, count, items, itemCount
       type(ESMF_TypeKind)    :: attrTK
@@ -96,7 +96,7 @@ program ESMF_AttributeDistGridUTest
       ! distgrid and grid
       distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
         regDecomp=(/2,3/), rc=rc)
-      distgridSwap = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
+      distgridMove = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
         regDecomp=(/2,3/), rc=rc)
       conv = "customconvention"
       purp = "custompurpose"
@@ -1050,15 +1050,15 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    !  Attribute swap
+    !  Attribute move
     !-------------------------------------------------------------------------
 
-      !EXdisable_UTest
-      ! Swap a DistGrid Attribute hierarchy Test
-      !call c_ESMC_AttributeSwap(distgrid, distgridSwap, rc)
+      !EX_UTest
+      ! Move a DistGrid Attribute hierarchy Test
+      call c_ESMC_AttributeMove(distgrid, distgridMove, rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Swapping a DistGrid Attribute hierarchy Test"
-      !call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Move a DistGrid Attribute hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif
@@ -1108,7 +1108,7 @@ program ESMF_AttributeDistGridUTest
      !------------------------------------------------------------------------
       ! clean up
       call ESMF_DistGridDestroy(distgrid, rc=rc)
-      call ESMF_DistGridDestroy(distgridSwap, rc=rc)
+      call ESMF_DistGridDestroy(distgridMove, rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 

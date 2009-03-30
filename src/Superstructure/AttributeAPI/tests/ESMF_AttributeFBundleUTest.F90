@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFBundleUTest.F90,v 1.11 2009/03/28 23:48:58 rokuingh Exp $
+! $Id: ESMF_AttributeFBundleUTest.F90,v 1.12 2009/03/30 20:33:27 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2009, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.11 2009/03/28 23:48:58 rokuingh Exp $'
+      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.12 2009/03/30 20:33:27 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -46,7 +46,7 @@ program ESMF_AttributeFBundleUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_FieldBundle)       :: fieldbundle, fieldbundleSwap
+      type(ESMF_FieldBundle)       :: fieldbundle, fieldbundleMove
       type(ESMF_Field)       :: ffb
       character(ESMF_MAXSTR) :: conv, purp, attrname, attrnameOut, attrvalue
       integer                :: rc, count, items, itemCount
@@ -99,7 +99,7 @@ program ESMF_AttributeFBundleUTest
       
       ! field bundles
       fieldbundle = ESMF_FieldBundleCreate(name="original field bundle", rc=rc)
-      fieldbundleSwap = ESMF_FieldBundleCreate(name="field bundle for swap", rc=rc)
+      fieldbundleMove = ESMF_FieldBundleCreate(name="field bundle for swap", rc=rc)
       
       conv = "customconvention"
       purp = "custompurpose"
@@ -1077,15 +1077,15 @@ program ESMF_AttributeFBundleUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
-    !  Attribute swap
+    !  Attribute move
     !-------------------------------------------------------------------------
 
-      !EXdisable_UTest
-      ! Swap a FieldBundle Attribute hierarchy Test
-      !call c_ESMC_AttributeSwap(fieldbundle%btypep%base, fieldbundleSwap%btypep%base, rc)
+      !EX_UTest
+      ! Move a FieldBundle Attribute hierarchy Test
+      call c_ESMC_AttributeMove(fieldbundle%btypep%base, fieldbundleMove%btypep%base, rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Swapping a FieldBundle Attribute hierarchy Test"
-      !call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Move a FieldBundle Attribute hierarchy Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif
@@ -1167,7 +1167,7 @@ program ESMF_AttributeFBundleUTest
       !------------------------------------------------------------------------
       ! clean up
       call ESMF_FieldBundleDestroy(fieldbundle, rc=rc)
-      call ESMF_FieldBundleDestroy(fieldbundleSwap, rc=rc)
+      call ESMF_FieldBundleDestroy(fieldbundleMove, rc=rc)
       
       call ESMF_FieldDestroy(ffb, rc=rc)
 
