@@ -689,7 +689,11 @@ template void common_objs<>(MeshObj** in_obj_begin, MeshObj** in_obj_end,
                  UInt out_obj_type, 
                  std::vector<MeshObj*> &out_obj);
 
-#ifdef ESMF_EXTRAEXPLICITTEMPLATEINSTANTIATION
+#if (__INTEL_COMPILER < 1100)
+// Intel's icpc version < 11.0 on ia64 have a problem with implicit template
+// instantiation if compiled and linked into a shared library.
+// Use explicit instantiation to help these compilers.
+
 template void common_objs<>(std::vector<MeshObj*>::iterator, 
                  std::vector<MeshObj*>::iterator, 
                  UInt rel_type, 
