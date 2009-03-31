@@ -1,4 +1,4 @@
-! $Id: user_modelB.F90,v 1.7 2009/03/26 03:28:21 theurich Exp $
+! $Id: user_modelB.F90,v 1.8 2009/03/31 17:39:30 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -89,14 +89,14 @@ module user_modelB
     ! Local variables
     integer               :: initConditionB
     
+    rc = ESMF_SUCCESS
+
     ! Set initial condition.
     initConditionB = 1
 
     ! Add the integer to the import State
     call ESMF_AttributeSet(exportState, name="CondB", value=initConditionB, rc=rc)
    
-    return
-    
   end subroutine user_init
 
 
@@ -113,6 +113,8 @@ module user_modelB
     ! Local variables
     integer               :: ConditionB
     
+    rc = ESMF_SUCCESS
+
     ! Get the value from the State
     call ESMF_AttributeGet(exportState, name="CondB", value=ConditionB, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -140,18 +142,20 @@ module user_modelB
 
     integer               :: ConditionB
 
+    rc = ESMF_SUCCESS
+
     print *, "User Comp Final starting"
 
-   ! Get the value from the State
+    ! Get the value from the State
     call ESMF_AttributeGet(exportState, name="CondB", value=ConditionB, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
     
-   if ( ConditionB.eq.6) then
-     rc = ESMF_SUCCESS
-   else
-     rc = ESMF_FAILURE
-     print *, "ConditionB = ", ConditionB
-   end if
+    if ( ConditionB.eq.6) then
+      rc = ESMF_SUCCESS
+    else
+      rc = ESMF_FAILURE
+      print *, "ConditionB = ", ConditionB
+    end if
     
     print *, "User Comp Final returning"
 

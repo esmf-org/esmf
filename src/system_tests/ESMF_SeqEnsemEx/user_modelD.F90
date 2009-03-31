@@ -1,4 +1,4 @@
-! $Id: user_modelD.F90,v 1.8 2009/03/26 03:28:21 theurich Exp $
+! $Id: user_modelD.F90,v 1.9 2009/03/31 17:39:30 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -88,7 +88,6 @@ module user_modelD
 
     ! Nothing to do
     rc = ESMF_SUCCESS 
-    return
     
   end subroutine user_init
 
@@ -107,6 +106,8 @@ module user_modelD
     integer               :: ConditionA, ConditionB, ConditionC
     real               :: average
     
+    rc = ESMF_SUCCESS
+
     ! Get the values from the State
     call ESMF_AttributeGet(importState, name="CondA", value=ConditionA, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -142,6 +143,8 @@ module user_modelD
     ! Local variables
     integer               :: ConditionA, ConditionB, ConditionC
     
+    rc = ESMF_SUCCESS
+
     print *, "User Comp Final starting"
 
     ! Get the values from the State

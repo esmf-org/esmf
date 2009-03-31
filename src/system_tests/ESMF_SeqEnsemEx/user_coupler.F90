@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.9 2009/03/26 03:28:21 theurich Exp $
+! $Id: user_coupler.F90,v 1.10 2009/03/31 17:39:30 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -87,7 +87,6 @@ module user_coupler
     print *, "User Coupler Init returning"
    
     rc = ESMF_SUCCESS
-    return
     
   end subroutine user_init
 
@@ -105,6 +104,8 @@ module user_coupler
     ! Local variables
     integer :: condition
     character (len=ESMF_MAXSTR) :: state_name, name
+
+    rc = ESMF_SUCCESS
 
     print *, "User Coupler Run starting"
 
