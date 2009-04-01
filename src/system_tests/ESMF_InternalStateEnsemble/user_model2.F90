@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.5 2009/03/26 03:28:21 theurich Exp $
+! $Id: user_model2.F90,v 1.6 2009/04/01 20:20:39 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -36,13 +36,8 @@ module user_model2
       type(testData), pointer :: p
    end type
 
-   type (dataWrapper) :: wrap1, wrap2, wrap3
-   type (testData), target,save :: data1, data2, data3
 
-
-        
-  contains
-
+   contains
 !-------------------------------------------------------------------------
 !   !  The Register routine sets the subroutines to be called
 !   !   as the init, run, and finalize routines.  Note that these are
@@ -121,6 +116,8 @@ module user_model2
     ! Local variables
     type(ESMF_VM)         :: vm
     integer               :: petCount
+    type(dataWrapper) :: wrap1, wrap2, wrap3
+    type(testData), pointer :: data1, data2, data3
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -135,7 +132,9 @@ module user_model2
 
 
 
-    ! Set internal State 1
+    ! Initialize  internal State 1
+    ! Allocate private data block
+    allocate(data1)
 
     ! Create the source Array and add it to the import State
     call ESMF_ArraySpecSet(arrayspec=data1%arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
@@ -152,13 +151,19 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     wrap1%p => data1
+    ! Set  internal State 1
     call ESMF_GridCompSetInternalState(comp, wrap1, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+ 
+    !Initialize solution
+    solution1 = 1
 
 
 
 
-    ! Set internal State 2
+    ! Initialize internal State 2
+    ! Allocate private data block
+    allocate(data2)
 
     ! Create the source Array and add it to the import State
     call ESMF_ArraySpecSet(arrayspec=data2%arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
@@ -175,12 +180,17 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     wrap2%p => data2
+    ! Set internal State 2
     call ESMF_GridCompSetInternalState(comp, wrap2, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
+    !Initialize solution
+    solution2 = 2
 
 
-    ! Set internal State 3
+    ! Initialize internal State 3
+    ! Allocate private data block
+    allocate(data3)
 
     ! Create the source Array and add it to the import State
     call ESMF_ArraySpecSet(arrayspec=data3%arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
@@ -197,8 +207,12 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     wrap3%p => data3
+    ! Set internal State 3
     call ESMF_GridCompSetInternalState(comp, wrap3, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+
+    !Initialize solution
+    solution3 = 3
 
     print *, "User Comp2 Init returning"
 
@@ -217,11 +231,16 @@ module user_model2
 
     ! Local variables
     type(ESMF_Array)      :: array1, array2, array3
-    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
+    real(ESMF_KIND_R8), pointer :: farrayPtr1(:,:)   ! matching F90 array pointer
+    real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)   ! matching F90 array pointer
+    real(ESMF_KIND_R8), pointer :: farrayPtr3(:,:)   ! matching F90 array pointer
     integer               :: i, j
     character(len=ESMF_MAXSTR) :: stateName
     type(ESMF_Time) :: startTime, currTime
     type(ESMF_Calendar) :: gregorianCalendar
+    type(dataWrapper) :: wrap1, wrap2, wrap3
+    type(testData), pointer :: data1, data2, data3
+
 
     
     ! Initialize return code
@@ -229,125 +248,84 @@ module user_model2
 
     print *, "User Comp2 Run starting"
 
+    ! Get internal State 1
+    call ESMF_GridCompGetInternalState(comp, wrap1, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    data1 => wrap1%p
 
     ! Get the destination Array 1 from the import State
     call ESMF_StateGet(importState, "array data1", array1, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array=array1, localDe=0, farrayPtr=farrayPtr, rc=rc)
+    call ESMF_ArrayGet(array=data1%array, localDe=0, farrayPtr=farrayPtr1, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Get import state name
-    call ESMF_StateGet(importState, name=stateName, rc=rc)
-
-    ! Determine if this is the first time run is called
-    ! initialize calendar to be Gregorian type
-    gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    call ESMF_TimeSet(startTime, yy=2009, mm=1, dd=1, h=9, &
-                        calendar=gregorianCalendar, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-   
     ! Set up the solution integer
-    if (startTime == currTime) then
-	solution1 = 1
-    else
-	solution1 = solution1 * 10
-    endif
+    solution1 = solution1 * 10
+
     ! Test Array in import state against exact solution
-    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
-        if (farrayPtr(i,j) /= solution1 ) then
+    do j = lbound(farrayPtr1, 2), ubound(farrayPtr1, 2)
+      do i = lbound(farrayPtr1, 1), ubound(farrayPtr1, 1)
+        if (farrayPtr1(i,j) /= solution1 ) then
           rc=ESMF_FAILURE
+print *, " array = ", farrayPtr1(i,j)
           return ! bail out
         endif
       enddo
     enddo
 
 
+print *, " after solution test"
+
+    call ESMF_GridCompGetInternalState(comp, wrap2, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    data2 => wrap2%p
 
     ! Get the destination Array 2 from the import State
     call ESMF_StateGet(importState, "array data2", array2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array=array2, localDe=0, farrayPtr=farrayPtr, rc=rc)
+    call ESMF_ArrayGet(array=data2%array, localDe=0, farrayPtr=farrayPtr2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Get import state name
-    call ESMF_StateGet(importState, name=stateName, rc=rc)
-
-    ! Determine if this is the first time run is called
-    ! initialize calendar to be Gregorian type
-    gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    call ESMF_TimeSet(startTime, yy=2009, mm=1, dd=1, h=9, &
-                        calendar=gregorianCalendar, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-  
     ! Set up the solution integer
-    if (startTime == currTime) then
-        solution2 = 2
-    else
-        solution2 = solution2 * 10
-    endif
+    solution2 = solution2 * 10
+
     ! Test Array in import state against exact solution
-    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
-        if (farrayPtr(i,j) /= solution2 ) then
+    do j = lbound(farrayPtr2, 2), ubound(farrayPtr2, 2)
+      do i = lbound(farrayPtr2, 1), ubound(farrayPtr2, 1)
+        if (farrayPtr2(i,j) /= solution2 ) then
           rc=ESMF_FAILURE
+print *, " array = ", farrayPtr2(i,j)
           return ! bail out
         endif
       enddo
     enddo
 
  
+    call ESMF_GridCompGetInternalState(comp, wrap3, rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    data3 => wrap3%p
+
     ! Get the destination Array 3 from the import State
     call ESMF_StateGet(importState, "array data3", array3, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array=array3, localDe=0, farrayPtr=farrayPtr, rc=rc)
+    call ESMF_ArrayGet(array=data3%array, localDe=0, farrayPtr=farrayPtr3, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Get import state name
-    call ESMF_StateGet(importState, name=stateName, rc=rc)
-
-    ! Determine if this is the first time run is called
-    ! initialize calendar to be Gregorian type
-    gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    call ESMF_TimeSet(startTime, yy=2009, mm=1, dd=1, h=9, &
-                        calendar=gregorianCalendar, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-  
     ! Set up the solution integer
-    if (startTime == currTime) then
-        solution3 = 3
-    else
-        solution3 = solution3 * 10
-    endif
+    solution3 = solution3 * 10
+
     ! Test Array in import state against exact solution
-    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
-        if (farrayPtr(i,j) /= solution3 ) then
+    do j = lbound(farrayPtr3, 2), ubound(farrayPtr3, 2)
+      do i = lbound(farrayPtr3, 1), ubound(farrayPtr3, 1)
+        if (farrayPtr3(i,j) /= solution3 ) then
           rc=ESMF_FAILURE
+print *, " array = ", farrayPtr3(i,j)
           return ! bail out
         endif
       enddo
@@ -368,6 +346,10 @@ module user_model2
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
+    ! Local variables
+    type(dataWrapper) :: wrap1, wrap2, wrap3
+    type(testData), pointer :: data1, data2, data3
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
@@ -377,51 +359,20 @@ module user_model2
     call ESMF_GridCompGetInternalState(comp, wrap1, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     data1 = wrap1%p
-    call ESMF_StateGet(importState, "array data1", data1%array, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArrayGet(array=data1%array, distgrid=data1%distgrid, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArrayDestroy(array=data1%array, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_DistGridDestroy(distgrid=data1%distgrid, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    wrap1%p => data1
-    call ESMF_GridCompSetInternalState(comp, wrap1, rc) 
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    deallocate(data1)
 
 
     ! Get internal State 2
     call ESMF_GridCompGetInternalState(comp, wrap2, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     data2 = wrap2%p
-    call ESMF_StateGet(importState, "array data2", data2%array, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArrayGet(array=data2%array, distgrid=data2%distgrid, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArrayDestroy(array=data2%array, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_DistGridDestroy(distgrid=data2%distgrid, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    wrap2%p => data2
-    call ESMF_GridCompSetInternalState(comp, wrap2, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
+    deallocate(data2)
 
     ! Get internal State 3
     call ESMF_GridCompGetInternalState(comp, wrap3, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     data3 = wrap3%p
-    call ESMF_StateGet(importState, "array data3", data3%array, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArrayGet(array=data3%array, distgrid=data3%distgrid, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_ArrayDestroy(array=data3%array, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_DistGridDestroy(distgrid=data3%distgrid, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    wrap3%p => data3
-    call ESMF_GridCompSetInternalState(comp, wrap3, rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    deallocate(data3)
 
     print *, "User Comp2 Final returning"
 
